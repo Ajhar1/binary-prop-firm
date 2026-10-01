@@ -1,0 +1,7 @@
+node_modules/
+cloudflared.exe
+*.log
+example-1.txt
+.env
+.DS_Store
+Thumbs.db

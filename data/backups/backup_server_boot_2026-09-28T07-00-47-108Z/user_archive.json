@@ -1,0 +1,70 @@
+[
+  {
+    "archiveId": "arc_init_usr_admin_master",
+    "timestamp": "2026-09-27T03:56:11.993Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_admin_master",
+    "userName": "AJ Funded Admin",
+    "userEmail": "admin@ajfunded.com",
+    "telegram": "@AJFundedAdmin",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  },
+  {
+    "archiveId": "arc_init_usr_1790479914536_bjtgpe",
+    "timestamp": "2026-09-27T03:31:54.536Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  },
+  {
+    "archiveId": "arc_init_usr_1790475483790_5etunz",
+    "timestamp": "2026-09-27T02:18:03.790Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_1790475483790_5etunz",
+    "userName": "MD Ajhar",
+    "userEmail": "ajhar@test.com",
+    "telegram": "@mdajhar1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  },
+  {
+    "archiveId": "arc_init_usr_1790486638103_3bbjv3",
+    "timestamp": "2026-09-27T05:23:58.103Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_1790486638103_3bbjv3",
+    "userName": "Pro Trader",
+    "userEmail": "protrader@example.com",
+    "telegram": "",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  }
+]

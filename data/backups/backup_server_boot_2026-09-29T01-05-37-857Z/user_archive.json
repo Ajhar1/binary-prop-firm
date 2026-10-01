@@ -1,0 +1,155 @@
+[
+  {
+    "archiveId": "arc_1790642558189_5272",
+    "timestamp": "2026-09-29T00:42:38.189Z",
+    "displayTime": "9/29/2026, 6:42:38 AM",
+    "action": "ADMIN_LOGIN_SUCCESS",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "method": "3_step_verification",
+      "ip": "::1"
+    }
+  },
+  {
+    "archiveId": "arc_1790641865649_qwvs",
+    "timestamp": "2026-09-29T00:31:05.649Z",
+    "displayTime": "9/29/2026, 6:31:05 AM",
+    "action": "ADMIN_LOGIN_SUCCESS",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "method": "3_step_verification",
+      "ip": "::1"
+    }
+  },
+  {
+    "archiveId": "arc_1790579938515_hxx2",
+    "timestamp": "2026-09-28T07:18:58.515Z",
+    "displayTime": "9/28/2026, 1:18:58 PM",
+    "action": "EMAIL_VERIFIED",
+    "userId": "usr_1790579892388_t1ezew",
+    "userName": "MD Ajhar",
+    "userEmail": "atharajhar6@gmail.come",
+    "telegram": "MDAJHAR1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "method": "otp"
+    }
+  },
+  {
+    "archiveId": "arc_1790579892389_w01o",
+    "timestamp": "2026-09-28T07:18:12.389Z",
+    "displayTime": "9/28/2026, 1:18:12 PM",
+    "action": "USER_REGISTERED",
+    "userId": "usr_1790579892388_t1ezew",
+    "userName": "MD Ajhar",
+    "userEmail": "atharajhar6@gmail.come",
+    "telegram": "MDAJHAR1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "ip": "::1"
+    }
+  },
+  {
+    "archiveId": "arc_1790579067877_r0hi",
+    "timestamp": "2026-09-28T07:04:27.877Z",
+    "displayTime": "9/28/2026, 1:04:27 PM",
+    "action": "PASSWORD_RESET",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {}
+  },
+  {
+    "archiveId": "arc_init_usr_admin_master",
+    "timestamp": "2026-09-27T03:56:11.993Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_admin_master",
+    "userName": "AJ Funded Admin",
+    "userEmail": "admin@ajfunded.com",
+    "telegram": "@AJFundedAdmin",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  },
+  {
+    "archiveId": "arc_init_usr_1790479914536_bjtgpe",
+    "timestamp": "2026-09-27T03:31:54.536Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  },
+  {
+    "archiveId": "arc_init_usr_1790475483790_5etunz",
+    "timestamp": "2026-09-27T02:18:03.790Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_1790475483790_5etunz",
+    "userName": "MD Ajhar",
+    "userEmail": "ajhar@test.com",
+    "telegram": "@mdajhar1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  },
+  {
+    "archiveId": "arc_init_usr_1790486638103_3bbjv3",
+    "timestamp": "2026-09-27T05:23:58.103Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_1790486638103_3bbjv3",
+    "userName": "Pro Trader",
+    "userEmail": "protrader@example.com",
+    "telegram": "",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  }
+]

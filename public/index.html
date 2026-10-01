@@ -1,0 +1,2881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Binary Prop Firm — External Binary Broker Prop Firm | Keep Up to 85% Profit</title>
+    <meta name="description" content="Binary Prop Firm is an external binary options prop firm. Trade on your favorite broker (Quotex, Pocket Option, Olymp Trade, Binomo, IQ Option), pass evaluation, and get funded up to $32,000 with 85% profit split." />
+    <meta name="keywords" content="Binary Prop Firm, binary prop firm, quotex prop firm, pocket option funded, binary challenge, trading discipline" />
+    <meta name="author" content="Binary Prop Firm" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Binary Prop Firm" />
+    <meta property="og:title" content="Binary Prop Firm — Trade with Our Capital on Any External Broker." />
+    <meta property="og:description" content="Pass the evaluation on your chosen binary broker demo. Keep up to 85% profit with zero risk to your personal savings." />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/logo.png" />
+    <link rel="apple-touch-icon" href="/assets/logo.png" />
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- World Countries Dataset -->
+    <script src="/assets/countries.js"></script>
+
+    <style>
+        /* ---------- RESET & BASE ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --yellow: #F5B041;
+            --yellow-dark: #E67E22;
+            --dark: #0a0a0a;
+            --dark-card: #121212;
+            --dark-border: rgba(255, 255, 255, 0.08);
+            --text: #f0f0f0;
+            --text-muted: #a0a0a0;
+            --neon-green: #2ecc71;
+            --danger-red: #ff5a5a;
+            --gold: #FFD700;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #080b11 radial-gradient(circle at 50% 12%, #141b26 0%, #080c12 55%, #05070a 100%);
+            background-attachment: fixed;
+            color: var(--text);
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--dark-border);
+            border-radius: 24px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass:hover {
+            background: rgba(26, 26, 26, 0.85);
+            border-color: rgba(245, 176, 65, 0.35);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
+            color: #0a0a0a;
+            padding: 12px 28px;
+            border-radius: 9999px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 176, 65, 0.4);
+            filter: brightness(1.08);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            padding: 12px 28px;
+            border-radius: 9999px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--yellow);
+            color: var(--yellow);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--yellow);
+            color: var(--yellow);
+            padding: 8px 20px;
+            border-radius: 9999px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            background: var(--yellow);
+            color: #0a0a0a;
+            box-shadow: 0 4px 15px rgba(245, 176, 65, 0.3);
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 0.8rem;
+            background: linear-gradient(135deg, #ffffff 40%, var(--yellow) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            max-width: 720px;
+            margin: 0 auto 3rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* ---------- NAVBAR ---------- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(10, 10, 10, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(245, 176, 65, 0.2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(245, 176, 65, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 0 0 20px rgba(245, 176, 65, 0.2);
+            font-weight: 900;
+            font-size: 1.25rem;
+            color: #fff;
+        }
+
+        .logo-text {
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #ffffff 10%, #FFE082 50%, #F5B041 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--yellow);
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        /* ---------- WATER CANVAS & TOUCH GLOW ---------- */
+        #waterCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .mouse-glow {
+            position: fixed;
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(245, 176, 65, 0.18) 0%, rgba(245, 176, 65, 0.05) 45%, rgba(245, 176, 65, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            transform: translate(-50%, -50%);
+            filter: blur(30px);
+            opacity: 0;
+            transition: transform 0.04s linear, opacity 0.3s ease;
+        }
+
+        /* ---------- HERO SECTION ---------- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 7rem 2rem 4rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content {
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245, 176, 65, 0.12);
+            color: var(--yellow);
+            padding: 0.5rem 1.4rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(245, 176, 65, 0.35);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.22;
+            margin-bottom: 1.4rem;
+            letter-spacing: -0.5px;
+        }
+
+        .hero h1 .yellow {
+            color: var(--yellow);
+            text-shadow: 0 0 25px rgba(245, 176, 65, 0.28);
+        }
+
+        .hero-desc {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .hero-mission-box {
+            background: rgba(245, 176, 65, 0.06);
+            border: 1px dashed rgba(245, 176, 65, 0.3);
+            border-radius: 18px;
+            padding: 1.2rem 1.5rem;
+            margin: 0 auto 2.5rem;
+            max-width: 780px;
+            font-size: 1.05rem;
+            color: #f7dfa5;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--yellow);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* ---------- SUPPORTED BROKERS ---------- */
+        .brokers-section {
+            padding: 5rem 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .brokers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .broker-card {
+            padding: 1.8rem 1.2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            border-radius: 20px;
+        }
+
+        .broker-logo-box {
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .broker-card:hover .broker-logo-box {
+            transform: scale(1.1) rotate(2deg);
+        }
+
+        .broker-logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .broker-name {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+        .broker-tag {
+            font-size: 0.75rem;
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--neon-green);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        /* ---------- 10 GOLDEN RULES SECTION ---------- */
+        .rules-section {
+            padding: 6rem 2rem;
+            background: rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+
+        .rules-badge {
+            display: inline-block;
+            background: rgba(245, 176, 65, 0.15);
+            color: var(--yellow);
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            margin-bottom: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.8rem;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .rule-card {
+            padding: 1.35rem 1.4rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            gap: 1.1rem;
+            align-items: flex-start;
+            border-radius: 18px;
+        }
+
+        .rule-number {
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
+            color: #0a0a0a;
+            border-radius: 12px;
+            font-size: 1.15rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(245, 176, 65, 0.25);
+        }
+
+        .rule-details h3 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            margin-bottom: 0.35rem;
+            color: #ffffff;
+            line-height: 1.35;
+        }
+
+        .rule-details p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        /* ---------- PROMO BANNER & COUNTDOWN ---------- */
+        .launch-promo-banner {
+            display: none;
+            max-width: 1100px;
+            margin: 0 auto 2.5rem auto;
+            background: linear-gradient(135deg, rgba(231,76,60,0.18), rgba(212,175,55,0.14));
+            border: 2px solid rgba(245,176,65,0.45);
+            border-radius: 18px;
+            padding: 1.6rem 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.45);
+            box-sizing: border-box;
+        }
+
+        .promo-countdown-wrapper {
+            text-align: center;
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(245,176,65,0.35);
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+            min-width: 280px;
+            max-width: 330px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+            box-sizing: border-box;
+        }
+
+        .promo-countdown-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .countdown-box {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 8px;
+            padding: 6px 4px;
+            flex: 1;
+            min-width: 0;
+            max-width: 60px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .countdown-box.secs {
+            background: rgba(255, 77, 77, 0.18);
+            border-color: rgba(255, 77, 77, 0.45);
+        }
+
+        .countdown-num {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        .countdown-box.secs .countdown-num {
+            color: #ff4d4d;
+        }
+
+        .countdown-unit {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 3px;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .countdown-box.secs .countdown-unit {
+            color: #ff6b81;
+        }
+
+        .countdown-sep {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--yellow);
+            align-self: center;
+            flex-shrink: 0;
+            line-height: 1;
+            padding: 0 1px;
+        }
+
+        /* ---------- CHALLENGES SECTION ---------- */
+        .challenge-section {
+            padding: 6rem 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .challenge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card-external {
+            padding: 2rem 1.6rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-external.popular {
+            border: 2px solid var(--yellow);
+            background: rgba(30, 30, 30, 0.85);
+            box-shadow: 0 0 35px rgba(245, 176, 65, 0.25);
+            transform: scale(1.03);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -14px;
+            right: 24px;
+            background: var(--yellow);
+            color: #0a0a0a;
+            font-size: 0.75rem;
+            font-weight: 900;
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+        }
+
+        .tier-name {
+            font-size: 1.7rem;
+            font-weight: 900;
+        }
+
+        .tier-fee {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .tier-fee span {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--yellow);
+        }
+
+        .funded-amount {
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin: 0.6rem 0 1.2rem;
+            background: linear-gradient(135deg, #ffffff 40%, var(--yellow) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .challenge-rules-list {
+            list-style: none;
+            margin: 1.2rem 0 1.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .challenge-rules-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+            font-size: 0.9rem;
+        }
+
+        .challenge-rules-list .lbl {
+            color: var(--text-muted);
+        }
+
+        .challenge-rules-list .val {
+            font-weight: 700;
+        }
+
+        .val.gold { color: var(--yellow); font-size: 1rem; }
+        .val.green { color: var(--neon-green); }
+        .val.red { color: var(--danger-red); }
+
+        .btn-start-challenge {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            border-radius: 40px;
+            background: rgba(245, 176, 65, 0.15);
+            border: 1px solid var(--yellow);
+            color: var(--yellow);
+            font-weight: 800;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-start-challenge:hover, .card-external.popular .btn-start-challenge {
+            background: var(--yellow);
+            color: #0a0a0a;
+            box-shadow: 0 6px 20px rgba(245, 176, 65, 0.35);
+        }
+
+        /* ---------- HOW IT WORKS ---------- */
+        .steps {
+            padding: 5rem 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step-card {
+            padding: 2.2rem 1.8rem;
+            text-align: center;
+        }
+
+        .step-icon-box {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
+            color: #0a0a0a;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 25px rgba(245, 176, 65, 0.35);
+        }
+
+        .step-card h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+        }
+
+        .step-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* ---------- MODALS ---------- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #141414;
+            border: 1px solid rgba(245, 176, 65, 0.3);
+            border-radius: 24px;
+            max-width: 480px;
+            width: 100%;
+            padding: 2.2rem;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            animation: modalFadeIn 0.25s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 0.4rem;
+            color: #fff;
+        }
+
+        .modal-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--yellow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-control option {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .pass-toggle-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .pass-toggle-wrap .form-control {
+            padding-right: 44px;
+        }
+
+        .pass-toggle-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.05rem;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+            z-index: 2;
+        }
+
+        .pass-toggle-btn:hover {
+            color: var(--yellow);
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+            margin-top: 0.8rem;
+        }
+
+        .modal-switch-text {
+            text-align: center;
+            margin-top: 1.2rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .modal-switch-text a {
+            color: var(--yellow);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1f1f1f;
+            border-left: 4px solid var(--yellow);
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            font-size: 0.95rem;
+        }
+
+        .toast.success { border-left-color: var(--neon-green); }
+        .toast.error { border-left-color: var(--danger-red); }
+        .toast.info { border-left-color: #3498db; }
+
+        /* ---------- FOOTER ---------- */
+        .footer {
+            padding: 4rem 2rem 2rem;
+            background: #050505;
+            border-top: 1px solid rgba(245, 176, 65, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-col h4 {
+            color: var(--yellow);
+            font-weight: 800;
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 0.6rem;
+        }
+
+        .footer-col ul li a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-col ul li a:hover {
+            color: #fff;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 3.5rem;
+            font-size: 0.85rem;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1.5rem;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.65rem 0.8rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 6px;
+            }
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                text-decoration: none;
+                flex-shrink: 0;
+            }
+            .logo-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 0.95rem;
+                border-radius: 8px;
+            }
+            .logo-text {
+                font-size: 1.15rem;
+            }
+            .nav-links {
+                display: none;
+            }
+            .nav-buttons {
+                display: flex !important;
+                align-items: center;
+                gap: 6px;
+                margin-left: auto;
+            }
+            .nav-buttons .btn-outline {
+                padding: 6px 10px !important;
+                font-size: 0.76rem !important;
+                border-radius: 8px !important;
+                white-space: nowrap !important;
+                border: 1px solid var(--yellow) !important;
+                color: var(--yellow) !important;
+                background: rgba(245, 176, 65, 0.08) !important;
+            }
+            .nav-buttons .btn-primary {
+                padding: 6px 11px !important;
+                font-size: 0.76rem !important;
+                border-radius: 8px !important;
+                white-space: nowrap !important;
+            }
+            .mobile-menu-btn {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                font-size: 1.25rem;
+                color: var(--yellow);
+                background: rgba(245, 176, 65, 0.1);
+                border: 1px solid rgba(245, 176, 65, 0.28);
+                border-radius: 8px;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+            .hero {
+                min-height: auto;
+                padding: 5.5rem 1.2rem 3rem;
+            }
+            .hero h1 {
+                font-size: 2.1rem;
+                line-height: 1.25;
+            }
+            .hero-desc {
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+            .hero-mission-box {
+                font-size: 0.9rem;
+                padding: 0.85rem 1.1rem;
+                margin-bottom: 1.8rem;
+            }
+            .hero-stats {
+                gap: 1.2rem 1.6rem;
+                padding-top: 1.2rem;
+            }
+            .stat-number {
+                font-size: 1.6rem;
+            }
+            .stat-label {
+                font-size: 0.78rem;
+            }
+            .section-title {
+                font-size: 1.9rem;
+            }
+            .section-subtitle {
+                font-size: 0.92rem;
+                margin-bottom: 2rem;
+            }
+            .brokers-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.9rem;
+            }
+            .broker-card {
+                padding: 1.2rem 0.8rem;
+                border-radius: 16px;
+            }
+            .broker-card:last-child {
+                grid-column: span 2;
+                max-width: 220px;
+                margin: 0 auto;
+                width: 100%;
+            }
+            .rules-grid {
+                grid-template-columns: 1fr;
+                gap: 0.9rem;
+            }
+            .rule-card {
+                padding: 1rem 1.1rem;
+                gap: 0.85rem;
+                border-radius: 16px;
+            }
+            .rule-number {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+                border-radius: 10px;
+            }
+            .challenge-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+            }
+            .card-external.popular {
+                transform: scale(1);
+            }
+            .launch-promo-banner {
+                padding: 1.2rem 0.9rem !important;
+                margin: 0 auto 2rem auto !important;
+                border-radius: 16px !important;
+            }
+            .promo-countdown-wrapper {
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                margin: 1.2rem auto 0 auto !important;
+                padding: 0.85rem 0.6rem !important;
+            }
+            .promo-countdown-grid {
+                gap: 5px !important;
+            }
+            .countdown-box {
+                padding: 6px 2px !important;
+                border-radius: 7px !important;
+                max-width: none !important;
+            }
+            .countdown-num {
+                font-size: 1.18rem !important;
+            }
+            .countdown-unit {
+                font-size: 0.58rem !important;
+            }
+            .countdown-sep {
+                font-size: 1rem !important;
+            }
+            .nav-links.mobile-show {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: rgba(13, 13, 15, 0.98);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                padding: 1.2rem 1.4rem;
+                gap: 1rem;
+                border-bottom: 2px solid var(--yellow);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.85);
+                z-index: 1001;
+            }
+            .nav-links.mobile-show a {
+                font-size: 1.02rem;
+                padding: 4px 0;
+                display: block;
+            }
+        }
+        @media (max-width: 360px) {
+            .promo-countdown-wrapper {
+                padding: 0.7rem 0.35rem !important;
+            }
+            .promo-countdown-grid {
+                gap: 3px !important;
+            }
+            .countdown-num {
+                font-size: 1.05rem !important;
+            }
+            .countdown-unit {
+                font-size: 0.52rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Water ripples interactive canvas -->
+    <canvas id="waterCanvas"></canvas>
+    <!-- Mouse glow -->
+    <div class="mouse-glow" id="mouseGlow"></div>
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar">
+        <a href="/" class="logo">
+            <img src="/assets/logo.png" alt="Binary Prop Firm Logo" style="width:44px; height:44px; object-fit:cover; border-radius:12px; box-shadow:0 0 15px rgba(245, 176, 65, 0.35);" />
+            <div class="logo-text">Binary Prop Firm</div>
+        </a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#brokers" onclick="closeMobileMenu()">Supported Brokers</a></li>
+            <li><a href="#challenges" onclick="closeMobileMenu()">Challenges</a></li>
+            <li><a href="#rules" onclick="closeMobileMenu()">10 Golden Rules</a></li>
+            <li><a href="#how-it-works" onclick="closeMobileMenu()">How It Works</a></li>
+            <li><a href="/dashboard" onclick="closeMobileMenu()">Dashboard</a></li>
+        </ul>
+        <div class="nav-buttons" id="navButtons">
+            <button class="btn-outline" onclick="openLoginModal()" id="navLoginBtn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button class="btn-primary" onclick="openRegisterModal()" id="navActionBtn">
+                <i class="fas fa-user-plus"></i> Sign Up
+            </button>
+        </div>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation">☰</button>
+    </nav>
+
+    <!-- ========== HERO ========== -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-shield-alt"></i> External Binary Prop Firm
+            </div>
+            <h1>
+                Trade <span class="yellow">Any Broker</span>.<br />
+                Get Funded. Keep <span class="yellow">85% Profit</span>.
+            </h1>
+            <p class="hero-desc">
+                Quotex, Pocket Option বা আপনার পছন্দের ব্রোকার ডেমোতে ১৫ সেশন মূল্যায়ন সম্পন্ন করে আমাদের ক্যাপিটালে ট্রেড করুন।
+            </p>
+
+            <div class="hero-mission-box">
+                <i class="fas fa-bullseye" style="color:var(--yellow); font-size:1.1rem; margin-right:6px;"></i>
+                <strong>আমাদের লক্ষ্য:</strong> নিজের টাকায় ঝুঁকি না নিয়ে ডেমোতে ডিসিপ্লিন প্রমাণ করুন—আমাদের ক্যাপিটালে ট্রেড করে প্রফিট তুলে নিন।
+            </div>
+
+            <div class="hero-buttons">
+                <a href="#challenges" class="btn-primary">
+                    <i class="fas fa-rocket"></i> Start Challenge →
+                </a>
+                <a href="#rules" class="btn-secondary">
+                    <i class="fas fa-book-open"></i> 10 Golden Rules
+                </a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-number">$5</div>
+                    <div class="stat-label">Entry From</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">$32,000</div>
+                    <div class="stat-label">Max Funded</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">85%</div>
+                    <div class="stat-label">Profit Split</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">6+</div>
+                    <div class="stat-label">Brokers</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">15</div>
+                    <div class="stat-label">Sessions</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== SUPPORTED BROKERS ========== -->
+    <section id="brokers" class="brokers-section">
+        <h2 class="section-title">Supported External Brokers</h2>
+        <p class="section-subtitle">
+            আপনার পছন্দের যেকোনো অনুমোদিত ব্রোকার ডেমোতে পরীক্ষা দিন। কোনো প্ল্যাটফর্ম বাধ্যবাধকতা নেই।
+        </p>
+        <div class="brokers-grid">
+            <div class="broker-card glass">
+                <div class="broker-logo-box">
+                    <img src="/assets/brokers/quotex.png" alt="Quotex">
+                </div>
+                <div class="broker-name">Quotex</div>
+                <span class="broker-tag"><i class="fas fa-check-circle"></i> Verified</span>
+                <p style="font-size:0.8rem; color:var(--text-muted);">1-Min OTC & Forex</p>
+            </div>
+            <div class="broker-card glass">
+                <div class="broker-logo-box">
+                    <img src="/assets/brokers/pocketoption.png" alt="Pocket Option">
+                </div>
+                <div class="broker-name">Pocket Option</div>
+                <span class="broker-tag"><i class="fas fa-check-circle"></i> Verified</span>
+                <p style="font-size:0.8rem; color:var(--text-muted);">High Payout & OTC</p>
+            </div>
+            <div class="broker-card glass">
+                <div class="broker-logo-box">
+                    <img src="/assets/brokers/olymp.png" alt="Olymp Trade">
+                </div>
+                <div class="broker-name">Olymp Trade</div>
+                <span class="broker-tag"><i class="fas fa-check-circle"></i> Verified</span>
+                <p style="font-size:0.8rem; color:var(--text-muted);">Fixed Time Trading</p>
+            </div>
+            <div class="broker-card glass">
+                <div class="broker-logo-box">
+                    <img src="/assets/brokers/binomo.png" alt="Binomo">
+                </div>
+                <div class="broker-name">Binomo</div>
+                <span class="broker-tag"><i class="fas fa-check-circle"></i> Verified</span>
+                <p style="font-size:0.8rem; color:var(--text-muted);">Fast Execution</p>
+            </div>
+            <div class="broker-card glass">
+                <div class="broker-logo-box">
+                    <img src="/assets/brokers/iqoption.png" alt="IQ Option">
+                </div>
+                <div class="broker-name">IQ Option</div>
+                <span class="broker-tag"><i class="fas fa-check-circle"></i> Verified</span>
+                <p style="font-size:0.8rem; color:var(--text-muted);">Technical Charts</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== EXTERNAL CHALLENGES ========== -->
+    <section id="challenges" class="challenge-section">
+        <h2 class="section-title">Challenge Packages</h2>
+        <p class="section-subtitle">
+            উপযুক্ত প্যাকেজ বাছাই করে ডেমো মূল্যায়নে অংশ নিন
+        </p>
+
+        <!-- Grand Broker Promo Offer Banner (Customizable Mega Discount Banner) -->
+        <div id="launchPromoBanner" class="launch-promo-banner">
+            <div style="position:absolute; top:-20px; right:-20px; width:130px; height:130px; background:radial-gradient(circle, rgba(231,76,60,0.35) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.5rem; position:relative; z-index:2;">
+                <div style="max-width:640px; flex:1 1 280px;">
+                    <div id="launchPromoBadgeBox" style="display:inline-flex; align-items:center; gap:8px; background:rgba(231,76,60,0.25); border:1px solid #ff4d4d; color:#ff6b81; padding:4px 14px; border-radius:20px; font-size:0.8rem; font-weight:800; margin-bottom:10px; letter-spacing:0.5px;">
+                        <i class="fas fa-fire fa-beat" style="color:#ff4757;"></i> <span id="launchPromoBadgeText">ব্রোকার লঞ্চিং মেগা অফার</span>
+                    </div>
+                    <h3 id="launchPromoTitleText" style="font-size:1.5rem; font-weight:900; color:#fff; margin-bottom:8px; line-height:1.3;">
+                        ব্রোকার প্রথম লঞ্চিং উপলক্ষে বিশেষ মূল্যছাড়!
+                    </h3>
+                    <p id="launchPromoDescText" style="color:var(--text-muted); font-size:0.92rem; line-height:1.65; margin:0;">
+                        অফিসিয়াল লঞ্চ উপলক্ষে <strong>২য় চ্যালেঞ্জে ৩০% ছাড়</strong> এবং <strong>৩য় থেকে বাকি সকল চ্যালেঞ্জে ৪০% মেগা ডিসকাউন্ট!</strong> (১ম ব্রোঞ্জ প্যাকেজ রেগুলার ফি)। অফারটি সীমিত সময়ের জন্য কার্যকর।
+                    </p>
+                </div>
+                <!-- Live Countdown Timer -->
+                <div id="promoCountdownWrapper" class="promo-countdown-wrapper">
+                    <div id="promoCountdownLabel" style="font-size:0.75rem; text-transform:uppercase; color:var(--gold); font-weight:800; letter-spacing:1px; margin-bottom:8px;">
+                        <i class="fas fa-hourglass-half"></i> <span id="promoCountdownLabelText">অফারটি শেষ হতে বাকি</span>
+                    </div>
+                    <div id="promoCountdown" class="promo-countdown-grid">
+                        <!-- Live countdown digits -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="challenge-grid" id="packagesContainer">
+            <!-- Populated dynamically from API -->
+        </div>
+    </section>
+
+    <!-- ========== 10 GOLDEN RULES ========== -->
+    <section id="rules" class="rules-section">
+        <div style="text-align:center;">
+            <span class="rules-badge"><i class="fas fa-star"></i> Rules</span>
+            <h2 class="section-title">The 10 Golden Rules</h2>
+            <p class="section-subtitle">
+                শৃঙ্খলাবদ্ধ ট্রেডিংয়ের ১০টি সুনির্দিষ্ট নিয়ম। নিয়ম মেনে সফল হলেই ফান্ডেড অ্যাকাউন্ট।
+            </p>
+        </div>
+
+        <div class="rules-grid" id="rulesContainer">
+            <!-- Populated dynamically or static fallback -->
+        </div>
+    </section>
+
+    <!-- ========== HOW IT WORKS (3 STEPS) ========== -->
+    <section id="how-it-works" class="steps">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">ফান্ডেড অ্যাকাউন্ট পাওয়ার ৩টি সহজ ধাপ</p>
+        <div class="steps-grid">
+            <div class="step-card glass">
+                <div class="step-icon-box">1</div>
+                <h3>প্যাকেজ ও ব্রোকার নির্বাচন</h3>
+                <p>পছন্দের প্যাকেজ ও ব্রোকার সিলেক্ট করে ডেমো অ্যাকাউন্ট দিয়ে শুরু করুন।</p>
+            </div>
+            <div class="step-card glass">
+                <div class="step-icon-box">2</div>
+                <h3>ডেমো ট্রেড ও প্রমাণ জমা</h3>
+                <p>১০টি নিয়ম মেনে ১৫ সেশন ট্রেড করুন এবং ভিডিও প্রমাণ ড্যাশবোর্ডে জমা দিন।</p>
+            </div>
+            <div class="step-card glass">
+                <div class="step-icon-box">3</div>
+                <h3>ফান্ডেড অ্যাকাউন্ট ও ৮৫% প্রফিট</h3>
+                <p>মূল্যায়ন সফল হলে রিয়েল ফান্ডেড অ্যাকাউন্ট পান এবং প্রফিটের ৮৫% উইথড্র করুন।</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== MODALS ========== -->
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModals()">&times;</button>
+            <div style="text-align:center; margin-bottom:0.8rem;">
+                <img src="/assets/logo.png" alt="Binary Prop Firm" style="width:52px; height:52px; object-fit:cover; border-radius:14px; box-shadow:0 0 20px rgba(245, 176, 65, 0.35); display:inline-block;" />
+            </div>
+            <h2 class="modal-title">Welcome Back</h2>
+            <p class="modal-subtitle">Log in to your Binary Prop Firm dashboard</p>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-control" id="loginEmail" required placeholder="name@example.com" />
+                </div>
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="margin-bottom:0;">Password</label>
+                        <a href="javascript:void(0)" onclick="openForgotPasswordModal()" style="font-size:0.82rem; color:var(--yellow); text-decoration:none; font-weight:600; cursor:pointer;">
+                            Forgot Password?
+                        </a>
+                    </div>
+                    <div class="pass-toggle-wrap">
+                        <input type="password" class="form-control" id="loginPassword" required placeholder="••••••••" />
+                        <button type="button" class="pass-toggle-btn" onclick="togglePasswordVis('loginPassword', this)" title="Show/Hide Password" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary btn-full">
+                    <i class="fas fa-sign-in-alt"></i> Login to Dashboard
+                </button>
+                <div class="modal-switch-text">
+                    Don't have an account? <a href="javascript:void(0)" onclick="openRegisterModal()">Sign Up</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <!-- Forgot Password Modal with Email Verification Code -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal-box" style="max-width: 480px;">
+            <button class="modal-close" onclick="closeModals()">&times;</button>
+            <div style="text-align:center; margin-bottom:1.2rem;">
+                <div style="width:58px; height:58px; border-radius:50%; background:rgba(245, 176, 65, 0.15); border:1px solid var(--yellow); display:flex; align-items:center; justify-content:center; margin:0 auto 10px auto; font-size:1.6rem; color:var(--yellow);">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h2 class="modal-title" style="margin-bottom:4px;">Reset Password</h2>
+                <p class="modal-subtitle" id="forgotModalSubtitle" style="font-size:0.88rem;">
+                    পাসওয়ার্ড রিসেট করতে আপনার রেজিস্টার্ড ইমেইল অ্যাড্রেস দিন।
+                </p>
+            </div>
+
+            <!-- STEP 1: Enter Email & Request Code -->
+            <form id="forgotStep1Form" onsubmit="handleSendResetCode(event)">
+                <div class="form-group">
+                    <label>Registered Email Address</label>
+                    <input type="email" class="form-control" id="forgotEmail" required placeholder="name@example.com" />
+                </div>
+                <button type="submit" class="btn-primary btn-full" id="forgotSendCodeBtn" style="justify-content:center; padding:12px; margin-bottom:1rem;">
+                    <i class="fas fa-paper-plane"></i> Send Verification Code
+                </button>
+                <div class="modal-switch-text" style="margin-top:0.5rem;">
+                    Remember your password? <a href="javascript:void(0)" onclick="openLoginModal()">Back to Login</a>
+                </div>
+            </form>
+
+            <!-- STEP 2: Enter OTP & Set New Password -->
+            <form id="forgotStep2Form" style="display:none;" onsubmit="handleResetPasswordSubmit(event)">
+                <div style="background:rgba(245, 176, 65, 0.1); border:1px solid rgba(245, 176, 65, 0.25); border-radius:10px; padding:10px 14px; margin-bottom:1.2rem; font-size:0.83rem; color:#fff; display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <i class="fas fa-envelope" style="color:var(--yellow); margin-right:6px;"></i>
+                        কোড পাঠানো হয়েছে: <strong id="forgotTargetEmailDisplay" style="color:var(--yellow);"></strong>
+                    </div>
+                    <a href="javascript:void(0)" onclick="switchForgotStep(1)" style="color:var(--yellow); font-weight:700; text-decoration:underline;">Change</a>
+                </div>
+
+                <div id="forgotDevNotice" style="display:none; background:rgba(245, 176, 65, 0.12); border:1px dashed var(--yellow); border-radius:10px; padding:12px 14px; margin-bottom:1.2rem; font-size:0.83rem; text-align:left;">
+                </div>
+
+                <div class="form-group" style="margin-bottom:1.2rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="margin-bottom:0;">6-Digit OTP Code (ইমেইল কোড)</label>
+                        <button type="button" id="forgotResendCodeBtn" onclick="handleResendResetCode()" style="background:none; border:none; color:var(--yellow); font-size:0.8rem; cursor:pointer; font-weight:700; text-decoration:underline;">
+                            Resend Code
+                        </button>
+                    </div>
+                    <input type="text" class="form-control" id="forgotOtpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="------" style="text-align:center; font-size:1.6rem; letter-spacing:8px; font-weight:800; color:var(--yellow); font-family:monospace; height:50px;" />
+                </div>
+
+                <div class="form-group">
+                    <label>New Password (নতুন পাসওয়ার্ড)</label>
+                    <div class="pass-toggle-wrap">
+                        <input type="password" class="form-control" id="forgotNewPassword" required minlength="6" placeholder="কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড" />
+                        <button type="button" class="pass-toggle-btn" onclick="togglePasswordVis('forgotNewPassword', this)" title="Show/Hide Password" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm New Password (পুনরায় নতুন পাসওয়ার্ড)</label>
+                    <div class="pass-toggle-wrap">
+                        <input type="password" class="form-control" id="forgotConfirmPassword" required minlength="6" placeholder="নতুন পাসওয়ার্ডটি পুনরায় লিখুন" />
+                        <button type="button" class="pass-toggle-btn" onclick="togglePasswordVis('forgotConfirmPassword', this)" title="Show/Hide Password" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary btn-full" id="forgotSubmitBtn" style="justify-content:center; padding:12px; margin-bottom:1rem;">
+                    <i class="fas fa-shield-alt"></i> Verify Code & Reset Password
+                </button>
+
+                <div class="modal-switch-text" style="margin-top:0.5rem;">
+                    Remember your password? <a href="javascript:void(0)" onclick="openLoginModal()">Back to Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModals()">&times;</button>
+            <div style="text-align:center; margin-bottom:0.8rem;">
+                <img src="/assets/logo.png" alt="Binary Prop Firm" style="width:52px; height:52px; object-fit:cover; border-radius:14px; box-shadow:0 0 20px rgba(245, 176, 65, 0.35); display:inline-block;" />
+            </div>
+            <h2 class="modal-title">Create Account</h2>
+            <p class="modal-subtitle">Join Binary Prop Firm & start your prop trading evaluation</p>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-control" id="regName" required placeholder="MD Trader" />
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-control" id="regEmail" required placeholder="trader@example.com" />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="pass-toggle-wrap">
+                        <input type="password" class="form-control" id="regPassword" required placeholder="Minimum 6 characters" minlength="6" />
+                        <button type="button" class="pass-toggle-btn" onclick="togglePasswordVis('regPassword', this)" title="Show/Hide Password" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Telegram Username (Optional)</label>
+                    <input type="text" class="form-control" id="regTelegram" placeholder="@YourTelegram" />
+                </div>
+                <div class="form-group">
+                    <label>Preferred External Broker</label>
+                    <select class="form-control" id="regBroker">
+                        <option value="quotex">Quotex</option>
+                        <option value="pocketoption">Pocket Option</option>
+                        <option value="olymptrade">Olymp Trade</option>
+                        <option value="binomo">Binomo</option>
+                        <option value="iqoption">IQ Option</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary btn-full">
+                    <i class="fas fa-user-plus"></i> Register & Continue
+                </button>
+                <div class="modal-switch-text">
+                    Already registered? <a href="javascript:void(0)" onclick="openLoginModal()">Login Here</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Email Verification Modal -->
+    <div class="modal-overlay" id="emailVerifyModal">
+        <div class="modal-box" style="text-align: center; max-width: 480px;">
+            <button class="modal-close" onclick="closeModals()">&times;</button>
+            <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(245, 176, 65, 0.15); border: 1px solid var(--yellow); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem auto; font-size: 1.8rem; color: var(--yellow);">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <h2 class="modal-title" style="margin-bottom: 6px;">ইমেইল ভেরিফিকেশন (Email Verify)</h2>
+            <p class="modal-subtitle" style="margin-bottom: 1.5rem; font-size: 0.9rem;">
+                আপনার ইমেইলে একটি ৬-সংখ্যার ভেরিফিকেশন কোড পাঠানো হয়েছে:<br/>
+                <strong id="verifyEmailTarget" style="color: var(--yellow); font-size: 0.98rem; word-break: break-all;">trader@example.com</strong>
+            </p>
+            <form id="emailVerifyForm" onsubmit="handleVerifyEmail(event)">
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; text-align:center; font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">Enter 6-Digit Verification Code</label>
+                    <input type="text" class="form-control" id="verifyOtpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="------" style="text-align:center; font-size:1.8rem; letter-spacing:10px; font-weight:800; color:var(--yellow); font-family:monospace; height:54px;" />
+                </div>
+                <button type="submit" class="btn-primary btn-full" id="verifySubmitBtn" style="justify-content:center; padding:12px; font-size:1rem; margin-bottom:1rem;">
+                    <i class="fas fa-check-circle"></i> Verify & Continue to Dashboard
+                </button>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem;">
+                    <span>Didn't receive code?</span>
+                    <button type="button" id="resendOtpBtn" onclick="handleResendOtp()" style="background:none; border:none; color:var(--yellow); font-weight:700; cursor:pointer; text-decoration:underline;">
+                        Resend Code
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Buy Challenge Modal -->
+    <div class="modal-overlay" id="buyModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModals()">&times;</button>
+            <h2 class="modal-title" id="buyModalTitle">Start Challenge</h2>
+            <p class="modal-subtitle" id="buyModalSubtitle">Select your external broker and initiate evaluation</p>
+            <form id="buyForm" onsubmit="handleBuyChallenge(event)">
+                <input type="hidden" id="selectedPackageId" value="" />
+                
+                <div class="form-group">
+                    <label>Select External Broker</label>
+                    <select class="form-control" id="buyBrokerSelect">
+                        <option value="quotex">Quotex</option>
+                        <option value="pocketoption">Pocket Option</option>
+                        <option value="olymptrade">Olymp Trade</option>
+                        <option value="binomo">Binomo</option>
+                        <option value="iqoption">IQ Option</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Account ID Number (On your broker)</label>
+                    <input type="text" class="form-control" id="buyBrokerAccountId" placeholder="e.g. Quotex ID 1849204" required />
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select class="form-control" id="buyPaymentMethod" onchange="renderPaymentMethodInstruction()">
+                        <option value="USDT (TRC20 - Instant)">USDT (TRC20 - Instant)</option>
+                        <option value="Binance Pay (Zero Fee)">Binance Pay (Zero Fee)</option>
+                        <option value="bKash (Personal - Send Money)">bKash (Personal - Send Money)</option>
+                        <option value="Nagad (Personal - Send Money)">Nagad (Personal - Send Money)</option>
+                    </select>
+                </div>
+
+                <div id="paymentInstructionBox" style="background:rgba(245,176,65,0.06); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px 14px; margin-bottom:1.2rem; font-size:0.88rem;">
+                    <!-- Populated dynamically by JS -->
+                </div>
+
+                <div class="form-group" id="buySenderNumberGroup" style="display:none;">
+                    <label><i class="fas fa-phone-alt" style="color:var(--yellow); margin-right:4px;"></i> Sender Number (যে নম্বর থেকে টাকা পাঠিয়েছেন)</label>
+                    <input type="text" class="form-control" id="buySenderNumber" placeholder="e.g. 017xxxxxxxx বা আপনার বিকাশ/নগদ নম্বর" />
+                </div>
+
+                <div class="form-group" id="buyTrxIdGroup">
+                    <label id="buyTrxIdLabel">Transaction ID / Hash (TrxID)</label>
+                    <input type="text" class="form-control" id="buyPaymentTxId" placeholder="e.g. 9J4K8L... or TrxID" />
+                </div>
+
+                <div style="background:rgba(255,255,255,0.05); padding:12px 14px; border-radius:12px; margin-bottom:1rem; font-size:0.85rem; color:var(--text-muted);">
+                    <i class="fas fa-info-circle" style="color:var(--yellow);"></i>
+                    চ্যালেঞ্জ কেনার পর আপনার ড্যাশবোর্ডে সেশন কাউন্টার চালু হবে এবং প্রতিদিনের ট্রেড হিস্টোরি সাবমিট করতে পারবেন।
+                </div>
+
+                <button type="submit" class="btn-primary btn-full" id="buySubmitBtn">
+                    <i class="fas fa-check-circle"></i> Confirm & Start Challenge
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle" id="toastIcon"></i>
+        <span id="toastMsg">Message</span>
+    </div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <div class="logo" style="margin-bottom:1rem;">
+                    <img src="/assets/logo.png" alt="Binary Prop Firm Logo" style="width:44px; height:44px; object-fit:cover; border-radius:12px; box-shadow:0 0 15px rgba(245, 176, 65, 0.35);" />
+                    <div class="logo-text">Binary Prop Firm</div>
+                </div>
+                <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.6;">
+                    The premiere external binary options proprietary evaluation firm. Trade on any broker, master the rules, and get funded.
+                </p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#brokers">Supported Brokers</a></li>
+                    <li><a href="#challenges">Challenge Packages</a></li>
+                    <li><a href="#rules">10 Golden Rules</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="/dashboard">Trader Dashboard</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Support & Community</h4>
+                <ul>
+                    <li><a href="https://t.me/binarypropfirm_support" target="_blank"><i class="fab fa-telegram"></i> Telegram Support (@binarypropfirm_support)</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> support@binarypropfirm.com</a></li>
+                    <li><a href="#"><i class="fas fa-shield-alt"></i> Risk Disclosure</a></li>
+                    <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            © 2026 Binary Prop Firm. All rights reserved. Binary options trading involves substantial risk. Never risk more capital than you can afford to lose. Our evaluation exists to develop disciplined, risk-conscious traders.
+        </div>
+    </footer>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script>
+        // Store API packages
+        let globalPackages = [];
+        let globalPaymentMethods = [];
+
+        // Check user session
+        function checkUserSession() {
+            const token = localStorage.getItem('aj_token');
+            const userName = localStorage.getItem('aj_user_name');
+            const navLoginBtn = document.getElementById('navLoginBtn');
+            const navActionBtn = document.getElementById('navActionBtn');
+
+            if (token && userName) {
+                if (navLoginBtn) {
+                    navLoginBtn.innerHTML = `<i class="fas fa-tachometer-alt"></i> Dashboard`;
+                    navLoginBtn.onclick = () => window.location.href = '/dashboard';
+                }
+                if (navActionBtn) {
+                    navActionBtn.innerHTML = `<i class="fas fa-user"></i> ${userName.split(' ')[0]}`;
+                    navActionBtn.onclick = () => window.location.href = '/dashboard';
+                }
+            } else {
+                if (navLoginBtn) {
+                    navLoginBtn.innerHTML = `<i class="fas fa-sign-in-alt"></i> Login`;
+                    navLoginBtn.onclick = () => openLoginModal();
+                }
+                if (navActionBtn) {
+                    navActionBtn.innerHTML = `<i class="fas fa-user-plus"></i> Sign Up`;
+                    navActionBtn.onclick = () => openRegisterModal();
+                }
+            }
+        }
+
+        // Show Toast
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toast.className = `toast ${type}`;
+            toastMsg.innerText = msg;
+            toastIcon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3500);
+        }
+
+        // Password visibility toggle
+        function togglePasswordVis(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const isPass = input.type === 'password';
+            input.type = isPass ? 'text' : 'password';
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.className = isPass ? 'fas fa-eye-slash' : 'fas fa-eye';
+            }
+        }
+
+        // Modals control
+        function openLoginModal() {
+            closeModals();
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function openRegisterModal() {
+            closeModals();
+            document.getElementById('registerModal').classList.add('active');
+        }
+
+        function switchForgotStep(step) {
+            const form1 = document.getElementById('forgotStep1Form');
+            const form2 = document.getElementById('forgotStep2Form');
+            const sub = document.getElementById('forgotModalSubtitle');
+
+            if (step === 1) {
+                if (form1) form1.style.display = 'block';
+                if (form2) form2.style.display = 'none';
+                if (sub) sub.innerText = 'পাসওয়ার্ড রিসেট করতে আপনার রেজিস্টার্ড ইমেইল অ্যাড্রেস দিন।';
+                setTimeout(() => document.getElementById('forgotEmail')?.focus(), 150);
+            } else {
+                if (form1) form1.style.display = 'none';
+                if (form2) form2.style.display = 'block';
+                if (sub) sub.innerText = 'আপনার ইমেইলে প্রাপ্ত ৬-সংখ্যার কোড এবং নতুন পাসওয়ার্ড দিন।';
+                setTimeout(() => document.getElementById('forgotOtpInput')?.focus(), 150);
+            }
+        }
+
+        function openForgotPasswordModal() {
+            closeModals();
+            const loginEmail = document.getElementById('loginEmail')?.value;
+            if (loginEmail) {
+                document.getElementById('forgotEmail').value = loginEmail;
+            }
+            switchForgotStep(1);
+            document.getElementById('forgotPasswordModal').classList.add('active');
+        }
+
+        function openBuyModal(pkgId) {
+            const token = localStorage.getItem('aj_token');
+            if (!token) {
+                showToast('Please login or create an account first to purchase a challenge.', 'error');
+                openLoginModal();
+                return;
+            }
+
+            const pkg = globalPackages.find(p => p.id === pkgId);
+            if (!pkg) return;
+
+            document.getElementById('selectedPackageId').value = pkg.id;
+            document.getElementById('buyModalTitle').innerText = `${pkg.name} ($${pkg.fundedAmount.toLocaleString()}) Challenge`;
+            
+            if (pkg.hasDiscount) {
+                document.getElementById('buyModalSubtitle').innerHTML = `
+                    ফি (Evaluation Fee): <span style="font-size:1.05rem; font-weight:800; color:#ff4d4d; text-decoration:line-through; text-decoration-color:#ff3838; text-decoration-thickness:2px;">$${pkg.originalFee}</span> 
+                    <strong style="color:var(--neon-green); font-size:1.35rem; margin-left:6px;">$${pkg.fee}</strong>
+                    <span style="background:rgba(255,77,77,0.2); color:#ff6b81; border:1px solid rgba(255,77,77,0.4); padding:2px 7px; border-radius:4px; font-size:0.75rem; font-weight:800; margin-left:6px;">
+                        ${pkg.discountPercent}% OFF (লঞ্চ অফার)
+                    </span> 
+                    • প্রফিট স্প্লিট: <strong style="color:var(--gold);">${pkg.profitSplit}</strong>
+                `;
+            } else {
+                document.getElementById('buyModalSubtitle').innerHTML = `One-time evaluation fee: <strong style="color:var(--gold); font-size:1.2rem;">$${pkg.fee}</strong> • Up to ${pkg.profitSplit} Profit Split`;
+            }
+            document.getElementById('buySubmitBtn').innerHTML = `<i class="fas fa-credit-card"></i> Pay $${pkg.fee} & Start Challenge`;
+
+            renderPaymentMethodInstruction();
+            closeModals();
+            document.getElementById('buyModal').classList.add('active');
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        }
+
+        // Helper: Sanitize & Auto-correct common email typos (.come, .con, @gamil, etc.)
+        function sanitizeEmailInput(str) {
+            if (!str || typeof str !== 'string') return '';
+            let s = str.trim();
+            s = s.replace(/\.(come|con|comm|coom)$/i, '.com');
+            s = s.replace(/@(gamil|gmial|gmai|gmaill)\.com$/i, '@gmail.com');
+            s = s.replace(/@gmail\.co$/i, '@gmail.com');
+            s = s.replace(/@(yaho|yahooo)\.com$/i, '@yahoo.com');
+            s = s.replace(/@(hotmial|hotmaill)\.com$/i, '@hotmail.com');
+            return s;
+        }
+
+        // Handle Login
+        async function handleLogin(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('loginEmail');
+            let email = emailInput.value ? emailInput.value.trim() : '';
+            const fixedEmail = sanitizeEmailInput(email);
+            if (fixedEmail && fixedEmail !== email) {
+                email = fixedEmail;
+                emailInput.value = fixedEmail;
+            }
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('aj_token', data.token);
+                    localStorage.setItem('aj_user_name', data.user.name);
+                    localStorage.setItem('aj_user_email', data.user.email);
+                    showToast('Login successful! Redirecting to Dashboard...', 'success');
+                    setTimeout(() => window.location.href = '/dashboard', 800);
+                } else {
+                    showToast(data.message || 'Login failed', 'error');
+                }
+            } catch (err) {
+                showToast('Network error during login', 'error');
+            }
+        }
+
+        let pendingVerificationEmail = '';
+
+        function openEmailVerifyModal(email, devOtp = null) {
+            closeModals();
+            pendingVerificationEmail = email;
+            document.getElementById('verifyEmailTarget').innerText = email;
+            document.getElementById('verifyOtpInput').value = '';
+            document.getElementById('emailVerifyModal').classList.add('active');
+            setTimeout(() => document.getElementById('verifyOtpInput').focus(), 200);
+
+            if (devOtp) {
+                showToast(`ভেরিফিকেশন কোড: ${devOtp} (আপনার ইমেইলেও পাঠানো হয়েছে)`, 'info');
+            }
+        }
+
+        // Handle Register
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const emailInput = document.getElementById('regEmail');
+            let email = emailInput.value ? emailInput.value.trim() : '';
+            const fixedEmail = sanitizeEmailInput(email);
+            if (fixedEmail && fixedEmail !== email) {
+                email = fixedEmail;
+                emailInput.value = fixedEmail;
+            }
+            const password = document.getElementById('regPassword').value;
+            const telegram = document.getElementById('regTelegram').value;
+            const preferredBroker = document.getElementById('regBroker').value;
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, telegram, preferredBroker })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (data.token) localStorage.setItem('aj_token', data.token);
+                    if (data.user) {
+                        localStorage.setItem('aj_user_name', data.user.name);
+                        localStorage.setItem('aj_user_email', data.user.email);
+                    }
+                    showToast(data.message || 'অ্যাকাউন্ট তৈরি হয়েছে! ইমেইল ভেরিফাই করুন।', 'success');
+                    openEmailVerifyModal(data.email || email, data.devOtp);
+                } else {
+                    showToast(data.message || 'Registration failed', 'error');
+                }
+            } catch (err) {
+                showToast('Network error during registration', 'error');
+            }
+        }
+
+        // Handle Email Verification Form Submit
+        async function handleVerifyEmail(e) {
+            e.preventDefault();
+            const otp = document.getElementById('verifyOtpInput').value.trim();
+            const submitBtn = document.getElementById('verifySubmitBtn');
+            const email = pendingVerificationEmail || localStorage.getItem('aj_user_email');
+
+            if (!email) {
+                showToast('ইমেইল অ্যাড্রেস পাওয়া যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।', 'error');
+                return;
+            }
+            if (!otp || otp.length !== 6) {
+                showToast('সঠিক ৬-সংখ্যার ভেরিফিকেশন কোড দিন।', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ভেরিফাই করা হচ্ছে...`;
+
+            try {
+                const res = await fetch('/api/auth/verify-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (data.token) localStorage.setItem('aj_token', data.token);
+                    if (data.user) {
+                        localStorage.setItem('aj_user_name', data.user.name);
+                        localStorage.setItem('aj_user_email', data.user.email);
+                    }
+                    showToast('🎉 ইমেইল সফলভাবে ভেরিফাই হয়েছে! ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...', 'success');
+                    closeModals();
+                    setTimeout(() => window.location.href = '/dashboard', 900);
+                } else {
+                    showToast(data.message || 'ভেরিফিকেশন ব্যর্থ হয়েছে। কোড পুনরায় যাচাই করুন।', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> Verify & Continue to Dashboard`;
+                }
+            } catch (err) {
+                showToast('নেটওয়ার্ক সমস্যার কারণে ভেরিফাই করা যায়নি।', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> Verify & Continue to Dashboard`;
+            }
+        }
+
+        // Handle Resend Verification OTP
+        let resendCooldown = 0;
+        async function handleResendOtp() {
+            if (resendCooldown > 0) return;
+            const email = pendingVerificationEmail || localStorage.getItem('aj_user_email');
+            if (!email) {
+                showToast('ইমেইল অ্যাড্রেস পাওয়া যায়নি।', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('resendOtpBtn');
+            btn.disabled = true;
+            btn.innerText = 'Sending...';
+
+            try {
+                const res = await fetch('/api/auth/resend-verification-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'নতুন ভেরিফিকেশন কোড পাঠানো হয়েছে!', 'success');
+                    if (data.devOtp) {
+                        showToast(`নতুন কোড: ${data.devOtp}`, 'info');
+                    }
+                    resendCooldown = 30;
+                    btn.disabled = true;
+                    const timer = setInterval(() => {
+                        resendCooldown--;
+                        if (resendCooldown <= 0) {
+                            clearInterval(timer);
+                            btn.disabled = false;
+                            btn.innerText = 'Resend Code';
+                        } else {
+                            btn.innerText = `Resend in ${resendCooldown}s`;
+                        }
+                    }, 1000);
+                } else {
+                    showToast(data.message || 'Failed to resend code', 'error');
+                    btn.disabled = false;
+                    btn.innerText = 'Resend Code';
+                }
+            } catch (err) {
+                showToast('Network error resending code', 'error');
+                btn.disabled = false;
+                btn.innerText = 'Resend Code';
+            }
+        }
+
+        // Handle Send Password Reset Verification Code (Step 1)
+        let forgotResendCooldown = 0;
+
+        async function handleSendResetCode(e) {
+            if (e) e.preventDefault();
+            const emailInput = document.getElementById('forgotEmail');
+            let email = emailInput.value ? emailInput.value.trim() : '';
+            const fixedEmail = sanitizeEmailInput(email);
+            if (fixedEmail && fixedEmail !== email) {
+                email = fixedEmail;
+                emailInput.value = fixedEmail;
+            }
+            const btn = document.getElementById('forgotSendCodeBtn');
+
+            if (!email) {
+                showToast('আপনার রেজিস্টার্ড ইমেইল অ্যাড্রেস দিন।', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> কোড পাঠানো হচ্ছে...`;
+
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'আপনার ইমেইলে ভেরিফিকেশন কোড পাঠানো হয়েছে!', 'success');
+                    
+                    const devBox = document.getElementById('forgotDevNotice');
+                    if (devBox) {
+                        if (data.devOtp) {
+                            devBox.style.display = 'block';
+                            devBox.innerHTML = `
+                                <div style="font-weight:700; color:var(--yellow); font-size:0.92rem; margin-bottom:6px;">
+                                    <i class="fas fa-key"></i> আপনার ভেরিফিকেশন কোড: <span style="font-size:1.3rem; letter-spacing:4px; font-family:monospace; background:rgba(0,0,0,0.5); padding:2px 10px; border-radius:6px; color:#fff; border:1px solid var(--yellow);">${data.devOtp}</span>
+                                </div>
+                                <div style="color:var(--text-secondary); font-size:0.78rem; line-height:1.4;">
+                                    💡 ইমেইল ইনবক্সে বা স্প্যাম ফোল্ডারে কোডটি না পেলে উপরোক্ত কোডটি ব্যবহার করে পাসওয়ার্ড রিসেট সম্পন্ন করুন।
+                                </div>
+                            `;
+                        } else {
+                            devBox.style.display = 'none';
+                        }
+                    }
+
+                    document.getElementById('forgotTargetEmailDisplay').innerText = email;
+                    document.getElementById('forgotOtpInput').value = '';
+                    switchForgotStep(2);
+                    startForgotResendTimer();
+                } else {
+                    showToast(data.message || 'কোড পাঠাতে ব্যর্থ হয়েছে।', 'error');
+                }
+            } catch (err) {
+                showToast('নেটওয়ার্ক সমস্যা। পুনরায় চেষ্টা করুন।', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-paper-plane"></i> Send Verification Code`;
+            }
+        }
+
+        function startForgotResendTimer() {
+            forgotResendCooldown = 30;
+            const resendBtn = document.getElementById('forgotResendCodeBtn');
+            if (!resendBtn) return;
+            resendBtn.disabled = true;
+            const timer = setInterval(() => {
+                forgotResendCooldown--;
+                if (forgotResendCooldown <= 0) {
+                    clearInterval(timer);
+                    resendBtn.disabled = false;
+                    resendBtn.innerText = 'Resend Code';
+                } else {
+                    resendBtn.innerText = `Resend in ${forgotResendCooldown}s`;
+                }
+            }, 1000);
+        }
+
+        async function handleResendResetCode() {
+            if (forgotResendCooldown > 0) return;
+            const email = document.getElementById('forgotEmail').value.trim();
+            if (!email) return;
+
+            const resendBtn = document.getElementById('forgotResendCodeBtn');
+            resendBtn.disabled = true;
+            resendBtn.innerText = 'Sending...';
+
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('নতুন ভেরিফিকেশন কোড পাঠানো হয়েছে!', 'success');
+                    const devBox = document.getElementById('forgotDevNotice');
+                    if (devBox && data.devOtp) {
+                        devBox.style.display = 'block';
+                        devBox.innerHTML = `
+                            <div style="font-weight:700; color:var(--yellow); font-size:0.92rem; margin-bottom:6px;">
+                                <i class="fas fa-key"></i> আপনার নতুন ভেরিফিকেশন কোড: <span style="font-size:1.3rem; letter-spacing:4px; font-family:monospace; background:rgba(0,0,0,0.5); padding:2px 10px; border-radius:6px; color:#fff; border:1px solid var(--yellow);">${data.devOtp}</span>
+                            </div>
+                            <div style="color:var(--text-secondary); font-size:0.78rem; line-height:1.4;">
+                                💡 ইমেইল ইনবক্সে বা স্প্যাম ফোল্ডারে কোডটি না পেলে উপরোক্ত কোডটি ব্যবহার করে পাসওয়ার্ড রিসেট সম্পন্ন করুন।
+                            </div>
+                        `;
+                    }
+                    startForgotResendTimer();
+                } else {
+                    showToast(data.message || 'Failed to resend code', 'error');
+                    resendBtn.disabled = false;
+                    resendBtn.innerText = 'Resend Code';
+                }
+            } catch (err) {
+                showToast('Network error resending code', 'error');
+                resendBtn.disabled = false;
+                resendBtn.innerText = 'Resend Code';
+            }
+        }
+
+        // Handle Verify Code & Reset Password Submit (Step 2)
+        async function handleResetPasswordSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgotEmail').value.trim();
+            const otp = document.getElementById('forgotOtpInput').value.trim();
+            const newPassword = document.getElementById('forgotNewPassword').value;
+            const confirmPassword = document.getElementById('forgotConfirmPassword').value;
+            const submitBtn = document.getElementById('forgotSubmitBtn');
+
+            if (!email) {
+                showToast('ইমেইল অ্যাড্রেস প্রয়োজন।', 'error');
+                return;
+            }
+            if (!otp || otp.length !== 6) {
+                showToast('আপনার ইমেইলে প্রাপ্ত ৬-সংখ্যার কোডটি দিন।', 'error');
+                return;
+            }
+            if (newPassword.length < 6) {
+                showToast('পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।', 'error');
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                showToast('উভয় পাসওয়ার্ড একই হতে হবে। অনুগ্রহ করে মিলিয়ে নিন।', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verifying & Updating...`;
+
+            try {
+                const res = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp, newPassword })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('🎉 ' + data.message, 'success');
+                    closeModals();
+                    document.getElementById('forgotStep1Form')?.reset();
+                    document.getElementById('forgotStep2Form')?.reset();
+                    document.getElementById('loginEmail').value = email;
+                    document.getElementById('loginPassword').value = '';
+                    setTimeout(() => openLoginModal(), 400);
+                } else {
+                    showToast(data.message || 'পাসওয়ার্ড রিসেট করতে ব্যর্থ হয়েছে। কোড পুনরায় যাচাই করুন।', 'error');
+                }
+            } catch (err) {
+                showToast('নেটওয়ার্ক সমস্যা। পুনরায় চেষ্টা করুন।', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fas fa-shield-alt"></i> Verify Code & Reset Password`;
+            }
+        }
+
+        // Handle Buy Challenge
+        async function handleBuyChallenge(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('aj_token');
+            const packageId = document.getElementById('selectedPackageId').value;
+            const brokerId = document.getElementById('buyBrokerSelect').value;
+            const brokerAccountId = document.getElementById('buyBrokerAccountId').value.trim();
+            const paymentMethod = document.getElementById('buyPaymentMethod').value;
+            const paymentTxId = (document.getElementById('buyPaymentTxId').value || '').trim();
+            const senderNumber = (document.getElementById('buySenderNumber')?.value || '').trim();
+
+            if (!brokerAccountId) {
+                showToast('Please enter your broker Account ID Number.', 'error');
+                return;
+            }
+
+            const pm = globalPaymentMethods.find(m => m.name === paymentMethod);
+            if (pm) {
+                if (pm.requireSenderNumber && !senderNumber) {
+                    showToast('যে নম্বর থেকে টাকা পাঠিয়েছেন (Sender Number) অনুগ্রহ করে সেটি লিখুন।', 'error');
+                    return;
+                }
+                if (pm.requireTrxId !== false && !paymentTxId) {
+                    showToast('অনুগ্রহ করে Transaction ID / Hash (TrxID) প্রদান করুন।', 'error');
+                    return;
+                }
+            }
+
+            const isBdDefault = pm ? (pm.name.toLowerCase().includes('bkash') || pm.name.toLowerCase().includes('nagad')) : false;
+            const curr = pm ? (pm.currency || (isBdDefault ? 'BDT' : 'USD')) : 'USD';
+            const sym = pm ? (pm.currencySymbol || (curr === 'BDT' ? '৳' : (curr === 'USD' ? '$' : curr))) : '$';
+            const rate = pm ? (Number(pm.exchangeRate) || (curr === 'BDT' ? 125 : 1)) : 1;
+            const pkg = globalPackages.find(p => p.id === packageId);
+            const pkgFee = pkg ? Number(pkg.fee) : 7;
+            const localAmount = (curr !== 'USD' && rate !== 1) ? Math.round(pkgFee * rate) : pkgFee;
+
+            const btn = document.getElementById('buySubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
+
+            try {
+                const res = await fetch('/api/challenges/buy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        packageId,
+                        brokerId,
+                        brokerAccountId,
+                        paymentMethod,
+                        paymentTxId,
+                        senderNumber,
+                        currency: curr,
+                        currencySymbol: sym,
+                        exchangeRate: rate,
+                        localAmount: localAmount
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Challenge order submitted! Redirecting to dashboard...', 'success');
+                    closeModals();
+                    setTimeout(() => window.location.href = '/dashboard', 900);
+                } else {
+                    showToast(data.message || 'Failed to start challenge', 'error');
+                }
+            } catch (err) {
+                showToast('Network error while purchasing challenge', 'error');
+            } finally {
+                btn.disabled = false;
+                renderPaymentMethodInstruction();
+            }
+        }
+
+        // Payment Methods Loader & Dynamic Instruction
+        async function loadPaymentMethods() {
+            try {
+                const res = await fetch('/api/payment-methods');
+                const data = await res.json();
+                if (data.success && data.paymentMethods && data.paymentMethods.length > 0) {
+                    globalPaymentMethods = data.paymentMethods;
+                    const select = document.getElementById('buyPaymentMethod');
+                    if (select) {
+                        select.innerHTML = globalPaymentMethods.map(pm => {
+                            const isBdDefault = pm.name.toLowerCase().includes('bkash') || pm.name.toLowerCase().includes('nagad');
+                            const countryName = pm.country || (isBdDefault ? 'Bangladesh' : 'Global / International');
+                            const countryCode = pm.countryCode || (isBdDefault ? 'BD' : 'GLOBAL');
+                            const curr = pm.currency || (isBdDefault ? 'BDT' : 'USD');
+                            const sym = pm.currencySymbol || (curr === 'BDT' ? '৳' : (curr === 'USD' ? '$' : curr));
+                            const rate = Number(pm.exchangeRate) || (curr === 'BDT' ? 125 : 1);
+                            const flag = countryCode === 'GLOBAL' ? '🌐' : (window.WORLD_COUNTRIES?.find(c => c.code === countryCode)?.flag || '🏳️');
+
+                            const rateLabel = curr === 'USD' && rate === 1
+                                ? `(${flag} Global • USD)`
+                                : `(${flag} ${countryName} • 1 USD = ${rate} ${sym})`;
+
+                            return `<option value="${pm.name}">${pm.name} ${rateLabel}</option>`;
+                        }).join('');
+                    }
+                }
+                renderPaymentMethodInstruction();
+            } catch (err) {
+                console.error('Failed to load payment methods:', err);
+            }
+        }
+
+        function renderPaymentMethodInstruction() {
+            const select = document.getElementById('buyPaymentMethod');
+            const box = document.getElementById('paymentInstructionBox');
+            if (!select || !box) return;
+
+            const selectedName = select.value;
+            const pm = globalPaymentMethods.find(m => m.name === selectedName);
+
+            const pkgId = document.getElementById('selectedPackageId')?.value;
+            const pkg = globalPackages.find(p => p.id === pkgId);
+            const pkgFee = pkg ? Number(pkg.fee) : 7;
+
+            const senderGroup = document.getElementById('buySenderNumberGroup');
+            const senderInput = document.getElementById('buySenderNumber');
+            const trxGroup = document.getElementById('buyTrxIdGroup');
+            const trxInput = document.getElementById('buyPaymentTxId');
+            const submitBtn = document.getElementById('buySubmitBtn');
+
+            if (pm) {
+                const isBdDefault = pm.name.toLowerCase().includes('bkash') || pm.name.toLowerCase().includes('nagad');
+                const countryName = pm.country || (isBdDefault ? 'Bangladesh' : 'Global / International');
+                const countryCode = pm.countryCode || (isBdDefault ? 'BD' : 'GLOBAL');
+                const curr = pm.currency || (isBdDefault ? 'BDT' : 'USD');
+                const sym = pm.currencySymbol || (curr === 'BDT' ? '৳' : (curr === 'USD' ? '$' : curr));
+                const rate = Number(pm.exchangeRate) || (curr === 'BDT' ? 125 : 1);
+                const isLocalCurrency = curr !== 'USD' && rate !== 1;
+                const localAmount = isLocalCurrency ? Math.round(pkgFee * rate) : pkgFee;
+                const flag = countryCode === 'GLOBAL' ? '🌐' : (window.WORLD_COUNTRIES?.find(c => c.code === countryCode)?.flag || '🏳️');
+
+                // Dynamic Button Text per Requirement 2:
+                // "Pay $7 & start challenge যেখানে লেখা আছে এখানে ডলারের জায়গায় যেন টাকা শো হয় এডমিন প্যানেলে প্রতি ডলারের মূল্য যত টাকা করে দেওয়া আছে ওই অনুযায়ী"
+                if (submitBtn) {
+                    if (isLocalCurrency) {
+                        submitBtn.innerHTML = `<i class="fas fa-credit-card"></i> Pay ${sym}${localAmount.toLocaleString()} & Start Challenge`;
+                    } else {
+                        submitBtn.innerHTML = `<i class="fas fa-credit-card"></i> Pay $${pkgFee} & Start Challenge`;
+                    }
+                }
+
+                // Dynamic subtitle update showing local amount
+                const subTitle = document.getElementById('buyModalSubtitle');
+                if (subTitle && pkg) {
+                    if (pkg.hasDiscount) {
+                        subTitle.innerHTML = `
+                            ফি (Evaluation Fee): <span style="font-size:1.05rem; font-weight:800; color:#ff4d4d; text-decoration:line-through; text-decoration-color:#ff3838; text-decoration-thickness:2px;">$${pkg.originalFee}</span> 
+                            <strong style="color:var(--neon-green); font-size:1.35rem; margin-left:6px;">$${pkg.fee}</strong>
+                            ${isLocalCurrency ? `<strong style="color:var(--yellow); font-size:1.2rem; margin-left:6px;">(${sym}${localAmount.toLocaleString()} ${curr})</strong>` : ''}
+                            <span style="background:rgba(255,77,77,0.2); color:#ff6b81; border:1px solid rgba(255,77,77,0.4); padding:2px 7px; border-radius:4px; font-size:0.75rem; font-weight:800; margin-left:6px;">
+                                ${pkg.discountPercent}% OFF (লঞ্চ অফার)
+                            </span> 
+                            • প্রফিট স্প্লিট: <strong style="color:var(--gold);">${pkg.profitSplit}</strong>
+                        `;
+                    } else {
+                        subTitle.innerHTML = `One-time evaluation fee: <strong style="color:var(--gold); font-size:1.2rem;">$${pkg.fee}</strong> ${isLocalCurrency ? `<strong style="color:var(--neon-green); font-size:1.15rem; margin-left:6px;">(${sym}${localAmount.toLocaleString()} ${curr})</strong>` : ''} • Up to ${pkg.profitSplit} Profit Split`;
+                    }
+                }
+
+                // Sender Number Toggle
+                if (senderGroup && senderInput) {
+                    if (pm.requireSenderNumber) {
+                        senderGroup.style.display = 'block';
+                        senderInput.required = true;
+                    } else {
+                        senderGroup.style.display = 'none';
+                        senderInput.required = false;
+                        senderInput.value = '';
+                    }
+                }
+
+                // TrxID Toggle
+                if (trxGroup && trxInput) {
+                    if (pm.requireTrxId !== false) {
+                        trxGroup.style.display = 'block';
+                        trxInput.required = true;
+                    } else {
+                        trxGroup.style.display = 'none';
+                        trxInput.required = false;
+                        trxInput.value = '';
+                    }
+                }
+
+                const conversionCard = isLocalCurrency ? `
+                    <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.35); border-radius:10px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <span style="font-size:0.78rem; color:var(--text-muted); display:block;">পরিশোধযোগ্য মোট অ্যামাউন্ট (${flag} ${countryName}):</span>
+                            <div style="display:flex; align-items:baseline; gap:6px;">
+                                <strong style="color:var(--neon-green); font-size:1.35rem; font-weight:900;">${sym}${localAmount.toLocaleString()}</strong>
+                                <span style="color:#fff; font-size:0.85rem; font-weight:700;">${curr}</span>
+                                <span style="color:#aaa; font-size:0.78rem; margin-left:4px;">($${pkgFee} USD)</span>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="background:rgba(245,176,65,0.18); color:var(--yellow); border:1px solid rgba(245,176,65,0.4); padding:3px 10px; border-radius:6px; font-size:0.78rem; font-weight:800;">
+                                রেট: 1 USD = ${rate} ${sym} (${curr})
+                            </span>
+                        </div>
+                    </div>
+                ` : `
+                    <div style="background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.25); border-radius:10px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span style="font-size:0.78rem; color:var(--text-muted); display:block;">পরিশোধযোগ্য মোট ফি:</span>
+                            <strong style="color:var(--yellow); font-size:1.3rem; font-weight:900;">$${pkgFee} USD</strong>
+                        </div>
+                        <span style="background:rgba(255,255,255,0.08); color:#fff; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:600;">
+                            ${flag} Global (1 USD = 1.00 USD)
+                        </span>
+                    </div>
+                `;
+
+                box.innerHTML = `
+                    ${conversionCard}
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                        <span style="font-weight:700; color:var(--yellow);"><i class="fas fa-wallet"></i> ${pm.name}</span>
+                        ${pm.badge ? `<span style="font-size:0.75rem; background:rgba(245,176,65,0.2); color:var(--yellow); padding:2px 8px; border-radius:10px;">${pm.badge}</span>` : ''}
+                    </div>
+                    <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:8px;">${pm.instructions || 'নিচের নম্বরে সেন্ড মানি / ডিপোজিট করে ট্রানজেকশন আইডি দিন:'}</div>
+                    <div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:8px; border:1px solid rgba(245,176,65,0.2);">
+                        <code style="color:#fff; font-weight:700; font-size:0.95rem; flex:1; word-break:break-all;">${pm.accountNumber}</code>
+                        <button type="button" onclick="copyPaymentNumber('${pm.accountNumber}')" style="background:var(--yellow); color:#000; border:none; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:700; cursor:pointer;">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                `;
+            } else {
+                box.innerHTML = `<span style="color:var(--text-muted); font-size:0.85rem;">পেমেন্ট মেথড অনুযায়ী অ্যাকাউন্ট তথ্য স্বয়ংক্রিয়ভাবে লোড হবে।</span>`;
+                if (senderGroup) senderGroup.style.display = 'none';
+                if (trxGroup) trxGroup.style.display = 'block';
+            }
+        }
+
+        function copyPaymentNumber(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Number / Wallet address copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Copied: ' + text, 'success');
+            });
+        }
+
+        // Fetch Packages and Rules from backend
+        let globalPromo = null;
+        let promoCountdownTimerInterval = null;
+
+        async function loadPackagesAndRules() {
+            try {
+                const res = await fetch('/api/challenges/packages');
+                const data = await res.json();
+                if (data.success) {
+                    globalPackages = data.packages;
+                    globalPromo = data.launchPromo;
+                    renderRules(data.tenRules);
+                    renderPackages(data.packages);
+                    renderPromoBanner(globalPromo);
+                }
+            } catch (err) {
+                console.error('Failed to load packages:', err);
+            }
+        }
+
+        // Promo Banner & Countdown Handler
+        function renderPromoBanner(promo) {
+            const banner = document.getElementById('launchPromoBanner');
+            if (!banner) return;
+
+            if (!promo || !promo.active) {
+                banner.style.display = 'none';
+                if (promoCountdownTimerInterval) clearInterval(promoCountdownTimerInterval);
+                return;
+            }
+
+            banner.style.display = 'block';
+
+            const badgeEl = document.getElementById('launchPromoBadgeText');
+            if (badgeEl && promo.badge) badgeEl.innerText = promo.badge;
+
+            const titleEl = document.getElementById('launchPromoTitleText');
+            if (titleEl && promo.title) titleEl.innerText = promo.title;
+
+            const descEl = document.getElementById('launchPromoDescText');
+            if (descEl && promo.description) descEl.innerHTML = promo.description;
+
+            const countdownWrap = document.getElementById('promoCountdownWrapper');
+            const showTimer = promo.showCountdown !== false && promo.expiresAt;
+            if (countdownWrap) {
+                countdownWrap.style.display = showTimer ? 'block' : 'none';
+            }
+
+            const labelEl = document.getElementById('promoCountdownLabelText');
+            if (labelEl && promo.countdownTitle) labelEl.innerText = promo.countdownTitle;
+
+            if (showTimer) {
+                initLaunchPromoCountdown(promo.expiresAt);
+            } else if (promoCountdownTimerInterval) {
+                clearInterval(promoCountdownTimerInterval);
+            }
+        }
+
+        function initLaunchPromoCountdown(expiresAt) {
+            if (promoCountdownTimerInterval) clearInterval(promoCountdownTimerInterval);
+
+            function update() {
+                const now = new Date().getTime();
+                const target = new Date(expiresAt).getTime();
+                const diff = target - now;
+
+                const countdownEl = document.getElementById('promoCountdown');
+                if (!countdownEl) return;
+
+                if (diff <= 0) {
+                    countdownEl.innerHTML = `<span style="color:#ff4d4d; font-weight:800; font-size:0.9rem;">অফার সমাপ্ত হয়েছে</span>`;
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                countdownEl.innerHTML = `
+                    <div class="countdown-box">
+                        <div class="countdown-num">${String(days).padStart(2, '0')}</div>
+                        <div class="countdown-unit">Days</div>
+                    </div>
+                    <div class="countdown-sep">:</div>
+                    <div class="countdown-box">
+                        <div class="countdown-num">${String(hours).padStart(2, '0')}</div>
+                        <div class="countdown-unit">Hours</div>
+                    </div>
+                    <div class="countdown-sep">:</div>
+                    <div class="countdown-box">
+                        <div class="countdown-num">${String(minutes).padStart(2, '0')}</div>
+                        <div class="countdown-unit">Mins</div>
+                    </div>
+                    <div class="countdown-sep">:</div>
+                    <div class="countdown-box secs">
+                        <div class="countdown-num">${String(seconds).padStart(2, '0')}</div>
+                        <div class="countdown-unit">Secs</div>
+                    </div>
+                `;
+            }
+
+            update();
+            promoCountdownTimerInterval = setInterval(update, 1000);
+        }
+
+        // Render 10 Golden Rules (Concise & Classic)
+        const conciseRules = [
+            { id: 1, title: '১৫ সেশন কমপ্লিট', desc: 'মানি ম্যানেজমেন্ট শিট অনুযায়ী নির্ধারিত ১৫টি সেশন সফলভাবে সম্পন্ন করতে হবে।' },
+            { id: 2, title: '৬ উইন ও ২৫% লস লিমিট', desc: 'প্রতি সেশনে ১৬ ট্রেডের মধ্যে ৬টি উইন করতে হবে; সর্বোচ্চ লস লিমিট ২৫%।' },
+            { id: 3, title: 'অতিরিক্ত ট্রেড নিষিদ্ধ', desc: 'চ্যালেঞ্জ চলাকালীন শিটের বাইরে ডেমোতে কোনো অতিরিক্ত ট্রেড নেওয়া সম্পূর্ণ নিষেধ।' },
+            { id: 4, title: 'দৈনিক সর্বোচ্চ ৩ সেশন', desc: 'প্রতিদিন সর্বোচ্চ ৩টি সেশন জমা দেওয়া যাবে; রাত ১১টার মধ্যে রেজাল্ট রিভিউ।' },
+            { id: 5, title: 'সেশন ক্লোজ নিয়ম', desc: '৬টি উইন হলে সেশন সম্পন্ন; ব্যালেন্স $০.৫০ নিচে নামলে সেশন ক্লোজ করতে হবে।' },
+            { id: 6, title: '৮৫%+ পেআউট মার্কেট', desc: 'সকল ট্রেড অবশ্যই ৮৫% বা তার বেশি রিটার্ন দেওয়া মার্কেটে এক্সিকিউট করতে হবে।' },
+            { id: 7, title: 'ট্রেড সাইজ রাউন্ডিং', desc: '৫০ সেন্ট বা নিচে বেস ডলার ($৪.৫০ = $৪); ৫১ সেন্টে রাউন্ড আপ ($৪.৫১ = $৫)।' },
+            { id: 8, title: 'প্রফিট কম্পাউন্ডিং', desc: 'প্রতিটি সেশনের প্রফিট পরবর্তী সেশনের স্টার্টিং ক্যাপিটালে যুক্ত হবে।' },
+            { id: 9, title: 'ভিডিও প্রুফ ভেরিফিকেশন', desc: 'ভিডিওতে ট্রেডার আইডি ও সেশন শুরুর পূর্বের ১টি ট্রেড রেকর্ড দেখাতে হবে।' },
+            { id: 10, title: '১৫ দিন সময়সীমা', desc: 'সম্পূর্ণ ১৫ সেশনের মূল্যায়ন সর্বোচ্চ ১৫ দিনের মধ্যে শেষ করতে হবে।' }
+        ];
+
+        function renderRules(rules) {
+            const container = document.getElementById('rulesContainer');
+            if (!container) return;
+
+            const list = (rules && rules.length === 10) ? rules.map((r, idx) => {
+                const c = conciseRules[idx] || {};
+                return {
+                    id: r.id || (idx + 1),
+                    title: c.title || r.titleBn || r.titleEn,
+                    desc: c.desc || r.descBn || r.descEn
+                };
+            }) : conciseRules;
+
+            container.innerHTML = list.map(rule => `
+                <div class="rule-card glass">
+                    <div class="rule-number">${rule.id}</div>
+                    <div class="rule-details">
+                        <h3>${rule.title}</h3>
+                        <p>${rule.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Packages
+        function renderPackages(packages) {
+            const container = document.getElementById('packagesContainer');
+            if (!container) return;
+
+            container.innerHTML = packages.map(pkg => `
+                <div class="card-external glass ${pkg.popular ? 'popular' : ''}">
+                    ${pkg.popular ? '<div class="popular-badge">Most Popular</div>' : ''}
+                    <div>
+                        <div class="card-top" style="align-items:flex-start; margin-bottom:12px;">
+                            <div>
+                                <span class="tier-name">${pkg.name}</span>
+                                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${pkg.badge}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                ${pkg.hasDiscount ? `
+                                    <!-- Original Price marked in Red strike-through -->
+                                    <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px; margin-bottom:2px;">
+                                        <span style="font-size:1.1rem; font-weight:800; color:#ff4d4d; text-decoration:line-through; text-decoration-color:#ff3838; text-decoration-thickness:2px;">
+                                            $${pkg.originalFee}
+                                        </span>
+                                        <span style="background:rgba(255,77,77,0.22); color:#ff6b81; border:1px solid rgba(255,77,77,0.45); font-size:0.72rem; font-weight:800; padding:1px 6px; border-radius:4px; letter-spacing:0.3px;">
+                                            ${pkg.discountPercent}% OFF
+                                        </span>
+                                    </div>
+                                    <!-- Discounted Price below it -->
+                                    <div style="font-size:1.9rem; font-weight:900; color:var(--neon-green); line-height:1.1;">
+                                        $${pkg.fee} <span style="font-size:0.85rem; color:var(--text-muted); font-weight:400;">fee</span>
+                                    </div>
+                                    <div style="font-size:0.7rem; color:var(--neon-green); font-weight:700; margin-top:2px;">
+                                        <i class="fas fa-tag"></i> ${pkg.discountTag || (globalPromo && globalPromo.discountTag) || 'লঞ্চ স্পেশাল ছাড়'}
+                                    </div>
+                                ` : `
+                                    <div style="font-size:1.9rem; font-weight:900; color:var(--yellow); line-height:1.1;">
+                                        $${pkg.fee} <span style="font-size:0.85rem; color:var(--text-muted); font-weight:400;">fee</span>
+                                    </div>
+                                    <div style="font-size:0.7rem; color:var(--text-muted); font-weight:500; margin-top:2px;">
+                                        রেগুলার ফি (Regular)
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                        <div class="funded-amount">$${pkg.fundedAmount.toLocaleString()}</div>
+                        <ul class="challenge-rules-list">
+                            <li><span class="lbl">Evaluation Sessions</span><span class="val">${pkg.sessions} Sessions</span></li>
+                            <li><span class="lbl">Max Drawdown</span><span class="val red">${pkg.maxDrawdown}</span></li>
+                            <li><span class="lbl">Trading Platform</span><span class="val">Any Binary Demo</span></li>
+                            <li><span class="lbl">Daily Loss Limit</span><span class="val" style="color:var(--text-muted);">${pkg.dailyLoss}</span></li>
+                            <li><span class="lbl">Profit Target</span><span class="val" style="color:var(--text-muted);">${pkg.profitTarget}</span></li>
+                            <li><span class="lbl">Profit Split (Funded)</span><span class="val gold">${pkg.profitSplit}</span></li>
+                        </ul>
+                    </div>
+                    <button class="btn-start-challenge" onclick="openBuyModal('${pkg.id}')">
+                        Start ${pkg.name} Challenge ($${pkg.fee})
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // ---------- TACTILE WATER TOUCH RIPPLE & GLOW ENGINE ----------
+        const canvas = document.getElementById('waterCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = 0, height = 0;
+        let ripples = [];
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        // Spawn organic concentric water ripples on touch/click
+        function addWaterRipple(x, y, scale = 1.0) {
+            ripples.push({
+                x,
+                y,
+                radius: 3,
+                maxRadius: Math.min(Math.max(width, height) * 0.28, 160) * scale,
+                speed: 3.0 * (scale < 1 ? 0.9 : 1),
+                opacity: 0.7 * scale,
+                decay: 0.012,
+                rings: [
+                    { offset: 0, width: 2.2, alphaMul: 1.0 },
+                    { offset: 14, width: 1.6, alphaMul: 0.65 },
+                    { offset: 32, width: 1.1, alphaMul: 0.35 }
+                ]
+            });
+        }
+
+        function updateAndDrawWater() {
+            ctx.clearRect(0, 0, width, height);
+
+            for (let i = 0; i < ripples.length; i++) {
+                const r = ripples[i];
+                r.radius += r.speed;
+                r.opacity -= r.decay;
+
+                if (r.opacity <= 0 || r.radius >= r.maxRadius) {
+                    ripples.splice(i, 1);
+                    i--;
+                    continue;
+                }
+
+                // Initial soft touch center glow
+                if (r.radius < 45) {
+                    const centerGrad = ctx.createRadialGradient(r.x, r.y, 0, r.x, r.y, r.radius * 1.3);
+                    centerGrad.addColorStop(0, `rgba(245, 176, 65, ${r.opacity * 0.25})`);
+                    centerGrad.addColorStop(1, 'rgba(245, 176, 65, 0)');
+                    ctx.fillStyle = centerGrad;
+                    ctx.beginPath();
+                    ctx.arc(r.x, r.y, r.radius * 1.3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Draw organic concentric water wave rings
+                for (const ring of r.rings) {
+                    const ringRadius = r.radius - ring.offset;
+                    if (ringRadius > 2 && ringRadius < r.maxRadius) {
+                        const alpha = Math.max(0, r.opacity * ring.alphaMul);
+                        if (alpha > 0.01) {
+                            // Primary warm golden aquatic shimmer
+                            ctx.beginPath();
+                            ctx.arc(r.x, r.y, ringRadius, 0, Math.PI * 2);
+                            ctx.strokeStyle = `rgba(245, 185, 75, ${alpha * 0.85})`;
+                            ctx.lineWidth = Math.max(0.6, ring.width * (1 - ringRadius / r.maxRadius));
+                            ctx.stroke();
+
+                            // Delicate water surface crest reflection
+                            ctx.beginPath();
+                            ctx.arc(r.x, r.y, Math.max(1, ringRadius - 1.2), 0, Math.PI * 2);
+                            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.4})`;
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            requestAnimationFrame(updateAndDrawWater);
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        requestAnimationFrame(updateAndDrawWater);
+
+        // Ambient Mouse & Mobile Touch Glow
+        const mouseGlow = document.getElementById('mouseGlow');
+        let lastRippleTime = 0;
+        let lastRipplePos = { x: -999, y: -999 };
+
+        function updateGlowPosition(x, y) {
+            if (mouseGlow) {
+                mouseGlow.style.opacity = '1';
+                mouseGlow.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+            }
+        }
+
+        function handleWaterInteraction(x, y, isDrag = false) {
+            updateGlowPosition(x, y);
+
+            const now = performance.now();
+            const dist = Math.hypot(x - lastRipplePos.x, y - lastRipplePos.y);
+
+            if (isDrag) {
+                // Subtle wake ripples while dragging across surface
+                if (dist > 36 && (now - lastRippleTime > 85)) {
+                    lastRippleTime = now;
+                    lastRipplePos = { x, y };
+                    addWaterRipple(x, y, 0.55);
+                }
+            } else {
+                // Direct touch / click generates clean water ripple
+                if (now - lastRippleTime > 70 || dist > 15) {
+                    lastRippleTime = now;
+                    lastRipplePos = { x, y };
+                    addWaterRipple(x, y, 1.0);
+                }
+            }
+        }
+
+        // Pointer event listener (uniform across Desktop Mouse, Pen, and Mobile Touch)
+        window.addEventListener('pointerdown', (e) => {
+            handleWaterInteraction(e.clientX, e.clientY, false);
+        }, { passive: true });
+
+        window.addEventListener('pointermove', (e) => {
+            updateGlowPosition(e.clientX, e.clientY);
+            if (e.buttons > 0) { // dragging while pressing
+                handleWaterInteraction(e.clientX, e.clientY, true);
+            }
+        }, { passive: true });
+
+        // Touch event listeners for seamless Mobile support
+        window.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches[0]) {
+                const t = e.touches[0];
+                handleWaterInteraction(t.clientX, t.clientY, false);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches && e.touches[0]) {
+                const t = e.touches[0];
+                handleWaterInteraction(t.clientX, t.clientY, true);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            setTimeout(() => {
+                if (mouseGlow && performance.now() - lastRippleTime > 2000) {
+                    mouseGlow.style.opacity = '0.35';
+                }
+            }, 1200);
+        }, { passive: true });
+
+        function closeMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            if (navLinks) navLinks.classList.remove('mobile-show');
+            if (mobileMenuBtn) mobileMenuBtn.innerHTML = '&#9776;';
+        }
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        if (mobileMenuBtn && navLinks) {
+            mobileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = navLinks.classList.toggle('mobile-show');
+                mobileMenuBtn.innerHTML = isOpen ? '&times;' : '&#9776;';
+            });
+            document.addEventListener('click', (e) => {
+                if (!navLinks.contains(e.target) && e.target !== mobileMenuBtn) {
+                    closeMobileMenu();
+                }
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkUserSession();
+            loadPackagesAndRules();
+            loadPaymentMethods();
+
+            // Auto-correct common email typos on blur
+            ['loginEmail', 'regEmail', 'forgotEmail'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('blur', function() {
+                        const fixed = sanitizeEmailInput(this.value);
+                        if (fixed && fixed !== this.value) {
+                            this.value = fixed;
+                        }
+                    });
+                }
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('login') === 'true') {
+                openLoginModal();
+            } else if (urlParams.get('forgot') === 'true') {
+                openForgotPasswordModal();
+            }
+        });
+    </script>
+</body>
+</html>

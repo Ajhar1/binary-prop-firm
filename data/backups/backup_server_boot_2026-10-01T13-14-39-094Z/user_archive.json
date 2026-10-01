@@ -1,0 +1,743 @@
+[
+  {
+    "archiveId": "arc_1790858159187_tk4x",
+    "timestamp": "2026-10-01T12:35:59.187Z",
+    "displayTime": "10/1/2026, 6:35:59 PM",
+    "action": "TRADE_PROOF_SUBMITTED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "submissionId": "sub_1790858159179_gfufb",
+      "challengeId": "ch_1790764216162_qs45b",
+      "packageName": "Master",
+      "broker": "Quotex",
+      "winTrades": 6,
+      "lossTrades": 3,
+      "tradesCount": 9,
+      "winRate": "66.7%",
+      "profitLoss": 420.5
+    }
+  },
+  {
+    "archiveId": "arc_1790851945350_2xtf",
+    "timestamp": "2026-10-01T10:52:25.350Z",
+    "displayTime": "10/1/2026, 4:52:25 PM",
+    "action": "SUPPORT_REPLY_SENT",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "ticketId": "tkt_1790769187927_qqeyf",
+      "adminReplySnippet": "আপনার চ্যালেঞ্জ অর্ডারটি ভেরিফাই করে অনুমোদন করা হয়েছে। ড্যাশবোর্ডে সেশন শুরু করুন।",
+      "status": "in_progress"
+    }
+  },
+  {
+    "archiveId": "arc_1790851137205_v9qq",
+    "timestamp": "2026-10-01T10:38:57.205Z",
+    "displayTime": "10/1/2026, 4:38:57 PM",
+    "action": "ADMIN_LOGIN_SUCCESS",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "method": "3_step_verification",
+      "ip": "::1"
+    }
+  },
+  {
+    "archiveId": "arc_1790825035253_zfm6",
+    "timestamp": "2026-10-01T03:23:55.253Z",
+    "displayTime": "10/1/2026, 9:23:55 AM",
+    "action": "ADMIN_LOGIN_SUCCESS",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "method": "3_step_verification",
+      "ip": "::1"
+    }
+  },
+  {
+    "archiveId": "arc_1790824453793_0v9w",
+    "timestamp": "2026-10-01T03:14:13.793Z",
+    "displayTime": "10/1/2026, 9:14:13 AM",
+    "action": "ADMIN_LOGIN_SUCCESS",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "method": "3_step_verification",
+      "ip": "::ffff:192.168.0.104"
+    }
+  },
+  {
+    "archiveId": "arc_1790770550855_5t7d",
+    "timestamp": "2026-09-30T12:15:50.855Z",
+    "displayTime": "9/30/2026, 6:15:50 PM",
+    "action": "PACKAGE_CREATED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "packageId": "pkg_1790770550854_n6rb",
+      "name": "Apex",
+      "fundedAmount": 65000,
+      "fee": 1199,
+      "discountPercent": 40
+    }
+  },
+  {
+    "archiveId": "arc_1790769187928_vgod",
+    "timestamp": "2026-09-30T11:53:07.928Z",
+    "displayTime": "9/30/2026, 5:53:07 PM",
+    "action": "SUPPORT_TICKET_CREATED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "ticketId": "tkt_1790769187927_qqeyf",
+      "subject": "challange chancel",
+      "category": "challenge_issue"
+    }
+  },
+  {
+    "archiveId": "arc_1790768759240_bif1",
+    "timestamp": "2026-09-30T11:45:59.240Z",
+    "displayTime": "9/30/2026, 5:45:59 PM",
+    "action": "SUPPORT_REPLY_SENT",
+    "userId": "usr_admin_master",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "ticketId": "tkt_1790768759191_2ni33",
+      "adminReplySnippet": "আপনার TrxID BK789210492 সফলভাবে ভেরিফাই করা হয়েছে। আপনার চ্যালেঞ্জটি অনুমোদন ও এক্টিভ করা হলো। শুভ ট",
+      "status": "resolved"
+    }
+  },
+  {
+    "archiveId": "arc_1790768759191_b1ap",
+    "timestamp": "2026-09-30T11:45:59.191Z",
+    "displayTime": "9/30/2026, 5:45:59 PM",
+    "action": "SUPPORT_TICKET_CREATED",
+    "userId": "usr_admin_master",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "ticketId": "tkt_1790768759191_2ni33",
+      "subject": "পেমেন্ট ভেরিফিকেশন ও চ্যালেঞ্জ চালু করার অনুরোধ",
+      "category": "challenge_issue"
+    }
+  },
+  {
+    "archiveId": "arc_1790765840629_q2vw",
+    "timestamp": "2026-09-30T10:57:20.629Z",
+    "displayTime": "9/30/2026, 4:57:20 PM",
+    "action": "CHALLENGE_PURCHASED",
+    "userId": "usr_admin_master",
+    "userName": "N/A",
+    "userEmail": "admin@ajfunded.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790765840628_grbkd",
+      "packageName": "Silver",
+      "fundedAmount": 210,
+      "broker": "Quotex",
+      "paymentMethod": "bKash (Personal - Send Money)",
+      "paymentTxId": "9J4K8LTEST",
+      "senderNumber": "01686313198",
+      "localAmount": 875,
+      "currency": "BDT",
+      "exchangeRate": 125
+    }
+  },
+  {
+    "archiveId": "arc_1790764216167_kvz5",
+    "timestamp": "2026-09-30T10:30:16.167Z",
+    "displayTime": "9/30/2026, 4:30:16 PM",
+    "action": "CHALLENGE_PURCHASED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790764216162_qs45b",
+      "packageName": "Master",
+      "fundedAmount": 32000,
+      "broker": "Quotex",
+      "paymentMethod": "bKash (Personal - Send Money)",
+      "paymentTxId": "test funded",
+      "senderNumber": "01902414382"
+    }
+  },
+  {
+    "archiveId": "arc_1790652448429_iglk",
+    "timestamp": "2026-09-29T03:27:28.429Z",
+    "displayTime": "9/29/2026, 9:27:28 AM",
+    "action": "PACKAGE_UPDATED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "packageId": "pkg-platinum",
+      "name": "Platinum",
+      "fee": 30,
+      "discountPercent": 40
+    }
+  },
+  {
+    "archiveId": "arc_1790652380898_hn0u",
+    "timestamp": "2026-09-29T03:26:20.898Z",
+    "displayTime": "9/29/2026, 9:26:20 AM",
+    "action": "AVATAR_UPDATED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "avatarUrl": "/uploads/avatar_usr_1790479914536_bjtgpe_1790652380873.jpeg"
+    }
+  },
+  {
+    "archiveId": "arc_1790652359113_nf2v",
+    "timestamp": "2026-09-29T03:25:59.113Z",
+    "displayTime": "9/29/2026, 9:25:59 AM",
+    "action": "AVATAR_UPDATED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "avatarUrl": "/uploads/avatar_usr_1790479914536_bjtgpe_1790652359107.jpeg"
+    }
+  },
+  {
+    "archiveId": "arc_1790652320523_8wgt",
+    "timestamp": "2026-09-29T03:25:20.523Z",
+    "displayTime": "9/29/2026, 9:25:20 AM",
+    "action": "PROFILE_UPDATED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {}
+  },
+  {
+    "archiveId": "arc_1790652159750_ropk",
+    "timestamp": "2026-09-29T03:22:39.750Z",
+    "displayTime": "9/29/2026, 9:22:39 AM",
+    "action": "PACKAGE_UPDATED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "packageId": "pkg-bronze",
+      "name": "Bronze",
+      "fee": 4,
+      "discountPercent": 20
+    }
+  },
+  {
+    "archiveId": "arc_1790651364630_o0yb",
+    "timestamp": "2026-09-29T03:09:24.630Z",
+    "displayTime": "9/29/2026, 9:09:24 AM",
+    "action": "PACKAGE_DELETED",
+    "userId": "admin",
+    "userName": "Super Admin",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "packageId": "pkg_1790651364609_0jix",
+      "name": "Custom Mega $30,000 Challenge (Updated)"
+    }
+  },
+  {
+    "archiveId": "arc_1790651364623_nnuu",
+    "timestamp": "2026-09-29T03:09:24.623Z",
+    "displayTime": "9/29/2026, 9:09:24 AM",
+    "action": "PACKAGE_UPDATED",
+    "userId": "admin",
+    "userName": "Super Admin",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "packageId": "pkg_1790651364609_0jix",
+      "name": "Custom Mega $30,000 Challenge (Updated)",
+      "fee": 60,
+      "discountPercent": 50
+    }
+  },
+  {
+    "archiveId": "arc_1790651364610_0xot",
+    "timestamp": "2026-09-29T03:09:24.610Z",
+    "displayTime": "9/29/2026, 9:09:24 AM",
+    "action": "PACKAGE_CREATED",
+    "userId": "admin",
+    "userName": "Super Admin",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "packageId": "pkg_1790651364609_0jix",
+      "name": "Custom Mega $25,000 Challenge",
+      "fundedAmount": 25000,
+      "fee": 90,
+      "discountPercent": 25
+    }
+  },
+  {
+    "archiveId": "arc_1790650439313_nttx",
+    "timestamp": "2026-09-29T02:53:59.313Z",
+    "displayTime": "9/29/2026, 8:53:59 AM",
+    "action": "CHALLENGE_PURCHASED",
+    "userId": "test_discount_user",
+    "userName": "Discount Tester",
+    "userEmail": "disc@example.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790650439313_c5pj6",
+      "packageName": "Silver",
+      "fundedAmount": 210,
+      "broker": "Quotex",
+      "paymentMethod": "USDT TRC20",
+      "paymentTxId": "TX_TEST_DISCOUNT",
+      "senderNumber": ""
+    }
+  },
+  {
+    "archiveId": "arc_1790648234693_65fc",
+    "timestamp": "2026-09-29T02:17:14.693Z",
+    "displayTime": "9/29/2026, 8:17:14 AM",
+    "action": "TRADE_PROOF_SUBMITTED",
+    "userId": "test_user_eval_1790648234637",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "submissionId": "sub_1790648234692_e4mq9",
+      "challengeId": "ch_test_1790648234672",
+      "packageName": ",000 Evaluation",
+      "broker": "Quotex",
+      "winTrades": 4,
+      "lossTrades": 1,
+      "tradesCount": 5,
+      "winRate": "80.0%",
+      "profitLoss": 38.2
+    }
+  },
+  {
+    "archiveId": "arc_1790647029339_u7vt",
+    "timestamp": "2026-09-29T01:57:09.339Z",
+    "displayTime": "9/29/2026, 7:57:09 AM",
+    "action": "CHALLENGE_PURCHASED",
+    "userId": "usr_test_1",
+    "userName": "Test Trader",
+    "userEmail": "test@trader.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790647029338_0a2rq",
+      "packageName": "Bronze",
+      "fundedAmount": 100,
+      "broker": "Quotex",
+      "paymentMethod": "bKash (Personal - Send Money)",
+      "paymentTxId": "9BKASH789XYZ",
+      "senderNumber": "01812345678"
+    }
+  },
+  {
+    "archiveId": "arc_1790644588238_ddo8",
+    "timestamp": "2026-09-29T01:16:28.238Z",
+    "displayTime": "9/29/2026, 7:16:28 AM",
+    "action": "USER_DELETED_BY_ADMIN",
+    "userId": "usr_1790644588120_nmqiyz",
+    "userName": "Rahim Trader",
+    "userEmail": "rahim.trader@gmail.com",
+    "telegram": "@rahim_trade",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {}
+  },
+  {
+    "archiveId": "arc_1790644588173_mcbl",
+    "timestamp": "2026-09-29T01:16:28.173Z",
+    "displayTime": "9/29/2026, 7:16:28 AM",
+    "action": "TRADE_PROOF_SUBMITTED",
+    "userId": "usr_1790644588120_nmqiyz",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "submissionId": "sub_1790644588172_9x8vv",
+      "challengeId": "ch_1790644588128_hg2jv",
+      "packageName": "Gold",
+      "broker": "Quotex",
+      "profitLoss": 45.5
+    }
+  },
+  {
+    "archiveId": "arc_1790644588158_h7mg",
+    "timestamp": "2026-09-29T01:16:28.158Z",
+    "displayTime": "9/29/2026, 7:16:28 AM",
+    "action": "CHALLENGE_APPROVED",
+    "userId": "usr_1790644588120_nmqiyz",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790644588128_hg2jv",
+      "packageName": "Gold",
+      "mmSerial": 1,
+      "mmTitle": "অফিসিয়াল মানি ম্যানেজমেন্ট শিট #১ (Standard 15-Session Evaluation Sheet)"
+    }
+  },
+  {
+    "archiveId": "arc_1790644588128_oejp",
+    "timestamp": "2026-09-29T01:16:28.128Z",
+    "displayTime": "9/29/2026, 7:16:28 AM",
+    "action": "CHALLENGE_PURCHASED",
+    "userId": "usr_1790644588120_nmqiyz",
+    "userName": "Rahim Trader",
+    "userEmail": "rahim.trader@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790644588128_hg2jv",
+      "packageName": "Gold",
+      "fundedAmount": 525,
+      "broker": "Quotex",
+      "paymentMethod": "USDT (TRC20 - Instant)",
+      "paymentTxId": "TX_998877AABBCC"
+    }
+  },
+  {
+    "archiveId": "arc_1790644588121_srje",
+    "timestamp": "2026-09-29T01:16:28.121Z",
+    "displayTime": "9/29/2026, 7:16:28 AM",
+    "action": "USER_REGISTERED",
+    "userId": "usr_1790644588120_nmqiyz",
+    "userName": "Rahim Trader",
+    "userEmail": "rahim.trader@gmail.com",
+    "telegram": "@rahim_trade",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "ip": "::1"
+    }
+  },
+  {
+    "archiveId": "arc_1790644569798_oadu",
+    "timestamp": "2026-09-29T01:16:09.798Z",
+    "displayTime": "9/29/2026, 7:16:09 AM",
+    "action": "USER_REGISTERED",
+    "userId": "usr_1790644569797_aqr7hf",
+    "userName": "Rahim Trader",
+    "userEmail": "rahim.trader@gmail.com",
+    "telegram": "@rahim_trade",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "ip": "::1"
+    }
+  },
+  {
+    "archiveId": "arc_1790643953100_532f",
+    "timestamp": "2026-09-29T01:05:53.100Z",
+    "displayTime": "9/29/2026, 7:05:53 AM",
+    "action": "AVATAR_REMOVED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {}
+  },
+  {
+    "archiveId": "arc_1790643953073_kslv",
+    "timestamp": "2026-09-29T01:05:53.073Z",
+    "displayTime": "9/29/2026, 7:05:53 AM",
+    "action": "AVATAR_UPDATED",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "avatarUrl": "/uploads/avatar_usr_1790479914536_bjtgpe_1790643953072.png"
+    }
+  },
+  {
+    "archiveId": "arc_1790642558189_5272",
+    "timestamp": "2026-09-29T00:42:38.189Z",
+    "displayTime": "9/29/2026, 6:42:38 AM",
+    "action": "ADMIN_LOGIN_SUCCESS",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "method": "3_step_verification",
+      "ip": "::1"
+    }
+  },
+  {
+    "archiveId": "arc_1790641865649_qwvs",
+    "timestamp": "2026-09-29T00:31:05.649Z",
+    "displayTime": "9/29/2026, 6:31:05 AM",
+    "action": "ADMIN_LOGIN_SUCCESS",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "method": "3_step_verification",
+      "ip": "::1"
+    }
+  },
+  {
+    "archiveId": "arc_1790579938515_hxx2",
+    "timestamp": "2026-09-28T07:18:58.515Z",
+    "displayTime": "9/28/2026, 1:18:58 PM",
+    "action": "EMAIL_VERIFIED",
+    "userId": "usr_1790579892388_t1ezew",
+    "userName": "MD Ajhar",
+    "userEmail": "atharajhar6@gmail.come",
+    "telegram": "MDAJHAR1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "method": "otp"
+    }
+  },
+  {
+    "archiveId": "arc_1790579892389_w01o",
+    "timestamp": "2026-09-28T07:18:12.389Z",
+    "displayTime": "9/28/2026, 1:18:12 PM",
+    "action": "USER_REGISTERED",
+    "userId": "usr_1790579892388_t1ezew",
+    "userName": "MD Ajhar",
+    "userEmail": "atharajhar6@gmail.come",
+    "telegram": "MDAJHAR1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "ip": "::1"
+    }
+  },
+  {
+    "archiveId": "arc_1790579067877_r0hi",
+    "timestamp": "2026-09-28T07:04:27.877Z",
+    "displayTime": "9/28/2026, 1:04:27 PM",
+    "action": "PASSWORD_RESET",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {}
+  },
+  {
+    "archiveId": "arc_init_usr_admin_master",
+    "timestamp": "2026-09-27T03:56:11.993Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_admin_master",
+    "userName": "AJ Funded Admin",
+    "userEmail": "admin@ajfunded.com",
+    "telegram": "@AJFundedAdmin",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  },
+  {
+    "archiveId": "arc_init_usr_1790479914536_bjtgpe",
+    "timestamp": "2026-09-27T03:31:54.536Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  },
+  {
+    "archiveId": "arc_init_usr_1790475483790_5etunz",
+    "timestamp": "2026-09-27T02:18:03.790Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_1790475483790_5etunz",
+    "userName": "MD Ajhar",
+    "userEmail": "ajhar@test.com",
+    "telegram": "@mdajhar1",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  },
+  {
+    "archiveId": "arc_init_usr_1790486638103_3bbjv3",
+    "timestamp": "2026-09-27T05:23:58.103Z",
+    "displayTime": "9/28/2026, 1:00:32 PM",
+    "action": "INITIAL_IMPORT",
+    "userId": "usr_1790486638103_3bbjv3",
+    "userName": "Pro Trader",
+    "userEmail": "protrader@example.com",
+    "telegram": "",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "note": "Existing user seed"
+    }
+  }
+]

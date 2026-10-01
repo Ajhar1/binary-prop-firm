@@ -1,0 +1,79 @@
+[
+  {
+    "id": "lesson-1",
+    "serial": 1,
+    "title": "ট্রেডিং মানে কি এবং কেন শিখবেন? (What is Trading & Why Learn It?)",
+    "duration": "18:45",
+    "category": "Basics",
+    "summary": "লাভের আশায় কোনো কিছু ক্রয়-বিক্রয় করাকে ট্রেডিং বলে। বাস্তব উদাহরণ ও ৩টি সহজ ধাপ।",
+    "videoEmbed": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "slidesCount": 8,
+    "createdAt": "2026-09-29T01:13:38.029Z"
+  },
+  {
+    "id": "lesson-2",
+    "serial": 2,
+    "title": "বাইনারি ট্রেডিং কিভাবে কাজ করে? (How Binary Options Works?)",
+    "duration": "24:10",
+    "category": "Mechanism",
+    "summary": "২০০৮ সালের আর্থিক মন্দার পর বাইনারি ট্রেডিংয়ের উৎপত্তি। দাম পর্যবেক্ষণ, পেআউট (৭০-৯৫%) ও ঝুঁকি।",
+    "videoEmbed": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "slidesCount": 8,
+    "createdAt": "2026-09-29T01:13:38.029Z"
+  },
+  {
+    "id": "lesson-3",
+    "serial": 3,
+    "title": "ট্রেডিং দিয়ে বাস্তব ইনকাম ও ক্যারিয়ার (Skill-based Career)",
+    "duration": "21:30",
+    "category": "Career",
+    "summary": "কোনো সুপারিশ বা ডিগ্রি ছাড়াই দক্ষতা দিয়ে ঘরে বসে স্বাধীন ইনকাম গড়ার বাস্তব পথ ও মেন্টরশিপ।",
+    "videoEmbed": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "slidesCount": 8,
+    "createdAt": "2026-09-29T01:13:38.029Z"
+  },
+  {
+    "id": "lesson-4",
+    "serial": 4,
+    "title": "ট্রেডিং এর ভালো দিক ও সুবিধা সমূহ (Pros & Freedom of Trading)",
+    "duration": "15:20",
+    "category": "Pros & Cons",
+    "summary": "২৪ ঘন্টা খোলা মার্কেট, আনলিমিটেড ইনকাম সম্ভাব্যতা, এবং সময় নিজের হাতে রাখার স্বাধীনতা।",
+    "videoEmbed": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "slidesCount": 8,
+    "createdAt": "2026-09-29T01:13:38.029Z"
+  },
+  {
+    "id": "lesson-5",
+    "serial": 5,
+    "title": "কেন ৯০% ট্রেডার লস করে ও উত্তরণের উপায় (Why Most Lose)",
+    "duration": "28:50",
+    "category": "Psychology",
+    "summary": "না শিখে শর্টকাট খোঁজা, ইমোশনাল রিভেঞ্জ ট্রেড এবং রিস্ক ম্যানেজমেন্টের অভাব কাটানোর উপায়।",
+    "videoEmbed": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "slidesCount": 8,
+    "createdAt": "2026-09-29T01:13:38.029Z"
+  },
+  {
+    "id": "lesson-6",
+    "serial": 6,
+    "title": "সফল ট্রেডিংয়ের সোনালী সমীকরণ (The Golden Formula)",
+    "duration": "22:15",
+    "category": "Equation",
+    "summary": "সঠিক শিক্ষা + নিখুঁত বিশ্লেষণ + নিয়মতান্ত্রিক ধৈর্য = দীর্ঘমেয়াদী প্রফিটেবল ট্রেডার।",
+    "videoEmbed": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "slidesCount": 8,
+    "createdAt": "2026-09-29T01:13:38.029Z"
+  },
+  {
+    "id": "lesson-7",
+    "serial": 7,
+    "title": "ওটিসি (OTC) সিক্রেট প্রাইস অ্যাকশন ও ক্যান্ডেলস্টিক স্ট্র্যাটেজি",
+    "duration": "32:00",
+    "category": "Strategy",
+    "summary": "ব্রোকার ওটিসি অ্যালগরিদম ও সাপোর্ট-রেজিস্ট্যান্স দিয়ে কনফার্ম উইন ট্রেড নেওয়ার গোপন কৌশল।",
+    "videoEmbed": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    "slidesCount": 8,
+    "createdAt": "2026-09-29T01:13:38.029Z"
+  }
+]

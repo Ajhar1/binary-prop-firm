@@ -1,0 +1,59 @@
+[
+  {
+    "id": "usr_admin_master",
+    "name": "AJ Funded Admin",
+    "email": "admin@ajfunded.com",
+    "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+    "role": "admin",
+    "telegram": "@AJFundedAdmin",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "",
+    "isEmailVerified": true,
+    "createdAt": "2026-09-27T03:56:11.993Z",
+    "adminSecurityPin": "254271"
+  },
+  {
+    "id": "usr_1790479914536_bjtgpe",
+    "name": "MD AJHAR",
+    "email": "atharajhar6@gmail.com",
+    "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "",
+    "role": "admin",
+    "isEmailVerified": true,
+    "createdAt": "2026-09-27T03:31:54.536Z",
+    "updatedAt": "2026-09-28T07:04:27.876Z",
+    "passwordResetCode": "628661",
+    "passwordResetExpires": 1790581233530,
+    "adminSecurityPin": "254271"
+  },
+  {
+    "id": "usr_1790475483790_5etunz",
+    "name": "MD Ajhar",
+    "email": "ajhar@test.com",
+    "password": "$2a$10$FREDgcpZITIG6WB1ei3bYuaz4pAmGrHJo7OV5meJ5g/KqfjiP7Mgy",
+    "telegram": "@mdajhar1",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "",
+    "isEmailVerified": true,
+    "createdAt": "2026-09-27T02:18:03.790Z"
+  },
+  {
+    "id": "usr_1790486638103_3bbjv3",
+    "name": "Pro Trader",
+    "email": "protrader@example.com",
+    "password": "$2a$10$Iv2SFXHIFoQy6vuxR/TzjOXTFTWxQkPYYIUUKeOxfUoZPlEGbZhP2",
+    "role": "user",
+    "telegram": "",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "",
+    "isEmailVerified": true,
+    "createdAt": "2026-09-27T05:23:58.103Z",
+    "updatedAt": "2026-09-28T05:51:13.880Z"
+  }
+]

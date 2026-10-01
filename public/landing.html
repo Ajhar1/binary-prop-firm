@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Binary Prop Firm — ট্রেড করুন আমাদের ক্যাপিটালে | ৮৫% প্রফিট শেয়ার</title>
+    <!-- Meta tags for Facebook Ad & OpenGraph -->
+    <meta name="description" content="নিজের পকেটের টাকা দিয়ে আর লস নয়! Binary Prop Firm এর ক্যাপিটাল দিয়ে ট্রেড করুন এবং ৮৫% পর্যন্ত প্রফিট তুলে নিন সরাসরি আপনার ওয়ালেটে।">
+    <meta property="og:title" content="Binary Prop Firm — এক্সটার্নাল বাইনারি প্রপ ট্রেডিং প্ল্যাটফর্ম">
+    <meta property="og:description" content="Quotex, Pocket Option বা Olymp Trade এ ডেমো মূল্যায়ন পাস করে পেয়ে যান $32,000 পর্যন্ত ফান্ডেড অ্যাকাউন্ট।">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/logo.png" />
+    <link rel="apple-touch-icon" href="/assets/logo.png" />
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #070a10;
+            --bg-card: #0d131f;
+            --bg-card-hover: #131c2d;
+            --gold: #f5b041;
+            --gold-glow: rgba(245, 176, 65, 0.4);
+            --gold-gradient: linear-gradient(135deg, #f5b041 0%, #d48b14 100%);
+            --telegram-blue: #0088cc;
+            --telegram-gradient: linear-gradient(135deg, #29b6f6 0%, #0288d1 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-gold: rgba(245, 176, 65, 0.35);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            padding-bottom: 90px; /* Space for mobile sticky bar */
+        }
+
+        /* Ambient Glow Backgrounds */
+        .ambient-glow-1 {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(245, 176, 65, 0.15) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .ambient-glow-2 {
+            position: fixed;
+            bottom: 10%;
+            right: -100px;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(0, 136, 204, 0.12) 0%, transparent 70%);
+            filter: blur(90px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Bar */
+        header.top-header {
+            padding: 1.2rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--gold-gradient);
+            color: #000;
+            font-weight: 900;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        .brand-text {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-text span {
+            color: var(--gold);
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s ease;
+        }
+
+        .header-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(245, 176, 65, 0.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 2.2rem 0 1.5rem;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245, 176, 65, 0.12);
+            border: 1px solid var(--border-gold);
+            color: var(--gold);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            animation: pulse-glow 2.5s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 rgba(245, 176, 65, 0); }
+            50% { box-shadow: 0 0 16px rgba(245, 176, 65, 0.35); }
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1.35;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title .highlight {
+            color: var(--gold);
+            background: linear-gradient(135deg, #f5b041 0%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-title .danger-highlight {
+            color: #ff5252;
+            text-decoration: line-through;
+            opacity: 0.85;
+        }
+
+        .hero-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 680px;
+            margin: 0 auto 1.8rem;
+            line-height: 1.6;
+        }
+
+        /* Video Showcase Section */
+        .video-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 18px;
+            padding: 10px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 30px rgba(245, 176, 65, 0.12);
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .video-header-tag {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            background: #000;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            border-radius: 12px;
+        }
+
+        /* Action Buttons Grid */
+        .cta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2.2rem;
+        }
+
+        .cta-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.4rem;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .cta-card.telegram {
+            border-color: rgba(0, 136, 204, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 136, 204, 0.15);
+        }
+
+        .cta-card.telegram::before {
+            background: var(--telegram-gradient);
+        }
+
+        .cta-card.telegram:hover {
+            transform: translateY(-4px);
+            border-color: #29b6f6;
+            box-shadow: 0 15px 40px rgba(0, 136, 204, 0.3);
+        }
+
+        .cta-card.platform {
+            border-color: var(--border-gold);
+            box-shadow: 0 10px 30px rgba(245, 176, 65, 0.12);
+        }
+
+        .cta-card.platform::before {
+            background: var(--gold-gradient);
+        }
+
+        .cta-card.platform:hover {
+            transform: translateY(-4px);
+            border-color: var(--gold);
+            box-shadow: 0 15px 40px rgba(245, 176, 65, 0.25);
+        }
+
+        .cta-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+        }
+
+        .cta-card.telegram .cta-icon {
+            background: rgba(0, 136, 204, 0.15);
+            color: #29b6f6;
+            border: 1px solid rgba(41, 182, 246, 0.4);
+        }
+
+        .cta-card.platform .cta-icon {
+            background: rgba(245, 176, 65, 0.15);
+            color: var(--gold);
+            border: 1px solid var(--border-gold);
+        }
+
+        .cta-title {
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .cta-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .cta-btn {
+            width: 100%;
+            margin-top: 14px;
+            padding: 11px 18px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-tg {
+            background: var(--telegram-gradient);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.35);
+        }
+
+        .btn-tg:hover {
+            opacity: 0.95;
+            box-shadow: 0 6px 20px rgba(0, 136, 204, 0.5);
+        }
+
+        .btn-prop {
+            background: var(--gold-gradient);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(245, 176, 65, 0.35);
+        }
+
+        .btn-prop:hover {
+            opacity: 0.95;
+            box-shadow: 0 6px 20px rgba(245, 176, 65, 0.5);
+        }
+
+        /* Features / Why Choose Us */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .feature-item {
+            background: rgba(13, 19, 31, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .feature-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(245, 176, 65, 0.1);
+            color: var(--gold);
+            border: 1px solid var(--border-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+
+        .feature-content h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .feature-content p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Brokers Supported Strip */
+        .brokers-card {
+            background: linear-gradient(135deg, rgba(245, 176, 65, 0.08) 0%, rgba(13, 19, 31, 0.9) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .brokers-card h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+
+        .brokers-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .broker-badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .broker-tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .broker-tag i {
+            color: var(--gold);
+        }
+
+        /* Footer & Disclaimer */
+        footer.landing-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer-disclaimer {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .footer-copyright {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        /* Mobile Bottom Sticky Bar */
+        .mobile-sticky-bar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 15, 25, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-gold);
+            padding: 10px 14px;
+            z-index: 1000;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .mobile-sticky-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .sticky-btn {
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 80px;
+            }
+
+            .hero-title {
+                font-size: 1.65rem;
+            }
+
+            .hero-subtitle {
+                font-size: 0.95rem;
+            }
+
+            .cta-grid {
+                grid-template-columns: 1fr;
+                gap: 0.9rem;
+            }
+
+            .cta-card {
+                padding: 1.2rem;
+            }
+
+            .mobile-sticky-bar {
+                display: block;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .hero-title {
+                font-size: 2.35rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.15rem;
+            }
+
+            .video-wrapper {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Glows -->
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="top-header">
+            <a href="/" class="brand-logo">
+                <img src="/assets/logo.png" alt="Binary Prop Firm" style="width:38px; height:38px; object-fit:cover; border-radius:10px; box-shadow:0 0 12px rgba(245, 176, 65, 0.35); flex-shrink:0;" />
+                <span class="brand-text">BINARY <span>PROP FIRM</span></span>
+            </a>
+            <a href="https://t.me/MDAJHAR1" target="_blank" class="header-btn">
+                <i class="fab fa-telegram"></i> @MDAJHAR1
+            </a>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-badge">
+                <i class="fas fa-fire"></i> এক্সটার্নাল বাইনারি প্রপ ট্রেডিং প্ল্যাটফর্ম
+            </div>
+
+            <h1 class="hero-title">
+                ট্রেডিংয়ে নিজের টাকা আর <span class="danger-highlight">লস নয়</span>!<br/>
+                ট্রেড করুন <span class="highlight">আমাদের ক্যাপিটালে</span>,<br/>
+                প্রফিটের ৮৫% তুলে নিন সরাসরি।
+            </h1>
+
+            <p class="hero-subtitle">
+                Quotex, Pocket Option, বা Olymp Trade এ আপনার ডেমো মূল্যায়ন সম্পূর্ণ করুন এবং $32,000 পর্যন্ত রিয়েল ফান্ডেড অ্যাকাউন্ট উপভোগ করুন।
+            </p>
+
+            <!-- Video Player Showcase -->
+            <div class="video-wrapper">
+                <div class="video-header-tag">
+                    <span><i class="fas fa-play-circle"></i> ভিডিওতে দেখুন কীভাবে ফান্ডেড একাউন্ট পাবেন:</span>
+                    <a href="https://youtu.be/srv6fJZSe4M?si=zG3PgvigCuak6ihD" target="_blank" style="color:var(--text-secondary); text-decoration:none; font-size:0.78rem;">
+                        <i class="fab fa-youtube" style="color:#ff0000;"></i> YouTube এ দেখুন
+                    </a>
+                </div>
+                <div class="video-container">
+                    <iframe 
+                        src="https://www.youtube.com/embed/srv6fJZSe4M?rel=0&modestbranding=1" 
+                        title="Binary Prop Firm Explainer Video" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Two Big Action Cards -->
+            <div class="cta-grid">
+                <!-- Telegram Option -->
+                <div class="cta-card telegram">
+                    <div class="cta-icon">
+                        <i class="fab fa-telegram-plane"></i>
+                    </div>
+                    <div class="cta-title">টেলিগ্রামে সরাসরি কথা বলুন</div>
+                    <div class="cta-subtitle">যেকোনো প্রশ্ন, রুলস বা সহায়তার জন্য সরাসরি এডমিনকে মেসেজ দিন।</div>
+                    <a href="https://t.me/MDAJHAR1" target="_blank" class="cta-btn btn-tg">
+                        <i class="fab fa-telegram"></i> Telegram (@MDAJHAR1)
+                    </a>
+                </div>
+
+                <!-- Binary Prop Firm Main Platform -->
+                <div class="cta-card platform">
+                    <div class="cta-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <div class="cta-title">Binary Prop Firm প্ল্যাটফর্মে যান</div>
+                    <div class="cta-subtitle">চ্যালেঞ্জ প্যাকেজ বাছাই করুন এবং আপনার ট্রেডিং জার্নি শুরু করুন।</div>
+                    <a href="/" class="cta-btn btn-prop">
+                        <i class="fas fa-rocket"></i> Start Challenge ($5 Only)
+                    </a>
+                </div>
+            </div>
+
+            <!-- Key Highlights Grid -->
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div class="feature-content">
+                        <h4>জিরো ক্যাপিটাল রিস্ক</h4>
+                        <p>নিজের রিয়েল ব্যালেন্স হারানোর কোনো ভয় নেই। আমরা ক্যাপিটাল সরবরাহ করব।</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="feature-content">
+                        <h4>৮৫% প্রফিট স্প্লিট</h4>
+                        <p>আপনার অর্জিত লাভের সিংহভাগ (৮৫%) সরাসরি বিকাশ, নগদ বা ক্রিপ্টোতে উইথড্র করুন।</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="feature-content">
+                        <h4>১৫ সেশন মূল্যায়ন</h4>
+                        <p>কঠোর মানি ম্যানেজমেন্ট শিট ফলো করে ১৫টি সফল সেশনে ডেমো পরীক্ষা দিন।</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                    <div class="feature-content">
+                        <h4>২৪/৭ টেলিগ্রাম সাপোর্ট</h4>
+                        <p>যেকোনো সময় পরামর্শ ও সহযোগিতার জন্য আমাদের অফিশিয়াল টেলিগ্রাম সাপোর্ট প্রস্তুত।</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supported Brokers Card -->
+            <div class="brokers-card">
+                <h3><i class="fas fa-check-circle"></i> পছন্দের ব্রোকারে ট্রেড করার স্বাধীনতা</h3>
+                <p>আমরা কোনো ব্রোকারের সাথে সীমাবদ্ধ নই। নিচের যেকোনো পছন্দের ব্রোকারে ট্রেড করতে পারবেন:</p>
+                <div class="broker-badges">
+                    <span class="broker-tag"><i class="fas fa-bolt"></i> Quotex</span>
+                    <span class="broker-tag"><i class="fas fa-bolt"></i> Pocket Option</span>
+                    <span class="broker-tag"><i class="fas fa-bolt"></i> Olymp Trade</span>
+                    <span class="broker-tag"><i class="fas fa-bolt"></i> Binomo</span>
+                    <span class="broker-tag"><i class="fas fa-bolt"></i> IQ Option</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="landing-footer">
+            <div class="footer-disclaimer">
+                <strong>Disclaimer (আইনগত সতর্কবার্তা):</strong> Binary Prop Firm একটি প্রোপ্রাইটরি ডেমো মূল্যায়ন ও ট্রেডার ট্যালেন্ট ডিসকভারি প্ল্যাটফর্ম। এখানে সকল মূল্যায়ন ডেমো অ্যাকাউন্টে পূর্বনির্ধারিত ডিসিপ্লিন ও মানি ম্যানেজমেন্ট রুলসের মাধ্যমে পরিচালিত হয়। Binary Prop Firm কোনো ব্রোকারেজ নয় এবং বিনিয়োগের জন্য সরাসরি ডিপোজিট গ্রহণ করে না। বাইনারি অপশনস এবং ওটিসি ট্রেডিং অত্যন্ত ঝুঁকিপূর্ণ—কখনোই এমন অর্থ নিয়ে ট্রেড করবেন না যা হারানোর সামর্থ্য আপনার নেই।
+            </div>
+            <div class="footer-copyright">
+                &copy; 2026 Binary Prop Firm. All rights reserved. &bull; Designed for disciplined traders.
+            </div>
+        </footer>
+    </div>
+
+    <!-- Mobile Bottom Sticky Floating CTA Bar -->
+    <div class="mobile-sticky-bar">
+        <div class="mobile-sticky-inner">
+            <a href="https://t.me/MDAJHAR1" target="_blank" class="sticky-btn btn-tg">
+                <i class="fab fa-telegram"></i> টেলিগ্রাম (@MDAJHAR1)
+            </a>
+            <a href="/" class="sticky-btn btn-prop">
+                <i class="fas fa-rocket"></i> Binary Prop Firm যান
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
