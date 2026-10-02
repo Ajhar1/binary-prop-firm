@@ -3759,6 +3759,9 @@
                     const traderIdDisp = document.getElementById('profTraderIdDisplay');
                     if (traderIdDisp) traderIdDisp.innerText = currentUser.traderId || 'AJ-1000';
 
+                    const helperBadge = document.getElementById('syncHelperTraderId');
+                    if (helperBadge && currentUser.traderId) helperBadge.innerText = currentUser.traderId;
+
                     const heroEmail = document.getElementById('profHeroEmailText');
                     if (heroEmail) heroEmail.innerText = currentUser.email;
 
@@ -7846,8 +7849,11 @@
         }
 
         async function fetchUserSyncedTrades() {
-            const token = localStorage.getItem('token');
-            if (!token) return;
+            const authToken = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token') || (typeof token !== 'undefined' ? token : null);
+            if (!authToken) {
+                console.warn('[Sync Trades] No auth token found in session.');
+                return;
+            }
 
             // Update trader ID badge
             const traderId = (currentUser && currentUser.traderId) || 'AJ-1008';
@@ -7868,7 +7874,7 @@
 
             try {
                 const res = await fetch('/api/user/synced-trades', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -8006,13 +8012,13 @@
 
         async function clearUserSyncedTrades() {
             if (!confirm('আপনি কি নিশ্চিত যে আপনার সিঙ্ক হওয়া টেস্ট ট্রেড হিস্টোরি মুছে ফেলতে চান?')) return;
-            const token = localStorage.getItem('token');
-            if (!token) return;
+            const authToken = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token') || (typeof token !== 'undefined' ? token : null);
+            if (!authToken) return;
 
             try {
                 const res = await fetch('/api/user/synced-trades', {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -8039,6 +8045,7 @@
             fetchCourses();
             fetchDashPaymentMethods();
             fetchUserSupportTickets();
+            fetchUserSyncedTrades();
             initMasaniello();
         });
     </script>
