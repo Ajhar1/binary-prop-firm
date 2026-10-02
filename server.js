@@ -18,6 +18,7 @@ const DATA_DIR = path.join(__dirname, 'data');
 const UPLOADS_DIR = path.join(__dirname, 'public', 'uploads');
 const BACKUPS_DIR = path.join(DATA_DIR, 'backups');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const USERS_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'users_permanent_store.json');
 const CHALLENGES_FILE = path.join(DATA_DIR, 'challenges.json');
 const SUBMISSIONS_FILE = path.join(DATA_DIR, 'submissions.json');
 const COURSES_FILE = path.join(DATA_DIR, 'courses.json');
@@ -109,6 +110,7 @@ function createDatabaseBackup(type = 'auto') {
 
     const filesToBackup = [
       USERS_FILE,
+      USERS_PERMANENT_STORE_FILE,
       CHALLENGES_FILE,
       SUBMISSIONS_FILE,
       COURSES_FILE,
@@ -828,10 +830,179 @@ function generateNextTraderId(users) {
   return `AJ-${maxId + 1}`;
 }
 
+// Permanent Auto-Healing User & Trader Synchronizer
+// Ensures NO registered user or buyer can ever be lost due to git deploy, file overwrites, or server restarts
+function syncUsersWithAllData() {
+  try {
+    let users = readJson(USERS_FILE, []);
+    let permUsers = readJson(USERS_PERMANENT_STORE_FILE, []);
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const archive = readJson(ARCHIVE_FILE, []);
+
+    let modified = false;
+
+    // Helper maps keyed by normalized email, and by userId
+    const userByEmail = new Map();
+    const userById = new Map();
+
+    const registerUser = (u) => {
+      if (!u) return;
+      if (u.email) {
+        const normEmail = u.email.trim().toLowerCase();
+        if (normEmail && !userByEmail.has(normEmail)) {
+          userByEmail.set(normEmail, u);
+        }
+      }
+      if (u.id && !userById.has(u.id)) {
+        userById.set(u.id, u);
+      }
+    };
+
+    // 1. Index users from users.json
+    users.forEach(u => registerUser(u));
+
+    // 2. Merge from permanent store
+    permUsers.forEach(pu => {
+      const normEmail = pu.email ? pu.email.trim().toLowerCase() : '';
+      let existing = (normEmail && userByEmail.get(normEmail)) || (pu.id && userById.get(pu.id));
+      if (!existing) {
+        users.push(pu);
+        registerUser(pu);
+        modified = true;
+      } else {
+        let enriched = false;
+        if (!existing.traderId && pu.traderId) { existing.traderId = pu.traderId; enriched = true; }
+        if (!existing.brokerAccountId && pu.brokerAccountId) { existing.brokerAccountId = pu.brokerAccountId; enriched = true; }
+        if (!existing.telegram && pu.telegram) { existing.telegram = pu.telegram; enriched = true; }
+        if (enriched) modified = true;
+      }
+    });
+
+    // 3. Scan challenges.json for any buyer missing from users
+    challenges.forEach(c => {
+      const cEmail = c.userEmail ? c.userEmail.trim().toLowerCase() : '';
+      const cUserId = c.userId || '';
+      let existing = (cEmail && userByEmail.get(cEmail)) || (cUserId && userById.get(cUserId));
+
+      if (!existing && (cEmail || cUserId)) {
+        const recoveredUser = {
+          id: cUserId || `usr_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          name: c.userName || 'Trader',
+          email: c.userEmail || '',
+          password: '$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW',
+          role: 'user',
+          telegram: (c.userTelegram && c.userTelegram !== 'N/A') ? c.userTelegram : '',
+          preferredBroker: (c.brokerId || c.userBroker || 'quotex').toLowerCase(),
+          payoutWallet: '',
+          brokerAccountId: c.brokerAccountId || '',
+          profilePicture: c.userAvatar || null,
+          isEmailVerified: true,
+          createdAt: c.createdAt || new Date().toISOString(),
+          traderId: (c.userTraderId && c.userTraderId.startsWith('AJ-')) ? c.userTraderId : null
+        };
+        users.push(recoveredUser);
+        registerUser(recoveredUser);
+        modified = true;
+        console.log(`[AUTO-HEAL] Resurrected user from challenges.json: ${recoveredUser.name} (${recoveredUser.email})`);
+      } else if (existing) {
+        if (!existing.brokerAccountId && c.brokerAccountId) {
+          existing.brokerAccountId = c.brokerAccountId;
+          modified = true;
+        }
+        if ((!existing.telegram || existing.telegram === 'N/A') && c.userTelegram && c.userTelegram !== 'N/A') {
+          existing.telegram = c.userTelegram;
+          modified = true;
+        }
+      }
+    });
+
+    // 4. Scan user_archive.json for any registered user
+    archive.forEach(arc => {
+      if (arc.action === 'USER_REGISTERED' || arc.action === 'CHALLENGE_PURCHASED') {
+        const arcEmail = arc.userEmail ? arc.userEmail.trim().toLowerCase() : '';
+        const arcUserId = arc.userId && arc.userId !== 'N/A' ? arc.userId : '';
+        if (arcEmail && !userByEmail.has(arcEmail) && (!arcUserId || !userById.has(arcUserId))) {
+          const recoveredUser = {
+            id: arcUserId || `usr_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+            name: arc.userName && arc.userName !== 'N/A' ? arc.userName : 'Trader',
+            email: arc.userEmail,
+            password: '$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW',
+            role: 'user',
+            telegram: arc.telegram || '',
+            preferredBroker: (arc.preferredBroker || 'quotex').toLowerCase(),
+            payoutWallet: arc.payoutWallet || '',
+            brokerAccountId: arc.brokerAccountId || '',
+            profilePicture: null,
+            isEmailVerified: Boolean(arc.isEmailVerified),
+            createdAt: arc.timestamp || new Date().toISOString(),
+            traderId: null
+          };
+          users.push(recoveredUser);
+          registerUser(recoveredUser);
+          modified = true;
+          console.log(`[AUTO-HEAL] Resurrected user from user_archive.json: ${recoveredUser.name} (${recoveredUser.email})`);
+        }
+      }
+    });
+
+    // 5. Ensure sequential and unique Trader IDs for all non-admin users
+    const adminUser = users.find(u => u.role === 'admin' || u.email === 'admin@binarypropfirm.com');
+    if (adminUser) {
+      if (!adminUser.traderId) adminUser.traderId = 'BPF-1000';
+    }
+
+    const regularUsers = users.filter(u => u.role !== 'admin');
+    regularUsers.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+
+    let maxNum = 1000;
+    regularUsers.forEach(u => {
+      if (u.traderId && typeof u.traderId === 'string') {
+        const m = u.traderId.match(/(\d+)/);
+        if (m) {
+          const n = parseInt(m[1], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      }
+    });
+
+    regularUsers.forEach(u => {
+      if (!u.traderId || !u.traderId.startsWith('AJ-')) {
+        maxNum++;
+        u.traderId = `AJ-${maxNum}`;
+        modified = true;
+      }
+    });
+
+    // 6. Update userTraderId in challenges.json if mismatched
+    let challengesModified = false;
+    challenges.forEach(c => {
+      const u = users.find(user => (c.userId && user.id === c.userId) || (c.userEmail && user.email.toLowerCase() === c.userEmail.toLowerCase()));
+      if (u && u.traderId && c.userTraderId !== u.traderId) {
+        c.userTraderId = u.traderId;
+        challengesModified = true;
+      }
+    });
+    if (challengesModified) {
+      writeJson(CHALLENGES_FILE, challenges);
+    }
+
+    // 7. Persist to both USERS_FILE and USERS_PERMANENT_STORE_FILE
+    if (modified || !fs.existsSync(USERS_PERMANENT_STORE_FILE)) {
+      writeJson(USERS_FILE, users);
+      writeJson(USERS_PERMANENT_STORE_FILE, users);
+    }
+
+    return users;
+  } catch (err) {
+    console.error('[SYNC USERS ERROR]:', err);
+    return readJson(USERS_FILE, []);
+  }
+}
+
 // Ensure default admin user exists
 async function ensureAdminUser() {
   try {
-    let users = readJson(USERS_FILE);
+    let users = syncUsersWithAllData();
     let changed = false;
 
     // Filter out invalid variations
@@ -906,6 +1077,7 @@ async function ensureAdminUser() {
 
     if (changed) {
       writeJson(USERS_FILE, users);
+      writeJson(USERS_PERMANENT_STORE_FILE, users);
     }
   } catch (err) {
     console.error('Error ensuring admin user:', err);
@@ -1585,7 +1757,7 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'অনুগ্রহ করে একটি সঠিক ইমেইল দিন (যেমন: name@gmail.com)।' });
     }
 
-    const users = readJson(USERS_FILE);
+    const users = syncUsersWithAllData();
     const existing = users.find(u => u.email.toLowerCase() === cleanedEmail);
     if (existing) {
       return res.status(400).json({ success: false, message: 'An account with this email already exists.' });
@@ -1616,6 +1788,7 @@ app.post('/api/auth/register', async (req, res) => {
 
     users.push(newUser);
     writeJson(USERS_FILE, users);
+    writeJson(USERS_PERMANENT_STORE_FILE, users);
 
     // Permanently archive user creation
     logUserArchive('USER_REGISTERED', newUser, { ip: req.ip || req.connection.remoteAddress });
@@ -3089,7 +3262,7 @@ app.post('/api/admin/login', async (req, res) => {
 
 // 2. Platform Stats Overview
 app.get('/api/admin/stats', authenticateAdminToken, (req, res) => {
-  const allUsers = readJson(USERS_FILE);
+  const allUsers = syncUsersWithAllData();
   const users = allUsers.filter(u => u.role !== 'admin');
   const challenges = readJson(CHALLENGES_FILE);
   const submissions = readJson(SUBMISSIONS_FILE);
@@ -3155,7 +3328,8 @@ app.get('/api/admin/stats', authenticateAdminToken, (req, res) => {
 
 // 3. User Accounts & Management
 app.get('/api/admin/users', authenticateAdminToken, (req, res) => {
-  const users = readJson(USERS_FILE).filter(u => u.role !== 'admin');
+  const allUsers = syncUsersWithAllData();
+  const users = allUsers.filter(u => u.role !== 'admin');
   const challenges = readJson(CHALLENGES_FILE);
   const submissions = readJson(SUBMISSIONS_FILE);
 
@@ -3189,7 +3363,7 @@ app.get('/api/admin/users', authenticateAdminToken, (req, res) => {
 
 // 4. Single User Complete History
 app.get('/api/admin/users/:id/history', authenticateAdminToken, (req, res) => {
-  const users = readJson(USERS_FILE);
+  const users = syncUsersWithAllData();
   const user = users.find(u => u.id === req.params.id);
   if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
 
@@ -3219,7 +3393,7 @@ app.get('/api/admin/users/:id/history', authenticateAdminToken, (req, res) => {
 
 // Toggle Trader Email Verification by Admin
 app.post('/api/admin/users/:id/toggle-verify', authenticateAdminToken, (req, res) => {
-  const users = readJson(USERS_FILE);
+  const users = syncUsersWithAllData();
   const user = users.find(u => u.id === req.params.id);
   if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
 
@@ -3230,6 +3404,7 @@ app.post('/api/admin/users/:id/toggle-verify', authenticateAdminToken, (req, res
     user.emailVerifiedAt = new Date().toISOString();
   }
   writeJson(USERS_FILE, users);
+  writeJson(USERS_PERMANENT_STORE_FILE, users);
   logUserArchive('ADMIN_TOGGLE_VERIFY', user, { isEmailVerified: user.isEmailVerified });
 
   res.json({
@@ -3241,13 +3416,14 @@ app.post('/api/admin/users/:id/toggle-verify', authenticateAdminToken, (req, res
 
 // Delete User Account by Admin
 app.delete('/api/admin/users/:id', authenticateAdminToken, (req, res) => {
-  let users = readJson(USERS_FILE);
+  let users = syncUsersWithAllData();
   const target = users.find(u => u.id === req.params.id);
   if (!target) return res.status(404).json({ success: false, message: 'User not found.' });
   if (target.role === 'admin') return res.status(403).json({ success: false, message: 'এডমিন একাউন্ট ডিলিট করা সম্ভব নয়।' });
 
   users = users.filter(u => u.id !== req.params.id);
   writeJson(USERS_FILE, users);
+  writeJson(USERS_PERMANENT_STORE_FILE, users);
 
   // Clean up user's challenges and submissions
   let challenges = readJson(CHALLENGES_FILE).filter(c => c.userId !== req.params.id);
@@ -3476,7 +3652,7 @@ app.get('/api/admin/backups/archive-logs', authenticateAdminToken, (req, res) =>
 // 5. Update User Profile by Admin
 app.put('/api/admin/users/:id', authenticateAdminToken, async (req, res) => {
   const { name, telegram, preferredBroker, brokerAccountId, payoutWallet, newPassword } = req.body;
-  const users = readJson(USERS_FILE);
+  const users = syncUsersWithAllData();
   const idx = users.findIndex(u => u.id === req.params.id);
   if (idx === -1) return res.status(404).json({ success: false, message: 'User not found.' });
 
@@ -3492,6 +3668,7 @@ app.put('/api/admin/users/:id', authenticateAdminToken, async (req, res) => {
   }
 
   writeJson(USERS_FILE, users);
+  writeJson(USERS_PERMANENT_STORE_FILE, users);
 
   res.json({ success: true, message: 'Trader account updated successfully!', user: users[idx] });
 });
@@ -3499,7 +3676,7 @@ app.put('/api/admin/users/:id', authenticateAdminToken, async (req, res) => {
 // 6. Challenges List (All / Pending / Active)
 app.get('/api/admin/challenges', authenticateAdminToken, (req, res) => {
   const challenges = syncChallengesWithSubmissions();
-  const users = readJson(USERS_FILE);
+  const users = syncUsersWithAllData();
 
   const enriched = challenges.map(c => {
     const user = users.find(u => u.id === c.userId);
