@@ -1,9 +1,26 @@
 [
   {
+    "id": "usr_1790479914536_bjtgpe",
+    "name": "MD AJHAR",
+    "email": "atharajhar6@gmail.com",
+    "password": "$2a$10$/6JJ3T574wtACbuTUsmSyugEr1s3xXqu5S.4FvmZEQ5GPLO0E3EEC",
+    "role": "admin",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "",
+    "isEmailVerified": true,
+    "createdAt": "2026-09-27T03:31:54.536Z",
+    "updatedAt": "2026-10-02T19:49:42.671Z",
+    "adminSecurityPin": "254271",
+    "traderId": "BPF-ADMIN-1",
+    "profilePicture": null
+  },
+  {
     "id": "usr_admin_master",
     "name": "Binary Prop Firm Admin",
     "email": "admin@binarypropfirm.com",
-    "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+    "password": "$2a$10$/6JJ3T574wtACbuTUsmSyugEr1s3xXqu5S.4FvmZEQ5GPLO0E3EEC",
     "role": "admin",
     "telegram": "@BinaryPropFirmAdmin",
     "preferredBroker": "quotex",
@@ -45,21 +62,6 @@
     "createdAt": "2026-10-02T11:40:00.000Z",
     "updatedAt": "2026-10-02T11:44:19.659Z",
     "traderId": "AJ-1008",
-    "profilePicture": null
-  },
-  {
-    "id": "usr_1790644588120_nmqiyz",
-    "name": "Rahim Trader",
-    "email": "rahim.trader@gmail.com",
-    "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
-    "role": "user",
-    "telegram": "@RahimTrader",
-    "preferredBroker": "quotex",
-    "payoutWallet": "",
-    "brokerAccountId": "7829104",
-    "isEmailVerified": true,
-    "createdAt": "2026-09-29T01:16:28.238Z",
-    "traderId": "AJ-1007",
     "profilePicture": null
   },
   {
@@ -150,6 +152,21 @@
     "isEmailVerified": true,
     "createdAt": "2026-09-26T22:00:00.000Z",
     "traderId": "AJ-1001",
+    "profilePicture": null
+  },
+  {
+    "id": "usr_1790644588120_nmqiyz",
+    "name": "Rahim Trader",
+    "email": "rahim.trader@gmail.com",
+    "password": "/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+    "role": "user",
+    "telegram": "@RahimTrader",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "7829104",
+    "isEmailVerified": true,
+    "createdAt": "2026-09-29T01:16:28.238Z",
+    "traderId": "AJ-1007",
     "profilePicture": null
   }
 ]
