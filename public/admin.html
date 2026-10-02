@@ -2580,6 +2580,59 @@
         </div>
     </div>
 
+    <!-- UPDATE SESSION PROOF MEDIA MODAL -->
+    <div class="modal-overlay" id="updateProofMediaModal">
+        <div class="modal-box" style="max-width:560px; text-align:left;">
+            <button class="modal-close" onclick="closeModal('updateProofMediaModal')">&times;</button>
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:1rem;">
+                <div style="width:42px; height:42px; border-radius:10px; background:rgba(212,175,55,0.2); border:1px solid var(--gold); display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:1.25rem; flex-shrink:0;">
+                    <i class="fas fa-photo-video"></i>
+                </div>
+                <div>
+                    <h3 style="font-size:1.15rem; font-weight:800; color:#fff; margin:0;">
+                        সেশন প্রুফ মিডিয়া আপডেট
+                    </h3>
+                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">
+                        ট্রেডারের মূল ভিডিও ও স্ক্রিনশট লিংক যুক্ত বা পরিবর্তন করুন
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" id="editMediaSubId" value="" />
+
+            <div class="form-group" style="margin-bottom:1rem;">
+                <label style="font-size:0.85rem; font-weight:700; color:#fff; margin-bottom:6px; display:block;">
+                    <i class="fas fa-video" style="color:var(--neon-blue);"></i> সেশন ভিডিও URL / ফাইল লিংক:
+                </label>
+                <input type="text" id="editMediaVideoUrl" class="form-control" style="width:100%;" placeholder="https://files.catbox.moe/... বা গুগল ড্রাইভ / এমপি৪ লিংক" />
+                <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">
+                    অথবা সরাসরি নতুন ভিডিও ফাইল নির্বাচন করুন:
+                </div>
+                <input type="file" id="editMediaVideoFile" accept="video/*" class="form-control" style="width:100%; margin-top:4px; font-size:0.8rem;" />
+            </div>
+
+            <div class="form-group" style="margin-bottom:1.2rem;">
+                <label style="font-size:0.85rem; font-weight:700; color:#fff; margin-bottom:6px; display:block;">
+                    <i class="fas fa-image" style="color:var(--gold);"></i> ট্রেড হিস্টোরি স্ক্রিনশট ইমেজ URL / লিংক:
+                </label>
+                <input type="text" id="editMediaScreenshotUrl" class="form-control" style="width:100%;" placeholder="https://files.catbox.moe/... বা সরাসরি ছবির লিংক" />
+                <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">
+                    অথবা সরাসরি নতুন স্ক্রিনশট ছবি নির্বাচন করুন:
+                </div>
+                <input type="file" id="editMediaScreenshotFile" accept="image/*" class="form-control" style="width:100%; margin-top:4px; font-size:0.8rem;" />
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" class="btn-outline" style="padding:8px 16px; border-radius:8px;" onclick="closeModal('updateProofMediaModal')">
+                    বাতিল
+                </button>
+                <button type="button" id="btnSaveProofMedia" class="btn-gold" style="padding:8px 20px; font-weight:700; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;" onclick="submitUpdateProofMedia()">
+                    <i class="fas fa-save"></i> মিডিয়া সেভ করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 7. ADD / EDIT PAYMENT METHOD MODAL -->
     <div class="modal-overlay" id="paymentMethodModal">
         <div class="modal-box">
@@ -5173,9 +5226,14 @@
 
                             <!-- Trade Proof Media Area (Supports Both Video & Image Together) -->
                             <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:16px; margin-bottom:1.2rem;">
-                                <div style="font-size:0.88rem; font-weight:750; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-                                    <i class="fas fa-file-shield" style="color:var(--gold);"></i> 
-                                    <span>ট্রেড হিস্টোরি প্রুফ ফাইল ও ভিডিও (Proof Verification Media)</span>
+                                <div style="font-size:0.88rem; font-weight:750; color:#fff; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <i class="fas fa-file-shield" style="color:var(--gold);"></i> 
+                                        <span>ট্রেড হিস্টোরি প্রুফ ফাইল ও ভিডিও (Proof Verification Media)</span>
+                                    </div>
+                                    <button type="button" class="btn-outline" style="font-size:0.78rem; padding:4px 10px; border-radius:6px; color:var(--gold); border-color:rgba(212,175,55,0.4); display:inline-flex; align-items:center; gap:5px; cursor:pointer;" onclick="openUpdateProofMediaModal('${sub.id}', '${(sub.videoUrl || '').replace(/'/g, "\\'")}', '${(sub.screenshotUrl || '').replace(/'/g, "\\'")}')">
+                                        <i class="fas fa-edit"></i> প্রুফ মিডিয়া এডিট / আপডেট
+                                    </button>
                                 </div>
 
                                 <div style="display:flex; flex-direction:column; gap:16px;">
@@ -5224,7 +5282,19 @@
                                     ` : ''}
 
                                     ${(!videoSrc && !imageSrc && !externalVideoLink) ? `
-                                        <div style="color:var(--text-secondary); font-size:0.85rem;">কোনো প্রুফ ফাইল বা ভিডিও পাওয়া যায়নি।</div>
+                                        <div style="padding:1.5rem; text-align:center; background:rgba(255,255,255,0.02); border-radius:10px; border:1px dashed rgba(255,255,255,0.15);">
+                                            <i class="fas fa-photo-video" style="font-size:1.8rem; color:var(--text-secondary); margin-bottom:8px; display:block;"></i>
+                                            <div style="color:#fff; font-weight:700; font-size:0.9rem;">কোনো প্রুফ ফাইল বা ভিডিও লিংক যুক্ত নেই</div>
+                                            <div style="color:var(--text-secondary); font-size:0.8rem; margin-top:4px; margin-bottom:12px;">ট্রেডারের মূল ভিডিও/ইমেজ লিংক এখানে সেট করুন অথবা ট্রেডারকে পুনরায় আপলোডের অনুরোধ পাঠান।</div>
+                                            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                                                <button type="button" class="btn-gold" style="font-size:0.8rem; padding:6px 14px; border-radius:6px;" onclick="openUpdateProofMediaModal('${sub.id}', '', '')">
+                                                    <i class="fas fa-plus-circle"></i> ভিডিও / স্ক্রিনশট লিংক যুক্ত করুন
+                                                </button>
+                                                <button type="button" class="btn-warning" style="background:#d97706; font-size:0.8rem; padding:6px 14px; border-radius:6px; color:#fff; border:none;" onclick="openResubmitModal('${sub.id}', '${sessionNum}')">
+                                                    <i class="fas fa-redo-alt"></i> পুনরায় আপলোডের অনুরোধ পাঠান
+                                                </button>
+                                            </div>
+                                        </div>
                                     ` : ''}
                                 </div>
                             </div>
@@ -5242,6 +5312,9 @@
                                         </button>
                                         <button class="btn-warning" style="background:linear-gradient(135deg, #d97706, #b45309); color:#fff; border:none; padding:7px 16px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; border-radius:8px; cursor:pointer;" onclick="openResubmitModal('${sub.id}', '${sessionNum}')">
                                             <i class="fas fa-redo-alt"></i> পুনরায় আপলোডের অনুরোধ (Request Re-upload)
+                                        </button>
+                                        <button type="button" class="btn-outline" style="padding:7px 14px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; border-color:rgba(212,175,55,0.4); color:var(--gold); border-radius:8px; cursor:pointer;" onclick="openUpdateProofMediaModal('${sub.id}', '${(sub.videoUrl || '').replace(/'/g, "\\'")}', '${(sub.screenshotUrl || '').replace(/'/g, "\\'")}')">
+                                            <i class="fas fa-link"></i> প্রুফ মিডিয়া লিংক আপডেট
                                         </button>
                                         ${!sub.isPractice ? `
                                             <button class="btn-danger" style="background:#dc2626; border:none; padding:7px 14px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; border-radius:8px; cursor:pointer;" onclick="openDisqualifyModal('${ch?.id}', '${sub.id}')" title="এই সেশনে রুলস লঙ্ঘনের কারণে সম্পূর্ণ চ্যালেঞ্জ বাতিল ও বাদ দিন">
@@ -5622,6 +5695,77 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fas fa-paper-plane"></i> ট্রেডারকে নির্দেশনা পাঠান`;
+            }
+        }
+
+        // ==================== UPDATE SESSION PROOF MEDIA ====================
+        function openUpdateProofMediaModal(subId, currentVideo = '', currentImg = '') {
+            document.getElementById('editMediaSubId').value = subId;
+            document.getElementById('editMediaVideoUrl').value = currentVideo || '';
+            document.getElementById('editMediaScreenshotUrl').value = currentImg || '';
+            const vidFileInput = document.getElementById('editMediaVideoFile');
+            const imgFileInput = document.getElementById('editMediaScreenshotFile');
+            if (vidFileInput) vidFileInput.value = '';
+            if (imgFileInput) imgFileInput.value = '';
+            openModal('updateProofMediaModal');
+        }
+
+        async function submitUpdateProofMedia() {
+            const subId = document.getElementById('editMediaSubId').value;
+            if (!subId) return;
+
+            const videoUrl = document.getElementById('editMediaVideoUrl').value.trim();
+            const screenshotUrl = document.getElementById('editMediaScreenshotUrl').value.trim();
+            const vidFile = document.getElementById('editMediaVideoFile')?.files[0];
+            const imgFile = document.getElementById('editMediaScreenshotFile')?.files[0];
+
+            const btn = document.getElementById('btnSaveProofMedia');
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...`;
+
+            try {
+                let res;
+                if (vidFile || imgFile) {
+                    const formData = new FormData();
+                    formData.append('videoUrl', videoUrl);
+                    formData.append('screenshotUrl', screenshotUrl);
+                    if (vidFile) formData.append('videoFile', vidFile);
+                    if (imgFile) formData.append('screenshot', imgFile);
+
+                    res = await fetch(`/api/admin/submissions/${subId}/update-media`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${adminToken}` },
+                        body: formData
+                    });
+                } else {
+                    res = await fetch(`/api/admin/submissions/${subId}/update-media`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${adminToken}`
+                        },
+                        body: JSON.stringify({ videoUrl, screenshotUrl })
+                    });
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'প্রুফ মিডিয়া সফলভাবে আপডেট করা হয়েছে!', 'success');
+                    closeModal('updateProofMediaModal');
+                    await loadAllAdminData();
+                    if (activeTraderDetailId) {
+                        renderTraderSerialSessions();
+                    }
+                } else {
+                    showToast(data.message || 'মিডিয়া আপডেট ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                console.error('Error updating proof media:', err);
+                showToast('সার্ভার ত্রুটি, মিডিয়া আপডেট করা যায়নি', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
             }
         }
 

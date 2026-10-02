@@ -4133,6 +4133,59 @@ app.delete('/api/admin/submissions/:id', authenticateAdminToken, (req, res) => {
   res.json({ success: true, message: 'Submission deleted successfully.' });
 });
 
+// Update Trade Submission Media / URLs / Notes (Admin)
+app.post('/api/admin/submissions/:id/update-media', authenticateAdminToken, upload.fields([
+  { name: 'screenshot', maxCount: 1 },
+  { name: 'videoFile', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const submissions = readJson(SUBMISSIONS_FILE);
+    const idx = submissions.findIndex(s => s.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Submission record not found.' });
+
+    let videoUrl = req.body.videoUrl !== undefined ? req.body.videoUrl.trim() : submissions[idx].videoUrl;
+    let screenshotUrl = req.body.screenshotUrl !== undefined ? req.body.screenshotUrl.trim() : submissions[idx].screenshotUrl;
+
+    const screenshotFile = req.files?.['screenshot']?.[0];
+    const videoUploadFile = req.files?.['videoFile']?.[0];
+
+    if (screenshotFile) {
+      const fileBuffer = fs.readFileSync(screenshotFile.path);
+      const cloudUpload = await uploadToFreeCloudCdn(fileBuffer, screenshotFile.originalname, screenshotFile.mimetype);
+      if (fs.existsSync(screenshotFile.path)) { try { fs.unlinkSync(screenshotFile.path); } catch (e) {} }
+      if (cloudUpload.success) screenshotUrl = cloudUpload.url;
+    }
+
+    if (videoUploadFile) {
+      const fileBuffer = fs.readFileSync(videoUploadFile.path);
+      const cloudUpload = await uploadToFreeCloudCdn(fileBuffer, videoUploadFile.originalname, videoUploadFile.mimetype);
+      if (fs.existsSync(videoUploadFile.path)) { try { fs.unlinkSync(videoUploadFile.path); } catch (e) {} }
+      if (cloudUpload.success) videoUrl = cloudUpload.url;
+    }
+
+    submissions[idx].videoUrl = videoUrl;
+    submissions[idx].screenshotUrl = screenshotUrl;
+    if (req.body.notes !== undefined) submissions[idx].notes = req.body.notes.trim();
+
+    if (submissions[idx].videoUrl && submissions[idx].screenshotUrl) {
+      submissions[idx].fileType = 'both';
+    } else if (submissions[idx].videoUrl) {
+      submissions[idx].fileType = 'video';
+    } else if (submissions[idx].screenshotUrl) {
+      submissions[idx].fileType = 'image';
+    } else {
+      submissions[idx].fileType = 'none';
+    }
+
+    writeJson(SUBMISSIONS_FILE, submissions);
+    res.json({ success: true, message: 'সেশন প্রুফ মিডিয়া সফলভাবে আপডেট করা হয়েছে!', submission: submissions[idx] });
+  } catch (err) {
+    console.error('Error updating submission media:', err);
+    res.status(500).json({ success: false, message: 'Failed to update submission media.' });
+  }
+});
+
+
 // 12. Money Management Serial Links (CRUD)
 app.get('/api/admin/mm-links', authenticateAdminToken, (req, res) => {
   const links = readJson(MM_LINKS_FILE);
