@@ -1924,12 +1924,34 @@
             document.getElementById('forgotPasswordModal').classList.add('active');
         }
 
-        function openBuyModal(pkgId) {
+        async function openBuyModal(pkgId) {
             const token = localStorage.getItem('aj_token');
             if (!token) {
                 showToast('Please login or create an account first to purchase a challenge.', 'error');
                 openLoginModal();
                 return;
+            }
+
+            // Check if user already has a running or pending challenge
+            try {
+                const res = await fetch('/api/challenges/my', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success && data.challenges) {
+                    const runningCh = data.challenges.find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
+                    if (runningCh) {
+                        showToast('আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে।', 'error');
+                        return;
+                    }
+                    const pendingCh = data.challenges.find(c => c.status === 'pending_approval' || c.status === 'pending');
+                    if (pendingCh) {
+                        showToast('আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে।', 'error');
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.warn('Could not verify existing challenges:', err);
             }
 
             const pkg = globalPackages.find(p => p.id === pkgId);

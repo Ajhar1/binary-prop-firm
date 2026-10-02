@@ -2274,6 +2274,40 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
   const pkg = enrichedPackages.find(p => p.id === packageId);
   if (!pkg) return res.status(400).json({ success: false, message: 'Invalid package selected.' });
 
+  // Sync existing challenges to ensure status freshness
+  const allChallenges = syncChallengesWithSubmissions();
+  const userChallenges = allChallenges.filter(c => c.userId === req.user.id);
+
+  // 1. Check if user already has a pending challenge
+  const pendingChallenge = userChallenges.find(c => c.status === 'pending_approval' || c.status === 'pending');
+  if (pendingChallenge) {
+    return res.status(400).json({
+      success: false,
+      message: 'আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে।',
+      reason: 'CHALLENGE_PENDING',
+      existingChallenge: {
+        id: pendingChallenge.id,
+        packageName: pendingChallenge.packageName,
+        status: pendingChallenge.status
+      }
+    });
+  }
+
+  // 2. Check if user already has a running / in_progress challenge
+  const runningChallenge = userChallenges.find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
+  if (runningChallenge) {
+    return res.status(400).json({
+      success: false,
+      message: 'আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে।',
+      reason: 'CHALLENGE_RUNNING',
+      existingChallenge: {
+        id: runningChallenge.id,
+        packageName: runningChallenge.packageName,
+        status: runningChallenge.status
+      }
+    });
+  }
+
   const broker = SUPPORTED_BROKERS.find(b => b.id === brokerId) || SUPPORTED_BROKERS[0];
   const challenges = readJson(CHALLENGES_FILE);
 

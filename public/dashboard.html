@@ -5748,7 +5748,37 @@
             const container = document.getElementById('dashboardPackagesGrid');
             if (!container) return;
 
-            container.innerHTML = packages.map(pkg => `
+            const runningCh = myChallenges.find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
+            const pendingCh = myChallenges.find(c => c.status === 'pending_approval' || c.status === 'pending');
+
+            let noticeBanner = '';
+            if (runningCh) {
+                noticeBanner = `
+                    <div style="grid-column: 1 / -1; background:linear-gradient(135deg, rgba(245,176,65,0.12), rgba(245,176,65,0.04)); border:1.5px solid rgba(245,176,65,0.45); border-radius:14px; padding:1.1rem 1.4rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:14px; box-shadow:0 8px 24px rgba(0,0,0,0.35);">
+                        <div style="width:44px; height:44px; border-radius:12px; background:rgba(245,176,65,0.2); border:1px solid rgba(245,176,65,0.45); color:var(--yellow); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:1.05rem; font-weight:800; color:#fff;">আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে (${runningCh.packageName || ''} - $${(runningCh.fundedAmount || 0).toLocaleString()})</div>
+                            <div style="font-size:0.84rem; color:var(--text-secondary); margin-top:2px;">বর্তমান চ্যালেঞ্জটি সমাপ্ত, সফল বা বাদ না হওয়া পর্যন্ত নতুন কোনো চ্যালেঞ্জ কেনা যাবে না।</div>
+                        </div>
+                    </div>
+                `;
+            } else if (pendingCh) {
+                noticeBanner = `
+                    <div style="grid-column: 1 / -1; background:linear-gradient(135deg, rgba(0,188,212,0.12), rgba(0,188,212,0.04)); border:1.5px solid rgba(0,188,212,0.45); border-radius:14px; padding:1.1rem 1.4rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:14px; box-shadow:0 8px 24px rgba(0,0,0,0.35);">
+                        <div style="width:44px; height:44px; border-radius:12px; background:rgba(0,188,212,0.2); border:1px solid rgba(0,188,212,0.45); color:#00bcd4; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:1.05rem; font-weight:800; color:#fff;">আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে (${pendingCh.packageName || ''} - $${(pendingCh.fundedAmount || 0).toLocaleString()})</div>
+                            <div style="font-size:0.84rem; color:var(--text-secondary); margin-top:2px;">এডমিন ভেরিফাই ও অনুমোদন দেওয়া পর্যন্ত অপেক্ষা করুন। পেন্ডিং থাকা অবস্থায় নতুন চ্যালেঞ্জ নেওয়া যাবে না।</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = noticeBanner + packages.map(pkg => `
                 <div class="glass-card" style="display:flex; flex-direction:column; justify-content:space-between;">
                     <div>
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
@@ -5806,6 +5836,18 @@
 
         // Buy Challenge Modal & Payment Logic
         function openDashBuyModal(pkgId) {
+            // Check if user already has a running or pending challenge
+            const runningCh = myChallenges.find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
+            if (runningCh) {
+                showToast('আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে।', 'error');
+                return;
+            }
+            const pendingCh = myChallenges.find(c => c.status === 'pending_approval' || c.status === 'pending');
+            if (pendingCh) {
+                showToast('আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে।', 'error');
+                return;
+            }
+
             const pkg = allPackages.find(p => p.id === pkgId);
             if (!pkg) return;
 
