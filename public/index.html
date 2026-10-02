@@ -1712,9 +1712,9 @@
                 <h4>Support & Community</h4>
                 <ul>
                     <li><a href="https://t.me/BinaryPropFirmSupport" target="_blank"><i class="fab fa-telegram"></i> Telegram Support (@BinaryPropFirmSupport)</a></li>
-                    <li><a href="#"><i class="fas fa-envelope"></i> support@binarypropfirm.com</a></li>
-                    <li><a href="#"><i class="fas fa-shield-alt"></i> Risk Disclosure</a></li>
-                    <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+                    <li><a href="mailto:support@binarypropfirm.com" onclick="copySupportEmail(event)" title="Click to email or copy support@binarypropfirm.com"><i class="fas fa-envelope"></i> support@binarypropfirm.com</a></li>
+                    <li><a href="#rules"><i class="fas fa-shield-alt"></i> Risk Disclosure</a></li>
+                    <li><a href="#rules"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
                 </ul>
             </div>
         </div>
@@ -1772,6 +1772,32 @@
                 toast.style.display = 'none';
             }, 3500);
         }
+
+        // Copy support email to clipboard & notify
+        function copySupportEmail(e) {
+            const email = 'support@binarypropfirm.com';
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(email).then(() => {
+                    showToast('ইমেইল অ্যাড্রেস কপি হয়েছে: ' + email, 'success');
+                }).catch(() => {
+                    showToast('সাপোর্ট ইমেইল: ' + email, 'success');
+                });
+            } else {
+                // Fallback for older browsers
+                try {
+                    const tempInput = document.createElement('input');
+                    tempInput.value = email;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    showToast('ইমেইল অ্যাড্রেস কপি হয়েছে: ' + email, 'success');
+                } catch (err) {
+                    showToast('সাপোর্ট ইমেইল: ' + email, 'success');
+                }
+            }
+        }
+
 
         // Password visibility toggle
         function togglePasswordVis(inputId, btn) {
