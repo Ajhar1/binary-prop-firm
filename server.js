@@ -31,9 +31,11 @@ const PROMO_PRESETS_FILE = path.join(DATA_DIR, 'promo_presets.json');
 const PACKAGES_FILE = path.join(DATA_DIR, 'packages.json');
 const SUPPORT_FILE = path.join(DATA_DIR, 'support_tickets.json');
 const TRADER_STATES_FILE = path.join(DATA_DIR, 'trader_states.json');
+const SYNCED_TRADES_FILE = path.join(DATA_DIR, 'synced_trades.json');
+const DOWNLOADS_DIR = path.join(__dirname, 'public', 'downloads');
 
 // Ensure directories exist
-[DATA_DIR, UPLOADS_DIR, BACKUPS_DIR].forEach(dir => {
+[DATA_DIR, UPLOADS_DIR, BACKUPS_DIR, DOWNLOADS_DIR].forEach(dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
@@ -3034,6 +3036,151 @@ app.post('/api/submissions/:id/resubmit', authenticateToken, upload.fields([
   } catch (err) {
     console.error('Error in submission resubmit:', err);
     res.status(500).json({ success: false, message: 'Failed to process re-submission.' });
+  }
+});
+
+// ----------------- EXTENSION & SYNCED TRADES API -----------------
+// 1. Sync Trades from Quotex Extension
+app.post('/api/extension/sync-trades', (req, res) => {
+  try {
+    const { traderId, accountType = 'demo', source = 'quotex', trades = [] } = req.body;
+    if (!traderId) {
+      return res.status(400).json({ success: false, message: 'Trader ID প্রয়োজন।' });
+    }
+
+    const users = readJson(USERS_FILE, []);
+    const cleanId = traderId.trim().toLowerCase();
+    const user = users.find(u => 
+      (u.traderId && u.traderId.toLowerCase() === cleanId) || 
+      (u.email && u.email.toLowerCase() === cleanId) ||
+      (u.id && u.id.toLowerCase() === cleanId)
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: `Trader ID (${traderId}) প্ল্যাটফর্মে খুঁজে পাওয়া যায়নি। আপনার প্রোফাইলে থাকা সঠিক Trader ID দিন।` });
+    }
+
+    if (!Array.isArray(trades) || trades.length === 0) {
+      return res.status(400).json({ success: false, message: 'কোনো ট্রেড পাওয়া যায়নি।' });
+    }
+
+    let allSynced = readJson(SYNCED_TRADES_FILE, []);
+    let newCount = 0;
+    const nowIso = new Date().toISOString();
+
+    trades.forEach(t => {
+      const ticketId = t.ticketId || `trd_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+      const exists = allSynced.some(existing => existing.userId === user.id && existing.ticketId === ticketId);
+      if (!exists) {
+        allSynced.unshift({
+          id: `sync_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          userId: user.id,
+          traderId: user.traderId || traderId,
+          userName: user.name || 'Trader',
+          userEmail: user.email || '',
+          ticketId,
+          asset: t.asset || 'N/A',
+          payout: t.payout || '90%',
+          direction: t.direction || 'CALL',
+          openQuote: t.openQuote || '0.00',
+          openTime: t.openTime || nowIso,
+          closeQuote: t.closeQuote || '0.00',
+          closeTime: t.closeTime || nowIso,
+          amount: parseFloat(t.amount) || 0,
+          profit: parseFloat(t.profit) || 0,
+          result: t.result || (parseFloat(t.profit) > 0 ? 'WIN' : 'LOSS'),
+          accountType: t.accountType || accountType || 'demo',
+          source: source || 'quotex',
+          syncedAt: nowIso
+        });
+        newCount++;
+      }
+    });
+
+    if (newCount > 0) {
+      if (allSynced.length > 5000) allSynced.length = 5000;
+      writeJson(SYNCED_TRADES_FILE, allSynced);
+    }
+
+    const totalForUser = allSynced.filter(t => t.userId === user.id).length;
+
+    res.json({
+      success: true,
+      addedCount: newCount,
+      totalSynced: totalForUser,
+      message: newCount > 0 
+        ? `${newCount} টি নতুন ট্রেড সফলভাবে সিঙ্ক হয়েছে!` 
+        : `সকল ${trades.length} টি ট্রেড ইতিমধ্যে সেভ রয়েছে (ডুপ্লিকেট এড়ানো হয়েছে)।`
+    });
+  } catch (err) {
+    console.error('Error syncing extension trades:', err);
+    res.status(500).json({ success: false, message: 'সার্ভার ত্রুটি।' });
+  }
+});
+
+// 2. Get Synced Trades for Logged-in Trader
+app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
+  try {
+    const allSynced = readJson(SYNCED_TRADES_FILE, []);
+    const userTrades = allSynced.filter(t => t.userId === req.user.id || (t.userEmail && t.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()));
+
+    const totalTrades = userTrades.length;
+    const wins = userTrades.filter(t => t.result === 'WIN').length;
+    const losses = userTrades.filter(t => t.result === 'LOSS').length;
+    const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0.0';
+    const totalInvested = userTrades.reduce((sum, t) => sum + (t.amount || 0), 0);
+    const grossReturn = userTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
+    const netProfit = userTrades.reduce((sum, t) => {
+      if (t.result === 'WIN') {
+        return sum + (t.profit > t.amount ? (t.profit - t.amount) : t.profit);
+      } else {
+        return sum - (t.amount || 0);
+      }
+    }, 0);
+
+    const demoCount = userTrades.filter(t => t.accountType === 'demo').length;
+    const liveCount = userTrades.filter(t => t.accountType === 'live').length;
+
+    res.json({
+      success: true,
+      trades: userTrades,
+      stats: {
+        totalTrades,
+        wins,
+        losses,
+        winRate: winRate + '%',
+        totalInvested: parseFloat(totalInvested.toFixed(2)),
+        grossReturn: parseFloat(grossReturn.toFixed(2)),
+        netProfit: parseFloat(netProfit.toFixed(2)),
+        demoCount,
+        liveCount
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching synced trades:', err);
+    res.status(500).json({ success: false, message: 'সার্ভার ত্রুটি।' });
+  }
+});
+
+// 3. Clear Synced Trades for Testing (Trader specific)
+app.delete('/api/user/synced-trades', authenticateToken, (req, res) => {
+  try {
+    let allSynced = readJson(SYNCED_TRADES_FILE, []);
+    allSynced = allSynced.filter(t => t.userId !== req.user.id && (t.userEmail || '').toLowerCase() !== (req.user.email || '').toLowerCase());
+    writeJson(SYNCED_TRADES_FILE, allSynced);
+    res.json({ success: true, message: 'আপনার সিঙ্ক হওয়া ট্রেডিং হিস্টোরি ক্লিয়ার করা হয়েছে।' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'সার্ভার ত্রুটি।' });
+  }
+});
+
+// 4. Download Extension ZIP
+app.get('/api/extension/download', (req, res) => {
+  const zipPath = path.join(DOWNLOADS_DIR, 'binary-prop-sync-extension.zip');
+  if (fs.existsSync(zipPath)) {
+    res.download(zipPath, 'binary-prop-sync-extension.zip');
+  } else {
+    res.status(404).send('Extension package not found.');
   }
 });
 

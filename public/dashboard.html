@@ -2087,6 +2087,11 @@
                     <span>Support & Helpdesk</span>
                     <span id="userSupportUnreadBadge" style="display:none; background:var(--yellow); color:#000; font-size:0.7rem; font-weight:800; padding:1px 6px; border-radius:10px; margin-left:auto;">New</span>
                 </li>
+                <li class="sidebar-item" onclick="switchTab('trade-history', this)" id="nav-trade-history">
+                    <i class="fas fa-chart-line" style="color:var(--yellow);"></i>
+                    <span>ট্রেডিং হিস্টোরি</span>
+                    <span style="background:rgba(0,230,118,0.15); color:#00e676; font-size:0.68rem; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:auto; border:1px solid rgba(0,230,118,0.3);">Extension</span>
+                </li>
             </ul>
         </div>
 
@@ -3125,6 +3130,136 @@
                 </div>
             </div>
         </section>
+
+        <!-- ==============================================
+             TAB 8: SYNCED TRADE HISTORY (QUOTEX EXTENSION)
+        ============================================== -->
+        <section class="tab-pane" id="pane-trade-history">
+            <!-- Extension Download & Quick Setup Card -->
+            <div style="background:linear-gradient(135deg, rgba(255,184,0,0.08), rgba(18,20,26,0.95)); border:1px solid rgba(255,184,0,0.3); border-radius:16px; padding:1.5rem; margin-bottom:1.8rem; box-shadow:0 8px 30px rgba(0,0,0,0.35);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:1rem;">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg, #ffb800, #ff8800); display:flex; align-items:center; justify-content:center; color:#000; font-size:1.5rem; font-weight:900; flex-shrink:0;">
+                            <i class="fas fa-plug"></i>
+                        </div>
+                        <div>
+                            <h3 style="font-size:1.2rem; font-weight:800; color:#fff; margin:0 0 4px 0;">
+                                Quotex লাইভ ট্রেড সিঙ্ক এক্সটেনশন (Auto Sync Extension)
+                            </h3>
+                            <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">
+                                ভিডিও বা স্ক্রিনশট আপলোড করার ঝামেলা ছাড়াই ১-ক্লিকে সরাসরি ব্রোকার থেকে ট্রেড সিঙ্ক করুন।
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <a href="/api/extension/download" class="btn-gold" style="padding:10px 20px; font-weight:800; font-size:0.9rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                            <i class="fas fa-download"></i> ডাউনলোড এক্সটেনশন (ZIP)
+                        </a>
+                        <a href="https://market-qx.info/en/trades?page=1&account=demo" target="_blank" class="btn-outline" style="padding:10px 18px; font-size:0.88rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                            <i class="fas fa-external-link-alt"></i> Quotex Trade History
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 3-Step Setup Guide -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; background:rgba(0,0,0,0.25); padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+                    <div style="display:flex; gap:10px;">
+                        <div style="width:28px; height:28px; border-radius:50%; background:var(--yellow); color:#000; font-weight:800; font-size:0.85rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">১</div>
+                        <div>
+                            <strong style="color:#fff; font-size:0.85rem;">ডাউনলোড ও আনজিপ করুন</strong>
+                            <p style="font-size:0.78rem; color:var(--text-secondary); margin:2px 0 0 0;">উপরের বাটন দিয়ে জিপ ফাইলটি ডাউনলোড করে যেকোনো ফোল্ডারে এক্সট্রাক্ট (Extract) করুন।</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <div style="width:28px; height:28px; border-radius:50%; background:var(--yellow); color:#000; font-weight:800; font-size:0.85rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">২</div>
+                        <div>
+                            <strong style="color:#fff; font-size:0.85rem;">ব্রাউজারে ইন্সটল করুন</strong>
+                            <p style="font-size:0.78rem; color:var(--text-secondary); margin:2px 0 0 0;">কম্পিউটারে <code>chrome://extensions</code> এ Developer Mode অন করে <strong>Load unpacked</strong> দিন। মোবাইলে Kiwi Browser ব্যবহার করুন।</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <div style="width:28px; height:28px; border-radius:50%; background:var(--yellow); color:#000; font-weight:800; font-size:0.85rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">৩</div>
+                        <div>
+                            <strong style="color:#fff; font-size:0.85rem;">Trader ID দিন ও সিঙ্ক করুন</strong>
+                            <p style="font-size:0.78rem; color:var(--text-secondary); margin:2px 0 0 0;">
+                                এক্সটেনশনে আপনার Trader ID: <strong id="syncHelperTraderId" style="color:var(--yellow); cursor:pointer;" onclick="copySyncTraderId()" title="ক্লিক করে কপি করুন">AJ-xxxx</strong> বসিয়ে Quotex-এ সিঙ্ক চাপুন।
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Overview Stats -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:16px; margin-bottom:1.8rem;">
+                <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; text-align:center;">
+                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">মোট সিঙ্ক হওয়া ট্রেড</div>
+                    <div id="syncStatTotal" style="font-size:1.8rem; font-weight:800; color:#fff;">0</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;" id="syncStatAccountBreakdown">Demo: 0 | Live: 0</div>
+                </div>
+                <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; text-align:center;">
+                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">উইন রেট (Win Rate)</div>
+                    <div id="syncStatWinRate" style="font-size:1.8rem; font-weight:800; color:#00e676;">0.0%</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;" id="syncStatWinLoss">0 Win / 0 Loss</div>
+                </div>
+                <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; text-align:center;">
+                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">মোট ইনভেস্টমেন্ট</div>
+                    <div id="syncStatInvested" style="font-size:1.8rem; font-weight:800; color:#fff;">$0.00</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">Total Volume</div>
+                </div>
+                <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; text-align:center;">
+                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">নিট প্রফিট / লস (Net PnL)</div>
+                    <div id="syncStatNetProfit" style="font-size:1.8rem; font-weight:800; color:#ffb800;">$0.00</div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;" id="syncStatGrossReturn">Gross Return: $0.00</div>
+                </div>
+            </div>
+
+            <!-- Trade History Records Table -->
+            <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:1.5rem; box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.2rem;">
+                    <div>
+                        <h3 style="font-size:1.15rem; font-weight:800; color:#fff; margin:0 0 2px 0;">
+                            <i class="fas fa-list-alt" style="color:var(--yellow); margin-right:6px;"></i> Quotex থেকে সিঙ্ক হওয়া ট্রেড রেকর্ড
+                        </h3>
+                        <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">
+                            Asset, Ticket ID, Opening/Closing Quotes, Amount ও PnL লাইভ রেকর্ড
+                        </p>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-outline" style="padding:7px 14px; font-size:0.8rem; border-radius:8px; cursor:pointer;" onclick="fetchUserSyncedTrades()">
+                            <i class="fas fa-sync-alt"></i> রিফ্রেশ
+                        </button>
+                        <button class="btn-outline" style="padding:7px 14px; font-size:0.8rem; border-radius:8px; color:#f87171; border-color:rgba(239,68,68,0.3); cursor:pointer;" onclick="clearUserSyncedTrades()">
+                            <i class="fas fa-trash-alt"></i> ক্লিয়ার টেস্ট ডেটা
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Container -->
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
+                        <thead>
+                            <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.76rem; text-transform:uppercase; letter-spacing:0.5px;">
+                                <th style="padding:10px 12px;">Asset</th>
+                                <th style="padding:10px 12px;">Info (Ticket / Payout)</th>
+                                <th style="padding:10px 12px;">Opening Quote</th>
+                                <th style="padding:10px 12px;">Closing Quote</th>
+                                <th style="padding:10px 12px;">Amount</th>
+                                <th style="padding:10px 12px;">Profit / Return</th>
+                                <th style="padding:10px 12px;">Account</th>
+                            </tr>
+                        </thead>
+                        <tbody id="syncedTradesTableBody">
+                            <tr>
+                                <td colspan="7" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
+                                    <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
+                                    ট্রেড হিস্টোরি লোড হচ্ছে...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Email Verification Modal in Dashboard -->
@@ -3507,7 +3642,8 @@
                 'course': ['🎓 ট্রেডিং একাডেমি (Trading Academy)', 'বাইনারি ট্রেডিং মাস্টারক্লাস ও ভিডিও গাইড।'],
                 'buy-challenge': ['🛒 চ্যালেঞ্জ প্যাকেজ (Challenge Packages)', 'পছন্দের ফান্ডেড প্যাকেজ বাছাই করুন।'],
                 'profile': ['👤 প্রোফাইল সেটিংস (Profile & Settings)', 'ব্যক্তিগত তথ্য ও পেআউট ওয়ালেট পরিচালনা।'],
-                'support': ['🎧 সাপোর্ট হেল্পডেস্ক (Support & Helpdesk)', 'এডমিন সহায়তা ও মেসেজ ইনবক্স।']
+                'support': ['🎧 সাপোর্ট হেল্পডেস্ক (Support & Helpdesk)', 'এডমিন সহায়তা ও মেসেজ ইনবক্স।'],
+                'trade-history': ['📊 ট্রেডিং হিস্টোরি (Synced Trade History)', 'Quotex এক্সটেনশন থেকে সিঙ্ক হওয়া রিয়েল-টাইম ট্রেড রেকর্ড ও অ্যানালিটিক্স।']
             };
 
             if (headings[tabId]) {
@@ -3528,6 +3664,8 @@
                 calculateAndRenderMasaniello();
             } else if (tabId === 'support') {
                 fetchUserSupportTickets();
+            } else if (tabId === 'trade-history') {
+                fetchUserSyncedTrades();
             }
 
             // Close mobile sidebar on switch
@@ -7690,6 +7828,202 @@
                 await fetchUserSupportTickets(data.ticket.id);
             } catch (err) {
                 showToast(err.message, 'error');
+            }
+        }
+
+        // ==========================================
+        // SYNCED TRADES (QUOTEX EXTENSION) CLIENT LOGIC
+        // ==========================================
+        let userSyncedTradesData = [];
+
+        function copySyncTraderId() {
+            const traderId = (currentUser && currentUser.traderId) || 'AJ-1008';
+            navigator.clipboard.writeText(traderId).then(() => {
+                showToast(`Trader ID (${traderId}) কপি করা হয়েছে!`, 'success');
+            }).catch(() => {
+                showToast(`Trader ID: ${traderId}`, 'info');
+            });
+        }
+
+        async function fetchUserSyncedTrades() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            // Update trader ID badge
+            const traderId = (currentUser && currentUser.traderId) || 'AJ-1008';
+            const badgeEl = document.getElementById('syncHelperTraderId');
+            if (badgeEl) badgeEl.innerText = traderId;
+
+            const tbody = document.getElementById('syncedTradesTableBody');
+            if (tbody && userSyncedTradesData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
+                            <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
+                            ট্রেড হিস্টোরি লোড হচ্ছে...
+                        </td>
+                    </tr>
+                `;
+            }
+
+            try {
+                const res = await fetch('/api/user/synced-trades', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    userSyncedTradesData = data.trades || [];
+                    renderSyncedTrades(data);
+                } else {
+                    if (tbody) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="7" style="text-align:center; padding:2.5rem 1rem; color:#f87171;">
+                                    <i class="fas fa-exclamation-circle" style="font-size:1.8rem; margin-bottom:8px; display:block;"></i>
+                                    ${data.message || 'ট্রেড হিস্টোরি লোড করতে সমস্যা হয়েছে।'}
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching synced trades:', err);
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding:2.5rem 1rem; color:#f87171;">
+                                <i class="fas fa-wifi" style="font-size:1.8rem; margin-bottom:8px; display:block;"></i>
+                                নেটওয়ার্ক ত্রুটি। পুনরায় চেষ্টা করুন।
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        function renderSyncedTrades(data) {
+            const trades = data.trades || [];
+            const stats = data.stats || {};
+
+            // Update stat boxes
+            const totalEl = document.getElementById('syncStatTotal');
+            if (totalEl) totalEl.innerText = stats.totalTrades || 0;
+
+            const acctEl = document.getElementById('syncStatAccountBreakdown');
+            if (acctEl) acctEl.innerText = `Demo: ${stats.demoCount || 0} | Live: ${stats.liveCount || 0}`;
+
+            const winRateEl = document.getElementById('syncStatWinRate');
+            if (winRateEl) winRateEl.innerText = stats.winRate || '0.0%';
+
+            const winLossEl = document.getElementById('syncStatWinLoss');
+            if (winLossEl) winLossEl.innerText = `${stats.wins || 0} Win / ${stats.losses || 0} Loss`;
+
+            const investedEl = document.getElementById('syncStatInvested');
+            if (investedEl) investedEl.innerText = `$${(stats.totalInvested || 0).toFixed(2)}`;
+
+            const netProfitEl = document.getElementById('syncStatNetProfit');
+            if (netProfitEl) {
+                const np = stats.netProfit || 0;
+                netProfitEl.innerText = (np >= 0 ? '+$' : '-$') + Math.abs(np).toFixed(2);
+                netProfitEl.style.color = np >= 0 ? '#00e676' : '#ff5252';
+            }
+
+            const grossEl = document.getElementById('syncStatGrossReturn');
+            if (grossEl) grossEl.innerText = `Gross Return: $${(stats.grossReturn || 0).toFixed(2)}`;
+
+            const tbody = document.getElementById('syncedTradesTableBody');
+            if (!tbody) return;
+
+            if (trades.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:3.5rem 1rem; color:var(--text-secondary);">
+                            <div style="width:60px; height:60px; border-radius:50%; background:rgba(255,184,0,0.1); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; font-size:1.6rem; color:var(--yellow);">
+                                <i class="fas fa-cloud-download-alt"></i>
+                            </div>
+                            <h4 style="color:#fff; font-size:1.05rem; margin-bottom:4px;">এখনও কোনো ট্রেড সিঙ্ক করা হয়নি</h4>
+                            <p style="font-size:0.82rem; color:var(--text-secondary); max-width:440px; margin:0 auto 1.2rem auto;">
+                                উপরের বাটন থেকে এক্সটেনশনটি ডাউনলোড করে Quotex Trade History পেজে যান এবং ১-ক্লিকে ট্রেড সিঙ্ক করুন।
+                            </p>
+                            <a href="https://market-qx.info/en/trades?page=1&account=demo" target="_blank" class="btn-gold" style="padding:8px 18px; font-size:0.84rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                <i class="fas fa-external-link-alt"></i> Quotex Trade History ওপেন করুন
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = trades.map(t => {
+                const isWin = t.result === 'WIN';
+                const isCall = t.direction === 'CALL';
+                const arrowIcon = isCall ? '<i class="fas fa-arrow-up" style="color:#00e676; margin-right:4px;"></i>' : '<i class="fas fa-arrow-down" style="color:#ff5252; margin-right:4px;"></i>';
+                const profitColor = isWin ? '#00e676' : 'var(--text-secondary)';
+                const resultBadge = isWin 
+                    ? `<span style="background:rgba(0,230,118,0.15); color:#00e676; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; border:1px solid rgba(0,230,118,0.3); margin-left:6px;">WIN</span>` 
+                    : `<span style="background:rgba(255,82,82,0.12); color:#ff5252; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; border:1px solid rgba(255,82,82,0.3); margin-left:6px;">LOSS</span>`;
+
+                const accountBadge = (t.accountType === 'live')
+                    ? `<span style="background:rgba(0,230,118,0.12); color:#00e676; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; border:1px solid rgba(0,230,118,0.3);">LIVE</span>`
+                    : `<span style="background:rgba(255,184,0,0.12); color:#ffb800; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700; border:1px solid rgba(255,184,0,0.3);">DEMO</span>`;
+
+                return `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding:12px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${isWin ? '#00e676' : '#ff5252'};"></span>
+                            ${escapeHtml(t.asset || 'N/A')}
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="font-size:0.78rem; font-weight:700; color:#cbd5e1;">Payout: ${escapeHtml(t.payout || '90%')}</div>
+                            <div style="font-size:0.72rem; color:var(--text-secondary); font-family:monospace; margin-top:2px;" title="${escapeHtml(t.ticketId)}">
+                                ${escapeHtml((t.ticketId || '').substring(0, 16))}...
+                            </div>
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="font-weight:700; color:#fff;">${escapeHtml(t.openQuote || '0.00')}</div>
+                            <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:2px;">${escapeHtml(t.openTime || '')}</div>
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="font-weight:700; color:#fff;">${escapeHtml(t.closeQuote || '0.00')}</div>
+                            <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:2px;">${escapeHtml(t.closeTime || '')}</div>
+                        </td>
+                        <td style="padding:12px; font-weight:700; color:#fff;">
+                            ${arrowIcon} $${(t.amount || 0).toFixed(2)}
+                        </td>
+                        <td style="padding:12px;">
+                            <span style="font-weight:800; color:${profitColor}; font-size:0.92rem;">
+                                $${(t.profit || 0).toFixed(2)}
+                            </span>
+                            ${resultBadge}
+                        </td>
+                        <td style="padding:12px;">
+                            ${accountBadge}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function clearUserSyncedTrades() {
+            if (!confirm('আপনি কি নিশ্চিত যে আপনার সিঙ্ক হওয়া টেস্ট ট্রেড হিস্টোরি মুছে ফেলতে চান?')) return;
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/user/synced-trades', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('ট্রেডিং হিস্টোরি ক্লিয়ার করা হয়েছে।', 'success');
+                    userSyncedTradesData = [];
+                    renderSyncedTrades({ trades: [], stats: {} });
+                } else {
+                    showToast(data.message || 'ক্লিয়ার করতে সমস্যা হয়েছে।', 'error');
+                }
+            } catch (err) {
+                showToast('নেটওয়ার্ক ত্রুটি: ' + err.message, 'error');
             }
         }
 

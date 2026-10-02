@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Binary Prop Firm - Quotex Trade Sync",
+  "version": "1.0.0",
+  "description": "Quotex Trade History live sync extension for Binary Prop Firm traders.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "*://market-qx.info/*",
+    "*://*.quotex.com/*",
+    "*://*.quotex.io/*",
+    "*://*.binarypropfirm.com/*",
+    "http://localhost:*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Binary Prop Firm Sync",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://market-qx.info/*",
+        "*://*.quotex.com/*",
+        "*://*.quotex.io/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+/* Binary Prop Firm Floating Sync Widget on Quotex */
+#bpf-sync-widget-root {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 9999999;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+}
+
+.bpf-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(18, 20, 26, 0.95);
+  border: 1px solid rgba(255, 184, 0, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(255, 184, 0, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 30px;
+  color: #fff;
+  font-size: 12px;
+  transition: all 0.25s ease;
+}
+
+.bpf-pill:hover {
+  border-color: #ffb800;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 184, 0, 0.3);
+}
+
+.bpf-logo-badge {
+  background: linear-gradient(135deg, #ffb800, #ff8800);
+  color: #000;
+  font-weight: 900;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+
+.bpf-status-text {
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.bpf-status-text span {
+  color: #ffb800;
+}
+
+.bpf-btn-sync {
+  background: linear-gradient(135deg, #ffb800, #ff9500);
+  color: #000;
+  font-weight: 700;
+  font-size: 11px;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: transform 0.15s, background 0.2s;
+}
+
+.bpf-btn-sync:hover {
+  background: linear-gradient(135deg, #ffc21a, #ffa01a);
+  transform: scale(1.04);
+}
+
+.bpf-btn-sync:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Floating Toast */
+#bpf-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000000;
+  background: #151821;
+  border: 1px solid #00e676;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: bpfSlideUp 0.3s ease-out;
+}
+
+#bpf-toast.error {
+  border-color: #ff5252;
+}
+
+@keyframes bpfSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

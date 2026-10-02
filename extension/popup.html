@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>Binary Prop Firm - Trade Sync</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-wrap">
+        <div class="logo-badge">BPF</div>
+        <div>
+          <h1 class="title">Binary Prop Firm</h1>
+          <p class="subtitle">Quotex Live Trade Synchronizer</p>
+        </div>
+      </div>
+      <div id="connBadge" class="badge badge-idle">● Idle</div>
+    </header>
+
+    <!-- Main Card -->
+    <main class="content">
+      <div class="form-group">
+        <label for="traderId">আপনার Trader ID (বা ইমেইল):</label>
+        <input type="text" id="traderId" placeholder="যেমন: AJ-1008" autocomplete="off" />
+        <small class="hint">ড্যাশবোর্ড প্রোফাইল থেকে আপনার Trader ID লিখুন।</small>
+      </div>
+
+      <div class="form-group">
+        <label for="serverUrl">সার্ভার ইউআরএল (Server URL):</label>
+        <input type="text" id="serverUrl" value="https://binarypropfirm.com" autocomplete="off" />
+      </div>
+
+      <div class="toggle-group">
+        <div class="toggle-label">
+          <strong>Auto-Sync on Page Load</strong>
+          <small>Quotex ট্রেড হিস্টোরি ওপেন হলে অটোমেটিক সিঙ্ক হবে</small>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="autoSync" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <button id="syncNowBtn" class="btn btn-primary">
+        <span>🚀 Sync Quotex Trades Now</span>
+      </button>
+
+      <div id="statusBox" class="status-box" style="display:none;"></div>
+
+      <div class="quick-links">
+        <button id="openHistoryBtn" class="btn btn-secondary">
+          📈 Open Quotex Trade History
+        </button>
+        <button id="openDashBtn" class="btn btn-secondary">
+          👤 Open Prop Firm Dashboard
+        </button>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span id="lastSyncedText">Last Synced: Never</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
