@@ -4699,8 +4699,14 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-app.get('/admin', (req, res) => {
+// Secret Admin Route (Hidden custom URL)
+app.get(['/proboxaj', '/proboxaj/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Block /admin completely: Anyone trying /admin is redirected to homepage
+app.get(['/admin', '/admin/*'], (req, res) => {
+  res.redirect('/');
 });
 
 app.get(['/landing', '/ad'], (req, res) => {
