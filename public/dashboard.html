@@ -3213,9 +3213,11 @@
                     পেমেন্ট ভেরিফাই করে এডমিন অনুমোদন দেওয়ার পর আপনার একাউন্টে মানি ম্যানেজমেন্ট শিট লিংক যুক্ত হবে।
                 </div>
 
-                <button type="submit" class="btn-gold" style="width:100%; justify-content:center; padding:12px;" id="dashBuySubmitBtn">
-                    <i class="fas fa-check-circle"></i> Confirm & Start Challenge
-                </button>
+                <div class="modal-sticky-footer" style="position:sticky; bottom:-1rem; background:linear-gradient(180deg, rgba(18,24,36,0) 0%, rgba(18,24,36,0.95) 25%, #121824 100%); padding:10px 0 4px 0; margin-top:10px; z-index:10;">
+                    <button type="submit" class="btn-gold" style="width:100%; justify-content:center; padding:13px; font-size:1.02rem; font-weight:800; box-shadow:0 6px 20px rgba(245,176,65,0.35);" id="dashBuySubmitBtn">
+                        <i class="fas fa-check-circle"></i> Confirm & Start Challenge
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -5833,7 +5835,10 @@
             }
 
             renderDashPaymentInstruction();
-            document.getElementById('dashBuyModal').classList.add('active');
+            const dashModalEl = document.getElementById('dashBuyModal');
+            dashModalEl.classList.add('active');
+            const dashModalBox = dashModalEl.querySelector('.modal-box');
+            if (dashModalBox) dashModalBox.scrollTop = 0;
         }
 
         function closeDashBuyModal() {

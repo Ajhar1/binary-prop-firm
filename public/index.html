@@ -778,14 +778,16 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.88);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             z-index: 9999;
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            padding: 1.5rem 1rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .modal-overlay.active {
@@ -798,10 +800,40 @@
             border-radius: 24px;
             max-width: 480px;
             width: 100%;
-            padding: 2.2rem;
+            padding: 2.2rem 2rem 2.5rem 2rem;
             position: relative;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
             animation: modalFadeIn 0.25s ease-out;
+            max-height: 88vh;
+            max-height: 88dvh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            margin: auto;
+        }
+
+        .modal-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-box::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+        }
+        .modal-box::-webkit-scrollbar-thumb {
+            background: rgba(245, 176, 65, 0.35);
+            border-radius: 10px;
+        }
+        .modal-box::-webkit-scrollbar-thumb:hover {
+            background: var(--yellow);
+        }
+
+        .modal-sticky-footer {
+            position: sticky;
+            bottom: -1.2rem;
+            background: linear-gradient(180deg, rgba(20,20,20,0) 0%, rgba(20,20,20,0.95) 25%, #141414 100%);
+            padding: 12px 0 6px 0;
+            margin-top: 12px;
+            z-index: 10;
         }
 
         @keyframes modalFadeIn {
@@ -1186,6 +1218,46 @@
                 font-size: 1.02rem;
                 padding: 4px 0;
                 display: block;
+            }
+
+            /* Modals Mobile Touch & Scroll Optimization */
+            .modal-overlay {
+                padding: 0.5rem 0.5rem 1.5rem 0.5rem !important;
+                align-items: center !important;
+            }
+            .modal-box {
+                padding: 1.35rem 1.05rem 1.8rem 1.05rem !important;
+                border-radius: 20px !important;
+                max-height: 92vh !important;
+                max-height: 92dvh !important;
+                width: 100% !important;
+            }
+            .modal-title {
+                font-size: 1.35rem !important;
+            }
+            .modal-subtitle {
+                font-size: 0.82rem !important;
+                margin-bottom: 1rem !important;
+            }
+            .form-group {
+                margin-bottom: 0.85rem !important;
+            }
+            .form-group label {
+                font-size: 0.8rem !important;
+                margin-bottom: 4px !important;
+            }
+            .form-control {
+                padding: 10px 12px !important;
+                font-size: 0.9rem !important;
+            }
+            .modal-close {
+                top: 12px !important;
+                right: 14px !important;
+                font-size: 1.6rem !important;
+            }
+            .modal-sticky-footer {
+                bottom: -1rem !important;
+                padding: 10px 0 4px 0 !important;
             }
         }
         @media (max-width: 360px) {
@@ -1673,9 +1745,11 @@
                     চ্যালেঞ্জ কেনার পর আপনার ড্যাশবোর্ডে সেশন কাউন্টার চালু হবে এবং প্রতিদিনের ট্রেড হিস্টোরি সাবমিট করতে পারবেন।
                 </div>
 
-                <button type="submit" class="btn-primary btn-full" id="buySubmitBtn">
-                    <i class="fas fa-check-circle"></i> Confirm & Start Challenge
-                </button>
+                <div class="modal-sticky-footer">
+                    <button type="submit" class="btn-primary btn-full" id="buySubmitBtn" style="padding:14px 20px; font-size:1.05rem; font-weight:800; border-radius:12px; box-shadow:0 6px 20px rgba(245,176,65,0.4); display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fas fa-check-circle"></i> Confirm & Start Challenge
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -1880,7 +1954,10 @@
 
             renderPaymentMethodInstruction();
             closeModals();
-            document.getElementById('buyModal').classList.add('active');
+            const buyModalEl = document.getElementById('buyModal');
+            buyModalEl.classList.add('active');
+            const buyModalBox = buyModalEl.querySelector('.modal-box');
+            if (buyModalBox) buyModalBox.scrollTop = 0;
         }
 
         function closeModals() {
