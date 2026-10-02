@@ -271,6 +271,23 @@
             display: flex;
             align-items: center;
             gap: 16px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card.clickable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .stat-card.clickable:hover {
+            transform: translateY(-5px);
+            border-color: rgba(245, 176, 65, 0.45);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 16px rgba(245, 176, 65, 0.2);
+        }
+
+        .stat-card.clickable:active {
+            transform: translateY(-2px);
         }
 
         .stat-icon {
@@ -1179,7 +1196,7 @@
         <!-- ==================== TAB 1: OVERVIEW ==================== -->
         <div class="tab-content active" id="pane-overview">
             <div class="stats-grid">
-                <div class="stat-card glass">
+                <div class="stat-card glass clickable" onclick="filterChallengesByStatus('pending_approval')" title="পেন্ডিং অর্ডার দেখতে ক্লিক করুন">
                     <div class="stat-icon" style="background:rgba(245,176,65,0.15); color:var(--gold);">
                         <i class="fas fa-clock"></i>
                     </div>
@@ -1188,7 +1205,7 @@
                         <div class="stat-label">Pending Orders</div>
                     </div>
                 </div>
-                <div class="stat-card glass">
+                <div class="stat-card glass clickable" onclick="filterChallengesByStatus('in_progress')" title="চলমান একটিভ চ্যালেঞ্জ দেখতে ক্লিক করুন">
                     <div class="stat-icon" style="background:rgba(46,204,113,0.15); color:var(--neon-green);">
                         <i class="fas fa-play-circle"></i>
                     </div>
@@ -1197,7 +1214,7 @@
                         <div class="stat-label">Active Challenges</div>
                     </div>
                 </div>
-                <div class="stat-card glass">
+                <div class="stat-card glass clickable" onclick="switchAdminTab('users')" title="সকল ট্রেডার অ্যাকাউন্ট দেখতে ক্লিক করুন">
                     <div class="stat-icon" style="background:rgba(52,152,219,0.15); color:var(--neon-blue);">
                         <i class="fas fa-users"></i>
                     </div>
@@ -1206,7 +1223,7 @@
                         <div class="stat-label">Total Traders</div>
                     </div>
                 </div>
-                <div class="stat-card glass">
+                <div class="stat-card glass clickable" onclick="filterChallengesByStatus('approved_success')" title="সাকসেস পেমেন্ট হিস্ট্রি দেখতে ক্লিক করুন">
                     <div class="stat-icon" style="background:rgba(155,89,182,0.15); color:#9b59b6;">
                         <i class="fas fa-file-invoice-dollar"></i>
                     </div>
@@ -1215,22 +1232,13 @@
                         <div class="stat-label">Total Challenge Fees</div>
                     </div>
                 </div>
-                <div class="stat-card glass">
+                <div class="stat-card glass clickable" onclick="viewPendingProofs()" title="ডেইলি ট্রেড প্রুফ অপশনে যান">
                     <div class="stat-icon" style="background:rgba(231,76,60,0.15); color:var(--neon-red);">
                         <i class="fas fa-video"></i>
                     </div>
                     <div>
                         <div class="stat-val" id="statPendingProofs">0</div>
                         <div class="stat-label">Pending Proofs</div>
-                    </div>
-                </div>
-                <div class="stat-card glass">
-                    <div class="stat-icon" style="background:rgba(26,188,156,0.15); color:#1abc9c;">
-                        <i class="fas fa-sheet-plastic"></i>
-                    </div>
-                    <div>
-                        <div class="stat-val" id="statMmLimits">0</div>
-                        <div class="stat-label">Serial MM Links</div>
                     </div>
                 </div>
             </div>
@@ -1304,10 +1312,11 @@
                         </p>
                     </div>
                     <div style="display:flex; gap:10px;">
-                        <select class="form-control" id="challengeStatusFilter" style="width:160px;" onchange="renderChallengesTable()">
-                            <option value="all">All Orders</option>
-                            <option value="pending_approval" selected>Pending Approval</option>
-                            <option value="in_progress">Active / Running</option>
+                        <select class="form-control" id="challengeStatusFilter" style="width:240px;" onchange="renderChallengesTable()">
+                            <option value="all">All Orders (সকল অর্ডার)</option>
+                            <option value="pending_approval" selected>Pending Approval (পেন্ডিং অর্ডার)</option>
+                            <option value="in_progress">Active / Running (অ্যাক্টিভ চ্যালেঞ্জ)</option>
+                            <option value="approved_success">Approved / Paid (সাকসেস পেমেন্ট হিস্ট্রি)</option>
                             <option value="passed">Passed (Funded)</option>
                             <option value="failed">Failed</option>
                             <option value="rejected">Rejected</option>
@@ -1318,6 +1327,7 @@
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th style="width:75px; text-align:center;"># SL</th>
                             <th>Order ID & Date</th>
                             <th>Trader</th>
                             <th>Package & Fee</th>
@@ -1437,6 +1447,7 @@
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th style="width:75px; text-align:center;"># SL</th>
                             <th>Trader ID, Photo & Name</th>
                             <th>Email Status</th>
                             <th>Telegram</th>
@@ -3449,7 +3460,8 @@
             document.getElementById('statTotalUsers').innerText = s.totalUsers;
             document.getElementById('statTotalRevenue').innerText = `$${s.totalRevenue.toLocaleString()}`;
             document.getElementById('statPendingProofs').innerText = s.pendingSubmissions;
-            document.getElementById('statMmLimits').innerText = s.totalMmLinks;
+            const mmStatEl = document.getElementById('statMmLimits');
+            if (mmStatEl) mmStatEl.innerText = s.totalMmLinks;
 
             // Badges in sidebar & mobile bottom bar
             const pChBadge = document.getElementById('pendingChallengesBadge');
@@ -3552,22 +3564,50 @@
             return 'badge-pending';
         }
 
+        // Filter challenges by status and jump to Challenge Orders tab
+        function filterChallengesByStatus(status) {
+            switchAdminTab('challenges');
+            const select = document.getElementById('challengeStatusFilter');
+            if (select) {
+                select.value = status;
+            }
+            renderChallengesTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Jump to Daily Trade Proofs tab and filter by pending review
+        function viewPendingProofs() {
+            switchAdminTab('submissions');
+            const select = document.getElementById('runningTradersFilter');
+            if (select) {
+                select.value = 'pending_review';
+            }
+            renderRunningTradersList();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         // ==================== CHALLENGES MANAGEMENT ====================
         function renderChallengesTable() {
             const filter = document.getElementById('challengeStatusFilter').value;
             const container = document.getElementById('challengesTableBody');
-            let list = adminChallenges;
+            let list = [...(adminChallenges || [])];
 
-            if (filter !== 'all') {
+            if (filter === 'approved_success') {
+                list = list.filter(c => c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled' && (c.approvedAt || c.status === 'in_progress' || c.status === 'passed' || c.status === 'failed'));
+            } else if (filter !== 'all') {
                 list = list.filter(c => c.status === filter);
             }
 
+            // Latest challenge on top (৯.৮.৭.৬...১)
+            list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
             if (list.length === 0) {
-                container.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-secondary);">কোনো রেকর্ড খুঁজে পাওয়া যায়নি।</td></tr>`;
+                container.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:2rem; color:var(--text-secondary);">কোনো রেকর্ড খুঁজে পাওয়া যায়নি।</td></tr>`;
                 return;
             }
 
-            container.innerHTML = list.map(c => {
+            container.innerHTML = list.map((c, idx) => {
+                const sl = list.length - idx; // Serial: 9, 8, 7, 6, 5, 4, 3, 2, 1
                 const date = new Date(c.createdAt).toLocaleDateString();
                 const assignedMm = c.assignedMmSerial ? `
                     <div>
@@ -3580,6 +3620,11 @@
 
                 return `
                     <tr>
+                        <td style="text-align:center;">
+                            <span style="background:rgba(212,175,55,0.18); color:var(--gold); border:1px solid rgba(212,175,55,0.45); padding:3px 9px; border-radius:6px; font-weight:900; font-family:monospace; font-size:0.86rem;">
+                                #${sl}
+                            </span>
+                        </td>
                         <td>
                             <div style="font-weight:700; font-size:0.82rem;">${c.id}</div>
                             <div style="font-size:0.75rem; color:var(--text-secondary);">${date}</div>
@@ -3978,7 +4023,7 @@
         function renderUsersTable() {
             const query = (document.getElementById('userSearchInput').value || '').toLowerCase().trim();
             const container = document.getElementById('usersTableBody');
-            let list = adminUsers;
+            let list = [...(adminUsers || [])];
 
             if (query) {
                 list = list.filter(u => 
@@ -3989,12 +4034,16 @@
                 );
             }
 
+            // Latest registered user on top (৯.৮.৭.৬...১)
+            list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
             if (list.length === 0) {
-                container.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-secondary);">কোনো ট্রেডার একাউন্ট পাওয়া যায়নি।</td></tr>`;
+                container.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:2rem; color:var(--text-secondary);">কোনো ট্রেডার একাউন্ট পাওয়া যায়নি।</td></tr>`;
                 return;
             }
 
-            container.innerHTML = list.map(u => {
+            container.innerHTML = list.map((u, idx) => {
+                const sl = list.length - idx; // Serial: 9, 8, 7, 6, 5, 4, 3, 2, 1
                 const date = new Date(u.createdAt).toLocaleDateString();
                 const isVerified = u.isEmailVerified !== false;
                 const avatarHtml = u.profilePicture 
@@ -4002,6 +4051,11 @@
                     : `<div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg, var(--gold), #f39c12); color:#000; font-weight:800; font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${(u.name || 'T').charAt(0).toUpperCase()}</div>`;
                 return `
                     <tr>
+                        <td style="text-align:center;">
+                            <span style="background:rgba(212,175,55,0.18); color:var(--gold); border:1px solid rgba(212,175,55,0.45); padding:3px 9px; border-radius:6px; font-weight:900; font-family:monospace; font-size:0.86rem;">
+                                #${sl}
+                            </span>
+                        </td>
                         <td>
                             <div style="display:flex; align-items:center; gap:10px;">
                                 ${avatarHtml}

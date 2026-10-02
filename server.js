@@ -3102,7 +3102,14 @@ app.get('/api/admin/stats', authenticateAdminToken, (req, res) => {
   const passedChallenges = challenges.filter(c => c.status === 'passed').length;
   const failedChallenges = challenges.filter(c => c.status === 'failed').length;
   const pendingSubmissions = submissions.filter(s => s.status === 'under_review').length;
-  const totalRevenue = challenges.filter(c => c.status !== 'rejected').reduce((sum, c) => sum + (c.fee || 0), 0);
+  const isApprovedChallenge = (c) => Boolean(
+    c &&
+    c.status !== 'pending_approval' &&
+    c.status !== 'rejected' &&
+    c.status !== 'cancelled' &&
+    (c.approvedAt || c.status === 'in_progress' || c.status === 'passed' || c.status === 'failed')
+  );
+  const totalRevenue = challenges.filter(isApprovedChallenge).reduce((sum, c) => sum + (c.fee || 0), 0);
 
   const enrichedChallenges = challenges.map(c => {
     const user = allUsers.find(u => u.id === c.userId);
@@ -3115,6 +3122,7 @@ app.get('/api/admin/stats', authenticateAdminToken, (req, res) => {
       userAvatar: user ? (user.profilePicture || null) : (c.userAvatar || null)
     };
   });
+  enrichedChallenges.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const enrichedSubmissions = submissions.map(s => {
     const user = allUsers.find(u => u.id === s.userId);
@@ -3174,6 +3182,7 @@ app.get('/api/admin/users', authenticateAdminToken, (req, res) => {
       verificationCode: u.emailVerificationCode || null
     };
   });
+  enrichedUsers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   res.json({ success: true, users: enrichedUsers });
 });
@@ -3503,6 +3512,7 @@ app.get('/api/admin/challenges', authenticateAdminToken, (req, res) => {
       userAvatar: user ? (user.profilePicture || null) : (c.userAvatar || null)
     };
   });
+  enriched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   res.json({ success: true, challenges: enriched });
 });
