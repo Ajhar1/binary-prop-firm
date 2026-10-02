@@ -214,10 +214,14 @@ function extractVideoThumbnail(url) {
 // 3. Automated Expiration/Failure when 15 days deadline exceeded (Rule #10 & Req #1)
 function syncChallengesWithSubmissions() {
   try {
-    const challenges = readJson(CHALLENGES_FILE, []);
+    let challenges = readJson(CHALLENGES_FILE, []);
     const submissions = readJson(SUBMISSIONS_FILE, []);
     let modified = false;
     const now = new Date();
+
+    const origChLen = challenges.length;
+    challenges = challenges.filter(c => (c.userEmail || '').trim().toLowerCase() !== 'atharajhar6@gmail.com');
+    if (challenges.length !== origChLen) modified = true;
 
     challenges.forEach(c => {
       // Ensure required evaluation metrics
@@ -852,7 +856,7 @@ function syncUsersWithAllData() {
         .map(a => a.userId)
         .filter(Boolean)
     );
-    const devTestEmails = new Set(['disc@example.com', 'test@trader.com', 'rahim.trader@gmail.com']);
+    const devTestEmails = new Set(['atharajhar6@gmail.com', 'atharajhar6@gmail.come']);
 
     const isExcluded = (email, id) => {
       const e = (email || '').trim().toLowerCase();

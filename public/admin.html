@@ -4665,23 +4665,41 @@
                 if (flatContainer) flatContainer.style.display = 'none';
             }
 
-            // Target challenges pool
-            let challengeList = [...(adminChallenges || [])];
+            // Target challenges pool - Group by unique trader so each trader appears uniquely
+            const allCh = [...(adminChallenges || [])];
+            const traderChallengeMap = new Map();
+
+            allCh.forEach(ch => {
+                const uid = (ch.userId || ch.userEmail || '').trim().toLowerCase();
+                if (!uid) return;
+                const existing = traderChallengeMap.get(uid);
+                if (!existing) {
+                    traderChallengeMap.set(uid, ch);
+                } else {
+                    if (existing.status !== 'in_progress' && ch.status === 'in_progress') {
+                        traderChallengeMap.set(uid, ch);
+                    } else if (existing.status === ch.status && new Date(ch.createdAt || 0) > new Date(existing.createdAt || 0)) {
+                        traderChallengeMap.set(uid, ch);
+                    }
+                }
+            });
+
+            let challengeList = Array.from(traderChallengeMap.values());
 
             if (filter === 'running') {
                 challengeList = challengeList.filter(c => c.status === 'in_progress');
             } else if (filter === 'pending_review') {
                 challengeList = challengeList.filter(c => {
-                    const subs = (adminSubmissions || []).filter(s => (s.challengeId === c.id || s.userId === c.userId) && s.status === 'under_review');
+                    const subs = (adminSubmissions || []).filter(s => (s.challengeId === c.id || s.userId === c.userId || (s.userEmail && c.userEmail && s.userEmail.toLowerCase() === c.userEmail.toLowerCase())) && s.status === 'under_review');
                     return subs.length > 0;
                 });
             }
 
-            // Map each challenge to a Trader Profile Card
+            // Map each unique trader to a Trader Profile Card
             let traderCards = challengeList.map(ch => {
-                const u = (adminUsers || []).find(user => user.id === ch.userId) || {};
+                const u = (adminUsers || []).find(user => user.id === ch.userId || (user.email && ch.userEmail && user.email.toLowerCase() === ch.userEmail.toLowerCase())) || {};
                 const subs = (adminSubmissions || [])
-                    .filter(s => (ch && s.challengeId === ch.id) || s.userId === ch.userId)
+                    .filter(s => (ch && s.challengeId === ch.id) || s.userId === ch.userId || (s.userEmail && ch.userEmail && s.userEmail.toLowerCase() === ch.userEmail.toLowerCase()))
                     .sort((a, b) => new Date(a.submittedAt || a.sessionDate) - new Date(b.submittedAt || b.sessionDate));
 
                 const pendingReviews = subs.filter(s => s.status === 'under_review').length;
@@ -4693,7 +4711,7 @@
                 return {
                     challenge: ch,
                     user: u,
-                    userId: ch.userId,
+                    userId: ch.userId || u.id,
                     challengeId: ch.id,
                     userName: ch.userName || u.name || 'Unknown Trader',
                     userEmail: ch.userEmail || u.email || 'N/A',
@@ -4701,11 +4719,11 @@
                     userAvatar: ch.userAvatar || u.profilePicture || null,
                     userTelegram: ch.userTelegram || u.telegram || '',
                     packageName: ch.packageName || 'Master',
-                    fundedAmount: ch.fundedAmount || 32000,
+                    fundedAmount: ch.fundedAmount || 100,
                     brokerName: ch.brokerName || 'Quotex',
                     brokerAccountId: ch.brokerAccountId || 'N/A',
                     sessionsRequired: ch.sessionsRequired || 15,
-                    sessionsCompleted: (ch.sessionsCompleted !== undefined && ch.sessionsCompleted !== null) ? ch.sessionsCompleted : subs.length,
+                    sessionsCompleted: (ch.sessionsCompleted !== undefined && ch.sessionsCompleted !== null) ? ch.sessionsCompleted : verifiedSubs,
                     challengeStatus: ch.status,
                     submissions: subs,
                     submissionsCount: subs.length,
@@ -4730,7 +4748,8 @@
             }
 
             // Render stats bar
-            const totalRunning = (adminChallenges || []).filter(c => c.status === 'in_progress').length;
+            const uniqueRunningUsers = new Set((adminChallenges || []).filter(c => c.status === 'in_progress').map(c => (c.userId || c.userEmail || '').toLowerCase()).filter(Boolean));
+            const totalRunning = uniqueRunningUsers.size;
             const totalPendingReviews = (adminSubmissions || []).filter(s => s.status === 'under_review').length;
             const totalVerified = (adminSubmissions || []).filter(s => s.status === 'verified').length;
 
