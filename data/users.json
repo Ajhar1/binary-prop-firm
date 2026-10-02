@@ -14,5 +14,22 @@
     "adminSecurityPin": "254271",
     "traderId": "BPF-1000",
     "profilePicture": null
+  },
+  {
+    "id": "usr_1790479914536_bjtgpe",
+    "name": "MD AJHAR",
+    "email": "atharajhar6@gmail.com",
+    "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+    "telegram": "@BinaryPropFirmSupport",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "92940617",
+    "role": "user",
+    "isEmailVerified": true,
+    "createdAt": "2026-09-27T03:31:54.536Z",
+    "updatedAt": "2026-10-02T10:00:00.000Z",
+    "adminSecurityPin": "254271",
+    "traderId": "AJ-1001",
+    "profilePicture": null
   }
 ]
