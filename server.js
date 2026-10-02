@@ -839,14 +839,37 @@ function syncUsersWithAllData() {
     const challenges = readJson(CHALLENGES_FILE, []);
     const archive = readJson(ARCHIVE_FILE, []);
 
-    let modified = false;
+    // Exclude users explicitly deleted by admin or dummy test scratch emails
+    const deletedEmails = new Set(
+      archive
+        .filter(a => a.action === 'USER_DELETED_BY_ADMIN')
+        .map(a => (a.userEmail || '').trim().toLowerCase())
+        .filter(Boolean)
+    );
+    const deletedIds = new Set(
+      archive
+        .filter(a => a.action === 'USER_DELETED_BY_ADMIN')
+        .map(a => a.userId)
+        .filter(Boolean)
+    );
+    const devTestEmails = new Set(['disc@example.com', 'test@trader.com', 'rahim.trader@gmail.com']);
+
+    const isExcluded = (email, id) => {
+      const e = (email || '').trim().toLowerCase();
+      return devTestEmails.has(e) || (e && deletedEmails.has(e)) || (id && deletedIds.has(id));
+    };
+
+    // Filter out excluded from existing users
+    const initialUserLen = users.length;
+    users = users.filter(u => !isExcluded(u.email, u.id));
+    if (users.length !== initialUserLen) modified = true;
 
     // Helper maps keyed by normalized email, and by userId
     const userByEmail = new Map();
     const userById = new Map();
 
     const registerUser = (u) => {
-      if (!u) return;
+      if (!u || isExcluded(u.email, u.id)) return;
       if (u.email) {
         const normEmail = u.email.trim().toLowerCase();
         if (normEmail && !userByEmail.has(normEmail)) {
@@ -863,6 +886,7 @@ function syncUsersWithAllData() {
 
     // 2. Merge from permanent store
     permUsers.forEach(pu => {
+      if (isExcluded(pu.email, pu.id)) return;
       const normEmail = pu.email ? pu.email.trim().toLowerCase() : '';
       let existing = (normEmail && userByEmail.get(normEmail)) || (pu.id && userById.get(pu.id));
       if (!existing) {
@@ -880,6 +904,7 @@ function syncUsersWithAllData() {
 
     // 3. Scan challenges.json for any buyer missing from users
     challenges.forEach(c => {
+      if (isExcluded(c.userEmail, c.userId)) return;
       const cEmail = c.userEmail ? c.userEmail.trim().toLowerCase() : '';
       const cUserId = c.userId || '';
       let existing = (cEmail && userByEmail.get(cEmail)) || (cUserId && userById.get(cUserId));
@@ -918,6 +943,7 @@ function syncUsersWithAllData() {
 
     // 4. Scan user_archive.json for any registered user
     archive.forEach(arc => {
+      if (isExcluded(arc.userEmail, arc.userId)) return;
       if (arc.action === 'USER_REGISTERED' || arc.action === 'CHALLENGE_PURCHASED') {
         const arcEmail = arc.userEmail ? arc.userEmail.trim().toLowerCase() : '';
         const arcUserId = arc.userId && arc.userId !== 'N/A' ? arc.userId : '';
