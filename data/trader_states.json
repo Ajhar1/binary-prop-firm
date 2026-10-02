@@ -1,18 +1,1 @@
-{
-  "usr_1790479914536_bjtgpe": {
-    "userId": "usr_1790479914536_bjtgpe",
-    "version": 226,
-    "updatedAt": "2026-10-01T19:46:47.576Z",
-    "lastDeviceId": "dev_d4pjvxe_1790884000935",
-    "masState": {
-      "capital": 210,
-      "totalTrades": 16,
-      "winTrades": 6,
-      "quota": 1.85,
-      "stopLossPct": 0.25,
-      "history": []
-    },
-    "pendingProof": null,
-    "activeTab": "course"
-  }
-}
+{}

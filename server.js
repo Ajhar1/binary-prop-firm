@@ -834,53 +834,53 @@ async function ensureAdminUser() {
     let users = readJson(USERS_FILE);
     let changed = false;
 
-    // Filter out invalid test accounts
+    // Filter out test accounts
+    const testEmails = ['atharajhar6@gmail.com', 'atharajhar6@gmail.come'];
+    const testUserIds = users.filter(u => testEmails.includes(u.email.toLowerCase())).map(u => u.id);
+    testUserIds.push('usr_1790479914536_bjtgpe', 'usr_admin_athar');
+
     const initialLen = users.length;
-    users = users.filter(u => u.email.toLowerCase() !== 'atharajhar6@gmail.come');
+    users = users.filter(u => !testEmails.includes(u.email.toLowerCase()) && !testUserIds.includes(u.id));
     if (users.length !== initialLen) changed = true;
+
+    // Clean up test account data from challenges, submissions, support, trader_states, user_archive
+    try {
+      let challenges = readJson(CHALLENGES_FILE);
+      const chLen = challenges.length;
+      challenges = challenges.filter(c => !testUserIds.includes(c.userId));
+      if (challenges.length !== chLen) writeJson(CHALLENGES_FILE, challenges);
+
+      let submissions = readJson(SUBMISSIONS_FILE);
+      const subLen = submissions.length;
+      submissions = submissions.filter(s => !testUserIds.includes(s.userId));
+      if (submissions.length !== subLen) writeJson(SUBMISSIONS_FILE, submissions);
+
+      let tickets = readJson(SUPPORT_FILE);
+      const tktLen = tickets.length;
+      tickets = tickets.filter(t => !testUserIds.includes(t.userId) && !testEmails.includes((t.userEmail || '').toLowerCase()));
+      if (tickets.length !== tktLen) writeJson(SUPPORT_FILE, tickets);
+
+      let states = readJson(TRADER_STATES_FILE);
+      let statesChanged = false;
+      testUserIds.forEach(id => {
+        if (states[id]) {
+          delete states[id];
+          statesChanged = true;
+        }
+      });
+      if (statesChanged) writeJson(TRADER_STATES_FILE, states);
+
+      let archive = readJson(ARCHIVE_FILE);
+      const archLen = archive.length;
+      archive = archive.filter(a => !testUserIds.includes(a.userId) && !testEmails.includes((a.userEmail || '').toLowerCase()));
+      if (archive.length !== archLen) writeJson(ARCHIVE_FILE, archive);
+    } catch (cleanErr) {
+      console.warn('Test data cleanup notice:', cleanErr.message);
+    }
 
     // Default target admin password hash for Ajhar1@2#3$
     const salt = await bcrypt.genSalt(10);
     const targetPasswordHash = await bcrypt.hash('Ajhar1@2#3$', salt);
-
-    // Primary Admin: atharajhar6@gmail.com
-    let athar = users.find(u => u.email.toLowerCase() === 'atharajhar6@gmail.com');
-    if (athar) {
-      if (athar.role !== 'admin') {
-        athar.role = 'admin';
-        changed = true;
-      }
-      if (!athar.isEmailVerified) {
-        athar.isEmailVerified = true;
-        changed = true;
-      }
-      athar.adminSecurityPin = '254271';
-      athar.traderId = athar.traderId || 'AJ-1001';
-      changed = true;
-      const match = await bcrypt.compare('Ajhar1@2#3$', athar.password);
-      if (!match) {
-        athar.password = targetPasswordHash;
-        changed = true;
-      }
-    } else {
-      users.unshift({
-        id: 'usr_admin_athar',
-        traderId: 'AJ-1001',
-        name: 'MD AJHAR',
-        email: 'atharajhar6@gmail.com',
-        password: targetPasswordHash,
-        role: 'admin',
-        telegram: '@MDAJHAR1',
-        preferredBroker: 'quotex',
-        payoutWallet: '',
-        brokerAccountId: '',
-        profilePicture: null,
-        isEmailVerified: true,
-        adminSecurityPin: '254271',
-        createdAt: new Date().toISOString()
-      });
-      changed = true;
-    }
 
     // Default backup admin account: admin@binarypropfirm.com
     const masterAdmin = users.find(u => u.email.toLowerCase() === 'admin@binarypropfirm.com' || u.email.toLowerCase() === 'admin@ajfunded.com');
@@ -918,7 +918,7 @@ async function ensureAdminUser() {
         changed = true;
       }
       masterAdmin.adminSecurityPin = '254271';
-      masterAdmin.traderId = masterAdmin.traderId || 'AJ-1000';
+      masterAdmin.traderId = masterAdmin.traderId || 'BPF-1000';
       changed = true;
     }
 
