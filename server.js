@@ -647,7 +647,7 @@ function buildProfessionalEmailHtml({ headline, title, userName, messageText, co
                 <tr>
                   <td align="center" style="color: #8fa0b5; font-size: 12.5px; line-height: 1.6;">
                     Need official assistance? Reach our support desk:<br/>
-                    <a href="https://t.me/binarypropfirm_support" style="color: #00bcd4; text-decoration: none; font-weight: 700; margin-right: 14px;">💬 Telegram Support (@binarypropfirm_support)</a>
+                    <a href="https://t.me/BinaryPropFirmSupport" style="color: #00bcd4; text-decoration: none; font-weight: 700; margin-right: 14px;">💬 Telegram Support (@BinaryPropFirmSupport)</a>
                     <a href="mailto:support@binarypropfirm.com" style="color: #f5b041; text-decoration: none; font-weight: 700;">✉️ support@binarypropfirm.com</a>
                   </td>
                 </tr>
