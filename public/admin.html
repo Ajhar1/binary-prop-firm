@@ -367,6 +367,74 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
+        /* Enhanced Challenge Orders & Approvals Table */
+        .challenge-orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.86rem;
+            text-align: left;
+        }
+        .challenge-orders-table th {
+            padding: 13px 12px;
+            color: #94a3b8;
+            font-weight: 800;
+            background: rgba(13, 22, 38, 0.95);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            text-transform: uppercase;
+            font-size: 0.74rem;
+            letter-spacing: 0.7px;
+            white-space: nowrap;
+        }
+        .challenge-orders-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+            color: #e2e8f0;
+        }
+        .challenge-orders-table tr:hover td {
+            background: rgba(212, 175, 55, 0.04) !important;
+        }
+        .challenge-filter-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .challenge-filter-pill:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        .challenge-filter-pill.active {
+            color: #000 !important;
+            background: linear-gradient(135deg, var(--gold), #f39c12) !important;
+            border-color: var(--gold) !important;
+            box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+        }
+        .challenge-filter-pill .pill-count {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 1px 7px;
+            border-radius: 12px;
+            font-size: 0.74rem;
+            font-weight: 800;
+            font-family: monospace;
+        }
+        .challenge-filter-pill.active .pill-count {
+            background: rgba(0, 0, 0, 0.2);
+            color: #000;
+        }
+
         /* Badges */
         .badge {
             display: inline-flex;
@@ -1303,45 +1371,70 @@
 
         <!-- ==================== TAB 2: CHALLENGE ORDERS / APPROVALS ==================== -->
         <div class="tab-content" id="pane-challenges">
-            <div class="table-card glass">
-                <div class="table-card-header">
+            <div class="table-card glass" style="border:1px solid rgba(255, 255, 255, 0.08); border-radius:18px; box-shadow:0 15px 35px rgba(0,0,0,0.4); padding:1.5rem;">
+                
+                <!-- Header with Title, Live Badge, and Search/Filters -->
+                <div class="table-card-header" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; margin-bottom:1.25rem; padding-bottom:1.25rem; border-bottom:1px solid rgba(255,255,255,0.06);">
                     <div>
-                        <div class="table-title"><i class="fas fa-shopping-cart" style="color:var(--gold);"></i> Challenge Orders & Approvals</div>
-                        <p style="color:var(--text-secondary); font-size:0.85rem; margin-top:3px;">
+                        <div class="table-title" style="font-size:1.3rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:12px;">
+                            <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.06)); border:1px solid var(--gold); display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:1.15rem; flex-shrink:0; box-shadow:0 0 15px rgba(212,175,55,0.2);">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div>
+                                <span>Challenge Orders & Approvals (চ্যালেঞ্জ অর্ডার ও অনুমোদন)</span>
+                            </div>
+                        </div>
+                        <p style="color:var(--text-secondary); font-size:0.86rem; margin:6px 0 0 54px; line-height:1.4;">
                             এখানে অনুমোদন (Approve) করলে স্বয়ংক্রিয়ভাবে সিরিয়াল অনুযায়ী মানি ম্যানেজমেন্ট শিট লিংক যুক্ত হয়ে ইউজারের ড্যাশবোর্ডে চ্যালেঞ্জ রানিং হবে।
                         </p>
                     </div>
-                    <div style="display:flex; gap:10px;">
-                        <select class="form-control" id="challengeStatusFilter" style="width:240px;" onchange="renderChallengesTable()">
-                            <option value="all">All Orders (সকল অর্ডার)</option>
-                            <option value="pending_approval" selected>Pending Approval (পেন্ডিং অর্ডার)</option>
-                            <option value="in_progress">Active / Running (অ্যাক্টিভ চ্যালেঞ্জ)</option>
-                            <option value="approved_success">Approved / Paid (সাকসেস পেমেন্ট হিস্ট্রি)</option>
-                            <option value="passed">Passed (Funded)</option>
-                            <option value="failed">Failed</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
+
+                    <!-- Search & Filter Controls -->
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <div style="position:relative; min-width:240px; flex:1;">
+                            <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-secondary); font-size:0.85rem;"></i>
+                            <input type="text" class="form-control" id="challengeSearchInput" placeholder="🔍 ট্রেডার নাম, আইডি, ইমেইল বা TxID খুঁজুন..." style="padding-left:34px; width:100%; border-radius:10px; height:40px; font-size:0.85rem;" oninput="renderChallengesTable()" />
+                        </div>
+                        <div style="min-width:280px;">
+                            <select class="form-control" id="challengeStatusFilter" style="width:100%; border-radius:10px; font-weight:600; height:40px; font-size:0.85rem;" onchange="renderChallengesTable()">
+                                <option value="all">📦 All Orders (সকল অর্ডার)</option>
+                                <option value="pending_approval" selected>⏳ Pending Approval (পেন্ডিং অর্ডার)</option>
+                                <option value="in_progress">🟢 Active / Running (অ্যাক্টিভ চ্যালেঞ্জ)</option>
+                                <option value="approved_success">💰 Approved / Paid (সাকসেস পেমেন্ট হিস্ট্রি)</option>
+                                <option value="passed">🏆 Passed (Funded Trader)</option>
+                                <option value="failed">🔴 Failed / Disqualified</option>
+                                <option value="rejected">❌ Rejected (বাতিলকৃত)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th style="width:75px; text-align:center;"># SL</th>
-                            <th>Order ID & Date</th>
-                            <th>Trader</th>
-                            <th>Package & Fee</th>
-                            <th>Broker & Demo ID</th>
-                            <th>Payment Info</th>
-                            <th>Assigned MM Sheet</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="challengesTableBody">
-                        <!-- Injected -->
-                    </tbody>
-                </table>
+                <!-- Quick Filter Tabs Bar (Pills with Live Counts) -->
+                <div id="challengeFilterPillsBar" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:1.3rem; padding:8px 10px; background:rgba(0,0,0,0.3); border-radius:12px; border:1px solid rgba(255,255,255,0.06); align-items:center;">
+                    <!-- Injected dynamically in renderChallengesTable() -->
+                </div>
+
+                <!-- Responsive Table Wrapper -->
+                <div style="overflow-x:auto; border-radius:14px; border:1px solid rgba(255,255,255,0.07); background:rgba(10, 16, 28, 0.7); box-shadow:inset 0 2px 10px rgba(0,0,0,0.3);">
+                    <table class="challenge-orders-table">
+                        <thead>
+                            <tr>
+                                <th style="width:65px; text-align:center;"># SL</th>
+                                <th style="min-width:140px;">Order ID & Date</th>
+                                <th style="min-width:180px;">Trader Profile</th>
+                                <th style="min-width:150px;">Package & Fee</th>
+                                <th style="min-width:130px;">Broker & Demo ID</th>
+                                <th style="min-width:165px;">Payment Info</th>
+                                <th style="min-width:125px;">MM Sheet</th>
+                                <th style="min-width:160px;">Status & Progress</th>
+                                <th style="min-width:180px; text-align:center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="challengesTableBody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -3564,6 +3657,56 @@
             return 'badge-pending';
         }
 
+        // Copy to clipboard helper
+        function copyText(text, successMsg = 'কপি হয়েছে!') {
+            if (!text) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(successMsg, 'success');
+                }).catch(() => {
+                    fallbackCopyText(text, successMsg);
+                });
+            } else {
+                fallbackCopyText(text, successMsg);
+            }
+        }
+        function fallbackCopyText(text, successMsg) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast(successMsg, 'success');
+            } catch (e) {
+                showToast('Failed to copy', 'error');
+            }
+            document.body.removeChild(ta);
+        }
+
+        // Format Order Date and Time nicely
+        function formatOrderDateTime(isoString) {
+            if (!isoString) return 'N/A';
+            try {
+                const d = new Date(isoString);
+                if (isNaN(d.getTime())) return isoString;
+                const day = String(d.getDate()).padStart(2, '0');
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const month = months[d.getMonth()];
+                const year = d.getFullYear();
+                let hours = d.getHours();
+                const minutes = String(d.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
+            } catch(e) {
+                return isoString;
+            }
+        }
+
         // Filter challenges by status and jump to Challenge Orders tab
         function filterChallengesByStatus(status) {
             switchAdminTab('challenges');
@@ -3588,141 +3731,365 @@
 
         // ==================== CHALLENGES MANAGEMENT ====================
         function renderChallengesTable() {
-            const filter = document.getElementById('challengeStatusFilter').value;
+            const filterSelect = document.getElementById('challengeStatusFilter');
+            const filter = filterSelect ? filterSelect.value : 'all';
+            const searchInput = document.getElementById('challengeSearchInput');
+            const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
             const container = document.getElementById('challengesTableBody');
-            let list = [...(adminChallenges || [])];
+            const pillsBar = document.getElementById('challengeFilterPillsBar');
 
+            let allChallengesList = [...(adminChallenges || [])];
+
+            // Render Quick Filter Tabs Bar (Pills with Live Counts)
+            if (pillsBar) {
+                const pendingCount = allChallengesList.filter(c => c.status === 'pending_approval').length;
+                const activeCount = allChallengesList.filter(c => c.status === 'in_progress').length;
+                const paidCount = allChallengesList.filter(c => c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled' && (c.approvedAt || c.status === 'in_progress' || c.status === 'passed' || c.status === 'failed')).length;
+                const passedCount = allChallengesList.filter(c => c.status === 'passed').length;
+                const failedCount = allChallengesList.filter(c => c.status === 'failed').length;
+                const rejectedCount = allChallengesList.filter(c => c.status === 'rejected').length;
+
+                const pillsData = [
+                    { key: 'all', label: 'সকল অর্ডার', count: allChallengesList.length, icon: 'fa-boxes' },
+                    { key: 'pending_approval', label: 'পেন্ডিং অর্ডার', count: pendingCount, icon: 'fa-clock', color: '#f5b041' },
+                    { key: 'in_progress', label: 'অ্যাক্টিভ চ্যালেঞ্জ', count: activeCount, icon: 'fa-play-circle', color: '#2ecc71' },
+                    { key: 'approved_success', label: 'সাকসেস পেমেন্ট', count: paidCount, icon: 'fa-file-invoice-dollar', color: '#a855f7' },
+                    { key: 'passed', label: 'পাসড (Funded)', count: passedCount, icon: 'fa-trophy', color: '#3b82f6' },
+                    { key: 'failed', label: 'বাদ / ফেইল্ড', count: failedCount, icon: 'fa-ban', color: '#ef4444' },
+                    { key: 'rejected', label: 'বাতিলকৃত', count: rejectedCount, icon: 'fa-times-circle', color: '#94a3b8' }
+                ];
+
+                pillsBar.innerHTML = pillsData.map(p => {
+                    const isActive = (filter === p.key);
+                    return `
+                        <div class="challenge-filter-pill ${isActive ? 'active' : ''}" onclick="filterChallengesByStatus('${p.key}')">
+                            <i class="fas ${p.icon}" style="${!isActive && p.color ? `color:${p.color};` : ''}"></i>
+                            <span>${p.label}</span>
+                            <span class="pill-count">${p.count}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            let list = allChallengesList;
+
+            // Apply Status Filter
             if (filter === 'approved_success') {
                 list = list.filter(c => c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled' && (c.approvedAt || c.status === 'in_progress' || c.status === 'passed' || c.status === 'failed'));
             } else if (filter !== 'all') {
                 list = list.filter(c => c.status === filter);
             }
 
+            // Apply Search Query Filter
+            if (query) {
+                list = list.filter(c => 
+                    (c.id && c.id.toLowerCase().includes(query)) ||
+                    (c.userName && c.userName.toLowerCase().includes(query)) ||
+                    (c.userEmail && c.userEmail.toLowerCase().includes(query)) ||
+                    (c.userTraderId && c.userTraderId.toLowerCase().includes(query)) ||
+                    (c.paymentTxId && c.paymentTxId.toLowerCase().includes(query)) ||
+                    (c.brokerAccountId && c.brokerAccountId.toLowerCase().includes(query)) ||
+                    (c.senderNumber && c.senderNumber.includes(query)) ||
+                    (c.packageName && c.packageName.toLowerCase().includes(query)) ||
+                    (c.brokerName && c.brokerName.toLowerCase().includes(query))
+                );
+            }
+
             // Latest challenge on top (৯.৮.৭.৬...১)
             list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+            if (!container) return;
+
             if (list.length === 0) {
-                container.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:2rem; color:var(--text-secondary);">কোনো রেকর্ড খুঁজে পাওয়া যায়নি।</td></tr>`;
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align:center; padding:3rem 2rem; color:var(--text-secondary);">
+                            <div style="width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; margin:0 auto 12px auto; color:var(--gold); font-size:1.5rem;">
+                                <i class="fas fa-folder-open"></i>
+                            </div>
+                            <div style="font-weight:700; font-size:1rem; color:#fff;">কোনো চ্যালেঞ্জ অর্ডার খুঁজে পাওয়া যায়নি</div>
+                            <div style="font-size:0.84rem; color:var(--text-secondary); margin-top:4px;">আপনার নির্বাচিত ফিল্টার বা সার্চ দিয়ে কোনো রেকর্ড পাওয়া যায়নি।</div>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
 
             container.innerHTML = list.map((c, idx) => {
                 const sl = list.length - idx; // Serial: 9, 8, 7, 6, 5, 4, 3, 2, 1
-                const date = new Date(c.createdAt).toLocaleDateString();
-                const assignedMm = c.assignedMmSerial ? `
-                    <div>
-                        <span class="badge badge-active">Serial #${c.assignedMmSerial}</span>
-                        <a href="${c.assignedMmUrl}" target="_blank" style="color:var(--gold); font-size:0.8rem; display:block; margin-top:2px;">
-                            <i class="fas fa-external-link-alt"></i> Open Sheet
-                        </a>
-                    </div>
-                ` : `<span style="color:var(--text-secondary); font-size:0.8rem;">(Not Assigned Yet)</span>`;
+                const formattedDateTime = formatOrderDateTime(c.createdAt);
+                
+                // Assigned MM Sheet
+                const assignedMmHtml = c.assignedMmSerial ? `
+                    <a href="${c.assignedMmUrl || '#'}" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background:rgba(46,204,113,0.12); border:1px solid rgba(46,204,113,0.35); padding:6px 10px; border-radius:8px; color:#2ecc71; font-weight:800; font-size:0.8rem; transition:all 0.2s; white-space:nowrap;" onmouseover="this.style.background='rgba(46,204,113,0.22)'" onmouseout="this.style.background='rgba(46,204,113,0.12)'" title="গুগল শিট নতুন ট্যাবে ওপেন করুন">
+                        <i class="fas fa-file-excel" style="font-size:0.85rem;"></i>
+                        <span>শিট #${c.assignedMmSerial}</span>
+                        <i class="fas fa-external-link-alt" style="font-size:0.65rem; opacity:0.8;"></i>
+                    </a>
+                ` : `
+                    <span style="display:inline-flex; align-items:center; gap:5px; color:#64748b; font-size:0.75rem; background:rgba(255,255,255,0.03); border:1px dashed rgba(255,255,255,0.14); padding:4px 9px; border-radius:6px; white-space:nowrap;">
+                        <i class="fas fa-hourglass-start" style="font-size:0.7rem;"></i> যুক্ত হয়নি
+                    </span>
+                `;
+
+                // Payment Info Styling
+                const paymentMethodName = c.paymentMethod || 'Manual Payment';
+                const isBkash = paymentMethodName.toLowerCase().includes('bkash');
+                const isBinance = paymentMethodName.toLowerCase().includes('binance');
+                const isUsdt = paymentMethodName.toLowerCase().includes('usdt');
+
+                const paymentIcon = isBkash ? 'fa-mobile-alt' : (isBinance ? 'fa-coins' : (isUsdt ? 'fa-dollar-sign' : 'fa-wallet'));
+                const paymentColor = isBkash ? '#ec4899' : (isBinance ? '#f59e0b' : (isUsdt ? '#10b981' : '#38bdf8'));
+
+                // Status Badge Helper
+                let statusBadgeClass = 'badge-pending';
+                let statusText = 'পেন্ডিং অনুমোদন';
+                let statusDotColor = '#f59e0b';
+
+                if (c.status === 'in_progress') {
+                    statusBadgeClass = 'badge-active';
+                    statusText = 'রানিং / একটিভ';
+                    statusDotColor = '#10b981';
+                } else if (c.status === 'passed') {
+                    statusBadgeClass = 'badge-passed';
+                    statusText = 'পাসড (Funded)';
+                    statusDotColor = '#3b82f6';
+                } else if (c.status === 'failed') {
+                    statusBadgeClass = 'badge-rejected';
+                    statusText = 'বাদ / ফেইল্ড';
+                    statusDotColor = '#ef4444';
+                } else if (c.status === 'rejected') {
+                    statusBadgeClass = 'badge-rejected';
+                    statusText = 'বাতিলকৃত';
+                    statusDotColor = '#ef4444';
+                }
 
                 return `
-                    <tr>
-                        <td style="text-align:center;">
-                            <span style="background:rgba(212,175,55,0.18); color:var(--gold); border:1px solid rgba(212,175,55,0.45); padding:3px 9px; border-radius:6px; font-weight:900; font-family:monospace; font-size:0.86rem;">
+                    <tr style="transition:background 0.2s ease;">
+                        <!-- 1. Serial # -->
+                        <td style="text-align:center; vertical-align:middle;">
+                            <span style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg, rgba(212,175,55,0.22), rgba(212,175,55,0.06)); color:var(--gold); border:1px solid rgba(212,175,55,0.4); font-weight:900; font-family:monospace; font-size:0.92rem; box-shadow:0 2px 6px rgba(0,0,0,0.3);">
                                 #${sl}
                             </span>
                         </td>
-                        <td>
-                            <div style="font-weight:700; font-size:0.82rem;">${c.id}</div>
-                            <div style="font-size:0.75rem; color:var(--text-secondary);">${date}</div>
-                        </td>
-                        <td>
-                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-                                <span style="background:rgba(212,175,55,0.18); color:var(--gold); border:1px solid rgba(212,175,55,0.45); padding:2px 7px; border-radius:5px; font-weight:900; font-family:monospace; font-size:0.76rem; letter-spacing:0.5px;">
-                                    <i class="fas fa-id-badge" style="font-size:0.7rem; margin-right:3px;"></i>${c.userTraderId || 'AJ-1000'}
+
+                        <!-- 2. Order ID & Date -->
+                        <td style="vertical-align:middle; min-width:140px;">
+                            <div style="display:flex; align-items:center; gap:5px;">
+                                <span style="cursor:pointer; display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); padding:3px 8px; border-radius:6px; font-family:monospace; font-size:0.78rem; color:#cbd5e1; white-space:nowrap;" onclick="copyText('${c.id}', 'অর্ডার ID কপি হয়েছে!')" title="ক্লিক করে পুরো অর্ডার ID কপি করুন: ${c.id}">
+                                    <i class="fas fa-receipt" style="color:var(--gold); font-size:0.72rem;"></i>
+                                    <strong>#${c.id.slice(-6)}</strong>
+                                    <i class="far fa-copy" style="opacity:0.6; font-size:0.68rem;"></i>
                                 </span>
-                                <strong style="color:#fff; font-size:0.92rem;">${c.userName || 'Trader'}</strong>
                             </div>
-                            <div style="font-size:0.78rem; color:#cbd5e1; display:flex; align-items:center; gap:5px; margin-top:2px;">
-                                <i class="fas fa-envelope" style="color:var(--text-secondary); font-size:0.72rem;"></i>
-                                <span>${c.userEmail || 'N/A'}</span>
+                            <div style="font-size:0.75rem; color:#94a3b8; margin-top:5px; display:flex; align-items:center; gap:4px; white-space:nowrap;">
+                                <i class="far fa-clock" style="font-size:0.7rem; color:rgba(212,175,55,0.7);"></i>
+                                <span>${formattedDateTime}</span>
                             </div>
-                            ${c.userTelegram && c.userTelegram !== 'N/A' ? `
-                                <div style="font-size:0.76rem; color:#60a5fa; display:flex; align-items:center; gap:5px; margin-top:3px;">
-                                    <i class="fab fa-telegram-plane" style="font-size:0.75rem;"></i>
-                                    <span>${c.userTelegram}</span>
+                        </td>
+
+                        <!-- 3. Trader Profile -->
+                        <td style="vertical-align:middle; min-width:180px;">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:nowrap;">
+                                    <span style="display:inline-flex !important; align-items:center; gap:3px; background:linear-gradient(135deg, rgba(212,175,55,0.22), rgba(212,175,55,0.08)); color:var(--gold); border:1px solid rgba(212,175,55,0.5); padding:2px 7px; border-radius:6px; font-weight:900; font-family:monospace; font-size:0.78rem; letter-spacing:0.5px; white-space:nowrap !important; flex-shrink:0;">
+                                        <i class="fas fa-id-badge" style="font-size:0.7rem;"></i>${c.userTraderId || 'AJ-1000'}
+                                    </span>
+                                    <strong style="color:#ffffff; font-size:0.92rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${c.userName || 'Trader'}">
+                                        ${c.userName || 'Trader'}
+                                    </strong>
                                 </div>
-                            ` : ''}
-                        </td>
-                        <td>
-                            <div style="font-weight:800; color:#fff;">${c.packageName}</div>
-                            <div style="font-size:0.8rem; color:var(--gold);">$${c.fundedAmount.toLocaleString()} Capital • Fee: $${c.fee} ${c.localAmount && c.currency && c.currency !== 'USD' ? `<span style="color:var(--neon-green); font-weight:700;">(${c.currencySymbol || ''}${Math.round(c.localAmount).toLocaleString()} ${c.currency})</span>` : ''}</div>
-                        </td>
-                        <td>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <img src="${c.brokerIcon || '/assets/brokers/quotex.png'}" style="width:20px; height:20px; border-radius:4px; object-fit:contain;">
-                                <strong>${c.brokerName}</strong>
-                            </div>
-                            <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">ID: <code>${c.brokerAccountId || 'Demo'}</code></div>
-                        </td>
-                        <td>
-                            <div style="font-size:0.85rem;"><strong>${c.paymentMethod || 'USDT TRC20'}</strong></div>
-                            ${c.senderNumber ? `<div style="font-size:0.78rem; color:var(--neon-green); margin-top:3px;"><i class="fas fa-phone-alt"></i> প্রেরক: <strong style="color:#fff;">${c.senderNumber}</strong></div>` : ''}
-                            ${c.paymentTxId ? `<div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">TX: <code>${c.paymentTxId}</code></div>` : ''}
-                        </td>
-                        <td>${assignedMm}</td>
-                        <td>
-                            <span class="badge ${getStatusBadgeClass(c.status)}">${c.status.replace('_', ' ').toUpperCase()}</span>
-                            ${c.status === 'in_progress' ? `
-                                <div style="margin-top:4px;">
-                                    ${c.challengePhase === 'practice' ? `
-                                        <span class="badge" style="background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.5); font-size:0.75rem;">
-                                            <i class="fas fa-graduation-cap"></i> প্র্যাকটিস (${c.practiceSessionsCompleted || 0}/3)
-                                        </span>
-                                    ` : `
-                                        <span class="badge" style="background:rgba(245,176,65,0.2); color:var(--gold); border:1px solid rgba(245,176,65,0.5); font-size:0.75rem;">
-                                            ⚡ মূল মূল্যায়ন (${c.sessionsCompleted || 0}/15)
-                                        </span>
-                                    `}
+                                <div style="font-size:0.78rem; color:#94a3b8; display:flex; align-items:center; gap:5px; white-space:nowrap;">
+                                    <i class="far fa-envelope" style="color:var(--text-secondary); font-size:0.72rem; flex-shrink:0;"></i>
+                                    <span title="${c.userEmail || ''}">${c.userEmail || 'N/A'}</span>
                                 </div>
-                            ` : ''}
-                            ${c.status === 'passed' ? `<div style="font-size:0.75rem; color:var(--neon-green); font-weight:800; margin-top:3px;"><i class="fas fa-trophy"></i> PASSED (১৫/১৫ সম্পন্ন)</div>` : ''}
-                            ${c.status === 'failed' ? `<div style="font-size:0.75rem; color:#f87171; font-weight:700; margin-top:3px;"><i class="fas fa-ban"></i> FAILED (${c.failReason || 'Disqualified'})<br><span style="font-size:0.7rem; color:var(--text-secondary);">${c.violatedRule || c.failReasonText || ''}</span></div>` : ''}
-                            ${c.status === 'rejected' && c.rejectedReason ? `<div style="font-size:0.75rem; color:#f87171; margin-top:3px; max-width:210px; line-height:1.4;"><i class="fas fa-times-circle"></i> <strong>রিজেক্ট কারণ:</strong> ${c.rejectedReason}</div>` : ''}
-                            <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:3px;">${c.sessionsCompleted || 0} / ${c.sessionsRequired || 15} Sessions</div>
-                        </td>
-                        <td>
-                            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                ${c.status === 'pending_approval' ? `
-                                    <button class="btn-success" onclick="openApproveChallengeModal('${c.id}')">
-                                        <i class="fas fa-check"></i> Approve
-                                    </button>
-                                    <button class="btn-danger" onclick="openRejectChallengeModal('${c.id}')">
-                                        <i class="fas fa-ban"></i> Reject
-                                    </button>
+                                ${c.userTelegram && c.userTelegram !== 'N/A' ? `
+                                    <div style="font-size:0.76rem; color:#60a5fa; display:flex; align-items:center; gap:5px; white-space:nowrap;">
+                                        <i class="fab fa-telegram-plane" style="font-size:0.74rem; flex-shrink:0;"></i>
+                                        <span>${c.userTelegram}</span>
+                                    </div>
                                 ` : ''}
+                            </div>
+                        </td>
+
+                        <!-- 4. Package & Fee -->
+                        <td style="vertical-align:middle; min-width:145px;">
+                            <div style="display:flex; flex-direction:column; gap:3px;">
+                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:nowrap;">
+                                    <span style="font-weight:900; font-size:0.95rem; color:#fff;">${c.packageName}</span>
+                                    <span style="background:rgba(212,175,55,0.15); color:var(--gold); border:1px solid rgba(212,175,55,0.35); padding:1px 6px; border-radius:5px; font-size:0.72rem; font-weight:800; font-family:monospace; white-space:nowrap;">
+                                        $${c.fundedAmount ? c.fundedAmount.toLocaleString() : '100'} Capital
+                                    </span>
+                                </div>
+                                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px;">
+                                    ফি: <strong style="color:var(--gold); font-size:0.88rem;">$${c.fee}</strong>
+                                    ${c.localAmount && c.currency && c.currency !== 'USD' ? `
+                                        <span style="display:inline-block; background:rgba(46,204,113,0.14); color:#2ecc71; border:1px solid rgba(46,204,113,0.3); padding:1px 6px; border-radius:4px; font-weight:700; font-size:0.74rem; margin-left:3px; white-space:nowrap;">
+                                            ${c.currencySymbol || ''}${Math.round(c.localAmount).toLocaleString()} ${c.currency}
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- 5. Broker & Demo ID -->
+                        <td style="vertical-align:middle; min-width:130px;">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <img src="${c.brokerIcon || '/assets/brokers/quotex.png'}" style="width:20px; height:20px; border-radius:4px; object-fit:contain; background:rgba(255,255,255,0.06); padding:2px; border:1px solid rgba(255,255,255,0.1);" />
+                                    <strong style="color:#fff; font-size:0.88rem;">${c.brokerName || 'Quotex'}</strong>
+                                </div>
+                                <div style="display:inline-flex; align-items:center; gap:5px; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); padding:3px 7px; border-radius:5px; font-family:monospace; font-size:0.78rem; color:#cbd5e1; width:fit-content; cursor:pointer;" onclick="copyText('${c.brokerAccountId || 'Demo'}', 'ব্রোকার একাউন্ট ID কপি হয়েছে!')" title="ক্লিক করে একাউন্ট ID কপি করুন">
+                                    <span style="color:var(--text-secondary); font-size:0.7rem;">ID:</span>
+                                    <strong style="color:var(--gold); letter-spacing:0.5px;">${c.brokerAccountId || 'Demo'}</strong>
+                                    <i class="far fa-copy" style="font-size:0.68rem; opacity:0.6;"></i>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- 6. Payment Info -->
+                        <td style="vertical-align:middle; min-width:165px;">
+                            <div style="display:flex; flex-direction:column; gap:3px;">
+                                <div style="display:inline-flex; align-items:center; gap:5px; font-weight:800; font-size:0.82rem; color:#fff;">
+                                    <i class="fas ${paymentIcon}" style="color:${paymentColor}; font-size:0.8rem;"></i>
+                                    <span>${paymentMethodName}</span>
+                                </div>
+                                ${c.senderNumber ? `
+                                    <div style="font-size:0.76rem; color:#2ecc71; display:flex; align-items:center; gap:4px; margin-top:1px;">
+                                        <i class="fas fa-phone-alt" style="font-size:0.68rem;"></i>
+                                        <span>প্রেরক: <strong style="color:#fff; font-family:monospace; cursor:pointer;" onclick="copyText('${c.senderNumber}', 'প্রেরক নম্বর কপি হয়েছে!')" title="কপি করুন">${c.senderNumber}</strong></span>
+                                    </div>
+                                ` : ''}
+                                ${c.paymentTxId ? `
+                                    <div style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); padding:2px 7px; border-radius:5px; font-family:monospace; font-size:0.74rem; color:#94a3b8; margin-top:2px; width:fit-content; cursor:pointer;" onclick="copyText('${c.paymentTxId}', 'TxID কপি হয়েছে!')" title="ক্লিক করে পুরো TxID কপি করুন: ${c.paymentTxId}">
+                                        <span style="color:var(--text-secondary); font-size:0.68rem;">TX:</span>
+                                        <strong style="color:#e2e8f0;">${c.paymentTxId.length > 15 ? c.paymentTxId.slice(0, 6) + '..' + c.paymentTxId.slice(-5) : c.paymentTxId}</strong>
+                                        <i class="far fa-copy" style="font-size:0.65rem; opacity:0.6;"></i>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </td>
+
+                        <!-- 7. Assigned MM Sheet -->
+                        <td style="vertical-align:middle; min-width:125px;">
+                            ${assignedMmHtml}
+                        </td>
+
+                        <!-- 8. Status & Progress -->
+                        <td style="vertical-align:middle; min-width:160px;">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <div>
+                                    <span class="badge ${statusBadgeClass}" style="font-size:0.76rem; padding:3px 9px; font-weight:800; letter-spacing:0.5px;">
+                                        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${statusDotColor}; margin-right:3px;"></span>
+                                        ${statusText}
+                                    </span>
+                                </div>
 
                                 ${c.status === 'in_progress' ? `
+                                    <div style="margin-top:2px;">
+                                        ${c.challengePhase === 'practice' ? `
+                                            <span class="badge" style="background:rgba(59,130,246,0.16); color:#60a5fa; border:1px solid rgba(59,130,246,0.4); font-size:0.73rem; padding:2px 7px; font-weight:700;">
+                                                <i class="fas fa-graduation-cap"></i> প্র্যাকটিস (${c.practiceSessionsCompleted || 0}/3)
+                                            </span>
+                                        ` : `
+                                            <span class="badge" style="background:rgba(212,175,55,0.16); color:var(--gold); border:1px solid rgba(212,175,55,0.4); font-size:0.73rem; padding:2px 7px; font-weight:700;">
+                                                ⚡ মূল পর্ব (${c.sessionsCompleted || 0}/15)
+                                            </span>
+                                        `}
+                                    </div>
+                                    <div style="margin-top:3px; display:flex; align-items:center; gap:6px;">
+                                        <div style="flex:1; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+                                            <div style="height:100%; width:${Math.min(100, Math.round(((c.sessionsCompleted || 0) / (c.sessionsRequired || 15)) * 100))}%; background:linear-gradient(90deg, #2ecc71, var(--gold)); border-radius:3px;"></div>
+                                        </div>
+                                        <span style="font-size:0.72rem; color:var(--text-secondary); font-family:monospace; white-space:nowrap;">
+                                            ${c.sessionsCompleted || 0}/${c.sessionsRequired || 15}
+                                        </span>
+                                    </div>
+                                ` : ''}
+
+                                ${c.status === 'passed' ? `
+                                    <div style="font-size:0.74rem; color:#2ecc71; font-weight:800; display:flex; align-items:center; gap:4px; margin-top:2px;">
+                                        <i class="fas fa-award"></i> ১৫টি সেশন সফলভাবে সম্পন্ন
+                                    </div>
+                                ` : ''}
+
+                                ${c.status === 'failed' ? `
+                                    <div style="font-size:0.73rem; color:#f87171; font-weight:700; margin-top:2px; line-height:1.3;">
+                                        <i class="fas fa-ban"></i> ${c.failReason || 'Disqualified'}
+                                    </div>
+                                ` : ''}
+
+                                ${c.status === 'rejected' && c.rejectedReason ? `
+                                    <div style="font-size:0.73rem; color:#f87171; margin-top:2px; max-width:170px; line-height:1.3;">
+                                        <i class="fas fa-times-circle"></i> ${c.rejectedReason}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </td>
+
+                        <!-- 9. Actions Column -->
+                        <td style="vertical-align:middle; text-align:center; min-width:175px;">
+                            ${c.status === 'pending_approval' ? `
+                                <div style="display:flex; flex-direction:column; gap:6px; width:100%; max-width:160px; margin:0 auto;">
+                                    <button class="btn-gold" onclick="openApproveChallengeModal('${c.id}')" style="padding:7px 12px; font-size:0.82rem; font-weight:800; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:8px; box-shadow:0 3px 10px rgba(212,175,55,0.25);">
+                                        <i class="fas fa-check-circle"></i> অনুমোদন করুন
+                                    </button>
+                                    <div style="display:flex; gap:4px;">
+                                        <button class="btn-outline" onclick="openRejectChallengeModal('${c.id}')" style="flex:1; padding:5px 8px; font-size:0.76rem; border-color:rgba(239,68,68,0.4); color:#f87171; border-radius:6px; display:flex; align-items:center; justify-content:center; gap:4px;" title="অর্ডার রিজেক্ট করুন">
+                                            <i class="fas fa-times"></i> রিজেক্ট
+                                        </button>
+                                        <button class="btn-outline" onclick="handleDeleteChallenge('${c.id}')" style="padding:5px 8px; font-size:0.76rem; border-color:rgba(239,68,68,0.3); color:#f87171; border-radius:6px;" title="অর্ডার ডিলিট">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            ${c.status === 'in_progress' ? `
+                                <div style="display:flex; flex-direction:column; gap:5px; width:100%; max-width:175px; margin:0 auto;">
+                                    <!-- Row 1: Phase Switch -->
                                     ${c.challengePhase === 'practice' ? `
-                                        <button class="btn-outline" style="padding:4px 8px; font-size:0.75rem; border-color:#3b82f6; color:#60a5fa;" onclick="switchChallengePhase('${c.id}', 'evaluation')" title="মূল ১৫ দিনের চ্যালেঞ্জে পরিবর্তন করুন">
+                                        <button class="btn-outline" style="padding:5px 10px; font-size:0.76rem; font-weight:800; border-color:#3b82f6; background:rgba(59,130,246,0.12); color:#60a5fa; border-radius:7px; display:flex; align-items:center; justify-content:center; gap:5px; transition:all 0.2s;" onclick="switchChallengePhase('${c.id}', 'evaluation')" title="৪৮ ঘণ্টার প্র্যাকটিস শেষ করে মূল ১৫ দিনের মূল্যায়নে নিন">
                                             <i class="fas fa-play"></i> মূল পর্বে নিন
                                         </button>
                                     ` : `
-                                        <button class="btn-outline" style="padding:4px 8px; font-size:0.75rem; border-color:#8b5cf6; color:#a78bfa;" onclick="switchChallengePhase('${c.id}', 'practice')" title="৪৮ ঘণ্টার প্র্যাকটিস পর্বে ফেরত নিন">
+                                        <button class="btn-outline" style="padding:5px 10px; font-size:0.76rem; font-weight:800; border-color:#8b5cf6; background:rgba(139,92,246,0.12); color:#c4b5fd; border-radius:7px; display:flex; align-items:center; justify-content:center; gap:5px; transition:all 0.2s;" onclick="switchChallengePhase('${c.id}', 'practice')" title="পুনরায় প্র্যাকটিস পর্বে ফিরিয়ে নিন">
                                             <i class="fas fa-undo"></i> প্র্যাকটিসে নিন
                                         </button>
                                     `}
-                                    <button class="btn-outline" style="padding:4px 8px; font-size:0.75rem; border-color:rgba(239,68,68,0.5); color:#f87171;" onclick="openDisqualifyModal('${c.id}')" title="রুলস লঙ্ঘনে বাদ দিন">
-                                        <i class="fas fa-ban"></i> Disqualify
-                                    </button>
-                                    <button class="btn-outline" style="padding:4px 8px; font-size:0.75rem; border-color:rgba(239,68,68,0.3); color:#f87171;" onclick="openRejectChallengeModal('${c.id}')" title="চ্যালেঞ্জ রিজেক্ট করুন">
-                                        <i class="fas fa-times"></i> Reject
-                                    </button>
-                                    <button class="btn-outline" style="padding:4px 8px; font-size:0.75rem; border-color:rgba(46,204,113,0.5); color:#2ecc71;" onclick="markChallengePassed('${c.id}')" title="Pass and Fund Trader">
-                                        <i class="fas fa-award"></i> Pass (১৫/১৫)
-                                    </button>
-                                ` : ''}
 
-                                <button class="btn-outline" style="padding:4px 8px; font-size:0.78rem;" onclick="viewUserHistory('${c.userId}')" title="View Full History">
-                                    <i class="fas fa-history"></i>
-                                </button>
-                                <button class="btn-outline" style="padding:4px 8px; font-size:0.78rem; border-color:rgba(239,68,68,0.4); color:#f87171;" onclick="handleDeleteChallenge('${c.id}')" title="Delete Challenge">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
+                                    <!-- Row 2: Pass & Disqualify -->
+                                    <div style="display:flex; gap:5px;">
+                                        <button class="btn-outline" style="flex:1; padding:4px 6px; font-size:0.74rem; font-weight:700; border-color:rgba(46,204,113,0.45); background:rgba(46,204,113,0.08); color:#2ecc71; border-radius:6px; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="markChallengePassed('${c.id}')" title="১৫ সেশন সম্পন্ন - ফান্ডেড একাউন্ট প্রদান করুন">
+                                            <i class="fas fa-award"></i> পাস
+                                        </button>
+                                        <button class="btn-outline" style="flex:1; padding:4px 6px; font-size:0.74rem; font-weight:700; border-color:rgba(239,68,68,0.45); background:rgba(239,68,68,0.08); color:#f87171; border-radius:6px; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="openDisqualifyModal('${c.id}')" title="রুলস লঙ্ঘনের কারণে বাদ দিন">
+                                            <i class="fas fa-ban"></i> বাদ দিন
+                                        </button>
+                                    </div>
+
+                                    <!-- Row 3: History & Delete -->
+                                    <div style="display:flex; gap:5px;">
+                                        <button class="btn-outline" style="flex:1; padding:4px 6px; font-size:0.74rem; border-color:rgba(212,175,55,0.35); color:var(--gold); border-radius:6px; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="viewUserHistory('${c.userId}')" title="ট্রেডারের পূর্ণ হিস্টরি ও সাবমিশন দেখুন">
+                                            <i class="fas fa-eye"></i> হিস্টোরি
+                                        </button>
+                                        <button class="btn-outline" style="padding:4px 7px; font-size:0.74rem; border-color:rgba(239,68,68,0.3); color:#f87171; border-radius:6px;" onclick="handleDeleteChallenge('${c.id}')" title="চ্যালেঞ্জ ডিলিট">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            ${c.status !== 'pending_approval' && c.status !== 'in_progress' ? `
+                                <div style="display:flex; gap:5px; justify-content:center; align-items:center;">
+                                    <button class="btn-gold" style="padding:5px 10px; font-size:0.76rem; display:flex; align-items:center; gap:5px; border-radius:6px;" onclick="viewUserHistory('${c.userId}')" title="ট্রেডারের পূর্ণ প্রোফাইল ও হিস্টরি দেখুন">
+                                        <i class="fas fa-eye"></i> হিস্টোরি
+                                    </button>
+                                    <button class="btn-outline" style="padding:5px 8px; font-size:0.76rem; border-color:rgba(239,68,68,0.4); color:#f87171; border-radius:6px;" onclick="handleDeleteChallenge('${c.id}')" title="ডিলিট করুন">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            ` : ''}
                         </td>
                     </tr>
                 `;
