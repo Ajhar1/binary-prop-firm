@@ -834,49 +834,10 @@ async function ensureAdminUser() {
     let users = readJson(USERS_FILE);
     let changed = false;
 
-    // Filter out test accounts
-    const testEmails = ['atharajhar6@gmail.com', 'atharajhar6@gmail.come'];
-    const testUserIds = users.filter(u => testEmails.includes(u.email.toLowerCase())).map(u => u.id);
-    testUserIds.push('usr_1790479914536_bjtgpe', 'usr_admin_athar');
-
+    // Filter out invalid variations
     const initialLen = users.length;
-    users = users.filter(u => !testEmails.includes(u.email.toLowerCase()) && !testUserIds.includes(u.id));
+    users = users.filter(u => u.email.toLowerCase() !== 'atharajhar6@gmail.come');
     if (users.length !== initialLen) changed = true;
-
-    // Clean up test account data from challenges, submissions, support, trader_states, user_archive
-    try {
-      let challenges = readJson(CHALLENGES_FILE);
-      const chLen = challenges.length;
-      challenges = challenges.filter(c => !testUserIds.includes(c.userId));
-      if (challenges.length !== chLen) writeJson(CHALLENGES_FILE, challenges);
-
-      let submissions = readJson(SUBMISSIONS_FILE);
-      const subLen = submissions.length;
-      submissions = submissions.filter(s => !testUserIds.includes(s.userId));
-      if (submissions.length !== subLen) writeJson(SUBMISSIONS_FILE, submissions);
-
-      let tickets = readJson(SUPPORT_FILE);
-      const tktLen = tickets.length;
-      tickets = tickets.filter(t => !testUserIds.includes(t.userId) && !testEmails.includes((t.userEmail || '').toLowerCase()));
-      if (tickets.length !== tktLen) writeJson(SUPPORT_FILE, tickets);
-
-      let states = readJson(TRADER_STATES_FILE);
-      let statesChanged = false;
-      testUserIds.forEach(id => {
-        if (states[id]) {
-          delete states[id];
-          statesChanged = true;
-        }
-      });
-      if (statesChanged) writeJson(TRADER_STATES_FILE, states);
-
-      let archive = readJson(ARCHIVE_FILE);
-      const archLen = archive.length;
-      archive = archive.filter(a => !testUserIds.includes(a.userId) && !testEmails.includes((a.userEmail || '').toLowerCase()));
-      if (archive.length !== archLen) writeJson(ARCHIVE_FILE, archive);
-    } catch (cleanErr) {
-      console.warn('Test data cleanup notice:', cleanErr.message);
-    }
 
     // Default target admin password hash for Ajhar1@2#3$
     const salt = await bcrypt.genSalt(10);
