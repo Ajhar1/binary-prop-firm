@@ -2,6 +2,10 @@
   {
     "id": "ch_1790938100000_bronze",
     "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "userTraderId": "AJ-1001",
+    "userTelegram": "@BinaryPropFirmSupport",
     "packageId": "pkg-bronze",
     "packageName": "Bronze",
     "originalFee": 7,
@@ -48,6 +52,10 @@
   {
     "id": "ch_1790876364479_yc6k6",
     "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "userTraderId": "AJ-1001",
+    "userTelegram": "@BinaryPropFirmSupport",
     "packageId": "pkg-silver",
     "packageName": "Silver",
     "originalFee": 10,

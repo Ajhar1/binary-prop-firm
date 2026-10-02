@@ -1498,6 +1498,10 @@
             </div>
             <h2 class="modal-title">Welcome Back</h2>
             <p class="modal-subtitle">Log in to your Binary Prop Firm dashboard</p>
+            <div id="loginPromptNotice" style="display:none; background:rgba(245,176,65,0.12); border:1px solid rgba(245,176,65,0.35); border-radius:10px; padding:10px 14px; margin-bottom:14px; text-align:center;">
+                <i class="fas fa-info-circle" style="color:var(--yellow); margin-right:6px;"></i>
+                <span style="color:#fff; font-size:0.85rem; font-weight:700;">আপনার অ্যাকাউন্টে লগইন করে সরাসরি চ্যালেঞ্জ ক্রয় সম্পন্ন করুন।</span>
+            </div>
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label>Email Address</label>
@@ -1619,6 +1623,10 @@
             </div>
             <h2 class="modal-title">Create Account</h2>
             <p class="modal-subtitle">Join Binary Prop Firm & start your prop trading evaluation</p>
+            <div id="regPromptNotice" style="display:none; background:rgba(245,176,65,0.12); border:1px solid rgba(245,176,65,0.35); border-radius:10px; padding:10px 14px; margin-bottom:14px; text-align:center;">
+                <i class="fas fa-user-plus" style="color:var(--yellow); margin-right:6px;"></i>
+                <span style="color:#fff; font-size:0.85rem; font-weight:700;">চ্যালেঞ্জ কেনার আগে প্রথমে আপনার ট্রেডার অ্যাকাউন্ট খুলুন (Sign Up করুন)। অ্যাকাউন্ট তৈরি শেষে সরাসরি চ্যালেঞ্জ ক্রয় করতে পারবেন।</span>
+            </div>
             <form id="registerForm" onsubmit="handleRegister(event)">
                 <div class="form-group">
                     <label>Full Name</label>
@@ -1888,11 +1896,21 @@
         // Modals control
         function openLoginModal() {
             closeModals();
+            const notice = document.getElementById('loginPromptNotice');
+            if (notice) {
+                const pending = sessionStorage.getItem('pendingBuyPackageId');
+                notice.style.display = pending ? 'block' : 'none';
+            }
             document.getElementById('loginModal').classList.add('active');
         }
 
         function openRegisterModal() {
             closeModals();
+            const notice = document.getElementById('regPromptNotice');
+            if (notice) {
+                const pending = sessionStorage.getItem('pendingBuyPackageId');
+                notice.style.display = pending ? 'block' : 'none';
+            }
             document.getElementById('registerModal').classList.add('active');
         }
 
@@ -1927,8 +1945,9 @@
         async function openBuyModal(pkgId) {
             const token = localStorage.getItem('aj_token');
             if (!token) {
-                showToast('Please login or create an account first to purchase a challenge.', 'error');
-                openLoginModal();
+                if (pkgId) sessionStorage.setItem('pendingBuyPackageId', pkgId);
+                showToast('চ্যালেঞ্জ কেনার আগে প্রথমে আপনার ট্রেডার অ্যাকাউন্ট খুলুন (Sign Up করুন)।', 'error');
+                openRegisterModal();
                 return;
             }
 
@@ -2021,6 +2040,15 @@
                     localStorage.setItem('aj_token', data.token);
                     localStorage.setItem('aj_user_name', data.user.name);
                     localStorage.setItem('aj_user_email', data.user.email);
+                    checkUserSession();
+                    const pendingPkg = sessionStorage.getItem('pendingBuyPackageId');
+                    if (pendingPkg) {
+                        sessionStorage.removeItem('pendingBuyPackageId');
+                        closeModals();
+                        showToast('লগইন সফল হয়েছে! এবার প্যাকেজটি ক্রয় সম্পন্ন করুন।', 'success');
+                        setTimeout(() => openBuyModal(pendingPkg), 400);
+                        return;
+                    }
                     showToast('Login successful! Redirecting to Dashboard...', 'success');
                     setTimeout(() => window.location.href = '/dashboard', 800);
                 } else {
@@ -2115,6 +2143,15 @@
                     if (data.user) {
                         localStorage.setItem('aj_user_name', data.user.name);
                         localStorage.setItem('aj_user_email', data.user.email);
+                    }
+                    checkUserSession();
+                    const pendingPkg = sessionStorage.getItem('pendingBuyPackageId');
+                    if (pendingPkg) {
+                        sessionStorage.removeItem('pendingBuyPackageId');
+                        closeModals();
+                        showToast('🎉 অ্যাকাউন্ট তৈরি ও ভেরিফাই সম্পন্ন! এবার আপনার প্যাকেজ ক্রয় কনফার্ম করুন।', 'success');
+                        setTimeout(() => openBuyModal(pendingPkg), 400);
+                        return;
                     }
                     showToast('🎉 ইমেইল সফলভাবে ভেরিফাই হয়েছে! ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...', 'success');
                     closeModals();
@@ -2365,6 +2402,13 @@
             e.preventDefault();
             const token = localStorage.getItem('aj_token');
             const packageId = document.getElementById('selectedPackageId').value;
+            if (!token) {
+                if (packageId) sessionStorage.setItem('pendingBuyPackageId', packageId);
+                closeModals();
+                showToast('চ্যালেঞ্জ কেনার আগে প্রথমে আপনার ট্রেডার অ্যাকাউন্ট খুলুন (Sign Up করুন)।', 'error');
+                openRegisterModal();
+                return;
+            }
             const brokerId = document.getElementById('buyBrokerSelect').value;
             const brokerAccountId = document.getElementById('buyBrokerAccountId').value.trim();
             const paymentMethod = document.getElementById('buyPaymentMethod').value;

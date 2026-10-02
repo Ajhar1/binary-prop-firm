@@ -2271,6 +2271,8 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
 
   const broker = SUPPORTED_BROKERS.find(b => b.id === brokerId) || SUPPORTED_BROKERS[0];
   const challenges = readJson(CHALLENGES_FILE);
+  const users = readJson(USERS_FILE);
+  const currentUser = users.find(u => u.id === req.user.id) || req.user;
 
   const numExchangeRate = (exchangeRate && !isNaN(parseFloat(exchangeRate)) && parseFloat(exchangeRate) > 0) ? parseFloat(exchangeRate) : 1;
   const numLocalAmount = (localAmount && !isNaN(parseFloat(localAmount)) && parseFloat(localAmount) > 0) ? parseFloat(localAmount) : (pkg.fee * numExchangeRate);
@@ -2278,6 +2280,11 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
   const newChallenge = {
     id: `ch_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
     userId: req.user.id,
+    userName: currentUser.name || req.user.name || 'Trader',
+    userEmail: currentUser.email || req.user.email || '',
+    userTraderId: currentUser.traderId || 'AJ-1000',
+    userTelegram: currentUser.telegram || 'N/A',
+    userBroker: currentUser.preferredBroker || broker.name,
     packageId: pkg.id,
     packageName: pkg.name,
     originalFee: pkg.originalFee,
@@ -3101,10 +3108,11 @@ app.get('/api/admin/stats', authenticateAdminToken, (req, res) => {
     const user = allUsers.find(u => u.id === c.userId);
     return {
       ...c,
-      userTraderId: user ? (user.traderId || 'AJ-1001') : 'AJ-1001',
-      userName: user ? user.name : 'Trader',
-      userEmail: user ? user.email : '',
-      userAvatar: user ? (user.profilePicture || null) : null
+      userTraderId: (user && user.traderId) ? user.traderId : (c.userTraderId || 'AJ-1000'),
+      userName: (user && user.name) ? user.name : (c.userName || 'Trader'),
+      userEmail: (user && user.email) ? user.email : (c.userEmail || ''),
+      userTelegram: (user && user.telegram) ? user.telegram : (c.userTelegram || 'N/A'),
+      userAvatar: user ? (user.profilePicture || null) : (c.userAvatar || null)
     };
   });
 
@@ -3488,11 +3496,11 @@ app.get('/api/admin/challenges', authenticateAdminToken, (req, res) => {
     const user = users.find(u => u.id === c.userId);
     return {
       ...c,
-      userTraderId: user ? (user.traderId || 'N/A') : 'N/A',
-      userName: user ? user.name : 'Unknown Trader',
-      userEmail: user ? user.email : 'Unknown Email',
-      userTelegram: user ? user.telegram : 'N/A',
-      userAvatar: user ? (user.profilePicture || null) : null
+      userTraderId: (user && user.traderId) ? user.traderId : (c.userTraderId || 'AJ-1000'),
+      userName: (user && user.name) ? user.name : (c.userName || 'Trader'),
+      userEmail: (user && user.email) ? user.email : (c.userEmail || ''),
+      userTelegram: (user && user.telegram) ? user.telegram : (c.userTelegram || 'N/A'),
+      userAvatar: user ? (user.profilePicture || null) : (c.userAvatar || null)
     };
   });
 
