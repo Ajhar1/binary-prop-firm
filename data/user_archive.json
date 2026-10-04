@@ -1,5 +1,65 @@
 [
   {
+    "archiveId": "arc_1791090000000_afia_appr",
+    "timestamp": "2026-10-04T08:00:00.000Z",
+    "displayTime": "10/4/2026, 2:00:00 PM",
+    "action": "CHALLENGE_APPROVED",
+    "userId": "usr_1791090000000_afia",
+    "userName": "Afia Farjana",
+    "userEmail": "afiafarjana933@gmail.com",
+    "telegram": "@AfiaFarjana",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "challengeId": "ch_1791090000000_afia_gold",
+      "packageName": "Gold",
+      "fundedAmount": 525,
+      "mmSerial": 1,
+      "mmTitle": "অফিসিয়াল মানি ম্যানেজমেন্ট শিট #১"
+    }
+  },
+  {
+    "archiveId": "arc_1791090000000_afia_buy",
+    "timestamp": "2026-10-04T07:45:00.000Z",
+    "displayTime": "10/4/2026, 1:45:00 PM",
+    "action": "CHALLENGE_PURCHASED",
+    "userId": "usr_1791090000000_afia",
+    "userName": "Afia Farjana",
+    "userEmail": "afiafarjana933@gmail.com",
+    "telegram": "@AfiaFarjana",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "challengeId": "ch_1791090000000_afia_gold",
+      "packageName": "Gold",
+      "fundedAmount": 525,
+      "broker": "Quotex",
+      "paymentMethod": "bKash / Binance Pay",
+      "paymentTxId": "TX_525_GOLD_AFIA"
+    }
+  },
+  {
+    "archiveId": "arc_1791090000000_afia_reg",
+    "timestamp": "2026-10-04T07:30:00.000Z",
+    "displayTime": "10/4/2026, 1:30:00 PM",
+    "action": "USER_REGISTERED",
+    "userId": "usr_1791090000000_afia",
+    "userName": "Afia Farjana",
+    "userEmail": "afiafarjana933@gmail.com",
+    "telegram": "@AfiaFarjana",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "ip": "::1"
+    }
+  },
+  {
     "archiveId": "arc_1790768759240_bif1",
     "timestamp": "2026-09-30T11:45:59.240Z",
     "displayTime": "9/30/2026, 5:45:59 PM",

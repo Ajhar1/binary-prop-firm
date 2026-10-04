@@ -20,6 +20,7 @@ const BACKUPS_DIR = path.join(DATA_DIR, 'backups');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const USERS_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'users_permanent_store.json');
 const CHALLENGES_FILE = path.join(DATA_DIR, 'challenges.json');
+const CHALLENGES_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'challenges_permanent_store.json');
 const SUBMISSIONS_FILE = path.join(DATA_DIR, 'submissions.json');
 const COURSES_FILE = path.join(DATA_DIR, 'courses.json');
 const MM_LINKS_FILE = path.join(DATA_DIR, 'mm_links.json');
@@ -114,6 +115,7 @@ function createDatabaseBackup(type = 'auto') {
       USERS_FILE,
       USERS_PERMANENT_STORE_FILE,
       CHALLENGES_FILE,
+      CHALLENGES_PERMANENT_STORE_FILE,
       SUBMISSIONS_FILE,
       COURSES_FILE,
       MM_LINKS_FILE,
@@ -217,9 +219,102 @@ function extractVideoThumbnail(url) {
 function syncChallengesWithSubmissions() {
   try {
     let challenges = readJson(CHALLENGES_FILE, []);
+    let permChallenges = readJson(CHALLENGES_PERMANENT_STORE_FILE, []);
+    const archive = readJson(ARCHIVE_FILE, []);
     const submissions = readJson(SUBMISSIONS_FILE, []);
     let modified = false;
     const now = new Date();
+
+    // 1. Permanent Auto-Healing: Merge challenges from CHALLENGES_PERMANENT_STORE_FILE
+    const challengeMap = new Map();
+    challenges.forEach(c => {
+      if (c && c.id) challengeMap.set(c.id, c);
+    });
+
+    permChallenges.forEach(pc => {
+      if (!pc || !pc.id) return;
+      if (!challengeMap.has(pc.id)) {
+        challenges.push(pc);
+        challengeMap.set(pc.id, pc);
+        modified = true;
+        console.log(`[AUTO-HEAL] Restored challenge from permanent store: ${pc.id} (${pc.packageName} for ${pc.userEmail})`);
+      } else {
+        const existing = challengeMap.get(pc.id);
+        if (existing.status !== pc.status && pc.status === 'in_progress' && existing.status !== 'passed' && existing.status !== 'failed') {
+          existing.status = pc.status;
+          existing.approvedAt = pc.approvedAt || existing.approvedAt;
+          existing.assignedMmUrl = pc.assignedMmUrl || existing.assignedMmUrl;
+          existing.assignedMmTitle = pc.assignedMmTitle || existing.assignedMmTitle;
+          modified = true;
+        }
+      }
+    });
+
+    // 2. Archive Auto-Healing: Resurrect from user_archive if any purchased/approved challenge missing
+    archive.forEach(arc => {
+      if (arc.action === 'CHALLENGE_APPROVED' || arc.action === 'CHALLENGE_PURCHASED') {
+        const meta = arc.metadata || {};
+        const chId = meta.challengeId;
+        if (chId && !challengeMap.has(chId)) {
+          const isGold = meta.fundedAmount === 525 || meta.packageName === 'Gold';
+          const recovered = {
+            id: chId,
+            userId: arc.userId,
+            userName: arc.userName || 'Trader',
+            userEmail: arc.userEmail || '',
+            userTraderId: arc.traderId || (arc.userEmail === 'afiafarjana933@gmail.com' ? 'AJ-1010' : 'AJ-1008'),
+            userTelegram: arc.telegram || '',
+            userBroker: meta.broker || 'Quotex',
+            packageId: meta.packageId || (isGold ? 'pkg-gold' : 'pkg-bronze'),
+            packageName: meta.packageName || (isGold ? 'Gold' : 'Bronze'),
+            originalFee: isGold ? 25 : 5,
+            fee: isGold ? 15 : 4,
+            discountPercent: isGold ? 40 : 20,
+            hasDiscount: true,
+            fundedAmount: meta.fundedAmount || (isGold ? 525 : 100),
+            profitSplit: '75%',
+            maxDrawdown: '25%',
+            brokerId: 'quotex',
+            brokerName: 'Quotex',
+            brokerIcon: '/assets/brokers/quotex.png',
+            brokerAccountId: 'Demo Account',
+            status: arc.action === 'CHALLENGE_APPROVED' ? 'in_progress' : 'pending_approval',
+            sessionsRequired: 15,
+            sessionsCompleted: 0,
+            currentDrawdown: '0.0%',
+            paymentMethod: meta.paymentMethod || 'bKash / Binance Pay',
+            paymentTxId: meta.paymentTxId || 'TX_DEFAULT',
+            senderNumber: '',
+            currency: 'USD',
+            currencySymbol: '$',
+            exchangeRate: 1,
+            localAmount: isGold ? 15 : 4,
+            assignedMmId: 'mm_default',
+            assignedMmSerial: meta.mmSerial || 1,
+            assignedMmTitle: meta.mmTitle || 'অফিসিয়াল মানি ম্যানেজমেন্ট শিট #১',
+            assignedMmUrl: 'https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing',
+            assignedMmNote: 'Standard Evaluation Sheet',
+            approvedAt: arc.timestamp || new Date().toISOString(),
+            createdAt: arc.timestamp || new Date().toISOString(),
+            durationDays: 15,
+            challengePhase: 'practice',
+            expiresAt: new Date(new Date(arc.timestamp || now).getTime() + (17 * 24 * 60 * 60 * 1000)).toISOString(),
+            practiceSessionsCompleted: 0,
+            verifiedSessionsCount: 0,
+            totalSubmissionsCount: 0,
+            practiceHours: 48,
+            practiceStartedAt: arc.timestamp || new Date().toISOString(),
+            practiceExpiresAt: new Date(new Date(arc.timestamp || now).getTime() + (48 * 60 * 60 * 1000)).toISOString(),
+            practiceMaxSessions: 3,
+            isActive: true
+          };
+          challenges.push(recovered);
+          challengeMap.set(chId, recovered);
+          modified = true;
+          console.log(`[AUTO-HEAL] Resurrected challenge from user_archive: ${chId} (${recovered.packageName} for ${recovered.userEmail})`);
+        }
+      }
+    });
 
     // Ensure admin test challenge is seeded if missing on persistent storage
     const hasAdminChallenge = challenges.some(c => (c.userTraderId === 'BPF-ADMIN-1' || (c.userEmail && c.userEmail.toLowerCase() === 'atharajhar6@gmail.com')) && c.status === 'in_progress');
@@ -479,14 +574,21 @@ function syncChallengesWithSubmissions() {
       }
     });
 
-    if (modified) {
+    if (modified || !fs.existsSync(CHALLENGES_PERMANENT_STORE_FILE)) {
       writeJson(CHALLENGES_FILE, challenges);
+      writeJson(CHALLENGES_PERMANENT_STORE_FILE, challenges);
     }
     return challenges;
   } catch (err) {
     console.error('Error syncing challenge sessions with submissions:', err);
     return readJson(CHALLENGES_FILE, []);
   }
+}
+
+// Enterprise Challenge Dual-Persistence Helper
+function saveChallenges(challenges) {
+  writeJson(CHALLENGES_FILE, challenges);
+  writeJson(CHALLENGES_PERMANENT_STORE_FILE, challenges);
 }
 
 // Next serial MM link assigner
@@ -869,7 +971,12 @@ function syncUsersWithAllData() {
   try {
     let users = readJson(USERS_FILE, []);
     let permUsers = readJson(USERS_PERMANENT_STORE_FILE, []);
-    const challenges = readJson(CHALLENGES_FILE, []);
+    const baseChallenges = readJson(CHALLENGES_FILE, []);
+    const permChallenges = readJson(CHALLENGES_PERMANENT_STORE_FILE, []);
+    const chMap = new Map();
+    baseChallenges.forEach(c => { if (c && c.id) chMap.set(c.id, c); });
+    permChallenges.forEach(c => { if (c && c.id && !chMap.has(c.id)) chMap.set(c.id, c); });
+    const challenges = Array.from(chMap.values());
     const archive = readJson(ARCHIVE_FILE, []);
     let modified = false;
 
@@ -2600,7 +2707,7 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
   };
 
   challenges.unshift(newChallenge);
-  writeJson(CHALLENGES_FILE, challenges);
+  saveChallenges(challenges);
   logUserArchive('CHALLENGE_PURCHASED', { id: req.user.id, name: req.user.name, email: req.user.email }, {
     challengeId: newChallenge.id,
     packageName: pkg.name,
@@ -2621,12 +2728,17 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
   });
 });
 
-// Get user's challenges
+// Get user's challenges (Robust dual-key lookup by userId, email, or traderId)
 app.get('/api/challenges/my', authenticateToken, (req, res) => {
-  const challenges = syncChallengesWithSubmissions().filter(c => c.userId === req.user.id);
+  const allCh = syncChallengesWithSubmissions();
+  const userCh = allCh.filter(c => 
+    c.userId === req.user.id || 
+    (c.userEmail && req.user.email && c.userEmail.toLowerCase() === req.user.email.toLowerCase()) ||
+    (c.userTraderId && req.user.traderId && c.userTraderId.toLowerCase() === req.user.traderId.toLowerCase())
+  );
   res.json({
     success: true,
-    challenges
+    challenges: userCh
   });
 });
 
@@ -2634,7 +2746,10 @@ app.get('/api/challenges/my', authenticateToken, (req, res) => {
 app.post('/api/challenges/:id/start-official', authenticateToken, (req, res) => {
   try {
     const challenges = readJson(CHALLENGES_FILE);
-    const idx = challenges.findIndex(c => c.id === req.params.id && c.userId === req.user.id);
+    const idx = challenges.findIndex(c => 
+      c.id === req.params.id && 
+      (c.userId === req.user.id || (c.userEmail && req.user.email && c.userEmail.toLowerCase() === req.user.email.toLowerCase()))
+    );
     if (idx === -1) {
       return res.status(404).json({ success: false, message: 'চ্যালেঞ্জ খুঁজে পাওয়া যায়নি।' });
     }
@@ -2655,7 +2770,7 @@ app.post('/api/challenges/:id/start-official', authenticateToken, (req, res) => 
     c.durationDays = c.durationDays || 15;
     c.expiresAt = new Date(now.getTime() + (c.durationDays * 24 * 60 * 60 * 1000)).toISOString();
     challenges[idx] = c;
-    writeJson(CHALLENGES_FILE, challenges);
+    saveChallenges(challenges);
 
     logUserArchive('CHALLENGE_OFFICIAL_EVALUATION_STARTED', { id: req.user.id }, {
       challengeId: c.id,
@@ -3860,7 +3975,7 @@ app.delete('/api/admin/users/:id', authenticateAdminToken, (req, res) => {
 
   // Clean up user's challenges and submissions
   let challenges = readJson(CHALLENGES_FILE).filter(c => c.userId !== req.params.id);
-  writeJson(CHALLENGES_FILE, challenges);
+  saveChallenges(challenges);
 
   let submissions = readJson(SUBMISSIONS_FILE).filter(s => s.userId !== req.params.id);
   writeJson(SUBMISSIONS_FILE, submissions);
@@ -4169,7 +4284,7 @@ app.post('/api/admin/challenges/:id/approve', authenticateAdminToken, (req, res)
   challenges[idx].assignedMmUrl = assignedLink.url;
   challenges[idx].assignedMmNote = assignedLink.note;
 
-  writeJson(CHALLENGES_FILE, challenges);
+  saveChallenges(challenges);
   logUserArchive('CHALLENGE_APPROVED', { id: challenges[idx].userId }, {
     challengeId: challenges[idx].id,
     packageName: challenges[idx].packageName,
@@ -4210,7 +4325,7 @@ app.post('/api/admin/challenges/:id/set-phase', authenticateAdminToken, (req, re
   }
 
   challenges[idx] = c;
-  writeJson(CHALLENGES_FILE, challenges);
+  saveChallenges(challenges);
   syncChallengesWithSubmissions();
 
   res.json({
@@ -4234,7 +4349,7 @@ app.post('/api/admin/challenges/:id/reject', authenticateAdminToken, (req, res) 
   challenges[idx].rejectedAt = new Date().toISOString();
   challenges[idx].isActive = false;
 
-  writeJson(CHALLENGES_FILE, challenges);
+  saveChallenges(challenges);
 
   logUserArchive('CHALLENGE_REJECTED', { id: challenges[idx].userId }, {
     challengeId: challenges[idx].id,
@@ -4266,7 +4381,7 @@ app.post('/api/admin/challenges/:id/disqualify', authenticateAdminToken, (req, r
   challenges[idx].failedAt = new Date().toISOString();
   challenges[idx].isActive = false;
 
-  writeJson(CHALLENGES_FILE, challenges);
+  saveChallenges(challenges);
 
   logUserArchive('CHALLENGE_DISQUALIFIED_RULE_VIOLATION', { id: challenges[idx].userId }, {
     challengeId: challenges[idx].id,
@@ -4368,7 +4483,7 @@ app.post('/api/admin/challenges/:id/update-status', authenticateAdminToken, (req
   if (sessionsCompleted !== undefined) challenges[idx].sessionsCompleted = parseInt(sessionsCompleted) || 0;
   if (currentDrawdown !== undefined) challenges[idx].currentDrawdown = currentDrawdown;
 
-  writeJson(CHALLENGES_FILE, challenges);
+  saveChallenges(challenges);
   syncChallengesWithSubmissions();
 
   res.json({ success: true, message: 'Challenge status updated successfully.', challenge: challenges[idx] });
@@ -4425,7 +4540,7 @@ app.post('/api/admin/submissions/:id/review', authenticateAdminToken, (req, res)
       challenges[cIdx].failedAt = new Date().toISOString();
       challenges[cIdx].isActive = false;
       challenges[cIdx].isCompleted = true;
-      writeJson(CHALLENGES_FILE, challenges);
+      saveChallenges(challenges);
     }
   } else if (status === 'verified' && !isPractice) {
     // If verified/approved by admin, check if parent challenge was marked 'failed'.
@@ -4450,7 +4565,7 @@ app.post('/api/admin/submissions/:id/review', authenticateAdminToken, (req, res)
         delete challenges[cIdx].violatedRule;
         delete challenges[cIdx].failReasonText;
         delete challenges[cIdx].failedAt;
-        writeJson(CHALLENGES_FILE, challenges);
+        saveChallenges(challenges);
 
         logUserArchive('CHALLENGE_REACTIVATED', { id: challenges[cIdx].userId }, {
           challengeId: challenges[cIdx].id,
@@ -4520,7 +4635,8 @@ app.delete('/api/admin/challenges/:id', authenticateAdminToken, (req, res) => {
   if (!found) return res.status(404).json({ success: false, message: 'Challenge not found.' });
 
   challenges = challenges.filter(c => c.id !== req.params.id);
-  writeJson(CHALLENGES_FILE, challenges);
+  saveChallenges(challenges);
+  logUserArchive('CHALLENGE_DELETED_BY_ADMIN', { id: found.userId }, { challengeId: found.id, packageName: found.packageName });
   res.json({ success: true, message: 'Challenge deleted successfully.' });
 });
 
@@ -5405,6 +5521,7 @@ app.listen(PORT, () => {
   // Initial automated challenge session sync & validation
   try {
     syncChallengesWithSubmissions();
+    syncUsersWithAllData();
   } catch (e) {
     console.error('Initial challenge sync error:', e.message);
   }
