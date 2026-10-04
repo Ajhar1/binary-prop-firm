@@ -221,10 +221,7 @@ function syncChallengesWithSubmissions() {
     let modified = false;
     const now = new Date();
 
-    const origChLen = challenges.length;
-    challenges = challenges.filter(c => (c.userEmail || '').trim().toLowerCase() !== 'atharajhar6@gmail.com');
-    if (challenges.length !== origChLen) modified = true;
-
+    // Challenges are preserved for all users
     challenges.forEach(c => {
       // Ensure required evaluation metrics
       if (!c.sessionsRequired) {
