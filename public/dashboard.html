@@ -4641,7 +4641,40 @@
                 `;
             }
 
+            let reactivationNoticeHtml = '';
+            if (challenge && challenge.reactivationNotice && !challenge.reactivationNotice.read) {
+                const noticeTime = new Date(challenge.reactivationNotice.reactivatedAt || Date.now()).toLocaleString();
+                reactivationNoticeHtml = `
+                    <div class="glass-card unified-alert-card" id="reactivationNoticeBanner" style="padding:1.4rem 1.6rem; border:2px solid #10b981; margin-bottom:1.6rem; background:radial-gradient(ellipse at top, rgba(16,185,129,0.18), rgba(22,22,26,0.96)); box-shadow:0 0 30px rgba(16,185,129,0.18); position:relative; overflow:hidden; border-radius:16px;">
+                        <div style="position:absolute; top:-15px; right:-15px; font-size:7rem; color:rgba(16,185,129,0.05); pointer-events:none;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:14px; position:relative; z-index:2;">
+                            <div style="display:flex; align-items:flex-start; gap:14px; flex:1;">
+                                <div style="width:48px; height:48px; border-radius:12px; background:rgba(16,185,129,0.25); border:1.5px solid #10b981; color:#10b981; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; margin-top:2px;">
+                                    <i class="fas fa-bullhorn"></i>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                        <h3 style="color:#fff; margin:0; font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                            <span style="background:rgba(16,185,129,0.2); color:#10b981; padding:2px 8px; border-radius:6px; font-size:0.78rem; border:1px solid rgba(16,185,129,0.4);">অফিসিয়াল নোটিফিকেশন</span>
+                                            চ্যালেঞ্জ পুনরায় সফলভাবে সক্রিয় করা হয়েছে!
+                                        </h3>
+                                        <span style="font-size:0.75rem; color:#94a3b8; display:inline-flex; align-items:center; gap:4px;">
+                                            <i class="far fa-clock"></i> ${noticeTime}
+                                        </span>
+                                    </div>
+                                    <div style="color:#e2e8f0; font-size:0.88rem; margin-top:8px; line-height:1.6; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); padding:10px 14px; border-radius:10px; white-space:pre-wrap;">${escapeHtml(challenge.reactivationNotice.message || '')}</div>
+                                </div>
+                            </div>
+                            <button type="button" onclick="dismissReactivationNotice('${challenge.id}')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; width:30px; height:30px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'; this.style.borderColor='rgba(239,68,68,0.4)';" onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.borderColor='rgba(255,255,255,0.15)';" title="নোটিফিকেশনটি বন্ধ করুন">&times;</button>
+                        </div>
+                    </div>
+                `;
+            }
+
             container.innerHTML = `
+                ${reactivationNoticeHtml}
                 ${practiceBannerHtml}
                 <div class="running-challenge-box">
                     <div class="running-top">
@@ -4704,6 +4737,19 @@
 
             if (isPracticeMode && challenge.practiceExpiresAt) {
                 startPracticeCountdown(challenge.practiceExpiresAt);
+            }
+        }
+
+        async function dismissReactivationNotice(challengeId) {
+            const el = document.getElementById('reactivationNoticeBanner');
+            if (el) el.style.display = 'none';
+            try {
+                await fetch(`/api/user/challenges/${challengeId}/dismiss-notice`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (err) {
+                console.error('Error dismissing reactivation notice:', err);
             }
         }
 

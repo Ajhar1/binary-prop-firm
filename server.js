@@ -314,6 +314,13 @@ function syncChallengesWithSubmissions() {
       ) {
         const chId = (arc.metadata && arc.metadata.challengeId) || arc.challengeId;
         if (chId) disqualifiedMap.set(chId, arc);
+      } else if (
+        arc.action === 'CHALLENGE_REACTIVATED_BY_ADMIN' ||
+        arc.action === 'CHALLENGE_REACTIVATED' ||
+        (arc.action === 'CHALLENGE_STATUS_UPDATED' && arc.metadata && arc.metadata.status === 'in_progress')
+      ) {
+        const chId = (arc.metadata && arc.metadata.challengeId) || arc.challengeId;
+        if (chId) disqualifiedMap.delete(chId);
       }
     });
 
@@ -4564,6 +4571,79 @@ app.post('/api/admin/challenges/:id/update-status', authenticateAdminToken, (req
   syncChallengesWithSubmissions();
 
   res.json({ success: true, message: 'Challenge status updated successfully.', challenge: challenges[idx] });
+});
+
+// 9.1 Reactivate Disqualified / Failed Challenge with Notification (Admin)
+app.post('/api/admin/challenges/:id/reactivate', authenticateAdminToken, (req, res) => {
+  let challenges = readJson(CHALLENGES_FILE, []);
+  let permChallenges = readJson(CHALLENGES_PERMANENT_STORE_FILE, []);
+  const idx = challenges.findIndex(c => c.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
+
+  const target = challenges[idx];
+  const previousRule = target.violatedRule || target.failReason || 'Unknown';
+  const previousReasonText = target.failReasonText || '';
+  const customMessage = (req.body.message && req.body.message.trim())
+    ? req.body.message.trim()
+    : 'সম্মানিত ট্রেডার, ভুলবশত আপনার অ্যাকাউন্টের চ্যালেঞ্জটি সাময়িকভাবে বন্ধ করা হয়েছিল। আপনার চ্যালেঞ্জটি পুনরায় সফলভাবে সক্রিয় করা হয়েছে এবং আগের সকল ডাটা অক্ষত রয়েছে। আপনি যথারীতি ট্রেডিং চালিয়ে যেতে পারেন। সাময়িক অসুবিধার জন্য আমরা আন্তরিকভাবে দুঃখিত।';
+
+  const nowIso = new Date().toISOString();
+
+  // 1. Restore status to in_progress & active (leaving all previous sessions and metrics 100% intact)
+  target.status = 'in_progress';
+  target.isActive = true;
+  target.isCompleted = false;
+
+  // 2. Remove failure fields
+  delete target.failReason;
+  delete target.violatedRule;
+  delete target.failReasonText;
+  delete target.failedAt;
+
+  // 3. Attach reactivation notice for trader dashboard
+  target.reactivationNotice = {
+    id: `notif_${Date.now()}`,
+    title: 'চ্যালেঞ্জ পুনরায় সচল করা হয়েছে',
+    message: customMessage,
+    reactivatedAt: nowIso,
+    read: false
+  };
+  target.reactivatedAt = nowIso;
+
+  // Save to both persistent stores
+  saveChallenges(challenges);
+
+  // 4. Log archive event
+  logUserArchive('CHALLENGE_REACTIVATED_BY_ADMIN',
+    { id: target.userId, name: target.userName, email: target.userEmail },
+    {
+      challengeId: target.id,
+      packageName: target.packageName,
+      previousRule,
+      previousReasonText,
+      reactivationMessage: customMessage,
+      sessionsCompleted: target.sessionsCompleted || 0
+    }
+  );
+
+  syncChallengesWithSubmissions();
+
+  res.json({
+    success: true,
+    message: `ট্রেডার "${target.userName}" এর চ্যালেঞ্জটি সফলভাবে পুনরায় সচল করা হয়েছে এবং ট্রেডারের কাছে নোটিফিকেশন পাঠানো হয়েছে।`,
+    challenge: target
+  });
+});
+
+// Dismiss Reactivation Notice (Trader)
+app.post('/api/user/challenges/:id/dismiss-notice', authenticateToken, (req, res) => {
+  let challenges = readJson(CHALLENGES_FILE, []);
+  const ch = challenges.find(c => c.id === req.params.id && (c.userId === req.user.id || (c.userEmail && c.userEmail.toLowerCase() === (req.user.email || '').toLowerCase())));
+  if (ch && ch.reactivationNotice) {
+    ch.reactivationNotice.read = true;
+    saveChallenges(challenges);
+  }
+  res.json({ success: true, message: 'Notice dismissed.' });
 });
 
 // 10. Submissions List
