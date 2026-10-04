@@ -3040,12 +3040,99 @@ app.post('/api/submissions/:id/resubmit', authenticateToken, upload.fields([
 });
 
 // ----------------- EXTENSION & SYNCED TRADES API -----------------
-// 1. Sync Trades from Quotex Extension
+// In-Memory Heartbeat Cache for Trader Extensions
+const traderHeartbeats = new Map();
+
+// Helper to parse Quotex and broker timestamps (DD/MM/YYYY, HH:MM:SS or ISO)
+function parseQuotexDate(str) {
+  if (!str) return 0;
+  if (typeof str === 'number') return str;
+  const clean = String(str).trim();
+  const m = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:,?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+  if (m) {
+    const day = parseInt(m[1], 10);
+    const month = parseInt(m[2], 10) - 1; // 0-indexed
+    const year = parseInt(m[3], 10);
+    const hour = parseInt(m[4] || '0', 10);
+    const min = parseInt(m[5] || '0', 10);
+    const sec = parseInt(m[6] || '0', 10);
+    return new Date(year, month, day, hour, min, sec).getTime();
+  }
+  const parsed = new Date(clean).getTime();
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+// 0. Extension Heartbeat Ping (Called every 30s by active extension)
+app.post('/api/extension/heartbeat', (req, res) => {
+  try {
+    const { traderId, status = 'online', accountType = 'demo', url = '' } = req.body;
+    if (!traderId) {
+      return res.status(400).json({ success: false, message: 'Trader ID প্রয়োজন।' });
+    }
+    const cleanId = traderId.trim().toLowerCase();
+    const entry = {
+      lastPing: Date.now(),
+      status,
+      accountType: (accountType || 'demo').toLowerCase(),
+      url
+    };
+    traderHeartbeats.set(cleanId, entry);
+
+    // Map by user ID / email if matched
+    const users = readJson(USERS_FILE, []);
+    const matchedUser = users.find(u => 
+      (u.traderId && u.traderId.toLowerCase() === cleanId) ||
+      (u.email && u.email.toLowerCase() === cleanId) ||
+      (u.id && u.id.toLowerCase() === cleanId)
+    );
+    if (matchedUser) {
+      if (matchedUser.id) traderHeartbeats.set(matchedUser.id.toLowerCase(), entry);
+      if (matchedUser.email) traderHeartbeats.set(matchedUser.email.toLowerCase(), entry);
+      if (matchedUser.traderId) traderHeartbeats.set(matchedUser.traderId.toLowerCase(), entry);
+    }
+
+    res.json({ success: true, timestamp: Date.now() });
+  } catch (err) {
+    console.error('Error handling extension heartbeat:', err);
+    res.status(500).json({ success: false });
+  }
+});
+
+// 0.1 Check Extension Connection Status for Authenticated Trader
+app.get('/api/user/extension-status', authenticateToken, (req, res) => {
+  try {
+    const user = req.user;
+    const cleanTraderId = (user.traderId || '').trim().toLowerCase();
+    const cleanEmail = (user.email || '').trim().toLowerCase();
+    const cleanId = (user.id || '').trim().toLowerCase();
+
+    const hb = (cleanTraderId && traderHeartbeats.get(cleanTraderId)) ||
+               (cleanEmail && traderHeartbeats.get(cleanEmail)) ||
+               (cleanId && traderHeartbeats.get(cleanId));
+
+    const now = Date.now();
+    // Connected if heartbeat received within last 65 seconds
+    const isConnected = !!(hb && (now - hb.lastPing) < 65000);
+
+    res.json({
+      success: true,
+      connected: isConnected,
+      lastPing: hb ? hb.lastPing : null,
+      accountType: hb ? hb.accountType : null,
+      url: hb ? hb.url : null,
+      secondsAgo: hb ? Math.round((now - hb.lastPing) / 1000) : null
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, connected: false });
+  }
+});
+
+// 1. Sync Trades from Quotex Extension (With Challenge Time-Lock Filter)
 app.post('/api/extension/sync-trades', (req, res) => {
   try {
     const { traderId, accountType = 'demo', source = 'quotex', trades = [] } = req.body;
     if (!traderId) {
-      return res.status(400).json({ success: false, message: 'Trader ID প্রয়োজন।' });
+      return res.status(400).json({ success: false, message: 'Trader ID প্রয়োজন।' });
     }
 
     const users = readJson(USERS_FILE, []);
@@ -3057,44 +3144,89 @@ app.post('/api/extension/sync-trades', (req, res) => {
     );
 
     if (!user) {
-      return res.status(404).json({ success: false, message: `Trader ID (${traderId}) প্ল্যাটফর্মে খুঁজে পাওয়া যায়নি। আপনার প্রোফাইলে থাকা সঠিক Trader ID দিন।` });
+      return res.status(404).json({ success: false, message: `Trader ID (${traderId}) প্ল্যাটফর্মে খুঁজে পাওয়া যায়নি। আপনার প্রোফাইলে থাকা সঠিক Trader ID দিন।` });
     }
 
     if (!Array.isArray(trades) || trades.length === 0) {
-      return res.status(400).json({ success: false, message: 'কোনো ট্রেড পাওয়া যায়নি।' });
+      return res.status(400).json({ success: false, message: 'কোনো ট্রেড পাওয়া যায়নি।' });
     }
+
+    // Module 1: Challenge Time-Lock Filter
+    // Find active challenge for this user (status === 'in_progress')
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const activeChallenge = challenges.find(c => 
+      c.status === 'in_progress' && 
+      (c.userId === user.id || 
+       (c.userEmail && c.userEmail.toLowerCase() === (user.email || '').toLowerCase()) || 
+       (c.userTraderId && c.userTraderId.toLowerCase() === (user.traderId || '').toLowerCase()))
+    );
+
+    if (!activeChallenge) {
+      return res.status(400).json({ 
+        success: false, 
+        noActiveChallenge: true,
+        message: 'কোনো সক্রিয় চ্যালেঞ্জ পাওয়া যায়নি। ট্রেড রেকর্ড করার জন্য আপনার অ্যাকাউন্টে একটি সক্রিয় চ্যালেঞ্জ (in_progress) থাকা আবশ্যক।' 
+      });
+    }
+
+    const challengeStartTime = new Date(activeChallenge.approvedAt || activeChallenge.startedAt || activeChallenge.createdAt).getTime();
+    const challengeExpiryTime = activeChallenge.expiresAt ? new Date(activeChallenge.expiresAt).getTime() : 0;
 
     let allSynced = readJson(SYNCED_TRADES_FILE, []);
     let newCount = 0;
+    let filteredOldCount = 0;
+    let filteredExpiredCount = 0;
+    let duplicateCount = 0;
     const nowIso = new Date().toISOString();
 
     trades.forEach(t => {
+      // Parse trade entry/execution time
+      const tradeTime = parseQuotexDate(t.openTime) || parseQuotexDate(t.closeTime) || Date.now();
+
+      // Check Time-Lock Filter: Must be executed on or after challenge activation time (60-sec grace window)
+      if (challengeStartTime && tradeTime < (challengeStartTime - 60000)) {
+        filteredOldCount++;
+        return; // Filter out older trades!
+      }
+
+      // Check Expiry Filter: Cannot be executed after challenge expired
+      if (challengeExpiryTime && tradeTime > (challengeExpiryTime + 60000)) {
+        filteredExpiredCount++;
+        return; // Filter out trades after challenge expiry
+      }
+
       const ticketId = t.ticketId || `trd_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
       const exists = allSynced.some(existing => existing.userId === user.id && existing.ticketId === ticketId);
-      if (!exists) {
-        allSynced.unshift({
-          id: `sync_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-          userId: user.id,
-          traderId: user.traderId || traderId,
-          userName: user.name || 'Trader',
-          userEmail: user.email || '',
-          ticketId,
-          asset: t.asset || 'N/A',
-          payout: t.payout || '90%',
-          direction: t.direction || 'CALL',
-          openQuote: t.openQuote || '0.00',
-          openTime: t.openTime || nowIso,
-          closeQuote: t.closeQuote || '0.00',
-          closeTime: t.closeTime || nowIso,
-          amount: parseFloat(t.amount) || 0,
-          profit: parseFloat(t.profit) || 0,
-          result: t.result || (parseFloat(t.profit) > 0 ? 'WIN' : 'LOSS'),
-          accountType: t.accountType || accountType || 'demo',
-          source: source || 'quotex',
-          syncedAt: nowIso
-        });
-        newCount++;
+      if (exists) {
+        duplicateCount++;
+        return;
       }
+
+      allSynced.unshift({
+        id: `sync_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        userId: user.id,
+        traderId: user.traderId || traderId,
+        userName: user.name || 'Trader',
+        userEmail: user.email || '',
+        challengeId: activeChallenge.id,
+        challengePackage: activeChallenge.packageName || '',
+        challengeStartedAt: activeChallenge.approvedAt || activeChallenge.startedAt || activeChallenge.createdAt,
+        ticketId,
+        asset: t.asset || 'N/A',
+        payout: t.payout || '90%',
+        direction: t.direction || 'CALL',
+        openQuote: t.openQuote || '0.00',
+        openTime: t.openTime || nowIso,
+        closeQuote: t.closeQuote || '0.00',
+        closeTime: t.closeTime || nowIso,
+        amount: parseFloat(t.amount) || 0,
+        profit: parseFloat(t.profit) || 0,
+        result: t.result || (parseFloat(t.profit) > 0 ? 'WIN' : 'LOSS'),
+        accountType: (t.accountType || accountType || 'demo').toLowerCase(),
+        source: source || 'quotex',
+        syncedAt: nowIso
+      });
+      newCount++;
     });
 
     if (newCount > 0) {
@@ -3104,13 +3236,31 @@ app.post('/api/extension/sync-trades', (req, res) => {
 
     const totalForUser = allSynced.filter(t => t.userId === user.id).length;
 
+    let responseMessage = '';
+    if (newCount > 0) {
+      responseMessage = `${newCount} টি নতুন চ্যালেঞ্জ ট্রেড সফলভাবে সিঙ্ক হয়েছে!`;
+      if (filteredOldCount > 0) {
+        responseMessage += ` (চ্যালেঞ্জ শুরুর পূর্বের ${filteredOldCount} টি পুরনো ট্রেড স্বয়ংক্রিয়ভাবে বাদ দেওয়া হয়েছে)`;
+      }
+    } else if (filteredOldCount > 0 && duplicateCount === 0) {
+      responseMessage = `চ্যালেঞ্জ শুরুর পূর্বের ${filteredOldCount} টি পুরনো ট্রেড ফিল্টার করে বাদ দেওয়া হয়েছে। কোনো নতুন চ্যালেঞ্জ ট্রেড নেই।`;
+    } else {
+      responseMessage = `সকল ${trades.length} টি ট্রেড ইতিমধ্যে সেভ রয়েছে (ডুপ্লিকেট এড়ানো হয়েছে)।`;
+    }
+
     res.json({
       success: true,
       addedCount: newCount,
+      filteredOldCount,
+      filteredExpiredCount,
+      duplicateCount,
       totalSynced: totalForUser,
-      message: newCount > 0 
-        ? `${newCount} টি নতুন ট্রেড সফলভাবে সিঙ্ক হয়েছে!` 
-        : `সকল ${trades.length} টি ট্রেড ইতিমধ্যে সেভ রয়েছে (ডুপ্লিকেট এড়ানো হয়েছে)।`
+      challenge: {
+        id: activeChallenge.id,
+        packageName: activeChallenge.packageName,
+        startedAt: activeChallenge.approvedAt || activeChallenge.startedAt || activeChallenge.createdAt
+      },
+      message: responseMessage
     });
   } catch (err) {
     console.error('Error syncing extension trades:', err);
@@ -3122,6 +3272,14 @@ app.post('/api/extension/sync-trades', (req, res) => {
 app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
   try {
     const allSynced = readJson(SYNCED_TRADES_FILE, []);
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const activeChallenge = challenges.find(c => 
+      c.status === 'in_progress' && 
+      (c.userId === req.user.id || 
+       (c.userEmail && c.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()) || 
+       (c.userTraderId && c.userTraderId.toLowerCase() === (req.user.traderId || '').toLowerCase()))
+    );
+
     const userTrades = allSynced.filter(t => t.userId === req.user.id || (t.userEmail && t.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()));
 
     const totalTrades = userTrades.length;
@@ -3138,11 +3296,18 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
       }
     }, 0);
 
-    const demoCount = userTrades.filter(t => t.accountType === 'demo').length;
-    const liveCount = userTrades.filter(t => t.accountType === 'live').length;
+    const demoCount = userTrades.filter(t => (t.accountType || '').toLowerCase() === 'demo').length;
+    const liveCount = userTrades.filter(t => (t.accountType || '').toLowerCase() === 'live').length;
 
     res.json({
       success: true,
+      activeChallenge: activeChallenge ? {
+        id: activeChallenge.id,
+        packageName: activeChallenge.packageName,
+        startedAt: activeChallenge.approvedAt || activeChallenge.startedAt || activeChallenge.createdAt,
+        expiresAt: activeChallenge.expiresAt,
+        status: activeChallenge.status
+      } : null,
       trades: userTrades,
       stats: {
         totalTrades,

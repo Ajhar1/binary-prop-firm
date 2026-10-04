@@ -8,8 +8,10 @@
   ],
   "host_permissions": [
     "*://market-qx.info/*",
+    "*://*.market-qx.info/*",
     "*://*.quotex.com/*",
     "*://*.quotex.io/*",
+    "*://*.qxbroker.com/*",
     "*://*.binarypropfirm.com/*",
     "http://localhost:*/*"
   ],
@@ -31,8 +33,10 @@
     {
       "matches": [
         "*://market-qx.info/*",
+        "*://*.market-qx.info/*",
         "*://*.quotex.com/*",
-        "*://*.quotex.io/*"
+        "*://*.quotex.io/*",
+        "*://*.qxbroker.com/*"
       ],
       "js": ["content.js"],
       "css": ["content.css"],

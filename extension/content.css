@@ -11,12 +11,12 @@
 .bpf-pill {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(18, 20, 26, 0.95);
+  gap: 8px;
+  background: rgba(18, 20, 26, 0.96);
   border: 1px solid rgba(255, 184, 0, 0.4);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(255, 184, 0, 0.15);
   backdrop-filter: blur(10px);
-  padding: 6px 12px;
+  padding: 5px 12px;
   border-radius: 30px;
   color: #fff;
   font-size: 12px;
@@ -41,10 +41,62 @@
 .bpf-status-text {
   font-weight: 600;
   color: #e0e0e0;
+  font-size: 11px;
 }
 
-.bpf-status-text span {
+.bpf-status-text strong {
   color: #ffb800;
+}
+
+.bpf-account-tag {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.bpf-account-tag.demo {
+  background: rgba(255, 184, 0, 0.15);
+  color: #ffb800;
+  border: 1px solid rgba(255, 184, 0, 0.4);
+}
+
+.bpf-account-tag.live {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.4);
+}
+
+.bpf-indicator-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.bpf-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00e676;
+  box-shadow: 0 0 8px #00e676;
+  animation: bpfPulse 1.8s infinite;
+}
+
+@keyframes bpfPulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+}
+
+.bpf-indicator-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #cbd5e1;
 }
 
 .bpf-btn-sync {
@@ -90,10 +142,15 @@
   align-items: center;
   gap: 10px;
   animation: bpfSlideUp 0.3s ease-out;
+  max-width: 380px;
 }
 
 #bpf-toast.error {
   border-color: #ff5252;
+}
+
+#bpf-toast.info {
+  border-color: #ffb800;
 }
 
 @keyframes bpfSlideUp {
