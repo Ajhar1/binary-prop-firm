@@ -178,7 +178,7 @@
     "telegram": "@AfiaFarjana",
     "preferredBroker": "quotex",
     "payoutWallet": "",
-    "brokerAccountId": "",
+    "brokerAccountId": "Demo Account",
     "isEmailVerified": true,
     "createdAt": "2026-10-04T07:30:00.000Z",
     "updatedAt": "2026-10-04T08:00:00.000Z",

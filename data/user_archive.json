@@ -1,5 +1,23 @@
 [
   {
+    "archiveId": "arc_del_ch_1790644588128_hg2jv",
+    "timestamp": "2026-10-04T06:00:00.000Z",
+    "displayTime": "10/4/2026, 12:00:00 PM",
+    "action": "CHALLENGE_DELETED_BY_ADMIN",
+    "userId": "usr_1790644588120_nmqiyz",
+    "userName": "Rahim Trader",
+    "userEmail": "rahim.trader@gmail.com",
+    "telegram": "@RahimTrader",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790644588128_hg2jv",
+      "packageName": "Gold"
+    }
+  },
+  {
     "archiveId": "arc_1791090000000_afia_appr",
     "timestamp": "2026-10-04T08:00:00.000Z",
     "displayTime": "10/4/2026, 2:00:00 PM",

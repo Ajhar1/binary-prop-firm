@@ -225,6 +225,38 @@ function syncChallengesWithSubmissions() {
     let modified = false;
     const now = new Date();
 
+    // 0. Exclude challenges explicitly deleted by admin or belonging to deleted users
+    const deletedChallengeIds = new Set(
+      archive
+        .filter(a => a.action === 'CHALLENGE_DELETED_BY_ADMIN')
+        .map(a => (a.metadata && a.metadata.challengeId) || a.challengeId)
+        .filter(Boolean)
+    );
+    const deletedUserIds = new Set(
+      archive
+        .filter(a => a.action === 'USER_DELETED_BY_ADMIN')
+        .map(a => a.userId)
+        .filter(Boolean)
+    );
+
+    const isChallengeDeleted = (c) => {
+      if (!c) return true;
+      if (c.id && deletedChallengeIds.has(c.id)) return true;
+      if (c.userId && deletedUserIds.has(c.userId)) return true;
+      return false;
+    };
+
+    // Filter out deleted challenges from current challenges array
+    const initialChLen = challenges.length;
+    challenges = challenges.filter(c => !isChallengeDeleted(c));
+    if (challenges.length !== initialChLen) modified = true;
+
+    // Clean up permanent store if deleted challenge is still present
+    if (permChallenges.some(pc => isChallengeDeleted(pc))) {
+      permChallenges = permChallenges.filter(pc => !isChallengeDeleted(pc));
+      writeJson(CHALLENGES_PERMANENT_STORE_FILE, permChallenges);
+    }
+
     // 1. Permanent Auto-Healing: Merge challenges from CHALLENGES_PERMANENT_STORE_FILE
     const challengeMap = new Map();
     challenges.forEach(c => {
@@ -232,7 +264,7 @@ function syncChallengesWithSubmissions() {
     });
 
     permChallenges.forEach(pc => {
-      if (!pc || !pc.id) return;
+      if (isChallengeDeleted(pc)) return;
       if (!challengeMap.has(pc.id)) {
         challenges.push(pc);
         challengeMap.set(pc.id, pc);
@@ -250,12 +282,12 @@ function syncChallengesWithSubmissions() {
       }
     });
 
-    // 2. Archive Auto-Healing: Resurrect from user_archive if any purchased/approved challenge missing
+    // 2. Archive Auto-Healing: Resurrect from user_archive if any purchased/approved challenge missing (and not deleted)
     archive.forEach(arc => {
       if (arc.action === 'CHALLENGE_APPROVED' || arc.action === 'CHALLENGE_PURCHASED') {
         const meta = arc.metadata || {};
         const chId = meta.challengeId;
-        if (chId && !challengeMap.has(chId)) {
+        if (chId && !deletedChallengeIds.has(chId) && !deletedUserIds.has(arc.userId) && !challengeMap.has(chId)) {
           const isGold = meta.fundedAmount === 525 || meta.packageName === 'Gold';
           const recovered = {
             id: chId,
@@ -4630,14 +4662,23 @@ app.post('/api/admin/submissions/:id/request-resubmission', authenticateAdminTok
 
 // Delete Challenge Order (Admin)
 app.delete('/api/admin/challenges/:id', authenticateAdminToken, (req, res) => {
-  let challenges = readJson(CHALLENGES_FILE);
-  const found = challenges.find(c => c.id === req.params.id);
+  let challenges = readJson(CHALLENGES_FILE, []);
+  let permChallenges = readJson(CHALLENGES_PERMANENT_STORE_FILE, []);
+  const found = challenges.find(c => c.id === req.params.id) || permChallenges.find(c => c.id === req.params.id);
   if (!found) return res.status(404).json({ success: false, message: 'Challenge not found.' });
 
   challenges = challenges.filter(c => c.id !== req.params.id);
+  permChallenges = permChallenges.filter(c => c.id !== req.params.id);
   saveChallenges(challenges);
-  logUserArchive('CHALLENGE_DELETED_BY_ADMIN', { id: found.userId }, { challengeId: found.id, packageName: found.packageName });
-  res.json({ success: true, message: 'Challenge deleted successfully.' });
+
+  logUserArchive('CHALLENGE_DELETED_BY_ADMIN', 
+    { id: found.userId, name: found.userName, email: found.userEmail }, 
+    { challengeId: found.id, packageName: found.packageName }
+  );
+
+  syncChallengesWithSubmissions();
+
+  res.json({ success: true, message: 'চ্যালেঞ্জ অর্ডারটি সফলভাবে ডিলিট করা হয়েছে।' });
 });
 
 // Delete Trade Submission (Admin)
