@@ -221,6 +221,36 @@ function syncChallengesWithSubmissions() {
     let modified = false;
     const now = new Date();
 
+    // Ensure admin test challenge is seeded if missing on persistent storage
+    const hasAdminChallenge = challenges.some(c => (c.userTraderId === 'BPF-ADMIN-1' || (c.userEmail && c.userEmail.toLowerCase() === 'atharajhar6@gmail.com')) && c.status === 'in_progress');
+    if (!hasAdminChallenge) {
+      challenges.push({
+        id: "ch_1791079900000_admin",
+        userId: "usr_1790479914536_bjtgpe",
+        userName: "MD AJHAR",
+        userEmail: "atharajhar6@gmail.com",
+        userTraderId: "BPF-ADMIN-1",
+        userTelegram: "@MDAJHA1",
+        userBroker: "Quotex",
+        packageId: "pkg-bronze",
+        packageName: "Bronze",
+        fundedAmount: 100,
+        profitSplit: "85%",
+        maxDrawdown: "25%",
+        status: "in_progress",
+        sessionsRequired: 15,
+        sessionsCompleted: 0,
+        currentDrawdown: "0.0%",
+        approvedAt: "2026-10-04T00:00:00.000Z",
+        createdAt: "2026-10-04T00:00:00.000Z",
+        durationDays: 15,
+        challengePhase: "evaluation",
+        expiresAt: "2026-10-25T00:00:00.000Z",
+        isActive: true
+      });
+      modified = true;
+    }
+
     // Challenges are preserved for all users
     challenges.forEach(c => {
       // Ensure required evaluation metrics
