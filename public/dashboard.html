@@ -2876,12 +2876,6 @@
                                 <input type="number" class="form-control" id="freeMasPayoutQuota" value="1.85" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed;" />
                                 <small style="color:var(--text-secondary); font-size:0.72rem; margin-top:3px; display:block;" id="freeMasQuotaHelper">🔒 ৮৫% পেআউট (লকড)</small>
                             </div>
-                            <!-- 5. Stop Session Loss (LOCKED) -->
-                            <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Stop Session Loss (%)</label>
-                                <input type="number" class="form-control" id="freeMasStopLossPct" value="24" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed;" />
-                                <small style="color:var(--danger-red); font-size:0.72rem; margin-top:3px; display:block;" id="freeMasStopLossDollarText">🔒 ২৪% ম্যাক্স লস (লকড)</small>
-                            </div>
                         </div>
                     </div>
 
@@ -2903,95 +2897,6 @@
                         <span class="badge" style="background:rgba(46,204,113,0.15); color:var(--neon-green); border:1px solid rgba(46,204,113,0.3); padding:4px 10px; border-radius:16px; font-size:0.72rem; font-weight:750; white-space:nowrap;">
                             ফ্রী ও আনলিমিটেড
                         </span>
-                    </div>
-
-                    <!-- Live KPI Summary Metrics Grid (6 Boxes) -->
-                    <div class="mas-kpi-grid">
-                        <!-- 1. Current Balance -->
-                        <div class="mas-kpi-card">
-                            <div class="mas-kpi-lbl">
-                                <span>বর্তমান ব্যালেন্স (Cashier)</span>
-                                <i class="fas fa-coins" style="color:var(--yellow);"></i>
-                            </div>
-                            <div class="mas-kpi-val" id="freeMasKpiBalance">$0.00</div>
-                            <div class="mas-kpi-sub" id="freeMasKpiPnl" style="color:var(--text-secondary);">P&L: $0.00 (0.00%)</div>
-                        </div>
-
-                        <!-- 2. Next Stake / Episode (Prominently Highlighted) -->
-                        <div class="mas-kpi-card highlight-stake">
-                            <div class="mas-kpi-lbl">
-                                <span style="color:var(--yellow); font-weight:800;">পরবর্তী এন্ট্রি (Planned Stake)</span>
-                                <i class="fas fa-fire fa-beat" style="color:var(--yellow);"></i>
-                            </div>
-                            <div class="mas-kpi-val" id="freeMasKpiNextStake" style="color:var(--yellow);">$0.00</div>
-                            <div class="mas-kpi-sub" id="freeMasKpiStakeHelper" style="color:#fff;">পরবর্তী ট্রেডে এই সাইজ ধরুন</div>
-                        </div>
-
-                        <!-- 3. Target Final Capital -->
-                        <div class="mas-kpi-card">
-                            <div class="mas-kpi-lbl">
-                                <span>টার্গেট ক্যাপিটাল (Target)</span>
-                                <i class="fas fa-bullseye" style="color:var(--neon-green);"></i>
-                            </div>
-                            <div class="mas-kpi-val" id="freeMasKpiTargetCap" style="color:var(--neon-green);">$0.00</div>
-                            <div class="mas-kpi-sub" id="freeMasKpiTargetProfit" style="color:var(--neon-green);">নিট প্রফিট: +$0.00 (+6.03%)</div>
-                        </div>
-
-                        <!-- 4. Required Win Rate -->
-                        <div class="mas-kpi-card">
-                            <div class="mas-kpi-lbl">
-                                <span>প্রয়োজনীয় উইন রেট</span>
-                                <i class="fas fa-chart-pie" style="color:#60a5fa;"></i>
-                            </div>
-                            <div class="mas-kpi-val" id="freeMasKpiWinRate" style="color:#60a5fa;">37.50%</div>
-                            <div class="mas-kpi-sub" id="freeMasKpiWinRateSub">১৬টিতে মাত্র ৬টি উইন দরকার</div>
-                        </div>
-
-                        <!-- 5. Session Score & Progress -->
-                        <div class="mas-kpi-card">
-                            <div class="mas-kpi-lbl">
-                                <span>সেশন স্কোর (W / L)</span>
-                                <i class="fas fa-tasks" style="color:#a78bfa;"></i>
-                            </div>
-                            <div class="mas-kpi-val" id="freeMasKpiScore">0W - 0L</div>
-                            <div class="mas-kpi-sub" id="freeMasKpiRemaining">বাকি ট্রেড: ১৬ | বাকি উইন: ৬</div>
-                        </div>
-
-                        <!-- 6. Stop Session Loss -->
-                        <div class="mas-kpi-card">
-                            <div class="mas-kpi-lbl">
-                                <span>স্টপ সেশন লস (Stop Loss)</span>
-                                <i class="fas fa-hand-paper" style="color:var(--danger-red);"></i>
-                            </div>
-                            <div class="mas-kpi-val" id="freeMasKpiStopLoss" style="color:var(--danger-red);">$0.00</div>
-                            <div class="mas-kpi-sub" id="freeMasKpiMinBalance">মিনিমাম ব্যালেন্স: $0.00</div>
-                        </div>
-                    </div>
-
-                    <!-- Live Dynamic Session Direction / Status Banner -->
-                    <div id="freeMasStatusBanner" class="mas-status-banner mas-banner-running">
-                        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-                            <div id="freeMasBannerIcon" style="width:36px; height:36px; border-radius:50%; background:rgba(245,176,65,0.2); display:flex; align-items:center; justify-content:center; color:var(--yellow); font-size:1.1rem;">
-                                <i class="fas fa-play"></i>
-                            </div>
-                            <div>
-                                <div id="freeMasBannerTitle" style="font-weight:800; font-size:1rem; color:#fff;">
-                                    টেস্ট সেশন চলছে — ট্রেড #১
-                                </div>
-                                <div id="freeMasBannerMessage" style="font-size:0.86rem; color:var(--text-secondary); margin-top:2px;">
-                                    ব্রোকারে <strong style="color:var(--yellow); font-size:0.95rem;" id="freeMasBannerStake">$0.00</strong> এন্ট্রি নিন এবং টেবিলে <strong>WIN</strong> বা <strong>LOSS</strong> চাপুন।
-                                </div>
-                            </div>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:0.8rem; color:var(--text-secondary);">
-                                শর্টকাট: <span class="mas-key-badge">W</span> উইন <span class="mas-key-badge">L</span> লস <span class="mas-key-badge">Z</span> আনডু
-                            </span>
-                        </div>
-                        <!-- Win Progress Bar -->
-                        <div class="mas-progress-bar-wrap">
-                            <div id="freeMasProgressBar" class="mas-progress-fill-win" style="width:0%;"></div>
-                        </div>
                     </div>
 
                     <!-- Interactive Trade Log Table Header with Universal Undo Icon Button -->
@@ -7798,11 +7703,9 @@
             } catch (e) {
                 console.error('Error loading free masaniello state:', e);
             }
-            // Strict Locked Parameters as requested:
             freeMasState.totalTrades = 16;
             freeMasState.winTrades = 6;
             freeMasState.quota = 1.85;
-            freeMasState.stopLossPct = 0.24;
         }
 
         function saveFreeMasState() {
@@ -7824,22 +7727,14 @@
             } else {
                 freeMasState.capital = 100;
             }
-            const slText = document.getElementById('freeMasStopLossDollarText');
-            if (slText) {
-                slText.innerText = `🔒 ২৪% ম্যাক্স লস ($${(freeMasState.capital * 0.24).toFixed(2)})`;
-            }
             saveFreeMasState();
             calculateAndRenderFreeMasaniello();
         }
 
         function freeMasRecordTrade(outcome) {
             if (outcome !== 'w' && outcome !== 'l') return;
-            if (freeMasSessionStatus !== 'RUNNING') {
-                showToast('টেস্ট সেশন সমাপ্ত হয়েছে! নতুন টেস্ট শুরু করতে Reset বাটনে চাপুন।', 'info');
-                return;
-            }
             if (freeMasState.history.length >= 16) {
-                showToast('সর্বোচ্চ ১৬টি ট্রেড সম্পন্ন হয়েছে!', 'warning');
+                showToast('১৬টি ট্রেড সম্পন্ন হয়েছে! নতুন টেস্ট শুরু করতে Reset বাটনে চাপুন।', 'info');
                 return;
             }
             freeMasState.history.push(outcome);
@@ -7884,37 +7779,34 @@
             const totalTrades = 16;
             const winTrades = 6;
             const quota = 1.85;
-            const stopLossPct = 0.24;
             const mat = buildMasanielloMatrix(totalTrades, winTrades, quota);
-
-            const targetCapital = capital * mat[0][0];
-            const targetProfit = targetCapital - capital;
-            const targetGrowthPct = ((mat[0][0] - 1) * 100);
-            const reqWinRate = ((winTrades / totalTrades) * 100).toFixed(2);
-            const maxLossDollar = capital * stopLossPct;
-            const stopLossFloor = capital - maxLossDollar;
 
             let curBal = capital;
             let wins = 0;
             let losses = 0;
-            let sessionStatus = 'RUNNING';
-            let nextPlannedStake = 0;
-            let activeTradeNum = freeMasState.history.length + 1;
+            let cycleWins = 0;
+            let cycleLosses = 0;
 
             const tbody = document.getElementById('freeMasanielloTableBody');
             let rowsHtml = '';
 
             for (let i = 0; i < totalTrades; i++) {
                 const tradeNum = i + 1;
-                const m = wins + losses;
-                const k = wins;
+
+                // In Excel Masaniello: when target 6 wins is achieved in current cycle, it starts a new 6-win cycle with current balance!
+                if (cycleWins >= winTrades) {
+                    cycleWins = 0;
+                    cycleLosses = 0;
+                }
+
+                const m = cycleWins + cycleLosses;
+                const k = cycleWins;
+                const remainingInCycle = totalTrades - m;
 
                 let stake = 0;
-                if (k >= winTrades) {
-                    stake = 0;
-                } else if (winTrades - k === totalTrades - m) {
+                if (winTrades - k === remainingInCycle && remainingInCycle > 0) {
                     stake = curBal;
-                } else {
+                } else if (winTrades - k < remainingInCycle) {
                     const down = (mat[m + 1] && mat[m + 1][k] != null) ? mat[m + 1][k] : 0;
                     const diag = (mat[m + 1] && mat[m + 1][k + 1] != null) ? mat[m + 1][k + 1] : 0;
                     const denom = down + (quota - 1) * diag;
@@ -7924,11 +7816,20 @@
                         const factor = 1 - (quota * diag) / denom;
                         stake = factor * curBal;
                     }
+                } else {
+                    // When losses in current cycle make it impossible to reach 6 wins in remaining trades:
+                    // Excel Masaniello formula uses base stake percentage of current balance (approx 3.33%)
+                    const firstStakeFactor = (1 - (quota * mat[1][1]) / (mat[1][0] + (quota - 1) * mat[1][1]));
+                    stake = firstStakeFactor * curBal;
                 }
 
-                stake = Math.max(0.01, Math.round(stake * 100) / 100);
+                stake = Math.max(0.1, Math.round(stake * 100) / 100);
+                if (curBal > 0 && stake > curBal) {
+                    stake = Math.round(curBal * 100) / 100;
+                }
 
                 if (i < freeMasState.history.length) {
+                    // Completed Trade
                     const outcome = freeMasState.history[i];
                     let returnAmt = 0;
                     let retStr = '';
@@ -7938,11 +7839,13 @@
                         returnAmt = Math.round(stake * (quota - 1) * 100) / 100;
                         curBal = Math.round((curBal + returnAmt) * 100) / 100;
                         wins++;
+                        cycleWins++;
                         retStr = `<span style="color:var(--neon-green); font-weight:800;">+$${returnAmt.toFixed(2)}</span>`;
                         outcomeBadge = `<span class="mas-outcome-badge mas-outcome-w"><i class="fas fa-check"></i> WIN</span>`;
                     } else {
                         curBal = Math.round((curBal - stake) * 100) / 100;
                         losses++;
+                        cycleLosses++;
                         retStr = `<span style="color:var(--danger-red); font-weight:800;">-$${stake.toFixed(2)}</span>`;
                         outcomeBadge = `<span class="mas-outcome-badge mas-outcome-l"><i class="fas fa-times"></i> LOSS</span>`;
                     }
@@ -7969,133 +7872,55 @@
                             </td>
                         </tr>
                     `;
+                } else if (i === freeMasState.history.length) {
+                    // Current Active Trade (always active, NEVER blocked by stop loss or 6 wins!)
+                    rowsHtml += `
+                        <tr class="mas-active-row">
+                            <td><strong style="color:var(--yellow);">${tradeNum}</strong></td>
+                            <td style="font-weight:900; font-size:1.15rem; color:var(--yellow);">$${stake.toFixed(2)}</td>
+                            <td style="text-align:center;">
+                                <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                                    <button class="btn-mas-w" onclick="freeMasRecordTrade('w')" title="ট্রেড উইন হলে চাপুন (কীবোর্ড: W)">
+                                        <i class="fas fa-check"></i> WIN (W)
+                                    </button>
+                                    <button class="btn-mas-l" onclick="freeMasRecordTrade('l')" title="ট্রেড লস হলে চাপুন (কীবোর্ড: L)">
+                                        <i class="fas fa-times"></i> LOSS (L)
+                                    </button>
+                                </div>
+                            </td>
+                            <td style="color:var(--text-secondary); font-size:0.85rem;">অপেক্ষমান</td>
+                            <td><strong>$${curBal.toFixed(2)}</strong></td>
+                            <td style="font-size:0.85rem; font-weight:700;">
+                                <span style="color:var(--neon-green);">${wins}W</span> - <span style="color:var(--danger-red);">${losses}L</span>
+                            </td>
+                            <td>
+                                <span class="badge" style="background:rgba(245,176,65,0.2); color:var(--yellow); border:1px solid rgba(245,176,65,0.4); font-size:0.75rem; font-weight:800;">
+                                    <i class="fas fa-play"></i> Active Trade 🔥
+                                </span>
+                            </td>
+                        </tr>
+                    `;
                 } else {
-                    if (sessionStatus === 'RUNNING') {
-                        if (wins >= winTrades) {
-                            sessionStatus = 'WON';
-                        } else if (losses > totalTrades - winTrades) {
-                            sessionStatus = 'MAX_LOSS';
-                        } else if (curBal <= stopLossFloor) {
-                            sessionStatus = 'LIMIT_EXCEEDED';
-                        }
-                    }
-
-                    if (i === freeMasState.history.length && sessionStatus === 'RUNNING') {
-                        nextPlannedStake = stake;
-                        rowsHtml += `
-                            <tr class="mas-active-row">
-                                <td><strong style="color:var(--yellow);">${tradeNum}</strong></td>
-                                <td style="font-weight:900; font-size:1.15rem; color:var(--yellow);">$${stake.toFixed(2)}</td>
-                                <td style="text-align:center;">
-                                    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-                                        <button class="btn-mas-w" onclick="freeMasRecordTrade('w')" title="ট্রেড উইন হলে চাপুন (কীবোর্ড: W)">
-                                            <i class="fas fa-check"></i> WIN (W)
-                                        </button>
-                                        <button class="btn-mas-l" onclick="freeMasRecordTrade('l')" title="ট্রেড লস হলে চাপুন (কীবোর্ড: L)">
-                                            <i class="fas fa-times"></i> LOSS (L)
-                                        </button>
-                                    </div>
-                                </td>
-                                <td style="color:var(--text-secondary); font-size:0.85rem;">অপেক্ষমান</td>
-                                <td><strong>$${curBal.toFixed(2)}</strong></td>
-                                <td style="font-size:0.85rem; font-weight:700;">
-                                    <span style="color:var(--neon-green);">${wins}W</span> - <span style="color:var(--danger-red);">${losses}L</span>
-                                </td>
-                                <td>
-                                    <span class="badge" style="background:rgba(245,176,65,0.2); color:var(--yellow); border:1px solid rgba(245,176,65,0.4); font-size:0.75rem; font-weight:800;">
-                                        <i class="fas fa-play"></i> Active Trade 🔥
-                                    </span>
-                                </td>
-                            </tr>
-                        `;
-                    } else {
-                        rowsHtml += `
-                            <tr class="mas-pending-row">
-                                <td><strong>${tradeNum}</strong></td>
-                                <td style="color:var(--text-secondary);">~$${stake.toFixed(2)}</td>
-                                <td style="text-align:center; color:var(--text-secondary); font-size:0.85rem;">
-                                    <span>⏳ অপেক্ষমান</span>
-                                </td>
-                                <td style="color:var(--text-secondary);">-</td>
-                                <td style="color:var(--text-secondary);">-</td>
-                                <td style="color:var(--text-secondary);">-</td>
-                                <td>
-                                    <span style="color:var(--text-secondary); font-size:0.75rem;">Pending</span>
-                                </td>
-                            </tr>
-                        `;
-                    }
+                    // Pending future trades
+                    rowsHtml += `
+                        <tr class="mas-pending-row">
+                            <td><strong>${tradeNum}</strong></td>
+                            <td style="color:var(--text-secondary);">~$${stake.toFixed(2)}</td>
+                            <td style="text-align:center; color:var(--text-secondary); font-size:0.85rem;">
+                                <span>⏳ অপেক্ষমান</span>
+                            </td>
+                            <td style="color:var(--text-secondary);">-</td>
+                            <td style="color:var(--text-secondary);">-</td>
+                            <td style="color:var(--text-secondary);">-</td>
+                            <td>
+                                <span style="color:var(--text-secondary); font-size:0.75rem;">Pending</span>
+                            </td>
+                        </tr>
+                    `;
                 }
             }
 
             if (tbody) tbody.innerHTML = rowsHtml;
-            freeMasSessionStatus = sessionStatus;
-
-            // Update KPI cards
-            const kpiBal = document.getElementById('freeMasKpiBalance');
-            if (kpiBal) {
-                kpiBal.innerText = `$${curBal.toFixed(2)}`;
-                if (curBal > capital) kpiBal.style.color = 'var(--neon-green)';
-                else if (curBal < capital) kpiBal.style.color = 'var(--danger-red)';
-                else kpiBal.style.color = '#fff';
-            }
-
-            const pnl = curBal - capital;
-            const pnlPct = ((pnl / capital) * 100);
-            const kpiPnl = document.getElementById('freeMasKpiPnl');
-            if (kpiPnl) {
-                kpiPnl.innerHTML = `P&L: <strong style="color:${pnl >= 0 ? 'var(--neon-green)' : 'var(--danger-red)'};">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)</strong>`;
-            }
-
-            const kpiNextStake = document.getElementById('freeMasKpiNextStake');
-            if (kpiNextStake) {
-                kpiNextStake.innerText = sessionStatus === 'RUNNING' ? `$${nextPlannedStake.toFixed(2)}` : `$0.00`;
-            }
-
-            const kpiStakeHelper = document.getElementById('freeMasKpiStakeHelper');
-            if (kpiStakeHelper) {
-                if (sessionStatus === 'RUNNING') {
-                    kpiStakeHelper.innerText = `ট্রেড #${activeTradeNum}-এর নির্ধারিত ব্রোকার এন্ট্রি সাইজ`;
-                } else if (sessionStatus === 'WON') {
-                    kpiStakeHelper.innerText = `টার্গেট সফলভাবে অর্জিত হয়েছে`;
-                } else {
-                    kpiStakeHelper.innerText = `টেস্ট সেশন সমাপ্ত হয়েছে`;
-                }
-            }
-
-            const kpiTargetCap = document.getElementById('freeMasKpiTargetCap');
-            if (kpiTargetCap) kpiTargetCap.innerText = `$${targetCapital.toFixed(2)}`;
-
-            const kpiTargetProfit = document.getElementById('freeMasKpiTargetProfit');
-            if (kpiTargetProfit) {
-                kpiTargetProfit.innerText = `নিট প্রফিট: +$${targetProfit.toFixed(2)} (+${targetGrowthPct.toFixed(2)}%)`;
-            }
-
-            const kpiWinRate = document.getElementById('freeMasKpiWinRate');
-            if (kpiWinRate) kpiWinRate.innerText = `${reqWinRate}%`;
-
-            const kpiScore = document.getElementById('freeMasKpiScore');
-            if (kpiScore) kpiScore.innerText = `${wins}W - ${losses}L`;
-
-            const kpiRemaining = document.getElementById('freeMasKpiRemaining');
-            if (kpiRemaining) {
-                const remTrades = Math.max(0, totalTrades - (wins + losses));
-                const remWins = Math.max(0, winTrades - wins);
-                kpiRemaining.innerText = `বাকি ট্রেড: ${remTrades} | বাকি উইন: ${remWins}`;
-            }
-
-            const kpiStopLoss = document.getElementById('freeMasKpiStopLoss');
-            if (kpiStopLoss) kpiStopLoss.innerText = `$${maxLossDollar.toFixed(2)}`;
-
-            const kpiMinBalance = document.getElementById('freeMasKpiMinBalance');
-            if (kpiMinBalance) kpiMinBalance.innerText = `মিনিমাম ব্যালেন্স: $${stopLossFloor.toFixed(2)}`;
-
-            // Update Progress Bar
-            const progressBar = document.getElementById('freeMasProgressBar');
-            if (progressBar) {
-                const pct = Math.min(100, Math.round((wins / winTrades) * 100));
-                progressBar.style.width = pct + '%';
-            }
 
             // Update Undo Button state
             const btnUndo = document.getElementById('btnFreeMasUndo');
@@ -8108,38 +7933,6 @@
                     btnUndo.classList.add('no-history');
                     btnUndo.classList.remove('has-history');
                     btnUndo.title = 'আনডু করার মতো কোনো পূর্ববর্তী ট্রেড নেই';
-                }
-            }
-
-            // Update Status Banner
-            const banner = document.getElementById('freeMasStatusBanner');
-            const bIcon = document.getElementById('freeMasBannerIcon');
-            const bTitle = document.getElementById('freeMasBannerTitle');
-            const bMsg = document.getElementById('freeMasBannerMessage');
-
-            if (banner && bTitle && bMsg) {
-                banner.className = 'mas-status-banner';
-
-                if (sessionStatus === 'WON') {
-                    banner.classList.add('mas-banner-won');
-                    if (bIcon) bIcon.innerHTML = `<i class="fas fa-trophy" style="color:var(--neon-green);"></i>`;
-                    bTitle.innerHTML = `<span style="color:var(--neon-green); font-size:1.1rem;"><i class="fas fa-check-circle"></i> অভিনন্দন! টেস্ট সেশন সফলভাবে সম্পন্ন হয়েছে!</span>`;
-                    bMsg.innerHTML = `আলহামদুলিল্লাহ! আপনার টেস্ট টার্গেট <strong>${winTrades}টি উইন</strong> সম্পন্ন হয়েছে। মোট প্রফিট: <strong style="color:var(--neon-green); font-size:1.1rem;">+$${pnl.toFixed(2)} (+${pnlPct.toFixed(2)}%)</strong>। ফাইনাল ব্যালেন্স: <strong>$${curBal.toFixed(2)}</strong>। <button class="btn btn-sm btn-gold" onclick="resetFreeMasSession()" style="margin-left:12px; padding:4px 14px; font-weight:800; border-radius:8px;"><i class="fas fa-redo"></i> নতুন টেস্ট শুরু করুন</button>`;
-                } else if (sessionStatus === 'LIMIT_EXCEEDED') {
-                    banner.classList.add('mas-banner-loss');
-                    if (bIcon) bIcon.innerHTML = `<i class="fas fa-ban" style="color:var(--danger-red);"></i>`;
-                    bTitle.innerHTML = `<span style="color:var(--danger-red); font-size:1.1rem;"><i class="fas fa-exclamation-triangle"></i> টেস্ট সেশন সমাপ্ত (২৪% লিমিট অতিক্রম)</span>`;
-                    bMsg.innerHTML = `পরবর্তী ট্রেড সাইজ আপনার টেস্ট ক্যাপিটালের ২৪% ম্যাক্সিমাম রিস্ক সীমার বাইরে চলে গেছে। ব্যালেন্স সুরক্ষা যাচাই সম্পন্ন হয়েছে। <button class="btn btn-sm btn-outline-header" onclick="resetFreeMasSession()" style="margin-left:12px; padding:4px 14px; font-weight:800; border-radius:8px;"><i class="fas fa-redo"></i> নতুন টেস্ট শুরু করুন</button>`;
-                } else if (sessionStatus === 'MAX_LOSS') {
-                    banner.classList.add('mas-banner-loss');
-                    if (bIcon) bIcon.innerHTML = `<i class="fas fa-hand-paper" style="color:var(--danger-red);"></i>`;
-                    bTitle.innerHTML = `<span style="color:var(--danger-red); font-size:1.1rem;"><i class="fas fa-exclamation-triangle"></i> টেস্ট সেশন সমাপ্ত: সর্বোচ্চ লস লিমিট স্পর্শ করেছে</span>`;
-                    bMsg.innerHTML = `টেস্ট সেশনের সর্বোচ্চ লস সীমা (${losses}টি লস) হয়েছে। বাকি ট্রেড দিয়ে ৬টি উইন অর্জন সম্ভব নয়। <button class="btn btn-sm btn-outline-header" onclick="resetFreeMasSession()" style="margin-left:12px; padding:4px 14px; font-weight:800; border-radius:8px;"><i class="fas fa-redo"></i> নতুন টেস্ট শুরু করুন</button>`;
-                } else {
-                    banner.classList.add('mas-banner-running');
-                    if (bIcon) bIcon.innerHTML = `<i class="fas fa-play" style="color:var(--yellow);"></i>`;
-                    bTitle.innerText = `টেস্ট সেশন চলমান — ট্রেড #${activeTradeNum}`;
-                    bMsg.innerHTML = `ব্রোকারে <strong style="color:var(--yellow); font-size:1.05rem;">$${nextPlannedStake.toFixed(2)}</strong> সাইজে টেস্ট ট্রেড ওপেন করুন। ট্রেডের রেজাল্ট অনুযায়ী টেবিলে <strong>WIN (W)</strong> অথবা <strong>LOSS (L)</strong> বাটন চাপুন।`;
                 }
             }
         }
@@ -8174,8 +7967,6 @@
             if (freeWins) freeWins.value = 6;
             const freeQuota = document.getElementById('freeMasPayoutQuota');
             if (freeQuota) freeQuota.value = 1.85;
-            const freeStop = document.getElementById('freeMasStopLossPct');
-            if (freeStop) freeStop.value = 24;
 
             calculateAndRenderMasaniello();
             calculateAndRenderFreeMasaniello();
