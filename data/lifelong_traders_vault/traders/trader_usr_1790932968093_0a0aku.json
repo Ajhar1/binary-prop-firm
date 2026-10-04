@@ -1,0 +1,16 @@
+{
+  "id": "usr_1790932968093_0a0aku",
+  "name": "Ashraful",
+  "email": "fxashraful476@gmail.com",
+  "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+  "role": "user",
+  "telegram": "@AshrafulTrader",
+  "preferredBroker": "quotex",
+  "payoutWallet": "",
+  "brokerAccountId": "92940617",
+  "isEmailVerified": true,
+  "createdAt": "2026-10-02T11:40:00.000Z",
+  "updatedAt": "2026-10-02T11:44:19.659Z",
+  "traderId": "AJ-1008",
+  "profilePicture": null
+}

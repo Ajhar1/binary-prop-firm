@@ -1,5 +1,168 @@
 [
   {
+    "archiveId": "arc_1791121410376_ni2b",
+    "timestamp": "2026-10-04T13:43:30.376Z",
+    "displayTime": "10/4/2026, 7:43:30 PM",
+    "action": "CHALLENGE_APPROVED",
+    "userId": "usr_1791120812017_u9oqh3",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1791121315017_orl9s",
+      "packageName": "Bronze",
+      "mmSerial": 1,
+      "mmTitle": "অফিসিয়াল মানি ম্যানেজমেন্ট শিট #১"
+    }
+  },
+  {
+    "archiveId": "arc_1791121315018_as5f",
+    "timestamp": "2026-10-04T13:41:55.018Z",
+    "displayTime": "10/4/2026, 7:41:55 PM",
+    "action": "CHALLENGE_PURCHASED",
+    "userId": "usr_1791120812017_u9oqh3",
+    "userName": "Rabiul Hossain",
+    "userEmail": "01835020991r@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1791121315017_orl9s",
+      "packageName": "Bronze",
+      "fundedAmount": 100,
+      "broker": "Quotex",
+      "paymentMethod": "bKash (Personal - Send Money)",
+      "paymentTxId": "DJ40F290EU",
+      "senderNumber": "01835020991",
+      "localAmount": 508,
+      "currency": "BDT",
+      "exchangeRate": 127
+    }
+  },
+  {
+    "archiveId": "arc_1791120831655_351r",
+    "timestamp": "2026-10-04T13:33:51.655Z",
+    "displayTime": "10/4/2026, 7:33:51 PM",
+    "action": "EMAIL_VERIFIED",
+    "userId": "usr_1791120812017_u9oqh3",
+    "userName": "Rabiul Hossain",
+    "userEmail": "01835020991r@gmail.com",
+    "telegram": "@rabiul8880",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": true,
+    "metadata": {
+      "method": "otp"
+    }
+  },
+  {
+    "archiveId": "arc_1791120812019_5spw",
+    "timestamp": "2026-10-04T13:33:32.019Z",
+    "displayTime": "10/4/2026, 7:33:32 PM",
+    "action": "USER_REGISTERED",
+    "userId": "usr_1791120812017_u9oqh3",
+    "userName": "Rabiul Hossain",
+    "userEmail": "01835020991r@gmail.com",
+    "telegram": "@rabiul8880",
+    "preferredBroker": "quotex",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "ip": "127.0.0.1"
+    }
+  },
+  {
+    "archiveId": "arc_1791117805520_1fck",
+    "timestamp": "2026-10-04T12:43:25.520Z",
+    "displayTime": "10/4/2026, 6:43:25 PM",
+    "action": "CHALLENGE_DISQUALIFIED_RULE_VIOLATION",
+    "userId": "usr_1790947201000_m7cb0",
+    "userName": "MD ZAHID HASAN",
+    "userEmail": "rsgaming6321@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790947201248_m7cb0",
+      "packageName": "Bronze",
+      "violatedRule": "রুল ৩: শিটের বাহিরে ডেমোতে ট্রেড করা সম্পূর্ণ নিষিদ্ধ (শিট বহির্ভূত ট্রেড)",
+      "reasonNote": "প্ল্যাটফর্মের \"রুল ৩: শিটের বাহিরে ডেমোতে ট্রেড করা সম্পূর্ণ নিষিদ্ধ (শিট বহির্ভূত ট্রেড)\" করার কারণে আপনাকে এই চ্যালেঞ্জ থেকে বাদ দেওয়া হলো এবং চ্যালেঞ্জটি বন্ধ করা হলো।",
+      "failReason": "RULE_VIOLATION"
+    }
+  },
+  {
+    "archiveId": "arc_1791117792950_mkyw",
+    "timestamp": "2026-10-04T12:43:12.950Z",
+    "displayTime": "10/4/2026, 6:43:12 PM",
+    "action": "CHALLENGE_REACTIVATED_BY_ADMIN",
+    "userId": "usr_1790947201000_m7cb0",
+    "userName": "MD ZAHID HASAN",
+    "userEmail": "rsgaming6321@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790947201248_m7cb0",
+      "packageName": "Bronze",
+      "previousRule": "রুল ৩: শিটের বাহিরে ডেমোতে ট্রেড করা সম্পূর্ণ নিষিদ্ধ (শিট বহির্ভূত ট্রেড)",
+      "previousReasonText": "প্ল্যাটফর্মের \"রুল ৩: শিটের বাহিরে ডেমোতে ট্রেড করা সম্পূর্ণ নিষিদ্ধ (শিট বহির্ভূত ট্রেড)\" করার কারণে আপনাকে এই চ্যালেঞ্জ থেকে বাদ দেওয়া হলো এবং চ্যালেঞ্জটি বন্ধ করা হলো।",
+      "reactivationMessage": "সম্মানিত ট্রেডার, ভুলবশত আপনা�� অ্যাকাউন্টের চ্যালেঞ্জটি সাময়িকভাবে বন্ধ করা হয়েছিল। আপনার চ্যালেঞ্জটি পুনরায় সফলভাবে সক্রিয় করা হয়েছে এবং আগের সকল ডাটা, সম্পন্ন সেশন ও মানি ম্যানেজমেন্ট শিট সম্পূর্ণ অক্ষত রয়েছে। আপনি যথারীতি মানি ম্যানেজমেন্ট শিট অনুযায়ী ট্রেডিং চালিয়ে যেতে পারেন। সাময়িক অসুবিধার জন্য আমরা আন্তরিকভাবে দুঃখিত।",
+      "sessionsCompleted": 0
+    }
+  },
+  {
+    "archiveId": "arc_1791117783230_ly5p",
+    "timestamp": "2026-10-04T12:43:03.230Z",
+    "displayTime": "10/4/2026, 6:43:03 PM",
+    "action": "CHALLENGE_DISQUALIFIED_RULE_VIOLATION",
+    "userId": "usr_1790947201000_m7cb0",
+    "userName": "MD ZAHID HASAN",
+    "userEmail": "rsgaming6321@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790947201248_m7cb0",
+      "packageName": "Bronze",
+      "violatedRule": "রুল ৩: শিটের বাহিরে ডেমোতে ট্রেড করা সম্পূর্ণ নিষিদ্ধ (শিট বহির্ভূত ট্রেড)",
+      "reasonNote": "প্ল্যাটফর্মের \"রুল ৩: শিটের বাহিরে ডেমোতে ট্রেড করা সম্পূর্ণ নিষিদ্ধ (শিট বহির্ভূত ট্রেড)\" করার কারণে আপনাকে এই চ্যালেঞ্জ থেকে বাদ দেওয়া হলো এবং চ্যালেঞ্জটি বন্ধ করা হলো।",
+      "failReason": "RULE_VIOLATION"
+    }
+  },
+  {
+    "archiveId": "arc_1791117525051_tkxg",
+    "timestamp": "2026-10-04T12:38:45.051Z",
+    "displayTime": "10/4/2026, 6:38:45 PM",
+    "action": "PRACTICE_AUTO_TRANSITION_TO_EVALUATION",
+    "userId": "usr_1790932968093_0a0aku",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1790947711951_m7uc4",
+      "packageName": "Bronze",
+      "transitionReason": "48-hour practice period completed"
+    }
+  },
+  {
     "archiveId": "arc_del_ch_1790644588128_hg2jv",
     "timestamp": "2026-10-04T06:00:00.000Z",
     "displayTime": "10/4/2026, 12:00:00 PM",

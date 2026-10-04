@@ -1,0 +1,16 @@
+{
+  "id": "usr_1791090000000_afia",
+  "name": "Afia Farjana",
+  "email": "afiafarjana933@gmail.com",
+  "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+  "role": "user",
+  "telegram": "@AfiaFarjana",
+  "preferredBroker": "quotex",
+  "payoutWallet": "",
+  "brokerAccountId": "Demo Account",
+  "isEmailVerified": true,
+  "createdAt": "2026-10-04T07:30:00.000Z",
+  "updatedAt": "2026-10-04T08:00:00.000Z",
+  "traderId": "AJ-1010",
+  "profilePicture": null
+}

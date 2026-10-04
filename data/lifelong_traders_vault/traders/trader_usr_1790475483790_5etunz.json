@@ -1,0 +1,15 @@
+{
+  "id": "usr_1790475483790_5etunz",
+  "name": "MD Ajhar",
+  "email": "ajhar@test.com",
+  "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+  "role": "user",
+  "telegram": "@MDAjharTest",
+  "preferredBroker": "quotex",
+  "payoutWallet": "",
+  "brokerAccountId": "3298104",
+  "isEmailVerified": true,
+  "createdAt": "2026-09-27T02:18:03.790Z",
+  "traderId": "AJ-1003",
+  "profilePicture": null
+}

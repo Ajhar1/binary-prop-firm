@@ -4612,13 +4612,26 @@
             }).join('');
         }
 
-        // Delete User Account
+        // Delete User Account - STRICTLY PROTECTED BY MASTER PASSWORD 'AJHAR1'
         async function handleDeleteUser(userId, userName) {
-            if (!confirm(`আপনি কি নিশ্চিত যে ট্রেডার "${userName}" এর একাউন্ট ও সকল রেকর্ড সম্পূর্ণ মুছে ফেলতে চান?`)) return;
+            if (!confirm(`⚠️ সতর্কবার্তা! আপনি কি নিশ্চিত যে ট্রেডার "${userName}" এর একাউন্ট ও সকল রেকর্ড মুছে ফেলতে চান?`)) return;
+            const masterPass = prompt(`🔒 উচ্চ নিরাপত্তা লক:\nট্রেডার "${userName}" একাউন্ট মোছার জন্য মাস্টার সিকিউরিটি পাসওয়ার্ড লিখুন:`);
+            if (!masterPass) {
+                showToast('অপারেশন বাতিল করা হয়েছে।', 'info');
+                return;
+            }
+            if (masterPass.trim() !== 'AJHAR1') {
+                showToast('ভুল মাস্টার সিকিউরিটি পাসওয়ার্ড! একাউন্ট মোছা সম্পূর্ণ নিষিদ্ধ।', 'error');
+                return;
+            }
             try {
                 const res = await fetch(`/api/admin/users/${userId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ masterPassword: masterPass.trim() })
                 });
                 const data = await res.json();
                 if (data.success) {

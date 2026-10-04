@@ -1,0 +1,18 @@
+{
+  "id": "usr_1791120812017_u9oqh3",
+  "traderId": "AJ-1011",
+  "name": "Rabiul Hossain",
+  "email": "01835020991r@gmail.com",
+  "password": "$2a$10$T8jM.RjReyQM/p3ZN7PxRenVOftTtQiBCGjbMQ78CLhLX5uYil8xu",
+  "role": "user",
+  "telegram": "@rabiul8880",
+  "preferredBroker": "quotex",
+  "payoutWallet": "",
+  "brokerAccountId": "94325851",
+  "profilePicture": null,
+  "isEmailVerified": true,
+  "emailVerificationCode": null,
+  "emailVerificationExpires": null,
+  "createdAt": "2026-10-04T13:33:32.018Z",
+  "emailVerifiedAt": "2026-10-04T13:33:51.654Z"
+}

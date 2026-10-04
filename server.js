@@ -34,9 +34,14 @@ const SUPPORT_FILE = path.join(DATA_DIR, 'support_tickets.json');
 const TRADER_STATES_FILE = path.join(DATA_DIR, 'trader_states.json');
 const SYNCED_TRADES_FILE = path.join(DATA_DIR, 'synced_trades.json');
 const DOWNLOADS_DIR = path.join(__dirname, 'public', 'downloads');
+const TRADERS_VAULT_DIR = path.join(DATA_DIR, 'lifelong_traders_vault');
+const TRADERS_VAULT_FILE = path.join(TRADERS_VAULT_DIR, 'master_registered_traders_vault.json');
+const TRADERS_VAULT_PROFILES_DIR = path.join(TRADERS_VAULT_DIR, 'traders');
+const TRADERS_VAULT_AUDIT_LOG = path.join(TRADERS_VAULT_DIR, 'vault_audit_log.jsonl');
+const MASTER_SECURITY_PASSWORD = 'AJHAR1';
 
 // Ensure directories exist
-[DATA_DIR, UPLOADS_DIR, BACKUPS_DIR, DOWNLOADS_DIR].forEach(dir => {
+[DATA_DIR, UPLOADS_DIR, BACKUPS_DIR, DOWNLOADS_DIR, TRADERS_VAULT_DIR, TRADERS_VAULT_PROFILES_DIR].forEach(dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
@@ -101,6 +106,115 @@ function logUserArchive(action, userDetails = {}, metadata = {}) {
   }
 }
 
+// Lifelong Traders Vault: Supreme Immutable Registration Store
+// Guarantees registered traders can NEVER be lost, erased, or locked out, across 5-10+ years
+function saveTraderToLifelongVault(user) {
+  if (!user || !user.email) return;
+  try {
+    if (!fs.existsSync(TRADERS_VAULT_DIR)) fs.mkdirSync(TRADERS_VAULT_DIR, { recursive: true });
+    if (!fs.existsSync(TRADERS_VAULT_PROFILES_DIR)) fs.mkdirSync(TRADERS_VAULT_PROFILES_DIR, { recursive: true });
+
+    const normEmail = user.email.trim().toLowerCase();
+    const vault = readJson(TRADERS_VAULT_FILE, []);
+    const idx = vault.findIndex(u => (u.email && u.email.trim().toLowerCase() === normEmail) || (user.id && u.id === user.id));
+    if (idx >= 0) {
+      // Never allow valid password hash to be replaced with empty or dummy
+      const existingPass = vault[idx].password;
+      vault[idx] = { ...vault[idx], ...user };
+      if ((!user.password || user.password.length < 15) && existingPass && existingPass.length >= 15) {
+        vault[idx].password = existingPass;
+      }
+    } else {
+      vault.push(user);
+    }
+    writeJson(TRADERS_VAULT_FILE, vault);
+
+    const safeFileId = (user.id || normEmail).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const profileFile = path.join(TRADERS_VAULT_PROFILES_DIR, `trader_${safeFileId}.json`);
+    fs.writeFileSync(profileFile, JSON.stringify(user, null, 2), 'utf8');
+
+    const logEntry = JSON.stringify({
+      timestamp: new Date().toISOString(),
+      action: 'VAULT_PRESERVE_TRADER',
+      traderId: user.traderId || 'N/A',
+      userId: user.id || 'N/A',
+      email: user.email,
+      name: user.name
+    }) + '\n';
+    fs.appendFileSync(TRADERS_VAULT_AUDIT_LOG, logEntry, 'utf8');
+  } catch (err) {
+    console.error('[LIFELONG VAULT SAVE ERROR]:', err);
+  }
+}
+
+function readAllFromLifelongVault() {
+  const traders = [];
+  const seenEmails = new Set();
+  const seenIds = new Set();
+
+  const addTrader = (t) => {
+    if (!t || !t.email) return;
+    const ne = t.email.trim().toLowerCase();
+    if (!seenEmails.has(ne)) {
+      seenEmails.add(ne);
+      if (t.id) seenIds.add(t.id);
+      traders.push(t);
+    }
+  };
+
+  const masterList = readJson(TRADERS_VAULT_FILE, []);
+  if (Array.isArray(masterList)) {
+    masterList.forEach(addTrader);
+  }
+
+  if (fs.existsSync(TRADERS_VAULT_PROFILES_DIR)) {
+    try {
+      const files = fs.readdirSync(TRADERS_VAULT_PROFILES_DIR);
+      files.forEach(f => {
+        if (f.endsWith('.json')) {
+          try {
+            const p = JSON.parse(fs.readFileSync(path.join(TRADERS_VAULT_PROFILES_DIR, f), 'utf8'));
+            addTrader(p);
+          } catch (e) {}
+        }
+      });
+    } catch (e) {}
+  }
+
+  return traders;
+}
+
+function removeTraderFromLifelongVault(userId, email, masterPassword) {
+  if (masterPassword !== MASTER_SECURITY_PASSWORD) {
+    throw new Error('Unauthorized: Master Security Password (AJHAR1) required to touch Lifelong Vault');
+  }
+  try {
+    const vault = readJson(TRADERS_VAULT_FILE, []);
+    const normEmail = (email || '').trim().toLowerCase();
+    const updatedVault = vault.filter(u => {
+      const uEmail = (u.email || '').trim().toLowerCase();
+      return u.id !== userId && (!normEmail || uEmail !== normEmail);
+    });
+    writeJson(TRADERS_VAULT_FILE, updatedVault);
+
+    const safeFileId = (userId || normEmail).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const profileFile = path.join(TRADERS_VAULT_PROFILES_DIR, `trader_${safeFileId}.json`);
+    if (fs.existsSync(profileFile)) {
+      try { fs.unlinkSync(profileFile); } catch (e) {}
+    }
+
+    const logEntry = JSON.stringify({
+      timestamp: new Date().toISOString(),
+      action: 'VAULT_REMOVE_TRADER_WITH_MASTER_KEY',
+      userId,
+      email
+    }) + '\n';
+    fs.appendFileSync(TRADERS_VAULT_AUDIT_LOG, logEntry, 'utf8');
+  } catch (err) {
+    console.error('[REMOVE TRADER VAULT ERROR]:', err);
+  }
+}
+
 // Automatic and manual database snapshot backup creator
 function createDatabaseBackup(type = 'auto') {
   try {
@@ -114,6 +228,7 @@ function createDatabaseBackup(type = 'auto') {
     const filesToBackup = [
       USERS_FILE,
       USERS_PERMANENT_STORE_FILE,
+      TRADERS_VAULT_FILE,
       CHALLENGES_FILE,
       CHALLENGES_PERMANENT_STORE_FILE,
       SUBMISSIONS_FILE,
@@ -1035,16 +1150,16 @@ function syncUsersWithAllData() {
     const archive = readJson(ARCHIVE_FILE, []);
     let modified = false;
 
-    // Exclude users explicitly deleted by admin or dummy test scratch emails
+    // Exclude users ONLY if explicitly deleted with master security key (AJHAR1) or dev test typo
     const deletedEmails = new Set(
       archive
-        .filter(a => a.action === 'USER_DELETED_BY_ADMIN')
+        .filter(a => a.action === 'USER_DELETED_WITH_MASTER_KEY')
         .map(a => (a.userEmail || '').trim().toLowerCase())
         .filter(Boolean)
     );
     const deletedIds = new Set(
       archive
-        .filter(a => a.action === 'USER_DELETED_BY_ADMIN')
+        .filter(a => a.action === 'USER_DELETED_WITH_MASTER_KEY')
         .map(a => a.userId)
         .filter(Boolean)
     );
@@ -1080,7 +1195,30 @@ function syncUsersWithAllData() {
     // 1. Index users from users.json
     users.forEach(u => registerUser(u));
 
-    // 2. Merge from permanent store
+    // 2. Merge from Lifelong Vault (Highest priority permanent store for registered traders)
+    const vaultUsers = readAllFromLifelongVault();
+    vaultUsers.forEach(vu => {
+      if (isExcluded(vu.email, vu.id)) return;
+      const normEmail = vu.email ? vu.email.trim().toLowerCase() : '';
+      let existing = (normEmail && userByEmail.get(normEmail)) || (vu.id && userById.get(vu.id));
+      if (!existing) {
+        users.push(vu);
+        registerUser(vu);
+        modified = true;
+      } else {
+        // Protect existing password: if existing password is short/invalid, use vault's bcrypt hash
+        if (vu.password && (!existing.password || existing.password.length < 20)) {
+          existing.password = vu.password;
+          modified = true;
+        }
+        if (!existing.traderId && vu.traderId) { existing.traderId = vu.traderId; modified = true; }
+        if (!existing.brokerAccountId && vu.brokerAccountId) { existing.brokerAccountId = vu.brokerAccountId; modified = true; }
+        if (!existing.telegram && vu.telegram) { existing.telegram = vu.telegram; modified = true; }
+        if (vu.isEmailVerified && !existing.isEmailVerified) { existing.isEmailVerified = true; modified = true; }
+      }
+    });
+
+    // 3. Merge from permanent store
     permUsers.forEach(pu => {
       if (isExcluded(pu.email, pu.id)) return;
       const normEmail = pu.email ? pu.email.trim().toLowerCase() : '';
@@ -1213,6 +1351,13 @@ function syncUsersWithAllData() {
       writeJson(USERS_FILE, users);
       writeJson(USERS_PERMANENT_STORE_FILE, users);
     }
+
+    // 8. Guarantee every valid user is mirrored to Lifelong Vault
+    users.forEach(u => {
+      if (u && u.email && !isExcluded(u.email, u.id)) {
+        saveTraderToLifelongVault(u);
+      }
+    });
 
     return users;
   } catch (err) {
@@ -2059,6 +2204,7 @@ app.post('/api/auth/register', async (req, res) => {
     users.push(newUser);
     writeJson(USERS_FILE, users);
     writeJson(USERS_PERMANENT_STORE_FILE, users);
+    saveTraderToLifelongVault(newUser);
 
     // Permanently archive user creation
     logUserArchive('USER_REGISTERED', newUser, { ip: req.ip || req.connection.remoteAddress });
@@ -2130,6 +2276,8 @@ app.post('/api/auth/verify-email', async (req, res) => {
     user.emailVerificationExpires = null;
     user.emailVerifiedAt = new Date().toISOString();
     writeJson(USERS_FILE, users);
+    writeJson(USERS_PERMANENT_STORE_FILE, users);
+    saveTraderToLifelongVault(user);
     logUserArchive('EMAIL_VERIFIED', user, { method: 'otp' });
 
     const token = jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role || 'user' }, JWT_SECRET, { expiresIn: '15d' });
@@ -2210,12 +2358,18 @@ app.post('/api/auth/login', async (req, res) => {
     const cleanedEmail = rawEmail.toLowerCase();
     const normalizedEmail = normalizeEmail(rawEmail);
 
-    const users = readJson(USERS_FILE);
-    let user = users.find(u => u.email.toLowerCase() === cleanedEmail);
+    let users = readJson(USERS_FILE, []);
+    let user = users.find(u => u.email && u.email.toLowerCase() === cleanedEmail);
 
     // If direct match failed, try normalized match (fixes typos like .come -> .com, @gamil -> @gmail)
     if (!user && normalizedEmail && normalizedEmail !== cleanedEmail) {
-      user = users.find(u => u.email.toLowerCase() === normalizedEmail);
+      user = users.find(u => u.email && u.email.toLowerCase() === normalizedEmail);
+    }
+
+    // High reliability fallback: Auto-sync with Lifelong Vault if not found immediately
+    if (!user) {
+      users = syncUsersWithAllData();
+      user = users.find(u => u.email && (u.email.toLowerCase() === cleanedEmail || (normalizedEmail && u.email.toLowerCase() === normalizedEmail)));
     }
 
     if (!user) {
@@ -2331,6 +2485,8 @@ app.post('/api/auth/reset-password', async (req, res) => {
     user.passwordResetExpires = null;
     user.updatedAt = new Date().toISOString();
     writeJson(USERS_FILE, users);
+    writeJson(USERS_PERMANENT_STORE_FILE, users);
+    saveTraderToLifelongVault(user);
     logUserArchive('PASSWORD_RESET', user);
 
     res.json({
@@ -2391,6 +2547,8 @@ app.post('/api/auth/update-profile', authenticateToken, (req, res) => {
   users[idx].updatedAt = new Date().toISOString();
 
   writeJson(USERS_FILE, users);
+  writeJson(USERS_PERMANENT_STORE_FILE, users);
+  saveTraderToLifelongVault(users[idx]);
   logUserArchive('PROFILE_UPDATED', users[idx]);
 
   res.json({
@@ -2488,6 +2646,8 @@ app.post('/api/user/change-password', authenticateToken, async (req, res) => {
     user.password = await bcrypt.hash(newPassword.trim(), salt);
     user.updatedAt = new Date().toISOString();
     writeJson(USERS_FILE, users);
+    writeJson(USERS_PERMANENT_STORE_FILE, users);
+    saveTraderToLifelongVault(user);
 
     logUserArchive('PASSWORD_CHANGED', user);
 
@@ -4017,8 +4177,17 @@ app.post('/api/admin/users/:id/toggle-verify', authenticateAdminToken, (req, res
   });
 });
 
-// Delete User Account by Admin
+// Delete User Account by Admin - STRICTLY GATED BY MASTER PASSWORD 'AJHAR1'
 app.delete('/api/admin/users/:id', authenticateAdminToken, (req, res) => {
+  const masterPassword = (req.body && req.body.masterPassword) || req.headers['x-master-password'];
+  if (!masterPassword || masterPassword.trim() !== MASTER_SECURITY_PASSWORD) {
+    console.warn(`[SECURITY ALERT] Unauthorized deletion attempt for user ${req.params.id} rejected. Master key missing/invalid.`);
+    return res.status(403).json({
+      success: false,
+      message: 'অননুমোদিত প্রচেষ্টা: মাস্টার সিকিউরিটি পাসওয়ার্ড (AJHAR1) ছাড়া কোনো ট্রেডার একাউন্ট মোছা অসম্ভব ও কঠোরভাবে নিষিদ্ধ।'
+    });
+  }
+
   let users = syncUsersWithAllData();
   const target = users.find(u => u.id === req.params.id);
   if (!target) return res.status(404).json({ success: false, message: 'User not found.' });
@@ -4028,6 +4197,9 @@ app.delete('/api/admin/users/:id', authenticateAdminToken, (req, res) => {
   writeJson(USERS_FILE, users);
   writeJson(USERS_PERMANENT_STORE_FILE, users);
 
+  // Remove from lifelong vault with validated master key
+  removeTraderFromLifelongVault(target.id, target.email, masterPassword.trim());
+
   // Clean up user's challenges and submissions
   let challenges = readJson(CHALLENGES_FILE).filter(c => c.userId !== req.params.id);
   saveChallenges(challenges);
@@ -4035,7 +4207,7 @@ app.delete('/api/admin/users/:id', authenticateAdminToken, (req, res) => {
   let submissions = readJson(SUBMISSIONS_FILE).filter(s => s.userId !== req.params.id);
   writeJson(SUBMISSIONS_FILE, submissions);
 
-  logUserArchive('USER_DELETED_BY_ADMIN', target);
+  logUserArchive('USER_DELETED_WITH_MASTER_KEY', target, { deletedBy: req.user ? req.user.email : 'Admin', ip: req.ip });
   res.json({ success: true, message: `ট্রেডার একাউন্ট "${target.name}" (${target.traderId || target.email}) সফলভাবে মুছে ফেলা হয়েছে।` });
 });
 
@@ -4272,6 +4444,7 @@ app.put('/api/admin/users/:id', authenticateAdminToken, async (req, res) => {
 
   writeJson(USERS_FILE, users);
   writeJson(USERS_PERMANENT_STORE_FILE, users);
+  saveTraderToLifelongVault(users[idx]);
 
   res.json({ success: true, message: 'Trader account updated successfully!', user: users[idx] });
 });
