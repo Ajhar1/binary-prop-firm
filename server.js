@@ -3229,7 +3229,7 @@ app.post('/api/extension/sync-trades', (req, res) => {
         return;
       }
 
-      allSynced.unshift({
+      allSynced.push({
         id: `sync_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
         userId: user.id,
         traderId: user.traderId || traderId,
@@ -3254,6 +3254,13 @@ app.post('/api/extension/sync-trades', (req, res) => {
         syncedAt: nowIso
       });
       newCount++;
+    });
+
+    // Sort all trades strictly newest-first (latest trade on top)
+    allSynced.sort((a, b) => {
+      const timeA = parseQuotexDate(a.openTime) || parseQuotexDate(a.closeTime) || new Date(a.syncedAt || 0).getTime();
+      const timeB = parseQuotexDate(b.openTime) || parseQuotexDate(b.closeTime) || new Date(b.syncedAt || 0).getTime();
+      return timeB - timeA;
     });
 
     if (newCount > 0) {
@@ -3308,6 +3315,13 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
     );
 
     const userTrades = allSynced.filter(t => t.userId === req.user.id || (t.userEmail && t.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()));
+
+    // Strict sort newest-first (latest trade on top)
+    userTrades.sort((a, b) => {
+      const timeA = parseQuotexDate(a.openTime) || parseQuotexDate(a.closeTime) || new Date(a.syncedAt || 0).getTime();
+      const timeB = parseQuotexDate(b.openTime) || parseQuotexDate(b.closeTime) || new Date(b.syncedAt || 0).getTime();
+      return timeB - timeA;
+    });
 
     const totalTrades = userTrades.length;
     const wins = userTrades.filter(t => t.result === 'WIN').length;

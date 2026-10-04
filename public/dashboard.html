@@ -3278,6 +3278,7 @@
                     <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
                         <thead>
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.76rem; text-transform:uppercase; letter-spacing:0.5px;">
+                                <th style="padding:10px 12px; width:50px; text-align:center;">#</th>
                                 <th style="padding:10px 12px;">Asset</th>
                                 <th style="padding:10px 12px;">Info (Ticket / Payout)</th>
                                 <th style="padding:10px 12px;">Opening Quote</th>
@@ -3289,7 +3290,7 @@
                         </thead>
                         <tbody id="syncedTradesTableBody">
                             <tr>
-                                <td colspan="7" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
+                                <td colspan="8" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
                                     <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
                                     ট্রেড হিস্টোরি লোড হচ্ছে...
                                 </td>
@@ -8020,7 +8021,7 @@
                     if (tbody) {
                         tbody.innerHTML = `
                             <tr>
-                                <td colspan="7" style="text-align:center; padding:2.5rem 1rem; color:#f87171;">
+                                <td colspan="8" style="text-align:center; padding:2.5rem 1rem; color:#f87171;">
                                     <i class="fas fa-exclamation-circle" style="font-size:1.8rem; margin-bottom:8px; display:block;"></i>
                                     ${data.message || 'ট্রেড হিস্টোরি লোড করতে সমস্যা হয়েছে।'}
                                 </td>
@@ -8033,7 +8034,7 @@
                 if (tbody) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="7" style="text-align:center; padding:2.5rem 1rem; color:#f87171;">
+                            <td colspan="8" style="text-align:center; padding:2.5rem 1rem; color:#f87171;">
                                 <i class="fas fa-wifi" style="font-size:1.8rem; margin-bottom:8px; display:block;"></i>
                                 নেটওয়ার্ক ত্রুটি। পুনরায় চেষ্টা করুন।
                             </td>
@@ -8043,9 +8044,35 @@
             }
         }
 
+        // Helper to parse Quotex and broker timestamps for accurate descending sorting
+        function parseTradeTime(str) {
+            if (!str) return 0;
+            if (typeof str === 'number') return str;
+            const clean = String(str).trim();
+            const m = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:,?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+            if (m) {
+                const day = parseInt(m[1], 10);
+                const month = parseInt(m[2], 10) - 1;
+                const year = parseInt(m[3], 10);
+                const hour = parseInt(m[4] || '0', 10);
+                const min = parseInt(m[5] || '0', 10);
+                const sec = parseInt(m[6] || '0', 10);
+                return new Date(year, month, day, hour, min, sec).getTime();
+            }
+            const parsed = new Date(clean).getTime();
+            return isNaN(parsed) ? 0 : parsed;
+        }
+
         function renderSyncedTrades(data) {
-            const trades = data.trades || [];
+            let trades = (data.trades || []).slice();
             const stats = data.stats || {};
+
+            // Strict sort: newest trades first (latest trade at top)
+            trades.sort((a, b) => {
+                const timeA = parseTradeTime(a.openTime) || parseTradeTime(a.closeTime) || new Date(a.syncedAt || 0).getTime();
+                const timeB = parseTradeTime(b.openTime) || parseTradeTime(b.closeTime) || new Date(b.syncedAt || 0).getTime();
+                return timeB - timeA;
+            });
 
             // Update stat boxes
             const totalEl = document.getElementById('syncStatTotal');
@@ -8079,7 +8106,7 @@
             if (trades.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" style="text-align:center; padding:3.5rem 1rem; color:var(--text-secondary);">
+                        <td colspan="8" style="text-align:center; padding:3.5rem 1rem; color:var(--text-secondary);">
                             <div style="width:60px; height:60px; border-radius:50%; background:rgba(255,184,0,0.1); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; font-size:1.6rem; color:var(--yellow);">
                                 <i class="fas fa-cloud-download-alt"></i>
                             </div>
@@ -8096,7 +8123,8 @@
                 return;
             }
 
-            tbody.innerHTML = trades.map(t => {
+            tbody.innerHTML = trades.map((t, idx) => {
+                const serialNum = trades.length - idx;
                 const isWin = t.result === 'WIN';
                 const isCall = t.direction === 'CALL';
                 const arrowIcon = isCall ? '<i class="fas fa-arrow-up" style="color:#00e676; margin-right:4px;"></i>' : '<i class="fas fa-arrow-down" style="color:#ff5252; margin-right:4px;"></i>';
@@ -8116,6 +8144,9 @@
 
                 return `
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding:12px; text-align:center;">
+                            <span style="background:rgba(255,184,0,0.12); color:var(--yellow); padding:3px 8px; border-radius:6px; font-weight:800; font-family:monospace; font-size:0.82rem; border:1px solid rgba(255,184,0,0.3);">#${serialNum}</span>
+                        </td>
                         <td style="padding:12px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px;">
                             <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${isWin ? '#00e676' : '#ff5252'};"></span>
                             ${escapeHtml(t.asset || 'N/A')}
