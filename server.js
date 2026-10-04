@@ -272,7 +272,26 @@ function syncChallengesWithSubmissions() {
         console.log(`[AUTO-HEAL] Restored challenge from permanent store: ${pc.id} (${pc.packageName} for ${pc.userEmail})`);
       } else {
         const existing = challengeMap.get(pc.id);
-        if (existing.status !== pc.status && pc.status === 'in_progress' && existing.status !== 'passed' && existing.status !== 'failed') {
+        // If permanent store has a failed/disqualified status, ensure existing challenge inherits it
+        if (pc.status === 'failed' && existing.status !== 'failed') {
+          existing.status = 'failed';
+          existing.failReason = pc.failReason || 'DISQUALIFIED';
+          existing.violatedRule = pc.violatedRule;
+          existing.failReasonText = pc.failReasonText;
+          existing.failedAt = pc.failedAt;
+          existing.isActive = false;
+          existing.isCompleted = true;
+          modified = true;
+        } else if (existing.status === 'failed' && pc.status !== 'failed') {
+          pc.status = 'failed';
+          pc.failReason = existing.failReason || 'DISQUALIFIED';
+          pc.violatedRule = existing.violatedRule;
+          pc.failReasonText = existing.failReasonText;
+          pc.failedAt = existing.failedAt;
+          pc.isActive = false;
+          pc.isCompleted = true;
+          writeJson(CHALLENGES_PERMANENT_STORE_FILE, permChallenges);
+        } else if (existing.status !== pc.status && pc.status === 'in_progress' && existing.status !== 'passed' && existing.status !== 'failed') {
           existing.status = pc.status;
           existing.approvedAt = pc.approvedAt || existing.approvedAt;
           existing.assignedMmUrl = pc.assignedMmUrl || existing.assignedMmUrl;
@@ -283,11 +302,29 @@ function syncChallengesWithSubmissions() {
     });
 
     // 2. Archive Auto-Healing: Resurrect from user_archive if any purchased/approved challenge missing (and not deleted)
+    const disqualifiedMap = new Map();
+    archive.forEach(arc => {
+      if (
+        arc.action === 'CHALLENGE_DISQUALIFIED_RULE_VIOLATION' ||
+        arc.action === 'CHALLENGE_DISQUALIFIED_FROM_SESSION' ||
+        arc.action === 'CHALLENGE_FAILED_SESSION_REJECTED' ||
+        arc.action === 'CHALLENGE_FAILED_DRAWDOWN' ||
+        arc.action === 'CHALLENGE_FAILED_TIME_LIMIT' ||
+        (arc.action === 'CHALLENGE_STATUS_UPDATED' && arc.metadata && arc.metadata.status === 'failed')
+      ) {
+        const chId = (arc.metadata && arc.metadata.challengeId) || arc.challengeId;
+        if (chId) disqualifiedMap.set(chId, arc);
+      }
+    });
+
     archive.forEach(arc => {
       if (arc.action === 'CHALLENGE_APPROVED' || arc.action === 'CHALLENGE_PURCHASED') {
         const meta = arc.metadata || {};
         const chId = meta.challengeId;
         if (chId && !deletedChallengeIds.has(chId) && !deletedUserIds.has(arc.userId) && !challengeMap.has(chId)) {
+          const isDisqualified = disqualifiedMap.has(chId);
+          const disqInfo = isDisqualified ? disqualifiedMap.get(chId) : null;
+          const disqMeta = (disqInfo && disqInfo.metadata) || {};
           const isGold = meta.fundedAmount === 525 || meta.packageName === 'Gold';
           const recovered = {
             id: chId,
@@ -310,7 +347,7 @@ function syncChallengesWithSubmissions() {
             brokerName: 'Quotex',
             brokerIcon: '/assets/brokers/quotex.png',
             brokerAccountId: 'Demo Account',
-            status: arc.action === 'CHALLENGE_APPROVED' ? 'in_progress' : 'pending_approval',
+            status: isDisqualified ? 'failed' : (arc.action === 'CHALLENGE_APPROVED' ? 'in_progress' : 'pending_approval'),
             sessionsRequired: 15,
             sessionsCompleted: 0,
             currentDrawdown: '0.0%',
@@ -338,12 +375,17 @@ function syncChallengesWithSubmissions() {
             practiceStartedAt: arc.timestamp || new Date().toISOString(),
             practiceExpiresAt: new Date(new Date(arc.timestamp || now).getTime() + (48 * 60 * 60 * 1000)).toISOString(),
             practiceMaxSessions: 3,
-            isActive: true
+            isActive: !isDisqualified,
+            isCompleted: isDisqualified,
+            failReason: isDisqualified ? (disqMeta.failReason || 'RULE_VIOLATION') : undefined,
+            violatedRule: isDisqualified ? (disqMeta.violatedRule || '') : undefined,
+            failReasonText: isDisqualified ? (disqMeta.reasonNote || disqMeta.feedback || 'এডমিন কর্তৃক চ্যালেঞ্জ বাতিল ও বাদ দেওয়া হয়েছে।') : undefined,
+            failedAt: isDisqualified ? (disqInfo.timestamp || new Date().toISOString()) : undefined
           };
           challenges.push(recovered);
           challengeMap.set(chId, recovered);
           modified = true;
-          console.log(`[AUTO-HEAL] Resurrected challenge from user_archive: ${chId} (${recovered.packageName} for ${recovered.userEmail})`);
+          console.log(`[AUTO-HEAL] Resurrected challenge from user_archive: ${chId} (${recovered.packageName} for ${recovered.userEmail}, status: ${recovered.status})`);
         }
       }
     });
@@ -499,32 +541,6 @@ function syncChallengesWithSubmissions() {
       const isTimeExpired = (c.challengePhase === 'evaluation') && c.expiresAt && (now.getTime() > new Date(c.expiresAt).getTime());
       const isDrawdownBreached = (c.challengePhase === 'evaluation') && (maxDdPct >= 25 || has25Loss);
 
-      // AUTO-REACTIVATION: If challenge was marked failed, but no official rejected submissions remain and limits are intact -> REACTIVATE!
-      if (c.status === 'failed' && (c.failReason === 'SESSION_REJECTED' || c.failReason === 'RULE_VIOLATION' || c.failReason === 'DRAWDOWN_EXCEEDED') && !rejectedOfficialSub && !isDrawdownBreached && !isTimeExpired) {
-        if (verifiedSubs.length >= (c.sessionsRequired || 15)) {
-          c.status = 'passed';
-          c.passedAt = c.passedAt || now.toISOString();
-          c.isCompleted = true;
-          c.isActive = false;
-        } else {
-          c.status = 'in_progress';
-          c.isActive = true;
-          c.isCompleted = false;
-        }
-        delete c.failReason;
-        delete c.violatedRule;
-        delete c.failReasonText;
-        delete c.failedAt;
-        modified = true;
-        try {
-          logUserArchive('CHALLENGE_REACTIVATED', { id: c.userId }, {
-            challengeId: c.id,
-            packageName: c.packageName,
-            sessionsCompleted: c.sessionsCompleted,
-            reason: 'All official sessions are verified/valid, no rejections remaining'
-          });
-        } catch (e) {}
-      }
 
       // DISQUALIFICATION & EVALUATION RULES: Strictly active only if in_progress AND challengePhase === 'evaluation'
       if (c.status === 'in_progress' && c.challengePhase === 'evaluation') {
@@ -4398,29 +4414,35 @@ app.post('/api/admin/challenges/:id/reject', authenticateAdminToken, (req, res) 
 
 // Disqualify Challenge for Rule Violation (Admin - Req #3)
 app.post('/api/admin/challenges/:id/disqualify', authenticateAdminToken, (req, res) => {
-  const challenges = readJson(CHALLENGES_FILE);
+  const challenges = readJson(CHALLENGES_FILE, []);
   const idx = challenges.findIndex(c => c.id === req.params.id);
   if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
 
   const { violatedRule, reasonNote } = req.body;
   const ruleText = (violatedRule && violatedRule.trim()) ? violatedRule.trim() : 'অফিসিয়াল রুলস লঙ্ঘন';
   const detailNote = (reasonNote && reasonNote.trim()) ? reasonNote.trim() : 'প্ল্যাটফর্মের অফিসিয়াল নিয়ম ভঙ্গ করায় এই চ্যালেঞ্জটি বাতিল ও বন্ধ করা হয়েছে।';
+  const nowIso = new Date().toISOString();
 
   challenges[idx].status = 'failed';
   challenges[idx].failReason = 'RULE_VIOLATION';
   challenges[idx].violatedRule = ruleText;
   challenges[idx].failReasonText = detailNote;
-  challenges[idx].failedAt = new Date().toISOString();
+  challenges[idx].failedAt = nowIso;
   challenges[idx].isActive = false;
+  challenges[idx].isCompleted = true;
 
   saveChallenges(challenges);
 
-  logUserArchive('CHALLENGE_DISQUALIFIED_RULE_VIOLATION', { id: challenges[idx].userId }, {
-    challengeId: challenges[idx].id,
-    packageName: challenges[idx].packageName,
-    violatedRule: ruleText,
-    reasonNote: detailNote
-  });
+  logUserArchive('CHALLENGE_DISQUALIFIED_RULE_VIOLATION', 
+    { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, 
+    {
+      challengeId: challenges[idx].id,
+      packageName: challenges[idx].packageName,
+      violatedRule: ruleText,
+      reasonNote: detailNote,
+      failReason: 'RULE_VIOLATION'
+    }
+  );
 
   syncChallengesWithSubmissions();
 
@@ -4433,7 +4455,7 @@ app.post('/api/admin/challenges/:id/disqualify', authenticateAdminToken, (req, r
 
 // Disqualify Trader from Challenge via a Session Rule Violation (Admin - Req #3)
 app.post('/api/admin/submissions/:id/disqualify-challenge', authenticateAdminToken, (req, res) => {
-  const submissions = readJson(SUBMISSIONS_FILE);
+  const submissions = readJson(SUBMISSIONS_FILE, []);
   const sIdx = submissions.findIndex(s => s.id === req.params.id);
   if (sIdx === -1) return res.status(404).json({ success: false, message: 'Submission not found.' });
 
@@ -4448,31 +4470,38 @@ app.post('/api/admin/submissions/:id/disqualify-challenge', authenticateAdminTok
   const { violatedRule, adminFeedback } = req.body;
   const ruleText = (violatedRule && violatedRule.trim()) ? violatedRule.trim() : 'অফিসিয়াল রুলস লঙ্ঘন';
   const feedback = (adminFeedback && adminFeedback.trim()) ? adminFeedback.trim() : 'রুল লঙ্ঘনের কারণে সেশন ও চ্যালেঞ্জ বাতিল করা হয়েছে।';
+  const nowIso = new Date().toISOString();
 
   targetSub.status = 'rejected';
   targetSub.adminFeedback = `[রুল লঙ্ঘন]: ${ruleText} - ${feedback}`;
-  targetSub.reviewedAt = new Date().toISOString();
+  targetSub.reviewedAt = nowIso;
   submissions[sIdx] = targetSub;
   writeJson(SUBMISSIONS_FILE, submissions);
 
   // Disqualify the associated challenge
-  const challenges = readJson(CHALLENGES_FILE);
+  const challenges = readJson(CHALLENGES_FILE, []);
   const cIdx = challenges.findIndex(c => c.id === targetSub.challengeId || (c.userId === targetSub.userId && c.status === 'in_progress'));
   if (cIdx !== -1) {
     challenges[cIdx].status = 'failed';
     challenges[cIdx].failReason = 'RULE_VIOLATION';
     challenges[cIdx].violatedRule = ruleText;
     challenges[cIdx].failReasonText = feedback;
-    challenges[cIdx].failedAt = new Date().toISOString();
+    challenges[cIdx].failedAt = nowIso;
     challenges[cIdx].isActive = false;
-    writeJson(CHALLENGES_FILE, challenges);
+    challenges[cIdx].isCompleted = true;
+    saveChallenges(challenges);
 
-    logUserArchive('CHALLENGE_DISQUALIFIED_FROM_SESSION', { id: targetSub.userId }, {
-      submissionId: targetSub.id,
-      challengeId: challenges[cIdx].id,
-      violatedRule: ruleText,
-      feedback: feedback
-    });
+    logUserArchive('CHALLENGE_DISQUALIFIED_FROM_SESSION', 
+      { id: targetSub.userId, name: targetSub.userName, email: targetSub.userEmail }, 
+      {
+        submissionId: targetSub.id,
+        challengeId: challenges[cIdx].id,
+        packageName: challenges[cIdx].packageName,
+        violatedRule: ruleText,
+        feedback: feedback,
+        failReason: 'RULE_VIOLATION'
+      }
+    );
   }
 
   syncChallengesWithSubmissions();
@@ -4480,29 +4509,32 @@ app.post('/api/admin/submissions/:id/disqualify-challenge', authenticateAdminTok
   res.json({
     success: true,
     message: `সেশনটি বাতিল করা হয়েছে এবং ট্রেডারকে ${ruleText}-এর জন্য চ্যালেঞ্জ থেকে বাদ দেওয়া হয়েছে।`,
-    submission: targetSub
+    submission: targetSub,
+    challenge: cIdx !== -1 ? challenges[cIdx] : null
   });
 });
 
 // 9. Update Challenge Status (Passed / Failed / Drawdown)
 app.post('/api/admin/challenges/:id/update-status', authenticateAdminToken, (req, res) => {
   const { status, sessionsCompleted, currentDrawdown, failReason, failReasonText, violatedRule } = req.body;
-  const challenges = readJson(CHALLENGES_FILE);
+  const challenges = readJson(CHALLENGES_FILE, []);
   const idx = challenges.findIndex(c => c.id === req.params.id);
   if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
 
+  const nowIso = new Date().toISOString();
   if (status) {
     challenges[idx].status = status;
     if (status === 'passed') {
-      challenges[idx].passedAt = new Date().toISOString();
+      challenges[idx].passedAt = nowIso;
       challenges[idx].isCompleted = true;
       challenges[idx].isActive = false;
     } else if (status === 'failed') {
-      challenges[idx].failedAt = new Date().toISOString();
+      challenges[idx].failedAt = nowIso;
       challenges[idx].failReason = failReason || 'DISQUALIFIED_BY_ADMIN';
       challenges[idx].failReasonText = failReasonText || 'এডমিন কর্তৃক চ্যালেঞ্জ বাতিল ও বাদ দেওয়া হয়েছে।';
       if (violatedRule) challenges[idx].violatedRule = violatedRule;
       challenges[idx].isActive = false;
+      challenges[idx].isCompleted = true;
     } else if (status === 'in_progress') {
       challenges[idx].isActive = true;
       challenges[idx].isCompleted = false;
@@ -4516,6 +4548,19 @@ app.post('/api/admin/challenges/:id/update-status', authenticateAdminToken, (req
   if (currentDrawdown !== undefined) challenges[idx].currentDrawdown = currentDrawdown;
 
   saveChallenges(challenges);
+
+  logUserArchive('CHALLENGE_STATUS_UPDATED', 
+    { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, 
+    {
+      challengeId: challenges[idx].id,
+      packageName: challenges[idx].packageName,
+      status: challenges[idx].status,
+      failReason: challenges[idx].failReason,
+      violatedRule: challenges[idx].violatedRule,
+      failReasonText: challenges[idx].failReasonText
+    }
+  );
+
   syncChallengesWithSubmissions();
 
   res.json({ success: true, message: 'Challenge status updated successfully.', challenge: challenges[idx] });
