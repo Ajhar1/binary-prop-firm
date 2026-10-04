@@ -77,6 +77,152 @@
     }, 5000);
   }
 
+  // Helper to safely update Sync button text while keeping mobile indicator dot
+  function setSyncBtnText(text) {
+    const btn = document.getElementById('bpfSyncBtn');
+    if (!btn) return;
+    btn.innerHTML = `<span class="bpf-mobile-dot"></span><span>${text}</span>`;
+  }
+
+  // Draggable Engine for Floating Widget (Supports PC Mouse & Mobile Phone Touch)
+  function makeWidgetDraggable(root) {
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let initialLeft = 0;
+    let initialTop = 0;
+    let dragThresholdPassed = false;
+
+    // Restore previously saved position from localStorage
+    try {
+      const savedPos = localStorage.getItem('bpf_widget_pos');
+      if (savedPos) {
+        const { left, top } = JSON.parse(savedPos);
+        const maxLeft = Math.max(0, window.innerWidth - 60);
+        const maxTop = Math.max(0, window.innerHeight - 40);
+        const clampedLeft = Math.min(Math.max(6, left), maxLeft);
+        const clampedTop = Math.min(Math.max(6, top), maxTop);
+        root.style.left = clampedLeft + 'px';
+        root.style.top = clampedTop + 'px';
+        root.style.right = 'auto';
+        root.style.bottom = 'auto';
+      }
+    } catch (e) {}
+
+    const onStart = (clientX, clientY) => {
+      isDragging = true;
+      dragThresholdPassed = false;
+      startX = clientX;
+      startY = clientY;
+      const rect = root.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+    };
+
+    const onMove = (clientX, clientY, e) => {
+      if (!isDragging) return;
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+
+      if (!dragThresholdPassed && Math.hypot(dx, dy) > 5) {
+        dragThresholdPassed = true;
+        root.classList.add('is-dragging');
+      }
+
+      if (dragThresholdPassed) {
+        if (e && e.cancelable) e.preventDefault(); // prevent touch scroll
+        let newLeft = initialLeft + dx;
+        let newTop = initialTop + dy;
+
+        const maxLeft = Math.max(0, window.innerWidth - root.offsetWidth - 6);
+        const maxTop = Math.max(0, window.innerHeight - root.offsetHeight - 6);
+
+        newLeft = Math.min(Math.max(6, newLeft), maxLeft);
+        newTop = Math.min(Math.max(6, newTop), maxTop);
+
+        root.style.left = newLeft + 'px';
+        root.style.top = newTop + 'px';
+        root.style.right = 'auto';
+        root.style.bottom = 'auto';
+      }
+    };
+
+    const onEnd = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      root.classList.remove('is-dragging');
+
+      if (dragThresholdPassed) {
+        try {
+          const rect = root.getBoundingClientRect();
+          localStorage.setItem('bpf_widget_pos', JSON.stringify({
+            left: Math.round(rect.left),
+            top: Math.round(rect.top)
+          }));
+        } catch (e) {}
+      }
+    };
+
+    // Mouse Listeners (Desktop Computer)
+    root.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return; // only left click
+      onStart(e.clientX, e.clientY);
+
+      const moveHandler = (moveEvent) => {
+        onMove(moveEvent.clientX, moveEvent.clientY, moveEvent);
+      };
+
+      const upHandler = () => {
+        window.removeEventListener('mousemove', moveHandler);
+        window.removeEventListener('mouseup', upHandler);
+        onEnd();
+      };
+
+      window.addEventListener('mousemove', moveHandler, { passive: false });
+      window.addEventListener('mouseup', upHandler);
+    });
+
+    // Touch Listeners (Mobile Phone)
+    root.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches[0]) {
+        onStart(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+
+    root.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches[0]) {
+        onMove(e.touches[0].clientX, e.touches[0].clientY, e);
+      }
+    }, { passive: false });
+
+    root.addEventListener('touchend', () => {
+      onEnd();
+    }, { passive: true });
+
+    root.addEventListener('touchcancel', () => {
+      onEnd();
+    }, { passive: true });
+
+    // Prevent button click if dragged
+    root.addEventListener('click', (e) => {
+      if (dragThresholdPassed) {
+        e.preventDefault();
+        e.stopPropagation();
+        dragThresholdPassed = false;
+      }
+    }, true);
+
+    // Keep clamped inside viewport on screen resize or mobile orientation change
+    window.addEventListener('resize', () => {
+      if (!root.style.left) return;
+      const rect = root.getBoundingClientRect();
+      const maxLeft = Math.max(0, window.innerWidth - root.offsetWidth - 6);
+      const maxTop = Math.max(0, window.innerHeight - root.offsetHeight - 6);
+      if (rect.left > maxLeft) root.style.left = maxLeft + 'px';
+      if (rect.top > maxTop) root.style.top = maxTop + 'px';
+    });
+  }
+
   // 4. Inject Floating Widget onto Quotex Page
   function injectWidget() {
     if (document.getElementById('bpf-sync-widget-root')) {
@@ -92,7 +238,8 @@
     const traderLabel = config.traderId ? config.traderId : 'ID Not Set';
 
     root.innerHTML = `
-      <div class="bpf-pill" id="bpfPill" title="Binary Prop Firm - Live Synchronizer">
+      <div class="bpf-pill" id="bpfPill" title="Binary Prop Firm — ড্র্যাগ করে যেকোনো জায়গায় নিয়ে রাখুন">
+        <span class="bpf-drag-handle" title="ড্র্যাগ করুন">⋮⋮</span>
         <span class="bpf-logo-badge">BPF</span>
         <span class="bpf-status-text">
           Trader: <strong id="bpfTraderIdDisplay">${traderLabel}</strong>
@@ -105,6 +252,7 @@
           <span class="bpf-indicator-label">Connected</span>
         </div>
         <button class="bpf-btn-sync" id="bpfSyncBtn" title="Sync Trades এ চাপ দিলে সোজা Trades পেজে গিয়ে অটোমেটিক ট্রেড সিঙ্ক হবে">
+          <span class="bpf-mobile-dot"></span>
           <span>⚡ Sync Trades</span>
         </button>
         ${isHistoryPage ? `
@@ -116,6 +264,7 @@
     `;
 
     document.body.appendChild(root);
+    makeWidgetDraggable(root);
 
     // Sync Trades Click Handler:
     // User Requirement: "Sync Trades এর মধ্যে চাপ দিলে সোজা যেন ইউজাররা Trades অপশনে চলে যাই তারপর ট্রেডিং হিস্টোরি আমাদের সার্ভারে চলে আসে।"
@@ -137,7 +286,7 @@
         const btn = document.getElementById('bpfSyncBtn');
         if (btn) {
           btn.disabled = true;
-          btn.innerHTML = '<span>⏳ Trades পেজে যাওয়া হচ্ছে...</span>';
+          setSyncBtnText('⏳ Trades পেজে যাওয়া হচ্ছে...');
         }
 
         showToast('🚀 Trades হিস্টোরি পেজে নিয়ে যাওয়া হচ্ছে, সেখানে স্বয়ংক্রিয়ভাবে সিঙ্ক হবে...', 'info');
@@ -375,7 +524,7 @@
         showToast('ট্রেড লিস্টে কোনো ট্রেড পাওয়া যায়নি। পেজটি স্ক্রল বা রিফ্রেশ করুন।', 'error');
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = '<span>⚡ Sync Trades</span>';
+          setSyncBtnText('⚡ Sync Trades');
         }
         isSyncing = false;
         return;
@@ -386,9 +535,9 @@
 
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = '<span>✅ Synced</span>';
+          setSyncBtnText('✅ Synced');
           setTimeout(() => {
-            if (btn) btn.innerHTML = '<span>⚡ Sync Trades</span>';
+            if (btn) setSyncBtnText('⚡ Sync Trades');
           }, 3500);
         }
 
@@ -404,7 +553,7 @@
       } catch (err) {
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = '<span>⚡ Sync Trades</span>';
+          setSyncBtnText('⚡ Sync Trades');
         }
         showToast('সার্ভার কানেকশন ত্রুটি: ' + err.message, 'error');
       } finally {
@@ -424,7 +573,7 @@
       const btn = document.getElementById('bpfSyncBtn');
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<span>⏳ ট্রেড সিঙ্ক হচ্ছে...</span>';
+        setSyncBtnText('⏳ ট্রেড সিঙ্ক হচ্ছে...');
       }
 
       waitForTradesTable(() => {

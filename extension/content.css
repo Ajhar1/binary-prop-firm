@@ -3,49 +3,81 @@
   position: fixed;
   top: 16px;
   right: 20px;
-  z-index: 9999999;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  z-index: 99999999;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  cursor: grab;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+#bpf-sync-widget-root:active,
+#bpf-sync-widget-root.is-dragging {
+  cursor: grabbing !important;
+  transform: scale(1.02);
+  opacity: 0.94;
+  transition: none !important;
 }
 
 .bpf-pill {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(18, 20, 26, 0.96);
+  background: rgba(14, 17, 24, 0.94);
   border: 1px solid rgba(255, 184, 0, 0.4);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(255, 184, 0, 0.15);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.65), 0 0 14px rgba(255, 184, 0, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 5px 12px;
   border-radius: 30px;
   color: #fff;
   font-size: 12px;
-  transition: all 0.25s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .bpf-pill:hover {
-  border-color: #ffb800;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 184, 0, 0.3);
+  border-color: rgba(255, 184, 0, 0.7);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.8), 0 0 18px rgba(255, 184, 0, 0.28);
+}
+
+.bpf-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 13px;
+  letter-spacing: -1px;
+  cursor: grab;
+  padding: 0 3px 0 0;
+  transition: color 0.2s;
+}
+
+.bpf-pill:hover .bpf-drag-handle {
+  color: #ffb800;
 }
 
 .bpf-logo-badge {
   background: linear-gradient(135deg, #ffb800, #ff8800);
-  color: #000;
+  color: #0b0e14;
   font-weight: 900;
   font-size: 10px;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 12px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
+  box-shadow: 0 2px 6px rgba(255, 184, 0, 0.3);
 }
 
 .bpf-status-text {
   font-weight: 600;
-  color: #e0e0e0;
+  color: #cbd5e1;
   font-size: 11px;
+  white-space: nowrap;
 }
 
 .bpf-status-text strong {
   color: #ffb800;
+  font-weight: 700;
 }
 
 .bpf-account-tag {
@@ -55,27 +87,29 @@
   border-radius: 10px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .bpf-account-tag.demo {
-  background: rgba(255, 184, 0, 0.15);
+  background: rgba(255, 184, 0, 0.16);
   color: #ffb800;
-  border: 1px solid rgba(255, 184, 0, 0.4);
+  border: 1px solid rgba(255, 184, 0, 0.45);
 }
 
 .bpf-account-tag.live {
-  background: rgba(0, 230, 118, 0.15);
+  background: rgba(0, 230, 118, 0.16);
   color: #00e676;
-  border: 1px solid rgba(0, 230, 118, 0.4);
+  border: 1px solid rgba(0, 230, 118, 0.45);
 }
 
 .bpf-indicator-wrap {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 6px;
-  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 7px;
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 12px;
+  white-space: nowrap;
 }
 
 .bpf-pulse-dot {
@@ -99,10 +133,21 @@
   color: #cbd5e1;
 }
 
+.bpf-mobile-dot {
+  display: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00e676;
+  box-shadow: 0 0 6px #00e676;
+  animation: bpfPulse 1.8s infinite;
+  margin-right: 2px;
+}
+
 .bpf-btn-sync {
-  background: linear-gradient(135deg, #ffb800, #ff9500);
-  color: #000;
-  font-weight: 700;
+  background: linear-gradient(135deg, #ffb800 0%, #ff9100 100%);
+  color: #0b0e14;
+  font-weight: 800;
   font-size: 11px;
   border: none;
   padding: 5px 12px;
@@ -111,16 +156,23 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: transform 0.15s, background 0.2s;
+  box-shadow: 0 2px 10px rgba(255, 184, 0, 0.35);
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap;
 }
 
 .bpf-btn-sync:hover {
-  background: linear-gradient(135deg, #ffc21a, #ffa01a);
+  background: linear-gradient(135deg, #ffc21a 0%, #ffa01a 100%);
   transform: scale(1.04);
+  box-shadow: 0 3px 14px rgba(255, 184, 0, 0.5);
+}
+
+.bpf-btn-sync:active {
+  transform: scale(0.97);
 }
 
 .bpf-btn-sync:disabled {
-  opacity: 0.6;
+  opacity: 0.65;
   cursor: not-allowed;
   transform: none;
 }
@@ -138,6 +190,7 @@
   align-items: center;
   gap: 5px;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .bpf-btn-chart:hover {
@@ -146,12 +199,73 @@
   transform: scale(1.04);
 }
 
+/* ========================================================
+   MOBILE VIEW (<= 768px): ULTRA-MINIMAL CLASSIC FLOATING PILL
+   User Requirement:
+   "মোবাইল ফোনে যেন শুধু (Sync Trades) অপশনটুকু আসে ছোট করে
+    (যেন এই টুকুর মধ্যে চাপ দিলেই ট্রেডিং হিস্টোরি Sync হয়ে যায়)
+    আরো ছোট এবং মিনিমাল ভাবে যেন আসে দেখতে ক্লাসিক এবং সুন্দর লাগে যেন।"
+   ======================================================== */
+@media (max-width: 768px) {
+  #bpf-sync-widget-root {
+    top: 14px;
+    right: 14px;
+  }
+
+  .bpf-pill {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    gap: 0 !important;
+  }
+
+  /* Completely hide bulky items on mobile */
+  .bpf-drag-handle,
+  .bpf-logo-badge,
+  .bpf-status-text,
+  .bpf-account-tag,
+  .bpf-indicator-wrap,
+  .bpf-btn-chart {
+    display: none !important;
+  }
+
+  /* Show tiny pulse dot inside mobile button */
+  .bpf-mobile-dot {
+    display: inline-block !important;
+  }
+
+  /* Ultra-sleek, compact, classic Sync Trades pill on mobile */
+  .bpf-btn-sync {
+    background: linear-gradient(135deg, #ffb800 0%, #ff8c00 100%) !important;
+    color: #0b0e14 !important;
+    font-weight: 800 !important;
+    font-size: 11px !important;
+    letter-spacing: 0.3px !important;
+    padding: 6px 12px !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7), 0 0 14px rgba(255, 184, 0, 0.4) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    touch-action: none !important;
+    cursor: grab !important;
+  }
+
+  .bpf-btn-sync:active {
+    transform: scale(0.95) !important;
+  }
+}
+
 /* Floating Toast */
 #bpf-toast {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 10000000;
+  z-index: 100000000;
   background: #151821;
   border: 1px solid #00e676;
   color: #fff;
