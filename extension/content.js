@@ -9,8 +9,6 @@
   const syncedTicketsCache = new Set();
   let isSyncing = false;
   let heartbeatTimer = null;
-  let liveWatcherTimer = null;
-  let warnedNoActiveChallenge = false;
 
   // 1. Load config from chrome.storage.local
   function loadConfig(cb) {
@@ -31,7 +29,6 @@
 
   function saveSyncedCache() {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      // Save last 500 ticket IDs
       const arr = Array.from(syncedTicketsCache).slice(-500);
       chrome.storage.local.set({ syncedCache: arr });
     }
@@ -77,7 +74,7 @@
     document.body.appendChild(toast);
     setTimeout(() => {
       if (toast && toast.parentNode) toast.remove();
-    }, 4500);
+    }, 5000);
   }
 
   // 4. Inject Floating Widget onto Quotex Page
@@ -91,7 +88,6 @@
     root.id = 'bpf-sync-widget-root';
 
     const accountType = detectAccountType();
-    const isLivePage = window.location.pathname.includes('/demo-trade') || window.location.pathname.includes('/trade');
     const isHistoryPage = window.location.pathname.includes('/trades');
     const traderLabel = config.traderId ? config.traderId : 'ID Not Set';
 
@@ -104,28 +100,62 @@
         <span class="bpf-account-tag ${accountType === 'live' ? 'live' : 'demo'}" id="bpfAcctTag">
           ${accountType === 'live' ? 'LIVE' : 'DEMO'}
         </span>
-        <div class="bpf-indicator-wrap" id="bpfIndicatorWrap" title="লাইভ অটো-সিঙ্ক সচল রয়েছে">
+        <div class="bpf-indicator-wrap" id="bpfIndicatorWrap" title="এক্সটেনশন কানেক্টেড রয়েছে">
           <span class="bpf-pulse-dot"></span>
-          <span class="bpf-indicator-label">${isLivePage ? 'Auto-Sync' : 'Connected'}</span>
+          <span class="bpf-indicator-label">Connected</span>
         </div>
-        <button class="bpf-btn-sync" id="bpfSyncBtn">
-          <span>${isHistoryPage ? '⚡ Sync Trades' : (isLivePage ? '🔄 Sync Now' : '📊 Trade History')}</span>
+        <button class="bpf-btn-sync" id="bpfSyncBtn" title="Sync Trades এ চাপ দিলে সোজা Trades পেজে গিয়ে অটোমেটিক ট্রেড সিঙ্ক হবে">
+          <span>⚡ Sync Trades</span>
         </button>
+        ${isHistoryPage ? `
+          <button class="bpf-btn-chart" id="bpfBackChartBtn" title="ট্রেডিং চার্টে ফিরে যান">
+            <span>📈 ট্রেড চার্ট</span>
+          </button>
+        ` : ''}
       </div>
     `;
 
     document.body.appendChild(root);
 
+    // Sync Trades Click Handler:
+    // User Requirement: "Sync Trades এর মধ্যে চাপ দিলে সোজা যেন ইউজাররা Trades অপশনে চলে যাই তারপর ট্রেডিং হিস্টোরি আমাদের সার্ভারে চলে আসে।"
     document.getElementById('bpfSyncBtn').addEventListener('click', () => {
+      if (!config.traderId) {
+        showToast('ত্রুটি: আপনার Trader ID সেট করা নেই! এক্সটেনশন আইকনে ক্লিক করে Trader ID লিখুন।', 'error');
+        return;
+      }
+
       if (window.location.pathname.includes('/trades')) {
+        // Already on Trades page -> Sync now
         runManualTradeSync();
-      } else if (isLivePage) {
-        silentLiveSync(true);
       } else {
+        // On Live Chart or other page -> Navigate directly to Trades page with correct account, and auto-sync on load!
         const acct = detectAccountType();
-        window.location.href = `https://market-qx.info/en/trades?page=1&account=${acct}`;
+        sessionStorage.setItem('bpf_auto_sync_target', 'true');
+        sessionStorage.setItem('bpf_account_type', acct);
+
+        const btn = document.getElementById('bpfSyncBtn');
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<span>⏳ Trades পেজে যাওয়া হচ্ছে...</span>';
+        }
+
+        showToast('🚀 Trades হিস্টোরি পেজে নিয়ে যাওয়া হচ্ছে, সেখানে স্বয়ংক্রিয়ভাবে সিঙ্ক হবে...', 'info');
+
+        // Navigate straight to Quotex Trades page with account query
+        window.location.href = `${window.location.origin}/en/trades?page=1&account=${acct}`;
       }
     });
+
+    // Back to Chart Click Handler (if present)
+    const backBtn = document.getElementById('bpfBackChartBtn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        const acct = detectAccountType();
+        const targetPath = (acct === 'live') ? '/en/trade' : '/en/demo-trade';
+        window.location.href = `${window.location.origin}${targetPath}`;
+      });
+    }
   }
 
   function updateWidgetStatus() {
@@ -141,7 +171,7 @@
     }
   }
 
-  // 5. Module 3: Heartbeat Engine (Sends ping every 30s)
+  // 5. Heartbeat Engine (Sends ping every 30s to keep dashboard connected)
   function sendHeartbeat() {
     if (!config.traderId) return;
     const targetUrl = (config.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '') + '/api/extension/heartbeat';
@@ -162,7 +192,7 @@
     });
   }
 
-  // 6. Parse Quotex Trade History Table from any Document/DOM
+  // 6. Parse Quotex Trade History Table from Document
   function parseQuotexTradesFromDoc(doc, forcedAccountType) {
     const trades = [];
     const accountType = forcedAccountType || detectAccountType();
@@ -311,83 +341,30 @@
     return await res.json();
   }
 
-  // 8. Module 2: Zero-Click Live Chart Auto-Capture (Silent Background Sync)
-  async function silentLiveSync(isUserTriggered = false) {
-    if (isSyncing) return;
-    if (!config.traderId) return;
+  // 8. Wait for SPA Trade Table to Render
+  function waitForTradesTable(callback, maxAttempts = 30) {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      const rows = document.querySelectorAll('table tbody tr, .trades-table__row');
+      const noData = document.querySelector('.no-data, [class*="no-data"]');
 
-    isSyncing = true;
-    const acctType = detectAccountType();
-
-    try {
-      // Fetch latest trade history silently using active session
-      const historyUrl = `${window.location.origin}/en/trades?page=1&account=${acctType}`;
-      const res = await fetch(historyUrl, { credentials: 'include' });
-      if (!res.ok) {
-        isSyncing = false;
-        return;
+      if (rows.length > 0 || noData || attempts >= maxAttempts) {
+        clearInterval(interval);
+        callback();
       }
-
-      const html = await res.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const { trades } = parseQuotexTradesFromDoc(doc, acctType);
-
-      if (!trades || trades.length === 0) {
-        if (isUserTriggered) {
-          showToast('কোনো ট্রেড পাওয়া যায়নি।', 'info');
-        }
-        isSyncing = false;
-        return;
-      }
-
-      // Filter trades not yet cached
-      const unsyncedTrades = trades.filter(t => !syncedTicketsCache.has(t.ticketId));
-
-      if (unsyncedTrades.length > 0) {
-        const result = await postTradesToServer(unsyncedTrades, acctType);
-
-        if (result && result.success) {
-          unsyncedTrades.forEach(t => syncedTicketsCache.add(t.ticketId));
-          saveSyncedCache();
-
-          if (result.addedCount > 0) {
-            const firstTrade = unsyncedTrades[0];
-            const pnlStr = firstTrade.result === 'WIN' ? `+$${firstTrade.profit}` : `-$${firstTrade.amount}`;
-            const badgeType = acctType === 'live' ? 'রিয়েল' : 'ডেমো';
-            showToast(`⚡ [${badgeType}] নতুন ট্রেড সিঙ্ক হয়েছে: ${firstTrade.asset} (${pnlStr})`, 'success');
-          } else if (result.filteredOldCount > 0 && !isUserTriggered) {
-            // Old trades filtered silently
-          } else if (isUserTriggered) {
-            showToast(result.message || 'ট্রেড আপডেট হয়েছে।', 'success');
-          }
-        } else if (result && result.noActiveChallenge) {
-          if (!warnedNoActiveChallenge || isUserTriggered) {
-            showToast('⚠️ আপনার অ্যাকাউন্টে কোনো সক্রিয় চ্যালেঞ্জ (in_progress) চালু নেই।', 'error');
-            warnedNoActiveChallenge = true;
-          }
-        } else if (isUserTriggered && result?.message) {
-          showToast(result.message, 'error');
-        }
-      } else if (isUserTriggered) {
-        showToast('সকল ট্রেড ইতিমধ্যে সিঙ্ক রয়েছে!', 'success');
-      }
-    } catch (err) {
-      console.warn('[BPF Live Auto-Sync Error]', err);
-      if (isUserTriggered) {
-        showToast('সিঙ্ক ত্রুটি: ' + err.message, 'error');
-      }
-    } finally {
-      isSyncing = false;
-    }
+    }, 250);
   }
 
-  // 9. Manual Sync on /en/trades History Page
+  // 9. Manual / Auto Sync Handler on /en/trades Page
   async function runManualTradeSync() {
+    if (isSyncing) return;
+    isSyncing = true;
+
     const btn = document.getElementById('bpfSyncBtn');
     if (btn) {
       btn.disabled = true;
-      btn.innerText = '⏳ Syncing...';
+      btn.innerHTML = '<span>⏳ সিঙ্ক হচ্ছে...</span>';
     }
 
     loadConfig(async () => {
@@ -398,8 +375,9 @@
         showToast('ট্রেড লিস্টে কোনো ট্রেড পাওয়া যায়নি। পেজটি স্ক্রল বা রিফ্রেশ করুন।', 'error');
         if (btn) {
           btn.disabled = false;
-          btn.innerText = '⚡ Sync Trades';
+          btn.innerHTML = '<span>⚡ Sync Trades</span>';
         }
+        isSyncing = false;
         return;
       }
 
@@ -408,7 +386,10 @@
 
         if (btn) {
           btn.disabled = false;
-          btn.innerText = '⚡ Sync Trades';
+          btn.innerHTML = '<span>✅ Synced</span>';
+          setTimeout(() => {
+            if (btn) btn.innerHTML = '<span>⚡ Sync Trades</span>';
+          }, 3500);
         }
 
         if (result && result.success) {
@@ -423,58 +404,47 @@
       } catch (err) {
         if (btn) {
           btn.disabled = false;
-          btn.innerText = '⚡ Sync Trades';
+          btn.innerHTML = '<span>⚡ Sync Trades</span>';
         }
         showToast('সার্ভার কানেকশন ত্রুটি: ' + err.message, 'error');
+      } finally {
+        isSyncing = false;
       }
     });
   }
 
-  // 10. Live Chart Sidebar DOM Observer (Zero-Click Trigger)
-  function initLiveChartWatcher() {
-    const isLivePage = window.location.pathname.includes('/demo-trade') || window.location.pathname.includes('/trade');
-    if (!isLivePage) return;
+  // 10. Check and Auto-Sync on /en/trades Page
+  function handleTradesPageAutoSync() {
+    if (!window.location.pathname.includes('/trades')) return;
 
-    // Observe changes in document body for trades panel changes
-    let observerTimeout = null;
-    const observer = new MutationObserver(() => {
-      if (observerTimeout) clearTimeout(observerTimeout);
-      observerTimeout = setTimeout(() => {
-        silentLiveSync(false);
-        updateWidgetStatus();
-      }, 1200);
-    });
+    const isPending = sessionStorage.getItem('bpf_auto_sync_target') === 'true';
+    if (isPending || config.autoSync) {
+      sessionStorage.removeItem('bpf_auto_sync_target');
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true
-    });
+      const btn = document.getElementById('bpfSyncBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ ট্রেড সিঙ্ক হচ্ছে...</span>';
+      }
 
-    // Also run periodic poll every 8 seconds on live chart
-    if (liveWatcherTimer) clearInterval(liveWatcherTimer);
-    liveWatcherTimer = setInterval(() => {
-      silentLiveSync(false);
-      updateWidgetStatus();
-    }, 8000);
-
-    // Initial silent check on live chart after 3 seconds
-    setTimeout(() => {
-      silentLiveSync(false);
-    }, 3000);
+      waitForTradesTable(() => {
+        setTimeout(() => {
+          runManualTradeSync();
+        }, 600);
+      });
+    }
   }
 
   // 11. Listen for messages from popup
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
     chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
       if (req.action === 'TRIGGER_SYNC') {
-        const isLivePage = window.location.pathname.includes('/demo-trade') || window.location.pathname.includes('/trade');
-        if (isLivePage) {
-          silentLiveSync(true).then(() => {
-            sendResponse({ success: true, message: 'লাইভ চার্ট থেকে সিঙ্ক সম্পন্ন হয়েছে!' });
-          }).catch(err => {
-            sendResponse({ success: false, error: err.message });
-          });
+        if (!window.location.pathname.includes('/trades')) {
+          const acct = detectAccountType();
+          sessionStorage.setItem('bpf_auto_sync_target', 'true');
+          window.location.href = `${window.location.origin}/en/trades?page=1&account=${acct}`;
+          sendResponse({ success: true, message: 'Trades অপশনে নেওয়া হচ্ছে...' });
+          return true;
         } else {
           const acct = detectAccountType();
           const { trades } = parseQuotexTradesFromDoc(document, acct);
@@ -487,8 +457,8 @@
           }).catch(err => {
             sendResponse({ success: false, error: err.message });
           });
+          return true;
         }
-        return true;
       }
     });
   }
@@ -503,18 +473,9 @@
       if (heartbeatTimer) clearInterval(heartbeatTimer);
       heartbeatTimer = setInterval(sendHeartbeat, 30000);
 
-      const path = window.location.pathname.toLowerCase();
-
-      // If on Trade History page and autoSync is enabled
-      if (path.includes('/trades') && config.autoSync && config.traderId) {
-        setTimeout(() => {
-          runManualTradeSync();
-        }, 2200);
-      }
-
-      // If on Live Chart page, start zero-click watcher
-      if (path.includes('/demo-trade') || path.includes('/trade')) {
-        initLiveChartWatcher();
+      // If on Trade History page, check for auto-sync
+      if (window.location.pathname.includes('/trades')) {
+        handleTradesPageAutoSync();
       }
     });
   }

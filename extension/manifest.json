@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Binary Prop Firm - Quotex Trade Sync",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Quotex Trade History live sync extension for Binary Prop Firm traders.",
   "permissions": [
     "storage"

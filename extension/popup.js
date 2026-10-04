@@ -55,8 +55,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab || !tab.url || (!tab.url.includes('market-qx.info') && !tab.url.includes('quotex.com'))) {
-        showStatus('Quotex Trade History পেজ ওপেন করুন: market-qx.info/en/trades', 'error');
+      if (!tab || !tab.url || (!tab.url.includes('market-qx.info') && !tab.url.includes('quotex.com') && !tab.url.includes('qxbroker.com'))) {
+        chrome.tabs.create({ url: 'https://market-qx.info/en/trades?page=1&account=demo' });
+        showStatus('Quotex Trades পেজ ওপেন করা হচ্ছে...', 'success');
+        syncNowBtn.disabled = false;
+        syncNowBtn.innerText = '🚀 Sync Quotex Trades Now';
+        return;
+      }
+
+      // If active tab is on Quotex but not on /trades, navigate directly to /trades
+      if (!tab.url.includes('/trades')) {
+        chrome.tabs.update(tab.id, { url: 'https://market-qx.info/en/trades?page=1&account=demo' });
+        showStatus('🚀 Trades পেজে নেওয়া হচ্ছে, সেখানে অটোমেটিক সিঙ্ক হবে...', 'success');
         syncNowBtn.disabled = false;
         syncNowBtn.innerText = '🚀 Sync Quotex Trades Now';
         return;
