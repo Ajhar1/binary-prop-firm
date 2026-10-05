@@ -1,5 +1,25 @@
 [
   {
+    "archiveId": "arc_1791213235232_8v02",
+    "timestamp": "2026-10-05T15:13:55.232Z",
+    "displayTime": "10/5/2026, 9:13:55 PM",
+    "action": "CHALLENGE_FAILED_SESSION_REJECTED",
+    "userId": "usr_1791041803620_qz1qbz",
+    "userName": "N/A",
+    "userEmail": "N/A",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1791163048463_m2byd",
+      "packageName": "Gold",
+      "submissionId": "sub_1791209049366_agyo4",
+      "adminFeedback": "[রুল লঙ্ঘন]: রুল ৬: ৮৫% এর নিচের পে-আউট মার্কেটে ট্রেড করা - প্ল্যাটফর্মের \"রুল ৬: ৮৫% এর নিচের পে-আউট মার্কেটে ট্রেড করা\" করার কারণ�� আপনাকে এই চ্যালেঞ্জ থেকে বাদ দেওয়া হলো এবং চ্যালেঞ্জটি বন্ধ করা হলো।"
+    }
+  },
+  {
     "archiveId": "arc_1791121410376_ni2b",
     "timestamp": "2026-10-04T13:43:30.376Z",
     "displayTime": "10/4/2026, 7:43:30 PM",
