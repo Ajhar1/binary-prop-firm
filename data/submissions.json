@@ -58,7 +58,9 @@
     "userName": "SADMAN",
     "userEmail": "tradersadman78@gmail.com",
     "userTelegram": "",
-    "userAvatar": null
+    "userAvatar": null,
+    "forgivenOnReactivation": true,
+    "reactivatedAt": "2026-10-05T16:01:30.645Z"
   },
   {
     "id": "sub_1791193064728_65k0y",

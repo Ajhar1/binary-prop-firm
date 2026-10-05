@@ -1,0 +1,15 @@
+{
+  "id": "usr_test_1",
+  "name": "Test Trader",
+  "email": "test@trader.com",
+  "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+  "role": "user",
+  "telegram": "@TestTrader",
+  "preferredBroker": "quotex",
+  "payoutWallet": "",
+  "brokerAccountId": "6721903",
+  "isEmailVerified": true,
+  "createdAt": "2026-09-29T01:57:09.339Z",
+  "traderId": "AJ-1006",
+  "profilePicture": null
+}

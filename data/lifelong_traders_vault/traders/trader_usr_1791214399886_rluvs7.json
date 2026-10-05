@@ -1,0 +1,18 @@
+{
+  "id": "usr_1791214399886_rluvs7",
+  "traderId": "AJ-1007",
+  "name": "Md Kawsar",
+  "email": "kawsar016084151@gmail.com",
+  "password": "$2a$10$DUiyZve4dJR9k/rAvy1dWefDUrrG7Q.p/OwW.r2S5m101wrsFQuo.",
+  "role": "user",
+  "telegram": "",
+  "preferredBroker": "quotex",
+  "payoutWallet": "",
+  "brokerAccountId": "",
+  "profilePicture": null,
+  "isEmailVerified": true,
+  "emailVerificationCode": null,
+  "emailVerificationExpires": null,
+  "createdAt": "2026-10-05T15:33:19.886Z",
+  "emailVerifiedAt": "2026-10-05T15:34:13.767Z"
+}

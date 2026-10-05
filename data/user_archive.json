@@ -1,5 +1,27 @@
 [
   {
+    "archiveId": "arc_1791216090647_182j",
+    "timestamp": "2026-10-05T16:01:30.647Z",
+    "displayTime": "10/5/2026, 10:01:30 PM",
+    "action": "CHALLENGE_REACTIVATED_BY_ADMIN",
+    "userId": "usr_1791041803620_qz1qbz",
+    "userName": "SADMAN",
+    "userEmail": "tradersadman78@gmail.com",
+    "telegram": "",
+    "preferredBroker": "",
+    "brokerAccountId": "",
+    "payoutWallet": "",
+    "isEmailVerified": false,
+    "metadata": {
+      "challengeId": "ch_1791163048463_m2byd",
+      "packageName": "Gold",
+      "previousRule": "Unknown",
+      "previousReasonText": "",
+      "reactivationMessage": "Reactivated test",
+      "sessionsCompleted": 1
+    }
+  },
+  {
     "archiveId": "arc_1791213235232_8v02",
     "timestamp": "2026-10-05T15:13:55.232Z",
     "displayTime": "10/5/2026, 9:13:55 PM",
