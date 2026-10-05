@@ -1729,7 +1729,16 @@ async function uploadToFreeCloudCdn(fileBuffer, originalFilename, mimeType) {
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Anti-Cache Middleware: Prevent browsers from caching HTML, JS, or API responses
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
+app.use(express.static(path.join(__dirname, 'public'), { etag: false, maxAge: 0 }));
 
 // JWT Auth Middleware
 function authenticateToken(req, res, next) {
