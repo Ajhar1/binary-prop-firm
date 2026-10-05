@@ -1699,6 +1699,36 @@
         </div>
     </div>
 
+    <!-- Login 2FA OTP Modal (Mandatory Every Login Verification) -->
+    <div class="modal-overlay" id="loginOtpModal">
+        <div class="modal-box" style="text-align: center; max-width: 480px;">
+            <button class="modal-close" onclick="closeModals()">&times;</button>
+            <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(46, 204, 113, 0.15); border: 1px solid #2ecc71; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem auto; font-size: 1.8rem; color: #2ecc71;">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2 class="modal-title" style="margin-bottom: 6px;">২-ধাপের নিরাপত্তা যাচাই (2FA Login OTP)</h2>
+            <p class="modal-subtitle" style="margin-bottom: 1.5rem; font-size: 0.9rem;">
+                আপনার অ্যাকাউন্টের সুরক্ষার্থে জিমেইলে একটি ৬-সংখ্যার লগইন কোড পাঠানো হয়েছে:<br/>
+                <strong id="loginOtpEmailTarget" style="color: var(--yellow); font-size: 0.98rem; word-break: break-all;">trader@example.com</strong>
+            </p>
+            <form id="loginOtpForm" onsubmit="handleVerifyLoginOtp(event)">
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; text-align:center; font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">Enter 6-Digit Login Security Code</label>
+                    <input type="text" class="form-control" id="loginOtpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="------" style="text-align:center; font-size:1.8rem; letter-spacing:10px; font-weight:800; color:var(--yellow); font-family:monospace; height:54px;" autocomplete="one-time-code" />
+                </div>
+                <button type="submit" class="btn-primary btn-full" id="loginOtpSubmitBtn" style="justify-content:center; padding:12px; font-size:1rem; margin-bottom:1rem;">
+                    <i class="fas fa-lock-open"></i> কোড যাচাই ও ড্যাশবোর্ডে প্রবেশ
+                </button>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem;">
+                    <span>কোড পাননি?</span>
+                    <button type="button" id="resendLoginOtpBtn" onclick="handleResendLoginOtp()" style="background:none; border:none; color:var(--yellow); font-weight:700; cursor:pointer; text-decoration:underline;">
+                        পুনরায় কোড পাঠান (Resend)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Buy Challenge Modal -->
     <div class="modal-overlay" id="buyModal">
         <div class="modal-box">
@@ -2017,6 +2047,22 @@
             return s;
         }
 
+        // Auth Global State Variables
+        let pendingVerificationEmail = '';
+        let pendingLoginEmail = '';
+        let pendingLoginPreAuthToken = '';
+        let loginResendCooldown = 0;
+
+        function openLoginOtpModal(email, maskedEmail) {
+            closeModals();
+            pendingLoginEmail = email;
+            document.getElementById('loginOtpEmailTarget').innerText = maskedEmail || email;
+            const input = document.getElementById('loginOtpInput');
+            input.value = '';
+            document.getElementById('loginOtpModal').classList.add('active');
+            setTimeout(() => input.focus(), 200);
+        }
+
         // Handle Login
         async function handleLogin(e) {
             e.preventDefault();
@@ -2028,6 +2074,12 @@
                 emailInput.value = fixedEmail;
             }
             const password = document.getElementById('loginPassword').value;
+            const submitBtn = document.querySelector('#loginForm button[type="submit"]');
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> যাচাই করা হচ্ছে...`;
+            }
 
             try {
                 const res = await fetch('/api/auth/login', {
@@ -2036,7 +2088,16 @@
                     body: JSON.stringify({ email, password })
                 });
                 const data = await res.json();
-                if (data.success) {
+                if (data.requiresLoginOtp) {
+                    pendingLoginEmail = data.email || email;
+                    pendingLoginPreAuthToken = data.preAuthToken;
+                    openLoginOtpModal(pendingLoginEmail, data.maskedEmail);
+                    showToast(data.message || 'আপনার জিমেইলে ৬-সংখ্যার লগইন কোড পাঠানো হয়েছে।', 'info');
+                } else if (data.requiresEmailVerification) {
+                    pendingVerificationEmail = data.email || email;
+                    openEmailVerifyModal(pendingVerificationEmail);
+                    showToast(data.message || 'অনুগ্রহ করে প্রথমে আপনার ইমেইল ভেরিফাই করুন।', 'warning');
+                } else if (data.success && data.token) {
                     localStorage.setItem('aj_token', data.token);
                     localStorage.setItem('aj_user_name', data.user.name);
                     localStorage.setItem('aj_user_email', data.user.email);
@@ -2049,17 +2110,126 @@
                         setTimeout(() => openBuyModal(pendingPkg), 400);
                         return;
                     }
-                    showToast('Login successful! Redirecting to Dashboard...', 'success');
+                    showToast('লগইন সফল হয়েছে! ড্যাশবোর্ডে প্রবেশ করা হচ্ছে...', 'success');
                     setTimeout(() => window.location.href = '/dashboard', 800);
                 } else {
-                    showToast(data.message || 'Login failed', 'error');
+                    showToast(data.message || 'লগইন ব্যর্থ হয়েছে', 'error');
                 }
             } catch (err) {
-                showToast('Network error during login', 'error');
+                showToast('লগইন প্রক্রিয়ায় নেটওয়ার্ক ত্রুটি ঘটেছে।', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `Login to Dashboard`;
+                }
             }
         }
 
-        let pendingVerificationEmail = '';
+        // Handle Verify Login 2FA OTP
+        async function handleVerifyLoginOtp(e) {
+            e.preventDefault();
+            const otp = document.getElementById('loginOtpInput').value.trim();
+            const submitBtn = document.getElementById('loginOtpSubmitBtn');
+            const email = pendingLoginEmail;
+            const preAuthToken = pendingLoginPreAuthToken;
+
+            if (!email || !preAuthToken) {
+                showToast('লগইন সেশন পাওয়া যায়নি। দয়া করে পুনরায় ইমেইল-পাসওয়ার্ড দিয়ে চেষ্টা করুন।', 'error');
+                closeModals();
+                document.getElementById('loginModal').classList.add('active');
+                return;
+            }
+            if (!otp || otp.length !== 6) {
+                showToast('সঠিক ৬-সংখ্যার লগইন কোড দিন।', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> কোড যাচাই হচ্ছে...`;
+
+            try {
+                const res = await fetch('/api/auth/verify-login-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp, preAuthToken })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('aj_token', data.token);
+                    localStorage.setItem('aj_user_name', data.user.name);
+                    localStorage.setItem('aj_user_email', data.user.email);
+                    checkUserSession();
+
+                    const pendingPkg = sessionStorage.getItem('pendingBuyPackageId');
+                    if (pendingPkg) {
+                        sessionStorage.removeItem('pendingBuyPackageId');
+                        closeModals();
+                        showToast('🎉 ২-ধাপ যাচাই সম্পন্ন! এবার প্যাকেজ ক্রয় সম্পন্ন করুন।', 'success');
+                        setTimeout(() => openBuyModal(pendingPkg), 400);
+                        return;
+                    }
+
+                    showToast('🎉 নিরাপত্তা যাচাই সফল! ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...', 'success');
+                    closeModals();
+                    setTimeout(() => window.location.href = '/dashboard', 800);
+                } else {
+                    showToast(data.message || 'ভুল বা মেয়াদোত্তীর্ণ লগইন কোড।', 'error');
+                }
+            } catch (err) {
+                showToast('নেটওয়ার্ক সমস্যার কারণে কোড যাচাই করা যায়নি।', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fas fa-lock-open"></i> কোড যাচাই ও ড্যাশবোর্ডে প্রবেশ`;
+            }
+        }
+
+        // Handle Resend Login 2FA OTP
+        async function handleResendLoginOtp() {
+            if (loginResendCooldown > 0) return;
+            const email = pendingLoginEmail;
+            const preAuthToken = pendingLoginPreAuthToken;
+
+            if (!email || !preAuthToken) {
+                showToast('সেশন পাওয়া যায়নি। পুনরায় লগইন করুন।', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('resendLoginOtpBtn');
+            btn.disabled = true;
+            btn.innerText = 'পাঠানো হচ্ছে...';
+
+            try {
+                const res = await fetch('/api/auth/resend-login-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, preAuthToken })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'নতুন লগইন কোড পাঠানো হয়েছে!', 'success');
+                    loginResendCooldown = 30;
+                    btn.disabled = true;
+                    const timer = setInterval(() => {
+                        loginResendCooldown--;
+                        if (loginResendCooldown <= 0) {
+                            clearInterval(timer);
+                            btn.disabled = false;
+                            btn.innerText = 'পুনরায় কোড পাঠান (Resend)';
+                        } else {
+                            btn.innerText = `অপেক্ষা করুন (${loginResendCooldown}s)`;
+                        }
+                    }, 1000);
+                } else {
+                    showToast(data.message || 'কোড পুনরায় পাঠানো যায়নি।', 'error');
+                    btn.disabled = false;
+                    btn.innerText = 'পুনরায় কোড পাঠান (Resend)';
+                }
+            } catch (err) {
+                showToast('নেটওয়ার্ক সমস্যা। পুনরায় চেষ্টা করুন।', 'error');
+                btn.disabled = false;
+                btn.innerText = 'পুনরায় কোড পাঠান (Resend)';
+            }
+        }
 
         function openEmailVerifyModal(email, devOtp = null) {
             closeModals();
@@ -2088,6 +2258,12 @@
             const password = document.getElementById('regPassword').value;
             const telegram = document.getElementById('regTelegram').value;
             const preferredBroker = document.getElementById('regBroker').value;
+            const submitBtn = document.querySelector('#regForm button[type="submit"]');
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> অ্যাকাউন্ট তৈরি হচ্ছে...`;
+            }
 
             try {
                 const res = await fetch('/api/auth/register', {
@@ -2097,18 +2273,20 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    if (data.token) localStorage.setItem('aj_token', data.token);
-                    if (data.user) {
-                        localStorage.setItem('aj_user_name', data.user.name);
-                        localStorage.setItem('aj_user_email', data.user.email);
-                    }
+                    // Mandatory OTP verification required - do not store token until verified
+                    pendingVerificationEmail = data.email || email;
                     showToast(data.message || 'অ্যাকাউন্ট তৈরি হয়েছে! ইমেইল ভেরিফাই করুন।', 'success');
-                    openEmailVerifyModal(data.email || email, data.devOtp);
+                    openEmailVerifyModal(pendingVerificationEmail);
                 } else {
                     showToast(data.message || 'Registration failed', 'error');
                 }
             } catch (err) {
                 showToast('Network error during registration', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `Register & Get Funded`;
+                }
             }
         }
 

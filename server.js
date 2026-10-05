@@ -354,10 +354,34 @@ function syncChallengesWithSubmissions() {
         .filter(Boolean)
     );
 
+    const dummyChallengeIds = new Set([
+      'ch_1790765840628_grbkd',
+      'ch_1790650439313_c5pj6',
+      'ch_1790647029338_0a2rq'
+    ]);
+    const dummyChallengeEmails = new Set([
+      'disc@example.com',
+      'test@trader.com',
+      'protrader@example.com',
+      'ajhar@test.com',
+      'admin@ajfunded.com',
+      'lead.trader@binarypropfirm.com',
+      'atharajhar6@gmail.come'
+    ]);
+    const dummyChallengeUserIds = new Set([
+      'usr_test_1',
+      'test_discount_user',
+      'usr_1790486638103_3bbjv3',
+      'usr_1790475483790_5etunz',
+      'usr_1790479900000_ajf',
+      'usr_1790470000000_lead'
+    ]);
+
     const isChallengeDeleted = (c) => {
       if (!c) return true;
-      if (c.id && deletedChallengeIds.has(c.id)) return true;
-      if (c.userId && deletedUserIds.has(c.userId)) return true;
+      if (c.id && (deletedChallengeIds.has(c.id) || dummyChallengeIds.has(c.id))) return true;
+      if (c.userId && (deletedUserIds.has(c.userId) || dummyChallengeUserIds.has(c.userId))) return true;
+      if (c.userEmail && dummyChallengeEmails.has(c.userEmail.trim().toLowerCase())) return true;
       return false;
     };
 
@@ -1120,6 +1144,82 @@ async function sendAdminLoginOtpEmail(toEmail, code, userName = 'Admin') {
   }
 }
 
+// Send Trader Login 2FA OTP Email (Mandatory Login Verification)
+async function sendTraderLoginOtpEmail(toEmail, code, userName = 'Trader') {
+  if (!isValidEmail(toEmail)) {
+    console.warn(`[EMAIL WARNING] Attempted to send trader login OTP to invalid email: ${toEmail}`);
+    return { success: false, method: 'invalid_email', error: 'Invalid email address format' };
+  }
+  const mailConfig = getEmailTransporter();
+  const html = buildProfessionalEmailHtml({
+    headline: 'লগইন ২-ধাপ ভেরিফিকেশন ওটিপি / Login 2FA Verification OTP',
+    title: 'Trader Account Login Verification',
+    userName,
+    messageText: 'A login attempt to your <strong>Binary Prop Firm</strong> trader dashboard was initiated. To securely complete your login, enter the 6-digit one-time authorization code below:',
+    code,
+    securityNote: 'CRITICAL SECURITY: If you did not initiate this login attempt, someone may know your password. Change your password immediately.'
+  });
+
+  if (mailConfig && mailConfig.transporter) {
+    try {
+      await mailConfig.transporter.sendMail({
+        from: mailConfig.fromAddress,
+        to: toEmail,
+        subject: `[Binary Prop Firm Security] ${code} is your Login Verification Code`,
+        text: `Hello ${userName}, Your Binary Prop Firm login verification code is: ${code}. It expires in 15 minutes. Never share this code with anyone.`,
+        html: html
+      });
+      console.log(`[TRADER LOGIN OTP DISPATCH] Sent to ${toEmail}`);
+      return { success: true, method: 'smtp' };
+    } catch (err) {
+      console.error(`[TRADER LOGIN OTP ERROR] Failed to dispatch to ${toEmail}:`, err.message);
+      return { success: false, method: 'smtp_failed', error: err.message };
+    }
+  } else {
+    console.log(`[TRADER LOGIN OTP DEV/FALLBACK] Code for ${toEmail} is: ${code}`);
+    return { success: true, method: 'dev' };
+  }
+}
+
+// Send Challenge Order Rejection Notice Email
+async function sendChallengeRejectionEmail(toEmail, userName = 'Trader', packageName = 'Challenge', reason = '') {
+  if (!isValidEmail(toEmail)) return { success: false };
+  const mailConfig = getEmailTransporter();
+  const html = buildProfessionalEmailHtml({
+    headline: 'অর্ডার বাতিল সংক্রান্ত নোটিশ / Challenge Order Rejected',
+    title: 'Challenge Order Rejection Notice',
+    userName,
+    messageText: `Your order for <strong>${packageName}</strong> evaluation has been reviewed by the Binary Prop Firm administration team and was rejected.<br><br>
+    <div style="background: rgba(239, 68, 68, 0.12); border-left: 4px solid #ef4444; padding: 12px 14px; border-radius: 8px; margin: 12px 0; color: #fca5a5; font-size: 13.5px; line-height: 1.5;">
+      <strong style="color: #ff8b80; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">বাতিলের কারণ / Reason:</strong><br>
+      <span style="color: #ffffff; font-weight: 600;">${reason}</span>
+    </div>
+    You may log into your trader dashboard, review the feedback, and place a new order with verified payment credentials.`,
+    code: 'REJECTED',
+    securityNote: 'If you have questions regarding this decision, please reach out to our official support team.'
+  });
+
+  if (mailConfig && mailConfig.transporter) {
+    try {
+      await mailConfig.transporter.sendMail({
+        from: mailConfig.fromAddress,
+        to: toEmail,
+        subject: `[Binary Prop Firm] আপনার চ্যালেঞ্জ অর্ডার বাতিল সংক্রান্ত নোটিশ (${packageName})`,
+        text: `Hello ${userName}, Your ${packageName} challenge order has been rejected by admin. Reason: ${reason}. Please login to your dashboard for details.`,
+        html: html
+      });
+      console.log(`[CHALLENGE REJECTION EMAIL DISPATCH] Sent to ${toEmail}`);
+      return { success: true, method: 'smtp' };
+    } catch (err) {
+      console.error(`[CHALLENGE REJECTION EMAIL ERROR] Failed to dispatch to ${toEmail}:`, err.message);
+      return { success: false, method: 'smtp_failed', error: err.message };
+    }
+  } else {
+    console.log(`[CHALLENGE REJECTION EMAIL DEV/FALLBACK] Sent to ${toEmail}`);
+    return { success: true, method: 'dev' };
+  }
+}
+
 // Generate Next Unique Trader ID (e.g. AJ-1004)
 function generateNextTraderId(users) {
   let maxId = 1000;
@@ -1163,11 +1263,27 @@ function syncUsersWithAllData() {
         .map(a => a.userId)
         .filter(Boolean)
     );
-    const devTestEmails = new Set(['atharajhar6@gmail.come']);
+    const devTestEmails = new Set([
+      'atharajhar6@gmail.come',
+      'disc@example.com',
+      'test@trader.com',
+      'protrader@example.com',
+      'ajhar@test.com',
+      'admin@ajfunded.com',
+      'lead.trader@binarypropfirm.com'
+    ]);
+    const devTestIds = new Set([
+      'usr_test_1',
+      'test_discount_user',
+      'usr_1790486638103_3bbjv3',
+      'usr_1790475483790_5etunz',
+      'usr_1790479900000_ajf',
+      'usr_1790470000000_lead'
+    ]);
 
     const isExcluded = (email, id) => {
       const e = (email || '').trim().toLowerCase();
-      return devTestEmails.has(e) || (e && deletedEmails.has(e)) || (id && deletedIds.has(id));
+      return devTestEmails.has(e) || (id && devTestIds.has(id)) || (e && deletedEmails.has(e)) || (id && deletedIds.has(id));
     };
 
     // Filter out excluded from existing users
@@ -2212,15 +2328,11 @@ app.post('/api/auth/register', async (req, res) => {
     // Send verification email in background
     sendVerificationEmail(newUser.email, verificationCode, newUser.name);
 
-    const token = jwt.sign({ id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role }, JWT_SECRET, { expiresIn: '15d' });
-
     res.status(201).json({
       success: true,
-      message: 'অ্যাকাউন্ট তৈরি হয়েছে! আপনার ইমেইলে একটি ভেরিফিকেশন কোড পাঠানো হয়েছে।',
+      message: 'অ্যাকাউন্ট তৈরি হয়েছে! আপনার ইমেইলে একটি ৬-সংখ্যার ভেরিফিকেশন কোড পাঠানো হয়েছে। অ্যাকাউন্ট সচল করতে কোডটি দিন।',
       requiresVerification: true,
       email: newUser.email,
-      devOtp: verificationCode,
-      token,
       user: {
         id: newUser.id,
         traderId: newUser.traderId,
@@ -2346,12 +2458,12 @@ app.post('/api/auth/resend-verification-otp', async (req, res) => {
   }
 });
 
-// Login
+// Login (Initiates 2-Step Gmail Verification)
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required.' });
+      return res.status(400).json({ success: false, message: 'ইমেইল এবং পাসওয়ার্ড আবশ্যক।' });
     }
 
     const rawEmail = typeof email === 'string' ? email.trim() : '';
@@ -2361,7 +2473,7 @@ app.post('/api/auth/login', async (req, res) => {
     let users = readJson(USERS_FILE, []);
     let user = users.find(u => u.email && u.email.toLowerCase() === cleanedEmail);
 
-    // If direct match failed, try normalized match (fixes typos like .come -> .com, @gamil -> @gmail)
+    // If direct match failed, try normalized match
     if (!user && normalizedEmail && normalizedEmail !== cleanedEmail) {
       user = users.find(u => u.email && u.email.toLowerCase() === normalizedEmail);
     }
@@ -2373,19 +2485,134 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     if (!user) {
-      return res.status(400).json({ success: false, message: 'Invalid credentials. User not found.' });
+      return res.status(400).json({ success: false, message: 'ভুল তথ্য। এই ইমেইলে কোনো অ্যাকাউন্ট পাওয়া যায়নি।' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ success: false, message: 'Invalid password. Please check and try again.' });
+      return res.status(400).json({ success: false, message: 'ভুল পাসওয়ার্ড। দয়া করে সঠিক পাসওয়ার্ড দিয়ে চেষ্টা করুন।' });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role || 'user' }, JWT_SECRET, { expiresIn: '15d' });
+    // If email is not yet verified from registration, force registration verification
+    if (user.isEmailVerified === false) {
+      const verifyCode = generateVerificationCode();
+      user.emailVerificationCode = verifyCode;
+      user.emailVerificationExpires = Date.now() + 15 * 60 * 1000;
+      writeJson(USERS_FILE, users);
+      writeJson(USERS_PERMANENT_STORE_FILE, users);
+      saveTraderToLifelongVault(user);
+      sendVerificationEmail(user.email, verifyCode, user.name);
+
+      return res.status(403).json({
+        success: false,
+        requiresEmailVerification: true,
+        email: user.email,
+        message: 'আপনার অ্যাকাউন্টটি এখনও ইমেইল ভেরিফাই করা হয়নি। আপনার ইমেইলে একটি নতুন ভেরিফিকেশন কোড পাঠানো হয়েছে।'
+      });
+    }
+
+    // Generate 6-digit Login 2FA OTP
+    const loginOtp = generateVerificationCode();
+    user.loginOtp = loginOtp;
+    user.loginOtpExpires = Date.now() + 15 * 60 * 1000; // 15 mins expiry
+    writeJson(USERS_FILE, users);
+    writeJson(USERS_PERMANENT_STORE_FILE, users);
+    saveTraderToLifelongVault(user);
+
+    // Send Login OTP to user's registered Gmail
+    sendTraderLoginOtpEmail(user.email, loginOtp, user.name);
+
+    // Issue short-lived preAuthToken for 2FA verification step only
+    const preAuthToken = jwt.sign(
+      { id: user.id, email: user.email, type: 'pre_auth_otp' },
+      JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    // Mask email for display: e.g. fx***@gmail.com
+    const emailParts = user.email.split('@');
+    const maskedPrefix = emailParts[0].length > 2 
+      ? emailParts[0].substring(0, 2) + '***' 
+      : emailParts[0] + '***';
+    const maskedEmail = `${maskedPrefix}@${emailParts[1]}`;
 
     res.json({
       success: true,
-      message: 'Logged in successfully.',
+      requiresLoginOtp: true,
+      preAuthToken,
+      email: user.email,
+      maskedEmail,
+      message: 'আপনার জিমেইলে একটি ৬-সংখ্যার লগইন ভেরিফিকেশন কোড পাঠানো হয়েছে।'
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, message: 'সার্ভার ত্রুটি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।' });
+  }
+});
+
+// Verify Login 2FA OTP & Issue Final JWT Session
+app.post('/api/auth/verify-login-otp', async (req, res) => {
+  try {
+    const { email, otp, preAuthToken } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: 'ইমেইল এবং ৬-সংখ্যার ওটিপি কোড দিন।' });
+    }
+    if (!preAuthToken) {
+      return res.status(401).json({ success: false, message: 'লগইন সেশন অবৈধ। পুনরায় ইমেইল ও পাসওয়ার্ড দিয়ে চেষ্টা করুন।' });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(preAuthToken, JWT_SECRET);
+      if (decoded.type !== 'pre_auth_otp' || decoded.email.toLowerCase() !== email.trim().toLowerCase()) {
+        return res.status(401).json({ success: false, message: 'অবৈধ অথেনটিকেশন সেশন।' });
+      }
+    } catch (e) {
+      return res.status(401).json({ success: false, message: 'ওটিপি সেশনের মেয়াদ শেষ হয়ে গেছে। পুনরায় লগইন করুন।' });
+    }
+
+    let users = readJson(USERS_FILE, []);
+    const rawEmail = typeof email === 'string' ? email.trim() : '';
+    const cleanedEmail = rawEmail.toLowerCase();
+    const normalizedEmail = normalizeEmail(rawEmail);
+
+    let user = users.find(u => u.email && (u.email.toLowerCase() === cleanedEmail || (normalizedEmail && u.email.toLowerCase() === normalizedEmail)));
+    if (!user) {
+      users = syncUsersWithAllData();
+      user = users.find(u => u.email && (u.email.toLowerCase() === cleanedEmail || (normalizedEmail && u.email.toLowerCase() === normalizedEmail)));
+    }
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'ইউজার খুঁজে পাওয়া যায়নি।' });
+    }
+
+    if (!user.loginOtp || user.loginOtp !== otp.trim()) {
+      return res.status(400).json({ success: false, message: 'ভুল ওটিপি কোড। অনুগ্রহ করে সঠিক ৬-সংখ্যার কোডটি দিন।' });
+    }
+
+    if (user.loginOtpExpires && Date.now() > user.loginOtpExpires) {
+      return res.status(400).json({ success: false, message: 'ওটিপি কোডের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে "Resend Code" ক্লিক করুন।' });
+    }
+
+    // Clear login OTP once used
+    user.loginOtp = null;
+    user.loginOtpExpires = null;
+    user.lastLoginAt = new Date().toISOString();
+    writeJson(USERS_FILE, users);
+    writeJson(USERS_PERMANENT_STORE_FILE, users);
+    saveTraderToLifelongVault(user);
+
+    logUserArchive('USER_LOGGED_IN_WITH_2FA_OTP', user, { ip: req.ip || req.connection.remoteAddress });
+
+    // Issue official full 15-day JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email, name: user.name, role: user.role || 'user' },
+      JWT_SECRET,
+      { expiresIn: '15d' }
+    );
+
+    res.json({
+      success: true,
+      message: 'লগইন সফল হয়েছে!',
       token,
       user: {
         id: user.id,
@@ -2398,12 +2625,55 @@ app.post('/api/auth/login', async (req, res) => {
         payoutWallet: user.payoutWallet,
         brokerAccountId: user.brokerAccountId,
         profilePicture: user.profilePicture || null,
-        isEmailVerified: user.isEmailVerified !== undefined ? user.isEmailVerified : true
+        isEmailVerified: true
       }
     });
   } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ success: false, message: 'Internal server error while logging in.' });
+    console.error('Verify login OTP error:', err);
+    res.status(500).json({ success: false, message: 'সার্ভার ত্রুটি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।' });
+  }
+});
+
+// Resend Login 2FA OTP
+app.post('/api/auth/resend-login-otp', async (req, res) => {
+  try {
+    const { email, preAuthToken } = req.body;
+    if (!email || !preAuthToken) {
+      return res.status(400).json({ success: false, message: 'অনুরোধটি অসম্পূর্ণ।' });
+    }
+    try {
+      const decoded = jwt.verify(preAuthToken, JWT_SECRET);
+      if (decoded.type !== 'pre_auth_otp' || decoded.email.toLowerCase() !== email.trim().toLowerCase()) {
+        return res.status(401).json({ success: false, message: 'অবৈধ অনুরোধ।' });
+      }
+    } catch (e) {
+      return res.status(401).json({ success: false, message: 'সেশনের মেয়াদ শেষ হয়ে গেছে। পুনরায় লগইন ফর্ম থেকে চেষ্টা করুন।' });
+    }
+
+    let users = readJson(USERS_FILE, []);
+    const rawEmail = typeof email === 'string' ? email.trim() : '';
+    const cleanedEmail = rawEmail.toLowerCase();
+    const normalizedEmail = normalizeEmail(rawEmail);
+
+    let user = users.find(u => u.email && (u.email.toLowerCase() === cleanedEmail || (normalizedEmail && u.email.toLowerCase() === normalizedEmail)));
+    if (!user) return res.status(404).json({ success: false, message: 'ইউজার পাওয়া যায়নি।' });
+
+    const freshOtp = generateVerificationCode();
+    user.loginOtp = freshOtp;
+    user.loginOtpExpires = Date.now() + 15 * 60 * 1000;
+    writeJson(USERS_FILE, users);
+    writeJson(USERS_PERMANENT_STORE_FILE, users);
+    saveTraderToLifelongVault(user);
+
+    sendTraderLoginOtpEmail(user.email, freshOtp, user.name);
+
+    res.json({
+      success: true,
+      message: 'আপনার জিমেইলে নতুন ৬-সংখ্যার লগইন ওটিপি কোড পাঠানো হয়েছে।'
+    });
+  } catch (err) {
+    console.error('Resend login OTP error:', err);
+    res.status(500).json({ success: false, message: 'ওটিপি পাঠাতে সমস্যা হয়েছে।' });
   }
 });
 
@@ -4563,7 +4833,7 @@ app.post('/api/admin/challenges/:id/set-phase', authenticateAdminToken, (req, re
   });
 });
 
-// 8. Reject / Disqualify Challenge (Admin)
+// 8. Reject Challenge Order (Admin)
 app.post('/api/admin/challenges/:id/reject', authenticateAdminToken, (req, res) => {
   const challenges = readJson(CHALLENGES_FILE);
   const idx = challenges.findIndex(c => c.id === req.params.id);
@@ -4579,7 +4849,7 @@ app.post('/api/admin/challenges/:id/reject', authenticateAdminToken, (req, res) 
 
   saveChallenges(challenges);
 
-  logUserArchive('CHALLENGE_REJECTED', { id: challenges[idx].userId }, {
+  logUserArchive('CHALLENGE_REJECTED', { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, {
     challengeId: challenges[idx].id,
     packageName: challenges[idx].packageName,
     fundedAmount: challenges[idx].fundedAmount,
@@ -4587,9 +4857,12 @@ app.post('/api/admin/challenges/:id/reject', authenticateAdminToken, (req, res) 
     reason: reason
   });
 
+  // Automatically notify trader via Gmail with rejection reason
+  sendChallengeRejectionEmail(challenges[idx].userEmail, challenges[idx].userName, challenges[idx].packageName, reason);
+
   syncChallengesWithSubmissions();
 
-  res.json({ success: true, message: 'চ্যালেঞ্জটি বাতিল ও বন্ধ করা হয়েছে এবং সদস্য এই চ্যালেঞ্জ থেকে বাদ পড়েছেন।', challenge: challenges[idx] });
+  res.json({ success: true, message: 'চ্যালেঞ্জ অর্ডারটি বাতিল করা হয়েছে এবং কারণ ইউজারের ড্যাশবোর্ড ও ইমেইলে পাঠানো হয়েছে।', challenge: challenges[idx] });
 });
 
 // Disqualify Challenge for Rule Violation (Admin - Req #3)
@@ -4958,7 +5231,7 @@ app.post('/api/admin/submissions/:id/request-resubmission', authenticateAdminTok
   });
 });
 
-// Delete Challenge Order (Admin)
+// Delete Challenge Order (Admin) - Permanent Cascade Removal
 app.delete('/api/admin/challenges/:id', authenticateAdminToken, (req, res) => {
   let challenges = readJson(CHALLENGES_FILE, []);
   let permChallenges = readJson(CHALLENGES_PERMANENT_STORE_FILE, []);
@@ -4969,6 +5242,14 @@ app.delete('/api/admin/challenges/:id', authenticateAdminToken, (req, res) => {
   permChallenges = permChallenges.filter(c => c.id !== req.params.id);
   saveChallenges(challenges);
 
+  // Clean out any past approval/purchase logs from user_archive so auto-heal NEVER recovers it
+  let archive = readJson(ARCHIVE_FILE, []);
+  archive = archive.filter(a => {
+    const chId = (a.metadata && a.metadata.challengeId) || a.challengeId;
+    return chId !== req.params.id;
+  });
+  writeJson(ARCHIVE_FILE, archive);
+
   logUserArchive('CHALLENGE_DELETED_BY_ADMIN', 
     { id: found.userId, name: found.userName, email: found.userEmail }, 
     { challengeId: found.id, packageName: found.packageName }
@@ -4976,7 +5257,7 @@ app.delete('/api/admin/challenges/:id', authenticateAdminToken, (req, res) => {
 
   syncChallengesWithSubmissions();
 
-  res.json({ success: true, message: 'চ্যালেঞ্জ অর্ডারটি সফলভাবে ডিলিট করা হয়েছে।' });
+  res.json({ success: true, message: 'চ্যালেঞ্জ অর্ডারটি স্থায়ীভাবে মুছে ফেলা হয়েছে।' });
 });
 
 // Delete Trade Submission (Admin)
