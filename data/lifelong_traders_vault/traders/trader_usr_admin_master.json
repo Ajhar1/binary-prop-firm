@@ -1,0 +1,16 @@
+{
+  "id": "usr_admin_master",
+  "name": "Binary Prop Firm Admin",
+  "email": "admin@binarypropfirm.com",
+  "password": "$2a$10$/6JJ3T574wtACbuTUsmSyugEr1s3xXqu5S.4FvmZEQ5GPLO0E3EEC",
+  "role": "admin",
+  "telegram": "@BinaryPropFirmAdmin",
+  "preferredBroker": "quotex",
+  "payoutWallet": "",
+  "brokerAccountId": "",
+  "isEmailVerified": true,
+  "createdAt": "2026-09-27T03:56:11.993Z",
+  "adminSecurityPin": "254271",
+  "traderId": "BPF-1000",
+  "profilePicture": null
+}

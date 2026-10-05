@@ -1,0 +1,29 @@
+[
+  {
+    "id": "sub_1790948500000_m7cb0",
+    "userId": "usr_1790947201000_m7cb0",
+    "challengeId": "ch_1790947201248_m7cb0",
+    "packageName": "Bronze",
+    "isPractice": true,
+    "sessionType": "practice",
+    "practiceSessionNumber": 1,
+    "brokerName": "Quotex",
+    "sessionDate": "2026-10-02",
+    "winTrades": 3,
+    "lossTrades": 1,
+    "tradesCount": 4,
+    "profitLoss": 5.75,
+    "winRate": "75.0%",
+    "videoUrl": "",
+    "screenshotUrl": "",
+    "fileType": "none",
+    "isCloudHosted": true,
+    "cloudProvider": "Cloud Host",
+    "notes": "[সেশন ১ রিপোর্ট] প্র্যাকটিস সেশন ১ সম্পন্ন। লাভ: +$5.75",
+    "status": "under_review",
+    "adminFeedback": "",
+    "submittedAt": "2026-10-02T14:10:00.000Z",
+    "userName": "MD ZAHID HASAN",
+    "userEmail": "rsgaming6321@gmail.com"
+  }
+]

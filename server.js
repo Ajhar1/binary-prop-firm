@@ -326,6 +326,470 @@ function extractVideoThumbnail(url) {
   return '';
 }
 
+// ==================== HARDCODED CORE PERMANENT TRADERS & CHALLENGES ====================
+const CORE_PERMANENT_TRADERS = [
+  {
+    "id": "usr_1790479914536_bjtgpe",
+    "name": "MD AJHAR",
+    "email": "atharajhar6@gmail.com",
+    "password": "$2a$10$/6JJ3T574wtACbuTUsmSyugEr1s3xXqu5S.4FvmZEQ5GPLO0E3EEC",
+    "role": "admin",
+    "telegram": "MDAJHA1",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "92940617",
+    "isEmailVerified": true,
+    "createdAt": "2026-09-27T03:31:54.536Z",
+    "updatedAt": "2026-10-02T19:49:42.671Z",
+    "adminSecurityPin": "254271",
+    "traderId": "BPF-ADMIN-1",
+    "profilePicture": null
+  },
+  {
+    "id": "usr_admin_master",
+    "name": "Binary Prop Firm Admin",
+    "email": "admin@binarypropfirm.com",
+    "password": "$2a$10$/6JJ3T574wtACbuTUsmSyugEr1s3xXqu5S.4FvmZEQ5GPLO0E3EEC",
+    "role": "admin",
+    "telegram": "@BinaryPropFirmAdmin",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "",
+    "isEmailVerified": true,
+    "createdAt": "2026-09-27T03:56:11.993Z",
+    "adminSecurityPin": "254271",
+    "traderId": "BPF-1000",
+    "profilePicture": null
+  },
+  {
+    "id": "usr_1790947201000_m7cb0",
+    "name": "MD ZAHID HASAN",
+    "email": "rsgaming6321@gmail.com",
+    "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+    "role": "user",
+    "telegram": "@RS_GAMING_99",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "92245390",
+    "isEmailVerified": true,
+    "createdAt": "2026-10-02T13:15:00.000Z",
+    "updatedAt": "2026-10-02T13:20:00.000Z",
+    "traderId": "AJ-1003",
+    "profilePicture": null
+  },
+  {
+    "id": "usr_1790932968093_0a0aku",
+    "name": "Ashraful",
+    "email": "fxashraful476@gmail.com",
+    "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+    "role": "user",
+    "telegram": "@AshrafulTrader",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "92940617",
+    "isEmailVerified": true,
+    "createdAt": "2026-10-02T11:40:00.000Z",
+    "updatedAt": "2026-10-02T11:44:19.659Z",
+    "traderId": "AJ-1002",
+    "profilePicture": null
+  },
+  {
+    "id": "usr_1790644588120_nmqiyz",
+    "name": "Rahim Trader",
+    "email": "rahim.trader@gmail.com",
+    "password": "/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+    "role": "user",
+    "telegram": "@RahimTrader",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "7829104",
+    "isEmailVerified": true,
+    "createdAt": "2026-09-29T01:16:28.238Z",
+    "traderId": "AJ-1001",
+    "profilePicture": null
+  },
+  {
+    "id": "usr_1791090000000_afia",
+    "name": "Afia Farjana",
+    "email": "afiafarjana933@gmail.com",
+    "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+    "role": "user",
+    "telegram": "@AfiaFarjana",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "Demo Account",
+    "isEmailVerified": true,
+    "createdAt": "2026-10-04T07:30:00.000Z",
+    "updatedAt": "2026-10-04T08:00:00.000Z",
+    "traderId": "AJ-1004",
+    "profilePicture": null
+  },
+  {
+    "id": "usr_1791120812017_u9oqh3",
+    "traderId": "AJ-1005",
+    "name": "Rabiul Hossain",
+    "email": "01835020991r@gmail.com",
+    "password": "$2a$10$T8jM.RjReyQM/p3ZN7PxRenVOftTtQiBCGjbMQ78CLhLX5uYil8xu",
+    "role": "user",
+    "telegram": "@rabiul8880",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "94325851",
+    "profilePicture": null,
+    "isEmailVerified": true,
+    "emailVerificationCode": null,
+    "emailVerificationExpires": null,
+    "createdAt": "2026-10-04T13:33:32.018Z",
+    "emailVerifiedAt": "2026-10-04T13:33:51.654Z"
+  },
+  {
+    "id": "usr_1791041803620_qz1qbz",
+    "name": "SADMAN",
+    "email": "tradersadman78@gmail.com",
+    "password": "$2a$10$E4Z4i1YoCstc9o/y/PtvserVlaqlREVhpie5Jz8Ysgr0sAVbmKkVW",
+    "role": "user",
+    "telegram": "",
+    "preferredBroker": "quotex",
+    "payoutWallet": "",
+    "brokerAccountId": "92818711",
+    "profilePicture": null,
+    "isEmailVerified": true,
+    "createdAt": "2026-10-05T01:17:28.464Z",
+    "traderId": "AJ-1006"
+  }
+];
+
+const CORE_PERMANENT_CHALLENGES = [
+  {
+    "id": "ch_1791121315017_orl9s",
+    "userId": "usr_1791120812017_u9oqh3",
+    "userName": "Rabiul Hossain",
+    "userEmail": "01835020991r@gmail.com",
+    "userTraderId": "AJ-1005",
+    "userTelegram": "@rabiul8880",
+    "userBroker": "quotex",
+    "packageId": "pkg-bronze",
+    "packageName": "Bronze",
+    "originalFee": 5,
+    "fee": 4,
+    "discountPercent": 20,
+    "hasDiscount": true,
+    "fundedAmount": 100,
+    "profitSplit": "75%",
+    "maxDrawdown": "25%",
+    "brokerId": "quotex",
+    "brokerName": "Quotex",
+    "brokerIcon": "/assets/brokers/quotex.png",
+    "brokerAccountId": "94325851",
+    "status": "in_progress",
+    "sessionsRequired": 15,
+    "sessionsCompleted": 0,
+    "currentDrawdown": "0.0%",
+    "paymentMethod": "bKash (Personal - Send Money)",
+    "paymentTxId": "DJ40F290EU",
+    "senderNumber": "01835020991",
+    "currency": "BDT",
+    "currencySymbol": "৳",
+    "exchangeRate": 127,
+    "localAmount": 508,
+    "assignedMmId": "mm_default",
+    "assignedMmSerial": 1,
+    "assignedMmTitle": "অফিসিয়াল মানি ম্যানেজমেন্ট শিট #১",
+    "assignedMmUrl": "https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing",
+    "assignedMmNote": "Standard Evaluation Sheet",
+    "approvedAt": "2026-10-04T13:43:30.375Z",
+    "createdAt": "2026-10-04T13:41:55.017Z",
+    "durationDays": 15,
+    "challengePhase": "practice",
+    "expiresAt": "2026-10-21T13:43:30.375Z",
+    "practiceSessionsCompleted": 0,
+    "verifiedSessionsCount": 0,
+    "totalSubmissionsCount": 0,
+    "practiceHours": 48,
+    "practiceStartedAt": "2026-10-04T13:43:30.375Z",
+    "practiceExpiresAt": "2026-10-06T13:43:30.375Z",
+    "practiceMaxSessions": 3,
+    "isActive": true
+  },
+  {
+    "id": "ch_1790947711951_m7uc4",
+    "userId": "usr_1790932968093_0a0aku",
+    "userName": "Ashraful",
+    "userEmail": "fxashraful476@gmail.com",
+    "userTraderId": "AJ-1002",
+    "userTelegram": "@AshrafulTrader",
+    "userBroker": "Quotex",
+    "packageId": "pkg-bronze",
+    "packageName": "Bronze",
+    "originalFee": 5,
+    "fee": 4,
+    "discountPercent": 20,
+    "hasDiscount": true,
+    "fundedAmount": 100,
+    "profitSplit": "85%",
+    "maxDrawdown": "25%",
+    "brokerId": "quotex",
+    "brokerName": "Quotex",
+    "brokerIcon": "/assets/brokers/quotex.png",
+    "brokerAccountId": "92940617",
+    "status": "in_progress",
+    "sessionsRequired": 15,
+    "sessionsCompleted": 0,
+    "currentDrawdown": "0.0%",
+    "paymentMethod": "bKash (Personal - Send Money)",
+    "paymentTxId": "DJ27AHKWUN",
+    "senderNumber": "01314138524",
+    "currency": "BDT",
+    "currencySymbol": "৳",
+    "exchangeRate": 127,
+    "localAmount": 508,
+    "assignedMmId": "mm_default",
+    "assignedMmSerial": 1,
+    "assignedMmTitle": "অফিসিয়াল মানি ম্যানেজমেন্ট শিট #১",
+    "assignedMmUrl": "https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing",
+    "assignedMmNote": "Standard Evaluation Sheet",
+    "approvedAt": "2026-10-02T12:00:00.000Z",
+    "createdAt": "2026-10-02T11:44:19.659Z",
+    "durationDays": 15,
+    "challengePhase": "evaluation",
+    "expiresAt": "2026-10-19T12:00:00.000Z",
+    "practiceSessionsCompleted": 0,
+    "verifiedSessionsCount": 0,
+    "totalSubmissionsCount": 0,
+    "practiceHours": 48,
+    "practiceStartedAt": "2026-10-02T12:00:00.000Z",
+    "practiceExpiresAt": "2026-10-04T12:00:00.000Z",
+    "practiceMaxSessions": 3,
+    "isActive": true,
+    "evaluationStartedAt": "2026-10-04T12:00:00.000Z"
+  },
+  {
+    "id": "ch_1790947201248_m7cb0",
+    "userId": "usr_1790947201000_m7cb0",
+    "userName": "MD ZAHID HASAN",
+    "userEmail": "rsgaming6321@gmail.com",
+    "userTraderId": "AJ-1003",
+    "userTelegram": "@RS_GAMING_99",
+    "userBroker": "Quotex",
+    "packageId": "pkg-bronze",
+    "packageName": "Bronze",
+    "originalFee": 5,
+    "fee": 4,
+    "discountPercent": 20,
+    "hasDiscount": true,
+    "fundedAmount": 100,
+    "profitSplit": "85%",
+    "maxDrawdown": "25%",
+    "brokerId": "quotex",
+    "brokerName": "Quotex",
+    "brokerIcon": "/assets/brokers/quotex.png",
+    "brokerAccountId": "92245390",
+    "status": "failed",
+    "sessionsRequired": 15,
+    "sessionsCompleted": 0,
+    "currentDrawdown": "0.0%",
+    "paymentMethod": "Binance Pay (Zero Fee)",
+    "paymentTxId": "457649291189428224",
+    "senderNumber": "",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "exchangeRate": 1,
+    "localAmount": 4,
+    "assignedMmId": "mm_default",
+    "assignedMmSerial": 1,
+    "assignedMmTitle": "অফিসিয়াল মানি ম্যানেজমেন্ট শিট #১",
+    "assignedMmUrl": "https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing",
+    "assignedMmNote": "Standard Evaluation Sheet",
+    "approvedAt": "2026-10-02T13:25:00.000Z",
+    "createdAt": "2026-10-02T13:20:01.248Z",
+    "durationDays": 15,
+    "challengePhase": "practice",
+    "expiresAt": "2026-10-19T13:25:00.000Z",
+    "practiceSessionsCompleted": 1,
+    "verifiedSessionsCount": 0,
+    "totalSubmissionsCount": 0,
+    "practiceHours": 48,
+    "practiceStartedAt": "2026-10-02T13:25:00.000Z",
+    "practiceExpiresAt": "2026-10-04T13:25:00.000Z",
+    "practiceMaxSessions": 3,
+    "isActive": false,
+    "isCompleted": true,
+    "reactivationNotice": {
+      "id": "notif_1791117792950",
+      "title": "চ্যালেঞ্জ পুনরায় সচল করা হয়েছে",
+      "message": "সম্মানিত ট্রেডার, ভুলবশত আপনার অ্যাকাউ��্টের চ্যালেঞ্জটি সাময়িকভাবে বন্ধ করা হয়েছিল। আপনার চ্যালেঞ্জটি পুনরায় সফলভাবে সক্রিয় করা হয়েছে এবং আগের সকল ডাটা, সম্পন্ন সেশন ও মানি ম্যানেজমেন্ট শিট সম্পূর্ণ অক্ষত রয়েছে। আপনি যথারীতি মানি ম্যানেজমেন্ট শিট অনুযায়ী ট্রেডিং চালিয়ে যেতে পারেন। সাময়িক অসুবিধার জন্য আমরা আন্তরিকভাবে দুঃখিত।",
+      "reactivatedAt": "2026-10-04T12:43:12.950Z",
+      "read": false
+    },
+    "reactivatedAt": "2026-10-04T12:43:12.950Z",
+    "failReason": "RULE_VIOLATION",
+    "violatedRule": "রুল ৩: শিটের বাহিরে ডেমোতে ট্রেড করা সম্পূর্ণ নিষিদ্ধ (শিট বহির্ভূত ট্রেড)",
+    "failReasonText": "প্ল্যাটফর্মের \"রুল ৩: শিটের বাহিরে ডেমোতে ট্রেড করা সম্পূর্ণ ন��ষিদ্ধ (শিট বহির্ভূত ট্রেড)\" করার কারণে আপনাকে এই চ্যালেঞ্জ থেকে বাদ দেওয়া হলো এবং চ্যালেঞ্জটি বন্ধ করা হলো।",
+    "failedAt": "2026-10-04T12:43:25.519Z"
+  },
+  {
+    "id": "ch_1791090000000_afia_gold",
+    "userId": "usr_1791090000000_afia",
+    "userName": "Afia Farjana",
+    "userEmail": "afiafarjana933@gmail.com",
+    "userTraderId": "AJ-1004",
+    "userTelegram": "@AfiaFarjana",
+    "userBroker": "Quotex",
+    "packageId": "pkg-gold",
+    "packageName": "Gold",
+    "originalFee": 25,
+    "fee": 15,
+    "discountPercent": 40,
+    "hasDiscount": true,
+    "fundedAmount": 525,
+    "profitSplit": "75%",
+    "maxDrawdown": "25%",
+    "brokerId": "quotex",
+    "brokerName": "Quotex",
+    "brokerIcon": "/assets/brokers/quotex.png",
+    "brokerAccountId": "Demo Account",
+    "status": "in_progress",
+    "sessionsRequired": 15,
+    "sessionsCompleted": 0,
+    "currentDrawdown": "0.0%",
+    "paymentMethod": "bKash / Binance Pay",
+    "paymentTxId": "TX_525_GOLD_AFIA",
+    "senderNumber": "",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "exchangeRate": 1,
+    "localAmount": 15,
+    "assignedMmId": "mm_default",
+    "assignedMmSerial": 1,
+    "assignedMmTitle": "অফিসিয়াল মানি ম্যানেজমেন্ট শিট #১",
+    "assignedMmUrl": "https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing",
+    "assignedMmNote": "Standard Evaluation Sheet",
+    "approvedAt": "2026-10-04T08:00:00.000Z",
+    "createdAt": "2026-10-04T07:30:00.000Z",
+    "durationDays": 15,
+    "challengePhase": "practice",
+    "expiresAt": "2026-10-21T08:00:00.000Z",
+    "practiceSessionsCompleted": 0,
+    "verifiedSessionsCount": 0,
+    "totalSubmissionsCount": 0,
+    "practiceHours": 48,
+    "practiceStartedAt": "2026-10-04T08:00:00.000Z",
+    "practiceExpiresAt": "2026-10-06T08:00:00.000Z",
+    "practiceMaxSessions": 3,
+    "isActive": true
+  },
+  {
+    "id": "ch_1791079900000_admin",
+    "userId": "usr_1790479914536_bjtgpe",
+    "userName": "MD AJHAR",
+    "userEmail": "atharajhar6@gmail.com",
+    "userTraderId": "BPF-ADMIN-1",
+    "userTelegram": "@MDAJHA1",
+    "userBroker": "Quotex",
+    "packageId": "pkg-bronze",
+    "packageName": "Bronze",
+    "fundedAmount": 100,
+    "profitSplit": "85%",
+    "maxDrawdown": "25%",
+    "status": "in_progress",
+    "sessionsRequired": 15,
+    "sessionsCompleted": 0,
+    "currentDrawdown": "0.0%",
+    "approvedAt": "2026-10-04T00:00:00.000Z",
+    "createdAt": "2026-10-04T00:00:00.000Z",
+    "durationDays": 15,
+    "challengePhase": "evaluation",
+    "expiresAt": "2026-10-25T00:00:00.000Z",
+    "isActive": true,
+    "practiceSessionsCompleted": 0,
+    "verifiedSessionsCount": 0,
+    "totalSubmissionsCount": 0
+  },
+  {
+    "id": "ch_1791163048463_m2byd",
+    "userId": "usr_1791041803620_qz1qbz",
+    "userName": "SADMAN",
+    "userEmail": "tradersadman78@gmail.com",
+    "userTraderId": "AJ-1006",
+    "userTelegram": "N/A",
+    "userBroker": "Quotex",
+    "packageId": "pkg-gold",
+    "packageName": "Gold",
+    "originalFee": 25,
+    "fee": 15,
+    "discountPercent": 40,
+    "hasDiscount": true,
+    "fundedAmount": 525,
+    "profitSplit": "75%",
+    "maxDrawdown": "25%",
+    "brokerId": "quotex",
+    "brokerName": "Quotex",
+    "brokerIcon": "/assets/brokers/quotex.png",
+    "brokerAccountId": "92818711",
+    "status": "in_progress",
+    "sessionsRequired": 15,
+    "sessionsCompleted": 0,
+    "currentDrawdown": "0.0%",
+    "paymentMethod": "USDT (TRC20 - Instant)",
+    "paymentTxId": "417716212558",
+    "senderNumber": "",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "exchangeRate": 1,
+    "localAmount": 15,
+    "assignedMmId": "mm_default",
+    "assignedMmSerial": 1,
+    "assignedMmTitle": "অফিসিয়াল মানি ম্যানেজমেন্ট শিট #১",
+    "assignedMmUrl": "https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing",
+    "assignedMmNote": "Standard Evaluation Sheet",
+    "approvedAt": "2026-10-05T03:47:43.362Z",
+    "createdAt": "2026-10-05T01:17:28.464Z",
+    "durationDays": 15,
+    "challengePhase": "evaluation",
+    "expiresAt": "2026-10-20T03:49:23.728Z",
+    "practiceSessionsCompleted": 0,
+    "verifiedSessionsCount": 0,
+    "totalSubmissionsCount": 0,
+    "practiceHours": 48,
+    "practiceStartedAt": "2026-10-05T03:47:43.362Z",
+    "practiceExpiresAt": "2026-10-07T03:47:43.362Z",
+    "practiceMaxSessions": 3,
+    "isActive": true,
+    "evaluationStartedAt": "2026-10-05T03:49:23.728Z",
+    "practiceSkippedAt": "2026-10-05T03:49:23.728Z"
+  }
+];
+
+const CORE_PERMANENT_SUBMISSIONS = [
+  {
+    "id": "sub_1790948500000_m7cb0",
+    "userId": "usr_1790947201000_m7cb0",
+    "challengeId": "ch_1790947201248_m7cb0",
+    "packageName": "Bronze",
+    "isPractice": true,
+    "sessionType": "practice",
+    "practiceSessionNumber": 1,
+    "brokerName": "Quotex",
+    "sessionDate": "2026-10-02",
+    "winTrades": 3,
+    "lossTrades": 1,
+    "tradesCount": 4,
+    "profitLoss": 5.75,
+    "winRate": "75.0%",
+    "videoUrl": "",
+    "screenshotUrl": "",
+    "fileType": "none",
+    "isCloudHosted": true,
+    "cloudProvider": "Cloud Host",
+    "notes": "[সেশন ১ রিপোর্ট] প্র্যাকটিস সেশন ১ সম্পন্ন। লাভ: +$5.75",
+    "status": "under_review",
+    "adminFeedback": "",
+    "submittedAt": "2026-10-02T14:10:00.000Z",
+    "userName": "MD ZAHID HASAN",
+    "userEmail": "rsgaming6321@gmail.com"
+  }
+];
+
 // Bulletproof Challenge Sessions & Submissions Synchronizer
 // Enforces:
 // 1. sessionsCompleted ALWAYS matches the true number of valid non-rejected submissions
@@ -402,6 +866,18 @@ function syncChallengesWithSubmissions() {
       if (c && c.id) challengeMap.set(c.id, c);
     });
 
+    permChallenges.forEach(pc => {
+      if (isChallengeDeleted(pc)) return;
+    });
+    CORE_PERMANENT_CHALLENGES.forEach(cc => {
+      if (isChallengeDeleted(cc)) return;
+      if (!challengeMap.has(cc.id)) {
+        challenges.push(cc);
+        challengeMap.set(cc.id, cc);
+        modified = true;
+        console.log(`[CORE-RECOVERY] Restored core challenge: ${cc.id} (${cc.packageName} for ${cc.userEmail})`);
+      }
+    });
     permChallenges.forEach(pc => {
       if (isChallengeDeleted(pc)) return;
       if (!challengeMap.has(pc.id)) {
@@ -1307,6 +1783,23 @@ function syncUsersWithAllData() {
         userById.set(u.id, u);
       }
     };
+
+    // 0. Core Permanent Traders Recovery (Immune to disk wipe / git wipe)
+    CORE_PERMANENT_TRADERS.forEach(cu => {
+      if (isExcluded(cu.email, cu.id)) return;
+      const normEmail = cu.email ? cu.email.trim().toLowerCase() : '';
+      let existing = (normEmail && userByEmail.get(normEmail)) || (cu.id && userById.get(cu.id));
+      if (!existing) {
+        users.push(cu);
+        registerUser(cu);
+        saveTraderToLifelongVault(cu);
+        modified = true;
+        console.log(`[CORE-RECOVERY] Restored core trader: ${cu.name} (${cu.email}) [${cu.traderId}]`);
+      } else {
+        if (!existing.traderId && cu.traderId) { existing.traderId = cu.traderId; modified = true; }
+        if (!existing.password && cu.password) { existing.password = cu.password; modified = true; }
+      }
+    });
 
     // 1. Index users from users.json
     users.forEach(u => registerUser(u));
@@ -4606,6 +5099,26 @@ app.get('/api/admin/backups', authenticateAdminToken, (req, res) => {
     console.error('Failed to list backups:', err);
     res.status(500).json({ success: false, message: 'Failed to retrieve backups list' });
   }
+});
+
+// Emergency Direct Core Database Restore (Master Key Protected)
+app.post('/api/admin/backups/restore-core', authenticateAdminToken, (req, res) => {
+  const masterPassword = (req.body && req.body.masterPassword) || req.headers['x-master-password'];
+  if (!masterPassword || masterPassword.trim() !== MASTER_SECURITY_PASSWORD) {
+    return res.status(403).json({ success: false, message: 'Master security key invalid.' });
+  }
+  writeJson(USERS_FILE, CORE_PERMANENT_TRADERS);
+  writeJson(USERS_PERMANENT_STORE_FILE, CORE_PERMANENT_TRADERS);
+  writeJson(CHALLENGES_FILE, CORE_PERMANENT_CHALLENGES);
+  writeJson(CHALLENGES_PERMANENT_STORE_FILE, CORE_PERMANENT_CHALLENGES);
+  writeJson(SUBMISSIONS_FILE, CORE_PERMANENT_SUBMISSIONS);
+  CORE_PERMANENT_TRADERS.forEach(u => saveTraderToLifelongVault(u));
+  res.json({
+    success: true,
+    message: 'Core database fully restored to disk and memory!',
+    usersCount: CORE_PERMANENT_TRADERS.length,
+    challengesCount: CORE_PERMANENT_CHALLENGES.length
+  });
 });
 
 // 2. Create instant manual backup

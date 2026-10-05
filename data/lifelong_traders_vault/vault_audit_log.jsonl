@@ -1,0 +1,103 @@
+{"timestamp":"2026-09-27T03:31:54.536Z","action":"VAULT_STORE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-09-27T03:56:11.993Z","action":"VAULT_STORE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-02T13:15:00.000Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1009","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-02T11:40:00.000Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1008","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-09-29T01:57:09.339Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1006","userId":"usr_test_1","email":"test@trader.com","name":"Test Trader"}
+{"timestamp":"2026-09-29T02:53:59.313Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1005","userId":"test_discount_user","email":"disc@example.com","name":"Discount Tester"}
+{"timestamp":"2026-09-27T05:23:58.103Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1004","userId":"usr_1790486638103_3bbjv3","email":"protrader@example.com","name":"Pro Trader"}
+{"timestamp":"2026-09-27T02:18:03.790Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1003","userId":"usr_1790475483790_5etunz","email":"ajhar@test.com","name":"MD Ajhar"}
+{"timestamp":"2026-09-27T01:00:00.000Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1002","userId":"usr_1790479900000_ajf","email":"admin@ajfunded.com","name":"AJ Trader"}
+{"timestamp":"2026-09-26T22:00:00.000Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1001","userId":"usr_1790470000000_lead","email":"lead.trader@binarypropfirm.com","name":"Binary Prop Lead"}
+{"timestamp":"2026-09-29T01:16:28.238Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1007","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-04T07:30:00.000Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1010","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-04T13:33:32.018Z","action":"VAULT_STORE_TRADER","traderId":"AJ-1011","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T05:23:08.461Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T05:23:08.462Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T05:23:08.463Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T05:23:08.463Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T05:23:08.464Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T05:23:08.465Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T05:23:08.465Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T05:23:08.473Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T05:23:08.474Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T05:23:08.475Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T05:23:08.475Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T05:23:08.476Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T05:23:08.476Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T05:23:08.477Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T05:23:38.119Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T05:23:38.120Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T05:23:38.121Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T05:23:38.122Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T05:23:38.123Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T05:23:38.123Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T05:23:38.124Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T05:23:38.192Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1006","userId":"usr_1791177818190_xuawid","email":"verify.test.trader@gmail.com","name":"OTP Test User"}
+{"timestamp":"2026-10-05T05:23:38.211Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1006","userId":"usr_1791177818190_xuawid","email":"verify.test.trader@gmail.com","name":"OTP Test User"}
+{"timestamp":"2026-10-05T05:23:38.285Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1006","userId":"usr_1791177818190_xuawid","email":"verify.test.trader@gmail.com","name":"OTP Test User"}
+{"timestamp":"2026-10-05T05:23:38.296Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1006","userId":"usr_1791177818190_xuawid","email":"verify.test.trader@gmail.com","name":"OTP Test User"}
+{"timestamp":"2026-10-05T05:50:33.976Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T05:50:33.977Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T05:50:33.978Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T05:50:33.979Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T05:50:33.985Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T05:50:33.986Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T05:50:33.987Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T05:50:33.995Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T05:50:33.996Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T05:50:33.996Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T05:50:33.997Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T05:50:33.998Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T05:50:33.999Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T05:50:34.000Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T05:51:09.815Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T05:51:09.816Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T05:51:09.816Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T05:51:09.817Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T05:51:09.818Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T05:51:09.819Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T05:51:09.819Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T05:51:09.826Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T05:51:09.827Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T05:51:09.828Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T05:51:09.828Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T05:51:09.829Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T05:51:09.830Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T05:51:09.831Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T05:53:46.424Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T05:53:46.425Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T05:53:46.426Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T05:53:46.426Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T05:53:46.427Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T05:53:46.428Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T05:53:46.428Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T05:53:52.900Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T05:53:52.901Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T05:53:52.902Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T05:53:52.902Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T05:53:52.904Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T05:53:52.904Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T05:53:52.905Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T05:53:52.911Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T05:53:52.912Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T05:53:52.913Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T05:53:52.914Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T05:53:52.914Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T05:53:52.915Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T05:53:52.916Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T06:03:07.801Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T06:03:07.803Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T06:03:07.804Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T06:03:07.804Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T06:03:07.805Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T06:03:07.806Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T06:03:07.807Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T06:03:07.808Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1006","userId":"usr_1791041803620_qz1qbz","email":"tradersadman78@gmail.com","name":"SADMAN"}
+{"timestamp":"2026-10-05T06:03:07.816Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-ADMIN-1","userId":"usr_1790479914536_bjtgpe","email":"atharajhar6@gmail.com","name":"MD AJHAR"}
+{"timestamp":"2026-10-05T06:03:07.817Z","action":"VAULT_PRESERVE_TRADER","traderId":"BPF-1000","userId":"usr_admin_master","email":"admin@binarypropfirm.com","name":"Binary Prop Firm Admin"}
+{"timestamp":"2026-10-05T06:03:07.818Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1003","userId":"usr_1790947201000_m7cb0","email":"rsgaming6321@gmail.com","name":"MD ZAHID HASAN"}
+{"timestamp":"2026-10-05T06:03:07.818Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1002","userId":"usr_1790932968093_0a0aku","email":"fxashraful476@gmail.com","name":"Ashraful"}
+{"timestamp":"2026-10-05T06:03:07.819Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1001","userId":"usr_1790644588120_nmqiyz","email":"rahim.trader@gmail.com","name":"Rahim Trader"}
+{"timestamp":"2026-10-05T06:03:07.820Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1004","userId":"usr_1791090000000_afia","email":"afiafarjana933@gmail.com","name":"Afia Farjana"}
+{"timestamp":"2026-10-05T06:03:07.820Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1005","userId":"usr_1791120812017_u9oqh3","email":"01835020991r@gmail.com","name":"Rabiul Hossain"}
+{"timestamp":"2026-10-05T06:03:07.821Z","action":"VAULT_PRESERVE_TRADER","traderId":"AJ-1006","userId":"usr_1791041803620_qz1qbz","email":"tradersadman78@gmail.com","name":"SADMAN"}
