@@ -1784,7 +1784,26 @@ function syncUsersWithAllData() {
       }
     };
 
-    // 0. Core Permanent Traders Recovery (Immune to disk wipe / git wipe)
+    // 1. Index users from users.json and deduplicate
+    const seenEmails = new Set();
+    const seenIds = new Set();
+    const uniqueUsers = [];
+    users.forEach(u => {
+      if (!u) return;
+      const e = (u.email || '').trim().toLowerCase();
+      const id = u.id || '';
+      if ((e && seenEmails.has(e)) || (id && seenIds.has(id))) return;
+      if (e) seenEmails.add(e);
+      if (id) seenIds.add(id);
+      uniqueUsers.push(u);
+      registerUser(u);
+    });
+    if (uniqueUsers.length !== users.length) {
+      users = uniqueUsers;
+      modified = true;
+    }
+
+    // 2. Core Permanent Traders Recovery (Immune to disk wipe / git wipe)
     CORE_PERMANENT_TRADERS.forEach(cu => {
       if (isExcluded(cu.email, cu.id)) return;
       const normEmail = cu.email ? cu.email.trim().toLowerCase() : '';
@@ -1794,15 +1813,12 @@ function syncUsersWithAllData() {
         registerUser(cu);
         saveTraderToLifelongVault(cu);
         modified = true;
-        console.log(`[CORE-RECOVERY] Restored core trader: ${cu.name} (${cu.email}) [${cu.traderId}]`);
+        console.log("[CORE-RECOVERY] Restored core trader: " + cu.name + " (" + cu.email + ") [" + cu.traderId + "]");
       } else {
         if (!existing.traderId && cu.traderId) { existing.traderId = cu.traderId; modified = true; }
         if (!existing.password && cu.password) { existing.password = cu.password; modified = true; }
       }
     });
-
-    // 1. Index users from users.json
-    users.forEach(u => registerUser(u));
 
     // 2. Merge from Lifelong Vault (Highest priority permanent store for registered traders)
     const vaultUsers = readAllFromLifelongVault();
