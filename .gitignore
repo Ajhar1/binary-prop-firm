@@ -5,6 +5,7 @@ example-1.txt
 .env
 .DS_Store
 Thumbs.db
-data/backups/
+data/
+data_secure_snapshot_*
+secure_vault_backup_*
 problem box/
-

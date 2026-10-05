@@ -1,9 +1,0 @@
-{
-  "smtpHost": "smtp.gmail.com",
-  "smtpPort": 465,
-  "smtpSecure": true,
-  "smtpUser": "atharajhar6@gmail.com",
-  "smtpPass": "wbpnuzkgjjncmesy",
-  "fromName": "AJ Funded Support",
-  "fromEmail": "atharajhar6@gmail.com"
-}
