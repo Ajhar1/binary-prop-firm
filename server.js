@@ -887,25 +887,52 @@ function syncChallengesWithSubmissions() {
         console.log(`[AUTO-HEAL] Restored challenge from permanent store: ${pc.id} (${pc.packageName} for ${pc.userEmail})`);
       } else {
         const existing = challengeMap.get(pc.id);
-        // If permanent store has a failed/disqualified status, ensure existing challenge inherits it
+        // If permanent store has a failed/disqualified status, check if the challenge was reactivated
         if (pc.status === 'failed' && existing.status !== 'failed') {
-          existing.status = 'failed';
-          existing.failReason = pc.failReason || 'DISQUALIFIED';
-          existing.violatedRule = pc.violatedRule;
-          existing.failReasonText = pc.failReasonText;
-          existing.failedAt = pc.failedAt;
-          existing.isActive = false;
-          existing.isCompleted = true;
-          modified = true;
+          // If the challenge was explicitly reactivated by admin, DO NOT revert it to failed!
+          if (existing.status === 'in_progress' && existing.reactivatedAt) {
+            pc.status = 'in_progress';
+            delete pc.failReason;
+            delete pc.violatedRule;
+            delete pc.failReasonText;
+            delete pc.failedAt;
+            pc.reactivatedAt = existing.reactivatedAt;
+            pc.reactivationNotice = existing.reactivationNotice;
+            pc.isActive = true;
+            pc.isCompleted = false;
+            modified = true;
+          } else {
+            existing.status = 'failed';
+            existing.failReason = pc.failReason || 'DISQUALIFIED';
+            existing.violatedRule = pc.violatedRule;
+            existing.failReasonText = pc.failReasonText;
+            existing.failedAt = pc.failedAt;
+            existing.isActive = false;
+            existing.isCompleted = true;
+            modified = true;
+          }
         } else if (existing.status === 'failed' && pc.status !== 'failed') {
-          pc.status = 'failed';
-          pc.failReason = existing.failReason || 'DISQUALIFIED';
-          pc.violatedRule = existing.violatedRule;
-          pc.failReasonText = existing.failReasonText;
-          pc.failedAt = existing.failedAt;
-          pc.isActive = false;
-          pc.isCompleted = true;
-          writeJson(CHALLENGES_PERMANENT_STORE_FILE, permChallenges);
+          if (pc.status === 'in_progress' && pc.reactivatedAt) {
+            existing.status = 'in_progress';
+            delete existing.failReason;
+            delete existing.violatedRule;
+            delete existing.failReasonText;
+            delete existing.failedAt;
+            existing.reactivatedAt = pc.reactivatedAt;
+            existing.reactivationNotice = pc.reactivationNotice;
+            existing.isActive = true;
+            existing.isCompleted = false;
+            modified = true;
+          } else {
+            pc.status = 'failed';
+            pc.failReason = existing.failReason || 'DISQUALIFIED';
+            pc.violatedRule = existing.violatedRule;
+            pc.failReasonText = existing.failReasonText;
+            pc.failedAt = existing.failedAt;
+            pc.isActive = false;
+            pc.isCompleted = true;
+            writeJson(CHALLENGES_PERMANENT_STORE_FILE, permChallenges);
+          }
         } else if (existing.status !== pc.status && pc.status === 'in_progress' && existing.status !== 'passed' && existing.status !== 'failed') {
           existing.status = pc.status;
           existing.approvedAt = pc.approvedAt || existing.approvedAt;
@@ -1159,7 +1186,16 @@ function syncChallengesWithSubmissions() {
         modified = true;
       }
 
-      const rejectedOfficialSub = officialSubs.find(s => s.status === 'rejected');
+      const reactivatedMs = c.reactivatedAt ? new Date(c.reactivatedAt).getTime() : 0;
+      const rejectedOfficialSub = officialSubs.find(s => {
+        if (s.status !== 'rejected') return false;
+        if (s.forgivenOnReactivation === true) return false;
+        if (reactivatedMs > 0) {
+          const subMs = new Date(s.reviewedAt || s.submittedAt || 0).getTime();
+          if (subMs <= reactivatedMs) return false;
+        }
+        return true;
+      });
       const isTimeExpired = (c.challengePhase === 'evaluation') && c.expiresAt && (now.getTime() > new Date(c.expiresAt).getTime());
       const isDrawdownBreached = (c.challengePhase === 'evaluation') && (maxDdPct >= 25 || has25Loss);
 
@@ -5594,10 +5630,40 @@ app.post('/api/admin/challenges/:id/reactivate', authenticateAdminToken, (req, r
   };
   target.reactivatedAt = nowIso;
 
+  // 4. Forgive any existing rejected submissions for this challenge/user so they never re-disqualify
+  let submissions = readJson(SUBMISSIONS_FILE, []);
+  let subsModified = false;
+  submissions.forEach(s => {
+    if ((s.challengeId === target.id || s.userId === target.userId) && s.status === 'rejected') {
+      s.forgivenOnReactivation = true;
+      s.reactivatedAt = nowIso;
+      subsModified = true;
+    }
+  });
+  if (subsModified) {
+    writeJson(SUBMISSIONS_FILE, submissions);
+  }
+
+  // 5. Update in CORE_PERMANENT_CHALLENGES if present
+  if (typeof CORE_PERMANENT_CHALLENGES !== 'undefined' && Array.isArray(CORE_PERMANENT_CHALLENGES)) {
+    const coreCh = CORE_PERMANENT_CHALLENGES.find(c => c.id === target.id);
+    if (coreCh) {
+      coreCh.status = 'in_progress';
+      coreCh.isActive = true;
+      coreCh.isCompleted = false;
+      delete coreCh.failReason;
+      delete coreCh.violatedRule;
+      delete coreCh.failReasonText;
+      delete coreCh.failedAt;
+      coreCh.reactivatedAt = nowIso;
+      coreCh.reactivationNotice = target.reactivationNotice;
+    }
+  }
+
   // Save to both persistent stores
   saveChallenges(challenges);
 
-  // 4. Log archive event
+  // 6. Log archive event
   logUserArchive('CHALLENGE_REACTIVATED_BY_ADMIN',
     { id: target.userId, name: target.userName, email: target.userEmail },
     {
@@ -5612,10 +5678,13 @@ app.post('/api/admin/challenges/:id/reactivate', authenticateAdminToken, (req, r
 
   syncChallengesWithSubmissions();
 
+  const freshChallenges = readJson(CHALLENGES_FILE, []);
+  const freshTarget = freshChallenges.find(c => c.id === target.id) || target;
+
   res.json({
     success: true,
-    message: `ট্রেডার "${target.userName}" এর চ্যালেঞ্জটি সফলভাবে পুনরায় সচল করা হয়েছে এবং ট্রেডারের কাছে নোটিফিকেশন পাঠানো হয়েছে।`,
-    challenge: target
+    message: `ট্রেডার "${freshTarget.userName}" এর চ্যালেঞ্জটি সফলভাবে পুনরায় সচল করা হয়েছে এবং ট্রেডারের কাছে নোটিফিকেশন পাঠানো হয়েছে।`,
+    challenge: freshTarget
   });
 });
 
