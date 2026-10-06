@@ -2424,7 +2424,7 @@
                         </div>
                     </div>
 
-                    <form id="submissionForm" onsubmit="handleTradeSubmission(event)">
+                    <form id="submissionForm" onsubmit="event.preventDefault(); runAutomatedSessionAudit();">
                         <div class="form-group">
                             <label>Session Date</label>
                             <input type="date" class="form-control" id="subDate" required />
@@ -5564,17 +5564,18 @@
                 }
 
                 if (submitBtn) {
+                    submitBtn.onclick = runAutomatedSessionAudit;
                     if (isPractice) {
                         if (practiceCompleted >= 3) {
                             submitBtn.disabled = true;
-                            submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> ৩টি প্র্যাকটিস সেশন সম্পন্ন হয়েছে (মূল চ্যালেঞ্জ শুরু করুন)`;
+                            submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> ৩টি প্র্যাকটিস সেশন সম্পন্ন হয়েছে (মূল মূল্যায়ন শুরু করুন)`;
                         } else {
                             submitBtn.disabled = false;
-                            submitBtn.innerHTML = `<i class="fas fa-graduation-cap"></i> 🎯 প্র্যাকটিস সেশন #${practiceCompleted + 1} আপলোড করুন`;
+                            submitBtn.innerHTML = `<i class="fas fa-graduation-cap"></i> 🎓 প্র্যাকটিস সেশন #${practiceCompleted + 1} আপলোড ও অডিট করুন`;
                         }
                     } else {
                         submitBtn.disabled = false;
-                        submitBtn.innerHTML = `<i class="fas fa-check"></i> Upload & Submit Session Proof`;
+                        submitBtn.innerHTML = `<i class="fas fa-bolt"></i> 🚀 সেশন #${(activeChallenge.sessionsCompleted || 0) + 1} আপলোড ও অডিট করুন`;
                     }
                 }
             } else {
@@ -5636,8 +5637,10 @@
                         </td>
                         <td style="${pnlClass}">${pnlSign}$${sub.profitLoss.toFixed(2)}</td>
                         <td>
+                            ${sub.fileType === 'auto_audit' ? `<span style="color:var(--neon-green); font-size:0.8rem; font-weight:700;"><i class="fas fa-bolt"></i> Auto-Audit (${(sub.auditReport || []).length} trades)</span>` : ''}
                             ${sub.screenshotUrl ? `<a href="${sub.screenshotUrl}" target="_blank" style="color:var(--yellow); text-decoration:none;"><i class="fas fa-image"></i> View</a>` : ''}
                             ${sub.videoUrl ? ` • <a href="${sub.videoUrl}" target="_blank" style="color:var(--blue); text-decoration:none;"><i class="fas fa-video"></i> Video</a>` : ''}
+                            ${!sub.screenshotUrl && !sub.videoUrl && sub.fileType !== 'auto_audit' ? '<span style="color:var(--text-secondary); font-size:0.75rem;">-</span>' : ''}
                         </td>
                         <td>
                             ${sub.status === 'needs_resubmission' ? `
@@ -5649,6 +5652,14 @@
                                         <i class="fas fa-redo-alt"></i> সংশোধন করুন
                                     </button>
                                 </div>
+                            ` : (sub.status === 'auto_verified') ? `
+                                <span class="badge-status" style="background:rgba(0,230,118,0.18); color:#00e676; border:1px solid rgba(0,230,118,0.4); font-size:0.75rem; font-weight:750;">
+                                    <i class="fas fa-check-circle"></i> Auto Verified
+                                </span>
+                            ` : (sub.status === 'practice_failed') ? `
+                                <span class="badge-status" style="background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); font-size:0.75rem; font-weight:750;">
+                                    <i class="fas fa-exclamation-triangle"></i> Practice (Mistake)
+                                </span>
                             ` : (sub.isPractice && sub.status === 'rejected') ? `
                                 <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
                                     <span class="badge-status" style="background:rgba(239,68,68,0.18); color:#fca5a5; border:1px solid rgba(239,68,68,0.4); font-size:0.72rem;">
@@ -5657,7 +5668,7 @@
                                     ${sub.adminFeedback ? `<div style="font-size:0.72rem; color:#fca5a5; max-width:180px; line-height:1.3;">${escapeHtml(sub.adminFeedback)}</div>` : ''}
                                 </div>
                             ` : `
-                                <span class="badge-status ${sub.status === 'verified' ? 'badge-verified' : sub.status === 'rejected' ? 'badge-rejected' : 'badge-review'}">
+                                <span class="badge-status ${sub.status === 'verified' ? 'badge-verified' : sub.status === 'rejected' || sub.status === 'failed' ? 'badge-rejected' : 'badge-review'}">
                                     ${sub.isResubmitted && sub.status === 'under_review' ? 'under review (পুনরায় আপলোডকৃত)' : sub.status.replace('_', ' ')}
                                 </span>
                             `}
@@ -6071,11 +6082,6 @@
                 return;
             }
 
-            if (!window.isExtensionLiveConnected) {
-                showToast('⚠️ অনুগ্রহ করে Quotex ব্রাউজারে এক্সটেনশনটি কানেক্ট করুন এবং ট্রেড সিঙ্ক করুন।', 'warning');
-                return;
-            }
-
             const modal = document.getElementById('masAuditProgressModal');
             const scanningView = document.getElementById('auditModalScanningView');
             const resultView = document.getElementById('auditModalResultView');
@@ -6126,6 +6132,8 @@
                 const remaining = Math.max(0, minWait - elapsed);
 
                 setTimeout(() => {
+                    clearTimeout(progressTimer1);
+                    clearTimeout(progressTimer2);
                     progressBar.style.width = '100%';
                     setTimeout(() => {
                         scanningView.style.display = 'none';
@@ -6174,8 +6182,8 @@
                     </p>
                     <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.25); border-radius:12px; padding:14px; margin-bottom:18px; text-align:left; font-size:0.85rem;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                            <span style="color:var(--text-secondary);">সম্পন্ন সেশন:</span>
-                            <strong style="color:var(--neon-green); font-size:0.95rem;">${data.sessionsCompleted}/15</strong>
+                            <span style="color:var(--text-secondary);">${data.isPractice ? 'প্র্যাকটিস সেশন:' : 'সম্পন্ন সেশন:'}</span>
+                            <strong style="color:var(--neon-green); font-size:0.95rem;">${data.sessionsCompleted || 1}/${data.isPractice ? 3 : 15}</strong>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
                             <span style="color:var(--text-secondary);">সেশন নিট P&L:</span>
@@ -6197,7 +6205,7 @@
                     </div>
                     <h3 style="color:#ff5252; font-size:1.25rem; font-weight:800; margin-bottom:10px;">ট্রেডিং সেশনে রুলস লঙ্ঘন সনাক্ত হয়েছে</h3>
                     <div style="background:rgba(255,82,82,0.08); border:1px solid rgba(255,82,82,0.3); border-radius:12px; padding:12px; margin-bottom:14px; text-align:left; font-size:0.83rem; color:#fca5a5; max-height:160px; overflow-y:auto;">
-                        ${(data.violations && data.violations.length > 0) ? data.violations.map(v => `<div style="margin-bottom:6px; line-height:1.4;">❌ ${escapeHtml(v)}</div>`).join('') : `<div>${data.message || 'অডিট অসঙ্গতি পাওয়া গেছে।'}</div>`}
+                        ${(data.violations && data.violations.length > 0) ? data.violations.map(v => `<div style="margin-bottom:6px; line-height:1.4;">❌ ${escapeHtml(v)}</div>`).join('') : `<div>${escapeHtml(data.message || 'অডিট অসঙ্গতি পাওয়া গেছে।')}</div>`}
                     </div>
                     <div style="background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.3); border-radius:12px; padding:12px; margin-bottom:16px; font-size:0.85rem; color:#fde047; text-align:left; line-height:1.5;">
                         💬 <strong>উৎসাহমূলক বার্তা:</strong><br/>

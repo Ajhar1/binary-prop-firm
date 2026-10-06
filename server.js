@@ -4548,14 +4548,11 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
     // Collect all ticket IDs already locked into previous submissions (Zero Overlap Guard)
     const usedTicketIds = new Set();
-    let lastSubTime = 0;
     submissions.forEach(s => {
-      if (s.challengeId === activeChallenge.id) {
+      if (s.challengeId === activeChallenge.id || s.userId === user.id) {
         if (Array.isArray(s.auditedTicketIds)) {
           s.auditedTicketIds.forEach(id => usedTicketIds.add(id));
         }
-        const subMs = new Date(s.submittedAt || s.sessionCompletedAt || 0).getTime();
-        if (subMs > lastSubTime) lastSubTime = subMs;
       }
     });
 
@@ -4567,8 +4564,6 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     else if (activeChallenge.startedAt) effectiveStartTime = new Date(activeChallenge.startedAt).getTime();
     else effectiveStartTime = new Date(activeChallenge.createdAt).getTime();
 
-    const sessionCutoffMs = Math.max(effectiveStartTime, lastSubTime);
-
     // Read synced trades
     const allSynced = readJson(SYNCED_TRADES_FILE, []);
     const candidateTrades = allSynced.filter(t => {
@@ -4577,9 +4572,16 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         (t.traderId && t.traderId.toLowerCase() === (user.traderId || '').toLowerCase()));
       if (!isUserMatch) return false;
       if (t.challengeId && t.challengeId !== activeChallenge.id) return false;
-      if (usedTicketIds.has(t.ticketId)) return false;
-      const tradeTime = parseQuotexDate(t.openTime) || parseQuotexDate(t.closeTime) || new Date(t.syncedAt || 0).getTime();
-      return tradeTime >= (sessionCutoffMs - 1000);
+      if (usedTicketIds.has(t.ticketId) || (t.id && usedTicketIds.has(t.id))) return false;
+
+      // Filter out trades synced before challenge activation (with 5 minute tolerance for clock drift)
+      if (effectiveStartTime && t.syncedAt) {
+        const syncMs = new Date(t.syncedAt).getTime();
+        if (!isNaN(syncMs) && syncMs < (effectiveStartTime - 300000)) {
+          return false;
+        }
+      }
+      return true;
     });
 
     // Sort chronologically oldest first
@@ -4590,10 +4592,10 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     });
 
     if (candidateTrades.length === 0) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         passed: false,
-        message: 'কোটেক্স এক্সটেনশন থেকে সিঙ্ক হওয়া কোনো নতুন ট্রেড পাওয়া যায়নি। অনুগ্রহ করে কোটেক্সে ট্রেড সম্পন্ন করে এক্সটেনশনের Sync বাটনে বা ট্রেডিং হিস্টোরি পেজের রিফ্রেশ বাটনে চাপ দিন।'
+        message: 'কোটেক্স এক্সটেনশন থেকে সিঙ্ক হওয়া কোনো নতুন ট্রেড পাওয়া যায়নি। অনুগ্রহ করে কোটেক্সে ট্রেড সম্পন্ন করে এক্সটেনশনের Sync বাটনে চাপ দিন বা পেজটি রিফ্রেশ করুন।'
       });
     }
 
@@ -4714,7 +4716,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
     const nonRefundAudited = auditedTrades.filter(t => !t.isRefund);
     if (nonRefundAudited.length === 0) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         passed: false,
         message: 'কোটেক্স থেকে শুধু রিফান্ড ট্রেড পাওয়া গেছে। অনুগ্রহ করে একটি নতুন ট্রেড সম্পন্ন করে পুনরায় অডিট বাটনে চাপ দিন।'
@@ -4722,7 +4724,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     }
 
     if (!sessionComplete && violations.length === 0) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         passed: false,
         message: `আপনার সেশনটি এখনো সমাপ্ত হয়নি (বর্তমান রেকর্ড: ${wins}W - ${losses}L)। ৬টি উইন অর্জন বা সেশন সমাপ্ত হওয়া পর্যন্ত কোটেক্সে ট্রেড সম্পন্ন করুন।`
@@ -4731,6 +4733,33 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
     // IF VIOLATIONS EXIST
     if (violations.length > 0) {
+      const failedSubmission = {
+        id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        userId: user.id,
+        challengeId: activeChallenge.id,
+        packageName: activeChallenge.packageName,
+        isPractice: isPracticePhase,
+        sessionType: isPracticePhase ? 'practice' : 'evaluation',
+        brokerName: 'Quotex',
+        sessionDate: targetSessionDate,
+        winTrades: wins,
+        lossTrades: losses,
+        tradesCount: wins + losses,
+        profitLoss: Math.round((runningCashier - sessionStartingCapital) * 100) / 100,
+        winRate: (wins + losses > 0) ? `${((wins / (wins + losses)) * 100).toFixed(1)}%` : '0%',
+        startingCapital: sessionStartingCapital,
+        endingCapital: runningCashier,
+        fileType: 'auto_audit',
+        status: isPracticePhase ? 'practice_failed' : 'failed',
+        auditedTicketIds: auditedTrades.map(t => t.ticketId),
+        auditReport: auditedTrades,
+        adminFeedback: `❌ Rule Violation: ${violations[0]}`,
+        submittedAt: new Date().toISOString()
+      };
+
+      submissions.unshift(failedSubmission);
+      writeJson(SUBMISSIONS_FILE, submissions);
+
       if (!isPracticePhase) {
         activeChallenge.status = 'failed';
         activeChallenge.failReason = 'RULE_VIOLATION';
@@ -4741,7 +4770,9 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         writeJson(CHALLENGES_FILE, challenges);
       }
 
-      return res.status(200).json({
+      syncChallengesWithSubmissions();
+
+      return res.json({
         success: false,
         passed: false,
         isDisqualified: !isPracticePhase,
@@ -4783,7 +4814,11 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     writeJson(SUBMISSIONS_FILE, submissions);
 
     // Update Challenge with new carried-forward capital & sessions count
-    activeChallenge.sessionsCompleted = (activeChallenge.sessionsCompleted || 0) + 1;
+    if (isPracticePhase) {
+      activeChallenge.practiceSessionsCompleted = (activeChallenge.practiceSessionsCompleted || 0) + 1;
+    } else {
+      activeChallenge.sessionsCompleted = (activeChallenge.sessionsCompleted || 0) + 1;
+    }
     activeChallenge.currentCapital = endingCapital; // Carried forward to next session!
     activeChallenge.lastSessionCompletedAt = newSubmission.submittedAt;
 
@@ -4802,7 +4837,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       message: '🎉 আপনার আজকের ট্রেডিং সেশন সফলভাবে সম্পন্ন হয়েছে ! পরবর্তী সেশন গুলো সুন্দর হবে! অবশ্যই ঠান্ডা মাথায় ট্রেড করবেন।',
       newCapital: endingCapital,
       previousCapital: sessionStartingCapital,
-      sessionsCompleted: activeChallenge.sessionsCompleted,
+      sessionsCompleted: isPracticePhase ? (activeChallenge.practiceSessionsCompleted || 1) : (activeChallenge.sessionsCompleted || 1),
       isPractice: isPracticePhase,
       auditReport: auditedTrades,
       sessionSummary: {
