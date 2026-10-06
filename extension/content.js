@@ -495,7 +495,7 @@
           }
         });
 
-        // F. Profit & Result (WIN / LOSS)
+        // F. Profit & Result (WIN / LOSS / REFUND)
         let profit = 0;
         let result = 'LOSS';
         const lastCell = cells[cells.length - 1];
@@ -507,6 +507,16 @@
               result = 'WIN';
             }
           }
+          if (lastCell.innerText.toLowerCase().includes('refund') || lastCell.innerText.toLowerCase().includes('tie')) {
+            result = 'REFUND';
+          }
+        }
+
+        // Check if trade is a Refund (entry quote equals exit quote or net profit is zero)
+        if (openQuote && closeQuote && openQuote !== '0.00' && parseFloat(openQuote) === parseFloat(closeQuote)) {
+          result = 'REFUND';
+        } else if (amount > 0 && Math.abs(profit - amount) < 0.01 && result !== 'WIN') {
+          result = 'REFUND';
         }
 
         // Fallback unique ticketId if Quotex didn't show full UUID

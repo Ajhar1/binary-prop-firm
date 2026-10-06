@@ -2477,57 +2477,49 @@
                             </div>
                         </div>
 
-                        <!-- DUAL PROOF UPLOAD SLOTS: Image Screenshot & Session Video -->
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px; margin-bottom:1.2rem;">
-                            <!-- 1. Screenshot Image Upload Slot -->
-                            <div class="form-group" style="margin-bottom:0;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                    <label style="margin:0; font-weight:700;"><i class="fas fa-image" style="color:var(--yellow);"></i> ট্রেড হিস্টোরি স্ক্রিনশট</label>
-                                    <span class="badge" style="background:rgba(212,175,55,0.12); color:var(--yellow); font-size:0.72rem; padding:2px 8px; border-radius:6px;">JPG, PNG, WebP</span>
-                                </div>
-                                <div class="file-dropzone" id="imageDropzone" onclick="document.getElementById('subScreenshotFile').click()" style="padding:16px; border:2px dashed rgba(212,175,55,0.4); border-radius:12px; cursor:pointer; text-align:center; background:rgba(212,175,55,0.03); transition:all 0.25s;">
-                                    <i class="fas fa-camera-retro" style="font-size:2rem; color:var(--yellow); margin-bottom:6px;"></i>
-                                    <div id="imageDropzoneText" style="font-weight:700; color:#fff; font-size:0.9rem;">ট্রেড হিস্ট্রি ছবি নির্বাচন করুন</div>
-                                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">ব্রোকার ট্রেড হিস্টোরির স্ক্রিনশট আপলোড</div>
-                                    <div id="imagePreviewContainer" style="display:none; margin-top:10px;">
-                                        <img id="imagePreviewImg" src="" style="max-height:85px; max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.2);" />
+                        <!-- AUTOMATED QUOTEX AUDIT & ZERO-VIDEO SUBMISSION ENGINE -->
+                        <div style="background:linear-gradient(135deg, rgba(245,176,65,0.08), rgba(0,230,118,0.05)); border:1px solid rgba(245,176,65,0.3); border-radius:12px; padding:18px; margin-bottom:1.2rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="font-size:1.4rem;">⚡</span>
+                                    <div>
+                                        <h4 style="margin:0; font-size:1rem; font-weight:800; color:#fff;">Quotex অটোমেটিক ট্রেড অডিট ও ভেরিফিকেশন</h4>
+                                        <small style="color:var(--text-secondary); font-size:0.75rem;">কোনো ভিডিও বা স্ক্রিনশট আপলোড করার প্রয়োজন নেই (Zero Video)</small>
                                     </div>
                                 </div>
-                                <input type="file" id="subScreenshotFile" accept="image/*,.png,.jpg,.jpeg,.webp" style="display:none;" onchange="handleImageFileSelected(this)" />
+                                <span class="badge" style="background:rgba(0,230,118,0.15); color:var(--neon-green); border:1px solid rgba(0,230,118,0.3); padding:4px 10px; border-radius:8px; font-weight:700; font-size:0.78rem;">
+                                    <i class="fas fa-robot"></i> Auto-Audit Engine
+                                </span>
                             </div>
 
-                            <!-- 2. Video File Upload Slot -->
-                            <div class="form-group" style="margin-bottom:0;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                    <label style="margin:0; font-weight:700;"><i class="fas fa-video" style="color:var(--neon-blue);"></i> সেশন ভিডিও ফাইল</label>
-                                    <span class="badge" style="background:rgba(59,130,246,0.12); color:#60a5fa; font-size:0.72rem; padding:2px 8px; border-radius:6px;">MP4, MOV, WebM</span>
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:14px;">
+                                <div style="background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                    <span style="color:var(--text-secondary); font-size:0.75rem; display:block;">চলমান সেশন নম্বর:</span>
+                                    <strong id="auditCardSessionNum" style="color:var(--yellow); font-size:1.05rem;">সেশন #১</strong>
                                 </div>
-                                <div class="file-dropzone" id="videoDropzone" onclick="document.getElementById('subVideoFile').click()" style="padding:16px; border:2px dashed rgba(59,130,246,0.4); border-radius:12px; cursor:pointer; text-align:center; background:rgba(59,130,246,0.03); transition:all 0.25s;">
-                                    <i class="fas fa-video" style="font-size:2rem; color:var(--neon-blue); margin-bottom:6px;"></i>
-                                    <div id="videoDropzoneText" style="font-weight:700; color:#fff; font-size:0.9rem;">সেশন ভিডিও ফাইল নির্বাচন করুন</div>
-                                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">ট্রেডিং স্ক্রিন রেকর্ডিং ফাইল (২০০MB পর্যন্ত)</div>
+                                <div style="background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                    <span style="color:var(--text-secondary); font-size:0.75rem; display:block;">সেশন প্রারম্ভিক ক্যাপিটাল:</span>
+                                    <strong id="auditCardStartingCap" style="color:#fff; font-size:1.05rem;">$100.00</strong>
                                 </div>
-                                <input type="file" id="subVideoFile" accept="video/*,.mp4,.mov,.webm,.mkv,.avi" style="display:none;" onchange="handleVideoFileSelected(this)" />
+                                <div style="background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                    <span style="color:var(--text-secondary); font-size:0.75rem; display:block;">এক্সটেনশন স্ট্যাটাস:</span>
+                                    <strong id="auditCardExtensionStatus" style="color:var(--neon-green); font-size:0.95rem;">কানেক্টেড</strong>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- 3. Optional External Video Link -->
-                        <div class="form-group">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
-                                <label style="margin:0; font-weight:700;"><i class="fas fa-link" style="color:var(--neon-green);"></i> অথবা ভিডিও প্রুফ লিংক</label>
-                                <span class="badge" style="background:rgba(46,204,113,0.12); color:#4ade80; font-size:0.72rem; padding:2px 8px; border-radius:6px;">ঐচ্ছিক (Optional)</span>
+                            <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.5; margin-bottom:14px; background:rgba(0,0,0,0.25); padding:10px 12px; border-radius:8px; border-left:3px solid var(--yellow);">
+                                📌 <strong>স্বয়ংক্রিয় অডিট নিয়ম:</strong> কোটেক্সে সিঙ্ক হওয়া প্রতিটি ট্রেডের Planned Stake সাইজ, রিফান্ড ট্রেড ফিল্টারিং এবং ২৫% ড্রডাউন লিমিট স্বয়ংক্রিয়ভাবে অডিট হয়ে সেশন ভেরিফাই হবে।
                             </div>
-                            <input type="url" class="form-control" id="subVideoUrl" placeholder="https://youtu.be/... or Drive link (যদি ফাইল আপলোড না করেন)" />
-                        </div>
 
-                        <div class="form-group">
-                            <label>ট্রেডার নোট (ঐচ্ছিক)</label>
-                            <textarea class="form-control" id="subNotes" rows="2" placeholder="মার্কেট অবস্থা বা স্ট্র্যাটেজি সংক্ষেপে লিখুন..."></textarea>
-                        </div>
+                            <div class="form-group" style="margin-bottom:14px;">
+                                <label style="font-size:0.85rem; color:#ccc;">ট্রেডার নোট (ঐচ্ছিক)</label>
+                                <textarea class="form-control" id="subNotes" rows="2" placeholder="মার্কেট অবস্থা বা স্ট্র্যাটেজি সংক্ষেপে লিখুন..."></textarea>
+                            </div>
 
-                        <button type="submit" class="btn-gold" style="width:100%; justify-content:center;" id="submitProofBtn">
-                            <i class="fas fa-check"></i> Upload & Submit Session Proof
-                        </button>
+                            <button type="button" class="btn-gold" style="width:100%; justify-content:center; padding:12px; font-size:0.95rem; font-weight:800; border-radius:10px; box-shadow:0 4px 15px rgba(245,176,65,0.25);" id="submitProofBtn" onclick="runAutomatedSessionAudit()">
+                                <i class="fas fa-bolt"></i> সেশন আপলোড ও অটোমেটিক অডিট করুন
+                            </button>
+                        </div>
                     </form>
                 </div>
 
@@ -3657,6 +3649,30 @@
         </div>
     </div>
 
+    <!-- REALISTIC 7-8 SECOND AUTOMATED SESSION AUDIT MODAL -->
+    <div id="masAuditProgressModal" class="modal-overlay" style="display:none; align-items:center; justify-content:center; z-index:99999;">
+        <div class="modal-box" style="max-width:500px; text-align:center; padding:2rem 1.6rem; border:1px solid rgba(245,176,65,0.4); border-radius:18px; box-shadow:0 10px 45px rgba(0,0,0,0.85); background:#12151e;">
+            <!-- Scanning View -->
+            <div id="auditModalScanningView">
+                <div style="width:76px; height:76px; margin:0 auto 1.2rem; border-radius:50%; background:rgba(245,176,65,0.08); border:3px solid rgba(245,176,65,0.25); border-top:3px solid var(--yellow); animation:spin 1.1s linear infinite; display:flex; align-items:center; justify-content:center; box-shadow:0 0 25px rgba(245,176,65,0.2);">
+                    <i class="fas fa-satellite-dish" style="font-size:2rem; color:var(--yellow);"></i>
+                </div>
+                <h3 style="font-size:1.25rem; font-weight:800; color:#fff; margin-bottom:8px;">কোটেক্স ট্রেড অডিট ও ভেরিফিকেশন চলছে...</h3>
+                <p id="auditModalStatusText" style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.4rem; min-height:42px; line-height:1.5;">
+                    🔍 কোটেক্স ব্রোকার টিকিট ও ট্রেড হিস্টোরি স্ক্যান করা হচ্ছে...
+                </p>
+                <!-- Animated Progress Bar -->
+                <div style="background:rgba(255,255,255,0.08); border-radius:10px; height:8px; overflow:hidden; margin-bottom:12px;">
+                    <div id="auditProgressBar" style="width:15%; height:100%; background:linear-gradient(90deg, var(--yellow), #00e676); transition:width 0.4s ease;"></div>
+                </div>
+                <small style="color:#64748b; font-size:0.75rem; display:block;">স্বয়ংক্রিয় অডিট সম্পন্ন হতে ৫-১০ সেকেন্ড সময় লাগবে, অনুগ্রহ করে অপেক্ষা করুন...</small>
+            </div>
+
+            <!-- Result View -->
+            <div id="auditModalResultView" style="display:none;"></div>
+        </div>
+    </div>
+
     <!-- 8. USER RESUBMIT TRADE PROOF MODAL -->
     <div class="modal-overlay" id="userResubmitModal">
         <div class="modal-box" style="max-width:620px; text-align:left; padding:1.4rem; max-height:92vh; overflow-y:auto;">
@@ -3867,7 +3883,7 @@
             const headings = {
                 'overview': ['📊 ড্যাশবোর্ড (Dashboard)', 'আপনার সক্রিয় চ্যালেঞ্জ ও পারফরম্যান্স ওভারভিউ।'],
                 'my-challenges': ['📁 আমার চ্যালেঞ্জসমূহ (My Challenges)', 'আপনার রানিং, পূর্ববর্তী ও বাদ পড়া সকল চ্যালেঞ্জের বিস্তারিত রেকর্ড।'],
-                'submission': ['📤 ট্রেড প্রুফ সাবমিশন (Trade Proof)', 'দৈনিক ট্রেড হিস্টোরি ও ভিডিও প্রুফ জমা দিন।'],
+                'submission': ['📤 ট্রেড প্রুফ ও অটো-অডিট (Trade Proof & Auto-Audit)', 'দৈনিক কোটেক্স ট্রেড হিস্টোরি অডিট ও সেশন ভেরিফিকেশন।'],
                 'money-management': ['📈 মানি ম্যানেজমেন্ট (Money Management)', 'অফিসিয়াল রিস্ক ও লট ক্যালকুলেটর শিট।'],
                 'course': ['🎓 ট্রেডিং একাডেমি (Trading Academy)', 'বাইনারি ট্রেডিং মাস্টারক্লাস ও ভিডিও গাইড।'],
                 'buy-challenge': ['🛒 চ্যালেঞ্জ প্যাকেজ (Challenge Packages)', 'পছন্দের ফান্ডেড প্যাকেজ বাছাই করুন।'],
@@ -3885,6 +3901,7 @@
                 checkSubmissionEligibility();
                 syncMasanielloToProofForm(true);
                 renderResubmissionAlerts();
+                updateAuditCardInfo();
             } else if (tabId === 'overview') {
                 renderResubmissionAlerts();
             } else if (tabId === 'my-challenges') {
@@ -6018,6 +6035,203 @@
             }
         }
 
+        // ============================================================================
+        // AUTOMATED SESSION AUDIT CONTROLLER (7-8 Second Realistic Compliance Audit)
+        // ============================================================================
+
+        function updateAuditCardInfo() {
+            const activeChallenge = (myChallenges || []).find(c => c.status === 'in_progress');
+            const sessionNumEl = document.getElementById('auditCardSessionNum');
+            const startingCapEl = document.getElementById('auditCardStartingCap');
+            const extStatusEl = document.getElementById('auditCardExtensionStatus');
+
+            if (sessionNumEl && activeChallenge) {
+                const sNum = (activeChallenge.sessionsCompleted || 0) + 1;
+                sessionNumEl.innerText = `সেশন #${sNum}`;
+            }
+            if (startingCapEl && activeChallenge) {
+                const cap = Number(activeChallenge.currentCapital || activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
+                startingCapEl.innerText = `$${cap.toFixed(2)}`;
+            }
+            if (extStatusEl) {
+                if (window.isExtensionLiveConnected) {
+                    extStatusEl.innerText = '🟢 কানেক্টেড (Active)';
+                    extStatusEl.style.color = 'var(--neon-green)';
+                } else {
+                    extStatusEl.innerText = '⚠️ ডিসকানেক্টেড';
+                    extStatusEl.style.color = 'var(--yellow)';
+                }
+            }
+        }
+
+        async function runAutomatedSessionAudit() {
+            const activeChallenge = (myChallenges || []).find(c => c.status === 'in_progress');
+            if (!activeChallenge) {
+                showToast('আপনার কোনো সক্রিয় (Active) চ্যালেঞ্জ নেই।', 'error');
+                return;
+            }
+
+            if (!window.isExtensionLiveConnected) {
+                showToast('⚠️ অনুগ্রহ করে Quotex ব্রাউজারে এক্সটেনশনটি কানেক্ট করুন এবং ট্রেড সিঙ্ক করুন।', 'warning');
+                return;
+            }
+
+            const modal = document.getElementById('masAuditProgressModal');
+            const scanningView = document.getElementById('auditModalScanningView');
+            const resultView = document.getElementById('auditModalResultView');
+            const statusText = document.getElementById('auditModalStatusText');
+            const progressBar = document.getElementById('auditProgressBar');
+
+            if (!modal) return;
+            modal.style.display = 'flex';
+            scanningView.style.display = 'block';
+            resultView.style.display = 'none';
+            progressBar.style.width = '15%';
+            statusText.innerText = '🔍 কোটেক্স ব্রোকার টিকিট ও ট্রেড হিস্টোরি স্ক্যান করা হচ্ছে...';
+
+            const token = getAuthToken();
+            const sessionDate = document.getElementById('subDate')?.value || new Date().toISOString().split('T')[0];
+            const notes = document.getElementById('subNotes')?.value || '';
+
+            // Realistic 7-8 second animation stages
+            let progressTimer1 = setTimeout(() => {
+                progressBar.style.width = '45%';
+                statusText.innerText = '⚖️ মানি ম্যানেজমেন্ট স্টেক সাইজ, রিফান্ড ফিল্টারিং ও রাউন্ডিং রুলস অডিট চলছে...';
+            }, 2600);
+
+            let progressTimer2 = setTimeout(() => {
+                progressBar.style.width = '80%';
+                statusText.innerText = '🛡️ ২৫% ড্রডাউন ও সেশন কমপ্লায়েন্স ভেরিফিকেশন সম্পন্ন হচ্ছে...';
+            }, 5200);
+
+            const startTime = Date.now();
+
+            try {
+                const res = await fetch('/api/user/session-audit-upload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        sessionDate,
+                        notes,
+                        clientSessionData: getMasanielloSessionData()
+                    })
+                });
+
+                const data = await res.json();
+                const elapsed = Date.now() - startTime;
+                const minWait = 7500; // Guarantee 7.5 seconds authentic audit experience
+                const remaining = Math.max(0, minWait - elapsed);
+
+                setTimeout(() => {
+                    progressBar.style.width = '100%';
+                    setTimeout(() => {
+                        scanningView.style.display = 'none';
+                        resultView.style.display = 'block';
+                        renderAuditModalResult(data);
+                    }, 400);
+                }, remaining);
+
+            } catch (err) {
+                console.error(err);
+                clearTimeout(progressTimer1);
+                clearTimeout(progressTimer2);
+                progressBar.style.width = '100%';
+                setTimeout(() => {
+                    scanningView.style.display = 'none';
+                    resultView.style.display = 'block';
+                    resultView.innerHTML = `
+                        <div style="color:#ff5252; font-size:3rem; margin-bottom:12px;"><i class="fas fa-exclamation-circle"></i></div>
+                        <h3 style="color:#fff; font-size:1.2rem; font-weight:800; margin-bottom:8px;">সার্ভার সংযোগে ত্রুটি</h3>
+                        <p style="color:#cbd5e1; font-size:0.85rem; margin-bottom:16px;">ইন্টারনেট বা সার্ভার সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।</p>
+                        <button class="btn-outline" style="width:100%; justify-content:center;" onclick="closeAuditModal()">বন্ধ করুন</button>
+                    `;
+                }, 800);
+            }
+        }
+
+        function renderAuditModalResult(data) {
+            const resultView = document.getElementById('auditModalResultView');
+            if (!resultView) return;
+
+            if (data.passed) {
+                // Confetti trigger
+                try {
+                    if (typeof confetti === 'function') {
+                        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+                    }
+                } catch(e){}
+
+                resultView.innerHTML = `
+                    <div style="width:72px; height:72px; margin:0 auto 14px; border-radius:50%; background:rgba(0,230,118,0.15); border:2px solid #00e676; display:flex; align-items:center; justify-content:center; color:#00e676; font-size:2.2rem; box-shadow:0 0 25px rgba(0,230,118,0.3);">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h3 style="color:#fff; font-size:1.3rem; font-weight:800; margin-bottom:10px;">সেশন সফলভাবে সম্পন্ন হয়েছে! 🎉</h3>
+                    <p style="color:#cbd5e1; font-size:0.92rem; line-height:1.6; margin-bottom:18px;">
+                        ${data.message || '🎉 আপনার আজকের ট্রেডিং সেশন সফলভাবে সম্পন্ন হয়েছে ! পরবর্তী সেশন গুলো সুন্দর হবে! অবশ্যই ঠান্ডা মাথায় ট্রেড করবেন।'}
+                    </p>
+                    <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.25); border-radius:12px; padding:14px; margin-bottom:18px; text-align:left; font-size:0.85rem;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <span style="color:var(--text-secondary);">সম্পন্ন সেশন:</span>
+                            <strong style="color:var(--neon-green); font-size:0.95rem;">${data.sessionsCompleted}/15</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <span style="color:var(--text-secondary);">সেশন নিট P&L:</span>
+                            <strong style="color:var(--neon-green); font-size:0.95rem;">+${data.sessionSummary?.netPnl >= 0 ? '+' : ''}$${data.sessionSummary?.netPnl || 0}</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px; margin-top:6px;">
+                            <span style="color:#fff; font-weight:700;">পরবর্তী সেশন প্রারম্ভিক ক্যাপিটাল:</span>
+                            <strong style="color:var(--yellow); font-size:1.1rem;">$${Number(data.newCapital || 0).toFixed(2)}</strong>
+                        </div>
+                    </div>
+                    <button class="btn-gold" style="width:100%; justify-content:center; padding:12px; font-weight:800; border-radius:10px;" onclick="closeAuditModalAndRefresh(${data.newCapital})">
+                        <i class="fas fa-arrow-right"></i> পরবর্তী সেশন প্রস্তুত করুন
+                    </button>
+                `;
+            } else {
+                resultView.innerHTML = `
+                    <div style="width:72px; height:72px; margin:0 auto 14px; border-radius:50%; background:rgba(255,82,82,0.15); border:2px solid #ff5252; display:flex; align-items:center; justify-content:center; color:#ff5252; font-size:2.2rem; box-shadow:0 0 25px rgba(255,82,82,0.3);">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h3 style="color:#ff5252; font-size:1.25rem; font-weight:800; margin-bottom:10px;">ট্রেডিং সেশনে রুলস লঙ্ঘন সনাক্ত হয়েছে</h3>
+                    <div style="background:rgba(255,82,82,0.08); border:1px solid rgba(255,82,82,0.3); border-radius:12px; padding:12px; margin-bottom:14px; text-align:left; font-size:0.83rem; color:#fca5a5; max-height:160px; overflow-y:auto;">
+                        ${(data.violations && data.violations.length > 0) ? data.violations.map(v => `<div style="margin-bottom:6px; line-height:1.4;">❌ ${escapeHtml(v)}</div>`).join('') : `<div>${data.message || 'অডিট অসঙ্গতি পাওয়া গেছে।'}</div>`}
+                    </div>
+                    <div style="background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.3); border-radius:12px; padding:12px; margin-bottom:16px; font-size:0.85rem; color:#fde047; text-align:left; line-height:1.5;">
+                        💬 <strong>উৎসাহমূলক বার্তা:</strong><br/>
+                        ${escapeHtml(data.encouragingMessage || 'আপনি যেই ভুলটা করেছেন তার থেকে শিক্ষা নেন এবং পরবর্তীতে আর এরকম ভুল হবেনা এবং আপনি চ্যালেঞ্জটি পাস করতে পারবেন আশা করি।')}
+                    </div>
+                    <button class="btn-outline" style="width:100%; justify-content:center; padding:10px; border-radius:10px;" onclick="closeAuditModal()">
+                        বন্ধ করুন
+                    </button>
+                `;
+            }
+        }
+
+        function closeAuditModal() {
+            const modal = document.getElementById('masAuditProgressModal');
+            if (modal) modal.style.display = 'none';
+            fetchChallenges();
+            fetchSubmissions();
+        }
+
+        function closeAuditModalAndRefresh(newCapital) {
+            closeAuditModal();
+            if (typeof newCapital === 'number' && newCapital > 0) {
+                masState.capital = newCapital;
+                const capInp = document.getElementById('masCapital');
+                if (capInp) capInp.value = newCapital;
+            }
+            masState.history = [];
+            localStorage.removeItem('aj_funded_mas_pending_proof');
+            saveMasanielloState({ pendingProof: null });
+            calculateAndRenderMasaniello();
+            switchTab('overview');
+            showToast('পরবর্তী সেশন ফ্রেশ নতুন ব্যালেন্স নিয়ে প্রস্তুত হয়েছে!', 'success');
+        }
+
         function handleImageFileSelected(input) {
             const dropzoneText = document.getElementById('imageDropzoneText');
             const previewContainer = document.getElementById('imagePreviewContainer');
@@ -7147,6 +7361,10 @@
 
         function masRecordTrade(outcome) {
             if (outcome !== 'w' && outcome !== 'l') return;
+            if (!window.isExtensionLiveConnected) {
+                showToast('ট্রেড করার পূর্বে অনুগ্রহ করে Quotex ব্রাউজারে এক্সটেনশনটি কানেক্ট করুন।', 'warning');
+                return;
+            }
             const pendingProof = localStorage.getItem('aj_funded_mas_pending_proof');
             if (pendingProof && masSessionStatus !== 'RUNNING') {
                 showToast('পূর্ববর্তী সেশনের প্রুফ এখনও আপলোড করা হয়নি! আগে প্রুফ সাবমিট করুন।', 'warning');
@@ -7430,17 +7648,24 @@
                             <tr class="mas-active-row">
                                 <td><strong style="color:var(--yellow); font-size:1.1rem;">#${tradeNum}</strong></td>
                                 <td>
-                                    <div style="font-size:1.2rem; font-weight:900; color:var(--yellow); text-shadow:0 0 10px rgba(245,176,65,0.4);">
-                                        $${stake.toFixed(2)}
-                                    </div>
-                                    <small style="color:var(--text-secondary); font-size:0.72rem;">পরবর্তী এন্ট্রি সাইজ</small>
+                                    ${window.isExtensionLiveConnected ? `
+                                        <div style="font-size:1.2rem; font-weight:900; color:var(--yellow); text-shadow:0 0 10px rgba(245,176,65,0.4);">
+                                            $${stake.toFixed(2)}
+                                        </div>
+                                        <small style="color:var(--text-secondary); font-size:0.72rem;">পরবর্তী এন্ট্রি সাইজ</small>
+                                    ` : `
+                                        <span class="badge" style="background:rgba(245,176,65,0.18); color:var(--yellow); border:1px solid rgba(245,176,65,0.45); font-size:0.85rem; padding:6px 12px; border-radius:8px; font-weight:800; display:inline-flex; align-items:center; gap:6px;">
+                                            <i class="fas fa-plug"></i> Connect Extension
+                                        </span>
+                                        <small style="color:#f87171; font-size:0.72rem; display:block; margin-top:3px;">এক্সটেনশন কানেক্ট করুন</small>
+                                    `}
                                 </td>
                                 <td style="text-align:center;">
                                     <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
-                                        <button class="btn-mas-w" onclick="masRecordTrade('w')" title="ট্রেড উইন হলে চাপুন (কীবোর্ড: W)">
+                                        <button class="btn-mas-w" onclick="masRecordTrade('w')" ${window.isExtensionLiveConnected ? '' : 'disabled style="opacity:0.4; cursor:not-allowed; pointer-events:none;"'} title="${window.isExtensionLiveConnected ? 'ট্রেড উইন হলে চাপুন (কীবোর্ড: W)' : 'ট্রেড করার পূর্বে অনুগ্রহ করে Quotex ব্রাউজারে এক্সটেনশনটি কানেক্ট করুন'}">
                                             <i class="fas fa-check"></i> WIN (W)
                                         </button>
-                                        <button class="btn-mas-l" onclick="masRecordTrade('l')" title="ট্রেড লস হলে চাপুন (কীবোর্ড: L)">
+                                        <button class="btn-mas-l" onclick="masRecordTrade('l')" ${window.isExtensionLiveConnected ? '' : 'disabled style="opacity:0.4; cursor:not-allowed; pointer-events:none;"'} title="${window.isExtensionLiveConnected ? 'ট্রেড লস হলে চাপুন (কীবোর্ড: L)' : 'ট্রেড করার পূর্বে অনুগ্রহ করে Quotex ব্রাউজারে এক্সটেনশনটি কানেক্ট করুন'}">
                                             <i class="fas fa-times"></i> LOSS (L)
                                         </button>
                                     </div>
@@ -8470,7 +8695,9 @@
                 });
                 const data = await res.json();
 
+                const prevConn = window.isExtensionLiveConnected;
                 if (data.isDisqualified) {
+                    window.isExtensionLiveConnected = false;
                     banner.style.borderColor = 'rgba(255, 82, 82, 0.55)';
                     banner.style.background = 'linear-gradient(135deg, rgba(255,82,82,0.1), #12151d)';
                     dot.style.background = '#ff5252';
@@ -8493,6 +8720,7 @@
                         `;
                     }
                 } else if (data.success && data.connected) {
+                    window.isExtensionLiveConnected = true;
                     banner.style.borderColor = 'rgba(0, 230, 118, 0.45)';
                     banner.style.background = 'linear-gradient(135deg, rgba(0,230,118,0.06), #12151d)';
                     dot.style.background = '#00e676';
@@ -8520,6 +8748,7 @@
                         `;
                     }
                 } else {
+                    window.isExtensionLiveConnected = false;
                     banner.style.borderColor = 'rgba(255, 82, 82, 0.35)';
                     banner.style.background = '#12151d';
                     dot.style.background = '#ff5252';
@@ -8536,6 +8765,11 @@
                             </a>
                         `;
                     }
+                }
+
+                if (prevConn !== window.isExtensionLiveConnected) {
+                    calculateAndRenderMasaniello();
+                    if (typeof updateAuditCardInfo === 'function') updateAuditCardInfo();
                 }
             } catch (err) {
                 // Keep current state on network hiccup

@@ -1422,7 +1422,7 @@ function syncChallengesWithSubmissions() {
 
       const officialSubs = allChSubs.filter(s => s.isPractice !== true);
       const officialNonRejectedSubs = officialSubs.filter(s => s.status !== 'rejected');
-      const verifiedSubs = officialSubs.filter(s => s.status === 'verified');
+      const verifiedSubs = officialSubs.filter(s => s.status === 'verified' || s.status === 'auto_verified');
       c.verifiedSessionsCount = verifiedSubs.length;
       c.totalSubmissionsCount = officialNonRejectedSubs.length;
 
@@ -4393,6 +4393,431 @@ app.post('/api/submissions/upload', authenticateToken, upload.fields([
   } catch (err) {
     console.error('Submission upload error:', err);
     res.status(500).json({ success: false, message: 'Failed to process submission. Please try again.' });
+  }
+});
+
+// ============================================================================
+// AUTOMATED SESSION AUDIT & QUOTEX COMPLIANCE ENGINE (Zero Video Trade Audit)
+// ============================================================================
+
+function buildServerMasanielloMatrix(N = 16, K = 6, Q = 1.85) {
+  const mat = [];
+  for (let m = 0; m <= N; m++) {
+    mat[m] = [];
+    for (let k = 0; k <= K; k++) {
+      if (k > K) mat[m][k] = null;
+      else if (k === K) mat[m][k] = 1;
+      else if (K - k === N - m) mat[m][k] = Math.pow(Q, N - m);
+      else mat[m][k] = 0;
+    }
+  }
+  for (let m = N - 1; m >= 0; m--) {
+    for (let k = 0; k < K; k++) {
+      if (K - k === N - m) {
+        mat[m][k] = Math.pow(Q, N - m);
+      } else if (K - k < N - m) {
+        const down = mat[m + 1][k];
+        const diag = mat[m + 1][k + 1];
+        if (down != null && diag != null) {
+          mat[m][k] = (Q * down * diag) / (down + (Q - 1) * diag);
+        }
+      }
+    }
+  }
+  return mat;
+}
+
+function computeServerPlannedStake(mat, N, K, Q, m, k, curBal) {
+  let stake = 0;
+  if (K - k === N - m) {
+    stake = curBal;
+  } else {
+    const down = (mat[m + 1] && mat[m + 1][k] != null) ? mat[m + 1][k] : 0;
+    const diag = (mat[m + 1] && mat[m + 1][k + 1] != null) ? mat[m + 1][k + 1] : 0;
+    const denom = down + (Q - 1) * diag;
+    if (denom <= 0) {
+      stake = curBal;
+    } else {
+      const factor = 1 - (Q * diag) / denom;
+      stake = factor * curBal;
+    }
+  }
+  return Math.max(0.01, Math.round(stake * 100) / 100);
+}
+
+// 50-Cent Mathematical Rounding Stake Validator
+function getValidStakesForPlanned(planned) {
+  const floor = Math.floor(planned);
+  const ceil = Math.ceil(planned);
+  const cents = Math.round((planned - floor) * 100);
+  const valid = [planned];
+  if (cents <= 50) {
+    valid.push(floor);
+  }
+  if (cents >= 50) {
+    valid.push(ceil);
+  }
+  return valid;
+}
+
+function isStakeCompliantWithRule(planned, actual) {
+  const actualNum = parseFloat(actual) || 0;
+  const validStakes = getValidStakesForPlanned(planned);
+  return validStakes.some(v => Math.abs(actualNum - v) < 0.05);
+}
+
+// Quotex Refund Trade Detector
+function isTradeRefundServer(t) {
+  const res = String(t.result || '').toUpperCase();
+  if (res === 'REFUND' || res === 'TIE' || res === 'EQUAL') return true;
+  const openQ = parseFloat(t.openQuote);
+  const closeQ = parseFloat(t.closeQuote);
+  if (openQ > 0 && closeQ > 0 && Math.abs(openQ - closeQ) < 0.000001) return true;
+  const amt = parseFloat(t.amount) || 0;
+  const prof = parseFloat(t.profit) || 0;
+  if (amt > 0 && Math.abs(prof - amt) < 0.01 && (t.payout === '0%' || res === 'LOSS')) return true;
+  return false;
+}
+
+// POST /api/user/session-audit-upload
+// Automatically audits Quotex synced trades against Money Management sheet and platform rules
+app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) => {
+  try {
+    const user = req.user;
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const activeChallenge = challenges.find(c => 
+      c.status === 'in_progress' && 
+      c.isActive !== false &&
+      (c.userId === user.id || 
+       (c.userEmail && c.userEmail.toLowerCase() === (user.email || '').toLowerCase()) || 
+       (c.userTraderId && c.userTraderId.toLowerCase() === (user.traderId || '').toLowerCase()))
+    );
+
+    if (!activeChallenge) {
+      return res.status(403).json({
+        success: false,
+        passed: false,
+        message: 'কোনো সক্রিয় (Active / in_progress) চ্যালেঞ্জ খুঁজে পাওয়া যায়নি।'
+      });
+    }
+
+    // Expiration check
+    if (activeChallenge.expiresAt && new Date().getTime() > new Date(activeChallenge.expiresAt).getTime()) {
+      syncChallengesWithSubmissions();
+      return res.status(403).json({
+        success: false,
+        passed: false,
+        message: 'চ্যালেঞ্জের নির্দিষ্ট মেয়াদ অতিক্রান্ত হয়েছে।'
+      });
+    }
+
+    const submissions = readJson(SUBMISSIONS_FILE, []);
+    const isPracticePhase = (activeChallenge.challengePhase === 'practice');
+    const targetSessionDate = req.body.sessionDate || new Date().toISOString().split('T')[0];
+
+    // Practice Mode Validation: Maximum 3 practice sessions in total
+    if (isPracticePhase) {
+      const practiceSubs = submissions.filter(s => 
+        s.isPractice === true &&
+        (s.challengeId ? s.challengeId === activeChallenge.id : s.userId === user.id)
+      );
+      if (practiceSubs.length >= (activeChallenge.practiceMaxSessions || 3)) {
+        return res.status(400).json({
+          success: false,
+          passed: false,
+          message: '⚠️ আপনি ইতিমধ্যে সর্বোচ্চ ৩টি প্র্যাকটিস সেশন সম্পন্ন করেছেন। এখন আপনি মূল মূল্যায়ন শুরু করতে পারেন।'
+        });
+      }
+    } else {
+      // Evaluation Mode: Max 3 sessions per day
+      const todayCount = submissions.filter(s => 
+        s.userId === user.id && 
+        s.isPractice !== true &&
+        s.challengeId === activeChallenge.id && 
+        (s.sessionDate === targetSessionDate || (s.submittedAt && s.submittedAt.startsWith(targetSessionDate)))
+      ).length;
+
+      if (todayCount >= 3) {
+        return res.status(400).json({
+          success: false,
+          passed: false,
+          message: '⚠️ রুল #৪: একদিনে সর্বোচ্চ ৩টি সেশন সম্পন্ন করা যাবে। আজকের ৩টি সেশন সম্পন্ন হয়েছে, পরবর্তী সেশন আগামীকাল সম্পন্ন করুন।'
+        });
+      }
+    }
+
+    // Collect all ticket IDs already locked into previous submissions (Zero Overlap Guard)
+    const usedTicketIds = new Set();
+    let lastSubTime = 0;
+    submissions.forEach(s => {
+      if (s.challengeId === activeChallenge.id) {
+        if (Array.isArray(s.auditedTicketIds)) {
+          s.auditedTicketIds.forEach(id => usedTicketIds.add(id));
+        }
+        const subMs = new Date(s.submittedAt || s.sessionCompletedAt || 0).getTime();
+        if (subMs > lastSubTime) lastSubTime = subMs;
+      }
+    });
+
+    let effectiveStartTime = 0;
+    if (activeChallenge.reactivatedAt) effectiveStartTime = new Date(activeChallenge.reactivatedAt).getTime();
+    else if (activeChallenge.evaluationStartedAt) effectiveStartTime = new Date(activeChallenge.evaluationStartedAt).getTime();
+    else if (activeChallenge.practiceStartedAt) effectiveStartTime = new Date(activeChallenge.practiceStartedAt).getTime();
+    else if (activeChallenge.approvedAt) effectiveStartTime = new Date(activeChallenge.approvedAt).getTime();
+    else if (activeChallenge.startedAt) effectiveStartTime = new Date(activeChallenge.startedAt).getTime();
+    else effectiveStartTime = new Date(activeChallenge.createdAt).getTime();
+
+    const sessionCutoffMs = Math.max(effectiveStartTime, lastSubTime);
+
+    // Read synced trades
+    const allSynced = readJson(SYNCED_TRADES_FILE, []);
+    const candidateTrades = allSynced.filter(t => {
+      const isUserMatch = (t.userId === user.id || 
+        (t.userEmail && t.userEmail.toLowerCase() === (user.email || '').toLowerCase()) ||
+        (t.traderId && t.traderId.toLowerCase() === (user.traderId || '').toLowerCase()));
+      if (!isUserMatch) return false;
+      if (t.challengeId && t.challengeId !== activeChallenge.id) return false;
+      if (usedTicketIds.has(t.ticketId)) return false;
+      const tradeTime = parseQuotexDate(t.openTime) || parseQuotexDate(t.closeTime) || new Date(t.syncedAt || 0).getTime();
+      return tradeTime >= (sessionCutoffMs - 1000);
+    });
+
+    // Sort chronologically oldest first
+    candidateTrades.sort((a, b) => {
+      const timeA = parseQuotexDate(a.openTime) || parseQuotexDate(a.closeTime) || new Date(a.syncedAt || 0).getTime();
+      const timeB = parseQuotexDate(b.openTime) || parseQuotexDate(b.closeTime) || new Date(b.syncedAt || 0).getTime();
+      return timeA - timeB;
+    });
+
+    if (candidateTrades.length === 0) {
+      return res.status(400).json({
+        success: false,
+        passed: false,
+        message: 'কোটেক্স এক্সটেনশন থেকে সিঙ্ক হওয়া কোনো নতুন ট্রেড পাওয়া যায়নি। অনুগ্রহ করে কোটেক্সে ট্রেড সম্পন্ন করে এক্সটেনশনের Sync বাটনে বা ট্রেডিং হিস্টোরি পেজের রিফ্রেশ বাটনে চাপ দিন।'
+      });
+    }
+
+    // Session Starting Capital
+    const sessionStartingCapital = Number(activeChallenge.currentCapital || activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
+    const maxLossLimit = sessionStartingCapital * 0.25;
+    const drawdownFloor = sessionStartingCapital - maxLossLimit;
+
+    const mat = buildServerMasanielloMatrix(16, 6, 1.85);
+    let runningCashier = sessionStartingCapital;
+    let wins = 0;
+    let losses = 0;
+    const auditedTrades = [];
+    const violations = [];
+    let sessionComplete = false;
+    let completionReason = '';
+
+    for (let idx = 0; idx < candidateTrades.length; idx++) {
+      const t = candidateTrades[idx];
+
+      // Check Refund Trade
+      if (isTradeRefundServer(t)) {
+        auditedTrades.push({
+          tradeNum: wins + losses + 1,
+          ticketId: t.ticketId,
+          asset: t.asset || 'N/A',
+          tradeTime: t.openTime || t.closeTime || t.syncedAt,
+          plannedStake: 0,
+          actualStake: parseFloat(t.amount) || 0,
+          outcome: 'REFUND',
+          pnl: 0,
+          balanceAfter: runningCashier,
+          isRefund: true,
+          complianceStatus: '🔄 Refund Skipped (মার্কেটের রিফান্ড ট্রেড বাদ দেওয়া হয়েছে)',
+          isPassed: true
+        });
+        continue; // Skip without advancing Masaniello step
+      }
+
+      if (sessionComplete) {
+        break; // Stop evaluating once session reached complete condition
+      }
+
+      const m = wins + losses;
+      if (m >= 16) {
+        break;
+      }
+
+      const plannedStake = computeServerPlannedStake(mat, 16, 6, 1.85, m, wins, runningCashier);
+      const actualStake = parseFloat(t.amount) || 0;
+      const isCompliant = isStakeCompliantWithRule(plannedStake, actualStake);
+      const tradeNum = m + 1;
+
+      const validStakes = getValidStakesForPlanned(plannedStake);
+      const expectedText = plannedStake % 1 === 0 ? `$${plannedStake}` : `$${validStakes.join(' বা $')}`;
+
+      if (!isCompliant) {
+        violations.push(`ট্রেড #${tradeNum}: Planned Stake ছিল $${plannedStake.toFixed(2)} (${expectedText}), কিন্তু কোটেক্সে ট্রেড ওপেন করা হয়েছে $${actualStake.toFixed(2)}।`);
+      }
+
+      // Check account type
+      if (t.accountType && t.accountType.toLowerCase() !== 'demo') {
+        violations.push(`ট্রেড #${tradeNum}: চ্যালেঞ্জের নিয়ম অনুযায়ী ডেমো অ্যাকাউন্টে ট্রেড করতে হবে, কিন্তু অন্য অ্যাকাউন্ট (${t.accountType}) সনাক্ত হয়েছে।`);
+      }
+
+      const isWin = (t.result === 'WIN' || (parseFloat(t.profit) > parseFloat(t.amount)));
+      let tradeNetPnl = 0;
+      if (isWin) {
+        const gross = parseFloat(t.profit) || 0;
+        tradeNetPnl = (gross > actualStake) ? (gross - actualStake) : gross;
+        runningCashier = Math.round((runningCashier + tradeNetPnl) * 100) / 100;
+        wins++;
+      } else {
+        tradeNetPnl = -actualStake;
+        runningCashier = Math.round((runningCashier - actualStake) * 100) / 100;
+        losses++;
+      }
+
+      // Check 25% drawdown limit
+      if (runningCashier < (drawdownFloor - 0.01)) {
+        violations.push(`সেশন চলাকালীন ক্যাশিয়ার ব্যালেন্স প্রারম্ভিক ক্যাপিটালের ($${sessionStartingCapital.toFixed(2)}) ২৫% ড্রডাউন লিমিট অতিক্রম করেছে (বর্তমান ব্যালেন্স: $${runningCashier.toFixed(2)})।`);
+      }
+
+      auditedTrades.push({
+        tradeNum,
+        ticketId: t.ticketId,
+        asset: t.asset || 'N/A',
+        tradeTime: t.openTime || t.closeTime || t.syncedAt,
+        plannedStake,
+        actualStake,
+        outcome: isWin ? 'WIN' : 'LOSS',
+        pnl: tradeNetPnl,
+        balanceAfter: runningCashier,
+        isRefund: false,
+        complianceStatus: isCompliant ? '✅ Passed' : `❌ Stake Mismatch ($${actualStake} vs ${expectedText})`,
+        isPassed: isCompliant
+      });
+
+      // Completion triggers
+      if (wins >= 6) {
+        sessionComplete = true;
+        completionReason = 'TARGET_6_WINS_REACHED';
+      } else {
+        const nextPlanned = computeServerPlannedStake(mat, 16, 6, 1.85, m + 1, wins, runningCashier);
+        if (nextPlanned < 0.50) {
+          sessionComplete = true;
+          completionReason = 'STAKE_BELOW_MIN_PROFIT_SECURED';
+        } else if ((m + 1) === 16) {
+          if (wins >= 6) {
+            sessionComplete = true;
+            completionReason = '16_TRADES_COMPLETED_WITH_6_WINS';
+          } else {
+            violations.push(`১৬টি ট্রেড সম্পন্ন করার পরেও ৬টি উইন অর্জিত হয়নি (মোট উইন: ${wins}টি)। রুলস অনুযায়ী আপনি এই চ্যালেঞ্জ থেকে বাদ পড়েছেন।`);
+          }
+        }
+      }
+    }
+
+    const nonRefundAudited = auditedTrades.filter(t => !t.isRefund);
+    if (nonRefundAudited.length === 0) {
+      return res.status(400).json({
+        success: false,
+        passed: false,
+        message: 'কোটেক্স থেকে শুধু রিফান্ড ট্রেড পাওয়া গেছে। অনুগ্রহ করে একটি নতুন ট্রেড সম্পন্ন করে পুনরায় অডিট বাটনে চাপ দিন।'
+      });
+    }
+
+    if (!sessionComplete && violations.length === 0) {
+      return res.status(400).json({
+        success: false,
+        passed: false,
+        message: `আপনার সেশনটি এখনো সমাপ্ত হয়নি (বর্তমান রেকর্ড: ${wins}W - ${losses}L)। ৬টি উইন অর্জন বা সেশন সমাপ্ত হওয়া পর্যন্ত কোটেক্সে ট্রেড সম্পন্ন করুন।`
+      });
+    }
+
+    // IF VIOLATIONS EXIST
+    if (violations.length > 0) {
+      if (!isPracticePhase) {
+        activeChallenge.status = 'failed';
+        activeChallenge.failReason = 'RULE_VIOLATION';
+        activeChallenge.violatedRule = violations[0];
+        activeChallenge.failReasonText = violations.join('; ');
+        activeChallenge.failedAt = new Date().toISOString();
+        activeChallenge.isActive = false;
+        writeJson(CHALLENGES_FILE, challenges);
+      }
+
+      return res.status(200).json({
+        success: false,
+        passed: false,
+        isDisqualified: !isPracticePhase,
+        violations,
+        encouragingMessage: 'আপনি যেই ভুলটা করেছেন তার থেকে শিক্ষা নেন এবং পরবর্তীতে আর এরকম ভুল হবেনা এবং আপনি চ্যালেঞ্জটি পাস করতে পারবেন আশা করি।',
+        auditReport: auditedTrades
+      });
+    }
+
+    // PASSED - SUCCESSFUL SESSION!
+    const actualSessionNetPnl = Math.round((runningCashier - sessionStartingCapital) * 100) / 100;
+    const endingCapital = Math.round(runningCashier * 100) / 100;
+
+    const newSubmission = {
+      id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      userId: user.id,
+      challengeId: activeChallenge.id,
+      packageName: activeChallenge.packageName,
+      isPractice: isPracticePhase,
+      sessionType: isPracticePhase ? 'practice' : 'evaluation',
+      brokerName: 'Quotex',
+      sessionDate: targetSessionDate,
+      winTrades: wins,
+      lossTrades: losses,
+      tradesCount: wins + losses,
+      profitLoss: actualSessionNetPnl,
+      winRate: `${((wins / (wins + losses)) * 100).toFixed(1)}%`,
+      startingCapital: sessionStartingCapital,
+      endingCapital: endingCapital,
+      fileType: 'auto_audit',
+      status: 'auto_verified',
+      auditedTicketIds: auditedTrades.map(t => t.ticketId),
+      auditReport: auditedTrades,
+      adminFeedback: '⚡ Auto-Verified by Quotex Extension (All stakes & rules compliant)',
+      submittedAt: new Date().toISOString()
+    };
+
+    submissions.unshift(newSubmission);
+    writeJson(SUBMISSIONS_FILE, submissions);
+
+    // Update Challenge with new carried-forward capital & sessions count
+    activeChallenge.sessionsCompleted = (activeChallenge.sessionsCompleted || 0) + 1;
+    activeChallenge.currentCapital = endingCapital; // Carried forward to next session!
+    activeChallenge.lastSessionCompletedAt = newSubmission.submittedAt;
+
+    if (!isPracticePhase && activeChallenge.sessionsCompleted >= (activeChallenge.sessionsRequired || 15)) {
+      activeChallenge.status = 'passed';
+      activeChallenge.passedAt = new Date().toISOString();
+    }
+
+    writeJson(CHALLENGES_FILE, challenges);
+
+    syncChallengesWithSubmissions();
+
+    res.json({
+      success: true,
+      passed: true,
+      message: '🎉 আপনার আজকের ট্রেডিং সেশন সফলভাবে সম্পন্ন হয়েছে ! পরবর্তী সেশন গুলো সুন্দর হবে! অবশ্যই ঠান্ডা মাথায় ট্রেড করবেন।',
+      newCapital: endingCapital,
+      previousCapital: sessionStartingCapital,
+      sessionsCompleted: activeChallenge.sessionsCompleted,
+      isPractice: isPracticePhase,
+      auditReport: auditedTrades,
+      sessionSummary: {
+        wins,
+        losses,
+        totalTrades: wins + losses,
+        netPnl: actualSessionNetPnl,
+        startingCapital: sessionStartingCapital,
+        endingCapital
+      }
+    });
+
+  } catch (err) {
+    console.error('Session audit upload error:', err);
+    res.status(500).json({ success: false, passed: false, message: 'সার্ভার অডিট প্রসেসিং ত্রুটি।' });
   }
 });
 

@@ -2552,6 +2552,39 @@
         </div>
     </div>
 
+    <!-- 6.1 AUTOMATED AUDIT REPORT MODAL -->
+    <div class="modal-overlay" id="adminAuditReportModal">
+        <div class="modal-box" style="max-width:980px; width:95%; text-align:left; max-height:90vh; display:flex; flex-direction:column; padding:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1.2rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:1rem;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:44px; height:44px; border-radius:12px; background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.35); display:flex; align-items:center; justify-content:center; color:#00e676; font-size:1.3rem;">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size:1.2rem; font-weight:800; color:#fff; margin:0;" id="auditModalTitle">
+                            Quotex অটোমেটিক ট্রেড অডিট ও ভেরিফিকেশন রিপোর্ট
+                        </h3>
+                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;" id="auditModalSubtitle">
+                            মানি ম্যানেজমেন্ট ফর্মুলা ও ব্রোকার রিয়েল-টাইম ট্রেডস সিঙ্ক অডিট
+                        </div>
+                    </div>
+                </div>
+                <button class="modal-close" style="position:static; margin-left:auto;" onclick="closeModal('adminAuditReportModal')">&times;</button>
+            </div>
+
+            <!-- Content Area (Scrollable) -->
+            <div id="adminAuditReportContent" style="overflow-y:auto; flex-grow:1; padding-right:6px;">
+                <!-- Populated via openAuditReportModal(subId) -->
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.08);">
+                <button type="button" class="btn-outline" style="padding:8px 18px; border-radius:8px;" onclick="closeModal('adminAuditReportModal')">
+                    বন্ধ করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- REQUEST PROOF RESUBMISSION MODAL -->
     <div class="modal-overlay" id="requestResubmitModal">
         <div class="modal-box" style="max-width:580px; text-align:left;">
@@ -3743,7 +3776,7 @@
 
         function getStatusBadgeClass(status) {
             if (status === 'pending_approval' || status === 'under_review') return 'badge-pending';
-            if (status === 'in_progress' || status === 'verified') return 'badge-active';
+            if (status === 'in_progress' || status === 'verified' || status === 'auto_verified') return 'badge-active';
             if (status === 'passed') return 'badge-passed';
             if (status === 'failed' || status === 'rejected') return 'badge-rejected';
             if (status === 'needs_resubmission') return 'badge-warning';
@@ -4763,8 +4796,15 @@
                                         <td style="color:${sub.profitLoss >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'}; font-weight:700;">
                                             ${sub.profitLoss >= 0 ? '+' : ''}$${sub.profitLoss}
                                         </td>
-                                            ${sub.videoUrl ? `<a href="${sub.videoUrl}" target="_blank" style="color:var(--neon-blue); margin-right:8px;"><i class="fas fa-video"></i> Video</a>` : ''}
-                                            ${sub.screenshotUrl ? `<a href="javascript:void(0)" onclick="openScreenshot('${sub.screenshotUrl}')" style="color:var(--gold); font-weight:700;"><i class="fas ${sub.fileType === 'video' || /\.(mp4|webm|mov)/i.test(sub.screenshotUrl) ? 'fa-play' : 'fa-image'}"></i> ${sub.fileType === 'video' || /\.(mp4|webm|mov)/i.test(sub.screenshotUrl) ? 'ভিডিও দেখুন' : 'ছবি দেখুন'}</a>` : ''}
+                                        <td>
+                                            ${sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0) ? `
+                                                <button class="btn-success" style="padding:2px 8px; font-size:0.75rem; border-radius:5px; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.4); cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
+                                                    <i class="fas fa-bolt"></i> অডিট রিপোর্ট (${(sub.auditReport || []).length}টি)
+                                                </button>
+                                            ` : `
+                                                ${sub.videoUrl ? `<a href="${sub.videoUrl}" target="_blank" style="color:var(--neon-blue); margin-right:8px;"><i class="fas fa-video"></i> Video</a>` : ''}
+                                                ${sub.screenshotUrl ? `<a href="javascript:void(0)" onclick="openScreenshot('${sub.screenshotUrl}')" style="color:var(--gold); font-weight:700;"><i class="fas ${sub.fileType === 'video' || /\.(mp4|webm|mov)/i.test(sub.screenshotUrl) ? 'fa-play' : 'fa-image'}"></i> ${sub.fileType === 'video' || /\.(mp4|webm|mov)/i.test(sub.screenshotUrl) ? 'ভিডিও দেখুন' : 'ছবি দেখুন'}</a>` : ''}
+                                            `}
                                         </td>
                                         <td><span class="badge ${getStatusBadgeClass(sub.status)}">${sub.status.replace('_', ' ')}</span></td>
                                     </tr>
@@ -4857,7 +4897,7 @@
                     .sort((a, b) => new Date(a.submittedAt || a.sessionDate) - new Date(b.submittedAt || b.sessionDate));
 
                 const pendingReviews = subs.filter(s => s.status === 'under_review').length;
-                const verifiedSubs = subs.filter(s => s.status === 'verified').length;
+                const verifiedSubs = subs.filter(s => s.status === 'verified' || s.status === 'auto_verified').length;
                 const totalPnl = subs.reduce((sum, s) => sum + (parseFloat(s.profitLoss) || 0), 0);
                 const winTradesTotal = subs.reduce((sum, s) => sum + (parseInt(s.winTrades) || 0), 0);
                 const lossTradesTotal = subs.reduce((sum, s) => sum + (parseInt(s.lossTrades) || 0), 0);
@@ -4905,7 +4945,7 @@
             const uniqueRunningUsers = new Set((adminChallenges || []).filter(c => c.status === 'in_progress').map(c => (c.userId || c.userEmail || '').toLowerCase()).filter(Boolean));
             const totalRunning = uniqueRunningUsers.size;
             const totalPendingReviews = (adminSubmissions || []).filter(s => s.status === 'under_review').length;
-            const totalVerified = (adminSubmissions || []).filter(s => s.status === 'verified').length;
+            const totalVerified = (adminSubmissions || []).filter(s => s.status === 'verified' || s.status === 'auto_verified').length;
 
             if (statsBar) {
                 statsBar.innerHTML = `
@@ -5076,7 +5116,7 @@
             const winTrades = subs.reduce((sum, s) => sum + (parseInt(s.winTrades) || 0), 0);
             const lossTrades = subs.reduce((sum, s) => sum + (parseInt(s.lossTrades) || 0), 0);
             const totalPnl = subs.reduce((sum, s) => sum + (parseFloat(s.profitLoss) || 0), 0);
-            const verifiedCount = subs.filter(s => s.status === 'verified').length;
+            const verifiedCount = subs.filter(s => s.status === 'verified' || s.status === 'auto_verified').length;
             const pendingCount = subs.filter(s => s.status === 'under_review').length;
             const pnlColor = totalPnl >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
             const pnlSign = totalPnl >= 0 ? '+' : '';
@@ -5338,6 +5378,81 @@
                                 </div>
 
                                 <div style="display:flex; flex-direction:column; gap:16px;">
+                                    ${sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0) ? `
+                                        <!-- Automated Audit Summary Card -->
+                                        <div style="background:rgba(0,230,118,0.05); border:1px solid rgba(0,230,118,0.3); border-radius:12px; padding:16px;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                                                <div style="display:flex; align-items:center; gap:8px;">
+                                                    <span style="background:rgba(0,230,118,0.2); color:#00e676; padding:4px 10px; border-radius:6px; font-weight:800; font-size:0.82rem; border:1px solid rgba(0,230,118,0.4);">
+                                                        <i class="fas fa-robot"></i> কোটেক্স অটোমেটিক অডিট সম্পন্ন
+                                                    </span>
+                                                    <span style="font-size:0.82rem; color:var(--text-secondary);">
+                                                        (ভিডিও বা ম্যানুয়াল স্ক্রিনশটের প্রয়োজন নেই)
+                                                    </span>
+                                                </div>
+                                                <button type="button" class="btn-success" style="padding:5px 12px; font-size:0.8rem; border-radius:6px; background:rgba(0,230,118,0.2); color:#00e676; border:1px solid rgba(0,230,118,0.4); cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
+                                                    <i class="fas fa-expand-alt"></i> পূর্ণাঙ্গ অডিট টেবিল দেখুন
+                                                </button>
+                                            </div>
+
+                                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:12px;">
+                                                <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
+                                                    <div style="font-size:0.72rem; color:var(--text-secondary);">শুরুর ক্যাপিটাল</div>
+                                                    <div style="font-weight:800; color:#fff; font-size:0.95rem; margin-top:2px;">$${(sub.startingCapital || 0).toFixed(2)}</div>
+                                                </div>
+                                                <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
+                                                    <div style="font-size:0.72rem; color:var(--text-secondary);">সমাপ্তি ক্যাপিটাল</div>
+                                                    <div style="font-weight:800; color:#00e676; font-size:0.95rem; margin-top:2px;">$${(sub.endingCapital || 0).toFixed(2)}</div>
+                                                </div>
+                                                <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
+                                                    <div style="font-size:0.72rem; color:var(--text-secondary);">মোট অডিটেড ট্রেড</div>
+                                                    <div style="font-weight:800; color:#fff; font-size:0.95rem; margin-top:2px;">${(sub.auditReport || []).length} টি</div>
+                                                </div>
+                                                <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
+                                                    <div style="font-size:0.72rem; color:var(--text-secondary);">স্ট্যাটাস</div>
+                                                    <div style="font-weight:800; color:${sub.disqualified ? '#ef4444' : '#00e676'}; font-size:0.95rem; margin-top:2px;">${sub.disqualified ? 'নিয়ম লঙ্ঘন' : '১০০% সঠিক ও রুল মান্য'}</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Mini preview of first 5 trades -->
+                                            <div style="overflow-x:auto; background:rgba(0,0,0,0.4); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                                <table style="width:100%; font-size:0.78rem; text-align:left; border-collapse:collapse;">
+                                                    <thead>
+                                                        <tr style="border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
+                                                            <th style="padding:8px 10px;"># ধাপ</th>
+                                                            <th style="padding:8px 10px;">পরিকল্পিত স্টেক</th>
+                                                            <th style="padding:8px 10px;">কোটেক্স স্টেক</th>
+                                                            <th style="padding:8px 10px;">অ্যাসেট ও টিকিট</th>
+                                                            <th style="padding:8px 10px;">ফলাফল</th>
+                                                            <th style="padding:8px 10px;">P&L</th>
+                                                            <th style="padding:8px 10px;">কমপ্লায়েন্স</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        ${(sub.auditReport || []).slice(0, 6).map(a => `
+                                                            <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                                                                <td style="padding:7px 10px; font-weight:700;">ধাপ #${a.stepIndex}</td>
+                                                                <td style="padding:7px 10px; color:var(--gold); font-weight:700;">$${(a.plannedStake || 0).toFixed(2)}</td>
+                                                                <td style="padding:7px 10px; font-weight:700; color:#fff;">$${(a.actualStake || 0).toFixed(2)}</td>
+                                                                <td style="padding:7px 10px; font-size:0.72rem; color:var(--text-secondary);">${a.asset} <span style="font-family:monospace; color:#aaa;">(${a.ticket})</span></td>
+                                                                <td style="padding:7px 10px;"><span class="badge ${a.result === 'WIN' ? 'badge-active' : (a.result === 'REFUND' ? 'badge-warning' : 'badge-rejected')}" style="padding:2px 6px; font-size:0.7rem;">${a.result}</span></td>
+                                                                <td style="padding:7px 10px; font-weight:700; color:${a.pnl >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'};">${a.pnl >= 0 ? '+' : ''}$${(a.pnl || 0).toFixed(2)}</td>
+                                                                <td style="padding:7px 10px;"><span style="color:${a.isCompliant ? '#00e676' : '#ef4444'}; font-weight:700;">${a.isCompliant ? '✓ সঠিক' : '✕ ত্রুটি'}</span></td>
+                                                            </tr>
+                                                        `).join('')}
+                                                        ${(sub.auditReport || []).length > 6 ? `
+                                                            <tr>
+                                                                <td colspan="7" style="padding:6px 10px; text-align:center; color:var(--gold); font-size:0.75rem; cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
+                                                                    + আরও ${(sub.auditReport.length - 6)}টি ট্রেড দেখতে ক্লিক করুন...
+                                                                </td>
+                                                            </tr>
+                                                        ` : ''}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+
                                     ${videoSrc ? `
                                         <!-- 1. Playable Video Player for Session Recording -->
                                         <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:14px;">
@@ -5383,19 +5498,26 @@
                                     ` : ''}
 
                                     ${(!videoSrc && !imageSrc && !externalVideoLink) ? `
-                                        <div style="padding:1.5rem; text-align:center; background:rgba(255,255,255,0.02); border-radius:10px; border:1px dashed rgba(255,255,255,0.15);">
-                                            <i class="fas fa-photo-video" style="font-size:1.8rem; color:var(--text-secondary); margin-bottom:8px; display:block;"></i>
-                                            <div style="color:#fff; font-weight:700; font-size:0.9rem;">কোনো প্রুফ ফাইল বা ভিডিও লিংক যুক্ত নেই</div>
-                                            <div style="color:var(--text-secondary); font-size:0.8rem; margin-top:4px; margin-bottom:12px;">ট্রেডারের মূল ভিডিও/ইমেজ লিংক এখানে সেট করুন অথবা ট্রেডারকে পুনরায় আপলোডের অনুরোধ পাঠান।</div>
-                                            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-                                                <button type="button" class="btn-gold" style="font-size:0.8rem; padding:6px 14px; border-radius:6px;" onclick="openUpdateProofMediaModal('${sub.id}', '', '')">
-                                                    <i class="fas fa-plus-circle"></i> ভিডিও / স্ক্রিনশট লিংক যুক্ত করুন
-                                                </button>
-                                                <button type="button" class="btn-warning" style="background:#d97706; font-size:0.8rem; padding:6px 14px; border-radius:6px; color:#fff; border:none;" onclick="openResubmitModal('${sub.id}', '${sessionNum}')">
-                                                    <i class="fas fa-redo-alt"></i> পুনরায় আপলোডের অনুরোধ পাঠান
-                                                </button>
+                                        ${sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0) ? `
+                                            <div style="padding:1rem; text-align:center; background:rgba(0,230,118,0.03); border-radius:10px; border:1px dashed rgba(0,230,118,0.25);">
+                                                <div style="color:#00e676; font-weight:700; font-size:0.85rem;"><i class="fas fa-check-circle"></i> ব্রোকার রিয়েল-টাইম ট্রেডস ও ম্যাথমেটিক্যাল ফর্মুলা অটোমেটিক অডিটকৃত</div>
+                                                <div style="color:var(--text-secondary); font-size:0.78rem; margin-top:2px;">এই সেশনের জন্য ম্যানুয়াল ভিডিও রেকর্ডিং বা ছবি দেওয়ার প্রয়োজন নেই।</div>
                                             </div>
-                                        </div>
+                                        ` : `
+                                            <div style="padding:1.5rem; text-align:center; background:rgba(255,255,255,0.02); border-radius:10px; border:1px dashed rgba(255,255,255,0.15);">
+                                                <i class="fas fa-photo-video" style="font-size:1.8rem; color:var(--text-secondary); margin-bottom:8px; display:block;"></i>
+                                                <div style="color:#fff; font-weight:700; font-size:0.9rem;">কোনো প্রুফ ফাইল বা ভিডিও লিংক যুক্ত নেই</div>
+                                                <div style="color:var(--text-secondary); font-size:0.8rem; margin-top:4px; margin-bottom:12px;">ট্রেডারের মূল ভিডিও/ইমেজ লিংক এখানে সেট করুন অথবা ট্রেডারকে পুনরায় আপলোডের অনুরোধ পাঠান।</div>
+                                                <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                                                    <button type="button" class="btn-gold" style="font-size:0.8rem; padding:6px 14px; border-radius:6px;" onclick="openUpdateProofMediaModal('${sub.id}', '', '')">
+                                                        <i class="fas fa-plus-circle"></i> ভিডিও / স্ক্রিনশট লিংক যুক্ত করুন
+                                                    </button>
+                                                    <button type="button" class="btn-warning" style="background:#d97706; font-size:0.8rem; padding:6px 14px; border-radius:6px; color:#fff; border:none;" onclick="openResubmitModal('${sub.id}', '${sessionNum}')">
+                                                        <i class="fas fa-redo-alt"></i> পুনরায় আপলোডের অনুরোধ পাঠান
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `}
                                     ` : ''}
                                 </div>
                             </div>
@@ -5447,11 +5569,17 @@
                                             </button>
                                         ` : ''}
                                     </div>
-                                ` : sub.status === 'verified' ? `
+                                ` : (sub.status === 'verified' || sub.status === 'auto_verified') ? `
                                     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                                         <div style="color:var(--neon-green); font-weight:700; font-size:0.86rem; display:inline-flex; align-items:center; gap:6px;">
-                                            <i class="fas fa-check-double"></i> ${sub.isPractice ? `প্র্যাকটিস #${sub.practiceSessionNumber || sessionNum} যাচাই ও অনুমোদন সম্পন্ন` : `সেশন #${sessionNum} অনুমোদিত ও চ্যালেঞ্জ অগ্রগতিতে যুক্ত হয়েছে (+১ দিন সম্পন্ন)`}
+                                            <i class="fas ${sub.status === 'auto_verified' ? 'fa-robot' : 'fa-check-double'}"></i> 
+                                            ${sub.status === 'auto_verified' ? `স্বয়ংক্রিয় অডিট দ্বারা সেশন #${sessionNum} ভেরিফাইড (+১ দিন সম্পন্ন)` : (sub.isPractice ? `প্র্যাকটিস #${sub.practiceSessionNumber || sessionNum} যাচাই ও অনুমোদন সম্পন্ন` : `সেশন #${sessionNum} অনুমোদিত ও চ্যালেঞ্জ অগ্রগতিতে যুক্ত হয়েছে (+১ দিন সম্পন্ন)`)}
                                         </div>
+                                        ${(sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0)) ? `
+                                            <button type="button" class="btn-success" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.4); cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
+                                                <i class="fas fa-bolt"></i> অডিট রিপোর্ট (${(sub.auditReport || []).length} ট্রেডস)
+                                            </button>
+                                        ` : ''}
                                         ${!sub.isPractice ? `
                                             <button class="btn-outline" style="border-color:rgba(239,68,68,0.4); color:#f87171; padding:4px 10px; font-size:0.75rem; border-radius:6px;" onclick="openDisqualifyModal('${ch?.id}', '${sub.id}')" title="পরবর্তী পর্যালোচনায় রুল ভঙ্গ ধরা পড়লে বাদ দিন">
                                                 <i class="fas fa-ban"></i> রুল ভঙ্গে বাতিল
@@ -5556,20 +5684,26 @@
                             </div>
                         </td>
                         <td>
-                            ${sub.videoUrl ? `
+                            ${sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0) ? `
+                                <button class="btn-success" style="padding:4px 10px; font-size:0.78rem; border-radius:6px; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.4); display:inline-flex; align-items:center; gap:5px; cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
+                                    <i class="fas fa-bolt"></i> অডিট রিপোর্ট (${(sub.auditReport || []).length}টি)
+                                </button>
+                            ` : (sub.videoUrl ? `
                                 <button class="btn-outline" style="padding:4px 10px; font-size:0.78rem; color:var(--neon-blue); border-color:var(--neon-blue); border-radius:6px; display:inline-flex; align-items:center; gap:5px;" onclick="openScreenshot('${sub.videoUrl}')">
                                     <i class="fas fa-play-circle"></i> ভিডিও দেখুন
                                 </button>
-                            ` : '<span style="color:var(--text-secondary); font-size:0.8rem;">ভিডিও নেই</span>'}
+                            ` : '<span style="color:var(--text-secondary); font-size:0.8rem;">ভিডিও নেই</span>')}
                         </td>
                         <td>
-                            ${sub.screenshotUrl ? `
+                            ${sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0) ? `
+                                <span style="color:#00e676; font-size:0.75rem; font-weight:700;"><i class="fas fa-check-circle"></i> নো ভিডিও নিডেড</span>
+                            ` : (sub.screenshotUrl ? `
                                 <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
                                     <button class="btn-gold" style="padding:4px 10px; font-size:0.78rem; border-radius:7px; display:inline-flex; align-items:center; gap:5px;" onclick="openScreenshot('${sub.screenshotUrl}')">
                                         <i class="fas fa-image"></i> ছবি দেখুন
                                     </button>
                                 </div>
-                            ` : '<span style="color:var(--text-secondary); font-size:0.8rem;">ছবি নেই</span>'}
+                            ` : '<span style="color:var(--text-secondary); font-size:0.8rem;">ছবি নেই</span>')}
                         </td>
                         <td>
                             <span class="badge ${getStatusBadgeClass(sub.status)}">${sub.status.replace('_', ' ')}</span>
@@ -5592,6 +5726,8 @@
                                     <button class="btn-outline" style="padding:2px 6px; font-size:0.72rem; border-color:#d97706; color:#fbbf24; cursor:pointer;" onclick="openResubmitModal('${sub.id}', 'Proof', \`${escapeHtml(sub.adminFeedback || '').replace(/`/g, '\\`')}\`)">
                                         <i class="fas fa-edit"></i> Edit
                                     </button>
+                                ` : sub.status === 'auto_verified' ? `
+                                    <span style="font-size:0.8rem; color:var(--neon-green); font-weight:700;"><i class="fas fa-robot"></i> Auto-Verified</span>
                                 ` : `
                                     <span style="font-size:0.8rem; color:var(--text-secondary);">Reviewed</span>
                                 `}
@@ -5646,6 +5782,126 @@
             const badge = document.getElementById('screenshotCloudBadge');
             if (badge) badge.innerHTML = isVideo ? '<i class="fas fa-video"></i> ট্রেড ভিডিও ফাইল' : '<i class="fas fa-image"></i> ট্রেড ইমেজ ফাইল';
             openModal('screenshotModal');
+        }
+
+        function openAuditReportModal(subId) {
+            const sub = (adminSubmissions || []).find(s => s.id === subId);
+            if (!sub) {
+                showToast('সাবমিশন রেকর্ড খুঁজে পাওয়া যায়নি', 'error');
+                return;
+            }
+
+            const title = document.getElementById('auditModalTitle');
+            const subtitle = document.getElementById('auditModalSubtitle');
+            const content = document.getElementById('adminAuditReportContent');
+
+            if (title) title.innerText = `ট্রেড অডিট রিপোর্ট: ${sub.userName || 'ট্রেডার'} (${sub.sessionDate || ''})`;
+            if (subtitle) subtitle.innerHTML = `ট্রেডার আইডি: <span style="color:var(--gold); font-weight:700;">${sub.userTraderId || 'N/A'}</span> | প্যাকেজ: ${sub.packageName || 'Master'} | ব্রোকার: ${sub.brokerName || 'Quotex'}`;
+
+            const report = sub.auditReport || [];
+            const subPnl = parseFloat(sub.profitLoss) || 0;
+            const pnlColor = subPnl >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
+            const pnlSign = subPnl >= 0 ? '+' : '';
+
+            if (content) {
+                content.innerHTML = `
+                    <!-- Summary Cards -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:1.2rem;">
+                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:12px; border-radius:10px;">
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">সেশন শুরুর ক্যাপিটাল</div>
+                            <div style="font-size:1.15rem; font-weight:800; color:#fff; margin-top:2px;">$${(sub.startingCapital || 0).toFixed(2)}</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:12px; border-radius:10px;">
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">সমাপ্তি ক্যাপিটাল</div>
+                            <div style="font-size:1.15rem; font-weight:800; color:#00e676; margin-top:2px;">$${(sub.endingCapital || 0).toFixed(2)}</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:12px; border-radius:10px;">
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">মোট অডিটেড ট্রেড</div>
+                            <div style="font-size:1.15rem; font-weight:800; color:var(--gold); margin-top:2px;">${report.length}টি (${sub.winTrades || 0}W / ${sub.lossTrades || 0}L)</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:12px; border-radius:10px;">
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">মোট নেট P&L</div>
+                            <div style="font-size:1.15rem; font-weight:800; color:${pnlColor}; margin-top:2px;">${pnlSign}$${subPnl.toFixed(2)}</div>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:12px; border-radius:10px;">
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">অডিট ফলাফল</div>
+                            <div style="font-size:1rem; font-weight:800; color:${sub.disqualified ? '#ef4444' : '#00e676'}; margin-top:2px;">
+                                <i class="fas ${sub.disqualified ? 'fa-times-circle' : 'fa-check-circle'}"></i> ${sub.disqualified ? 'বাতিল / নিয়মভঙ্গ' : 'ভেরিফাইড (স্বয়ংক্রিয়)'}
+                            </div>
+                        </div>
+                    </div>
+
+                    ${sub.disqualified && sub.violatedRule ? `
+                        <div style="background:rgba(239,68,68,0.15); border-left:4px solid #ef4444; border-radius:8px; padding:12px 16px; margin-bottom:1.2rem; color:#fff;">
+                            <div style="font-weight:800; font-size:0.88rem; color:#f87171; margin-bottom:4px;"><i class="fas fa-exclamation-triangle"></i> নিয়ম লঙ্ঘনের কারণ:</div>
+                            <div style="font-size:0.86rem; line-height:1.5;">${escapeHtml(sub.violatedRule)}</div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Audit Table -->
+                    <div style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; overflow:hidden;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.82rem;">
+                            <thead>
+                                <tr style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
+                                    <th style="padding:10px 14px;"># ধাপ</th>
+                                    <th style="padding:10px 14px;">পরিকল্পিত স্টেক</th>
+                                    <th style="padding:10px 14px;">গৃহীত স্টেক অপশন</th>
+                                    <th style="padding:10px 14px;">কোটেক্স আসল স্টেক</th>
+                                    <th style="padding:10px 14px;">অ্যাসেট ও টিকিট ID</th>
+                                    <th style="padding:10px 14px;">ফলাফল</th>
+                                    <th style="padding:10px 14px;">প্রফিট/লস</th>
+                                    <th style="padding:10px 14px;">কমপ্লায়েন্স স্ট্যাটাস</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${report.length === 0 ? `
+                                    <tr><td colspan="8" style="padding:2rem; text-align:center; color:var(--text-secondary);">এই সাবমিশনে কোনো অডিট রেকর্ড নেই।</td></tr>
+                                ` : report.map(a => `
+                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.04); background:${!a.isCompliant ? 'rgba(239,68,68,0.08)' : 'transparent'};">
+                                        <td style="padding:10px 14px; font-weight:800;">
+                                            ধাপ #${a.stepIndex}
+                                        </td>
+                                        <td style="padding:10px 14px; font-weight:800; color:var(--gold);">
+                                            $${(a.plannedStake || 0).toFixed(2)}
+                                        </td>
+                                        <td style="padding:10px 14px; font-size:0.75rem; color:var(--text-secondary);">
+                                            ${(a.acceptableStakes && a.acceptableStakes.length > 0) ? a.acceptableStakes.map(s => '$' + s).join(', ') : 'N/A'}
+                                        </td>
+                                        <td style="padding:10px 14px; font-weight:800; color:#fff;">
+                                            $${(a.actualStake || 0).toFixed(2)}
+                                        </td>
+                                        <td style="padding:10px 14px;">
+                                            <div style="font-weight:700; color:#fff;">${a.asset || 'Quotex'}</div>
+                                            <div style="font-size:0.72rem; color:var(--text-secondary); font-family:monospace;">${a.ticket || 'N/A'}</div>
+                                        </td>
+                                        <td style="padding:10px 14px;">
+                                            <span class="badge ${a.result === 'WIN' ? 'badge-active' : (a.result === 'REFUND' ? 'badge-warning' : 'badge-rejected')}" style="padding:2px 8px; font-size:0.72rem;">
+                                                ${a.result}
+                                            </span>
+                                        </td>
+                                        <td style="padding:10px 14px; font-weight:800; color:${a.pnl >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'};">
+                                            ${a.pnl >= 0 ? '+' : ''}$${(a.pnl || 0).toFixed(2)}
+                                        </td>
+                                        <td style="padding:10px 14px;">
+                                            ${a.isCompliant ? `
+                                                <span style="color:#00e676; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                                                    <i class="fas fa-check-circle"></i> সঠিক স্টেক
+                                                </span>
+                                            ` : `
+                                                <span style="color:#ef4444; font-weight:700; display:inline-flex; align-items:center; gap:4px;" title="${escapeHtml(a.reason || '')}">
+                                                    <i class="fas fa-times-circle"></i> ${escapeHtml(a.reason || 'নিয়ম বহির্ভূত')}
+                                                </span>
+                                            `}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            openModal('adminAuditReportModal');
         }
 
         async function reviewSubmission(id, status) {
