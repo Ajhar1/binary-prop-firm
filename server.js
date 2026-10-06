@@ -4573,14 +4573,6 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       if (!isUserMatch) return false;
       if (t.challengeId && t.challengeId !== activeChallenge.id) return false;
       if (usedTicketIds.has(t.ticketId) || (t.id && usedTicketIds.has(t.id))) return false;
-
-      // Filter out trades synced before challenge activation (with 5 minute tolerance for clock drift)
-      if (effectiveStartTime && t.syncedAt) {
-        const syncMs = new Date(t.syncedAt).getTime();
-        if (!isNaN(syncMs) && syncMs < (effectiveStartTime - 300000)) {
-          return false;
-        }
-      }
       return true;
     });
 

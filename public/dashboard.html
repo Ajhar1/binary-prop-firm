@@ -1922,10 +1922,18 @@
             padding: 1rem;
         }
 
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: all;
+        .modal-overlay.active,
+        #masAuditProgressModal.active,
+        #masSessionCompleteModal.active {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: all !important;
+            display: flex !important;
+        }
+
+        #masAuditProgressModal.active .modal-box,
+        #masSessionCompleteModal.active .modal-box {
+            transform: translateY(0) !important;
         }
 
         .modal-box {
@@ -3620,7 +3628,7 @@
     </div>
 
     <!-- Session Complete & Proof Upload Modal -->
-    <div id="masSessionCompleteModal" class="modal-overlay" style="display:none;">
+    <div id="masSessionCompleteModal" class="modal-overlay" style="z-index:999998;">
         <div class="modal-box" style="max-width:520px; text-align:center;">
             <div style="width:68px; height:68px; border-radius:50%; background:linear-gradient(135deg, rgba(46,204,113,0.25), rgba(245,176,65,0.25)); border:2px solid var(--neon-green); color:var(--neon-green); display:flex; align-items:center; justify-content:center; font-size:2.2rem; margin:0 auto 1rem;">
                 <i class="fas fa-trophy" id="masModalIcon"></i>
@@ -3639,10 +3647,13 @@
                 <span class="badge" id="masModalStatPnl" style="background:rgba(245,176,65,0.15); font-size:0.82rem; padding:6px 12px; color:var(--yellow); font-weight:800;">P&L: $0.00</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <button type="button" class="btn-gold" onclick="proceedToProofUploadFromSheet()" style="padding:12px 24px; font-weight:800; font-size:0.95rem; justify-content:center; border-radius:10px; box-shadow:0 0 15px rgba(245,176,65,0.4);">
-                    <i class="fas fa-cloud-upload-alt"></i> প্রুফ আপলোড করুন (সকল হিসাব অটো-এন্ট্রি)
+                <button type="button" class="btn-gold" onclick="closeMasCompleteModal(); switchTab('submission'); syncMasanielloToProofForm(true); runAutomatedSessionAudit();" style="padding:12px 24px; font-weight:800; font-size:0.95rem; justify-content:center; border-radius:10px; box-shadow:0 0 15px rgba(245,176,65,0.4);">
+                    <i class="fas fa-bolt"></i> ⚡ স্বয়ংক্রিয় অডিট ও সেশন সাবমিট করুন
                 </button>
-                <button type="button" class="btn-outline" onclick="closeMasCompleteModal()" style="padding:8px 18px; font-size:0.85rem; justify-content:center; border-color:rgba(255,255,255,0.2); color:var(--text-secondary); border-radius:10px;">
+                <button type="button" class="btn-outline" onclick="closeMasCompleteModal(); proceedToProofUploadFromSheet();" style="padding:10px 18px; font-size:0.88rem; justify-content:center; border-color:rgba(255,255,255,0.2); color:#cbd5e1; border-radius:10px;">
+                    <i class="fas fa-eye"></i> প্রুফ পেজে বিস্তারিত দেখুন
+                </button>
+                <button type="button" class="btn-outline" onclick="closeMasCompleteModal()" style="padding:8px 18px; font-size:0.82rem; justify-content:center; border-color:transparent; color:var(--text-secondary); border-radius:10px;">
                     পরে আপলোড করব (শীট দেখুন)
                 </button>
             </div>
@@ -3650,7 +3661,7 @@
     </div>
 
     <!-- REALISTIC 7-8 SECOND AUTOMATED SESSION AUDIT MODAL -->
-    <div id="masAuditProgressModal" class="modal-overlay" style="display:none; align-items:center; justify-content:center; z-index:99999;">
+    <div id="masAuditProgressModal" class="modal-overlay" style="z-index:999999;">
         <div class="modal-box" style="max-width:500px; text-align:center; padding:2rem 1.6rem; border:1px solid rgba(245,176,65,0.4); border-radius:18px; box-shadow:0 10px 45px rgba(0,0,0,0.85); background:#12151e;">
             <!-- Scanning View -->
             <div id="auditModalScanningView">
@@ -6090,6 +6101,8 @@
 
             if (!modal) return;
             modal.style.display = 'flex';
+            modal.classList.add('active');
+            openModal('masAuditProgressModal');
             scanningView.style.display = 'block';
             resultView.style.display = 'none';
             progressBar.style.width = '15%';
@@ -6203,7 +6216,7 @@
                     <div style="width:72px; height:72px; margin:0 auto 14px; border-radius:50%; background:rgba(255,82,82,0.15); border:2px solid #ff5252; display:flex; align-items:center; justify-content:center; color:#ff5252; font-size:2.2rem; box-shadow:0 0 25px rgba(255,82,82,0.3);">
                         <i class="fas fa-times"></i>
                     </div>
-                    <h3 style="color:#ff5252; font-size:1.25rem; font-weight:800; margin-bottom:10px;">ট্রেডিং সেশনে রুলস লঙ্ঘন সনাক্ত হয়েছে</h3>
+                    <h3 style="color:#ff5252; font-size:1.25rem; font-weight:800; margin-bottom:10px;">${(data.violations && data.violations.length > 0) ? 'ট্রেডিং সেশনে রুলস লঙ্ঘন সনাক্ত হয়েছে' : 'সেশন অডিট রিপোর্ট'}</h3>
                     <div style="background:rgba(255,82,82,0.08); border:1px solid rgba(255,82,82,0.3); border-radius:12px; padding:12px; margin-bottom:14px; text-align:left; font-size:0.83rem; color:#fca5a5; max-height:160px; overflow-y:auto;">
                         ${(data.violations && data.violations.length > 0) ? data.violations.map(v => `<div style="margin-bottom:6px; line-height:1.4;">❌ ${escapeHtml(v)}</div>`).join('') : `<div>${escapeHtml(data.message || 'অডিট অসঙ্গতি পাওয়া গেছে।')}</div>`}
                     </div>
@@ -6220,7 +6233,11 @@
 
         function closeAuditModal() {
             const modal = document.getElementById('masAuditProgressModal');
-            if (modal) modal.style.display = 'none';
+            if (modal) {
+                modal.classList.remove('active');
+                closeModal('masAuditProgressModal');
+                modal.style.display = 'none';
+            }
             fetchChallenges();
             fetchSubmissions();
         }
@@ -7348,11 +7365,17 @@
             }
 
             modal.style.display = 'flex';
+            modal.classList.add('active');
+            openModal('masSessionCompleteModal');
         }
 
         function closeMasCompleteModal() {
             const modal = document.getElementById('masSessionCompleteModal');
-            if (modal) modal.style.display = 'none';
+            if (modal) {
+                modal.classList.remove('active');
+                closeModal('masSessionCompleteModal');
+                modal.style.display = 'none';
+            }
         }
 
         function proceedToProofUploadFromSheet() {
