@@ -8,6 +8,7 @@ const multer = require('multer');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 require('dotenv').config();
+const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -73,8 +74,45 @@ function writeJson(file, data) {
       fs.copyFileSync(tempFile, file);
       try { fs.unlinkSync(tempFile); } catch (e) {}
     }
+
+    // Double Safety Mirroring to MySQL
+    mirrorToMySql(file, data);
   } catch (err) {
     console.error(`Error writing ${file}:`, err);
+  }
+}
+
+// Asynchronously mirror local writes to MySQL when active
+function mirrorToMySql(file, data) {
+  if (!db || !db.isMySqlActive() || !data) return;
+  try {
+    if (file === USERS_FILE || file === USERS_PERMANENT_STORE_FILE) {
+      if (Array.isArray(data)) {
+        data.forEach(u => {
+          if (u && u.id) {
+            db.saveUser(u).catch(e => console.error('[MYSQL USER MIRROR ERROR]:', e.message));
+          }
+        });
+      }
+    } else if (file === CHALLENGES_FILE || file === CHALLENGES_PERMANENT_STORE_FILE) {
+      if (Array.isArray(data)) {
+        data.forEach(c => {
+          if (c && c.id) {
+            db.saveChallenge(c).catch(e => console.error('[MYSQL CHALLENGE MIRROR ERROR]:', e.message));
+          }
+        });
+      }
+    } else if (file === SUBMISSIONS_FILE) {
+      if (Array.isArray(data)) {
+        data.forEach(s => {
+          if (s && s.id) {
+            db.saveSubmission(s).catch(e => console.error('[MYSQL SUBMISSION MIRROR ERROR]:', e.message));
+          }
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[MYSQL MIRROR ERROR]:', err.message);
   }
 }
 
@@ -101,6 +139,11 @@ function logUserArchive(action, userDetails = {}, metadata = {}) {
     // Keep max 2000 archive entries in JSON to stay super fast
     if (archive.length > 2000) archive.length = 2000;
     writeJson(ARCHIVE_FILE, archive);
+
+    // Persist to MySQL archive if active
+    if (db && db.isMySqlActive()) {
+      db.logArchiveEntry(record).catch(e => console.error('[MYSQL ARCHIVE LOG ERROR]:', e.message));
+    }
   } catch (e) {
     console.error('Failed to log to user archive:', e.message);
   }
@@ -142,6 +185,11 @@ function saveTraderToLifelongVault(user) {
       name: user.name
     }) + '\n';
     fs.appendFileSync(TRADERS_VAULT_AUDIT_LOG, logEntry, 'utf8');
+
+    // Persist trader profile directly to MySQL
+    if (db && db.isMySqlActive()) {
+      db.saveUser(user).catch(err => console.error('[MYSQL VAULT USER SAVE ERROR]:', err.message));
+    }
   } catch (err) {
     console.error('[LIFELONG VAULT SAVE ERROR]:', err);
   }
@@ -210,6 +258,11 @@ function removeTraderFromLifelongVault(userId, email, masterPassword) {
       email
     }) + '\n';
     fs.appendFileSync(TRADERS_VAULT_AUDIT_LOG, logEntry, 'utf8');
+
+    // Remove user directly from MySQL
+    if (db && db.isMySqlActive()) {
+      db.deleteUser(userId, email).catch(err => console.error('[MYSQL VAULT USER DELETE ERROR]:', err.message));
+    }
   } catch (err) {
     console.error('[REMOVE TRADER VAULT ERROR]:', err);
   }
@@ -3090,6 +3143,10 @@ app.post('/api/auth/register', async (req, res) => {
     writeJson(USERS_PERMANENT_STORE_FILE, users);
     saveTraderToLifelongVault(newUser);
 
+    if (db && db.isMySqlActive()) {
+      await db.saveUser(newUser);
+    }
+
     // Permanently archive user creation
     logUserArchive('USER_REGISTERED', newUser, { ip: req.ip || req.connection.remoteAddress });
 
@@ -3250,6 +3307,21 @@ app.post('/api/auth/login', async (req, res) => {
     if (!user) {
       users = syncUsersWithAllData();
       user = users.find(u => u.email && (u.email.toLowerCase() === cleanedEmail || (normalizedEmail && u.email.toLowerCase() === normalizedEmail)));
+    }
+
+    // Direct MySQL lookup fallback when MySQL is active
+    if (!user && db && db.isMySqlActive()) {
+      try {
+        const dbUser = await db.getUserByEmail(cleanedEmail) || (normalizedEmail ? await db.getUserByEmail(normalizedEmail) : null);
+        if (dbUser) {
+          user = dbUser;
+          users.push(dbUser);
+          writeJson(USERS_FILE, users);
+          saveTraderToLifelongVault(dbUser);
+        }
+      } catch (e) {
+        console.error('[MYSQL LOGIN LOOKUP ERROR]:', e.message);
+      }
     }
 
     if (!user) {
@@ -3961,6 +4033,9 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
 
   challenges.unshift(newChallenge);
   saveChallenges(challenges);
+  if (db && db.isMySqlActive()) {
+    db.saveChallenge(newChallenge).catch(e => console.error('[MYSQL CHALLENGE SAVE ERROR]:', e.message));
+  }
   logUserArchive('CHALLENGE_PURCHASED', { id: req.user.id, name: req.user.name, email: req.user.email }, {
     challengeId: newChallenge.id,
     packageName: pkg.name,
@@ -6063,6 +6138,10 @@ app.delete('/api/admin/challenges/:id', authenticateAdminToken, (req, res) => {
   permChallenges = permChallenges.filter(c => c.id !== req.params.id);
   saveChallenges(challenges);
 
+  if (db && db.isMySqlActive()) {
+    db.deleteChallenge(req.params.id).catch(e => console.error('[MYSQL CHALLENGE DELETE ERROR]:', e.message));
+  }
+
   // Clean out any past approval/purchase logs from user_archive so auto-heal NEVER recovers it
   let archive = readJson(ARCHIVE_FILE, []);
   archive = archive.filter(a => {
@@ -6089,6 +6168,11 @@ app.delete('/api/admin/submissions/:id', authenticateAdminToken, (req, res) => {
 
   submissions = submissions.filter(s => s.id !== req.params.id);
   writeJson(SUBMISSIONS_FILE, submissions);
+
+  if (db && db.isMySqlActive()) {
+    db.deleteSubmission(req.params.id).catch(e => console.error('[MYSQL SUBMISSION DELETE ERROR]:', e.message));
+  }
+
   syncChallengesWithSubmissions();
   res.json({ success: true, message: 'Submission deleted successfully.' });
 });
@@ -6951,12 +7035,25 @@ app.get('*', (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`=======================================================`);
   console.log(`🚀 Binary Prop Firm Platform is running at: http://localhost:${PORT}`);
   console.log(`📊 External Binary Prop Challenges | 85% Profit Share`);
   console.log(`⚡ Supported Brokers: Quotex, Pocket Option, Olymp, etc.`);
   console.log(`💾 Enterprise Data Permanence & Crash-Proof Storage: ACTIVE`);
+
+  // Initialize MySQL Database (Hostinger / Live Environment)
+  try {
+    const mysqlConnected = await db.initDatabase();
+    if (mysqlConnected) {
+      console.log(`🐬 MySQL Database Engine: CONNECTED & SYNCHRONIZED`);
+      await db.hydrateFromMySql(DATA_DIR);
+    } else {
+      console.log(`📁 Database Mode: Local JSON Safe Store & Lifelong Vault`);
+    }
+  } catch (dbErr) {
+    console.error('[DATABASE INIT ERROR]:', dbErr.message);
+  }
   console.log(`=======================================================`);
 
   // Initial automated challenge session sync & validation
