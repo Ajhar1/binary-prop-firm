@@ -5,17 +5,18 @@ example-1.txt
 .env
 .DS_Store
 Thumbs.db
-data/
-data/*.json
+
+# Dynamic User & Challenge Database Files (Untracked from Git to protect real user data)
 data/users.json
-data/challenges.json
 data/users_permanent_store.json
+data/challenges.json
 data/challenges_permanent_store.json
 data/user_archive.json
 data/submissions.json
 data/synced_trades.json
 data/trader_states.json
 data/support_tickets.json
+data/mm_links.json
 data/lifelong_traders_vault/
 data/backups/
 data_secure_snapshot_*

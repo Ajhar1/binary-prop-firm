@@ -1,0 +1,9 @@
+{
+  "smtpHost": "smtp.gmail.com",
+  "smtpPort": 465,
+  "smtpSecure": true,
+  "smtpUser": "atharajhar6@gmail.com",
+  "smtpPass": "wbpnuzkgjjncmesy",
+  "fromName": "Binary Prop Firm Support",
+  "fromEmail": "atharajhar6@gmail.com"
+}
