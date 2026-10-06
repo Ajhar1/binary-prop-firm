@@ -4540,28 +4540,80 @@ app.post('/api/extension/heartbeat', (req, res) => {
       return res.status(400).json({ success: false, message: 'Trader ID প্রয়োজন।' });
     }
     const cleanId = traderId.trim().toLowerCase();
-    const entry = {
-      lastPing: Date.now(),
-      status,
-      accountType: (accountType || 'demo').toLowerCase(),
-      url
-    };
-    traderHeartbeats.set(cleanId, entry);
 
-    // Map by user ID / email if matched
+    // Find matched user
     const users = readJson(USERS_FILE, []);
     const matchedUser = users.find(u => 
       (u.traderId && u.traderId.toLowerCase() === cleanId) ||
       (u.email && u.email.toLowerCase() === cleanId) ||
       (u.id && u.id.toLowerCase() === cleanId)
     );
-    if (matchedUser) {
+
+    if (!matchedUser) {
+      return res.status(404).json({ success: false, active: false, message: 'ট্রেডার অ্যাকাউন্ট পাওয়া যায়নি।' });
+    }
+
+    // Verify if user has an active, running challenge
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const activeChallenge = challenges.find(c => 
+      c.status === 'in_progress' && 
+      c.isActive !== false &&
+      (c.userId === matchedUser.id || 
+       (c.userEmail && c.userEmail.toLowerCase() === (matchedUser.email || '').toLowerCase()) || 
+       (c.userTraderId && c.userTraderId.toLowerCase() === (matchedUser.traderId || '').toLowerCase()))
+    );
+
+    const userChallenges = challenges.filter(c => 
+      c.userId === matchedUser.id || 
+      (c.userEmail && c.userEmail.toLowerCase() === (matchedUser.email || '').toLowerCase()) || 
+      (c.userTraderId && c.userTraderId.toLowerCase() === (matchedUser.traderId || '').toLowerCase())
+    );
+    const isDisqualified = !activeChallenge && userChallenges.some(c => c.status === 'failed' || c.status === 'disqualified');
+
+    if (!activeChallenge) {
+      const entry = {
+        lastPing: Date.now(),
+        status: isDisqualified ? 'disqualified' : 'inactive',
+        accountType: (accountType || 'demo').toLowerCase(),
+        url,
+        isActiveChallenge: false,
+        isDisqualified
+      };
+      traderHeartbeats.set(cleanId, entry);
       if (matchedUser.id) traderHeartbeats.set(matchedUser.id.toLowerCase(), entry);
       if (matchedUser.email) traderHeartbeats.set(matchedUser.email.toLowerCase(), entry);
       if (matchedUser.traderId) traderHeartbeats.set(matchedUser.traderId.toLowerCase(), entry);
+
+      return res.json({
+        success: false,
+        active: false,
+        isDisqualified,
+        noActiveChallenge: true,
+        message: isDisqualified
+          ? 'আপনার চ্যালেঞ্জটি বাতিল/ডিসকোয়ালিফাই করা হয়েছে। এক্সটেনশন বর্তমানে সম্পূর্ণ নিষ্ক্রিয়।'
+          : 'কোনো সক্রিয় চ্যালেঞ্জ চালু নেই। এক্সটেনশন নিষ্ক্রিয়।'
+      });
     }
 
-    res.json({ success: true, timestamp: Date.now() });
+    const entry = {
+      lastPing: Date.now(),
+      status,
+      accountType: (accountType || 'demo').toLowerCase(),
+      url,
+      isActiveChallenge: true,
+      challengeId: activeChallenge.id
+    };
+    traderHeartbeats.set(cleanId, entry);
+    if (matchedUser.id) traderHeartbeats.set(matchedUser.id.toLowerCase(), entry);
+    if (matchedUser.email) traderHeartbeats.set(matchedUser.email.toLowerCase(), entry);
+    if (matchedUser.traderId) traderHeartbeats.set(matchedUser.traderId.toLowerCase(), entry);
+
+    res.json({
+      success: true,
+      active: true,
+      challengeId: activeChallenge.id,
+      timestamp: Date.now()
+    });
   } catch (err) {
     console.error('Error handling extension heartbeat:', err);
     res.status(500).json({ success: false });
@@ -4576,17 +4628,36 @@ app.get('/api/user/extension-status', authenticateToken, (req, res) => {
     const cleanEmail = (user.email || '').trim().toLowerCase();
     const cleanId = (user.id || '').trim().toLowerCase();
 
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const activeChallenge = challenges.find(c => 
+      c.status === 'in_progress' && 
+      c.isActive !== false &&
+      (c.userId === user.id || 
+       (c.userEmail && c.userEmail.toLowerCase() === (user.email || '').toLowerCase()) || 
+       (c.userTraderId && c.userTraderId.toLowerCase() === (user.traderId || '').toLowerCase()))
+    );
+
+    const userChallenges = challenges.filter(c => 
+      c.userId === user.id || 
+      (c.userEmail && c.userEmail.toLowerCase() === (user.email || '').toLowerCase()) || 
+      (c.userTraderId && c.userTraderId.toLowerCase() === (user.traderId || '').toLowerCase())
+    );
+    const isDisqualified = !activeChallenge && userChallenges.some(c => c.status === 'failed' || c.status === 'disqualified');
+
     const hb = (cleanTraderId && traderHeartbeats.get(cleanTraderId)) ||
                (cleanEmail && traderHeartbeats.get(cleanEmail)) ||
                (cleanId && traderHeartbeats.get(cleanId));
 
     const now = Date.now();
-    // Connected if heartbeat received within last 65 seconds
-    const isConnected = !!(hb && (now - hb.lastPing) < 65000);
+    // Connected only if heartbeat received within last 65s AND has an active challenge
+    const isConnected = !!(activeChallenge && hb && hb.isActiveChallenge && (now - hb.lastPing) < 65000);
 
     res.json({
       success: true,
       connected: isConnected,
+      hasActiveChallenge: !!activeChallenge,
+      isDisqualified,
+      challengeStatus: activeChallenge ? activeChallenge.status : (isDisqualified ? 'failed' : 'none'),
       lastPing: hb ? hb.lastPing : null,
       accountType: hb ? hb.accountType : null,
       url: hb ? hb.url : null,
@@ -4617,30 +4688,61 @@ app.post('/api/extension/sync-trades', (req, res) => {
       return res.status(404).json({ success: false, message: `Trader ID (${traderId}) প্ল্যাটফর্মে খুঁজে পাওয়া যায়নি। আপনার প্রোফাইলে থাকা সঠিক Trader ID দিন।` });
     }
 
-    if (!Array.isArray(trades) || trades.length === 0) {
-      return res.status(400).json({ success: false, message: 'কোনো ট্রেড পাওয়া যায়নি।' });
-    }
-
     // Module 1: Challenge Time-Lock Filter
     // Find active challenge for this user (status === 'in_progress')
     const challenges = readJson(CHALLENGES_FILE, []);
     const activeChallenge = challenges.find(c => 
       c.status === 'in_progress' && 
+      c.isActive !== false &&
       (c.userId === user.id || 
        (c.userEmail && c.userEmail.toLowerCase() === (user.email || '').toLowerCase()) || 
        (c.userTraderId && c.userTraderId.toLowerCase() === (user.traderId || '').toLowerCase()))
     );
 
+    const userChallenges = challenges.filter(c => 
+      c.userId === user.id || 
+      (c.userEmail && c.userEmail.toLowerCase() === (user.email || '').toLowerCase()) || 
+      (c.userTraderId && c.userTraderId.toLowerCase() === (user.traderId || '').toLowerCase())
+    );
+    const isDisqualified = !activeChallenge && userChallenges.some(c => c.status === 'failed' || c.status === 'disqualified');
+
     if (!activeChallenge) {
-      return res.status(400).json({ 
+      return res.status(403).json({ 
         success: false, 
         noActiveChallenge: true,
-        message: 'কোনো সক্রিয় চ্যালেঞ্জ পাওয়া যায়নি। ট্রেড রেকর্ড করার জন্য আপনার অ্যাকাউন্টে একটি সক্রিয় চ্যালেঞ্জ (in_progress) থাকা আবশ্যক।' 
+        isDisqualified,
+        message: isDisqualified
+          ? 'আপনার চ্যালেঞ্জটি বাতিল/ডিসকোয়ালিফাই করা হয়েছে। এক্সটেনশন বর্তমানে সম্পূর্ণ নিষ্ক্রিয় এবং কোনো ট্রেড সিঙ্ক করবে না।'
+          : 'কোনো সক্রিয় চ্যালেঞ্জ পাওয়া যায়নি। ট্রেড রেকর্ড করার জন্য আপনার অ্যাকাউন্টে একটি সক্রিয় চ্যালেঞ্জ (in_progress) থাকা আবশ্যক।' 
       });
     }
 
-    const challengeStartTime = new Date(activeChallenge.approvedAt || activeChallenge.startedAt || activeChallenge.createdAt).getTime();
+    // Determine the exact activation timestamp:
+    // If reactivated: use reactivatedAt
+    // If evaluation started: use evaluationStartedAt
+    // If practice started: use practiceStartedAt
+    // If approved: use approvedAt
+    // Otherwise fallback to createdAt
+    let effectiveStartTime = 0;
+    if (activeChallenge.reactivatedAt) {
+      effectiveStartTime = new Date(activeChallenge.reactivatedAt).getTime();
+    } else if (activeChallenge.evaluationStartedAt) {
+      effectiveStartTime = new Date(activeChallenge.evaluationStartedAt).getTime();
+    } else if (activeChallenge.practiceStartedAt) {
+      effectiveStartTime = new Date(activeChallenge.practiceStartedAt).getTime();
+    } else if (activeChallenge.approvedAt) {
+      effectiveStartTime = new Date(activeChallenge.approvedAt).getTime();
+    } else if (activeChallenge.startedAt) {
+      effectiveStartTime = new Date(activeChallenge.startedAt).getTime();
+    } else {
+      effectiveStartTime = new Date(activeChallenge.createdAt).getTime();
+    }
+
     const challengeExpiryTime = activeChallenge.expiresAt ? new Date(activeChallenge.expiresAt).getTime() : 0;
+
+    if (!Array.isArray(trades) || trades.length === 0) {
+      return res.status(400).json({ success: false, message: 'কোনো ট্রেড পাওয়া যায়নি।' });
+    }
 
     let allSynced = readJson(SYNCED_TRADES_FILE, []);
     let newCount = 0;
@@ -4653,14 +4755,15 @@ app.post('/api/extension/sync-trades', (req, res) => {
       // Parse trade entry/execution time
       const tradeTime = parseQuotexDate(t.openTime) || parseQuotexDate(t.closeTime) || Date.now();
 
-      // Check Time-Lock Filter: Must be executed on or after challenge activation time (60-sec grace window)
-      if (challengeStartTime && tradeTime < (challengeStartTime - 60000)) {
+      // Check Time-Lock Filter: Must be executed on or after challenge activation time
+      // Any trade done before challenge became active or while challenge was closed/inactive is STRICTLY rejected!
+      if (effectiveStartTime && tradeTime < effectiveStartTime) {
         filteredOldCount++;
-        return; // Filter out older trades!
+        return; // Filter out older / closed-period trades!
       }
 
       // Check Expiry Filter: Cannot be executed after challenge expired
-      if (challengeExpiryTime && tradeTime > (challengeExpiryTime + 60000)) {
+      if (challengeExpiryTime && tradeTime > challengeExpiryTime) {
         filteredExpiredCount++;
         return; // Filter out trades after challenge expiry
       }
@@ -4680,7 +4783,7 @@ app.post('/api/extension/sync-trades', (req, res) => {
         userEmail: user.email || '',
         challengeId: activeChallenge.id,
         challengePackage: activeChallenge.packageName || '',
-        challengeStartedAt: activeChallenge.approvedAt || activeChallenge.startedAt || activeChallenge.createdAt,
+        challengeStartedAt: new Date(effectiveStartTime).toISOString(),
         ticketId,
         asset: t.asset || 'N/A',
         payout: t.payout || '90%',
@@ -4711,7 +4814,7 @@ app.post('/api/extension/sync-trades', (req, res) => {
       writeJson(SYNCED_TRADES_FILE, allSynced);
     }
 
-    const totalForUser = allSynced.filter(t => t.userId === user.id).length;
+    const totalForActiveChallenge = allSynced.filter(t => t.userId === user.id && t.challengeId === activeChallenge.id).length;
 
     let responseMessage = '';
     if (newCount > 0) {
@@ -4731,11 +4834,11 @@ app.post('/api/extension/sync-trades', (req, res) => {
       filteredOldCount,
       filteredExpiredCount,
       duplicateCount,
-      totalSynced: totalForUser,
+      totalSynced: totalForActiveChallenge,
       challenge: {
         id: activeChallenge.id,
         packageName: activeChallenge.packageName,
-        startedAt: activeChallenge.approvedAt || activeChallenge.startedAt || activeChallenge.createdAt
+        startedAt: new Date(effectiveStartTime).toISOString()
       },
       message: responseMessage
     });
@@ -4752,12 +4855,42 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
     const challenges = readJson(CHALLENGES_FILE, []);
     const activeChallenge = challenges.find(c => 
       c.status === 'in_progress' && 
+      c.isActive !== false &&
       (c.userId === req.user.id || 
        (c.userEmail && c.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()) || 
        (c.userTraderId && c.userTraderId.toLowerCase() === (req.user.traderId || '').toLowerCase()))
     );
 
-    const userTrades = allSynced.filter(t => t.userId === req.user.id || (t.userEmail && t.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()));
+    const userChallenges = challenges.filter(c => 
+      c.userId === req.user.id || 
+      (c.userEmail && c.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()) || 
+      (c.userTraderId && c.userTraderId.toLowerCase() === (req.user.traderId || '').toLowerCase())
+    );
+    const isDisqualified = !activeChallenge && userChallenges.some(c => c.status === 'failed' || c.status === 'disqualified');
+
+    let effectiveStartTime = 0;
+    if (activeChallenge) {
+      if (activeChallenge.reactivatedAt) {
+        effectiveStartTime = new Date(activeChallenge.reactivatedAt).getTime();
+      } else if (activeChallenge.evaluationStartedAt) {
+        effectiveStartTime = new Date(activeChallenge.evaluationStartedAt).getTime();
+      } else if (activeChallenge.practiceStartedAt) {
+        effectiveStartTime = new Date(activeChallenge.practiceStartedAt).getTime();
+      } else if (activeChallenge.approvedAt) {
+        effectiveStartTime = new Date(activeChallenge.approvedAt).getTime();
+      } else if (activeChallenge.startedAt) {
+        effectiveStartTime = new Date(activeChallenge.startedAt).getTime();
+      } else {
+        effectiveStartTime = new Date(activeChallenge.createdAt).getTime();
+      }
+    }
+
+    // Only return trades belonging to current active challenge and executed on/after activation time
+    const userTrades = activeChallenge ? allSynced.filter(t => 
+      (t.userId === req.user.id || (t.userEmail && t.userEmail.toLowerCase() === (req.user.email || '').toLowerCase())) &&
+      (t.challengeId === activeChallenge.id) &&
+      (!effectiveStartTime || (parseQuotexDate(t.openTime) || parseQuotexDate(t.closeTime) || new Date(t.syncedAt).getTime()) >= (effectiveStartTime - 1000))
+    ) : [];
 
     // Strict sort newest-first (latest trade on top)
     userTrades.sort((a, b) => {
@@ -4785,10 +4918,12 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
 
     res.json({
       success: true,
+      hasActiveChallenge: !!activeChallenge,
+      isDisqualified,
       activeChallenge: activeChallenge ? {
         id: activeChallenge.id,
         packageName: activeChallenge.packageName,
-        startedAt: activeChallenge.approvedAt || activeChallenge.startedAt || activeChallenge.createdAt,
+        startedAt: new Date(effectiveStartTime).toISOString(),
         expiresAt: activeChallenge.expiresAt,
         status: activeChallenge.status
       } : null,
@@ -4811,16 +4946,12 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
   }
 });
 
-// 3. Clear Synced Trades for Testing (Trader specific)
+// 3. Clear Synced Trades (Strictly Disabled & Prohibited)
 app.delete('/api/user/synced-trades', authenticateToken, (req, res) => {
-  try {
-    let allSynced = readJson(SYNCED_TRADES_FILE, []);
-    allSynced = allSynced.filter(t => t.userId !== req.user.id && (t.userEmail || '').toLowerCase() !== (req.user.email || '').toLowerCase());
-    writeJson(SYNCED_TRADES_FILE, allSynced);
-    res.json({ success: true, message: 'আপনার সিঙ্ক হওয়া ট্রেডিং হিস্টোরি ক্লিয়ার করা হয়েছে।' });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'সার্ভার ত্রুটি।' });
-  }
+  return res.status(403).json({ 
+    success: false, 
+    message: 'ট্রেডিং হিস্টোরি একবার সিঙ্ক হওয়ার পর তা মোছা বা পরিবর্তন করা কঠোরভাবে নিষিদ্ধ ও অসম্ভব।' 
+  });
 });
 
 // 4. Download Extension ZIP

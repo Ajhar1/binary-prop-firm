@@ -3460,9 +3460,6 @@
                         <button class="btn-outline" style="padding:7px 14px; font-size:0.8rem; border-radius:8px; cursor:pointer;" onclick="fetchUserSyncedTrades()">
                             <i class="fas fa-sync-alt"></i> রিফ্রেশ
                         </button>
-                        <button class="btn-outline" style="padding:7px 14px; font-size:0.8rem; border-radius:8px; color:#f87171; border-color:rgba(239,68,68,0.3); cursor:pointer;" onclick="clearUserSyncedTrades()">
-                            <i class="fas fa-trash-alt"></i> ক্লিয়ার টেস্ট ডেটা
-                        </button>
                     </div>
                 </div>
 
@@ -8473,7 +8470,29 @@
                 });
                 const data = await res.json();
 
-                if (data.success && data.connected) {
+                if (data.isDisqualified) {
+                    banner.style.borderColor = 'rgba(255, 82, 82, 0.55)';
+                    banner.style.background = 'linear-gradient(135deg, rgba(255,82,82,0.1), #12151d)';
+                    dot.style.background = '#ff5252';
+                    dot.style.boxShadow = '0 0 12px #ff5252';
+                    title.style.color = '#ff5252';
+                    title.innerHTML = '🚫 Extension Disabled: আপনার চ্যালেঞ্জটি বাতিল/ডিসকোয়ালিফাই করা হয়েছে।';
+                    if (badge) {
+                        badge.style.display = 'inline-block';
+                        badge.style.background = 'rgba(255,82,82,0.2)';
+                        badge.style.color = '#ff5252';
+                        badge.style.border = '1px solid rgba(255,82,82,0.4)';
+                        badge.innerText = 'চ্যালেঞ্জ বাতিল';
+                    }
+                    sub.innerText = 'চ্যালেঞ্জ বন্ধ থাকায় এক্সটেনশন স্বয়ংক্রিয়ভাবে লক করা হয়েছে। পুনরায় কোনো সক্রিয় চ্যালেঞ্জ না পাওয়া পর্যন্ত কোনো ট্রেড সিঙ্ক হবে না।';
+                    if (btnWrap) {
+                        btnWrap.innerHTML = `
+                            <a href="#pane-buy-challenge" onclick="switchTab('pane-buy-challenge')" class="btn-gold" style="padding:8px 16px; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                <i class="fas fa-shopping-cart"></i> নতুন চ্যালেঞ্জ ক্রয় করুন
+                            </a>
+                        `;
+                    }
+                } else if (data.success && data.connected) {
                     banner.style.borderColor = 'rgba(0, 230, 118, 0.45)';
                     banner.style.background = 'linear-gradient(135deg, rgba(0,230,118,0.06), #12151d)';
                     dot.style.background = '#00e676';
@@ -8574,10 +8593,14 @@
                         }
                     } else {
                         if (filterStatusEl) {
-                            filterStatusEl.innerHTML = `<span style="color:#f87171; font-weight:700;">কোনো সক্রিয় চ্যালেঞ্জ চালু নেই (নতুন কোনো ট্রেড সিঙ্ক হবে না)</span>`;
+                            filterStatusEl.innerHTML = data.isDisqualified
+                                ? `<span style="color:#f87171; font-weight:700;">⚠️ চ্যালেঞ্জ বাতিল/নিষ্ক্রিয় রয়েছে (চ্যালেঞ্জ বন্ধ থাকা অবস্থায় কোনো ট্রেড সিঙ্ক হবে না)</span>`
+                                : `<span style="color:#f87171; font-weight:700;">কোনো সক্রিয় চ্যালেঞ্জ চালু নেই (নতুন কোনো ট্রেড সিঙ্ক হবে না)</span>`;
                         }
                         if (filterBadgeEl) {
-                            filterBadgeEl.innerHTML = `<a href="#pane-buy-challenge" style="color:var(--yellow); text-decoration:none; font-weight:700;" onclick="switchTab('pane-buy-challenge')">চ্যালেঞ্জ সক্রিয় করুন &rarr;</a>`;
+                            filterBadgeEl.innerHTML = data.isDisqualified
+                                ? `<span style="color:#ff5252; font-weight:700; background:rgba(255,82,82,0.15); padding:3px 8px; border-radius:6px; border:1px solid rgba(255,82,82,0.3);">চ্যালেঞ্জ বাতিল</span>`
+                                : `<a href="#pane-buy-challenge" style="color:var(--yellow); text-decoration:none; font-weight:700;" onclick="switchTab('pane-buy-challenge')">চ্যালেঞ্জ সক্রিয় করুন &rarr;</a>`;
                         }
                     }
                 } else {
@@ -8743,29 +8766,6 @@
                     </tr>
                 `;
             }).join('');
-        }
-
-        async function clearUserSyncedTrades() {
-            if (!confirm('আপনি কি নিশ্চিত যে আপনার সিঙ্ক হওয়া টেস্ট ট্রেড হিস্টোরি মুছে ফেলতে চান?')) return;
-            const authToken = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token') || (typeof token !== 'undefined' ? token : null);
-            if (!authToken) return;
-
-            try {
-                const res = await fetch('/api/user/synced-trades', {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showToast('ট্রেডিং হিস্টোরি ক্লিয়ার করা হয়েছে।', 'success');
-                    userSyncedTradesData = [];
-                    renderSyncedTrades({ trades: [], stats: {} });
-                } else {
-                    showToast(data.message || 'ক্লিয়ার করতে সমস্যা হয়েছে।', 'error');
-                }
-            } catch (err) {
-                showToast('নেটওয়ার্ক ত্রুটি: ' + err.message, 'error');
-            }
         }
 
         // Init on load

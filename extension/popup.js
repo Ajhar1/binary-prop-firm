@@ -89,6 +89,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           lastSyncedText.innerText = `Last: ${new Date().toLocaleTimeString()} (${response.count || 0} trades)`;
         } else {
           showStatus(response?.error || 'কোনো ট্রেড পাওয়া যায়নি বা সিঙ্ক ব্যর্থ হয়েছে।', 'error');
+          if (response?.error && (response.error.includes('বাতিল') || response.error.includes('বন্ধ') || response.error.includes('নিষ্ক্রিয়') || response.error.includes('ডিসকোয়ালিফাই'))) {
+            connBadge.className = 'badge badge-locked';
+            connBadge.innerText = '● Locked';
+          }
         }
       });
     } catch (err) {

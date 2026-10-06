@@ -269,6 +269,11 @@
     // Sync Trades Click Handler:
     // User Requirement: "Sync Trades এর মধ্যে চাপ দিলে সোজা যেন ইউজাররা Trades অপশনে চলে যাই তারপর ট্রেডিং হিস্টোরি আমাদের সার্ভারে চলে আসে।"
     document.getElementById('bpfSyncBtn').addEventListener('click', () => {
+      if (isExtensionLocked) {
+        showToast(lockReason || '⚠️ আপনার চ্যালেঞ্জটি বর্তমানে বন্ধ/নিষ্ক্রিয় রয়েছে। এক্সটেনশন কোনো ট্রেড সিঙ্ক করবে না।', 'error');
+        return;
+      }
+
       if (!config.traderId) {
         showToast('ত্রুটি: আপনার Trader ID সেট করা নেই! এক্সটেনশন আইকনে ক্লিক করে Trader ID লিখুন।', 'error');
         return;
@@ -320,6 +325,67 @@
     }
   }
 
+  // Server Challenge Lock / Active Status Handler
+  let isExtensionLocked = false;
+  let lockReason = '';
+
+  function handleServerStatusResponse(data) {
+    if (!data) return;
+    const pill = document.getElementById('bpfPill');
+    const indicatorWrap = document.getElementById('bpfIndicatorWrap');
+    const syncBtn = document.getElementById('bpfSyncBtn');
+
+    if (data.isDisqualified || data.noActiveChallenge || data.active === false) {
+      isExtensionLocked = true;
+      lockReason = data.message || 'চ্যালেঞ্জ বন্ধ বা বাতিল রয়েছে।';
+
+      if (pill) {
+        pill.style.borderColor = 'rgba(255, 82, 82, 0.7)';
+        pill.style.background = 'linear-gradient(135deg, rgba(255,82,82,0.18), rgba(18,21,29,0.96))';
+      }
+      if (indicatorWrap) {
+        indicatorWrap.title = lockReason;
+        indicatorWrap.innerHTML = `
+          <span style="width:8px; height:8px; border-radius:50%; background:#ff5252; box-shadow:0 0 8px #ff5252; display:inline-block;"></span>
+          <span style="color:#ff5252; font-weight:700; font-size:11px;">${data.isDisqualified ? 'Disqualified' : 'Inactive'}</span>
+        `;
+      }
+      if (syncBtn) {
+        syncBtn.disabled = true;
+        syncBtn.style.opacity = '0.55';
+        syncBtn.style.cursor = 'not-allowed';
+        syncBtn.style.background = '#4a1515';
+        syncBtn.style.borderColor = '#ff5252';
+        syncBtn.style.color = '#ff8a80';
+        syncBtn.innerHTML = `<span>🚫 ${data.isDisqualified ? 'চ্যালেঞ্জ বাতিল' : 'চ্যালেঞ্জ বন্ধ'}</span>`;
+      }
+    } else if (data.active === true) {
+      isExtensionLocked = false;
+      lockReason = '';
+
+      if (pill) {
+        pill.style.borderColor = '';
+        pill.style.background = '';
+      }
+      if (indicatorWrap) {
+        indicatorWrap.title = 'এক্সটেনশন কানেক্টেড রয়েছে';
+        indicatorWrap.innerHTML = `
+          <span class="bpf-pulse-dot"></span>
+          <span class="bpf-indicator-label">Connected</span>
+        `;
+      }
+      if (syncBtn && !isSyncing) {
+        syncBtn.disabled = false;
+        syncBtn.style.opacity = '1';
+        syncBtn.style.cursor = 'pointer';
+        syncBtn.style.background = '';
+        syncBtn.style.borderColor = '';
+        syncBtn.style.color = '';
+        setSyncBtnText('⚡ Sync Trades');
+      }
+    }
+  }
+
   // 5. Heartbeat Engine (Sends ping every 30s to keep dashboard connected)
   function sendHeartbeat() {
     if (!config.traderId) return;
@@ -336,7 +402,12 @@
         url: window.location.href,
         timestamp: Date.now()
       })
-    }).catch(() => {
+    })
+    .then(res => res.json())
+    .then(data => {
+      handleServerStatusResponse(data);
+    })
+    .catch(() => {
       // Ignore background network heartbeat fail
     });
   }
@@ -508,6 +579,10 @@
   // 9. Manual / Auto Sync Handler on /en/trades Page
   async function runManualTradeSync() {
     if (isSyncing) return;
+    if (isExtensionLocked) {
+      showToast(lockReason || '⚠️ আপনার চ্যালেঞ্জটি বর্তমানে বন্ধ/নিষ্ক্রিয় রয়েছে। এক্সটেনশন কোনো ট্রেড সিঙ্ক করবে না।', 'error');
+      return;
+    }
     isSyncing = true;
 
     const btn = document.getElementById('bpfSyncBtn');
@@ -541,12 +616,14 @@
           }, 3500);
         }
 
-        if (result && result.success) {
+        if (result && (result.isDisqualified || result.noActiveChallenge)) {
+          handleServerStatusResponse(result);
+          showToast('⚠️ ' + (result.message || 'চ্যালেঞ্জ বন্ধ থাকায় এক্সটেনশন কোনো ট্রেড গ্রহণ করবে না।'), 'error');
+        } else if (result && result.success) {
+          handleServerStatusResponse({ active: true });
           trades.forEach(t => syncedTicketsCache.add(t.ticketId));
           saveSyncedCache();
           showToast(result.message || `${trades.length} টি ট্রেড সফলভাবে সিঙ্ক হয়েছে!`, 'success');
-        } else if (result && result.noActiveChallenge) {
-          showToast('⚠️ কোনো সক্রিয় চ্যালেঞ্জ পাওয়া যায়নি! ট্রেড সেভ করার জন্য চ্যালেঞ্জ সক্রিয় থাকতে হবে।', 'error');
         } else {
           showToast(result?.message || 'সিঙ্ক ব্যর্থ হয়েছে।', 'error');
         }
@@ -565,6 +642,7 @@
   // 10. Check and Auto-Sync on /en/trades Page
   function handleTradesPageAutoSync() {
     if (!window.location.pathname.includes('/trades')) return;
+    if (isExtensionLocked) return;
 
     const isPending = sessionStorage.getItem('bpf_auto_sync_target') === 'true';
     if (isPending || config.autoSync) {
@@ -588,6 +666,10 @@
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
     chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
       if (req.action === 'TRIGGER_SYNC') {
+        if (isExtensionLocked) {
+          sendResponse({ success: false, error: lockReason || 'আপনার চ্যালেঞ্জটি বন্ধ বা বাতিল রয়েছে।' });
+          return true;
+        }
         if (!window.location.pathname.includes('/trades')) {
           const acct = detectAccountType();
           sessionStorage.setItem('bpf_auto_sync_target', 'true');
@@ -622,9 +704,13 @@
       if (heartbeatTimer) clearInterval(heartbeatTimer);
       heartbeatTimer = setInterval(sendHeartbeat, 30000);
 
-      // If on Trade History page, check for auto-sync
+      // If on Trade History page, check for auto-sync after status verified
       if (window.location.pathname.includes('/trades')) {
-        handleTradesPageAutoSync();
+        setTimeout(() => {
+          if (!isExtensionLocked) {
+            handleTradesPageAutoSync();
+          }
+        }, 800);
       }
     });
   }
