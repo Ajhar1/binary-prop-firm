@@ -4720,9 +4720,18 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         completionReason = 'TARGET_6_WINS_REACHED';
       } else {
         const nextPlanned = computeServerPlannedStake(mat, 16, 6, 1.85, m + 1, wins, runningCashier);
+        const remainingDrawdownBuffer = Math.max(0, runningCashier - drawdownFloor);
+        const maxDrawdownDollar = sessionStartingCapital * 0.25;
+
         if (nextPlanned < 0.50) {
           sessionComplete = true;
           completionReason = 'STAKE_BELOW_MIN_PROFIT_SECURED';
+        } else if ((runningCashier - nextPlanned) < (drawdownFloor - 0.001) || nextPlanned > (remainingDrawdownBuffer + 0.001) || nextPlanned > maxDrawdownDollar) {
+          sessionComplete = true;
+          completionReason = 'LIMIT_25_EXCEEDED';
+        } else if ((16 - (m + 1)) < (6 - wins)) {
+          sessionComplete = true;
+          completionReason = 'INSUFFICIENT_TRADES_FOR_6_WINS';
         } else if ((m + 1) === 16) {
           if (wins >= 6) {
             sessionComplete = true;
@@ -4741,6 +4750,36 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         passed: false,
         message: 'কোটেক্স থেকে শুধু রিফান্ড ট্রেড পাওয়া গেছে। অনুগ্রহ করে একটি নতুন ট্রেড সম্পন্ন করে পুনরায় অডিট বাটনে চাপ দিন।'
       });
+    }
+
+    // Comprehensive 25% Maximum Drawdown & Buffer Exhaustion Guard
+    const finalNextPlanned = computeServerPlannedStake(mat, 16, 6, 1.85, wins + losses, wins, runningCashier);
+    const currentDrawdownBuffer = Math.max(0, Math.round((runningCashier - drawdownFloor) * 100) / 100);
+    const maxDrawdownAllowedDollar = Math.round(sessionStartingCapital * 0.25 * 100) / 100;
+    const totalLossDollar = Math.abs(Math.round((sessionStartingCapital - runningCashier) * 100) / 100);
+    const lossPercentage = ((totalLossDollar / sessionStartingCapital) * 100).toFixed(1);
+
+    const isCurrentBalExceeded = (runningCashier <= (drawdownFloor + 0.01));
+    const isNextStakeExceeded = (wins < 6 && (finalNextPlanned > (currentDrawdownBuffer + 0.001) || (runningCashier - finalNextPlanned) < (drawdownFloor - 0.001) || finalNextPlanned > maxDrawdownAllowedDollar));
+    const isMathImpossible = (wins < 6 && (16 - (wins + losses)) < (6 - wins));
+    const isClientFlaggedExceeded = (req.body.clientSessionData?.sessionStatus === 'LIMIT_25_EXCEEDED');
+
+    const isDrawdownHit = (isCurrentBalExceeded || isNextStakeExceeded || isMathImpossible || isClientFlaggedExceeded);
+
+    if (isDrawdownHit) {
+      sessionComplete = true;
+      const drawdownExplanation = `🛑 আপনার অ্যাকাউন্টে ২৫% লস লিমিট টার্গেট হিট হয়েছে:
+• সেশন প্রারম্ভিক ক্যাপিটাল: $${sessionStartingCapital.toFixed(2)}
+• বর্তমান ব্যালেন্স: $${runningCashier.toFixed(2)} (মোট ক্ষতি: -$${totalLossDollar.toFixed(2)} বা ${lossPercentage}%)
+• অনুমোদিত ২৫% সর্বোচ্চ লস সীমা (Floor): $${drawdownFloor.toFixed(2)}
+• অবশিষ্ট ড্রডাউন বাফার: $${currentDrawdownBuffer.toFixed(2)}
+• পরবর্তী নির্ধারিত স্টেক সাইজ: $${finalNextPlanned.toFixed(2)} (যা অবশিষ্ট বাফারের চেয়ে বড়)
+
+⚠️ কারণ ও সিদ্ধান্ত: প্ল্যাটফর্মের কঠোর রিস্ক পলিসি অনুযায়ী পরবর্তী ট্রেড নেওয়ার মতো নিরাপদ ব্যালেন্স বাফার নেই। একাউন্টে ২৫% সর্বোচ্চ লস লিমিট স্পর্শ করায় আপনি এই চ্যালেঞ্জ থেকে বাদ (Disqualified) পড়েছেন।`;
+
+      if (!violations.some(v => v.includes('২৫%'))) {
+        violations.unshift(drawdownExplanation);
+      }
     }
 
     if (!sessionComplete && violations.length === 0) {
@@ -4784,7 +4823,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
       if (!isPracticePhase) {
         activeChallenge.status = 'failed';
-        activeChallenge.failReason = 'RULE_VIOLATION';
+        activeChallenge.failReason = isDrawdownHit ? 'MAX_DRAWDOWN_25_PERCENT_HIT' : 'RULE_VIOLATION';
         activeChallenge.violatedRule = violations[0];
         activeChallenge.failReasonText = violations.join('; ');
         activeChallenge.failedAt = new Date().toISOString();
@@ -4798,8 +4837,21 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         success: false,
         passed: false,
         isDisqualified: !isPracticePhase,
+        isDrawdownHit,
+        drawdownInfo: {
+          startingCapital: sessionStartingCapital,
+          currentBalance: runningCashier,
+          drawdownFloor: drawdownFloor,
+          lossAmount: totalLossDollar,
+          lossPercent: lossPercentage,
+          nextPlannedStake: finalNextPlanned,
+          remainingBuffer: currentDrawdownBuffer,
+          record: `${wins}W - ${losses}L`
+        },
         violations,
-        encouragingMessage: 'আপনি যেই ভুলটা করেছেন তার থেকে শিক্ষা নেন এবং পরবর্তীতে আর এরকম ভুল হবেনা এবং আপনি চ্যালেঞ্জটি পাস করতে পারবেন আশা করি।',
+        encouragingMessage: isPracticePhase 
+          ? 'এটি প্র্যাকটিস সেশন ছিল, তাই মূল অ্যাকাউন্ট বাতিল হয়নি। প্র্যাকটিসের এই ভুল থেকে শিক্ষা নিন এবং পরবর্তীতে মানি ম্যানেজমেন্ট সঠিকভাবে মেনে ট্রেড করুন।'
+          : 'হাল ছাড়বেন না! ট্রেডিংয়ে সাময়িক ক্ষতি একটি বড় শিক্ষার সুযোগ। আপনি যেই ভুলটা করেছেন তার থেকে গভীরভাবে শিক্ষা নিন এবং পরবর্তীতে মানি ম্যানেজমেন্ট মেনে আরও সতর্কভাবে ট্রেড করুন। ইনশাআল্লাহ পরবর্তী চ্যালেঞ্জে ঠান্ডা মাথায় সঠিক নিয়ম মেনে আপনি সফল হবেন।',
         auditReport: auditedTrades
       });
     }
