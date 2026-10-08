@@ -235,15 +235,11 @@
 
     const accountType = detectAccountType();
     const isHistoryPage = window.location.pathname.includes('/trades');
-    const traderLabel = config.traderId ? config.traderId : 'ID Not Set';
 
     root.innerHTML = `
       <div class="bpf-pill" id="bpfPill" title="Binary Prop Firm — ড্র্যাগ করে যেকোনো জায়গায় নিয়ে রাখুন">
         <span class="bpf-drag-handle" title="ড্র্যাগ করুন">⋮⋮</span>
         <span class="bpf-logo-badge">BPF</span>
-        <span class="bpf-status-text">
-          Trader: <strong id="bpfTraderIdDisplay">${traderLabel}</strong>
-        </span>
         <span class="bpf-account-tag ${accountType === 'live' ? 'live' : 'demo'}" id="bpfAcctTag">
           ${accountType === 'live' ? 'LIVE' : 'DEMO'}
         </span>

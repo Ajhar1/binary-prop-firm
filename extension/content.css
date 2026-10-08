@@ -23,33 +23,54 @@
 .bpf-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(14, 17, 24, 0.94);
-  border: 1px solid rgba(255, 184, 0, 0.4);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.65), 0 0 14px rgba(255, 184, 0, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 5px 12px;
-  border-radius: 30px;
+  gap: 9px;
+  /* Ultra-clear liquid frosted glass */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(15, 23, 42, 0.45) 100%
+  );
+  background-color: rgba(15, 23, 42, 0.38);
+  /* Crystal highlight border with top shine */
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  /* Liquid glass depth, reflections & glow */
+  box-shadow: 
+    0 10px 32px 0 rgba(0, 0, 0, 0.38),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(255, 184, 0, 0.12);
+  /* Optical blur & saturation */
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  padding: 6px 14px;
+  border-radius: 40px;
   color: #fff;
   font-size: 12px;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bpf-pill:hover {
-  border-color: rgba(255, 184, 0, 0.7);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.8), 0 0 18px rgba(255, 184, 0, 0.28);
+  background-color: rgba(15, 23, 42, 0.48);
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 14px 40px 0 rgba(0, 0, 0, 0.48),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.55),
+    0 0 24px rgba(255, 184, 0, 0.22);
 }
 
 .bpf-drag-handle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.45);
   font-size: 13px;
   letter-spacing: -1px;
   cursor: grab;
-  padding: 0 3px 0 0;
+  padding: 0 2px 0 0;
   transition: color 0.2s;
 }
 
@@ -58,58 +79,55 @@
 }
 
 .bpf-logo-badge {
-  background: linear-gradient(135deg, #ffb800, #ff8800);
+  background: linear-gradient(135deg, rgba(255, 184, 0, 0.95), rgba(245, 158, 11, 0.95));
   color: #0b0e14;
   font-weight: 900;
   font-size: 10px;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 12px;
   letter-spacing: 0.6px;
-  box-shadow: 0 2px 6px rgba(255, 184, 0, 0.3);
-}
-
-.bpf-status-text {
-  font-weight: 600;
-  color: #cbd5e1;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.bpf-status-text strong {
-  color: #ffb800;
-  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 2px 8px rgba(255, 184, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .bpf-account-tag {
   font-size: 10px;
   font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 10px;
+  padding: 3px 8px;
+  border-radius: 12px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .bpf-account-tag.demo {
-  background: rgba(255, 184, 0, 0.16);
-  color: #ffb800;
-  border: 1px solid rgba(255, 184, 0, 0.45);
+  background: rgba(255, 184, 0, 0.15);
+  color: #ffc107;
+  border: 1px solid rgba(255, 184, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .bpf-account-tag.live {
-  background: rgba(0, 230, 118, 0.16);
+  background: rgba(0, 230, 118, 0.15);
   color: #00e676;
-  border: 1px solid rgba(0, 230, 118, 0.45);
+  border: 1px solid rgba(0, 230, 118, 0.4);
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .bpf-indicator-wrap {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 7px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
+  padding: 3px 9px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
   white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .bpf-pulse-dot {
@@ -129,8 +147,8 @@
 
 .bpf-indicator-label {
   font-size: 10px;
-  font-weight: 600;
-  color: #cbd5e1;
+  font-weight: 700;
+  color: #e2e8f0;
 }
 
 .bpf-mobile-dot {
@@ -145,18 +163,18 @@
 }
 
 .bpf-btn-sync {
-  background: linear-gradient(135deg, #ffb800 0%, #ff9100 100%);
+  background: linear-gradient(135deg, #ffb800 0%, #f59e0b 100%);
   color: #0b0e14;
   font-weight: 800;
   font-size: 11px;
-  border: none;
-  padding: 5px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 5px 13px;
   border-radius: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 5px;
-  box-shadow: 0 2px 10px rgba(255, 184, 0, 0.35);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.45);
   transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
   white-space: nowrap;
 }
@@ -164,7 +182,7 @@
 .bpf-btn-sync:hover {
   background: linear-gradient(135deg, #ffc21a 0%, #ffa01a 100%);
   transform: scale(1.04);
-  box-shadow: 0 3px 14px rgba(255, 184, 0, 0.5);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.6);
 }
 
 .bpf-btn-sync:active {
@@ -178,23 +196,26 @@
 }
 
 .bpf-btn-chart {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(96, 165, 250, 0.14);
   color: #60a5fa;
   border: 1px solid rgba(96, 165, 250, 0.35);
   font-weight: 700;
   font-size: 11px;
-  padding: 5px 10px;
+  padding: 5px 11px;
   border-radius: 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 5px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .bpf-btn-chart:hover {
-  background: rgba(96, 165, 250, 0.18);
+  background: rgba(96, 165, 250, 0.25);
   border-color: #60a5fa;
   transform: scale(1.04);
 }
