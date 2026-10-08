@@ -1381,36 +1381,6 @@ function syncChallengesWithSubmissions() {
         modified = true;
       }
 
-      // If in practice phase, check if 48 hours have elapsed -> Auto-transition to evaluation mode
-      if (c.status === 'in_progress' && c.challengePhase === 'practice') {
-        const practiceEndMs = c.practiceExpiresAt ? new Date(c.practiceExpiresAt).getTime() : 0;
-        if (practiceEndMs > 0 && now.getTime() >= practiceEndMs) {
-          c.challengePhase = 'evaluation';
-          c.evaluationStartedAt = c.practiceExpiresAt;
-          c.expiresAt = new Date(practiceEndMs + (c.durationDays * 24 * 60 * 60 * 1000)).toISOString();
-          modified = true;
-          try {
-            logUserArchive('PRACTICE_AUTO_TRANSITION_TO_EVALUATION', { id: c.userId }, {
-              challengeId: c.id,
-              packageName: c.packageName,
-              transitionReason: '48-hour practice period completed'
-            });
-          } catch(e) {}
-        }
-      }
-
-      // Calculate deadline for evaluation mode vs practice mode
-      if (c.challengePhase === 'evaluation') {
-        const evalStartMs = new Date(c.evaluationStartedAt || c.approvedAt || c.activatedAt || c.createdAt).getTime();
-        if (!c.expiresAt && !isNaN(evalStartMs)) {
-          c.expiresAt = new Date(evalStartMs + (c.durationDays * 24 * 60 * 60 * 1000)).toISOString();
-          modified = true;
-        }
-      } else if (c.challengePhase === 'practice') {
-        const practiceEndMs = c.practiceExpiresAt ? new Date(c.practiceExpiresAt).getTime() : (now.getTime() + 48*3600*1000);
-        c.expiresAt = new Date(practiceEndMs + (c.durationDays * 24 * 60 * 60 * 1000)).toISOString();
-      }
-
       // Find all submissions belonging to this challenge
       const allChSubs = submissions.filter(s => 
         (s.challengeId ? s.challengeId === c.id : s.userId === c.userId)
@@ -1419,6 +1389,50 @@ function syncChallengesWithSubmissions() {
       // Separate Practice Submissions from Official Evaluation Submissions
       const practiceSubs = allChSubs.filter(s => s.isPractice === true);
       c.practiceSessionsCompleted = practiceSubs.length;
+
+      // Auto-transition to evaluation mode if 3 practice sessions completed OR 48 hours have elapsed
+      if (c.status === 'in_progress' && c.challengePhase === 'practice') {
+        const practiceEndMs = c.practiceExpiresAt ? new Date(c.practiceExpiresAt).getTime() : 0;
+        const isTimeExpired = (practiceEndMs > 0 && now.getTime() >= practiceEndMs);
+        const isPracticeDone = (practiceSubs.length >= (c.practiceMaxSessions || 3));
+
+        if (isPracticeDone || isTimeExpired) {
+          c.challengePhase = 'evaluation';
+          const transitionTime = (isPracticeDone && practiceSubs.length > 0 && practiceSubs[practiceSubs.length - 1].submittedAt)
+            ? practiceSubs[practiceSubs.length - 1].submittedAt
+            : (isTimeExpired && c.practiceExpiresAt ? c.practiceExpiresAt : now.toISOString());
+          c.evaluationStartedAt = transitionTime;
+          c.durationDays = c.durationDays || 15;
+          const evalStartMs = new Date(c.evaluationStartedAt).getTime();
+          c.expiresAt = new Date(evalStartMs + (c.durationDays * 24 * 60 * 60 * 1000)).toISOString();
+
+          // Reset capital to official challenge initial capital for evaluation phase
+          const initialCap = Number(c.fundedAmount || c.accountSize || c.capital || 1000);
+          c.currentCapital = initialCap;
+
+          modified = true;
+          try {
+            logUserArchive('PRACTICE_AUTO_TRANSITION_TO_EVALUATION', { id: c.userId }, {
+              challengeId: c.id,
+              packageName: c.packageName,
+              transitionReason: isPracticeDone ? 'All 3 practice sessions completed' : '48-hour practice period completed',
+              evaluationStartedAt: c.evaluationStartedAt
+            });
+          } catch(e) {}
+        }
+      }
+
+      // Calculate deadline for evaluation mode vs practice mode
+      if (c.challengePhase === 'evaluation') {
+        const evalStartMs = new Date(c.evaluationStartedAt || c.approvedAt || c.activatedAt || c.createdAt).getTime();
+        if ((!c.expiresAt || isNaN(new Date(c.expiresAt).getTime())) && !isNaN(evalStartMs)) {
+          c.expiresAt = new Date(evalStartMs + (c.durationDays * 24 * 60 * 60 * 1000)).toISOString();
+          modified = true;
+        }
+      } else if (c.challengePhase === 'practice') {
+        const practiceEndMs = c.practiceExpiresAt ? new Date(c.practiceExpiresAt).getTime() : (now.getTime() + 48*3600*1000);
+        c.expiresAt = new Date(practiceEndMs + (c.durationDays * 24 * 60 * 60 * 1000)).toISOString();
+      }
 
       const officialSubs = allChSubs.filter(s => s.isPractice !== true);
       const officialNonRejectedSubs = officialSubs.filter(s => s.status !== 'rejected');
@@ -1458,6 +1472,21 @@ function syncChallengesWithSubmissions() {
           has25Loss = true;
         }
       });
+
+      // Sync evaluation mode current capital with official trade balance
+      if (c.challengePhase === 'evaluation') {
+        if (officialNonRejectedSubs.length === 0) {
+          if (c.currentCapital !== capital) {
+            c.currentCapital = capital;
+            modified = true;
+          }
+        } else {
+          if (c.currentCapital !== runningBal) {
+            c.currentCapital = runningBal;
+            modified = true;
+          }
+        }
+      }
 
       const maxDdPct = peakBal > 0 ? (maxDrawdownAmt / peakBal) * 100 : 0;
       const formattedDd = `${maxDdPct.toFixed(1)}%`;
@@ -4365,13 +4394,19 @@ app.post('/api/submissions/upload', authenticateToken, upload.fields([
     });
 
     // Automatically recalculate and sync challenge sessions accurately with real submissions
-    syncChallengesWithSubmissions();
+    const syncedChallenges = syncChallengesWithSubmissions();
 
     if (isPracticePhase) {
+      const chCheck = (syncedChallenges || []).find(c => c.id === challengeId);
+      const isTransitioned = chCheck && chCheck.challengePhase === 'evaluation';
+
       return res.status(200).json({
         success: true,
-        isPractice: true,
-        message: `🎯 প্র্যাকটিস সেশন #${newSubmission.practiceSessionNumber} সফলভাবে আপলোড করা হয়েছে! এডমিন প্যানেল থেকে আপনার সেশন যাচাই করে কোনো ভুল থাকলে নির্দেশনা দেওয়া হবে। (প্র্যাকটিসে কোনো ভুল হলেও বাদ পড়বেন না)`,
+        isPractice: !isTransitioned,
+        practiceTransitioned: isTransitioned,
+        message: isTransitioned
+          ? '🎉 অভিনন্দন! আপনার ৩টি প্র্যাকটিস পর্ব সমাপ্ত হয়েছে। আপনার মূল ১৫ দিনের মূল্যায়ন চ্যালেঞ্জ স্বয়ংক্রিয়ভাবে শুরু হয়ে গেছে!'
+          : `🎯 প্র্যাকটিস সেশন #${newSubmission.practiceSessionNumber} সফলভাবে আপলোড করা হয়েছে! এডমিন প্যানেল থেকে আপনার সেশন যাচাই করে কোনো ভুল থাকলে নির্দেশনা দেওয়া হবে। (প্র্যাকটিসে কোনো ভুল হলেও বাদ পড়বেন না)`,
         submission: newSubmission
       });
     }
@@ -4886,12 +4921,34 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     writeJson(SUBMISSIONS_FILE, submissions);
 
     // Update Challenge with new carried-forward capital & sessions count
+    let practiceTransitioned = false;
     if (isPracticePhase) {
       activeChallenge.practiceSessionsCompleted = (activeChallenge.practiceSessionsCompleted || 0) + 1;
+      if (activeChallenge.practiceSessionsCompleted >= (activeChallenge.practiceMaxSessions || 3)) {
+        practiceTransitioned = true;
+        activeChallenge.challengePhase = 'evaluation';
+        const nowIso = new Date().toISOString();
+        activeChallenge.evaluationStartedAt = nowIso;
+        activeChallenge.durationDays = activeChallenge.durationDays || 15;
+        activeChallenge.expiresAt = new Date(Date.now() + (activeChallenge.durationDays * 24 * 60 * 60 * 1000)).toISOString();
+        const initialCap = Number(activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
+        activeChallenge.currentCapital = initialCap;
+        try {
+          logUserArchive('PRACTICE_COMPLETED_AUTO_TRANSITION', { id: activeChallenge.userId }, {
+            challengeId: activeChallenge.id,
+            packageName: activeChallenge.packageName,
+            practiceSessionsCompleted: activeChallenge.practiceSessionsCompleted,
+            newPhase: 'evaluation',
+            evaluationStartedAt: activeChallenge.evaluationStartedAt
+          });
+        } catch(e) {}
+      } else {
+        activeChallenge.currentCapital = endingCapital; // Carried forward to next practice session!
+      }
     } else {
       activeChallenge.sessionsCompleted = (activeChallenge.sessionsCompleted || 0) + 1;
+      activeChallenge.currentCapital = endingCapital; // Carried forward to next session!
     }
-    activeChallenge.currentCapital = endingCapital; // Carried forward to next session!
     activeChallenge.lastSessionCompletedAt = newSubmission.submittedAt;
 
     if (!isPracticePhase && activeChallenge.sessionsCompleted >= (activeChallenge.sessionsRequired || 15)) {
@@ -4900,17 +4957,24 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     }
 
     writeJson(CHALLENGES_FILE, challenges);
+    writeJson(CHALLENGES_PERMANENT_STORE_FILE, challenges);
 
     syncChallengesWithSubmissions();
+
+    const finalNewCapital = practiceTransitioned ? activeChallenge.currentCapital : endingCapital;
+    const successMessage = practiceTransitioned
+      ? '🎉 অভিনন্দন! আপনার ৩টি প্র্যাকটিস পর্ব সফলভাবে সম্পন্ন হয়েছে। আপনার মূল ১৫ দিনের মূল্যায়ন চ্যালেঞ্জ এখন স্বয়ংক্রিয়ভাবে শুরু হয়ে গেছে! ঠান্ডা মাথায় ট্রেড করুন।'
+      : '🎉 আপনার আজকের ট্রেডিং সেশন সফলভাবে সম্পন্ন হয়েছে ! পরবর্তী সেশন গুলো সুন্দর হবে! অবশ্যই ঠান্ডা মাথায় ট্রেড করবেন।';
 
     res.json({
       success: true,
       passed: true,
-      message: '🎉 আপনার আজকের ট্রেডিং সেশন সফলভাবে সম্পন্ন হয়েছে ! পরবর্তী সেশন গুলো সুন্দর হবে! অবশ্যই ঠান্ডা মাথায় ট্রেড করবেন।',
-      newCapital: endingCapital,
+      message: successMessage,
+      practiceTransitioned,
+      newCapital: finalNewCapital,
       previousCapital: sessionStartingCapital,
-      sessionsCompleted: isPracticePhase ? (activeChallenge.practiceSessionsCompleted || 1) : (activeChallenge.sessionsCompleted || 1),
-      isPractice: isPracticePhase,
+      sessionsCompleted: practiceTransitioned ? 0 : (isPracticePhase ? (activeChallenge.practiceSessionsCompleted || 1) : (activeChallenge.sessionsCompleted || 1)),
+      isPractice: isPracticePhase && !practiceTransitioned,
       auditReport: auditedTrades,
       sessionSummary: {
         wins,
@@ -4918,7 +4982,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         totalTrades: wins + losses,
         netPnl: actualSessionNetPnl,
         startingCapital: sessionStartingCapital,
-        endingCapital
+        endingCapital: finalNewCapital
       }
     });
 

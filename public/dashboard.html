@@ -4827,7 +4827,7 @@
 
             // In Progress: Real-time Expiration Deadline check
             let deadlineHtml = '';
-            const isPracticeMode = (challenge.challengePhase === 'practice');
+            const isPracticeMode = (challenge.challengePhase === 'practice' && (challenge.practiceSessionsCompleted || 0) < 3);
 
             if (isPracticeMode) {
                 deadlineHtml = `
@@ -5177,8 +5177,8 @@
             }
 
             if (currentDisplayedChallenge) {
-                const isPractice = (currentDisplayedChallenge.challengePhase === 'practice');
                 const pCount = currentDisplayedChallenge.practiceSessionsCompleted !== undefined ? currentDisplayedChallenge.practiceSessionsCompleted : (mySubmissions.filter(s => s.isPractice).length);
+                const isPractice = (currentDisplayedChallenge.challengePhase === 'practice' && pCount < 3);
                 const req = currentDisplayedChallenge.sessionsRequired || 15;
                 const comp = currentDisplayedChallenge.sessionsCompleted || 0;
                 const statDaysCount = document.getElementById('statDaysCount');
@@ -5327,7 +5327,7 @@
                 const isPassed = (c.status === 'passed');
                 const isPending = (c.status === 'pending_approval');
                 const isRejected = (c.status === 'rejected');
-                const isPractice = (c.challengePhase === 'practice');
+                const isPractice = (c.challengePhase === 'practice' && (c.practiceSessionsCompleted || 0) < 3);
 
                 // Status badge
                 let statusBadgeHtml = '';
@@ -5566,8 +5566,8 @@
                 lockedCard.style.display = 'none';
                 formCard.style.display = 'block';
 
-                const isPractice = (activeChallenge.challengePhase === 'practice');
                 const practiceCompleted = activeChallenge.practiceSessionsCompleted || 0;
+                const isPractice = (activeChallenge.challengePhase === 'practice' && practiceCompleted < 3);
                 const submitBtn = document.getElementById('submitProofBtn');
 
                 if (activeNotice) {
@@ -5588,9 +5588,7 @@
                                     </div>
                                     <div style="font-size:0.84rem; color:#cbd5e1; margin-top:5px; line-height:1.5;">
                                         অনুশীলন অগ্রগতি: <strong style="color:#60a5fa;">${practiceCompleted} / 3 সেশন সম্পন্ন</strong> 
-                                        ${practiceCompleted >= 3 
-                                            ? '<span style="color:#f59e0b; font-weight:700; margin-left:6px;">(৩টি সেশন সম্পন্ন হয়েছে, এখন মূল চ্যালেঞ্জ শুরু করতে পারেন)</span>' 
-                                            : '• কোনো ভুল হলেও চ্যালেঞ্জ বাতিল হবে না।'}
+                                        • কোনো ভুল হলেও চ্যালেঞ্জ বাতিল হবে না।
                                     </div>
                                 </div>
                                 <div style="display:flex; gap:8px; align-items:center;">
@@ -5622,13 +5620,8 @@
                 if (submitBtn) {
                     submitBtn.onclick = runAutomatedSessionAudit;
                     if (isPractice) {
-                        if (practiceCompleted >= 3) {
-                            submitBtn.disabled = true;
-                            submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> ৩টি প্র্যাকটিস সেশন সম্পন্ন হয়েছে (মূল মূল্যায়ন শুরু করুন)`;
-                        } else {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = `<i class="fas fa-graduation-cap"></i> 🎓 প্র্যাকটিস সেশন #${practiceCompleted + 1} আপলোড ও অডিট করুন`;
-                        }
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `<i class="fas fa-graduation-cap"></i> 🎓 প্র্যাকটিস সেশন #${practiceCompleted + 1} আপলোড ও অডিট করুন`;
                     } else {
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = `<i class="fas fa-bolt"></i> 🚀 সেশন #${(activeChallenge.sessionsCompleted || 0) + 1} আপলোড ও অডিট করুন`;
@@ -6550,18 +6543,35 @@
                     }
                 } catch(e){}
 
+                const isPracticeDone = Boolean(data.practiceTransitioned);
+                const modalTitle = isPracticeDone 
+                    ? '🎉 ৩টি প্র্যাকটিস পর্ব সমাপ্ত! মূল চ্যালেঞ্জ শুরু হয়েছে!' 
+                    : 'সেশন সফলভাবে সম্পন্ন হয়েছে! 🎉';
+                const sessionLabel = isPracticeDone
+                    ? 'প্র্যাকটিস স্ট্যাটাস:'
+                    : (data.isPractice ? 'প্র্যাকটিস সেশন:' : 'সম্পন্ন সেশন:');
+                const sessionValue = isPracticeDone
+                    ? '৩ / ৩ (মূল ১৫ দিনের মূল্যায়ন শুরু)'
+                    : `${data.sessionsCompleted || 1}/${data.isPractice ? 3 : 15}`;
+                const capLabel = isPracticeDone
+                    ? 'মূল ১৫ দিনের চ্যালেঞ্জ প্রারম্ভিক ক্যাপিটাল:'
+                    : 'পরবর্তী সেশন প্রারম্ভিক ক্যাপিটাল:';
+                const nextBtnLabel = isPracticeDone
+                    ? `<i class="fas fa-bolt"></i> মূল মূল্যায়ন চ্যালেঞ্জে প্রবেশ করুন ($${Number(data.newCapital || 0).toFixed(2)})`
+                    : `<i class="fas fa-arrow-right"></i> পরবর্তী সেশন প্রস্তুত করুন ($${Number(data.newCapital || 0).toFixed(2)})`;
+
                 resultView.innerHTML = `
                     <div style="width:72px; height:72px; margin:0 auto 14px; border-radius:50%; background:rgba(0,230,118,0.15); border:2px solid #00e676; display:flex; align-items:center; justify-content:center; color:#00e676; font-size:2.2rem; box-shadow:0 0 25px rgba(0,230,118,0.3);">
                         <i class="fas fa-trophy"></i>
                     </div>
-                    <h3 style="color:#fff; font-size:1.3rem; font-weight:800; margin-bottom:10px;">সেশন সফলভাবে সম্পন্ন হয়েছে! 🎉</h3>
+                    <h3 style="color:#fff; font-size:1.3rem; font-weight:800; margin-bottom:10px;">${modalTitle}</h3>
                     <p style="color:#cbd5e1; font-size:0.92rem; line-height:1.6; margin-bottom:18px;">
                         ${data.message || '🎉 আপনার আজকের ট্রেডিং সেশন সফলভাবে সম্পন্ন হয়েছে ! পরবর্তী সেশন গুলো সুন্দর হবে! অবশ্যই ঠান্ডা মাথায় ট্রেড করবেন।'}
                     </p>
                     <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.25); border-radius:12px; padding:14px; margin-bottom:18px; text-align:left; font-size:0.85rem;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                            <span style="color:var(--text-secondary);">${data.isPractice ? 'প্র্যাকটিস সেশন:' : 'সম্পন্ন সেশন:'}</span>
-                            <strong style="color:var(--neon-green); font-size:0.95rem;">${data.sessionsCompleted || 1}/${data.isPractice ? 3 : 15}</strong>
+                            <span style="color:var(--text-secondary);">${sessionLabel}</span>
+                            <strong style="color:var(--neon-green); font-size:0.95rem;">${sessionValue}</strong>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
                             <span style="color:var(--text-secondary);">ট্রেড রেকর্ড:</span>
@@ -6572,12 +6582,12 @@
                             <strong style="color:var(--neon-green); font-size:0.98rem;">+${data.sessionSummary?.netPnl >= 0 ? '+' : ''}$${Number(data.sessionSummary?.netPnl || 0).toFixed(2)}</strong>
                         </div>
                         <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px; margin-top:8px;">
-                            <span style="color:#fff; font-weight:700;">পরবর্তী সেশন প্রারম্ভিক ক্যাপিটাল:</span>
+                            <span style="color:#fff; font-weight:700;">${capLabel}</span>
                             <strong style="color:var(--yellow); font-size:1.15rem;">$${Number(data.newCapital || 0).toFixed(2)}</strong>
                         </div>
                     </div>
                     <button class="btn-gold" style="width:100%; justify-content:center; padding:12px; font-weight:800; border-radius:10px;" onclick="closeAuditModalAndRefresh(${data.newCapital})">
-                        <i class="fas fa-arrow-right"></i> পরবর্তী সেশন প্রস্তুত করুন ($${Number(data.newCapital || 0).toFixed(2)})
+                        ${nextBtnLabel}
                     </button>
                 `;
             } else {
