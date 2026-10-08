@@ -4613,6 +4613,8 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         auditedTrades.push({
           tradeNum: wins + losses + 1,
           ticketId: t.ticketId,
+          ticket: t.ticketId,
+          stepIndex: wins + losses + 1,
           asset: t.asset || 'N/A',
           payout: t.payout || 'N/A',
           payoutPercent: parseFloat(String(t.payout || '').replace('%', '').trim()) || 0,
@@ -4621,11 +4623,15 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
           plannedStake: 0,
           actualStake: parseFloat(t.amount) || 0,
           outcome: 'REFUND',
+          result: 'REFUND',
           pnl: 0,
           balanceAfter: runningCashier,
           isRefund: true,
           complianceStatus: '🔄 Refund Skipped (মার্কেটের রিফান্ড ট্রেড বাদ দেওয়া হয়েছে)',
-          isPassed: true
+          isPassed: true,
+          isCompliant: true,
+          reason: 'মার্কেটের রিফান্ড ট্রেড বাদ দেওয়া হয়েছে',
+          acceptableStakes: [parseFloat(t.amount) || 0]
         });
         continue; // Skip without advancing Masaniello step
       }
@@ -4686,7 +4692,9 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       const isTradePassed = isCompliant && payoutCompliant;
       auditedTrades.push({
         tradeNum,
+        stepIndex: tradeNum,
         ticketId: t.ticketId,
+        ticket: t.ticketId,
         asset: t.asset || 'N/A',
         payout: t.payout || (payoutPercent ? `${payoutPercent}%` : 'N/A'),
         payoutPercent,
@@ -4695,11 +4703,15 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         plannedStake,
         actualStake,
         outcome: isWin ? 'WIN' : 'LOSS',
+        result: isWin ? 'WIN' : 'LOSS',
         pnl: tradeNetPnl,
         balanceAfter: runningCashier,
         isRefund: false,
         complianceStatus: isTradePassed ? '✅ Passed' : (!isCompliant ? `❌ Stake Mismatch ($${actualStake} vs ${expectedText})` : `❌ Low Payout (${t.payout || payoutPercent + '%'} < 85%)`),
-        isPassed: isTradePassed
+        isPassed: isTradePassed,
+        isCompliant: isTradePassed,
+        reason: isTradePassed ? 'সঠিক ট্রেড ও পেআউট' : (!isCompliant ? `Stake Mismatch ($${actualStake} vs ${expectedText})` : `Low Payout (${t.payout || payoutPercent + '%'} < 85%)`),
+        acceptableStakes: validStakes
       });
 
       // Completion triggers

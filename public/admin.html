@@ -5414,7 +5414,7 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Mini preview of first 5 trades -->
+                                            <!-- Mini preview of trades -->
                                             <div style="overflow-x:auto; background:rgba(0,0,0,0.4); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
                                                 <table style="width:100%; font-size:0.78rem; text-align:left; border-collapse:collapse;">
                                                     <thead>
@@ -5422,6 +5422,7 @@
                                                             <th style="padding:8px 10px;"># ধাপ</th>
                                                             <th style="padding:8px 10px;">পরিকল্পিত স্টেক</th>
                                                             <th style="padding:8px 10px;">কোটেক্স স্টেক</th>
+                                                            <th style="padding:8px 10px;">পেআউট %</th>
                                                             <th style="padding:8px 10px;">অ্যাসেট ও টিকিট</th>
                                                             <th style="padding:8px 10px;">ফলাফল</th>
                                                             <th style="padding:8px 10px;">P&L</th>
@@ -5429,20 +5430,54 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        ${(sub.auditReport || []).slice(0, 6).map(a => `
-                                                            <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
-                                                                <td style="padding:7px 10px; font-weight:700;">ধাপ #${a.stepIndex}</td>
-                                                                <td style="padding:7px 10px; color:var(--gold); font-weight:700;">$${(a.plannedStake || 0).toFixed(2)}</td>
-                                                                <td style="padding:7px 10px; font-weight:700; color:#fff;">$${(a.actualStake || 0).toFixed(2)}</td>
-                                                                <td style="padding:7px 10px; font-size:0.72rem; color:var(--text-secondary);">${a.asset} <span style="font-family:monospace; color:#aaa;">(${a.ticket})</span></td>
-                                                                <td style="padding:7px 10px;"><span class="badge ${a.result === 'WIN' ? 'badge-active' : (a.result === 'REFUND' ? 'badge-warning' : 'badge-rejected')}" style="padding:2px 6px; font-size:0.7rem;">${a.result}</span></td>
-                                                                <td style="padding:7px 10px; font-weight:700; color:${a.pnl >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'};">${a.pnl >= 0 ? '+' : ''}$${(a.pnl || 0).toFixed(2)}</td>
-                                                                <td style="padding:7px 10px;"><span style="color:${a.isCompliant ? '#00e676' : '#ef4444'}; font-weight:700;">${a.isCompliant ? '✓ সঠিক' : '✕ ত্রুটি'}</span></td>
-                                                            </tr>
-                                                        `).join('')}
+                                                        ${(sub.auditReport || []).slice(0, 6).map((a, idx) => {
+                                                            const stepNum = a.tradeNum || a.stepIndex || (idx + 1);
+                                                            const planned = Number(a.plannedStake || 0).toFixed(2);
+                                                            const actual = Number(a.actualStake || 0).toFixed(2);
+                                                            const ticket = a.ticketId || a.ticket || 'N/A';
+                                                            const outcome = a.outcome || a.result || 'N/A';
+                                                            const payout = a.payout || (a.payoutPercent ? a.payoutPercent + '%' : 'N/A');
+                                                            const pNum = parseFloat(String(payout).replace('%', '').trim()) || 0;
+                                                            const pGood = (pNum >= 85 || pNum === 0);
+                                                            const isPassed = (a.isPassed !== undefined ? a.isPassed : (a.isCompliant !== undefined ? a.isCompliant : true));
+                                                            const pnlNum = Number(a.pnl || 0);
+
+                                                            return `
+                                                                <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                                                                    <td style="padding:7px 10px; font-weight:700;">ধাপ #${stepNum}</td>
+                                                                    <td style="padding:7px 10px; color:var(--gold); font-weight:700;">$${planned}</td>
+                                                                    <td style="padding:7px 10px; font-weight:700; color:#38bdf8;">$${actual}</td>
+                                                                    <td style="padding:7px 10px;">
+                                                                        <span style="color:${pGood ? 'var(--neon-green)' : '#f87171'}; font-weight:700; background:${pGood ? 'rgba(0,230,118,0.1)' : 'rgba(239,68,68,0.1)'}; padding:2px 6px; border-radius:4px;">
+                                                                            ${payout}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td style="padding:7px 10px; font-size:0.72rem; color:var(--text-secondary);">
+                                                                        <span style="color:#fff;">${a.asset || 'N/A'}</span> <span style="font-family:monospace; color:#aaa;">(${ticket})</span>
+                                                                    </td>
+                                                                    <td style="padding:7px 10px;">
+                                                                        <span class="badge ${outcome === 'WIN' ? 'badge-active' : (outcome === 'REFUND' ? 'badge-warning' : 'badge-rejected')}" style="padding:2px 6px; font-size:0.7rem;">
+                                                                            ${outcome}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td style="padding:7px 10px; font-weight:700; color:${pnlNum >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'};">
+                                                                        ${pnlNum >= 0 ? '+' : ''}$${pnlNum.toFixed(2)}
+                                                                    </td>
+                                                                    <td style="padding:7px 10px;">
+                                                                        ${a.isRefund ? `
+                                                                            <span style="color:#f59e0b; font-weight:700;"><i class="fas fa-rotate"></i> রিফান্ড</span>
+                                                                        ` : isPassed ? `
+                                                                            <span style="color:#00e676; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-check-circle"></i> ✓ সঠিক</span>
+                                                                        ` : `
+                                                                            <span style="color:#ef4444; font-weight:700; display:inline-flex; align-items:center; gap:4px;" title="${escapeHtml(a.complianceStatus || a.reason || 'নিয়ম বহির্ভূত')}"><i class="fas fa-times-circle"></i> ✕ ত্রুটি</span>
+                                                                        `}
+                                                                    </td>
+                                                                </tr>
+                                                            `;
+                                                        }).join('')}
                                                         ${(sub.auditReport || []).length > 6 ? `
                                                             <tr>
-                                                                <td colspan="7" style="padding:6px 10px; text-align:center; color:var(--gold); font-size:0.75rem; cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
+                                                                <td colspan="8" style="padding:6px 10px; text-align:center; color:var(--gold); font-size:0.75rem; cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
                                                                     + আরও ${(sub.auditReport.length - 6)}টি ট্রেড দেখতে ক্লিক করুন...
                                                                 </td>
                                                             </tr>
@@ -5845,8 +5880,8 @@
                                 <tr style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
                                     <th style="padding:10px 14px;"># ধাপ</th>
                                     <th style="padding:10px 14px;">পরিকল্পিত স্টেক</th>
-                                    <th style="padding:10px 14px;">গৃহীত স্টেক অপশন</th>
                                     <th style="padding:10px 14px;">কোটেক্স আসল স্টেক</th>
+                                    <th style="padding:10px 14px;">পেআউট %</th>
                                     <th style="padding:10px 14px;">অ্যাসেট ও টিকিট ID</th>
                                     <th style="padding:10px 14px;">ফলাফল</th>
                                     <th style="padding:10px 14px;">প্রফিট/লস</th>
@@ -5856,45 +5891,62 @@
                             <tbody>
                                 ${report.length === 0 ? `
                                     <tr><td colspan="8" style="padding:2rem; text-align:center; color:var(--text-secondary);">এই সাবমিশনে কোনো অডিট রেকর্ড নেই।</td></tr>
-                                ` : report.map(a => `
-                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.04); background:${!a.isCompliant ? 'rgba(239,68,68,0.08)' : 'transparent'};">
-                                        <td style="padding:10px 14px; font-weight:800;">
-                                            ধাপ #${a.stepIndex}
-                                        </td>
-                                        <td style="padding:10px 14px; font-weight:800; color:var(--gold);">
-                                            $${(a.plannedStake || 0).toFixed(2)}
-                                        </td>
-                                        <td style="padding:10px 14px; font-size:0.75rem; color:var(--text-secondary);">
-                                            ${(a.acceptableStakes && a.acceptableStakes.length > 0) ? a.acceptableStakes.map(s => '$' + s).join(', ') : 'N/A'}
-                                        </td>
-                                        <td style="padding:10px 14px; font-weight:800; color:#fff;">
-                                            $${(a.actualStake || 0).toFixed(2)}
-                                        </td>
-                                        <td style="padding:10px 14px;">
-                                            <div style="font-weight:700; color:#fff;">${a.asset || 'Quotex'}</div>
-                                            <div style="font-size:0.72rem; color:var(--text-secondary); font-family:monospace;">${a.ticket || 'N/A'}</div>
-                                        </td>
-                                        <td style="padding:10px 14px;">
-                                            <span class="badge ${a.result === 'WIN' ? 'badge-active' : (a.result === 'REFUND' ? 'badge-warning' : 'badge-rejected')}" style="padding:2px 8px; font-size:0.72rem;">
-                                                ${a.result}
-                                            </span>
-                                        </td>
-                                        <td style="padding:10px 14px; font-weight:800; color:${a.pnl >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'};">
-                                            ${a.pnl >= 0 ? '+' : ''}$${(a.pnl || 0).toFixed(2)}
-                                        </td>
-                                        <td style="padding:10px 14px;">
-                                            ${a.isCompliant ? `
-                                                <span style="color:#00e676; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
-                                                    <i class="fas fa-check-circle"></i> সঠিক স্টেক
+                                ` : report.map((a, idx) => {
+                                    const stepNum = a.tradeNum || a.stepIndex || (idx + 1);
+                                    const planned = Number(a.plannedStake || 0).toFixed(2);
+                                    const actual = Number(a.actualStake || 0).toFixed(2);
+                                    const ticket = a.ticketId || a.ticket || 'N/A';
+                                    const outcome = a.outcome || a.result || 'N/A';
+                                    const payout = a.payout || (a.payoutPercent ? a.payoutPercent + '%' : 'N/A');
+                                    const pNum = parseFloat(String(payout).replace('%', '').trim()) || 0;
+                                    const pGood = (pNum >= 85 || pNum === 0);
+                                    const isPassed = (a.isPassed !== undefined ? a.isPassed : (a.isCompliant !== undefined ? a.isCompliant : true));
+                                    const pnlNum = Number(a.pnl || 0);
+
+                                    return `
+                                        <tr style="border-bottom:1px solid rgba(255,255,255,0.04); background:${!isPassed && !a.isRefund ? 'rgba(239,68,68,0.08)' : 'transparent'};">
+                                            <td style="padding:10px 14px; font-weight:800; color:var(--yellow);">
+                                                ধাপ #${stepNum}
+                                            </td>
+                                            <td style="padding:10px 14px; font-weight:800; color:var(--gold);">
+                                                $${planned}
+                                            </td>
+                                            <td style="padding:10px 14px; font-weight:800; color:#38bdf8;">
+                                                $${actual}
+                                            </td>
+                                            <td style="padding:10px 14px;">
+                                                <span style="color:${pGood ? 'var(--neon-green)' : '#f87171'}; font-weight:800; background:${pGood ? 'rgba(0,230,118,0.12)' : 'rgba(239,68,68,0.12)'}; padding:2px 8px; border-radius:6px; border:1px solid ${pGood ? 'rgba(0,230,118,0.3)' : 'rgba(239,68,68,0.3)'};">
+                                                    ${payout}
                                                 </span>
-                                            ` : `
-                                                <span style="color:#ef4444; font-weight:700; display:inline-flex; align-items:center; gap:4px;" title="${escapeHtml(a.reason || '')}">
-                                                    <i class="fas fa-times-circle"></i> ${escapeHtml(a.reason || 'নিয়ম বহির্ভূত')}
+                                            </td>
+                                            <td style="padding:10px 14px;">
+                                                <div style="font-weight:700; color:#fff;">${a.asset || 'Quotex'}</div>
+                                                <div style="font-size:0.72rem; color:var(--text-secondary); font-family:monospace;">${ticket}</div>
+                                            </td>
+                                            <td style="padding:10px 14px;">
+                                                <span class="badge ${outcome === 'WIN' ? 'badge-active' : (outcome === 'REFUND' ? 'badge-warning' : 'badge-rejected')}" style="padding:2px 8px; font-size:0.72rem;">
+                                                    ${outcome}
                                                 </span>
-                                            `}
-                                        </td>
-                                    </tr>
-                                `).join('')}
+                                            </td>
+                                            <td style="padding:10px 14px; font-weight:800; color:${pnlNum >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'};">
+                                                ${pnlNum >= 0 ? '+' : ''}$${pnlNum.toFixed(2)}
+                                            </td>
+                                            <td style="padding:10px 14px;">
+                                                ${a.isRefund ? `
+                                                    <span style="color:#f59e0b; font-weight:700;"><i class="fas fa-rotate"></i> রিফান্ড স্কিপড</span>
+                                                ` : isPassed ? `
+                                                    <span style="color:#00e676; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                                                        <i class="fas fa-check-circle"></i> ✓ সঠিক (Passed)
+                                                    </span>
+                                                ` : `
+                                                    <span style="color:#ef4444; font-weight:700; display:inline-flex; align-items:center; gap:4px;" title="${escapeHtml(a.complianceStatus || a.reason || '')}">
+                                                        <i class="fas fa-times-circle"></i> ✕ ${escapeHtml(a.complianceStatus || a.reason || 'নিয়ম বহির্ভূত')}
+                                                    </span>
+                                                `}
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
                             </tbody>
                         </table>
                     </div>
