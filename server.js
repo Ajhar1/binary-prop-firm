@@ -4614,6 +4614,9 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
           tradeNum: wins + losses + 1,
           ticketId: t.ticketId,
           asset: t.asset || 'N/A',
+          payout: t.payout || 'N/A',
+          payoutPercent: parseFloat(String(t.payout || '').replace('%', '').trim()) || 0,
+          payoutCompliant: true,
           tradeTime: t.openTime || t.closeTime || t.syncedAt,
           plannedStake: 0,
           actualStake: parseFloat(t.amount) || 0,
@@ -4648,6 +4651,15 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         violations.push(`ট্রেড #${tradeNum}: Planned Stake ছিল $${plannedStake.toFixed(2)} (${expectedText}), কিন্তু কোটেক্সে ট্রেড ওপেন করা হয়েছে $${actualStake.toFixed(2)}।`);
       }
 
+      // Check Quotex Payout rate (Minimum 85% required by platform rules)
+      const rawPayout = String(t.payout || '').replace('%', '').trim();
+      const payoutPercent = parseFloat(rawPayout) || 0;
+      let payoutCompliant = true;
+      if (payoutPercent > 0 && payoutPercent < 85) {
+        payoutCompliant = false;
+        violations.push(`ট্রেড #${tradeNum}: Quotex পেআউট ছিল ${t.payout || payoutPercent + '%'}, কিন্তু প্ল্যাটফর্মের নিয়ম অনুযায়ী ন্যূনতম ৮৫% পেআউটের অ্যাসেটে ট্রেড করতে হবে।`);
+      }
+
       // Check account type
       if (t.accountType && t.accountType.toLowerCase() !== 'demo') {
         violations.push(`ট্রেড #${tradeNum}: চ্যালেঞ্জের নিয়ম অনুযায়ী ডেমো অ্যাকাউন্টে ট্রেড করতে হবে, কিন্তু অন্য অ্যাকাউন্ট (${t.accountType}) সনাক্ত হয়েছে।`);
@@ -4671,10 +4683,14 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         violations.push(`সেশন চলাকালীন ক্যাশিয়ার ব্যালেন্স প্রারম্ভিক ক্যাপিটালের ($${sessionStartingCapital.toFixed(2)}) ২৫% ড্রডাউন লিমিট অতিক্রম করেছে (বর্তমান ব্যালেন্স: $${runningCashier.toFixed(2)})।`);
       }
 
+      const isTradePassed = isCompliant && payoutCompliant;
       auditedTrades.push({
         tradeNum,
         ticketId: t.ticketId,
         asset: t.asset || 'N/A',
+        payout: t.payout || (payoutPercent ? `${payoutPercent}%` : 'N/A'),
+        payoutPercent,
+        payoutCompliant,
         tradeTime: t.openTime || t.closeTime || t.syncedAt,
         plannedStake,
         actualStake,
@@ -4682,8 +4698,8 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         pnl: tradeNetPnl,
         balanceAfter: runningCashier,
         isRefund: false,
-        complianceStatus: isCompliant ? '✅ Passed' : `❌ Stake Mismatch ($${actualStake} vs ${expectedText})`,
-        isPassed: isCompliant
+        complianceStatus: isTradePassed ? '✅ Passed' : (!isCompliant ? `❌ Stake Mismatch ($${actualStake} vs ${expectedText})` : `❌ Low Payout (${t.payout || payoutPercent + '%'} < 85%)`),
+        isPassed: isTradePassed
       });
 
       // Completion triggers
