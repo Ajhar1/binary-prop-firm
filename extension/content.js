@@ -324,12 +324,23 @@
   // Server Challenge Lock / Active Status Handler
   let isExtensionLocked = false;
   let lockReason = '';
+  let currentChallengeStartTime = 0;
+  let currentChallengeStartedAtIso = '';
 
   function handleServerStatusResponse(data) {
     if (!data) return;
     const pill = document.getElementById('bpfPill');
     const indicatorWrap = document.getElementById('bpfIndicatorWrap');
     const syncBtn = document.getElementById('bpfSyncBtn');
+
+    if (data.challengeStartTime) {
+      currentChallengeStartTime = data.challengeStartTime;
+    } else if (data.challengeStartedAt) {
+      currentChallengeStartTime = new Date(data.challengeStartedAt).getTime();
+    }
+    if (data.challengeStartedAt) {
+      currentChallengeStartedAtIso = data.challengeStartedAt;
+    }
 
     if (data.isDisqualified || data.noActiveChallenge || data.active === false) {
       isExtensionLocked = true;
@@ -383,29 +394,67 @@
   }
 
   // 5. Heartbeat Engine (Sends ping every 30s to keep dashboard connected)
-  function sendHeartbeat() {
-    if (!config.traderId) return;
+  async function fetchChallengeStatus() {
+    if (!config.traderId) return null;
     const targetUrl = (config.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '') + '/api/extension/heartbeat';
     const accountType = detectAccountType();
 
-    fetch(targetUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        traderId: config.traderId,
-        status: 'online',
-        accountType,
-        url: window.location.href,
-        timestamp: Date.now()
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const res = await fetch(targetUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          traderId: config.traderId,
+          status: 'online',
+          accountType,
+          url: window.location.href,
+          timestamp: Date.now()
+        })
+      });
+      const data = await res.json();
       handleServerStatusResponse(data);
-    })
-    .catch(() => {
-      // Ignore background network heartbeat fail
-    });
+      return data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function sendHeartbeat() {
+    fetchChallengeStatus();
+  }
+
+  // Helper to parse Quotex browser timestamps in local browser timezone
+  function parseQuotexTimestampInBrowser(str) {
+    if (!str) return 0;
+    const clean = String(str).trim();
+    const m = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:,?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+    if (m) {
+      const day = parseInt(m[1], 10);
+      const month = parseInt(m[2], 10) - 1;
+      const year = parseInt(m[3], 10);
+      const hour = parseInt(m[4] || '0', 10);
+      const min = parseInt(m[5] || '0', 10);
+      const sec = parseInt(m[6] || '0', 10);
+      const d = new Date(year, month, day, hour, min, sec);
+      return d.getTime();
+    }
+    const d = new Date(clean).getTime();
+    return isNaN(d) ? 0 : d;
+  }
+
+  // Helper to build Quotex paginated URL
+  function buildQuotexPageUrl(currentUrl, page, acctType) {
+    try {
+      const u = new URL(currentUrl);
+      u.searchParams.set('page', String(page));
+      if (acctType) {
+        u.searchParams.set('account', acctType);
+      }
+      return u.toString();
+    } catch (e) {
+      const origin = window.location.origin;
+      return `${origin}/en/trades?page=${page}&account=${acctType || 'demo'}`;
+    }
   }
 
   // 6. Parse Quotex Trade History Table from Document
@@ -520,6 +569,11 @@
           ticketId = 'qx_' + btoa(`${asset}_${openTime}_${amount}`).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24);
         }
 
+        const openTimestamp = parseQuotexTimestampInBrowser(openTime);
+        const closeTimestamp = parseQuotexTimestampInBrowser(closeTime);
+        const openTimeIso = openTimestamp > 0 ? new Date(openTimestamp).toISOString() : '';
+        const closeTimeIso = closeTimestamp > 0 ? new Date(closeTimestamp).toISOString() : '';
+
         if (asset && (openTime || amount > 0)) {
           trades.push({
             ticketId,
@@ -528,8 +582,12 @@
             direction,
             openQuote: openQuote || '0.00',
             openTime: openTime || new Date().toLocaleString(),
+            openTimestamp: openTimestamp || Date.now(),
+            openTimeIso: openTimeIso || new Date().toISOString(),
             closeQuote: closeQuote || '0.00',
             closeTime: closeTime || new Date().toLocaleString(),
+            closeTimestamp: closeTimestamp || 0,
+            closeTimeIso: closeTimeIso || '',
             amount: amount || 1.0,
             profit: profit || 0.0,
             result,
@@ -542,6 +600,85 @@
     });
 
     return { trades, accountType };
+  }
+
+  // Multi-Page Auto-Pagination Scanner for Quotex Trade History
+  async function collectAllChallengeTrades(acctType, challengeStartTime) {
+    const allCollectedTrades = [];
+    const seenTicketIds = new Set();
+    let pagesScanned = 0;
+
+    // A. Parse Page 1 from currently rendered DOM (instant)
+    const page1 = parseQuotexTradesFromDoc(document, acctType);
+    pagesScanned++;
+
+    let reachedOlderTrades = false;
+
+    for (const t of page1.trades) {
+      if (!t.ticketId) continue;
+      // Filter out trades older than challenge start time
+      if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - 1000)) {
+        reachedOlderTrades = true;
+        continue;
+      }
+      if (!seenTicketIds.has(t.ticketId)) {
+        seenTicketIds.add(t.ticketId);
+        allCollectedTrades.push(t);
+      }
+    }
+
+    // If Page 1 already encountered a trade before challenge start time,
+    // all challenge trades are strictly on Page 1! No need to fetch older pages.
+    if (reachedOlderTrades || page1.trades.length < 20) {
+      return { trades: allCollectedTrades, pagesScanned };
+    }
+
+    // B. If Page 1 has 20+ trades and none were older than challenge start,
+    // fetch older pages (page=2, page=3, ...) until reaching trades before challenge start!
+    const maxPages = 20; // Safe ceiling: up to 500 trades across pages
+    for (let page = 2; page <= maxPages; page++) {
+      try {
+        const pageUrl = buildQuotexPageUrl(window.location.href, page, acctType);
+        const res = await fetch(pageUrl, { credentials: 'include' });
+        if (!res.ok) break;
+
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const pageResult = parseQuotexTradesFromDoc(doc, acctType);
+
+        if (!pageResult.trades || pageResult.trades.length === 0) {
+          break; // End of history
+        }
+
+        pagesScanned++;
+        let pageHasOlder = false;
+
+        for (const t of pageResult.trades) {
+          if (!t.ticketId) continue;
+          if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - 1000)) {
+            pageHasOlder = true;
+            continue;
+          }
+          if (!seenTicketIds.has(t.ticketId)) {
+            seenTicketIds.add(t.ticketId);
+            allCollectedTrades.push(t);
+          }
+        }
+
+        if (pageHasOlder) {
+          // Reached trades from before challenge start -> Stop pagination!
+          break;
+        }
+
+        // Polite throttle between background fetches (150ms)
+        await new Promise(r => setTimeout(r, 150));
+      } catch (err) {
+        console.warn(`[BPF Sync] Error during pagination scan on page ${page}:`, err);
+        break;
+      }
+    }
+
+    return { trades: allCollectedTrades, pagesScanned };
   }
 
   // 7. Send Trades to Prop Firm Server
@@ -560,6 +697,8 @@
         traderId: config.traderId,
         accountType,
         source: 'quotex',
+        clientTzOffset: new Date().getTimezoneOffset(),
+        clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Dhaka',
         trades
       })
     });
@@ -594,15 +733,22 @@
     const btn = document.getElementById('bpfSyncBtn');
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = '<span>⏳ সিঙ্ক হচ্ছে...</span>';
+      btn.innerHTML = '<span>⏳ স্ক্যান ও সিঙ্ক হচ্ছে...</span>';
     }
 
     loadConfig(async () => {
+      // If challenge start time not yet cached, fetch latest heartbeat first
+      if (!currentChallengeStartTime) {
+        try {
+          await fetchChallengeStatus();
+        } catch(e) {}
+      }
+
       const acctType = detectAccountType();
-      const { trades } = parseQuotexTradesFromDoc(document, acctType);
+      const { trades, pagesScanned } = await collectAllChallengeTrades(acctType, currentChallengeStartTime);
 
       if (!trades || trades.length === 0) {
-        showToast('ট্রেড লিস্টে কোনো ট্রেড পাওয়া যায়নি। পেজটি স্ক্রল বা রিফ্রেশ করুন।', 'error');
+        showToast('চ্যালেঞ্জ শুরু হওয়ার পর কোনো ট্রেড পাওয়া যায়নি। নতুন ট্রেড নেওয়ার পর পুনরায় চেষ্টা করুন।', 'info');
         if (btn) {
           btn.disabled = false;
           setSyncBtnText('⚡ Sync Trades');
@@ -626,10 +772,23 @@
           handleServerStatusResponse(result);
           showToast('⚠️ ' + (result.message || 'চ্যালেঞ্জ বন্ধ থাকায় এক্সটেনশন কোনো ট্রেড গ্রহণ করবে না।'), 'error');
         } else if (result && result.success) {
-          handleServerStatusResponse({ active: true });
+          handleServerStatusResponse({ active: true, ...result });
           trades.forEach(t => syncedTicketsCache.add(t.ticketId));
           saveSyncedCache();
-          showToast(result.message || `${trades.length} টি ট্রেড সফলভাবে সিঙ্ক হয়েছে!`, 'success');
+
+          let toastMsg = '';
+          if (result.addedCount > 0) {
+            toastMsg = `✅ ${result.addedCount} টি নতুন চ্যালেঞ্জ ট্রেড সফলভাবে সিঙ্ক হয়েছে! ${pagesScanned > 1 ? `(${pagesScanned} টি পেজ স্ক্যান করা হয়েছে)` : ''}`;
+            if (result.filteredOldCount > 0) {
+              toastMsg += ` (পুরনো ${result.filteredOldCount} টি ট্রেড বাদ দেওয়া হয়েছে)`;
+            }
+          } else if (result.duplicateCount > 0 || trades.length > 0) {
+            toastMsg = `✅ সকল ${trades.length} টি ট্রেড ইতিমধ্যে সেভ রয়েছে (ডুপ্লিকেট এড়ানো হয়েছে)।`;
+          } else {
+            toastMsg = result.message || 'ট্রেড হিস্টোরি সিঙ্ক সম্পন্ন হয়েছে!';
+          }
+
+          showToast(toastMsg, 'success');
         } else {
           showToast(result?.message || 'সিঙ্ক ব্যর্থ হয়েছে।', 'error');
         }
@@ -684,13 +843,20 @@
           return true;
         } else {
           const acct = detectAccountType();
-          const { trades } = parseQuotexTradesFromDoc(document, acct);
-          if (!trades || trades.length === 0) {
-            sendResponse({ success: false, error: 'ট্রেড পাওয়া যায়নি। পেজটি স্ক্রল বা রিফ্রেশ করুন।' });
-            return true;
-          }
-          postTradesToServer(trades, acct).then(res => {
-            sendResponse(res);
+          collectAllChallengeTrades(acct, currentChallengeStartTime).then(({ trades, pagesScanned }) => {
+            if (!trades || trades.length === 0) {
+              sendResponse({ success: false, error: 'চ্যালেঞ্জের কোনো ট্রেড পাওয়া যায়নি।' });
+              return;
+            }
+            postTradesToServer(trades, acct).then(res => {
+              if (res && res.success) {
+                trades.forEach(t => syncedTicketsCache.add(t.ticketId));
+                saveSyncedCache();
+              }
+              sendResponse({ ...res, count: trades.length, pagesScanned });
+            }).catch(err => {
+              sendResponse({ success: false, error: err.message });
+            });
           }).catch(err => {
             sendResponse({ success: false, error: err.message });
           });

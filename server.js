@@ -4570,18 +4570,14 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       const isUserMatch = (t.userId === user.id || 
         (t.userEmail && t.userEmail.toLowerCase() === (user.email || '').toLowerCase()) ||
         (t.traderId && t.traderId.toLowerCase() === (user.traderId || '').toLowerCase()));
-      if (!isUserMatch) return false;
       if (t.challengeId && t.challengeId !== activeChallenge.id) return false;
       if (usedTicketIds.has(t.ticketId) || (t.id && usedTicketIds.has(t.id))) return false;
+      if (effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 1000)) return false;
       return true;
     });
 
     // Sort chronologically oldest first
-    candidateTrades.sort((a, b) => {
-      const timeA = parseQuotexDate(a.openTime) || parseQuotexDate(a.closeTime) || new Date(a.syncedAt || 0).getTime();
-      const timeB = parseQuotexDate(b.openTime) || parseQuotexDate(b.closeTime) || new Date(b.syncedAt || 0).getTime();
-      return timeA - timeB;
-    });
+    candidateTrades.sort((a, b) => getTradeExecutionTime(a) - getTradeExecutionTime(b));
 
     if (candidateTrades.length === 0) {
       return res.json({
@@ -5050,10 +5046,17 @@ app.post('/api/submissions/:id/resubmit', authenticateToken, upload.fields([
 const traderHeartbeats = new Map();
 
 // Helper to parse Quotex and broker timestamps (DD/MM/YYYY, HH:MM:SS or ISO)
-function parseQuotexDate(str) {
+function parseQuotexDate(str, clientTzOffset) {
   if (!str) return 0;
   if (typeof str === 'number') return str;
   const clean = String(str).trim();
+
+  // If clean string is ISO 8601
+  if (clean.includes('T') && (clean.endsWith('Z') || clean.includes('+') || clean.includes('-'))) {
+    const parsedIso = new Date(clean).getTime();
+    if (!isNaN(parsedIso)) return parsedIso;
+  }
+
   const m = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:,?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
   if (m) {
     const day = parseInt(m[1], 10);
@@ -5062,10 +5065,39 @@ function parseQuotexDate(str) {
     const hour = parseInt(m[4] || '0', 10);
     const min = parseInt(m[5] || '0', 10);
     const sec = parseInt(m[6] || '0', 10);
+
+    // If client timezone offset is provided (in minutes, e.g. -360 for UTC+6)
+    if (typeof clientTzOffset === 'number' && !isNaN(clientTzOffset)) {
+      return Date.UTC(year, month, day, hour, min, sec) + (clientTzOffset * 60 * 1000);
+    }
+
+    // If the server runs in UTC (offset === 0), Quotex broker timestamps from Bangladesh traders are UTC+6 (-360 min)
+    const serverOffset = new Date().getTimezoneOffset();
+    if (serverOffset === 0) {
+      // Offset by 6 hours for Asia/Dhaka
+      return Date.UTC(year, month, day, hour, min, sec) - (6 * 60 * 60 * 1000);
+    }
+
     return new Date(year, month, day, hour, min, sec).getTime();
   }
   const parsed = new Date(clean).getTime();
   return isNaN(parsed) ? 0 : parsed;
+}
+
+// Consistent trade timestamp resolver across all formats
+function getTradeExecutionTime(t, clientTzOffset) {
+  if (!t) return 0;
+  if (typeof t.openTimestamp === 'number' && t.openTimestamp > 0) return t.openTimestamp;
+  if (t.openTimeIso) {
+    const d = new Date(t.openTimeIso).getTime();
+    if (!isNaN(d) && d > 0) return d;
+  }
+  if (typeof t.closeTimestamp === 'number' && t.closeTimestamp > 0) return t.closeTimestamp;
+  if (t.closeTimeIso) {
+    const d = new Date(t.closeTimeIso).getTime();
+    if (!isNaN(d) && d > 0) return d;
+  }
+  return parseQuotexDate(t.openTime, clientTzOffset) || parseQuotexDate(t.closeTime, clientTzOffset) || new Date(t.syncedAt || 0).getTime() || 0;
 }
 
 // 0. Extension Heartbeat Ping (Called every 30s by active extension)
@@ -5131,6 +5163,21 @@ app.post('/api/extension/heartbeat', (req, res) => {
       });
     }
 
+    let effectiveStartTime = 0;
+    if (activeChallenge.reactivatedAt) {
+      effectiveStartTime = new Date(activeChallenge.reactivatedAt).getTime();
+    } else if (activeChallenge.evaluationStartedAt) {
+      effectiveStartTime = new Date(activeChallenge.evaluationStartedAt).getTime();
+    } else if (activeChallenge.practiceStartedAt) {
+      effectiveStartTime = new Date(activeChallenge.practiceStartedAt).getTime();
+    } else if (activeChallenge.approvedAt) {
+      effectiveStartTime = new Date(activeChallenge.approvedAt).getTime();
+    } else if (activeChallenge.startedAt) {
+      effectiveStartTime = new Date(activeChallenge.startedAt).getTime();
+    } else {
+      effectiveStartTime = new Date(activeChallenge.createdAt).getTime();
+    }
+
     const entry = {
       lastPing: Date.now(),
       status,
@@ -5148,6 +5195,8 @@ app.post('/api/extension/heartbeat', (req, res) => {
       success: true,
       active: true,
       challengeId: activeChallenge.id,
+      challengeStartTime: effectiveStartTime,
+      challengeStartedAt: new Date(effectiveStartTime).toISOString(),
       timestamp: Date.now()
     });
   } catch (err) {
@@ -5286,14 +5335,26 @@ app.post('/api/extension/sync-trades', (req, res) => {
     let filteredExpiredCount = 0;
     let duplicateCount = 0;
     const nowIso = new Date().toISOString();
+    const clientTzOffset = req.body.clientTzOffset;
+    const seenBatchTickets = new Set();
 
     trades.forEach(t => {
-      // Parse trade entry/execution time
-      const tradeTime = parseQuotexDate(t.openTime) || parseQuotexDate(t.closeTime) || Date.now();
+      // Clean ticket ID
+      const ticketId = (t.ticketId || '').trim() || `trd_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+      
+      // Batch duplicate guard: a trade must never be processed twice in the same batch
+      if (seenBatchTickets.has(ticketId)) {
+        duplicateCount++;
+        return;
+      }
+      seenBatchTickets.add(ticketId);
+
+      // Parse accurate trade execution time
+      const tradeTime = getTradeExecutionTime(t, clientTzOffset);
 
       // Check Time-Lock Filter: Must be executed on or after challenge activation time
       // Any trade done before challenge became active or while challenge was closed/inactive is STRICTLY rejected!
-      if (effectiveStartTime && tradeTime < effectiveStartTime) {
+      if (effectiveStartTime && tradeTime < (effectiveStartTime - 1000)) {
         filteredOldCount++;
         return; // Filter out older / closed-period trades!
       }
@@ -5304,8 +5365,14 @@ app.post('/api/extension/sync-trades', (req, res) => {
         return; // Filter out trades after challenge expiry
       }
 
-      const ticketId = t.ticketId || `trd_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-      const exists = allSynced.some(existing => existing.userId === user.id && existing.ticketId === ticketId);
+      // Permanent duplicate guard: check ticketId or identical trade execution attributes
+      const exists = allSynced.some(existing => 
+        existing.userId === user.id && (
+          (existing.ticketId && existing.ticketId === ticketId) ||
+          (existing.id && existing.id === ticketId) ||
+          (existing.asset === t.asset && existing.openTime === t.openTime && Math.abs(existing.amount - t.amount) < 0.001)
+        )
+      );
       if (exists) {
         duplicateCount++;
         return;
@@ -5326,24 +5393,25 @@ app.post('/api/extension/sync-trades', (req, res) => {
         direction: t.direction || 'CALL',
         openQuote: t.openQuote || '0.00',
         openTime: t.openTime || nowIso,
+        openTimestamp: t.openTimestamp || tradeTime,
+        openTimeIso: t.openTimeIso || (tradeTime ? new Date(tradeTime).toISOString() : nowIso),
         closeQuote: t.closeQuote || '0.00',
         closeTime: t.closeTime || nowIso,
+        closeTimestamp: t.closeTimestamp || 0,
+        closeTimeIso: t.closeTimeIso || '',
         amount: parseFloat(t.amount) || 0,
         profit: parseFloat(t.profit) || 0,
         result: t.result || (parseFloat(t.profit) > 0 ? 'WIN' : 'LOSS'),
         accountType: (t.accountType || accountType || 'demo').toLowerCase(),
         source: source || 'quotex',
+        clientTzOffset: (typeof clientTzOffset === 'number') ? clientTzOffset : null,
         syncedAt: nowIso
       });
       newCount++;
     });
 
     // Sort all trades strictly newest-first (latest trade on top)
-    allSynced.sort((a, b) => {
-      const timeA = parseQuotexDate(a.openTime) || parseQuotexDate(a.closeTime) || new Date(a.syncedAt || 0).getTime();
-      const timeB = parseQuotexDate(b.openTime) || parseQuotexDate(b.closeTime) || new Date(b.syncedAt || 0).getTime();
-      return timeB - timeA;
-    });
+    allSynced.sort((a, b) => getTradeExecutionTime(b) - getTradeExecutionTime(a));
 
     if (newCount > 0) {
       if (allSynced.length > 5000) allSynced.length = 5000;
@@ -5376,6 +5444,8 @@ app.post('/api/extension/sync-trades', (req, res) => {
         packageName: activeChallenge.packageName,
         startedAt: new Date(effectiveStartTime).toISOString()
       },
+      challengeStartTime: effectiveStartTime,
+      challengeStartedAt: new Date(effectiveStartTime).toISOString(),
       message: responseMessage
     });
   } catch (err) {
@@ -5425,15 +5495,11 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
     const userTrades = activeChallenge ? allSynced.filter(t => 
       (t.userId === req.user.id || (t.userEmail && t.userEmail.toLowerCase() === (req.user.email || '').toLowerCase())) &&
       (t.challengeId === activeChallenge.id) &&
-      (!effectiveStartTime || (parseQuotexDate(t.openTime) || parseQuotexDate(t.closeTime) || new Date(t.syncedAt).getTime()) >= (effectiveStartTime - 1000))
+      (!effectiveStartTime || getTradeExecutionTime(t) >= (effectiveStartTime - 1000))
     ) : [];
 
     // Strict sort newest-first (latest trade on top)
-    userTrades.sort((a, b) => {
-      const timeA = parseQuotexDate(a.openTime) || parseQuotexDate(a.closeTime) || new Date(a.syncedAt || 0).getTime();
-      const timeB = parseQuotexDate(b.openTime) || parseQuotexDate(b.closeTime) || new Date(b.syncedAt || 0).getTime();
-      return timeB - timeA;
-    });
+    userTrades.sort((a, b) => getTradeExecutionTime(b) - getTradeExecutionTime(a));
 
     const totalTrades = userTrades.length;
     const wins = userTrades.filter(t => t.result === 'WIN').length;
