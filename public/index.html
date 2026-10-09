@@ -2118,17 +2118,14 @@
                 </div>
             </form>
 
-            <!-- STEP 2: Enter OTP & Set New Password -->
-            <form id="forgotStep2Form" style="display:none;" onsubmit="handleResetPasswordSubmit(event)">
+            <!-- STEP 2: Enter OTP Code (No password fields yet) -->
+            <form id="forgotStep2Form" style="display:none;" onsubmit="handleVerifyResetOtp(event)">
                 <div style="background:rgba(245, 176, 65, 0.1); border:1px solid rgba(245, 176, 65, 0.25); border-radius:10px; padding:10px 14px; margin-bottom:1.2rem; font-size:0.83rem; color:#fff; display:flex; align-items:center; justify-content:space-between;">
                     <div>
                         <i class="fas fa-envelope" style="color:var(--yellow); margin-right:6px;"></i>
                         কোড পাঠানো হয়েছে: <strong id="forgotTargetEmailDisplay" style="color:var(--yellow);"></strong>
                     </div>
                     <a href="javascript:void(0)" onclick="switchForgotStep(1)" style="color:var(--yellow); font-weight:700; text-decoration:underline;">Change</a>
-                </div>
-
-                <div id="forgotDevNotice" style="display:none; background:rgba(245, 176, 65, 0.12); border:1px dashed var(--yellow); border-radius:10px; padding:12px 14px; margin-bottom:1.2rem; font-size:0.83rem; text-align:left;">
                 </div>
 
                 <div class="form-group" style="margin-bottom:1.2rem;">
@@ -2139,6 +2136,25 @@
                         </button>
                     </div>
                     <input type="text" class="form-control" id="forgotOtpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="------" style="text-align:center; font-size:1.6rem; letter-spacing:8px; font-weight:800; color:var(--yellow); font-family:monospace; height:50px;" />
+                    <small style="display:block; margin-top:6px; color:var(--text-secondary); font-size:0.75rem;">
+                        <i class="fas fa-info-circle" style="color:var(--yellow);"></i> আপনার ইনবক্স অথবা স্প্যাম ফোল্ডারে প্রাপ্ত ৬-সংখ্যার কোডটি লিখুন।
+                    </small>
+                </div>
+
+                <button type="submit" class="btn-primary btn-full" id="forgotVerifyOtpBtn" style="justify-content:center; padding:12px; margin-bottom:1rem;">
+                    <i class="fas fa-check-circle"></i> Verify Code & Continue
+                </button>
+
+                <div class="modal-switch-text" style="margin-top:0.5rem;">
+                    Remember your password? <a href="javascript:void(0)" onclick="openLoginModal()">Back to Login</a>
+                </div>
+            </form>
+
+            <!-- STEP 3: Enter New Password (Only shown after OTP is verified!) -->
+            <form id="forgotStep3Form" style="display:none;" onsubmit="handleResetPasswordSubmit(event)">
+                <div style="background:rgba(46, 204, 113, 0.12); border:1px solid rgba(46, 204, 113, 0.35); border-radius:10px; padding:10px 14px; margin-bottom:1.2rem; font-size:0.83rem; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-shield-alt" style="color:var(--neon-green); font-size:1.1rem;"></i>
+                    <span>কোড সফলভাবে যাচাই হয়েছে! এবার নতুন পাসওয়ার্ড সেট করুন।</span>
                 </div>
 
                 <div class="form-group">
@@ -2162,7 +2178,7 @@
                 </div>
 
                 <button type="submit" class="btn-primary btn-full" id="forgotSubmitBtn" style="justify-content:center; padding:12px; margin-bottom:1rem;">
-                    <i class="fas fa-shield-alt"></i> Verify Code & Reset Password
+                    <i class="fas fa-save"></i> Save New Password
                 </button>
 
                 <div class="modal-switch-text" style="margin-top:0.5rem;">
@@ -2505,18 +2521,27 @@
         function switchForgotStep(step) {
             const form1 = document.getElementById('forgotStep1Form');
             const form2 = document.getElementById('forgotStep2Form');
+            const form3 = document.getElementById('forgotStep3Form');
             const sub = document.getElementById('forgotModalSubtitle');
 
             if (step === 1) {
                 if (form1) form1.style.display = 'block';
                 if (form2) form2.style.display = 'none';
+                if (form3) form3.style.display = 'none';
                 if (sub) sub.innerText = 'পাসওয়ার্ড রিসেট করতে আপনার রেজিস্টার্ড ইমেইল অ্যাড্রেস দিন।';
                 setTimeout(() => document.getElementById('forgotEmail')?.focus(), 150);
-            } else {
+            } else if (step === 2) {
                 if (form1) form1.style.display = 'none';
                 if (form2) form2.style.display = 'block';
-                if (sub) sub.innerText = 'আপনার ইমেইলে প্রাপ্ত ৬-সংখ্যার কোড এবং নতুন পাসওয়ার্ড দিন।';
+                if (form3) form3.style.display = 'none';
+                if (sub) sub.innerText = 'আপনার ইমেইলে প্রাপ্ত ৬-সংখ্যার ভেরিফিকেশন কোডটি দিন।';
                 setTimeout(() => document.getElementById('forgotOtpInput')?.focus(), 150);
+            } else if (step === 3) {
+                if (form1) form1.style.display = 'none';
+                if (form2) form2.style.display = 'none';
+                if (form3) form3.style.display = 'block';
+                if (sub) sub.innerText = 'আপনার অ্যাকাউন্টের জন্য একটি শক্তিশালী নতুন পাসওয়ার্ড সেট করুন।';
+                setTimeout(() => document.getElementById('forgotNewPassword')?.focus(), 150);
             }
         }
 
@@ -2984,25 +3009,7 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message || 'আপনার ইমেইলে ভেরিফিকেশন কোড পাঠানো হয়েছে!', 'success');
-                    
-                    const devBox = document.getElementById('forgotDevNotice');
-                    if (devBox) {
-                        if (data.devOtp) {
-                            devBox.style.display = 'block';
-                            devBox.innerHTML = `
-                                <div style="font-weight:700; color:var(--yellow); font-size:0.92rem; margin-bottom:6px;">
-                                    <i class="fas fa-key"></i> আপনার ভেরিফিকেশন কোড: <span style="font-size:1.3rem; letter-spacing:4px; font-family:monospace; background:rgba(0,0,0,0.5); padding:2px 10px; border-radius:6px; color:#fff; border:1px solid var(--yellow);">${data.devOtp}</span>
-                                </div>
-                                <div style="color:var(--text-secondary); font-size:0.78rem; line-height:1.4;">
-                                    💡 ইমেইল ইনবক্সে বা স্প্যাম ফোল্ডারে কোডটি না পেলে উপরোক্ত কোডটি ব্যবহার করে পাসওয়ার্ড রিসেট সম্পন্ন করুন।
-                                </div>
-                            `;
-                        } else {
-                            devBox.style.display = 'none';
-                        }
-                    }
-
+                    showToast(data.message || 'আপনার ইমেইলে একটি ৬-সংখ্যার পাসওয়ার্ড রিসেট কোড পাঠানো হয়েছে।', 'success');
                     document.getElementById('forgotTargetEmailDisplay').innerText = email;
                     document.getElementById('forgotOtpInput').value = '';
                     switchForgotStep(2);
@@ -3052,19 +3059,7 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('নতুন ভেরিফিকেশন কোড পাঠানো হয়েছে!', 'success');
-                    const devBox = document.getElementById('forgotDevNotice');
-                    if (devBox && data.devOtp) {
-                        devBox.style.display = 'block';
-                        devBox.innerHTML = `
-                            <div style="font-weight:700; color:var(--yellow); font-size:0.92rem; margin-bottom:6px;">
-                                <i class="fas fa-key"></i> আপনার নতুন ভেরিফিকেশন কোড: <span style="font-size:1.3rem; letter-spacing:4px; font-family:monospace; background:rgba(0,0,0,0.5); padding:2px 10px; border-radius:6px; color:#fff; border:1px solid var(--yellow);">${data.devOtp}</span>
-                            </div>
-                            <div style="color:var(--text-secondary); font-size:0.78rem; line-height:1.4;">
-                                💡 ইমেইল ইনবক্সে বা স্প্যাম ফোল্ডারে কোডটি না পেলে উপরোক্ত কোডটি ব্যবহার করে পাসওয়ার্ড রিসেট সম্পন্ন করুন।
-                            </div>
-                        `;
-                    }
+                    showToast('নতুন ভেরিফিকেশন কোড আপনার ইমেইলে পাঠানো হয়েছে!', 'success');
                     startForgotResendTimer();
                 } else {
                     showToast(data.message || 'Failed to resend code', 'error');
@@ -3078,21 +3073,59 @@
             }
         }
 
-        // Handle Verify Code & Reset Password Submit (Step 2)
+        // Handle Verify Reset OTP Code (Step 2)
+        async function handleVerifyResetOtp(e) {
+            if (e) e.preventDefault();
+            const email = document.getElementById('forgotEmail').value.trim();
+            const otp = document.getElementById('forgotOtpInput').value.trim();
+            const verifyBtn = document.getElementById('forgotVerifyOtpBtn');
+
+            if (!email) {
+                showToast('ইমেইল অ্যাড্রেস প্রয়োজন।', 'error');
+                switchForgotStep(1);
+                return;
+            }
+            if (!otp || otp.length !== 6) {
+                showToast('আপনার ইমেইলে প্রাপ্ত ৬-সংখ্যার কোডটি দিন।', 'error');
+                return;
+            }
+
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verifying Code...`;
+
+            try {
+                const res = await fetch('/api/auth/verify-reset-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('✅ ' + data.message, 'success');
+                    switchForgotStep(3);
+                } else {
+                    showToast(data.message || 'ভুল ওটিপি কোড। অনুগ্রহ করে সঠিক কোডটি দিন।', 'error');
+                }
+            } catch (err) {
+                showToast('নেটওয়ার্ক সমস্যা। পুনরায় চেষ্টা করুন।', 'error');
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = `<i class="fas fa-check-circle"></i> Verify Code & Continue`;
+            }
+        }
+
+        // Handle Set New Password & Submit (Step 3)
         async function handleResetPasswordSubmit(e) {
-            e.preventDefault();
+            if (e) e.preventDefault();
             const email = document.getElementById('forgotEmail').value.trim();
             const otp = document.getElementById('forgotOtpInput').value.trim();
             const newPassword = document.getElementById('forgotNewPassword').value;
             const confirmPassword = document.getElementById('forgotConfirmPassword').value;
             const submitBtn = document.getElementById('forgotSubmitBtn');
 
-            if (!email) {
-                showToast('ইমেইল অ্যাড্রেস প্রয়োজন।', 'error');
-                return;
-            }
-            if (!otp || otp.length !== 6) {
-                showToast('আপনার ইমেইলে প্রাপ্ত ৬-সংখ্যার কোডটি দিন।', 'error');
+            if (!email || !otp) {
+                showToast('অনুগ্রহ করে আবার কোড যাচাই করুন।', 'error');
+                switchForgotStep(2);
                 return;
             }
             if (newPassword.length < 6) {
@@ -3105,7 +3138,7 @@
             }
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verifying & Updating...`;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving Password...`;
 
             try {
                 const res = await fetch('/api/auth/reset-password', {
@@ -3119,9 +3152,15 @@
                     closeModals();
                     document.getElementById('forgotStep1Form')?.reset();
                     document.getElementById('forgotStep2Form')?.reset();
-                    document.getElementById('loginEmail').value = email;
-                    document.getElementById('loginPassword').value = '';
-                    setTimeout(() => openLoginModal(), 400);
+                    document.getElementById('forgotStep3Form')?.reset();
+                    switchForgotStep(1);
+
+                    // Pre-fill login modal and open it for user
+                    setTimeout(() => {
+                        openLoginModal();
+                        const loginEmail = document.getElementById('loginEmail');
+                        if (loginEmail) loginEmail.value = email;
+                    }, 500);
                 } else {
                     showToast(data.message || 'পাসওয়ার্ড রিসেট করতে ব্যর্থ হয়েছে। কোড পুনরায় যাচাই করুন।', 'error');
                 }
@@ -3129,7 +3168,7 @@
                 showToast('নেটওয়ার্ক সমস্যা। পুনরায় চেষ্টা করুন।', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fas fa-shield-alt"></i> Verify Code & Reset Password`;
+                submitBtn.innerHTML = `<i class="fas fa-save"></i> Save New Password`;
             }
         }
 

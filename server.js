@@ -3573,13 +3573,13 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     user.passwordResetExpires = Date.now() + 15 * 60 * 1000; // 15 mins
     writeJson(USERS_FILE, users);
 
-    sendPasswordResetEmail(user.email, resetCode, user.name);
+    // Send reset OTP code directly to user's registered email
+    await sendPasswordResetEmail(user.email, resetCode, user.name);
 
     res.json({
       success: true,
-      message: 'আপনার ইমেইলে একটি ৬-সংখ্যার পাসওয়ার্ড রিসেট কোড পাঠানো হয়েছে।',
-      email: user.email,
-      devOtp: resetCode
+      message: 'আপনার ইমেইলে একটি ৬-সংখ্যার পাসওয়ার্ড রিসেট কোড পাঠানো হয়েছে। অনুগ্রহ করে আপনার ইনবক্স বা স্প্যাম ফোল্ডার চেক করুন।',
+      email: user.email
     });
   } catch (err) {
     console.error('Forgot password error:', err);
@@ -3587,7 +3587,43 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   }
 });
 
-// Verify Code and Reset Password
+// Verify Password Reset OTP Code (Step 2 Verification)
+app.post('/api/auth/verify-reset-code', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: 'ইমেইল এবং ৬-সংখ্যার ওটিপি কোড দিন।' });
+    }
+
+    const normalizedUserEmail = normalizeEmail(email);
+    const users = readJson(USERS_FILE);
+    let user = users.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
+    if (!user && normalizedUserEmail) {
+      user = users.find(u => u.email.toLowerCase() === normalizedUserEmail);
+    }
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'এই ইমেইল দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি।' });
+    }
+
+    if (!user.passwordResetCode || user.passwordResetCode !== otp.trim()) {
+      return res.status(400).json({ success: false, message: 'ভুল ওটিপি কোড। অনুগ্রহ করে আপনার ইমেইল চেক করে সঠিক কোডটি দিন।' });
+    }
+
+    if (user.passwordResetExpires && Date.now() > user.passwordResetExpires) {
+      return res.status(400).json({ success: false, message: 'ওটিপি কোডের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে আবার কোড পাঠান।' });
+    }
+
+    res.json({
+      success: true,
+      message: 'ওটিপি কোড সফলভাবে যাচাই হয়েছে! এবার আপনার নতুন পাসওয়ার্ড সেট করুন।'
+    });
+  } catch (err) {
+    console.error('Verify reset code error:', err);
+    res.status(500).json({ success: false, message: 'কোড যাচাই করতে সমস্যা হয়েছে।' });
+  }
+});
+
+// Verify Code and Reset Password (Step 3 Save Password)
 app.post('/api/auth/reset-password', async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
@@ -3627,6 +3663,14 @@ app.post('/api/auth/reset-password', async (req, res) => {
     writeJson(USERS_PERMANENT_STORE_FILE, users);
     saveTraderToLifelongVault(user);
     logUserArchive('PASSWORD_RESET', user);
+
+    if (db && db.isMySqlActive()) {
+      try {
+        await db.saveUser(user);
+      } catch (dbErr) {
+        console.error('[DATABASE] Error updating password in MySQL:', dbErr.message);
+      }
+    }
 
     res.json({
       success: true,
