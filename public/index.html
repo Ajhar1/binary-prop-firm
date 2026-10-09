@@ -168,8 +168,9 @@
             margin-bottom: 0.8rem;
             background: linear-gradient(135deg, #ffffff 40%, var(--yellow) 100%);
             -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             background-clip: text;
-            color: transparent;
+            color: #ffffff;
         }
 
         .section-subtitle {
@@ -228,8 +229,9 @@
             letter-spacing: 0.5px;
             background: linear-gradient(135deg, #ffffff 10%, #FFE082 50%, #F5B041 100%);
             -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             background-clip: text;
-            color: transparent;
+            color: #ffffff;
         }
 
         .nav-links {
@@ -389,6 +391,10 @@
             padding: 5rem 2rem;
             position: relative;
             z-index: 2;
+        }
+
+        .broker-scroll-hint {
+            display: none;
         }
 
         .brokers-grid {
@@ -678,8 +684,9 @@
             margin: 0.6rem 0 1.2rem;
             background: linear-gradient(135deg, #ffffff 40%, var(--yellow) 100%);
             -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             background-clip: text;
-            color: transparent;
+            color: #ffffff;
         }
 
         .challenge-rules-list {
@@ -1035,14 +1042,28 @@
             padding-top: 1.5rem;
         }
 
-        /* ---------- RESPONSIVE ---------- */
+        /* ---------- RESPONSIVE MOBILE LUXURY LIQUID GLASS SYSTEM ---------- */
         @media (max-width: 768px) {
+            /* Global Liquid Glass Base for mobile cards */
+            .glass {
+                background: linear-gradient(145deg, rgba(22, 27, 40, 0.65), rgba(12, 16, 24, 0.78)) !important;
+                backdrop-filter: blur(20px) saturate(180%) !important;
+                -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+                border: 1px solid rgba(255, 255, 255, 0.13) !important;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
+            }
+
+            /* Navbar & Logo */
             .navbar {
                 padding: 0.65rem 0.8rem;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 gap: 6px;
+                background: rgba(10, 14, 22, 0.78) !important;
+                backdrop-filter: blur(20px) saturate(180%) !important;
+                -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
             }
             .logo {
                 display: flex;
@@ -1058,7 +1079,14 @@
                 border-radius: 8px;
             }
             .logo-text {
-                font-size: 1.15rem;
+                font-size: 1.15rem !important;
+                font-weight: 900 !important;
+                color: #ffffff !important;
+                background: linear-gradient(135deg, #ffffff 15%, #ffe082 60%, #f5b041 100%) !important;
+                -webkit-background-clip: text !important;
+                -webkit-text-fill-color: transparent !important;
+                background-clip: text !important;
+                filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5)) !important;
             }
             .nav-links {
                 display: none;
@@ -1098,91 +1126,345 @@
                 cursor: pointer;
                 flex-shrink: 0;
             }
+
+            /* Hero Section */
             .hero {
                 min-height: auto;
-                padding: 5.5rem 1.2rem 3rem;
+                padding: 4.8rem 1rem 2.2rem;
+            }
+            .hero-badge {
+                font-size: 0.76rem !important;
+                padding: 4px 12px !important;
+                margin-bottom: 0.85rem !important;
+                background: rgba(245, 176, 65, 0.08) !important;
+                backdrop-filter: blur(14px) !important;
+                -webkit-backdrop-filter: blur(14px) !important;
+                border: 1px solid rgba(245, 176, 65, 0.28) !important;
+                border-radius: 20px !important;
             }
             .hero h1 {
-                font-size: 2.1rem;
-                line-height: 1.25;
+                font-size: 1.85rem !important;
+                line-height: 1.25 !important;
+                letter-spacing: -0.5px !important;
+                margin-bottom: 0.75rem !important;
             }
             .hero-desc {
-                font-size: 1rem;
-                line-height: 1.5;
+                font-size: 0.88rem !important;
+                line-height: 1.55 !important;
+                color: #cbd5e1 !important;
+                margin-bottom: 1.1rem !important;
             }
             .hero-mission-box {
-                font-size: 0.9rem;
-                padding: 0.85rem 1.1rem;
-                margin-bottom: 1.8rem;
+                font-size: 0.82rem !important;
+                padding: 0.8rem 1rem !important;
+                margin-bottom: 1.4rem !important;
+                line-height: 1.5 !important;
+                background: rgba(245, 176, 65, 0.06) !important;
+                backdrop-filter: blur(16px) !important;
+                -webkit-backdrop-filter: blur(16px) !important;
+                border: 1px solid rgba(245, 176, 65, 0.25) !important;
+                border-radius: 14px !important;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+            }
+            .hero-buttons {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                width: 100% !important;
+                max-width: 320px !important;
+                margin: 0 auto !important;
+            }
+            .hero-buttons .btn {
+                width: 100% !important;
+                padding: 10px 14px !important;
+                font-size: 0.88rem !important;
+                font-weight: 800 !important;
+                border-radius: 12px !important;
             }
             .hero-stats {
-                gap: 1.2rem 1.6rem;
-                padding-top: 1.2rem;
+                gap: 0.8rem 1rem !important;
+                padding-top: 1rem !important;
             }
             .stat-number {
-                font-size: 1.6rem;
+                font-size: 1.35rem !important;
             }
             .stat-label {
-                font-size: 0.78rem;
+                font-size: 0.72rem !important;
             }
+
+            /* Section Headings */
             .section-title {
-                font-size: 1.9rem;
+                font-size: 1.55rem !important;
+                margin-bottom: 0.4rem !important;
+                color: #ffffff !important;
+                background: linear-gradient(135deg, #ffffff 35%, #ffd54f 90%, #f5b041 100%) !important;
+                -webkit-background-clip: text !important;
+                -webkit-text-fill-color: transparent !important;
+                background-clip: text !important;
             }
             .section-subtitle {
-                font-size: 0.92rem;
-                margin-bottom: 2rem;
+                font-size: 0.82rem !important;
+                line-height: 1.5 !important;
+                margin-bottom: 1.2rem !important;
+                color: #94a3b8 !important;
+                padding: 0 0.5rem !important;
+            }
+
+            /* Supported Brokers (Liquid Glass + Single Horizontal Row Just Like Computer) */
+            .brokers-section {
+                padding: 2.8rem 0.8rem !important;
+            }
+            .broker-scroll-hint {
+                display: block !important;
+                text-align: center !important;
+                margin: -0.6rem auto 1.1rem auto !important;
+            }
+            .broker-scroll-hint span {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                font-size: 0.72rem !important;
+                color: var(--yellow) !important;
+                background: rgba(245, 176, 65, 0.08) !important;
+                border: 1px solid rgba(245, 176, 65, 0.22) !important;
+                padding: 3px 10px !important;
+                border-radius: 20px !important;
+                font-weight: 700 !important;
             }
             .brokers-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 0.9rem;
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                scroll-snap-type: x mandatory !important;
+                -webkit-overflow-scrolling: touch !important;
+                gap: 10px !important;
+                padding: 6px 4px 14px 4px !important;
+                margin: 0 !important;
+                scrollbar-width: none !important;
+            }
+            .brokers-grid::-webkit-scrollbar {
+                display: none !important;
             }
             .broker-card {
-                padding: 1.2rem 0.8rem;
-                border-radius: 16px;
+                flex: 0 0 132px !important;
+                min-width: 132px !important;
+                max-width: 132px !important;
+                scroll-snap-align: start !important;
+                padding: 0.95rem 0.6rem !important;
+                border-radius: 18px !important;
+                background: linear-gradient(145deg, rgba(22, 27, 40, 0.65), rgba(12, 16, 24, 0.78)) !important;
+                backdrop-filter: blur(20px) saturate(180%) !important;
+                -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+                border: 1px solid rgba(255, 255, 255, 0.13) !important;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+                gap: 8px !important;
             }
             .broker-card:last-child {
-                grid-column: span 2;
-                max-width: 220px;
-                margin: 0 auto;
-                width: 100%;
+                grid-column: auto !important;
+                max-width: 132px !important;
+                margin: 0 !important;
+                width: auto !important;
             }
-            .rules-grid {
-                grid-template-columns: 1fr;
-                gap: 0.9rem;
+            .broker-logo-box {
+                width: 56px !important;
+                height: 56px !important;
+                border-radius: 16px !important;
+                padding: 6px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03)) !important;
+                backdrop-filter: blur(14px) !important;
+                -webkit-backdrop-filter: blur(14px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.22) !important;
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
             }
-            .rule-card {
-                padding: 1rem 1.1rem;
-                gap: 0.85rem;
-                border-radius: 16px;
+            .broker-logo-box img {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: contain !important;
+                border-radius: 10px !important;
             }
-            .rule-number {
-                width: 36px;
-                height: 36px;
-                font-size: 1rem;
-                border-radius: 10px;
+            .broker-name {
+                font-size: 0.92rem !important;
+                font-weight: 800 !important;
+                color: #ffffff !important;
+                white-space: nowrap !important;
+            }
+            .broker-tag {
+                font-size: 0.65rem !important;
+                padding: 2px 7px !important;
+                border-radius: 10px !important;
+            }
+            .broker-card p {
+                font-size: 0.68rem !important;
+                color: #94a3b8 !important;
+                margin: 0 !important;
+                line-height: 1.2 !important;
+            }
+
+            /* Challenge Packages (Two per Row, Liquid Glass, No Black Text) */
+            .challenge-section {
+                padding: 2.8rem 0.5rem !important;
             }
             .challenge-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
             }
-            .steps-grid {
-                grid-template-columns: 1fr;
-                gap: 1.2rem;
+            .card-external {
+                padding: 0.85rem 0.65rem !important;
+                border-radius: 18px !important;
+                background: linear-gradient(145deg, rgba(22, 27, 40, 0.65), rgba(12, 16, 24, 0.8)) !important;
+                backdrop-filter: blur(20px) saturate(180%) !important;
+                -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+                border: 1px solid rgba(255, 255, 255, 0.13) !important;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                min-height: auto !important;
             }
             .card-external.popular {
-                transform: scale(1);
+                border: 1.5px solid var(--yellow) !important;
+                box-shadow: 0 0 25px rgba(245, 176, 65, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.22) !important;
+                transform: none !important;
             }
+            .popular-badge {
+                top: -8px !important;
+                right: 8px !important;
+                font-size: 0.56rem !important;
+                font-weight: 850 !important;
+                padding: 2px 7px !important;
+                border-radius: 10px !important;
+                letter-spacing: 0.3px !important;
+            }
+            .card-top {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: flex-start !important;
+                margin-bottom: 4px !important;
+                gap: 4px !important;
+            }
+            .tier-name {
+                font-size: 1.08rem !important;
+                font-weight: 850 !important;
+                color: #ffffff !important;
+                line-height: 1.15 !important;
+            }
+            .tier-badge-sub {
+                font-size: 0.65rem !important;
+                color: #94a3b8 !important;
+            }
+            .card-orig-fee {
+                font-size: 0.78rem !important;
+                color: #ff5252 !important;
+            }
+            .card-discount-badge {
+                font-size: 0.56rem !important;
+                padding: 1px 4px !important;
+            }
+            .card-fee-val {
+                font-size: 1.22rem !important;
+                line-height: 1.1 !important;
+            }
+            .card-fee-val span {
+                font-size: 0.65rem !important;
+            }
+            .card-fee-sub {
+                font-size: 0.58rem !important;
+                line-height: 1.2 !important;
+            }
+            .funded-amount {
+                font-size: 1.35rem !important;
+                font-weight: 900 !important;
+                margin: 2px 0 6px !important;
+                line-height: 1.15 !important;
+                color: #ffffff !important;
+                background: linear-gradient(135deg, #ffffff 30%, #ffd54f 80%, #f5b041 100%) !important;
+                -webkit-background-clip: text !important;
+                -webkit-text-fill-color: transparent !important;
+                background-clip: text !important;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45)) !important;
+            }
+            .challenge-rules-list {
+                margin: 6px 0 10px !important;
+                padding: 0 !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+            }
+            .challenge-rules-list li {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 3.5px 0 !important;
+                border-bottom: 1px dashed rgba(255, 255, 255, 0.06) !important;
+                gap: 4px !important;
+            }
+            .challenge-rules-list .lbl {
+                color: #94a3b8 !important;
+                font-size: 0.65rem !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                max-width: 58% !important;
+            }
+            .challenge-rules-list .val {
+                font-size: 0.67rem !important;
+                font-weight: 750 !important;
+                white-space: nowrap !important;
+                text-align: right !important;
+            }
+            .val.gold {
+                color: var(--yellow) !important;
+                font-size: 0.72rem !important;
+            }
+            .btn-start-challenge {
+                padding: 7px 6px !important;
+                font-size: 0.72rem !important;
+                font-weight: 800 !important;
+                border-radius: 18px !important;
+                background: rgba(245, 176, 65, 0.16) !important;
+                border: 1px solid var(--yellow) !important;
+                color: var(--yellow) !important;
+                text-align: center !important;
+                width: 100% !important;
+                white-space: normal !important;
+                line-height: 1.2 !important;
+                box-shadow: 0 3px 10px rgba(245, 176, 65, 0.15) !important;
+            }
+
+            /* Promo Banner */
             .launch-promo-banner {
-                padding: 1.2rem 0.9rem !important;
-                margin: 0 auto 2rem auto !important;
+                padding: 1rem 0.85rem !important;
+                margin: 0 auto 1.6rem auto !important;
                 border-radius: 16px !important;
+                background: linear-gradient(145deg, rgba(30, 20, 25, 0.75), rgba(15, 12, 18, 0.85)) !important;
+                backdrop-filter: blur(18px) !important;
+                -webkit-backdrop-filter: blur(18px) !important;
+                border: 1px solid rgba(255, 77, 77, 0.28) !important;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+            }
+            #launchPromoTitleText {
+                font-size: 1.25rem !important;
+                margin-bottom: 6px !important;
+            }
+            #launchPromoDescText {
+                font-size: 0.82rem !important;
+                line-height: 1.5 !important;
             }
             .promo-countdown-wrapper {
                 width: 100% !important;
                 min-width: 0 !important;
                 max-width: 100% !important;
-                margin: 1.2rem auto 0 auto !important;
-                padding: 0.85rem 0.6rem !important;
+                margin: 1rem auto 0 auto !important;
+                padding: 0.75rem 0.5rem !important;
+                background: rgba(0, 0, 0, 0.45) !important;
+                border-radius: 12px !important;
             }
             .promo-countdown-grid {
                 gap: 5px !important;
@@ -1193,37 +1475,114 @@
                 max-width: none !important;
             }
             .countdown-num {
-                font-size: 1.18rem !important;
+                font-size: 1.15rem !important;
             }
             .countdown-unit {
-                font-size: 0.58rem !important;
+                font-size: 0.56rem !important;
             }
             .countdown-sep {
                 font-size: 1rem !important;
             }
+
+            /* 10 Golden Rules (Liquid Glass) */
+            .rules-section {
+                padding: 2.8rem 0.8rem !important;
+            }
+            .rules-badge {
+                font-size: 0.74rem !important;
+                padding: 4px 10px !important;
+            }
+            .rules-grid {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+            .rule-card {
+                padding: 0.85rem 0.95rem !important;
+                gap: 0.75rem !important;
+                border-radius: 14px !important;
+                background: linear-gradient(145deg, rgba(22, 27, 40, 0.55), rgba(12, 16, 24, 0.7)) !important;
+                backdrop-filter: blur(18px) saturate(180%) !important;
+                -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+                border: 1px solid rgba(255, 255, 255, 0.11) !important;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3) !important;
+            }
+            .rule-number {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 0.88rem !important;
+                border-radius: 8px !important;
+                flex-shrink: 0 !important;
+            }
+            .rule-details h3 {
+                font-size: 0.88rem !important;
+                margin-bottom: 2px !important;
+                color: #ffffff !important;
+            }
+            .rule-details p {
+                font-size: 0.78rem !important;
+                line-height: 1.45 !important;
+                color: #94a3b8 !important;
+            }
+
+            /* Steps (How It Works - Liquid Glass) */
+            .steps {
+                padding: 2.8rem 0.8rem !important;
+            }
+            .steps-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+            .step-card {
+                padding: 1rem 0.95rem !important;
+                border-radius: 16px !important;
+                background: linear-gradient(145deg, rgba(22, 27, 40, 0.55), rgba(12, 16, 24, 0.7)) !important;
+                backdrop-filter: blur(18px) saturate(180%) !important;
+                -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+                border: 1px solid rgba(255, 255, 255, 0.11) !important;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3) !important;
+            }
+            .step-icon-box {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 1.05rem !important;
+                border-radius: 10px !important;
+                margin-bottom: 6px !important;
+            }
+            .step-card h3 {
+                font-size: 0.95rem !important;
+                margin-bottom: 3px !important;
+                color: #ffffff !important;
+            }
+            .step-card p {
+                font-size: 0.78rem !important;
+                line-height: 1.45 !important;
+                color: #94a3b8 !important;
+            }
+
+            /* Mobile Menu Dropdown */
             .nav-links.mobile-show {
                 display: flex;
                 flex-direction: column;
                 position: absolute;
-                top: 56px;
+                top: 54px;
                 left: 0;
                 right: 0;
-                background: rgba(13, 13, 15, 0.98);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                padding: 1.2rem 1.4rem;
-                gap: 1rem;
+                background: rgba(13, 16, 24, 0.96);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                padding: 1.1rem 1.3rem;
+                gap: 0.9rem;
                 border-bottom: 2px solid var(--yellow);
                 box-shadow: 0 15px 35px rgba(0,0,0,0.85);
                 z-index: 1001;
             }
             .nav-links.mobile-show a {
-                font-size: 1.02rem;
+                font-size: 0.98rem;
                 padding: 4px 0;
                 display: block;
             }
 
-            /* Modals Mobile Touch & Scroll Optimization */
+            /* Modals Mobile Touch & Scroll */
             .modal-overlay {
                 padding: 0.5rem 0.5rem 1.5rem 0.5rem !important;
                 align-items: center !important;
@@ -1234,6 +1593,10 @@
                 max-height: 92vh !important;
                 max-height: 92dvh !important;
                 width: 100% !important;
+                background: linear-gradient(150deg, rgba(22, 27, 40, 0.88), rgba(12, 16, 24, 0.95)) !important;
+                backdrop-filter: blur(24px) !important;
+                -webkit-backdrop-filter: blur(24px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.15) !important;
             }
             .modal-title {
                 font-size: 1.35rem !important;
@@ -1252,6 +1615,7 @@
             .form-control {
                 padding: 10px 12px !important;
                 font-size: 0.9rem !important;
+                border-radius: 10px !important;
             }
             .modal-close {
                 top: 12px !important;
@@ -1369,6 +1733,9 @@
         <p class="section-subtitle">
             আপনার পছন্দের যেকোনো অনুমোদিত ব্রোকার ডেমোতে পরীক্ষা দিন। কোনো প্ল্যাটফর্ম বাধ্যবাধকতা নেই।
         </p>
+        <div class="broker-scroll-hint">
+            <span><i class="fas fa-arrows-left-right"></i> ব্রোকার দেখতে ডানে-বামে সোয়াইপ করুন</span>
+        </div>
         <div class="brokers-grid">
             <div class="broker-card glass">
                 <div class="broker-logo-box">
@@ -2987,31 +3354,31 @@
                         <div class="card-top" style="align-items:flex-start; margin-bottom:12px;">
                             <div>
                                 <span class="tier-name">${pkg.name}</span>
-                                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${pkg.badge}</div>
+                                <div class="tier-badge-sub" style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${pkg.badge}</div>
                             </div>
                             <div style="text-align:right;">
                                 ${pkg.hasDiscount ? `
                                     <!-- Original Price marked in Red strike-through -->
                                     <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px; margin-bottom:2px;">
-                                        <span style="font-size:1.1rem; font-weight:800; color:#ff4d4d; text-decoration:line-through; text-decoration-color:#ff3838; text-decoration-thickness:2px;">
+                                        <span class="card-orig-fee" style="font-size:1.1rem; font-weight:800; color:#ff4d4d; text-decoration:line-through; text-decoration-color:#ff3838; text-decoration-thickness:2px;">
                                             $${pkg.originalFee}
                                         </span>
-                                        <span style="background:rgba(255,77,77,0.22); color:#ff6b81; border:1px solid rgba(255,77,77,0.45); font-size:0.72rem; font-weight:800; padding:1px 6px; border-radius:4px; letter-spacing:0.3px;">
+                                        <span class="card-discount-badge" style="background:rgba(255,77,77,0.22); color:#ff6b81; border:1px solid rgba(255,77,77,0.45); font-size:0.72rem; font-weight:800; padding:1px 6px; border-radius:4px; letter-spacing:0.3px;">
                                             ${pkg.discountPercent}% OFF
                                         </span>
                                     </div>
                                     <!-- Discounted Price below it -->
-                                    <div style="font-size:1.9rem; font-weight:900; color:var(--neon-green); line-height:1.1;">
+                                    <div class="card-fee-val" style="font-size:1.9rem; font-weight:900; color:var(--neon-green); line-height:1.1;">
                                         $${pkg.fee} <span style="font-size:0.85rem; color:var(--text-muted); font-weight:400;">fee</span>
                                     </div>
-                                    <div style="font-size:0.7rem; color:var(--neon-green); font-weight:700; margin-top:2px;">
+                                    <div class="card-fee-sub" style="font-size:0.7rem; color:var(--neon-green); font-weight:700; margin-top:2px;">
                                         <i class="fas fa-tag"></i> ${pkg.discountTag || (globalPromo && globalPromo.discountTag) || 'লঞ্চ স্পেশাল ছাড়'}
                                     </div>
                                 ` : `
-                                    <div style="font-size:1.9rem; font-weight:900; color:var(--yellow); line-height:1.1;">
+                                    <div class="card-fee-val" style="font-size:1.9rem; font-weight:900; color:var(--yellow); line-height:1.1;">
                                         $${pkg.fee} <span style="font-size:0.85rem; color:var(--text-muted); font-weight:400;">fee</span>
                                     </div>
-                                    <div style="font-size:0.7rem; color:var(--text-muted); font-weight:500; margin-top:2px;">
+                                    <div class="card-fee-sub" style="font-size:0.7rem; color:var(--text-muted); font-weight:500; margin-top:2px;">
                                         রেগুলার ফি (Regular)
                                     </div>
                                 `}
