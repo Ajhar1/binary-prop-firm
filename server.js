@@ -4526,22 +4526,31 @@ function computeServerPlannedStake(mat, N, K, Q, m, k, curBal) {
 
 // 50-Cent Mathematical Rounding Stake Validator
 function getValidStakesForPlanned(planned) {
-  const floor = Math.floor(planned);
-  const ceil = Math.ceil(planned);
-  const cents = Math.round((planned - floor) * 100);
-  const valid = [planned];
-  if (cents <= 50) {
-    valid.push(floor);
+  const p = Math.round(Number(planned) * 100) / 100;
+  const floor = Math.floor(p);
+  const ceil = Math.ceil(p);
+  const cents = Math.round((p - floor) * 100);
+  const valid = [p];
+  // Rule 7: 50 cents or less can round down to floor; 50 cents or more can round up to ceil
+  // With +/- 5 cent safety buffer (45-55 cents) so boundary rounding is always protected
+  if (cents <= 55) {
+    if (!valid.includes(floor)) valid.push(floor);
   }
-  if (cents >= 50) {
-    valid.push(ceil);
+  if (cents >= 45) {
+    if (!valid.includes(ceil)) valid.push(ceil);
   }
   return valid;
 }
 
-function isStakeCompliantWithRule(planned, actual) {
-  const actualNum = parseFloat(actual) || 0;
+function isStakeCompliantWithRule(planned, actual, alternativePlanned = null) {
+  const actualNum = Math.round(parseFloat(actual) * 100) / 100 || 0;
   const validStakes = getValidStakesForPlanned(planned);
+  if (alternativePlanned != null && alternativePlanned > 0) {
+    const altValid = getValidStakesForPlanned(alternativePlanned);
+    altValid.forEach(v => {
+      if (!validStakes.includes(v)) validStakes.push(v);
+    });
+  }
   return validStakes.some(v => Math.abs(actualNum - v) < 0.05);
 }
 
@@ -4673,12 +4682,18 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
     const mat = buildServerMasanielloMatrix(16, 6, 1.85);
     let runningCashier = sessionStartingCapital;
+    let theoreticalCashier = sessionStartingCapital;
     let wins = 0;
     let losses = 0;
     const auditedTrades = [];
     const violations = [];
     let sessionComplete = false;
     let completionReason = '';
+
+    // Extract client session trade logs if provided by dashboard
+    const clientTradeLogs = (req.body.clientSessionData && Array.isArray(req.body.clientSessionData.tradeLogs))
+      ? req.body.clientSessionData.tradeLogs
+      : [];
 
     for (let idx = 0; idx < candidateTrades.length; idx++) {
       const t = candidateTrades[idx];
@@ -4720,13 +4735,39 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         break;
       }
 
-      const plannedStake = computeServerPlannedStake(mat, 16, 6, 1.85, m, wins, runningCashier);
+      // 1. Primary Planned Stake: strictly follows the Money Management Sheet's theoretical Masaniello progression
+      const theoreticalPlannedStake = computeServerPlannedStake(mat, 16, 6, 1.85, m, wins, theoreticalCashier);
+
+      // Also check client sheet log stake (if client sent it) and cashier-based stake (just in case)
+      const clientSheetStake = (clientTradeLogs[m] && typeof clientTradeLogs[m].stake === 'number' && clientTradeLogs[m].stake > 0)
+        ? clientTradeLogs[m].stake
+        : null;
+      const cashierPlannedStake = computeServerPlannedStake(mat, 16, 6, 1.85, m, wins, runningCashier);
+
+      // Planned stake to display in audit report matches the theoretical sheet stake (or client sheet log)
+      const plannedStake = (clientSheetStake != null && Math.abs(clientSheetStake - theoreticalPlannedStake) < 0.05)
+        ? clientSheetStake
+        : theoreticalPlannedStake;
+
       const actualStake = parseFloat(t.amount) || 0;
-      const isCompliant = isStakeCompliantWithRule(plannedStake, actualStake);
+
+      // Collect all authorized stakes for compliance
+      const validStakes = getValidStakesForPlanned(plannedStake);
+      if (clientSheetStake != null && clientSheetStake > 0) {
+        getValidStakesForPlanned(clientSheetStake).forEach(v => {
+          if (!validStakes.includes(v)) validStakes.push(v);
+        });
+      }
+      if (cashierPlannedStake != null && cashierPlannedStake > 0) {
+        getValidStakesForPlanned(cashierPlannedStake).forEach(v => {
+          if (!validStakes.includes(v)) validStakes.push(v);
+        });
+      }
+
+      const isCompliant = validStakes.some(v => Math.abs(actualStake - v) < 0.05);
       const tradeNum = m + 1;
 
-      const validStakes = getValidStakesForPlanned(plannedStake);
-      const expectedText = plannedStake % 1 === 0 ? `$${plannedStake}` : `$${validStakes.join(' বা $')}`;
+      const expectedText = plannedStake % 1 === 0 ? `$${plannedStake}` : `$${getValidStakesForPlanned(plannedStake).join(' বা $')}`;
 
       if (!isCompliant) {
         violations.push(`ট্রেড #${tradeNum}: Planned Stake ছিল $${plannedStake.toFixed(2)} (${expectedText}), কিন্তু কোটেক্সে ট্রেড ওপেন করা হয়েছে $${actualStake.toFixed(2)}।`);
@@ -4752,10 +4793,17 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         const gross = parseFloat(t.profit) || 0;
         tradeNetPnl = (gross > actualStake) ? (gross - actualStake) : gross;
         runningCashier = Math.round((runningCashier + tradeNetPnl) * 100) / 100;
+
+        // Advance theoretical balance exactly according to Masaniello sheet formula (Q=1.85)
+        const theoreticalReturn = Math.round(plannedStake * (1.85 - 1) * 100) / 100;
+        theoreticalCashier = Math.round((theoreticalCashier + theoreticalReturn) * 100) / 100;
         wins++;
       } else {
         tradeNetPnl = -actualStake;
         runningCashier = Math.round((runningCashier - actualStake) * 100) / 100;
+
+        // Advance theoretical balance exactly according to Masaniello sheet formula
+        theoreticalCashier = Math.round((theoreticalCashier - plannedStake) * 100) / 100;
         losses++;
       }
 
@@ -4794,7 +4842,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         sessionComplete = true;
         completionReason = 'TARGET_6_WINS_REACHED';
       } else {
-        const nextPlanned = computeServerPlannedStake(mat, 16, 6, 1.85, m + 1, wins, runningCashier);
+        const nextPlanned = computeServerPlannedStake(mat, 16, 6, 1.85, m + 1, wins, theoreticalCashier);
         const remainingDrawdownBuffer = Math.max(0, runningCashier - drawdownFloor);
         const maxDrawdownDollar = sessionStartingCapital * 0.25;
 
@@ -4828,7 +4876,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     }
 
     // Comprehensive 25% Maximum Drawdown & Buffer Exhaustion Guard
-    const finalNextPlanned = computeServerPlannedStake(mat, 16, 6, 1.85, wins + losses, wins, runningCashier);
+    const finalNextPlanned = computeServerPlannedStake(mat, 16, 6, 1.85, wins + losses, wins, theoreticalCashier);
     const currentDrawdownBuffer = Math.max(0, Math.round((runningCashier - drawdownFloor) * 100) / 100);
     const maxDrawdownAllowedDollar = Math.round(sessionStartingCapital * 0.25 * 100) / 100;
     const totalLossDollar = Math.abs(Math.round((sessionStartingCapital - runningCashier) * 100) / 100);
