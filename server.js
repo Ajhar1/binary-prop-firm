@@ -4531,26 +4531,20 @@ function getValidStakesForPlanned(planned) {
   const ceil = Math.ceil(p);
   const cents = Math.round((p - floor) * 100);
   const valid = [p];
-  // Rule 7: 50 cents or less can round down to floor; 50 cents or more can round up to ceil
-  // With +/- 5 cent safety buffer (45-55 cents) so boundary rounding is always protected
-  if (cents <= 55) {
+  // Rule 7: ৫০ সেন্ট বা তার কম থাকলে ফ্লোর (যেমন: $35.49 হলে অবশ্যই $35, $36 নেওয়া যাবে না)
+  // ৫০ সেন্টের বেশি থাকলে পরবর্তী পূর্ণ ডলারে রাউন্ড (যেমন: $35.55 হলে $36)
+  if (cents <= 50) {
     if (!valid.includes(floor)) valid.push(floor);
   }
-  if (cents >= 45) {
+  if (cents >= 50) {
     if (!valid.includes(ceil)) valid.push(ceil);
   }
   return valid;
 }
 
-function isStakeCompliantWithRule(planned, actual, alternativePlanned = null) {
+function isStakeCompliantWithRule(planned, actual) {
   const actualNum = Math.round(parseFloat(actual) * 100) / 100 || 0;
   const validStakes = getValidStakesForPlanned(planned);
-  if (alternativePlanned != null && alternativePlanned > 0) {
-    const altValid = getValidStakesForPlanned(alternativePlanned);
-    altValid.forEach(v => {
-      if (!validStakes.includes(v)) validStakes.push(v);
-    });
-  }
   return validStakes.some(v => Math.abs(actualNum - v) < 0.05);
 }
 
@@ -4751,15 +4745,10 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
       const actualStake = parseFloat(t.amount) || 0;
 
-      // Collect all authorized stakes for compliance
+      // Collect authorized stakes strictly according to the Money Management Sheet's plannedStake
       const validStakes = getValidStakesForPlanned(plannedStake);
-      if (clientSheetStake != null && clientSheetStake > 0) {
+      if (clientSheetStake != null && clientSheetStake > 0 && Math.abs(clientSheetStake - plannedStake) < 0.05) {
         getValidStakesForPlanned(clientSheetStake).forEach(v => {
-          if (!validStakes.includes(v)) validStakes.push(v);
-        });
-      }
-      if (cashierPlannedStake != null && cashierPlannedStake > 0) {
-        getValidStakesForPlanned(cashierPlannedStake).forEach(v => {
           if (!validStakes.includes(v)) validStakes.push(v);
         });
       }
