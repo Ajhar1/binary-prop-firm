@@ -1067,12 +1067,12 @@
             .navbar {
                 width: 100% !important;
                 max-width: 100% !important;
-                padding: 0.65rem 0.8rem !important;
+                padding: 0.5rem 0.55rem !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: space-between !important;
-                gap: 6px !important;
-                background: rgba(10, 14, 22, 0.9) !important;
+                gap: 4px !important;
+                background: rgba(10, 14, 22, 0.92) !important;
                 backdrop-filter: blur(20px) saturate(180%) !important;
                 -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -1081,19 +1081,23 @@
             .logo {
                 display: flex !important;
                 align-items: center !important;
-                gap: 6px !important;
+                gap: 4px !important;
                 text-decoration: none !important;
                 flex-shrink: 0 !important;
+                min-width: 0 !important;
             }
-            .logo-icon {
-                width: 32px !important;
-                height: 32px !important;
-                font-size: 0.95rem !important;
+            .logo-icon,
+            .logo img {
+                width: 28px !important;
+                height: 28px !important;
+                min-width: 28px !important;
+                font-size: 0.9rem !important;
                 border-radius: 8px !important;
                 flex-shrink: 0 !important;
+                box-shadow: 0 0 10px rgba(245, 176, 65, 0.3) !important;
             }
             .logo-text {
-                font-size: 1.12rem !important;
+                font-size: clamp(0.82rem, 2.7vw, 1rem) !important;
                 font-weight: 900 !important;
                 color: #ffffff !important;
                 background: none !important;
@@ -1102,6 +1106,7 @@
                 background-clip: initial !important;
                 text-shadow: 0 1px 8px rgba(245, 176, 65, 0.5) !important;
                 white-space: nowrap !important;
+                letter-spacing: -0.2px !important;
             }
             .nav-links {
                 display: none;
@@ -1109,35 +1114,51 @@
             .nav-buttons {
                 display: flex !important;
                 align-items: center !important;
-                gap: 6px !important;
+                gap: 4px !important;
                 margin-left: auto !important;
+                flex-shrink: 0 !important;
             }
             .nav-buttons .btn-outline {
-                padding: 6px 9px !important;
-                font-size: 0.74rem !important;
-                border-radius: 8px !important;
+                padding: 4px 7px !important;
+                font-size: 0.70rem !important;
+                font-weight: 700 !important;
+                border-radius: 7px !important;
                 white-space: nowrap !important;
                 border: 1px solid var(--yellow) !important;
                 color: var(--yellow) !important;
                 background: rgba(245, 176, 65, 0.08) !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 3px !important;
+                flex-shrink: 0 !important;
             }
             .nav-buttons .btn-primary {
-                padding: 6px 10px !important;
-                font-size: 0.74rem !important;
-                border-radius: 8px !important;
+                padding: 4px 8px !important;
+                font-size: 0.70rem !important;
+                font-weight: 700 !important;
+                border-radius: 7px !important;
                 white-space: nowrap !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 3px !important;
+                flex-shrink: 0 !important;
+            }
+            .nav-buttons .btn-outline i,
+            .nav-buttons .btn-primary i {
+                font-size: 0.68rem !important;
             }
             .mobile-menu-btn {
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                width: 32px !important;
-                height: 32px !important;
-                font-size: 1.25rem !important;
+                width: 28px !important;
+                height: 28px !important;
+                min-width: 28px !important;
+                font-size: 1.15rem !important;
                 color: var(--yellow) !important;
                 background: rgba(245, 176, 65, 0.1) !important;
                 border: 1px solid rgba(245, 176, 65, 0.28) !important;
-                border-radius: 8px !important;
+                border-radius: 7px !important;
                 cursor: pointer !important;
                 flex-shrink: 0 !important;
             }
@@ -1816,6 +1837,40 @@
             }
         }
         @media (max-width: 360px) {
+            .navbar {
+                padding: 0.45rem 0.35rem !important;
+                gap: 3px !important;
+            }
+            .logo {
+                gap: 3px !important;
+            }
+            .logo-icon,
+            .logo img {
+                width: 25px !important;
+                height: 25px !important;
+                min-width: 25px !important;
+            }
+            .logo-text {
+                font-size: 0.78rem !important;
+                letter-spacing: -0.3px !important;
+            }
+            .nav-buttons {
+                gap: 3px !important;
+            }
+            .nav-buttons .btn-outline {
+                padding: 4px 5px !important;
+                font-size: 0.66rem !important;
+            }
+            .nav-buttons .btn-primary {
+                padding: 4px 6px !important;
+                font-size: 0.66rem !important;
+            }
+            .mobile-menu-btn {
+                width: 26px !important;
+                height: 26px !important;
+                min-width: 26px !important;
+                font-size: 1.05rem !important;
+            }
             .promo-countdown-wrapper {
                 padding: 0.7rem 0.35rem !important;
             }
