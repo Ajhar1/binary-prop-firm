@@ -1473,8 +1473,29 @@ function syncChallengesWithSubmissions() {
         }
       });
 
-      // Sync evaluation mode current capital with official trade balance
-      if (c.challengePhase === 'evaluation') {
+      // Sync challenge currentCapital with completed session trade balance (Profit Compounding)
+      const practiceNonRejectedSubs = practiceSubs.filter(s => s.status !== 'rejected');
+      const practiceSortedSubs = [...practiceNonRejectedSubs].sort((a, b) => new Date(a.submittedAt || a.sessionDate) - new Date(b.submittedAt || b.sessionDate));
+      let practiceRunningBal = capital;
+      practiceSortedSubs.forEach(s => {
+        practiceRunningBal += (parseFloat(s.profitLoss) || 0);
+      });
+      practiceRunningBal = Math.round(practiceRunningBal * 100) / 100;
+      runningBal = Math.round(runningBal * 100) / 100;
+
+      if (c.challengePhase === 'practice') {
+        if (practiceNonRejectedSubs.length === 0) {
+          if (c.currentCapital !== capital) {
+            c.currentCapital = capital;
+            modified = true;
+          }
+        } else {
+          if (c.currentCapital !== practiceRunningBal) {
+            c.currentCapital = practiceRunningBal;
+            modified = true;
+          }
+        }
+      } else if (c.challengePhase === 'evaluation') {
         if (officialNonRejectedSubs.length === 0) {
           if (c.currentCapital !== capital) {
             c.currentCapital = capital;

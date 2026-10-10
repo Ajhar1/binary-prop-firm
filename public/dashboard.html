@@ -5072,7 +5072,46 @@
             }
         }
 
-        // Check Money Management Eligibility & Sync Challenge Capital
+        // Helper: Calculate Exact Compounded Starting Capital for Current Session (Profit Compounding)
+        function getActiveChallengeCurrentCapital(activeChallenge) {
+            if (!activeChallenge) return 100;
+            const baseFunded = Number(activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
+            
+            // Submissions belonging to this challenge
+            const allSubs = (Array.isArray(allMySubmissions) && allMySubmissions.length > 0) 
+                ? allMySubmissions 
+                : (Array.isArray(mySubmissions) ? mySubmissions : []);
+
+            const challengeSubs = allSubs.filter(s => 
+                (s.challengeId ? s.challengeId === activeChallenge.id : s.userId === activeChallenge.userId) &&
+                s.status !== 'rejected'
+            );
+
+            const practiceCompleted = activeChallenge.practiceSessionsCompleted !== undefined 
+                ? activeChallenge.practiceSessionsCompleted 
+                : challengeSubs.filter(s => s.isPractice).length;
+            const isPractice = (activeChallenge.challengePhase === 'practice' && practiceCompleted < 3);
+            const relevantSubs = challengeSubs.filter(s => isPractice ? (s.isPractice === true) : (s.isPractice !== true));
+
+            // Sort chronologically oldest first
+            const sortedSubs = [...relevantSubs].sort((a, b) => new Date(a.submittedAt || a.sessionDate || 0) - new Date(b.submittedAt || b.sessionDate || 0));
+
+            let accumulatedPnl = 0;
+            sortedSubs.forEach(s => {
+                accumulatedPnl += (parseFloat(s.profitLoss) || 0);
+            });
+
+            const calculatedCap = Math.round((baseFunded + accumulatedPnl) * 100) / 100;
+
+            const serverCap = Number(activeChallenge.currentCapital);
+            if (!isNaN(serverCap) && serverCap > 0 && Math.abs(serverCap - calculatedCap) < 0.05) {
+                return serverCap;
+            }
+
+            return calculatedCap;
+        }
+
+        // Check Money Management Eligibility & Sync Challenge Capital (Profit Compounding)
         function checkMoneyManagementEligibility() {
             const lockedCard = document.getElementById('masSheetLockedCard');
             const activeContainer = document.getElementById('masSheetActiveContainer');
@@ -5111,25 +5150,51 @@
             lockedCard.style.display = 'none';
             activeContainer.style.display = 'block';
 
-            const challengeFunded = Number(activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
+            const baseFunded = Number(activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
+            const currentAccCapital = getActiveChallengeCurrentCapital(activeChallenge);
+            const profitDiff = Math.round((currentAccCapital - baseFunded) * 100) / 100;
 
             if (badge) {
-                badge.innerHTML = `<i class="fas fa-check-circle"></i> এক্টিভ চ্যালেঞ্জ: ${activeChallenge.packageName || 'Challenge'} ($${challengeFunded.toLocaleString()})`;
+                badge.innerHTML = `<i class="fas fa-check-circle"></i> এক্টিভ চ্যালেঞ্জ: ${activeChallenge.packageName || 'Challenge'} (বর্তমান ক্যাপিটাল: $${currentAccCapital.toFixed(2)})`;
             }
             if (capSub) {
-                capSub.innerHTML = `🎯 ${activeChallenge.packageName || 'চ্যালেঞ্জ'} অনুযায়ী ক্যাপিটাল সেট করা হয়েছে ($${challengeFunded.toLocaleString()})`;
+                if (profitDiff !== 0) {
+                    const sign = profitDiff > 0 ? '+' : '';
+                    capSub.innerHTML = `🎯 এক্টিভ ক্যাপিটাল: <strong>$${currentAccCapital.toFixed(2)}</strong> (মূল $${baseFunded} এবং পূর্ববর্তী সেশনের P&L ${sign}$${profitDiff.toFixed(2)} স্বয়ংক্রিয় যুক্ত)`;
+                } else {
+                    capSub.innerHTML = `🎯 ${activeChallenge.packageName || 'চ্যালেঞ্জ'} অনুযায়ী ক্যাপিটাল সেট করা হয়েছে ($${baseFunded.toLocaleString()})`;
+                }
             }
 
-            // Sync capital if session is fresh (history is empty)
-            if (!masState.capital || masState.history.length === 0) {
-                masState.capital = challengeFunded;
-                if (capInput) capInput.value = challengeFunded;
+            // Sync capital if session is fresh (history is empty) OR if still holding old baseFunded
+            if (!masState.capital || masState.history.length === 0 || masState.capital === baseFunded) {
+                masState.capital = currentAccCapital;
+                if (capInput) capInput.value = currentAccCapital;
                 saveMasanielloState();
             } else if (capInput && (!capInput.value || Number(capInput.value) <= 0)) {
-                capInput.value = masState.capital || challengeFunded;
+                capInput.value = masState.capital || currentAccCapital;
+            }
+
+            // Also synchronize free test capital default if user has active challenge
+            const freeCapInput = document.getElementById('freeMasCapital');
+            const freeCapSub = document.getElementById('freeMasCapitalSubtext');
+            if (freeCapInput && (!freeMasState.history || freeMasState.history.length === 0)) {
+                if (!freeMasState.capital || freeMasState.capital === 100 || freeMasState.capital === baseFunded) {
+                    freeMasState.capital = currentAccCapital;
+                    freeCapInput.value = currentAccCapital;
+                    saveFreeMasState();
+                }
+                if (freeCapSub) {
+                    if (profitDiff !== 0) {
+                        freeCapSub.innerHTML = `🎯 এক্টিভ চ্যালেঞ্জ অনুযায়ী অটো-সিঙ্ক: <strong>$${currentAccCapital.toFixed(2)}</strong> (পূর্ববর্তী সেশনের P&L যুক্ত)`;
+                    } else {
+                        freeCapSub.innerHTML = `🎯 ওপেন — যেকোনো ব্যালেন্স লিখুন (এক্টিভ চ্যালেঞ্জ: $${baseFunded})`;
+                    }
+                }
             }
 
             calculateAndRenderMasaniello();
+            calculateAndRenderFreeMasaniello();
         }
 
         // Fetch Submissions
@@ -5191,6 +5256,8 @@
             renderResubmissionAlerts();
             updateProfileStats();
             renderMyChallengesTab();
+            checkMoneyManagementEligibility();
+            updateAuditCardInfo();
         }
 
         // ==================== MY CHALLENGES & HISTORY TAB RENDERING ====================
@@ -6325,12 +6392,20 @@
             const extStatusEl = document.getElementById('auditCardExtensionStatus');
 
             if (sessionNumEl && activeChallenge) {
-                const sNum = (activeChallenge.sessionsCompleted || 0) + 1;
-                sessionNumEl.innerText = `সেশন #${sNum}`;
+                const practiceCompleted = activeChallenge.practiceSessionsCompleted !== undefined 
+                    ? activeChallenge.practiceSessionsCompleted 
+                    : (mySubmissions ? mySubmissions.filter(s => s.isPractice).length : 0);
+                const isPractice = (activeChallenge.challengePhase === 'practice' && practiceCompleted < 3);
+                if (isPractice) {
+                    sessionNumEl.innerText = `প্র্যাকটিস #${practiceCompleted + 1}`;
+                } else {
+                    const sNum = (activeChallenge.sessionsCompleted || 0) + 1;
+                    sessionNumEl.innerText = `সেশন #${sNum}`;
+                }
             }
             if (startingCapEl && activeChallenge) {
-                const cap = Number(activeChallenge.currentCapital || activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
-                startingCapEl.innerText = `$${cap.toFixed(2)}`;
+                const currentAccCap = getActiveChallengeCurrentCapital(activeChallenge);
+                startingCapEl.innerText = `$${currentAccCap.toFixed(2)}`;
             }
             if (extStatusEl) {
                 if (window.isExtensionLiveConnected) {
@@ -6705,11 +6780,17 @@
                 masState.capital = newCapital;
                 const capInp = document.getElementById('masCapital');
                 if (capInp) capInp.value = newCapital;
+
+                freeMasState.capital = newCapital;
+                const freeCapInp = document.getElementById('freeMasCapital');
+                if (freeCapInp) freeCapInp.value = newCapital;
+                saveFreeMasState();
             }
             masState.history = [];
             localStorage.removeItem('aj_funded_mas_pending_proof');
             saveMasanielloState({ pendingProof: null });
             calculateAndRenderMasaniello();
+            calculateAndRenderFreeMasaniello();
             switchTab('overview');
             showToast('পরবর্তী সেশন ফ্রেশ নতুন ব্যালেন্স নিয়ে প্রস্তুত হয়েছে!', 'success');
         }
@@ -7917,10 +7998,10 @@
             }
             const activeChallenge = (myChallenges || []).find(c => c.status === 'in_progress');
             if (activeChallenge) {
-                const challengeFunded = Number(activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
-                masState.capital = challengeFunded;
+                const currentAccCapital = getActiveChallengeCurrentCapital(activeChallenge);
+                masState.capital = currentAccCapital;
                 const inpCap = document.getElementById('masCapital');
-                if (inpCap) inpCap.value = challengeFunded;
+                if (inpCap) inpCap.value = currentAccCapital;
             }
             masState.history = [];
             localStorage.removeItem('aj_funded_mas_pending_proof');
@@ -8389,6 +8470,18 @@
                 if (btnFree) btnFree.classList.add('active');
                 if (containerChallenge) containerChallenge.style.display = 'none';
                 if (containerFree) containerFree.style.display = 'block';
+
+                const activeChallenge = (myChallenges || []).find(c => c.status === 'in_progress');
+                if (activeChallenge && (!freeMasState.history || freeMasState.history.length === 0)) {
+                    const currentAccCapital = getActiveChallengeCurrentCapital(activeChallenge);
+                    const baseFunded = Number(activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
+                    if (!freeMasState.capital || freeMasState.capital === 100 || freeMasState.capital === baseFunded) {
+                        freeMasState.capital = currentAccCapital;
+                        const freeCap = document.getElementById('freeMasCapital');
+                        if (freeCap) freeCap.value = currentAccCapital;
+                        saveFreeMasState();
+                    }
+                }
                 calculateAndRenderFreeMasaniello();
             } else {
                 if (btnChallenge) btnChallenge.classList.add('active');
@@ -8480,12 +8573,19 @@
 
         function resetFreeMasSession() {
             if (freeMasState.history && freeMasState.history.length > 0) {
-                if (!confirm('আপনি কি টেস্ট সেশনটি রিসেট করে প্রথম থেকে শুরু করতে চান?')) return;
+                if (!confirm('আপনি কি টেস্ট সেশনটি রিসেট করে নতুন সেশন শুরু করতে চান?')) return;
+            }
+            const activeChallenge = (myChallenges || []).find(c => c.status === 'in_progress');
+            if (activeChallenge) {
+                const currentAccCapital = getActiveChallengeCurrentCapital(activeChallenge);
+                freeMasState.capital = currentAccCapital;
+                const freeCap = document.getElementById('freeMasCapital');
+                if (freeCap) freeCap.value = currentAccCapital;
             }
             freeMasState.history = [];
             saveFreeMasState();
             calculateAndRenderFreeMasaniello();
-            showToast('টেস্ট সেশন রিসেট করা হয়েছে', 'success');
+            showToast('টেস্ট সেশন ফ্রেশ রিসেট সফল হয়েছে', 'success');
         }
 
         function calculateAndRenderFreeMasaniello() {
