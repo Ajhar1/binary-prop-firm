@@ -3559,6 +3559,23 @@
                     </select>
                 </div>
 
+                <div class="form-group" style="margin-bottom:1.1rem; background:rgba(255,255,255,0.03); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px 14px;">
+                    <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span><i class="fas fa-ticket-alt" style="color:var(--yellow); margin-right:4px;"></i> Have a Promo Code? (প্রোমো কোড আছে?)</span>
+                        <span id="dashPromoSuccessTag" style="display:none; font-size:0.75rem; color:#2ecc71; font-weight:700;"><i class="fas fa-check-circle"></i> ডিসকাউন্ট প্রযোজ্য</span>
+                    </label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" class="form-control" id="dashBuyPromoCodeInput" placeholder="কুপন বা প্রোমো কোড দিন (e.g. SAVE20)" style="text-transform:uppercase; font-weight:700; letter-spacing:1px; font-size:0.9rem;" />
+                        <button type="button" id="dashBuyApplyPromoBtn" onclick="applyDashPromoCode()" class="btn-gold" style="padding:0 18px; white-space:nowrap; font-weight:700; font-size:0.88rem; flex-shrink:0;">
+                            Apply
+                        </button>
+                        <button type="button" id="dashBuyRemovePromoBtn" onclick="removeDashPromoCode()" class="btn-outline" style="display:none; padding:0 14px; white-space:nowrap; border-color:#e74c3c; color:#e74c3c; font-weight:700; font-size:0.85rem; flex-shrink:0;">
+                            Remove
+                        </button>
+                    </div>
+                    <div id="dashBuyPromoMessage" style="display:none; margin-top:6px; font-size:0.82rem; font-weight:600;"></div>
+                </div>
+
                 <div id="dashPaymentInstructionBox" style="background:rgba(245,176,65,0.06); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px 14px; margin-bottom:1.2rem; font-size:0.88rem;">
                     <!-- Populated dynamically by JS -->
                 </div>
@@ -7073,6 +7090,7 @@
                 document.getElementById('dashBuyBrokerAccountId').value = currentUser.brokerAccountId;
             }
 
+            removeDashPromoCode(false);
             renderDashPaymentInstruction();
             const dashModalEl = document.getElementById('dashBuyModal');
             dashModalEl.classList.add('active');
@@ -7115,6 +7133,95 @@
             }
         }
 
+        // ==========================================
+        // DASHBOARD PROMO CODE APPLICATION
+        // ==========================================
+        let dashAppliedPromoData = null;
+
+        async function applyDashPromoCode() {
+            const input = document.getElementById('dashBuyPromoCodeInput');
+            const msgEl = document.getElementById('dashBuyPromoMessage');
+            const applyBtn = document.getElementById('dashBuyApplyPromoBtn');
+            const removeBtn = document.getElementById('dashBuyRemovePromoBtn');
+            const successTag = document.getElementById('dashPromoSuccessTag');
+            const packageId = document.getElementById('dashSelectedPackageId')?.value;
+
+            if (!input || !input.value.trim()) {
+                showToast('অনুগ্রহ করে প্রোমো কোড লিখুন', 'error');
+                return;
+            }
+
+            const code = input.value.trim().toUpperCase();
+            applyBtn.disabled = true;
+            applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                const res = await fetch('/api/promo-codes/validate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, packageId })
+                });
+                const data = await res.json();
+                if (data.success && data.valid) {
+                    dashAppliedPromoData = {
+                        ...data.promo,
+                        discountAmount: data.discountAmount,
+                        finalFee: data.finalFee,
+                        baseFee: data.baseFee
+                    };
+                    input.value = dashAppliedPromoData.code;
+                    input.readOnly = true;
+                    applyBtn.style.display = 'none';
+                    removeBtn.style.display = 'inline-block';
+                    if (successTag) successTag.style.display = 'inline-block';
+                    if (msgEl) {
+                        msgEl.style.display = 'block';
+                        msgEl.style.color = '#2ecc71';
+                        msgEl.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message || 'প্রোমো কোড সফলভাবে যোগ করা হয়েছে!'}`;
+                    }
+                    showToast(`🎉 "${dashAppliedPromoData.code}" কার্যকর হয়েছে! $${data.discountAmount} ছাড় পেয়েছেন।`, 'success');
+                    renderDashPaymentInstruction();
+                } else {
+                    dashAppliedPromoData = null;
+                    if (msgEl) {
+                        msgEl.style.display = 'block';
+                        msgEl.style.color = '#e74c3c';
+                        msgEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message || 'প্রোমো কোডটি সঠিক নয়।'}`;
+                    }
+                    showToast(data.message || 'প্রোমো কোডটি সঠিক নয় বা মেয়াদ শেষ।', 'error');
+                }
+            } catch (err) {
+                showToast('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।', 'error');
+            } finally {
+                applyBtn.disabled = false;
+                applyBtn.innerHTML = 'Apply';
+            }
+        }
+
+        function removeDashPromoCode(rerender = true) {
+            dashAppliedPromoData = null;
+            const input = document.getElementById('dashBuyPromoCodeInput');
+            const msgEl = document.getElementById('dashBuyPromoMessage');
+            const applyBtn = document.getElementById('dashBuyApplyPromoBtn');
+            const removeBtn = document.getElementById('dashBuyRemovePromoBtn');
+            const successTag = document.getElementById('dashPromoSuccessTag');
+
+            if (input) {
+                input.value = '';
+                input.readOnly = false;
+            }
+            if (applyBtn) applyBtn.style.display = 'inline-block';
+            if (removeBtn) removeBtn.style.display = 'none';
+            if (successTag) successTag.style.display = 'none';
+            if (msgEl) {
+                msgEl.style.display = 'none';
+                msgEl.innerHTML = '';
+            }
+            if (rerender) {
+                renderDashPaymentInstruction();
+            }
+        }
+
         function renderDashPaymentInstruction() {
             const select = document.getElementById('dashBuyPaymentMethod');
             const box = document.getElementById('dashPaymentInstructionBox');
@@ -7126,6 +7233,7 @@
             const pkgId = document.getElementById('dashSelectedPackageId').value;
             const pkg = allPackages.find(p => p.id === pkgId);
             const pkgFee = pkg ? Number(pkg.fee) : 7;
+            const effectiveFee = (dashAppliedPromoData && typeof dashAppliedPromoData.finalFee === 'number') ? dashAppliedPromoData.finalFee : pkgFee;
 
             const senderGroup = document.getElementById('dashSenderNumberGroup');
             const senderInput = document.getElementById('dashBuySenderNumber');
@@ -7141,23 +7249,31 @@
                 const sym = pm.currencySymbol || (curr === 'BDT' ? '৳' : (curr === 'USD' ? '$' : curr));
                 const rate = Number(pm.exchangeRate) || (curr === 'BDT' ? 125 : 1);
                 const isLocalCurrency = curr !== 'USD' && rate !== 1;
-                const localAmount = isLocalCurrency ? Math.round(pkgFee * rate) : pkgFee;
+                const localAmount = isLocalCurrency ? Math.round(effectiveFee * rate) : effectiveFee;
                 const flag = countryCode === 'GLOBAL' ? '🌐' : (window.WORLD_COUNTRIES?.find(c => c.code === countryCode)?.flag || '🏳️');
 
-                // Dynamic Button Text per Requirement 2:
-                // "Pay $7 & start challenge যেখানে লেখা আছে এখানে ডলারের জায়গায় যেন টাকা শো হয় এডমিন প্যানেলে প্রতি ডলারের মূল্য যত টাকা করে দেওয়া আছে ওই অনুযায়ী"
                 if (submitBtn) {
                     if (isLocalCurrency) {
                         submitBtn.innerHTML = `<i class="fas fa-credit-card"></i> Pay ${sym}${localAmount.toLocaleString()} & Start Challenge`;
                     } else {
-                        submitBtn.innerHTML = `<i class="fas fa-credit-card"></i> Pay $${pkgFee} & Start Challenge`;
+                        submitBtn.innerHTML = `<i class="fas fa-credit-card"></i> Pay $${effectiveFee} & Start Challenge`;
                     }
                 }
 
                 // Dynamic subtitle update showing local amount
                 const subTitle = document.getElementById('dashBuyModalSubtitle');
                 if (subTitle && pkg) {
-                    if (pkg.hasDiscount) {
+                    if (dashAppliedPromoData) {
+                        subTitle.innerHTML = `
+                            ফি: <span style="font-size:1rem; font-weight:700; color:#ff4d4d; text-decoration:line-through; text-decoration-color:#ff3838; text-decoration-thickness:2px;">$${pkgFee}</span> 
+                            <strong style="color:var(--neon-green); font-size:1.35rem; margin-left:6px;">$${effectiveFee}</strong>
+                            ${isLocalCurrency ? `<strong style="color:var(--yellow); font-size:1.2rem; margin-left:6px;">(${sym}${localAmount.toLocaleString()} ${curr})</strong>` : ''}
+                            <span style="background:rgba(46,204,113,0.18); color:#2ecc71; border:1px solid #2ecc71; padding:2px 7px; border-radius:4px; font-size:0.75rem; font-weight:800; margin-left:6px;">
+                                🏷️ ${dashAppliedPromoData.code} (${dashAppliedPromoData.discountType === 'percentage' ? dashAppliedPromoData.discountValue + '% OFF' : '$' + dashAppliedPromoData.discountValue + ' OFF'})
+                            </span>
+                            • প্রফিট স্প্লিট: <strong style="color:var(--yellow);">${pkg.profitSplit}</strong>
+                        `;
+                    } else if (pkg.hasDiscount) {
                         subTitle.innerHTML = `
                             ফি (Evaluation Fee): <span style="font-size:1.05rem; font-weight:800; color:#ff4d4d; text-decoration:line-through; text-decoration-color:#ff3838; text-decoration-thickness:2px;">$${pkg.originalFee}</span> 
                             <strong style="color:var(--neon-green); font-size:1.35rem; margin-left:6px;">$${pkg.fee}</strong>
@@ -7204,20 +7320,26 @@
                             <div style="display:flex; align-items:baseline; gap:6px;">
                                 <strong style="color:var(--neon-green); font-size:1.35rem; font-weight:900;">${sym}${localAmount.toLocaleString()}</strong>
                                 <span style="color:#fff; font-size:0.85rem; font-weight:700;">${curr}</span>
-                                <span style="color:#aaa; font-size:0.78rem; margin-left:4px;">($${pkgFee} USD)</span>
+                                <span style="color:#aaa; font-size:0.78rem; margin-left:4px;">($${effectiveFee} USD)</span>
+                                ${dashAppliedPromoData ? `<span style="font-size:0.78rem; text-decoration:line-through; color:#e74c3c;">($${pkgFee} USD)</span>` : ''}
                             </div>
                         </div>
                         <div style="text-align:right;">
                             <span style="background:rgba(245,176,65,0.18); color:var(--yellow); border:1px solid rgba(245,176,65,0.4); padding:3px 10px; border-radius:6px; font-size:0.78rem; font-weight:800;">
                                 রেট: 1 USD = ${rate} ${sym} (${curr})
                             </span>
+                            ${dashAppliedPromoData ? `<div style="margin-top:4px;"><span style="background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid #2ecc71; padding:2px 8px; border-radius:4px; font-size:0.74rem; font-weight:700;">🏷️ ${dashAppliedPromoData.code} (${dashAppliedPromoData.discountType === 'percentage' ? dashAppliedPromoData.discountValue + '% OFF' : '$' + dashAppliedPromoData.discountValue + ' OFF'})</span></div>` : ''}
                         </div>
                     </div>
                 ` : `
                     <div style="background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.25); border-radius:10px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
                         <div>
                             <span style="font-size:0.78rem; color:var(--text-secondary); display:block;">পরিশোধযোগ্য মোট ফি:</span>
-                            <strong style="color:var(--yellow); font-size:1.3rem; font-weight:900;">$${pkgFee} USD</strong>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                ${dashAppliedPromoData ? `<span style="font-size:1rem; text-decoration:line-through; color:#e74c3c; font-weight:700;">$${pkgFee}</span>` : ''}
+                                <strong style="color:var(--yellow); font-size:1.3rem; font-weight:900;">$${effectiveFee} USD</strong>
+                                ${dashAppliedPromoData ? `<span style="background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid #2ecc71; padding:2px 8px; border-radius:4px; font-size:0.74rem; font-weight:700;">🏷️ ${dashAppliedPromoData.code} (${dashAppliedPromoData.discountType === 'percentage' ? dashAppliedPromoData.discountValue + '% OFF' : '$' + dashAppliedPromoData.discountValue + ' OFF'})</span>` : ''}
+                            </div>
                         </div>
                         <span style="background:rgba(255,255,255,0.08); color:#fff; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:600;">
                             ${flag} Global (1 USD = 1.00 USD)
@@ -7286,7 +7408,8 @@
             const rate = pm ? (Number(pm.exchangeRate) || (curr === 'BDT' ? 125 : 1)) : 1;
             const pkg = allPackages.find(p => p.id === packageId);
             const pkgFee = pkg ? Number(pkg.fee) : 7;
-            const localAmount = (curr !== 'USD' && rate !== 1) ? Math.round(pkgFee * rate) : pkgFee;
+            const effectiveFee = (dashAppliedPromoData && typeof dashAppliedPromoData.finalFee === 'number') ? dashAppliedPromoData.finalFee : pkgFee;
+            const localAmount = (curr !== 'USD' && rate !== 1) ? Math.round(effectiveFee * rate) : effectiveFee;
 
             const btn = document.getElementById('dashBuySubmitBtn');
             btn.disabled = true;
@@ -7309,7 +7432,8 @@
                         currency: curr,
                         currencySymbol: sym,
                         exchangeRate: rate,
-                        localAmount: localAmount
+                        localAmount: localAmount,
+                        promoCode: dashAppliedPromoData ? dashAppliedPromoData.code : null
                     })
                 });
                 const data = await res.json();

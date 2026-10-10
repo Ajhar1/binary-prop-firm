@@ -1468,6 +1468,9 @@
                         </div>
                     </div>
                     <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                        <button class="btn-primary" onclick="openAdminPromoCodeModal()" style="font-size:0.85rem; padding:8px 16px; background:linear-gradient(135deg, #8e44ad 0%, #6c3483 100%); border:1px solid #bb86fc; color:#fff; font-weight:700; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 15px rgba(142,68,173,0.35);">
+                            <i class="fas fa-ticket-alt"></i> 🏷️ প্রোমো কোড ম্যানেজার (Promo Codes)
+                        </button>
                         <button class="btn-gold" onclick="openAdminPromoModal()" style="font-size:0.85rem; padding:8px 14px;">
                             <i class="fas fa-sliders-h"></i> ⚙️ অফার ব্যানার ও ডিসকাউন্ট সেটিংস
                         </button>
@@ -1491,6 +1494,9 @@
                         </p>
                     </div>
                     <div style="display:flex; gap:10px; align-items:center;">
+                        <button class="btn-outline" onclick="openAdminPromoCodeModal()" style="border-color:#bb86fc; color:#bb86fc; font-weight:700;" title="প্রোমো কোড ম্যানেজ করুন">
+                            <i class="fas fa-ticket-alt"></i> 🏷️ Promo Codes
+                        </button>
                         <button class="btn-outline" onclick="fetchAdminPackages()" title="রিফ্রেশ করুন">
                             <i class="fas fa-sync-alt"></i> রিফ্রেশ
                         </button>
@@ -3152,6 +3158,162 @@
                             <i class="fas fa-save"></i> Save Changes (সেভ করুন)
                         </button>
                     </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 11. PROMO CODES / COUPONS MANAGEMENT MODAL -->
+    <div class="modal-overlay" id="adminPromoCodeModal">
+        <div class="modal-box" style="max-width:960px; max-height:92vh; overflow-y:auto; padding:24px;">
+            <button class="modal-close" onclick="closeModal('adminPromoCodeModal')">&times;</button>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:1.2rem;">
+                <div>
+                    <h2 style="font-size:1.4rem; font-weight:800; margin:0 0 4px 0; display:flex; align-items:center; gap:10px; color:#fff;">
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; background:rgba(187,134,252,0.15); border:1px solid #bb86fc; color:#bb86fc; font-size:1.1rem;">
+                            <i class="fas fa-ticket-alt"></i>
+                        </span>
+                        <span>প্রোমো কোড ও কুপন ম্যানেজার (Promo Code Hub)</span>
+                    </h2>
+                    <p style="color:var(--text-secondary); font-size:0.85rem; margin:0;">
+                        ট্রেডারদের জন্য আকর্ষণীয় ডিসকাউন্ট প্রোমো কোড তৈরি করুন, ব্যবহারের সীমা ও মেয়াদ নির্ধারণ করুন।
+                    </p>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button type="button" class="btn-outline" onclick="fetchAdminPromoCodes()" style="font-size:0.85rem; padding:8px 14px;" title="রিফ্রেশ করুন">
+                        <i class="fas fa-sync-alt"></i> রিফ্রেশ
+                    </button>
+                    <button type="button" class="btn-gold" onclick="openCreatePromoCodeModal()" style="font-size:0.85rem; padding:8px 18px; font-weight:700; background:linear-gradient(135deg, #bb86fc 0%, #9b59b6 100%); border-color:#bb86fc; color:#fff; box-shadow:0 4px 15px rgba(187,134,252,0.3);">
+                        <i class="fas fa-plus-circle"></i> + নতুন প্রোমো কোড তৈরি করুন
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Metrics Cards -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:1.4rem;">
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px 16px;">
+                    <div style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">মোট কোড</div>
+                    <div style="font-size:1.5rem; font-weight:800; color:#fff; margin-top:2px;" id="adminTotalPromoCodes">0</div>
+                </div>
+                <div style="background:rgba(46,204,113,0.06); border:1px solid rgba(46,204,113,0.25); border-radius:12px; padding:12px 16px;">
+                    <div style="font-size:0.75rem; color:#2ecc71; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">সক্রিয় কোড</div>
+                    <div style="font-size:1.5rem; font-weight:800; color:#2ecc71; margin-top:2px;" id="adminActivePromoCodes">0</div>
+                </div>
+                <div style="background:rgba(245,176,65,0.06); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px 16px;">
+                    <div style="font-size:0.75rem; color:var(--gold); text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">মোট ব্যবহার (Redeemed)</div>
+                    <div style="font-size:1.5rem; font-weight:800; color:var(--gold); margin-top:2px;" id="adminTotalPromoUses">0 বার</div>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px;">
+                <div style="position:relative; flex:1; max-width:320px;">
+                    <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-secondary); font-size:0.85rem;"></i>
+                    <input type="text" id="adminPromoSearchInput" oninput="renderAdminPromoCodesTable()" placeholder="কোড বা বিবরণ খুঁজুন..." class="form-control" style="padding-left:34px; font-size:0.85rem; height:38px;" />
+                </div>
+            </div>
+
+            <!-- Promo Codes Table -->
+            <div style="overflow-x:auto; background:rgba(0,0,0,0.2); border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+                <table class="data-table" style="width:100%; margin:0;">
+                    <thead>
+                        <tr>
+                            <th>কুপন / প্রোমো কোড</th>
+                            <th>ডিসকাউন্ট</th>
+                            <th>প্রযোজ্য প্যাকেজ</th>
+                            <th>ব্যবহারের হিসাব</th>
+                            <th>মেয়াদকাল</th>
+                            <th>স্ট্যাটাস</th>
+                            <th style="text-align:right;">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminPromoCodesTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-secondary);">
+                                <i class="fas fa-spinner fa-spin"></i> প্রোমো কোড লোড হচ্ছে...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 12. PROMO CODE CREATE / EDIT MODAL -->
+    <div class="modal-overlay" id="adminPromoCodeFormModal">
+        <div class="modal-box" style="max-width:580px; max-height:92vh; overflow-y:auto; padding:24px;">
+            <button class="modal-close" onclick="closeModal('adminPromoCodeFormModal')">&times;</button>
+            <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:0.4rem; display:flex; align-items:center; gap:8px;" id="promoFormModalTitle">
+                <i class="fas fa-tag" style="color:#bb86fc;"></i>
+                <span>নতুন প্রোমো কোড তৈরি করুন</span>
+            </h2>
+            <p style="color:var(--text-secondary); font-size:0.84rem; margin-bottom:1.4rem;">
+                সঠিক তথ্য দিয়ে প্রোমো কোড সেট করুন। ইউজাররা চেকআউট পেজে এই কোড দিলে ছাড় পাবে।
+            </p>
+
+            <form id="adminPromoCodeForm" onsubmit="handleSaveAdminPromoCode(event)">
+                <input type="hidden" id="promoFormId" value="" />
+
+                <div class="form-group">
+                    <label>প্রোমো কোড (Promo Code) <span style="color:var(--neon-red);">*</span></label>
+                    <div style="position:relative;">
+                        <input type="text" class="form-control" id="promoFormCode" required placeholder="যেমন: SAVE20, EID50, VIP10" style="text-transform:uppercase; font-weight:800; letter-spacing:1.5px; font-size:1.05rem;" />
+                        <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--text-secondary); font-size:0.75rem;">A-Z, 0-9</span>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div class="form-group">
+                        <label>ডিসকাউন্টের ধরন <span style="color:var(--neon-red);">*</span></label>
+                        <select class="form-control" id="promoFormDiscountType" onchange="updatePromoDiscountSymbol()">
+                            <option value="percentage">শতাংশ (%) / Percentage</option>
+                            <option value="fixed">ফিক্সড ডলার ($) / Fixed Amount</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>ছাড়ের পরিমাণ <span id="promoDiscountTypeSymbol">(%)</span> <span style="color:var(--neon-red);">*</span></label>
+                        <input type="number" step="any" min="0.1" class="form-control" id="promoFormDiscountValue" required placeholder="যেমন: 20" style="font-weight:700;" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>প্রযোজ্য চ্যালেঞ্জ প্যাকেজ</label>
+                    <select class="form-control" id="promoFormPackageId">
+                        <option value="all">🌐 সকল চ্যালেঞ্জ প্যাকেজে প্রযোজ্য (All Packages)</option>
+                    </select>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div class="form-group">
+                        <label>সর্বোচ্চ ব্যবহার সীমা (Max Uses)</label>
+                        <input type="number" min="1" class="form-control" id="promoFormMaxUses" placeholder="যেমন: 100 (ফাঁকা রাখলে আনলিমিটেড)" />
+                        <small style="color:var(--text-secondary); font-size:0.75rem;">খালি রাখলে সীমাহীন ব্যবহার করা যাবে</small>
+                    </div>
+                    <div class="form-group">
+                        <label>মেয়াদ উত্তীর্ণের তারিখ (Expires At)</label>
+                        <input type="datetime-local" class="form-control" id="promoFormExpiresAt" />
+                        <small style="color:var(--text-secondary); font-size:0.75rem;">খালি রাখলে আজীবন কার্যকর থাকবে</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>স্ট্যাটাস (Status)</label>
+                    <select class="form-control" id="promoFormStatus">
+                        <option value="active">🟢 সক্রিয় (Active - ইউজাররা ব্যবহার করতে পারবে)</option>
+                        <option value="inactive">🔴 নিষ্ক্রিয় (Inactive - সাময়িক বন্ধ)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>অভ্যন্তরীণ নোট / বিবরণ (ঐচ্ছিক)</label>
+                    <input type="text" class="form-control" id="promoFormNotes" placeholder="যেমন: ঈদ মেগা অফার অথবা স্পেশাল ট্রেডার ডিসকাউন্ট" />
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.5rem;">
+                    <button type="button" class="btn-outline" onclick="closeModal('adminPromoCodeFormModal')" style="padding:10px 18px;">বাতিল</button>
+                    <button type="submit" class="btn-gold" id="promoFormSubmitBtn" style="padding:10px 24px; font-weight:800; background:linear-gradient(135deg, #bb86fc 0%, #9b59b6 100%); border-color:#bb86fc; color:#fff;">
+                        <i class="fas fa-save"></i> সংরক্ষণ করুন
+                    </button>
                 </div>
             </form>
         </div>
@@ -7060,6 +7222,7 @@
                     updateAdminPromoBanner();
                     renderPromoPresetsButtons();
                     renderAdminPackagesTable();
+                    fetchAdminPromoCodes();
                 } else {
                     showToast(data.message || 'চ্যালেঞ্জ প্যাকেজ লোড করতে ত্রুটি', 'error');
                 }
@@ -7835,6 +7998,347 @@
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes (সেভ করুন)';
             }
+        }
+
+        // ==========================================
+        // ADMIN PROMO CODES / COUPONS MANAGEMENT
+        // ==========================================
+        let adminPromoCodesList = [];
+
+        async function fetchAdminPromoCodes() {
+            if (!adminToken) return;
+            try {
+                const res = await fetch('/api/admin/promo-codes', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.success) {
+                    adminPromoCodesList = data.promoCodes || [];
+                    renderAdminPromoCodesTable();
+                }
+            } catch (e) {
+                console.error('Fetch promo codes error:', e);
+            }
+        }
+
+        function openAdminPromoCodeModal() {
+            fetchAdminPromoCodes();
+            openModal('adminPromoCodeModal');
+        }
+
+        function populatePromoPackageDropdown(selectedPkgId = 'all') {
+            const select = document.getElementById('promoFormPackageId');
+            if (!select) return;
+            let html = '<option value="all">🌐 সকল চ্যালেঞ্জ প্যাকেজে প্রযোজ্য (All Packages)</option>';
+            if (Array.isArray(adminPackages) && adminPackages.length > 0) {
+                adminPackages.forEach(pkg => {
+                    const sel = (selectedPkgId === pkg.id) ? 'selected' : '';
+                    html += `<option value="${pkg.id}" ${sel}>📦 ${escapeHtml(pkg.name)} ($${(pkg.fundedAmount || 0).toLocaleString()} Capital)</option>`;
+                });
+            }
+            select.innerHTML = html;
+        }
+
+        function updatePromoDiscountSymbol() {
+            const type = document.getElementById('promoFormDiscountType')?.value;
+            const symEl = document.getElementById('promoDiscountTypeSymbol');
+            if (symEl) {
+                symEl.innerText = (type === 'fixed') ? '($)' : '(%)';
+            }
+        }
+
+        function openCreatePromoCodeModal() {
+            document.getElementById('promoFormModalTitle').innerHTML = '<i class="fas fa-tag" style="color:#bb86fc;"></i> <span>নতুন প্রোমো কোড তৈরি করুন</span>';
+            document.getElementById('promoFormId').value = '';
+            document.getElementById('promoFormCode').value = '';
+            document.getElementById('promoFormCode').readOnly = false;
+            document.getElementById('promoFormDiscountType').value = 'percentage';
+            document.getElementById('promoFormDiscountValue').value = '';
+            document.getElementById('promoFormMaxUses').value = '';
+            document.getElementById('promoFormExpiresAt').value = '';
+            document.getElementById('promoFormStatus').value = 'active';
+            document.getElementById('promoFormNotes').value = '';
+            updatePromoDiscountSymbol();
+            populatePromoPackageDropdown('all');
+            openModal('adminPromoCodeFormModal');
+        }
+
+        function openEditPromoCodeModal(id) {
+            const p = adminPromoCodesList.find(x => x.id === id);
+            if (!p) return;
+
+            document.getElementById('promoFormModalTitle').innerHTML = '<i class="fas fa-edit" style="color:#bb86fc;"></i> <span>প্রোমো কোড এডিট করুন</span>';
+            document.getElementById('promoFormId').value = p.id;
+            document.getElementById('promoFormCode').value = p.code || '';
+            document.getElementById('promoFormCode').readOnly = false;
+            document.getElementById('promoFormDiscountType').value = p.discountType || 'percentage';
+            document.getElementById('promoFormDiscountValue').value = p.discountValue || '';
+            document.getElementById('promoFormMaxUses').value = p.maxUses || '';
+            
+            // Format datetime-local
+            if (p.expiresAt) {
+                try {
+                    const d = new Date(p.expiresAt);
+                    const localIso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                    document.getElementById('promoFormExpiresAt').value = localIso;
+                } catch(e) {
+                    document.getElementById('promoFormExpiresAt').value = '';
+                }
+            } else {
+                document.getElementById('promoFormExpiresAt').value = '';
+            }
+
+            document.getElementById('promoFormStatus').value = p.status || 'active';
+            document.getElementById('promoFormNotes').value = p.notes || '';
+            updatePromoDiscountSymbol();
+            populatePromoPackageDropdown(p.packageId || 'all');
+            openModal('adminPromoCodeFormModal');
+        }
+
+        function renderAdminPromoCodesTable() {
+            const tbody = document.getElementById('adminPromoCodesTableBody');
+            if (!tbody) return;
+
+            const query = (document.getElementById('adminPromoSearchInput')?.value || '').trim().toLowerCase();
+            let filtered = adminPromoCodesList;
+            if (query) {
+                filtered = filtered.filter(p => 
+                    (p.code && p.code.toLowerCase().includes(query)) ||
+                    (p.notes && p.notes.toLowerCase().includes(query))
+                );
+            }
+
+            const totalCount = adminPromoCodesList.length;
+            const activeCount = adminPromoCodesList.filter(p => p.status === 'active' && (!p.expiresAt || new Date(p.expiresAt) > new Date()) && (!p.maxUses || (p.usedCount || 0) < p.maxUses)).length;
+            const totalUses = adminPromoCodesList.reduce((acc, p) => acc + (p.usedCount || 0), 0);
+
+            const totalEl = document.getElementById('adminTotalPromoCodes');
+            if (totalEl) totalEl.innerText = totalCount;
+            const activeEl = document.getElementById('adminActivePromoCodes');
+            if (activeEl) activeEl.innerText = activeCount;
+            const usesEl = document.getElementById('adminTotalPromoUses');
+            if (usesEl) usesEl.innerText = `${totalUses} বার`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2.5rem; color:var(--text-secondary);">
+                            ${query ? 'অনুসন্ধানের সাথে কোনো প্রোমো কোড মিলেনি।' : 'বর্তমানে কোনো প্রোমো কোড তৈরি করা নেই। "+ নতুন প্রোমো কোড তৈরি করুন" বাটনে ক্লিক করে কোড যুক্ত করুন।'}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(p => {
+                const isPercentage = p.discountType === 'percentage';
+                const discountLabel = isPercentage ? `${p.discountValue}% OFF` : `$${p.discountValue} Fixed OFF`;
+                const isExpired = p.expiresAt && new Date(p.expiresAt) < new Date();
+                const isLimitReached = p.maxUses && (p.usedCount || 0) >= p.maxUses;
+
+                let statusBadge = '';
+                if (p.status !== 'active') {
+                    statusBadge = '<span class="badge" style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid #e74c3c; font-weight:700;">🔴 Inactive</span>';
+                } else if (isExpired) {
+                    statusBadge = '<span class="badge" style="background:rgba(243,156,18,0.15); color:#f39c12; border:1px solid #f39c12; font-weight:700;">⏰ Expired</span>';
+                } else if (isLimitReached) {
+                    statusBadge = '<span class="badge" style="background:rgba(243,156,18,0.15); color:#f39c12; border:1px solid #f39c12; font-weight:700;">🚫 Limit Reached</span>';
+                } else {
+                    statusBadge = '<span class="badge" style="background:rgba(46,204,113,0.15); color:#2ecc71; border:1px solid #2ecc71; font-weight:700;">🟢 Active</span>';
+                }
+
+                let pkgLabel = '<span style="color:#bb86fc; font-weight:600;">🌐 সকল প্যাকেজ (All)</span>';
+                if (p.packageId && p.packageId !== 'all') {
+                    const foundPkg = adminPackages.find(pk => pk.id === p.packageId);
+                    pkgLabel = foundPkg ? `<span style="color:#fff;">📦 ${escapeHtml(foundPkg.name)} ($${(foundPkg.fundedAmount || 0).toLocaleString()})</span>` : escapeHtml(p.packageId);
+                }
+
+                let expiryLabel = '<span style="color:#2ecc71; font-weight:600;">লাইফটাইম (No Expiry)</span>';
+                if (p.expiresAt) {
+                    const d = new Date(p.expiresAt);
+                    expiryLabel = `<span style="color:${isExpired ? '#e74c3c' : '#f5b041'}; font-weight:600;">${d.toLocaleDateString('bn-BD', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' })}</span>`;
+                }
+
+                const usesLabel = `${p.usedCount || 0} / ${p.maxUses ? p.maxUses : '∞'}`;
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-family:monospace; font-weight:800; font-size:1.05rem; letter-spacing:1px; background:rgba(187,134,252,0.15); border:1px dashed #bb86fc; color:#bb86fc; padding:4px 10px; border-radius:6px;">
+                                    ${escapeHtml(p.code)}
+                                </span>
+                                <button type="button" onclick="copyPromoCode('${escapeHtml(p.code)}')" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.9rem;" title="কোড কপি করুন">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            ${p.notes ? `<div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">${escapeHtml(p.notes)}</div>` : ''}
+                        </td>
+                        <td>
+                            <span style="font-weight:800; color:#fff; background:rgba(46,204,113,0.15); border:1px solid #2ecc71; padding:4px 10px; border-radius:6px; font-size:0.88rem;">
+                                ${discountLabel}
+                            </span>
+                        </td>
+                        <td style="font-size:0.84rem;">
+                            ${pkgLabel}
+                        </td>
+                        <td>
+                            <span style="font-weight:700; color:#fff; font-family:monospace; font-size:0.92rem;">${usesLabel}</span>
+                        </td>
+                        <td style="font-size:0.82rem;">
+                            ${expiryLabel}
+                        </td>
+                        <td>
+                            ${statusBadge}
+                        </td>
+                        <td style="text-align:right;">
+                            <div style="display:inline-flex; gap:6px; align-items:center;">
+                                <button type="button" class="btn-outline" onclick="toggleAdminPromoCodeStatus('${p.id}')" style="padding:6px 10px; font-size:0.82rem;" title="${p.status === 'active' ? 'নিষ্ক্রিয় করুন' : 'সক্রিয় করুন'}">
+                                    <i class="fas fa-power-off" style="color:${p.status === 'active' ? '#e74c3c' : '#2ecc71'};"></i>
+                                </button>
+                                <button type="button" class="btn-outline" onclick="openEditPromoCodeModal('${p.id}')" style="padding:6px 10px; font-size:0.82rem; border-color:#bb86fc; color:#bb86fc;" title="এডিট করুন">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn-outline" onclick="deleteAdminPromoCode('${p.id}', '${escapeHtml(p.code)}')" style="padding:6px 10px; font-size:0.82rem; border-color:#e74c3c; color:#e74c3c;" title="মুছে ফেলুন">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function handleSaveAdminPromoCode(e) {
+            e.preventDefault();
+            const id = document.getElementById('promoFormId').value;
+            const code = document.getElementById('promoFormCode').value.trim();
+            const discountType = document.getElementById('promoFormDiscountType').value;
+            const discountValue = parseFloat(document.getElementById('promoFormDiscountValue').value);
+            const packageId = document.getElementById('promoFormPackageId').value;
+            const maxUses = document.getElementById('promoFormMaxUses').value.trim();
+            const expiresAt = document.getElementById('promoFormExpiresAt').value;
+            const status = document.getElementById('promoFormStatus').value;
+            const notes = document.getElementById('promoFormNotes').value.trim();
+
+            if (!code) {
+                showToast('প্রোমো কোড প্রদান করুন', 'error');
+                return;
+            }
+            if (isNaN(discountValue) || discountValue <= 0) {
+                showToast('সঠিক ডিসকাউন্টের পরিমাণ প্রদান করুন', 'error');
+                return;
+            }
+
+            const payload = {
+                code,
+                discountType,
+                discountValue,
+                packageId,
+                maxUses: maxUses ? parseInt(maxUses) : null,
+                expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+                status,
+                notes
+            };
+
+            const submitBtn = document.getElementById('promoFormSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...';
+
+            try {
+                const url = id ? `/api/admin/promo-codes/${id}` : '/api/admin/promo-codes';
+                const method = id ? 'PUT' : 'POST';
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'প্রোমো কোড সফলভাবে সংরক্ষিত হয়েছে!', 'success');
+                    closeModal('adminPromoCodeFormModal');
+                    if (data.promoCodes) {
+                        adminPromoCodesList = data.promoCodes;
+                        renderAdminPromoCodesTable();
+                    } else {
+                        fetchAdminPromoCodes();
+                    }
+                } else {
+                    showToast(data.message || 'প্রোমো কোড সংরক্ষণ ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                console.error('Save promo code error:', err);
+                showToast('নেটওয়ার্ক সমস্যা। পুনরায় চেষ্টা করুন।', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> সংরক্ষণ করুন';
+            }
+        }
+
+        async function toggleAdminPromoCodeStatus(id) {
+            const p = adminPromoCodesList.find(x => x.id === id);
+            if (!p) return;
+            const newStatus = p.status === 'active' ? 'inactive' : 'active';
+            try {
+                const res = await fetch(`/api/admin/promo-codes/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`প্রোমো কোড "${p.code}" ${newStatus === 'active' ? 'সক্রিয়' : 'নিষ্ক্রিয়'} করা হয়েছে।`, 'success');
+                    if (data.promoCodes) {
+                        adminPromoCodesList = data.promoCodes;
+                        renderAdminPromoCodesTable();
+                    } else {
+                        fetchAdminPromoCodes();
+                    }
+                } else {
+                    showToast(data.message || 'স্ট্যাটাস আপডেট ব্যর্থ হয়েছে', 'error');
+                }
+            } catch(e) {
+                showToast('স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে', 'error');
+            }
+        }
+
+        async function deleteAdminPromoCode(id, code) {
+            if (!confirm(`আপনি কি নিশ্চিত যে "${code}" প্রোমো কোডটি মুছে ফেলতে চান?`)) return;
+            try {
+                const res = await fetch(`/api/admin/promo-codes/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'প্রোমো কোড মুছে ফেলা হয়েছে', 'success');
+                    if (data.promoCodes) {
+                        adminPromoCodesList = data.promoCodes;
+                        renderAdminPromoCodesTable();
+                    } else {
+                        fetchAdminPromoCodes();
+                    }
+                } else {
+                    showToast(data.message || 'মুছে ফেলতে ব্যর্থ হয়েছে', 'error');
+                }
+            } catch(e) {
+                showToast('মুছে ফেলতে সমস্যা হয়েছে', 'error');
+            }
+        }
+
+        function copyPromoCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showToast(`প্রোমো কোড "${code}" ক্লিপবোর্ডে কপি হয়েছে!`, 'success');
+            }).catch(() => {
+                showToast(`কোড: ${code}`, 'success');
+            });
         }
 
         // ==========================================

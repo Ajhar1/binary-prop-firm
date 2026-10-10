@@ -31,6 +31,7 @@ const ARCHIVE_FILE = path.join(DATA_DIR, 'user_archive.json');
 const LAUNCH_PROMO_FILE = path.join(DATA_DIR, 'launch_promo.json');
 const PROMO_PRESETS_FILE = path.join(DATA_DIR, 'promo_presets.json');
 const PACKAGES_FILE = path.join(DATA_DIR, 'packages.json');
+const PROMO_CODES_FILE = path.join(DATA_DIR, 'promo_codes.json');
 const SUPPORT_FILE = path.join(DATA_DIR, 'support_tickets.json');
 const TRADER_STATES_FILE = path.join(DATA_DIR, 'trader_states.json');
 const SYNCED_TRADES_FILE = path.join(DATA_DIR, 'synced_trades.json');
@@ -2939,6 +2940,14 @@ function getPromoPresets() {
   return presets;
 }
 
+function getPromoCodes() {
+  return readJson(PROMO_CODES_FILE, []);
+}
+
+function savePromoCodes(codes) {
+  writeJson(PROMO_CODES_FILE, codes);
+}
+
 function getEnrichedPackages(includeInactive = false) {
   const promo = getLaunchPromo();
   const isPromoActive = promo && promo.active && new Date(promo.expiresAt) > new Date();
@@ -4037,7 +4046,7 @@ app.get('/api/challenges/packages', (req, res) => {
 
 // Buy / Enroll in a challenge
 app.post('/api/challenges/buy', authenticateToken, (req, res) => {
-  const { packageId, brokerId, brokerAccountId, paymentMethod, paymentTxId, senderNumber, currency, currencySymbol, exchangeRate, localAmount } = req.body;
+  const { packageId, brokerId, brokerAccountId, paymentMethod, paymentTxId, senderNumber, currency, currencySymbol, exchangeRate, localAmount, promoCode } = req.body;
   const enrichedPackages = getEnrichedPackages();
   const pkg = enrichedPackages.find(p => p.id === packageId);
   if (!pkg) return res.status(400).json({ success: false, message: 'Invalid package selected.' });
@@ -4081,8 +4090,47 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
   const users = readJson(USERS_FILE);
   const currentUser = users.find(u => u.id === req.user.id) || req.user;
 
+  let finalFee = pkg.fee;
+  let appliedPromo = null;
+  let promoDiscountAmount = 0;
+
+  if (promoCode && typeof promoCode === 'string' && promoCode.trim()) {
+    const codes = getPromoCodes();
+    const cleanPromoCode = promoCode.trim().toUpperCase();
+    const foundPromo = codes.find(c => c.code && c.code.toUpperCase() === cleanPromoCode);
+    if (!foundPromo) {
+      return res.status(400).json({ success: false, message: 'প্রদত্ত প্রোমো কোডটি সঠিক নয়।' });
+    }
+    if (foundPromo.status !== 'active') {
+      return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটি বর্তমানে নিষ্ক্রিয় রয়েছে।' });
+    }
+    if (foundPromo.expiresAt && new Date(foundPromo.expiresAt) < new Date()) {
+      return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটির মেয়াদ উত্তীর্ণ হয়ে গেছে।' });
+    }
+    if (foundPromo.maxUses && foundPromo.usedCount >= foundPromo.maxUses) {
+      return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটির সর্বোচ্চ ব্যবহার সম্পন্ন হয়েছে।' });
+    }
+    if (foundPromo.packageId && foundPromo.packageId !== 'all' && foundPromo.packageId !== pkg.id) {
+      return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটি নির্বাচিত প্যাকেজে প্রযোজ্য নয়।' });
+    }
+
+    // Calculate discount
+    if (foundPromo.discountType === 'percentage') {
+      promoDiscountAmount = Math.round((pkg.fee * (parseFloat(foundPromo.discountValue) / 100)) * 100) / 100;
+    } else {
+      promoDiscountAmount = Math.min(pkg.fee - 1, parseFloat(foundPromo.discountValue));
+    }
+    finalFee = Math.max(1, Math.round((pkg.fee - promoDiscountAmount) * 100) / 100);
+    promoDiscountAmount = Math.round((pkg.fee - finalFee) * 100) / 100;
+
+    // Increment usage
+    foundPromo.usedCount = (foundPromo.usedCount || 0) + 1;
+    savePromoCodes(codes);
+    appliedPromo = foundPromo;
+  }
+
   const numExchangeRate = (exchangeRate && !isNaN(parseFloat(exchangeRate)) && parseFloat(exchangeRate) > 0) ? parseFloat(exchangeRate) : 1;
-  const numLocalAmount = (localAmount && !isNaN(parseFloat(localAmount)) && parseFloat(localAmount) > 0) ? parseFloat(localAmount) : (pkg.fee * numExchangeRate);
+  const numLocalAmount = (localAmount && !isNaN(parseFloat(localAmount)) && parseFloat(localAmount) > 0) ? parseFloat(localAmount) : (finalFee * numExchangeRate);
 
   const newChallenge = {
     id: `ch_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
@@ -4095,9 +4143,12 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
     packageId: pkg.id,
     packageName: pkg.name,
     originalFee: pkg.originalFee,
-    fee: pkg.fee,
-    discountPercent: pkg.discountPercent || 0,
-    hasDiscount: Boolean(pkg.hasDiscount),
+    baseFee: pkg.fee,
+    fee: finalFee,
+    promoCode: appliedPromo ? appliedPromo.code : null,
+    promoDiscount: promoDiscountAmount,
+    discountPercent: appliedPromo ? (appliedPromo.discountType === 'percentage' ? appliedPromo.discountValue : Math.round((promoDiscountAmount / pkg.fee) * 100)) : (pkg.discountPercent || 0),
+    hasDiscount: Boolean(pkg.hasDiscount || appliedPromo),
     fundedAmount: pkg.fundedAmount,
     profitSplit: pkg.profitSplit,
     maxDrawdown: pkg.maxDrawdown,
@@ -4140,7 +4191,9 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
     senderNumber: newChallenge.senderNumber,
     localAmount: newChallenge.localAmount,
     currency: newChallenge.currency,
-    exchangeRate: newChallenge.exchangeRate
+    exchangeRate: newChallenge.exchangeRate,
+    promoCode: newChallenge.promoCode,
+    promoDiscount: newChallenge.promoDiscount
   });
 
   res.status(201).json({
@@ -7634,6 +7687,243 @@ app.delete('/api/admin/promo-presets/:id', authenticateAdminToken, (req, res) =>
     success: true,
     message: `'${found.name}' অফার টেমপ্লেট মুছে ফেলা হয়েছে।`,
     presets
+  });
+});
+
+// ==========================================
+// PROMO CODES / COUPONS MANAGEMENT API
+// ==========================================
+
+// 1. Admin: Get all promo codes
+app.get('/api/admin/promo-codes', authenticateAdminToken, (req, res) => {
+  const promoCodes = getPromoCodes();
+  res.json({
+    success: true,
+    promoCodes
+  });
+});
+
+// 2. Admin: Create a promo code
+app.post('/api/admin/promo-codes', authenticateAdminToken, (req, res) => {
+  const { code, discountType, discountValue, packageId, maxUses, expiresAt, status, notes } = req.body;
+
+  if (!code || !code.trim()) {
+    return res.status(400).json({ success: false, message: 'প্রোমো কোড প্রদান করুন।' });
+  }
+
+  const cleanCode = code.trim().toUpperCase().replace(/[^A-Z0-9_\-]/g, '');
+  if (!cleanCode) {
+    return res.status(400).json({ success: false, message: 'সঠিক প্রোমো কোড দিন (ইংরেজি বর্ণ বা সংখ্যা)।' });
+  }
+
+  const numValue = parseFloat(discountValue);
+  if (isNaN(numValue) || numValue <= 0) {
+    return res.status(400).json({ success: false, message: 'সঠিক ডিসকাউন্টের পরিমাণ প্রদান করুন।' });
+  }
+
+  const type = (discountType === 'fixed') ? 'fixed' : 'percentage';
+  if (type === 'percentage' && numValue > 100) {
+    return res.status(400).json({ success: false, message: 'শতাংশ ডিসকাউন্ট সর্বোচ্চ ১০০% হতে পারে।' });
+  }
+
+  const codes = getPromoCodes();
+  if (codes.some(c => c.code && c.code.toUpperCase() === cleanCode)) {
+    return res.status(400).json({ success: false, message: `"${cleanCode}" প্রোমো কোডটি ইতিমধ্যে বিদ্যমান রয়েছে।` });
+  }
+
+  let formattedExpiresAt = null;
+  if (expiresAt && !isNaN(new Date(expiresAt).getTime())) {
+    formattedExpiresAt = new Date(expiresAt).toISOString();
+  }
+
+  const newPromo = {
+    id: `promo_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+    code: cleanCode,
+    discountType: type,
+    discountValue: numValue,
+    packageId: packageId || 'all',
+    maxUses: (maxUses && parseInt(maxUses) > 0) ? parseInt(maxUses) : null,
+    usedCount: 0,
+    expiresAt: formattedExpiresAt,
+    status: status === 'inactive' ? 'inactive' : 'active',
+    notes: (notes && notes.trim()) || '',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  codes.unshift(newPromo);
+  savePromoCodes(codes);
+
+  res.status(201).json({
+    success: true,
+    message: `প্রোমো কোড "${newPromo.code}" সফলভাবে তৈরি হয়েছে!`,
+    promo: newPromo,
+    promoCodes: codes
+  });
+});
+
+// 3. Admin: Update a promo code
+app.put('/api/admin/promo-codes/:id', authenticateAdminToken, (req, res) => {
+  const targetId = req.params.id;
+  const codes = getPromoCodes();
+  const index = codes.findIndex(c => c.id === targetId);
+
+  if (index === -1) {
+    return res.status(404).json({ success: false, message: 'প্রোমো কোডটি পাওয়া যায়নি।' });
+  }
+
+  const { code, discountType, discountValue, packageId, maxUses, expiresAt, status, notes } = req.body;
+  const currentPromo = codes[index];
+
+  if (code && code.trim()) {
+    const cleanCode = code.trim().toUpperCase().replace(/[^A-Z0-9_\-]/g, '');
+    if (!cleanCode) {
+      return res.status(400).json({ success: false, message: 'সঠিক প্রোমো কোড দিন।' });
+    }
+    if (codes.some(c => c.id !== targetId && c.code && c.code.toUpperCase() === cleanCode)) {
+      return res.status(400).json({ success: false, message: `"${cleanCode}" প্রোমো কোডটি ইতিমধ্যে অন্য একটি অফারে ব্যবহার হচ্ছে।` });
+    }
+    currentPromo.code = cleanCode;
+  }
+
+  if (discountType !== undefined) {
+    currentPromo.discountType = (discountType === 'fixed') ? 'fixed' : 'percentage';
+  }
+
+  if (discountValue !== undefined) {
+    const numValue = parseFloat(discountValue);
+    if (isNaN(numValue) || numValue <= 0) {
+      return res.status(400).json({ success: false, message: 'সঠিক ডিসকাউন্টের পরিমাণ প্রদান করুন।' });
+    }
+    if (currentPromo.discountType === 'percentage' && numValue > 100) {
+      return res.status(400).json({ success: false, message: 'শতাংশ ডিসকাউন্ট সর্বোচ্চ ১০০% হতে পারে।' });
+    }
+    currentPromo.discountValue = numValue;
+  }
+
+  if (packageId !== undefined) {
+    currentPromo.packageId = packageId || 'all';
+  }
+
+  if (maxUses !== undefined) {
+    currentPromo.maxUses = (maxUses && parseInt(maxUses) > 0) ? parseInt(maxUses) : null;
+  }
+
+  if (expiresAt !== undefined) {
+    if (!expiresAt) {
+      currentPromo.expiresAt = null;
+    } else if (!isNaN(new Date(expiresAt).getTime())) {
+      currentPromo.expiresAt = new Date(expiresAt).toISOString();
+    }
+  }
+
+  if (status !== undefined) {
+    currentPromo.status = status === 'inactive' ? 'inactive' : 'active';
+  }
+
+  if (notes !== undefined) {
+    currentPromo.notes = (notes && notes.trim()) || '';
+  }
+
+  currentPromo.updatedAt = new Date().toISOString();
+  codes[index] = currentPromo;
+  savePromoCodes(codes);
+
+  res.json({
+    success: true,
+    message: `প্রোমো কোড "${currentPromo.code}" সফলভাবে আপডেট করা হয়েছে!`,
+    promo: currentPromo,
+    promoCodes: codes
+  });
+});
+
+// 4. Admin: Delete a promo code
+app.delete('/api/admin/promo-codes/:id', authenticateAdminToken, (req, res) => {
+  const targetId = req.params.id;
+  let codes = getPromoCodes();
+  const found = codes.find(c => c.id === targetId);
+
+  if (!found) {
+    return res.status(404).json({ success: false, message: 'প্রোমো কোডটি পাওয়া যায়নি।' });
+  }
+
+  codes = codes.filter(c => c.id !== targetId);
+  savePromoCodes(codes);
+
+  res.json({
+    success: true,
+    message: `প্রোমো কোড "${found.code}" মুছে ফেলা হয়েছে!`,
+    promoCodes: codes
+  });
+});
+
+// 5. Public / User: Validate promo code
+app.post('/api/promo-codes/validate', (req, res) => {
+  const { code, packageId } = req.body;
+
+  if (!code || !code.trim()) {
+    return res.status(400).json({ success: false, message: 'প্রোমো কোড প্রদান করুন।' });
+  }
+
+  const cleanCode = code.trim().toUpperCase();
+  const codes = getPromoCodes();
+  const promo = codes.find(c => c.code && c.code.toUpperCase() === cleanCode);
+
+  if (!promo) {
+    return res.status(404).json({ success: false, message: 'প্রোমো কোডটি সঠিক নয়।' });
+  }
+
+  if (promo.status !== 'active') {
+    return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটি বর্তমানে নিষ্ক্রিয় রয়েছে।' });
+  }
+
+  if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) {
+    return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটির মেয়াদ উত্তীর্ণ হয়ে গেছে।' });
+  }
+
+  if (promo.maxUses && (promo.usedCount || 0) >= promo.maxUses) {
+    return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটির ব্যবহারের সর্বোচ্চ সীমা শেষ হয়ে গেছে।' });
+  }
+
+  if (promo.packageId && promo.packageId !== 'all' && packageId && promo.packageId !== packageId) {
+    return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটি নির্বাচিত চ্যালেঞ্জ প্যাকেজের জন্য প্রযোজ্য নয়।' });
+  }
+
+  // Calculate discount if packageId provided
+  let baseFee = 0;
+  let discountAmount = 0;
+  let finalFee = 0;
+
+  if (packageId) {
+    const enrichedPackages = getEnrichedPackages();
+    const pkg = enrichedPackages.find(p => p.id === packageId);
+    if (pkg) {
+      baseFee = pkg.fee;
+      if (promo.discountType === 'percentage') {
+        discountAmount = Math.round((baseFee * (parseFloat(promo.discountValue) / 100)) * 100) / 100;
+      } else {
+        discountAmount = Math.min(baseFee - 1, parseFloat(promo.discountValue));
+      }
+      finalFee = Math.max(1, Math.round((baseFee - discountAmount) * 100) / 100);
+      discountAmount = Math.round((baseFee - finalFee) * 100) / 100;
+    }
+  }
+
+  res.json({
+    success: true,
+    valid: true,
+    promo: {
+      id: promo.id,
+      code: promo.code,
+      discountType: promo.discountType,
+      discountValue: promo.discountValue,
+      packageId: promo.packageId,
+      notes: promo.notes
+    },
+    baseFee,
+    discountAmount,
+    finalFee,
+    message: `প্রোমো কোড "${promo.code}" কার্যকর হয়েছে! ${promo.discountType === 'percentage' ? promo.discountValue + '% ডিসকাউন্ট' : '$' + promo.discountValue + ' ডিসকাউন্ট'} প্রযোজ্য।`
   });
 });
 
