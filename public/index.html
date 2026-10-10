@@ -735,6 +735,382 @@
             box-shadow: 0 6px 20px rgba(245, 176, 65, 0.35);
         }
 
+        /* ========== INTERACTIVE CAPITAL TIER PICKER (BinaryFunded Inspired) ========== */
+        .challenge-section-header {
+            max-width: 1100px;
+            margin: 0 auto 2.5rem auto;
+        }
+        .challenge-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(245, 176, 65, 0.12);
+            color: var(--yellow);
+            border: 1px solid rgba(245, 176, 65, 0.35);
+            font-size: 0.76rem;
+            font-weight: 850;
+            letter-spacing: 1px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .challenge-title-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+        }
+        .btn-view-all-packages {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 9px 20px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 750;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+        .btn-view-all-packages:hover {
+            border-color: var(--yellow);
+            color: var(--yellow);
+            background: rgba(245, 176, 65, 0.12);
+            box-shadow: 0 0 15px rgba(245, 176, 65, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .interactive-tier-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .tier-selector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 0 4px;
+        }
+        .tier-selector-label {
+            font-size: 0.82rem;
+            font-weight: 850;
+            letter-spacing: 1.5px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+        }
+        .tier-selector-hint {
+            font-size: 0.78rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* Desktop Stepper Track */
+        .desktop-tier-track-wrapper {
+            position: relative;
+            margin: 2rem 0 3rem 0;
+            padding: 0 14px;
+        }
+        .desktop-tier-track-line {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 4px;
+            position: relative;
+            margin: 32px 0;
+        }
+        .desktop-tier-track-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--yellow), #00e676);
+            border-radius: 4px;
+            transition: width 0.35s ease;
+            box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+            width: 30%;
+        }
+        .desktop-tier-nodes-row {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: 0;
+            left: 14px;
+            right: 14px;
+            bottom: 0;
+            pointer-events: none;
+        }
+        .desktop-tier-node {
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.25s ease;
+            position: relative;
+            top: -24px;
+        }
+        .tier-node-cap {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+        .tier-node-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0b0f19;
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.25s ease;
+            box-shadow: 0 0 0 2px transparent;
+        }
+        .tier-node-fee {
+            font-size: 0.74rem;
+            font-weight: 800;
+            color: #64748b;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3px 9px;
+            border-radius: 12px;
+            margin-top: 10px;
+            transition: all 0.25s;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .desktop-tier-node:hover .tier-node-cap {
+            color: #fff;
+        }
+        .desktop-tier-node:hover .tier-node-circle {
+            border-color: rgba(0, 230, 118, 0.7);
+            transform: scale(1.15);
+        }
+        .desktop-tier-node.active .tier-node-cap {
+            color: #ffffff;
+            font-size: 0.98rem;
+            font-weight: 900;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+        }
+        .desktop-tier-node.active .tier-node-circle {
+            border-color: #00e676;
+            background: #00e676;
+            box-shadow: 0 0 18px rgba(0, 230, 118, 0.8), 0 0 0 4px rgba(0, 230, 118, 0.2);
+            transform: scale(1.3);
+        }
+        .desktop-tier-node.active .tier-node-fee {
+            color: #00e676;
+            background: rgba(0, 230, 118, 0.18);
+            border-color: rgba(0, 230, 118, 0.5);
+            box-shadow: 0 0 12px rgba(0, 230, 118, 0.25);
+            font-weight: 900;
+        }
+
+        /* Mobile 2-Column Tier Grid (Hidden on desktop) */
+        .mobile-tier-grid {
+            display: none;
+        }
+
+        /* Active Showcase Card (Featured Tier) */
+        .active-tier-showcase-card {
+            background: linear-gradient(150deg, rgba(20, 26, 40, 0.85), rgba(10, 14, 22, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 24px;
+            padding: 2.4rem 2.8rem;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.18);
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 2.8rem;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .active-tier-showcase-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(0, 230, 118, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .tier-showcase-left {
+            position: relative;
+            z-index: 2;
+        }
+        .showcase-tier-name {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+        .showcase-badge {
+            background: rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 0.72rem;
+            font-weight: 850;
+            padding: 3px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .showcase-badge.popular {
+            background: rgba(245, 176, 65, 0.18);
+            color: var(--yellow);
+            border-color: rgba(245, 176, 65, 0.45);
+            box-shadow: 0 0 12px rgba(245, 176, 65, 0.25);
+        }
+        .showcase-funded-amt {
+            font-size: 3.8rem;
+            font-weight: 900;
+            line-height: 1;
+            margin: 10px 0 2px 0;
+            letter-spacing: -1.5px;
+            color: #ffffff;
+            text-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+        }
+        .showcase-funded-lbl {
+            font-size: 0.82rem;
+            font-weight: 850;
+            color: #64748b;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1.4rem;
+        }
+        .showcase-price-box {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 1.6rem;
+            flex-wrap: wrap;
+        }
+        .showcase-fee-label {
+            font-size: 0.95rem;
+            color: #94a3b8;
+        }
+        .showcase-orig-fee {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ff4d4d;
+            text-decoration: line-through;
+            text-decoration-thickness: 2px;
+        }
+        .showcase-fee-val {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--yellow);
+            line-height: 1;
+        }
+        .showcase-disc-badge {
+            background: rgba(0, 230, 118, 0.18);
+            color: #00e676;
+            border: 1px solid rgba(0, 230, 118, 0.45);
+            font-size: 0.74rem;
+            font-weight: 850;
+            padding: 2px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.3px;
+        }
+        .showcase-cta-btn {
+            width: 100%;
+            max-width: 380px;
+            padding: 15px 28px;
+            font-size: 1.05rem;
+            font-weight: 850;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
+            color: #05140b;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(0, 230, 118, 0.35);
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+        .showcase-cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 230, 118, 0.55);
+            background: linear-gradient(135deg, #1de9b6 0%, #00e676 100%);
+        }
+        .showcase-micro-footer {
+            font-size: 0.76rem;
+            color: #64748b;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tier-showcase-right {
+            position: relative;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 1.6rem 1.8rem;
+        }
+        .showcase-split-wrap {
+            margin-bottom: 1.2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .showcase-progress-bar {
+            height: 9px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .showcase-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--yellow), #00e676);
+            border-radius: 6px;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+        }
+        .showcase-specs-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .showcase-specs-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.07);
+            font-size: 0.88rem;
+        }
+        .showcase-specs-list li:last-child {
+            border-bottom: none;
+        }
+        .showcase-specs-list .spec-lbl {
+            color: #94a3b8;
+        }
+        .showcase-specs-list .spec-val {
+            font-weight: 750;
+            color: #fff;
+        }
+        .showcase-specs-list .spec-val.red {
+            color: #ff5252;
+            font-weight: 800;
+        }
+        .showcase-specs-list .spec-val.muted {
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+
         /* ---------- HOW IT WORKS ---------- */
         .steps {
             padding: 5rem 2rem;
@@ -1531,6 +1907,128 @@
                 box-shadow: 0 3px 10px rgba(245, 176, 65, 0.15) !important;
             }
 
+            /* Interactive Capital Tier Picker (Mobile - BinaryFunded Style) */
+            .challenge-section-header {
+                margin-bottom: 1.5rem !important;
+            }
+            .challenge-title-row {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 0.8rem !important;
+            }
+            .btn-view-all-packages {
+                width: 100% !important;
+                justify-content: center !important;
+                font-size: 0.8rem !important;
+                padding: 8px 14px !important;
+            }
+            .desktop-tier-track-wrapper {
+                display: none !important;
+            }
+            .mobile-tier-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 7px !important;
+                margin-bottom: 1.2rem !important;
+            }
+            .mobile-tier-card {
+                background: linear-gradient(145deg, rgba(22, 27, 40, 0.75), rgba(12, 16, 24, 0.88)) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 12px !important;
+                padding: 8px 10px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                cursor: pointer !important;
+                transition: all 0.2s ease !important;
+                user-select: none !important;
+            }
+            .mobile-tier-card.active {
+                border: 1.5px solid #00e676 !important;
+                background: rgba(0, 230, 118, 0.08) !important;
+                box-shadow: 0 0 16px rgba(0, 230, 118, 0.22) !important;
+            }
+            .tier-radio-outer {
+                width: 15px !important;
+                height: 15px !important;
+                border-radius: 50% !important;
+                border: 2px solid rgba(255, 255, 255, 0.3) !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                flex-shrink: 0 !important;
+            }
+            .tier-radio-inner {
+                width: 7px !important;
+                height: 7px !important;
+                border-radius: 50% !important;
+                background: #00e676 !important;
+                display: none !important;
+            }
+            .mobile-tier-card.active .tier-radio-outer {
+                border-color: #00e676 !important;
+            }
+            .mobile-tier-card.active .tier-radio-inner {
+                display: block !important;
+            }
+            .mobile-tier-cap {
+                font-size: 0.92rem !important;
+                font-weight: 850 !important;
+                color: #ffffff !important;
+                white-space: nowrap !important;
+            }
+            .mobile-tier-fee {
+                font-size: 0.74rem !important;
+                font-weight: 800 !important;
+                color: #94a3b8 !important;
+                background: rgba(255, 255, 255, 0.06) !important;
+                padding: 2px 7px !important;
+                border-radius: 6px !important;
+                white-space: nowrap !important;
+            }
+            .mobile-tier-card.active .mobile-tier-fee {
+                color: #00e676 !important;
+                background: rgba(0, 230, 118, 0.18) !important;
+                border: 1px solid rgba(0, 230, 118, 0.4) !important;
+            }
+
+            .active-tier-showcase-card {
+                grid-template-columns: 1fr !important;
+                gap: 1.4rem !important;
+                padding: 1.25rem 1rem !important;
+                border-radius: 18px !important;
+            }
+            .showcase-tier-name {
+                font-size: 1.5rem !important;
+            }
+            .showcase-funded-amt {
+                font-size: 2.7rem !important;
+                margin: 6px 0 2px 0 !important;
+            }
+            .showcase-funded-lbl {
+                font-size: 0.72rem !important;
+                margin-bottom: 1rem !important;
+            }
+            .showcase-price-box {
+                margin-bottom: 1.2rem !important;
+            }
+            .showcase-fee-val {
+                font-size: 1.8rem !important;
+            }
+            .showcase-cta-btn {
+                max-width: 100% !important;
+                padding: 13px 20px !important;
+                font-size: 0.95rem !important;
+            }
+            .tier-showcase-right {
+                padding: 1rem 0.9rem !important;
+                border-radius: 14px !important;
+            }
+            .showcase-specs-list li {
+                font-size: 0.8rem !important;
+                padding: 7px 0 !important;
+            }
+
             /* Promo Banner */
             .launch-promo-banner {
                 padding: 1rem 0.85rem !important;
@@ -2025,10 +2523,25 @@
 
     <!-- ========== EXTERNAL CHALLENGES ========== -->
     <section id="challenges" class="challenge-section">
-        <h2 class="section-title">Challenge Packages</h2>
-        <p class="section-subtitle">
-            উপযুক্ত প্যাকেজ বাছাই করে ডেমো মূল্যায়নে অংশ নিন
-        </p>
+        <!-- Interactive Section Header (BinaryFunded Inspired) -->
+        <div class="challenge-section-header">
+            <div class="challenge-badge-pill">
+                <i class="fas fa-crown"></i> Choose Your Capital
+            </div>
+            <div class="challenge-title-row">
+                <div>
+                    <h2 class="section-title" style="margin-bottom:0.4rem; text-align:left;">Choose your capital</h2>
+                    <p class="section-subtitle" style="margin:0; text-align:left;">
+                        আপনার সুবিধাজনক ক্যাপিটাল টায়ার নির্বাচন করে ফান্ডেড ট্রেডার হওয়ার চ্যালেঞ্জ শুরু করুন
+                    </p>
+                </div>
+                <div>
+                    <button type="button" class="btn-view-all-packages" onclick="toggleAllPackagesGrid()">
+                        <i class="fas fa-th-large"></i> <span id="toggleAllPackagesBtnText">View All Packages</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Grand Broker Promo Offer Banner (Customizable Mega Discount Banner) -->
         <div id="launchPromoBanner" class="launch-promo-banner">
@@ -2057,8 +2570,45 @@
             </div>
         </div>
 
-        <div class="challenge-grid" id="packagesContainer">
-            <!-- Populated dynamically from API -->
+        <!-- Interactive Capital Tier Picker (Desktop Stepper & Mobile Grid) -->
+        <div class="interactive-tier-container" id="interactiveTierContainer">
+            <div class="tier-selector-header">
+                <span class="tier-selector-label"><i class="fas fa-sliders-h" style="margin-right:8px; color:var(--yellow);"></i> Select Account Size</span>
+                <span class="tier-selector-hint"><i class="fas fa-hand-pointer"></i> Click tier to inspect specifications</span>
+            </div>
+
+            <!-- Desktop Stepper Track (10 Tiers) -->
+            <div class="desktop-tier-track-wrapper" id="desktopTierTrackWrapper">
+                <div class="desktop-tier-track-line">
+                    <div class="desktop-tier-track-fill" id="desktopTierTrackFill"></div>
+                </div>
+                <div class="desktop-tier-nodes-row" id="desktopTierNodesRow">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Mobile 2-Column Grid (Hidden on Desktop) -->
+            <div class="mobile-tier-grid" id="mobileTierGrid">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <!-- Active Featured Showcase Hero Card -->
+            <div class="active-tier-showcase-card" id="activeTierShowcaseCard">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+
+        <!-- Collapsible All Packages Grid View -->
+        <div id="allPackagesGridWrapper" style="display:none; margin-top:2.5rem;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; padding-bottom:0.8rem; border-bottom:1px solid rgba(255,255,255,0.08); max-width:1100px; margin-left:auto; margin-right:auto;">
+                <h3 style="font-size:1.25rem; font-weight:800; color:#fff; margin:0;"><i class="fas fa-boxes" style="color:var(--yellow); margin-right:8px;"></i> All Challenge Packages</h3>
+                <button type="button" onclick="toggleAllPackagesGrid()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:6px 14px; border-radius:20px; font-size:0.8rem; cursor:pointer;">
+                    <i class="fas fa-times"></i> Close Grid
+                </button>
+            </div>
+            <div class="challenge-grid" id="packagesContainer">
+                <!-- Populated dynamically from API -->
+            </div>
         </div>
     </section>
 
@@ -3493,6 +4043,7 @@
                     globalPromo = data.launchPromo;
                     renderRules(data.tenRules);
                     renderPackages(data.packages);
+                    renderInteractiveCapitalTier(data.packages);
                     renderPromoBanner(globalPromo);
                 }
             } catch (err) {
@@ -3681,6 +4232,170 @@
                     </button>
                 </div>
             `).join('');
+        }
+
+        // ---------- INTERACTIVE CAPITAL TIER PICKER (BinaryFunded Inspired) ----------
+        let currentSelectedTierIndex = 0;
+        let isAllPackagesGridVisible = false;
+
+        function toggleAllPackagesGrid() {
+            const wrap = document.getElementById('allPackagesGridWrapper');
+            const btnText = document.getElementById('toggleAllPackagesBtnText');
+            if (!wrap) return;
+            isAllPackagesGridVisible = !isAllPackagesGridVisible;
+            if (isAllPackagesGridVisible) {
+                wrap.style.display = 'block';
+                if (btnText) btnText.innerText = 'Hide All Packages';
+                wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                wrap.style.display = 'none';
+                if (btnText) btnText.innerText = 'View All Packages';
+            }
+        }
+
+        function formatCapitalShort(amount) {
+            if (!amount) return '$0';
+            if (amount >= 1000) {
+                const k = amount / 1000;
+                return '$' + (k % 1 === 0 ? k : k.toFixed(1)) + 'K';
+            }
+            return '$' + amount;
+        }
+
+        function renderInteractiveCapitalTier(packages) {
+            if (!packages || !packages.length) return;
+
+            // Desktop Stepper Track Nodes
+            const desktopRow = document.getElementById('desktopTierNodesRow');
+            if (desktopRow) {
+                desktopRow.innerHTML = packages.map((pkg, idx) => `
+                    <div class="desktop-tier-node" onclick="selectCapitalTier(${idx})">
+                        <span class="tier-node-cap">${formatCapitalShort(pkg.fundedAmount)}</span>
+                        <span class="tier-node-circle"></span>
+                        <span class="tier-node-fee">$${pkg.fee}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Mobile 2-Column Grid Cards
+            const mobileGrid = document.getElementById('mobileTierGrid');
+            if (mobileGrid) {
+                mobileGrid.innerHTML = packages.map((pkg, idx) => `
+                    <div class="mobile-tier-card" onclick="selectCapitalTier(${idx})">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="tier-radio-outer">
+                                <div class="tier-radio-inner"></div>
+                            </div>
+                            <span class="mobile-tier-cap">${formatCapitalShort(pkg.fundedAmount)}</span>
+                        </div>
+                        <span class="mobile-tier-fee">$${pkg.fee}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Default select popular package or index 0
+            const popIdx = packages.findIndex(p => p.popular);
+            const defaultIdx = popIdx !== -1 ? popIdx : 0;
+            selectCapitalTier(defaultIdx);
+        }
+
+        function selectCapitalTier(idx) {
+            if (!globalPackages || !globalPackages[idx]) return;
+            currentSelectedTierIndex = idx;
+
+            // Update desktop nodes active state
+            const desktopNodes = document.querySelectorAll('.desktop-tier-node');
+            desktopNodes.forEach((node, i) => {
+                if (i === idx) node.classList.add('active');
+                else node.classList.remove('active');
+            });
+            updateDesktopTrackFill(globalPackages.length);
+
+            // Update mobile cards active state
+            const mobileCards = document.querySelectorAll('.mobile-tier-card');
+            mobileCards.forEach((card, i) => {
+                if (i === idx) card.classList.add('active');
+                else card.classList.remove('active');
+            });
+
+            // Re-render active showcase hero card
+            renderActiveTierShowcase(idx);
+        }
+
+        function updateDesktopTrackFill(totalCount) {
+            const fillEl = document.getElementById('desktopTierTrackFill');
+            if (!fillEl || totalCount <= 1) return;
+            const percent = (currentSelectedTierIndex / (totalCount - 1)) * 100;
+            fillEl.style.width = `${percent}%`;
+        }
+
+        function renderActiveTierShowcase(idx) {
+            const card = document.getElementById('activeTierShowcaseCard');
+            if (!card || !globalPackages || !globalPackages[idx]) return;
+
+            const pkg = globalPackages[idx];
+            const splitMatch = (pkg.profitSplit || '80%').match(/(\d+)%/);
+            const splitVal = splitMatch ? parseInt(splitMatch[1], 10) : 80;
+
+            card.innerHTML = `
+                <div class="tier-showcase-left">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;">
+                        <span class="showcase-tier-name">${pkg.name} Tier</span>
+                        <span class="showcase-badge ${pkg.popular ? 'popular' : ''}">${pkg.popular ? '★ Most Popular' : (pkg.badge || 'Challenge')}</span>
+                    </div>
+                    <div class="showcase-funded-amt">$${pkg.fundedAmount.toLocaleString()}</div>
+                    <div class="showcase-funded-lbl">Funded Account Capital</div>
+
+                    <div class="showcase-price-box">
+                        <span class="showcase-fee-label">Evaluation Fee:</span>
+                        ${pkg.hasDiscount ? `
+                            <span class="showcase-orig-fee">$${pkg.originalFee}</span>
+                            <span class="showcase-fee-val" style="color:var(--neon-green);">$${pkg.fee}</span>
+                            <span class="showcase-disc-badge">${pkg.discountPercent}% OFF</span>
+                            <div style="width:100%; font-size:0.75rem; color:var(--neon-green); font-weight:700; margin-top:3px;">
+                                <i class="fas fa-tag"></i> ${pkg.discountTag || (globalPromo && globalPromo.discountTag) || 'লঞ্চ স্পেশাল মেগা ছাড়'}
+                            </div>
+                        ` : `
+                            <span class="showcase-fee-val">$${pkg.fee}</span>
+                            <span style="font-size:0.8rem; color:#94a3b8; font-weight:600; margin-left:4px;">One-time fee</span>
+                        `}
+                    </div>
+
+                    <button type="button" class="showcase-cta-btn" onclick="openBuyModal('${pkg.id}')">
+                        <span>Start ${pkg.name} Challenge ($${pkg.fee})</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+
+                    <div class="showcase-micro-footer">
+                        <i class="fas fa-shield-alt" style="color:#00e676;"></i>
+                        <span>Instant Demo Access • Automated Verification • 100% Refundable on Payout</span>
+                    </div>
+                </div>
+
+                <div class="tier-showcase-right">
+                    <div class="showcase-split-wrap">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:0.88rem; color:#94a3b8; font-weight:700;">
+                                <i class="fas fa-trophy" style="color:var(--yellow); margin-right:6px;"></i> Profit Split (Funded)
+                            </span>
+                            <span style="font-size:1.15rem; font-weight:900; color:var(--yellow);">${pkg.profitSplit}</span>
+                        </div>
+                        <div class="showcase-progress-bar">
+                            <div class="showcase-progress-fill" style="width:${splitVal}%;"></div>
+                        </div>
+                    </div>
+
+                    <ul class="showcase-specs-list">
+                        <li><span class="spec-lbl">Evaluation Sessions</span><span class="spec-val">${pkg.sessions} Sessions</span></li>
+                        <li><span class="spec-lbl">Maximum Drawdown</span><span class="spec-val red">${pkg.maxDrawdown}</span></li>
+                        <li><span class="spec-lbl">Trading Platform</span><span class="spec-val">Any Binary Demo</span></li>
+                        <li><span class="spec-lbl">Daily Loss Limit</span><span class="spec-val muted">${pkg.dailyLoss}</span></li>
+                        <li><span class="spec-lbl">Profit Target</span><span class="spec-val muted">${pkg.profitTarget}</span></li>
+                        <li><span class="spec-lbl">Evaluation Period</span><span class="spec-val">15 Days Max</span></li>
+                        <li><span class="spec-lbl">Refundable Fee</span><span class="spec-val" style="color:var(--neon-green);">100% On 1st Payout</span></li>
+                    </ul>
+                </div>
+            `;
         }
 
         // ---------- TACTILE WATER TOUCH RIPPLE & GLOW ENGINE ----------
