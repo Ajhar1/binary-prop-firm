@@ -50,6 +50,60 @@
             overflow-x: hidden;
         }
 
+        /* ==================== SLEEK DARK SCROLLBARS (ZERO WHITE) ==================== */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #2a354d #090e1a;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #090e1a;
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #25334d;
+            border-radius: 8px;
+            border: 2px solid #090e1a;
+            transition: background 0.2s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: #090e1a;
+        }
+
+        .challenge-table-scroll-wrapper::-webkit-scrollbar,
+        .challenge-table-top-scroll::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .challenge-table-scroll-wrapper::-webkit-scrollbar-track,
+        .challenge-table-top-scroll::-webkit-scrollbar-track {
+            background: rgba(10, 16, 28, 0.95);
+            border-radius: 6px;
+        }
+
+        .challenge-table-scroll-wrapper::-webkit-scrollbar-thumb,
+        .challenge-table-top-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #2a354d, #3b4d70);
+            border-radius: 6px;
+            border: 2px solid #0a101c;
+        }
+
+        .challenge-table-scroll-wrapper::-webkit-scrollbar-thumb:hover,
+        .challenge-table-top-scroll::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(90deg, #d4af37, #f5b041);
+        }
+
         /* Glassmorphism */
         .glass {
             background: var(--card-bg);
@@ -1417,9 +1471,14 @@
                     <!-- Injected dynamically in renderChallengesTable() -->
                 </div>
 
+                <!-- Top Synchronized Horizontal Scrollbar (Placed at TOP, Sleek Dark Theme, Zero White) -->
+                <div id="challengeTableTopScrollWrapper" class="challenge-table-top-scroll" style="overflow-x:auto; overflow-y:hidden; height:12px; margin-bottom:8px; border-radius:6px; background:rgba(10, 16, 28, 0.95); border:1px solid rgba(255,255,255,0.08); display:none;" title="হরাইজন্টাল স্ক্রলবার">
+                    <div id="challengeTableTopScrollInner" style="height:1px;"></div>
+                </div>
+
                 <!-- Responsive Table Wrapper -->
-                <div style="overflow-x:auto; border-radius:14px; border:1px solid rgba(255,255,255,0.07); background:rgba(10, 16, 28, 0.7); box-shadow:inset 0 2px 10px rgba(0,0,0,0.3);">
-                    <table class="challenge-orders-table">
+                <div id="challengeTableMainWrapper" class="challenge-table-scroll-wrapper" style="overflow-x:auto; border-radius:14px; border:1px solid rgba(255,255,255,0.07); background:rgba(10, 16, 28, 0.7); box-shadow:inset 0 2px 10px rgba(0,0,0,0.3);">
+                    <table class="challenge-orders-table" id="challengeOrdersTable">
                         <thead>
                             <tr>
                                 <th style="width:65px; text-align:center;"># SL</th>
@@ -2398,6 +2457,56 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- 2.3 DISQUALIFICATION / FAILURE REASON DETAILS MODAL (Pop-up on clicking বাদ/ফেইল্ড) -->
+    <div class="modal-overlay" id="disqualificationReasonModal">
+        <div class="modal-box" style="max-width:640px;">
+            <button class="modal-close" onclick="closeModal('disqualificationReasonModal')">&times;</button>
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+                <div style="width:44px; height:44px; border-radius:12px; background:rgba(239,68,68,0.18); border:1px solid rgba(239,68,68,0.4); display:flex; align-items:center; justify-content:center; color:#ef4444; font-size:1.4rem; flex-shrink:0;">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div>
+                    <h2 style="font-size:1.25rem; font-weight:800; color:#fff; margin:0;">
+                        চ্যালেঞ্জ বাতিলের কারণ ও বিবরণ
+                    </h2>
+                    <p style="font-size:0.8rem; color:var(--text-secondary); margin:2px 0 0 0;">
+                        Disqualification & Failure Audit Report
+                    </p>
+                </div>
+            </div>
+
+            <!-- Trader and Order Summary Cards -->
+            <div id="disqualifyReasonMeta" style="margin-bottom:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:12px; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; font-size:0.82rem;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Reason Box -->
+            <div style="margin-bottom:14px;">
+                <label style="font-weight:700; font-size:0.85rem; color:#f87171; display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                    <span><i class="fas fa-exclamation-triangle"></i> সম্পূর্ণ বাতিলের কারণ (Detailed Reason):</span>
+                    <button type="button" class="btn-outline" onclick="copyDisqualifyReasonText()" style="padding:2px 8px; font-size:0.72rem; border-color:rgba(255,255,255,0.2); color:#cbd5e1; cursor:pointer;">
+                        <i class="far fa-copy"></i> কপি করুন
+                    </button>
+                </label>
+                <div id="disqualifyReasonFullText" style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-left:4px solid #ef4444; border-radius:8px; padding:14px 16px; font-size:0.88rem; line-height:1.6; color:#f1f5f9; white-space:pre-wrap; word-break:break-word; max-height:280px; overflow-y:auto;">
+                    <!-- Reason text -->
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:1.2rem; flex-wrap:wrap;">
+                <div id="disqualifyModalReactivateBtnSlot">
+                    <!-- Option to reactivate if needed -->
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn-outline" onclick="closeModal('disqualificationReasonModal')" style="padding:8px 18px;">
+                        বন্ধ করুন (Close)
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -3885,7 +3994,7 @@
                                 <strong style="color:#fff; font-size:0.88rem;">${c.userName || 'Trader'}</strong>
                             </div>
                             <div style="font-size:0.75rem; color:#cbd5e1;"><i class="fas fa-envelope" style="color:var(--text-secondary); font-size:0.7rem; margin-right:3px;"></i>${c.userEmail || ''}</div>
-                            ${c.userTelegram && c.userTelegram !== 'N/A' ? `<div style="font-size:0.72rem; color:#60a5fa; margin-top:2px;"><i class="fab fa-telegram-plane"></i> ${c.userTelegram}</div>` : ''}
+                            ${c.userTelegram && c.userTelegram !== 'N/A' ? `<div style="font-size:0.72rem; color:#60a5fa; margin-top:2px;"><a href="https://t.me/${encodeURIComponent(c.userTelegram.replace(/^@+/, '').trim())}" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none; display:inline-flex; align-items:center; gap:4px;"><i class="fab fa-telegram-plane"></i> ${c.userTelegram.startsWith('@') ? c.userTelegram : '@' + c.userTelegram} <i class="fas fa-external-link-alt" style="font-size:0.55rem; opacity:0.7;"></i></a></div>` : ''}
                             <div style="font-size:0.72rem; color:var(--gold); margin-top:3px;">${c.brokerName || 'Broker'}: <code>${c.brokerAccountId || 'Demo'}</code></div>
                         </td>
                         <td>
@@ -4192,9 +4301,12 @@
                                     <span title="${c.userEmail || ''}">${c.userEmail || 'N/A'}</span>
                                 </div>
                                 ${c.userTelegram && c.userTelegram !== 'N/A' ? `
-                                    <div style="font-size:0.76rem; color:#60a5fa; display:flex; align-items:center; gap:5px; white-space:nowrap;">
-                                        <i class="fab fa-telegram-plane" style="font-size:0.74rem; flex-shrink:0;"></i>
-                                        <span>${c.userTelegram}</span>
+                                    <div style="margin-top:2px;">
+                                        <a href="https://t.me/${encodeURIComponent(c.userTelegram.replace(/^@+/, '').trim())}" target="_blank" rel="noopener noreferrer" style="font-size:0.75rem; color:#60a5fa; text-decoration:none; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; padding:2px 7px; border-radius:5px; background:rgba(96,165,250,0.12); border:1px solid rgba(96,165,250,0.3); transition:all 0.2s; cursor:pointer;" onmouseover="this.style.background='rgba(96,165,250,0.25)'; this.style.borderColor='#60a5fa';" onmouseout="this.style.background='rgba(96,165,250,0.12)'; this.style.borderColor='rgba(96,165,250,0.3)';" title="ক্লিক করে সরাসরি ইউজারের টেলিগ্রামে চলে যান (@${c.userTelegram.replace(/^@+/, '').trim()})">
+                                            <i class="fab fa-telegram-plane" style="font-size:0.75rem; color:#38bdf8;"></i>
+                                            <span>${c.userTelegram.startsWith('@') ? c.userTelegram : '@' + c.userTelegram}</span>
+                                            <i class="fas fa-external-link-alt" style="font-size:0.58rem; opacity:0.7; margin-left:2px;"></i>
+                                        </a>
                                     </div>
                                 ` : ''}
                             </div>
@@ -4266,12 +4378,27 @@
                         <!-- 8. Status & Progress -->
                         <td style="vertical-align:middle; min-width:160px;">
                             <div style="display:flex; flex-direction:column; gap:4px;">
-                                <div>
-                                    <span class="badge ${statusBadgeClass}" style="font-size:0.76rem; padding:3px 9px; font-weight:800; letter-spacing:0.5px;">
-                                        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${statusDotColor}; margin-right:3px;"></span>
-                                        ${statusText}
-                                    </span>
-                                </div>
+                                ${c.status === 'failed' ? `
+                                    <div>
+                                        <button type="button" class="badge badge-rejected" onclick="openDisqualificationReasonModal('${c.id}')" style="cursor:pointer; border:1px solid rgba(239,68,68,0.55); background:rgba(239,68,68,0.2); color:#fca5a5; font-size:0.76rem; padding:4px 10px; font-weight:800; border-radius:6px; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.35)'" onmouseout="this.style.background='rgba(239,68,68,0.2)'" title="ক্লিক করে বাদ পড়ার সম্পূর্ণ কারণ দেখুন">
+                                            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#ef4444;"></span>
+                                            <span>বাদ / ফেইল্ড</span>
+                                            <i class="fas fa-info-circle" style="font-size:0.72rem; margin-left:1px;"></i>
+                                        </button>
+                                    </div>
+                                    <div style="margin-top:2px;">
+                                        <button type="button" onclick="openDisqualificationReasonModal('${c.id}')" style="background:none; border:none; color:#f87171; font-size:0.71rem; font-weight:700; cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:4px; text-decoration:underline; text-underline-offset:2px;" title="পপআপে সম্পূর্ণ কারণ দেখুন">
+                                            <i class="fas fa-search-plus" style="font-size:0.68rem;"></i> কারণ দেখতে ট্যাপ করুন
+                                        </button>
+                                    </div>
+                                ` : `
+                                    <div>
+                                        <span class="badge ${statusBadgeClass}" style="font-size:0.76rem; padding:3px 9px; font-weight:800; letter-spacing:0.5px;">
+                                            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${statusDotColor}; margin-right:3px;"></span>
+                                            ${statusText}
+                                        </span>
+                                    </div>
+                                `}
 
                                 ${c.status === 'in_progress' ? `
                                     <div style="margin-top:2px;">
@@ -4298,12 +4425,6 @@
                                 ${c.status === 'passed' ? `
                                     <div style="font-size:0.74rem; color:#2ecc71; font-weight:800; display:flex; align-items:center; gap:4px; margin-top:2px;">
                                         <i class="fas fa-award"></i> ১৫টি সেশন সফলভাবে সম্পন্ন
-                                    </div>
-                                ` : ''}
-
-                                ${c.status === 'failed' ? `
-                                    <div style="font-size:0.73rem; color:#f87171; font-weight:700; margin-top:2px; line-height:1.3; max-width:180px;" title="${escapeHtml(c.failReasonText || c.violatedRule || '')}">
-                                        <i class="fas fa-ban"></i> ${escapeHtml(c.violatedRule || c.failReason || 'Disqualified')}
                                     </div>
                                 ` : ''}
 
@@ -4387,7 +4508,126 @@
                     </tr>
                 `;
             }).join('');
+
+            // Synchronize top and main horizontal scrollbars
+            setTimeout(syncChallengeTableScrollbars, 50);
         }
+
+        // ==================== DISQUALIFICATION REASON POPUP MODAL ====================
+        function openDisqualificationReasonModal(challengeId) {
+            const ch = (adminChallenges || []).find(c => c.id === challengeId);
+            if (!ch) return;
+
+            const reason = ch.violatedRule || ch.failReason || ch.failReasonText || 'চ্যালেঞ্জটি প্ল্যাটফর্মের রিস্ক পলিসি অথবা নির্দিষ্ট ট্রেডিং নিয়ম লঙ্ঘনের কারণে বাতিল (Disqualified) করা হয়েছে।';
+            
+            // Populate Meta Cards
+            const metaEl = document.getElementById('disqualifyReasonMeta');
+            if (metaEl) {
+                const tgHandle = (ch.userTelegram && ch.userTelegram !== 'N/A') ? ch.userTelegram : null;
+                metaEl.innerHTML = `
+                    <div style="background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:8px;">
+                        <span style="color:#94a3b8; font-size:0.75rem;">ট্রেডার ID ও নাম:</span>
+                        <div style="font-weight:700; color:#fff; margin-top:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                            <span style="color:var(--gold); font-family:monospace; font-size:0.8rem;">${escapeHtml(ch.userTraderId || 'AJ-1000')}</span>
+                            <span>${escapeHtml(ch.userName || 'Trader')}</span>
+                        </div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:8px;">
+                        <span style="color:#94a3b8; font-size:0.75rem;">অর্ডার ID & প্যাকেজ:</span>
+                        <div style="font-weight:700; color:#fff; margin-top:2px;">
+                            #${ch.id.slice(-6)} <span style="color:var(--gold);">(${escapeHtml(ch.packageName || 'Master')})</span>
+                        </div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:8px;">
+                        <span style="color:#94a3b8; font-size:0.75rem;">ব্রোকার & অ্যাকাউন্ট ID:</span>
+                        <div style="font-weight:700; color:#fff; margin-top:2px;">
+                            ${escapeHtml(ch.brokerName || 'Quotex')}: <strong style="font-family:monospace; color:var(--gold);">${escapeHtml(ch.brokerAccountId || 'Demo')}</strong>
+                        </div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:8px;">
+                        <span style="color:#94a3b8; font-size:0.75rem;">টেলিগ্রাম যোগাযোগ:</span>
+                        <div style="margin-top:2px;">
+                            ${tgHandle ? `
+                                <a href="https://t.me/${encodeURIComponent(tgHandle.replace(/^@+/, '').trim())}" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none; font-weight:700; font-size:0.8rem; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fab fa-telegram-plane"></i> ${tgHandle.startsWith('@') ? tgHandle : '@' + tgHandle}
+                                    <i class="fas fa-external-link-alt" style="font-size:0.58rem; opacity:0.7;"></i>
+                                </a>
+                            ` : `<span style="color:#94a3b8; font-size:0.8rem;">N/A</span>`}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Populate Reason
+            const reasonEl = document.getElementById('disqualifyReasonFullText');
+            if (reasonEl) {
+                reasonEl.textContent = reason;
+                reasonEl.dataset.rawReason = reason;
+            }
+
+            // Reactivate Button Slot
+            const reactivateSlot = document.getElementById('disqualifyModalReactivateBtnSlot');
+            if (reactivateSlot) {
+                reactivateSlot.innerHTML = `
+                    <button type="button" class="btn-success" style="padding:7px 14px; font-size:0.8rem; font-weight:800; background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; border-radius:6px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;" onclick="closeModal('disqualificationReasonModal'); openReactivateChallengeModal('${ch.id}')">
+                        <i class="fas fa-undo-alt"></i> পুনরায় সচল করুন (Reactivate)
+                    </button>
+                `;
+            }
+
+            openModal('disqualificationReasonModal');
+        }
+
+        function copyDisqualifyReasonText() {
+            const reasonEl = document.getElementById('disqualifyReasonFullText');
+            const text = reasonEl ? (reasonEl.dataset.rawReason || reasonEl.textContent) : '';
+            if (text) {
+                copyText(text, 'বাতিলের কারণ সফলভাবে কপি হয়েছে!');
+            }
+        }
+
+        // ==================== SYNCHRONIZED TOP & BOTTOM HORIZONTAL SCROLLBAR ====================
+        function syncChallengeTableScrollbars() {
+            const topWrapper = document.getElementById('challengeTableTopScrollWrapper');
+            const topInner = document.getElementById('challengeTableTopScrollInner');
+            const mainWrapper = document.getElementById('challengeTableMainWrapper');
+            const table = document.getElementById('challengeOrdersTable');
+
+            if (!topWrapper || !topInner || !mainWrapper || !table) return;
+
+            const scrollWidth = table.scrollWidth;
+            const clientWidth = mainWrapper.clientWidth;
+
+            if (scrollWidth > clientWidth + 5) {
+                topWrapper.style.display = 'block';
+                topInner.style.width = scrollWidth + 'px';
+            } else {
+                topWrapper.style.display = 'none';
+                return;
+            }
+
+            // Sync scrolling between top and main table wrapper
+            let isSyncingTop = false;
+            let isSyncingMain = false;
+
+            topWrapper.onscroll = function() {
+                if (!isSyncingTop) {
+                    isSyncingMain = true;
+                    mainWrapper.scrollLeft = topWrapper.scrollLeft;
+                }
+                isSyncingTop = false;
+            };
+
+            mainWrapper.onscroll = function() {
+                if (!isSyncingMain) {
+                    isSyncingTop = true;
+                    topWrapper.scrollLeft = mainWrapper.scrollLeft;
+                }
+                isSyncingMain = false;
+            };
+        }
+
+        window.addEventListener('resize', syncChallengeTableScrollbars);
 
         // Delete Challenge
         async function handleDeleteChallenge(id) {
@@ -4424,7 +4664,7 @@
                 </div>
                 <div style="color:#cbd5e1; font-size:0.85rem; margin-bottom:8px;">
                     <i class="fas fa-envelope" style="color:var(--text-secondary);"></i> ${ch.userEmail || 'N/A'}
-                    ${ch.userTelegram && ch.userTelegram !== 'N/A' ? ` • <i class="fab fa-telegram-plane" style="color:#60a5fa;"></i> ${ch.userTelegram}` : ''}
+                    ${ch.userTelegram && ch.userTelegram !== 'N/A' ? ` • <a href="https://t.me/${encodeURIComponent(ch.userTelegram.replace(/^@+/, '').trim())}" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none;"><i class="fab fa-telegram-plane"></i> ${ch.userTelegram.startsWith('@') ? ch.userTelegram : '@' + ch.userTelegram} <i class="fas fa-external-link-alt" style="font-size:0.6rem; opacity:0.7;"></i></a>` : ''}
                 </div>
                 Package: <strong>${ch.packageName} ($${(ch.fundedAmount || 0).toLocaleString()})</strong> • Fee: <strong>$${ch.fee}</strong> ${localFeeText}<br>
                 Broker: <strong>${ch.brokerName}</strong> • Demo ID: <code>${ch.brokerAccountId}</code><br>
@@ -4486,7 +4726,7 @@
                         </div>
                         <div style="color:#cbd5e1; font-size:0.8rem; margin-top:2px;">
                             <i class="fas fa-envelope" style="color:var(--text-secondary);"></i> ${challenge.userEmail || ''}
-                            ${challenge.userTelegram && challenge.userTelegram !== 'N/A' ? ` • <i class="fab fa-telegram-plane" style="color:#60a5fa;"></i> ${challenge.userTelegram}` : ''}
+                            ${challenge.userTelegram && challenge.userTelegram !== 'N/A' ? ` • <a href="https://t.me/${encodeURIComponent(challenge.userTelegram.replace(/^@+/, '').trim())}" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none;"><i class="fab fa-telegram-plane"></i> ${challenge.userTelegram.startsWith('@') ? challenge.userTelegram : '@' + challenge.userTelegram} <i class="fas fa-external-link-alt" style="font-size:0.6rem; opacity:0.7;"></i></a>` : ''}
                         </div>
                         <div style="color:var(--text-secondary); margin-top:4px;">
                             প্যাকেজ: <strong style="color:#fff;">${challenge.packageName} ($${(challenge.fundedAmount || 0).toLocaleString()})</strong> • ফি: <strong style="color:var(--gold);">$${challenge.fee}</strong>
@@ -4782,8 +5022,15 @@
                                 </span>
                                 ${u.verificationCode ? `<div style="font-size:0.72rem; color:var(--gold); font-family:monospace; margin-top:2px;">OTP: ${u.verificationCode}</div>` : ''}
                             `}
+                        <td>
+                            ${u.telegram && u.telegram !== 'N/A' ? `
+                                <a href="https://t.me/${encodeURIComponent(u.telegram.replace(/^@+/, '').trim())}" target="_blank" rel="noopener noreferrer" style="color:var(--gold); text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:5px; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); transition:all 0.2s;" onmouseover="this.style.background='rgba(212,175,55,0.2)'" onmouseout="this.style.background='rgba(212,175,55,0.1)'" title="টেলিগ্রামে মেসেজ করুন">
+                                    <i class="fab fa-telegram-plane" style="color:#60a5fa;"></i>
+                                    <span>${u.telegram.startsWith('@') ? u.telegram : '@' + u.telegram}</span>
+                                    <i class="fas fa-external-link-alt" style="font-size:0.58rem; opacity:0.7;"></i>
+                                </a>
+                            ` : `<span style="color:#94a3b8; font-size:0.8rem;">N/A</span>`}
                         </td>
-                        <td><span style="color:var(--gold); font-weight:600;">${u.telegram}</span></td>
                         <td><span style="text-transform:capitalize;">${u.preferredBroker}</span></td>
                         <td>${date}</td>
                         <td>
@@ -4877,8 +5124,9 @@
 
                 const u = data.user;
                 const isVerified = u.isEmailVerified !== false;
+                const tgLinkHtml = (u.telegram && u.telegram !== 'N/A') ? `<a href="https://t.me/${encodeURIComponent(u.telegram.replace(/^@+/, '').trim())}" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none;"><i class="fab fa-telegram-plane"></i> ${u.telegram.startsWith('@') ? u.telegram : '@' + u.telegram}</a>` : 'N/A';
                 document.getElementById('historyUserName').innerHTML = `${u.name} <span style="background:rgba(212,175,55,0.15); color:var(--gold); border:1px solid rgba(212,175,55,0.35); padding:2px 8px; border-radius:6px; font-weight:800; font-family:monospace; font-size:0.82rem; margin-left:8px;">ID: ${u.traderId || 'AJ-1001'}</span>`;
-                document.getElementById('historyUserMeta').innerText = `${u.email} • Telegram: ${u.telegram || 'N/A'} • Email: ${isVerified ? 'Verified ✅' : 'Unverified ⚠️'}`;
+                document.getElementById('historyUserMeta').innerHTML = `${u.email} • Telegram: ${tgLinkHtml} • Email: ${isVerified ? 'Verified ✅' : 'Unverified ⚠️'}`;
                 if (u.profilePicture) {
                     document.getElementById('historyUserAvatar').innerHTML = `<img src="${u.profilePicture}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" />`;
                 } else {
@@ -5322,7 +5570,7 @@
                                     </div>
                                     <div style="font-size:0.84rem; color:var(--text-secondary); margin-top:4px;">
                                         <i class="fas fa-envelope" style="margin-right:4px;"></i> ${ch?.userEmail || u.email || 'N/A'}
-                                        ${(ch?.userTelegram || u.telegram) ? ` • <i class="fab fa-telegram" style="color:var(--neon-blue); margin-left:6px; margin-right:2px;"></i> ${ch?.userTelegram || u.telegram}` : ''}
+                                        ${(ch?.userTelegram || u.telegram) ? ` • <a href="https://t.me/${encodeURIComponent((ch?.userTelegram || u.telegram).replace(/^@+/, '').trim())}" target="_blank" rel="noopener noreferrer" style="color:var(--neon-blue); text-decoration:none;"><i class="fab fa-telegram" style="color:var(--neon-blue); margin-left:6px; margin-right:2px;"></i> ${(ch?.userTelegram || u.telegram).startsWith('@') ? (ch?.userTelegram || u.telegram) : '@' + (ch?.userTelegram || u.telegram)} <i class="fas fa-external-link-alt" style="font-size:0.55rem; opacity:0.7;"></i></a>` : ''}
                                     </div>
                                 </div>
                             </div>
