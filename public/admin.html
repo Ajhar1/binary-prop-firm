@@ -5412,9 +5412,17 @@
             }
 
             // Render Chronological Serial Sessions (Session #1, Session #2, ...)
+            let officialIndex = 0;
             sessionsContainer.innerHTML = subs.map((sub, idx) => {
-                const sessionNum = idx + 1;
-                const sessionOrdinal = getBanglaOrdinal(sessionNum);
+                let sessionNum;
+                let sessionOrdinal;
+                if (sub.isPractice) {
+                    sessionNum = sub.practiceSessionNumber || (idx + 1);
+                } else {
+                    officialIndex++;
+                    sessionNum = sub.sessionNumber || officialIndex;
+                    sessionOrdinal = getBanglaOrdinal(sessionNum);
+                }
                 const isOpen = openSessionCards.has(sub.id) || (sub.status === 'under_review');
                 const subPnl = parseFloat(sub.profitLoss) || 0;
                 const pnlSign = subPnl >= 0 ? '+' : '';

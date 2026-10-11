@@ -4582,6 +4582,10 @@
                 reasonTitle = '❌ সেশন বাতিল (Session Rejected by Admin):';
                 ruleTag = challenge.violatedRule || 'ট্রেডিং সেশন বাতিল';
                 reasonText = challenge.failReasonText || 'এডমিন কর্তৃক সেশন রিজেক্ট করায় চ্যালেঞ্জটি বন্ধ করা হয়েছে।';
+            } else if (challenge.failReason === 'AUTO_AUDIT_RULE_VIOLATION') {
+                reasonTitle = '⚡ অটো-অডিটে রুল লঙ্ঘন (Auto-Audit Rule Violation):';
+                ruleTag = challenge.violatedRule || 'ট্রেডিং রুলস লঙ্ঘন';
+                reasonText = challenge.failReasonText || 'কোটেক্স অটো-অডিটে ট্রেডিং রুলস লঙ্ঘনের কারণে আপনার সেশন ফেইল্ড হয়েছে এবং প্ল্যাটফর্মের নিয়মানুযায়ী এই চ্যালেঞ্জটি বন্ধ ও বাতিল করা হয়েছে।';
             }
 
             return `

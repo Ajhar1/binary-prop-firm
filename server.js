@@ -1170,8 +1170,10 @@ function syncChallengesWithSubmissions() {
         const existing = challengeMap.get(pc.id);
         // If permanent store has a failed/disqualified status, check if the challenge was reactivated
         if (pc.status === 'failed' && existing.status !== 'failed') {
-          // If the challenge was explicitly reactivated by admin, DO NOT revert it to failed!
-          if (existing.status === 'in_progress' && existing.reactivatedAt) {
+          const reactivatedMs = existing.reactivatedAt ? new Date(existing.reactivatedAt).getTime() : 0;
+          const failedMs = pc.failedAt ? new Date(pc.failedAt).getTime() : 0;
+          // If the challenge was explicitly reactivated by admin AFTER the failure, DO NOT revert it to failed!
+          if (existing.status === 'in_progress' && reactivatedMs > failedMs) {
             pc.status = 'in_progress';
             delete pc.failReason;
             delete pc.violatedRule;
@@ -1193,7 +1195,9 @@ function syncChallengesWithSubmissions() {
             modified = true;
           }
         } else if (existing.status === 'failed' && pc.status !== 'failed') {
-          if (pc.status === 'in_progress' && pc.reactivatedAt) {
+          const reactivatedMs = pc.reactivatedAt ? new Date(pc.reactivatedAt).getTime() : 0;
+          const failedMs = existing.failedAt ? new Date(existing.failedAt).getTime() : 0;
+          if (pc.status === 'in_progress' && reactivatedMs > failedMs) {
             existing.status = 'in_progress';
             delete existing.failReason;
             delete existing.violatedRule;
@@ -1436,7 +1440,7 @@ function syncChallengesWithSubmissions() {
       }
 
       const officialSubs = allChSubs.filter(s => s.isPractice !== true);
-      const officialNonRejectedSubs = officialSubs.filter(s => s.status !== 'rejected');
+      const officialNonRejectedSubs = officialSubs.filter(s => s.status !== 'rejected' && s.status !== 'failed');
       const verifiedSubs = officialSubs.filter(s => s.status === 'verified' || s.status === 'auto_verified');
       c.verifiedSessionsCount = verifiedSubs.length;
       c.totalSubmissionsCount = officialNonRejectedSubs.length;
@@ -1519,7 +1523,7 @@ function syncChallengesWithSubmissions() {
 
       const reactivatedMs = c.reactivatedAt ? new Date(c.reactivatedAt).getTime() : 0;
       const rejectedOfficialSub = officialSubs.find(s => {
-        if (s.status !== 'rejected') return false;
+        if (s.status !== 'rejected' && s.status !== 'failed') return false;
         if (s.forgivenOnReactivation === true) return false;
         if (reactivatedMs > 0) {
           const subMs = new Date(s.reviewedAt || s.submittedAt || 0).getTime();
@@ -1533,15 +1537,22 @@ function syncChallengesWithSubmissions() {
 
       // DISQUALIFICATION & EVALUATION RULES: Strictly active only if in_progress AND challengePhase === 'evaluation'
       if (c.status === 'in_progress' && c.challengePhase === 'evaluation') {
-        // REQ 1: If any OFFICIAL session for this challenge was REJECTED by admin -> IMMEDIATELY FAIL & CLOSE CHALLENGE!
+        // REQ 1: If any OFFICIAL session for this challenge was REJECTED by admin or FAILED by Auto-Audit -> IMMEDIATELY FAIL & CLOSE CHALLENGE!
         if (rejectedOfficialSub) {
+          const isAutoAuditFail = (rejectedOfficialSub.status === 'failed');
           c.status = 'failed';
-          c.failReason = 'SESSION_REJECTED';
-          c.violatedRule = rejectedOfficialSub.adminFeedback ? `সেশন বাতিল (কারণ: ${rejectedOfficialSub.adminFeedback})` : 'সেশন রিজেক্ট / ট্রেডিং রুলস লঙ্ঘন';
-          c.failReasonText = rejectedOfficialSub.adminFeedback 
-            ? `এডমিন প্যানেল থেকে আপনার ট্রেডিং সেশন রিজেক্ট করা হয়েছে (কারণ: ${rejectedOfficialSub.adminFeedback})। প্ল্যাটফর্মের অফিসিয়াল নিয়মানুযায়ী সেশন রিজেক্ট হলে চ্যালেঞ্জটি বন্ধ হয়ে যায় এবং আপনি এই চ্যালেঞ্জ থেকে বাদ পড়েছেন।`
-            : 'এডমিন কর্তৃক আপনার ট্রেডিং সেশন রিজেক্ট করায় প্ল্যাটফর্মের অফিসিয়াল নিয়মানুযায়ী চ্যালেঞ্জটি বন্ধ করা হয়েছে এবং আপনি এই চ্যালেঞ্জ থেকে বাদ পড়েছেন।';
-          c.failedAt = rejectedOfficialSub.reviewedAt || now.toISOString();
+          c.failReason = isAutoAuditFail ? 'AUTO_AUDIT_RULE_VIOLATION' : 'SESSION_REJECTED';
+          c.violatedRule = rejectedOfficialSub.adminFeedback 
+            ? `সেশন বাতিল (কারণ: ${rejectedOfficialSub.adminFeedback})` 
+            : (rejectedOfficialSub.violatedRule || (rejectedOfficialSub.auditReport && rejectedOfficialSub.auditReport[0] && rejectedOfficialSub.auditReport[0].reason) || 'ট্রেডিং রুলস লঙ্ঘন');
+          c.failReasonText = isAutoAuditFail
+            ? (rejectedOfficialSub.adminFeedback 
+                ? `অটো-অডিটে ট্রেডিং রুলস লঙ্ঘনের কারণে সেশন ফেইল্ড হয়েছে (${rejectedOfficialSub.adminFeedback})। প্ল্যাটফর্মের অফিসিয়াল নিয়মানুযায়ী অফিসিয়াল সেশনে রুল ভঙ্গ হলে চ্যালেঞ্জ বাতিল ও বাদ দেওয়া হয়।`
+                : 'অটো-অডিটে ট্রেডিং রুলস লঙ্ঘনের কারণে আপনার সেশন ফেইল্ড হয়েছে। প্ল্যাটফর্মের অফিসিয়াল নিয়মানুযায়ী অফিসিয়াল মূল্যায়নে রুল ভঙ্গ হলে চ্যালেঞ্জ বাতিল ও বাদ দেওয়া হয়।')
+            : (rejectedOfficialSub.adminFeedback 
+                ? `এডমিন প্যানেল থেকে আপনার ট্রেডিং সেশন রিজেক্ট করা হয়েছে (কারণ: ${rejectedOfficialSub.adminFeedback})। প্ল্যাটফর্মের অফিসিয়াল নিয়মানুযায়ী সেশন রিজেক্ট হলে চ্যালেঞ্জটি বন্ধ হয়ে যায় এবং আপনি এই চ্যালেঞ্জ থেকে বাদ পড়েছেন।`
+                : 'এডমিন কর্তৃক আপনার ট্রেডিং সেশন রিজেক্ট করায় প্ল্যাটফর্মের অফিসিয়াল নিয়মানুযায়ী চ্যালেঞ্জটি বন্ধ করা হয়েছে এবং আপনি এই চ্যালেঞ্জ থেকে বাদ পড়েছেন।');
+          c.failedAt = rejectedOfficialSub.reviewedAt || rejectedOfficialSub.submittedAt || now.toISOString();
           c.isActive = false;
           c.isCompleted = true;
           modified = true;
@@ -1550,7 +1561,7 @@ function syncChallengesWithSubmissions() {
               challengeId: c.id,
               packageName: c.packageName,
               submissionId: rejectedOfficialSub.id,
-              adminFeedback: rejectedOfficialSub.adminFeedback || ''
+              adminFeedback: rejectedOfficialSub.adminFeedback || c.violatedRule
             });
           } catch (e) {}
         }
@@ -5014,7 +5025,18 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         activeChallenge.failReasonText = violations.join('; ');
         activeChallenge.failedAt = new Date().toISOString();
         activeChallenge.isActive = false;
-        writeJson(CHALLENGES_FILE, challenges);
+        activeChallenge.isCompleted = true;
+        saveChallenges(challenges);
+        try {
+          logUserArchive('CHALLENGE_DISQUALIFIED_RULE_VIOLATION', { id: user.id }, {
+            challengeId: activeChallenge.id,
+            packageName: activeChallenge.packageName,
+            submissionId: failedSubmission.id,
+            failReason: activeChallenge.failReason,
+            violatedRule: activeChallenge.violatedRule,
+            reasonNote: activeChallenge.failReasonText
+          });
+        } catch(e) {}
       }
 
       syncChallengesWithSubmissions();
@@ -8196,7 +8218,7 @@ app.post('/api/admin/support/resolve-challenge', authenticateAdminToken, (req, r
     challenges[idx].rejectedReason = reason || challenges[idx].rejectedReason;
   }
 
-  writeJson(CHALLENGES_FILE, challenges);
+  saveChallenges(challenges);
   res.json({ success: true, message: 'চ্যালেঞ্জের সমস্যা সফলভাবে সমাধান করা হয়েছে!', challenge: challenges[idx] });
 });
 
