@@ -16,6 +16,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- World Countries Dataset -->
     <script src="/assets/countries.js"></script>
+    <script>
+        (function() {
+            try {
+                var t = localStorage.getItem('dash_theme_template') || 'full-night';
+                document.documentElement.setAttribute('data-theme', t);
+            } catch(e) {}
+        })();
+    </script>
 
     <style>
         * {
@@ -24,19 +32,354 @@
             box-sizing: border-box;
         }
 
-        :root {
+        /* ==================== THEME TEMPLATES (Quotex 1:1) ==================== */
+        /* 1. Full Night (Default Dark Theme) */
+        :root, html[data-theme="full-night"], body[data-theme="full-night"] {
             --yellow: #F5B041;
             --yellow-dark: #E67E22;
             --dark-bg: #09090b;
             --sidebar-bg: #0e0e11;
-            --card-bg: rgba(22, 22, 26, 0.75);
+            --card-bg: rgba(22, 22, 26, 0.85);
             --card-border: rgba(255, 255, 255, 0.08);
             --text-primary: #f4f4f5;
             --text-secondary: #a1a1aa;
             --neon-green: #2ecc71;
             --danger-red: #ef4444;
             --blue: #3b82f6;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --input-border: rgba(255, 255, 255, 0.08);
+            --input-color: #ffffff;
+            --header-border: rgba(255, 255, 255, 0.08);
+            --table-row-hover: rgba(255, 255, 255, 0.02);
+            --card-subtle-bg: rgba(0, 0, 0, 0.35);
         }
+
+        /* 2. Twilight Mode (Quotex Twilight Navy / Slate) */
+        html[data-theme="twilight"], body[data-theme="twilight"] {
+            --yellow: #F5B041;
+            --yellow-dark: #E67E22;
+            --dark-bg: #0d1527;
+            --sidebar-bg: #141e34;
+            --card-bg: rgba(22, 33, 58, 0.92);
+            --card-border: rgba(99, 130, 185, 0.22);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --neon-green: #2ecc71;
+            --danger-red: #f87171;
+            --blue: #38bdf8;
+            --input-bg: rgba(255, 255, 255, 0.06);
+            --input-border: rgba(99, 130, 185, 0.28);
+            --input-color: #f8fafc;
+            --header-border: rgba(99, 130, 185, 0.18);
+            --table-row-hover: rgba(99, 130, 185, 0.08);
+            --card-subtle-bg: rgba(10, 18, 36, 0.6);
+        }
+
+        /* 3. Light Mode (Quotex Crisp Bright Theme) */
+        html[data-theme="light-mode"], body[data-theme="light-mode"] {
+            --yellow: #d97706;
+            --yellow-dark: #b45309;
+            --dark-bg: #f1f5f9;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --neon-green: #16a34a;
+            --danger-red: #dc2626;
+            --blue: #2563eb;
+            --input-bg: #f8fafc;
+            --input-border: #cbd5e1;
+            --input-color: #0f172a;
+            --header-border: #e2e8f0;
+            --table-row-hover: #f8fafc;
+            --card-subtle-bg: #f8fafc;
+        }
+
+        /* Light Mode Specific Enhancements */
+        body[data-theme="light-mode"] {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+        body[data-theme="light-mode"] .glass-card {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        body[data-theme="light-mode"] .sidebar {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.03);
+        }
+        body[data-theme="light-mode"] .brand-text {
+            background: linear-gradient(135deg, #0f172a, #d97706) !important;
+            -webkit-background-clip: text !important;
+            color: transparent !important;
+        }
+        body[data-theme="light-mode"] .sidebar-item {
+            color: #475569 !important;
+        }
+        body[data-theme="light-mode"] .sidebar-item:hover,
+        body[data-theme="light-mode"] .sidebar-item.active {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #d97706, #b45309) !important;
+        }
+        body[data-theme="light-mode"] .sidebar-item:hover i,
+        body[data-theme="light-mode"] .sidebar-item.active i {
+            color: #ffffff !important;
+        }
+        body[data-theme="light-mode"] .user-preview {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0;
+        }
+        body[data-theme="light-mode"] .user-name {
+            color: #0f172a !important;
+        }
+        body[data-theme="light-mode"] .top-header {
+            border-color: #e2e8f0 !important;
+        }
+        body[data-theme="light-mode"] .header-title h1,
+        body[data-theme="light-mode"] h1,
+        body[data-theme="light-mode"] h2,
+        body[data-theme="light-mode"] h3,
+        body[data-theme="light-mode"] h4 {
+            color: #0f172a !important;
+        }
+        body[data-theme="light-mode"] .header-title p {
+            color: #475569 !important;
+        }
+        body[data-theme="light-mode"] .btn-outline-header {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        body[data-theme="light-mode"] .btn-outline-header:hover {
+            background: #f8fafc !important;
+            border-color: #94a3b8 !important;
+        }
+        body[data-theme="light-mode"] .form-control {
+            background: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        body[data-theme="light-mode"] .form-control:focus {
+            background: #ffffff !important;
+            border-color: #d97706 !important;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+        }
+        body[data-theme="light-mode"] .stat-card,
+        body[data-theme="light-mode"] .prof-stat-card {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        body[data-theme="light-mode"] .profile-hero-card {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        body[data-theme="light-mode"] .styled-table th {
+            background: #f8fafc !important;
+            color: #334155 !important;
+            border-color: #e2e8f0 !important;
+        }
+        body[data-theme="light-mode"] .styled-table td {
+            color: #0f172a !important;
+            border-color: #e2e8f0 !important;
+        }
+        body[data-theme="light-mode"] .styled-table tr:hover {
+            background: #f8fafc !important;
+        }
+        body[data-theme="light-mode"] .trader-id-badge {
+            background: rgba(217, 119, 6, 0.1) !important;
+            color: #b45309 !important;
+            border-color: rgba(217, 119, 6, 0.25) !important;
+        }
+        body[data-theme="light-mode"] .modal-content {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        /* Twilight Mode Specific Enhancements */
+        body[data-theme="twilight"] .glass-card {
+            background: rgba(22, 33, 58, 0.88) !important;
+            border-color: rgba(99, 130, 185, 0.2) !important;
+        }
+        body[data-theme="twilight"] .sidebar {
+            background: #141e34 !important;
+            border-color: rgba(99, 130, 185, 0.2) !important;
+        }
+        body[data-theme="twilight"] .form-control {
+            background: rgba(14, 23, 42, 0.7) !important;
+            border-color: rgba(99, 130, 185, 0.25) !important;
+            color: #f8fafc !important;
+        }
+
+        /* Settings UI & Template Selector */
+        .template-selector-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .template-mode-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 2px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            user-select: none;
+        }
+
+        body[data-theme="light-mode"] .template-mode-card {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        .template-mode-card:hover {
+            border-color: var(--yellow);
+            transform: translateY(-2px);
+        }
+
+        .template-mode-card.active {
+            border-color: var(--yellow);
+            background: rgba(245, 176, 65, 0.12);
+            box-shadow: 0 0 20px rgba(245, 176, 65, 0.2);
+        }
+
+        body[data-theme="light-mode"] .template-mode-card.active {
+            background: rgba(217, 119, 6, 0.08);
+            border-color: #d97706;
+        }
+
+        .template-mode-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+
+        .template-mode-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .template-mode-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .template-mode-desc {
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .template-radio-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .template-mode-card.active .template-radio-circle {
+            border-color: var(--yellow);
+            background: var(--yellow);
+            box-shadow: 0 0 10px rgba(245, 176, 65, 0.5);
+        }
+
+        .template-mode-card.active .template-radio-circle::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #000;
+        }
+
+        /* Header Lang & Theme Pills */
+        .header-pill-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .header-lang-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 6px;
+            min-width: 200px;
+            max-height: 380px;
+            overflow-y: auto;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1050;
+        }
+
+        body[data-theme="light-mode"] .header-lang-dropdown {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .lang-option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            transition: all 0.15s;
+        }
+
+        .lang-option-item:hover {
+            background: rgba(245, 176, 65, 0.15);
+            color: var(--yellow);
+        }
+
+        .lang-option-item.active {
+            background: var(--yellow);
+            color: #000 !important;
+            font-weight: 800;
+        }
+
+        /* Hide Google Translate Banner and tooltips cleanly */
+        .goog-te-banner-frame.skiptranslate, iframe.goog-te-banner-frame { display: none !important; }
+        body { top: 0px !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background: none !important; box-shadow: none !important; }
+        .skiptranslate > iframe { height: 0 !important; border: 0 !important; }
 
         html {
             overflow-x: hidden !important;
@@ -2179,6 +2522,59 @@
                 </div>
             </div>
             <div class="header-actions">
+                <!-- Quick Language Picker Pill -->
+                <div class="header-lang-wrapper" style="position:relative;">
+                    <button type="button" class="btn-outline-header header-pill-btn" onclick="toggleHeaderLangMenu(event)" id="headerLangBtn" title="Change Language">
+                        <i class="fas fa-globe" style="color:var(--blue);"></i>
+                        <span id="headerCurrentLangLabel">বাংলা</span>
+                        <i class="fas fa-chevron-down" style="font-size:0.65rem; margin-left:2px; opacity:0.7;"></i>
+                    </button>
+                    <div id="headerLangDropdown" class="header-lang-dropdown" style="display:none;">
+                        <div class="lang-option-item active" onclick="changeLanguage('default')" data-lang="default">
+                            <span>🇧🇩</span> <span>বাংলা (Default)</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('en')" data-lang="en">
+                            <span>🇺🇸</span> <span>English</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('hi')" data-lang="hi">
+                            <span>🇮🇳</span> <span>हिन्दी (Hindi)</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('ar')" data-lang="ar">
+                            <span>🇸🇦</span> <span>العربية (Arabic)</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('es')" data-lang="es">
+                            <span>🇪🇸</span> <span>Español</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('fr')" data-lang="fr">
+                            <span>🇫🇷</span> <span>Français</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('pt')" data-lang="pt">
+                            <span>🇧🇷</span> <span>Português</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('id')" data-lang="id">
+                            <span>🇮🇩</span> <span>Indonesian</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('ru')" data-lang="ru">
+                            <span>🇷🇺</span> <span>Русский</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('tr')" data-lang="tr">
+                            <span>🇹🇷</span> <span>Türkçe</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('vi')" data-lang="vi">
+                            <span>🇻🇳</span> <span>Tiếng Việt</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLanguage('zh-CN')" data-lang="zh-CN">
+                            <span>🇨🇳</span> <span>中文 (Chinese)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Theme Template Toggle Pill -->
+                <button type="button" class="btn-outline-header header-pill-btn" onclick="cycleThemeTemplate()" id="headerThemeBtn" title="Switch Theme (Light / Twilight / Full Night)">
+                    <i id="headerThemeIcon" class="fas fa-moon" style="color:var(--yellow);"></i>
+                    <span id="headerThemeText">Full Night</span>
+                </button>
+
                 <span id="globalLiveSyncPill" class="mas-sync-indicator" title="সকল ডিভাইসে রিয়েল-টাইম অটো-সিঙ্ক সক্রিয়">
                     <span class="sync-dot"></span> <span class="sync-label">লাইভ সিঙ্ক</span>
                 </span>
@@ -3205,6 +3601,90 @@
                         </form>
                     </div>
 
+                    <!-- Platform Settings & Appearance (Language & Template - Quotex 1:1) -->
+                    <div class="glass-card" id="cardPlatformSettings">
+                        <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-sliders-h" style="color: var(--yellow);"></i>
+                            <span data-i18n="settings_title">প্লাটফর্ম সেটিংস (Platform Settings)</span>
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.4rem;" data-i18n="settings_subtitle">
+                            আপনার ব্রোকার ইন্টারফেসের ভাষা এবং থিম টেমপ্লেট পছন্দ অনুযায়ী পরিবর্তন করুন।
+                        </p>
+
+                        <!-- 1. Language Selector -->
+                        <div class="form-group" style="margin-bottom: 1.4rem;">
+                            <label style="font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-globe" style="color: var(--blue);"></i>
+                                <span data-i18n="settings_lang_label">ভাষা / Language</span>
+                            </label>
+                            <div style="position: relative;">
+                                <select class="form-control" id="profileLanguageSelect" onchange="changeLanguage(this.value)" style="height: 48px; font-weight: 600; cursor: pointer; padding-left: 42px;">
+                                    <option value="default">🇧🇩 বাংলা (বাংলা - Default)</option>
+                                    <option value="en">🇺🇸 English</option>
+                                    <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+                                    <option value="ar">🇸🇦 العربية (Arabic)</option>
+                                    <option value="es">🇪🇸 Español (Spanish)</option>
+                                    <option value="fr">🇫🇷 Français (French)</option>
+                                    <option value="pt">🇧🇷 Português (Portuguese)</option>
+                                    <option value="id">🇮🇩 Bahasa Indonesia</option>
+                                    <option value="ru">🇷🇺 Русский (Russian)</option>
+                                    <option value="tr">🇹🇷 Türkçe (Turkish)</option>
+                                    <option value="vi">🇻🇳 Tiếng Việt (Vietnamese)</option>
+                                    <option value="zh-CN">🇨🇳 中文 (Chinese)</option>
+                                </select>
+                                <i class="fas fa-language" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.15rem; color: var(--yellow); pointer-events: none;"></i>
+                            </div>
+                            <small style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 4px; display: block;" data-i18n="settings_lang_hint">
+                                যেকোনো ভাষা নির্বাচন করলে সম্পূর্ণ ব্রোকারের প্রত্যেকটি লেখা সেই ভাষায় পরিবর্তিত হবে।
+                            </small>
+                        </div>
+
+                        <!-- 2. Template / Theme Mode (Quotex 1:1) -->
+                        <div class="form-group" style="margin-bottom: 0.5rem;">
+                            <label style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-palette" style="color: var(--yellow);"></i>
+                                <span data-i18n="settings_template_label">টেমপ্লেট / Template</span>
+                            </label>
+                            <div class="template-selector-grid">
+                                <!-- Light Mode -->
+                                <div class="template-mode-card" id="themeCard-light-mode" onclick="applyThemeTemplate('light-mode')">
+                                    <div class="template-mode-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff;">
+                                        <i class="fas fa-sun"></i>
+                                    </div>
+                                    <div class="template-mode-info">
+                                        <strong class="template-mode-title" data-i18n="theme_light">Light Mode</strong>
+                                        <span class="template-mode-desc" data-i18n="theme_light_desc">উজ্জ্বল ও ফ্রেশ ইন্টারফেস</span>
+                                    </div>
+                                    <div class="template-radio-circle"></div>
+                                </div>
+
+                                <!-- Twilight -->
+                                <div class="template-mode-card" id="themeCard-twilight" onclick="applyThemeTemplate('twilight')">
+                                    <div class="template-mode-icon" style="background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff;">
+                                        <i class="fas fa-cloud-moon"></i>
+                                    </div>
+                                    <div class="template-mode-info">
+                                        <strong class="template-mode-title" data-i18n="theme_twilight">Twilight</strong>
+                                        <span class="template-mode-desc" data-i18n="theme_twilight_desc">সফট নেভি-স্লেট গোধূলি থিম</span>
+                                    </div>
+                                    <div class="template-radio-circle"></div>
+                                </div>
+
+                                <!-- Full Night -->
+                                <div class="template-mode-card active" id="themeCard-full-night" onclick="applyThemeTemplate('full-night')">
+                                    <div class="template-mode-icon" style="background: linear-gradient(135deg, #18181b, #09090b); color: var(--yellow); border: 1px solid rgba(245, 176, 65, 0.4);">
+                                        <i class="fas fa-moon"></i>
+                                    </div>
+                                    <div class="template-mode-info">
+                                        <strong class="template-mode-title" data-i18n="theme_full_night">Full Night</strong>
+                                        <span class="template-mode-desc" data-i18n="theme_full_night_desc">গাঢ় ব্ল্যাক প্রফেশনাল ডার্ক মোড</span>
+                                    </div>
+                                    <div class="template-radio-circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Guidelines Card -->
                     <div class="glass-card" style="background: rgba(245, 176, 65, 0.03); border-color: rgba(245, 176, 65, 0.2);">
                         <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--yellow); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
@@ -4075,6 +4555,13 @@
                     document.getElementById('profBrokerAccountId').value = currentUser.brokerAccountId || '';
                     document.getElementById('profPayoutWallet').value = currentUser.payoutWallet || '';
 
+                    if (currentUser.preferredTheme && !localStorage.getItem('dash_theme_template')) {
+                        applyThemeTemplate(currentUser.preferredTheme, false);
+                    }
+                    if (currentUser.preferredLanguage && !localStorage.getItem('dash_selected_lang')) {
+                        changeLanguage(currentUser.preferredLanguage, false);
+                    }
+
                     // Hero Profile Card
                     const heroName = document.getElementById('profHeroName');
                     if (heroName) heroName.innerText = currentUser.name;
@@ -4433,7 +4920,8 @@
             const telegram = document.getElementById('profTelegram').value;
             const preferredBroker = document.getElementById('profBroker').value;
             const brokerAccountId = document.getElementById('profBrokerAccountId').value;
-            const payoutWallet = document.getElementById('profPayoutWallet').value;
+            const preferredLanguage = localStorage.getItem('dash_selected_lang') || 'default';
+            const preferredTheme = localStorage.getItem('dash_theme_template') || 'full-night';
 
             try {
                 const res = await fetch('/api/auth/update-profile', {
@@ -4442,7 +4930,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ name, telegram, preferredBroker, brokerAccountId, payoutWallet })
+                    body: JSON.stringify({ name, telegram, preferredBroker, brokerAccountId, payoutWallet, preferredLanguage, preferredTheme })
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -9719,10 +10207,290 @@
             }).join('');
         }
 
+        // ==========================================
+        // MULTI-LANGUAGE & TEMPLATE THEME CONTROLLER
+        // ==========================================
+
+        const THEMES = ['full-night', 'twilight', 'light-mode'];
+        const LANG_META = {
+            'default': { label: 'বাংলা', name: 'বাংলা (Default)' },
+            'en': { label: 'English', name: 'English' },
+            'hi': { label: 'हिन्दी', name: 'हिन्दी (Hindi)' },
+            'ar': { label: 'العربية', name: 'العربية (Arabic)' },
+            'es': { label: 'Español', name: 'Español' },
+            'fr': { label: 'Français', name: 'Français' },
+            'pt': { label: 'Português', name: 'Português' },
+            'id': { label: 'Indonesia', name: 'Bahasa Indonesia' },
+            'ru': { label: 'Русский', name: 'Русский' },
+            'tr': { label: 'Türkçe', name: 'Türkçe' },
+            'vi': { label: 'Tiếng Việt', name: 'Tiếng Việt' },
+            'zh-CN': { label: '中文', name: '中文 (Chinese)' }
+        };
+
+        const I18N_LOCAL = {
+            'en': {
+                'settings_title': 'Platform Settings',
+                'settings_subtitle': 'Customize your broker interface language and template theme preference.',
+                'settings_lang_label': 'Language',
+                'settings_lang_hint': 'Selecting any language will translate every text of the broker into that language.',
+                'settings_template_label': 'Template',
+                'theme_light': 'Light Mode',
+                'theme_light_desc': 'Bright & crisp clean interface',
+                'theme_twilight': 'Twilight',
+                'theme_twilight_desc': 'Soft navy-slate dusk theme',
+                'theme_full_night': 'Full Night',
+                'theme_full_night_desc': 'Pure dark professional broker theme'
+            },
+            'hi': {
+                'settings_title': 'प्लेटफ़ॉर्म सेटिंग्स (Platform Settings)',
+                'settings_subtitle': 'अपनी पसंद के अनुसार ब्रोकर इंटरफ़ेस की भाषा और टेम्पलेट थीम बदलें।',
+                'settings_lang_label': 'भाषा (Language)',
+                'settings_lang_hint': 'कोई भी भाषा चुनने पर ब्रोकर का पूरा टेक्स्ट उस भाषा में बदल जाएगा।',
+                'settings_template_label': 'टेम्पलेट (Template)',
+                'theme_light': 'Light Mode',
+                'theme_light_desc': 'उज्ज्वल और ताज़ा इंटरफ़ेस',
+                'theme_twilight': 'Twilight',
+                'theme_twilight_desc': 'सॉफ्ट नेवी-स्लेट शाम की थीम',
+                'theme_full_night': 'Full Night',
+                'theme_full_night_desc': 'गहरा डार्क पेशेवर मोड'
+            },
+            'ar': {
+                'settings_title': 'إعدادات المنصة (Platform Settings)',
+                'settings_subtitle': 'قم بتخصيص لغة واجهة الوسيط والسمة المفضلة لديك.',
+                'settings_lang_label': 'اللغة (Language)',
+                'settings_lang_hint': 'اختيار أي لغة سيحول جميع نصوص المنصة إلى تلك اللغة.',
+                'settings_template_label': 'القالب (Template)',
+                'theme_light': 'Light Mode',
+                'theme_light_desc': 'واجهة ساطعة ونقية',
+                'theme_twilight': 'Twilight',
+                'theme_twilight_desc': 'سمة الغسق الكحلية الناعمة',
+                'theme_full_night': 'Full Night',
+                'theme_full_night_desc': 'الوضع المظلم الاحترافي'
+            },
+            'es': {
+                'settings_title': 'Configuración de la Plataforma',
+                'settings_subtitle': 'Personalice el idioma y la plantilla de tema de su interfaz.',
+                'settings_lang_label': 'Idioma',
+                'settings_lang_hint': 'Seleccionar cualquier idioma traducirá todo el texto del broker a ese idioma.',
+                'settings_template_label': 'Plantilla / Template',
+                'theme_light': 'Light Mode',
+                'theme_light_desc': 'Interfaz luminosa y fresca',
+                'theme_twilight': 'Twilight',
+                'theme_twilight_desc': 'Tema crepúsculo azul pizarra suave',
+                'theme_full_night': 'Full Night',
+                'theme_full_night_desc': 'Modo oscuro profesional'
+            }
+        };
+
+        function applyThemeTemplate(theme, persist = true) {
+            if (!THEMES.includes(theme)) theme = 'full-night';
+
+            document.documentElement.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+
+            THEMES.forEach(t => {
+                const card = document.getElementById(`themeCard-${t}`);
+                if (card) {
+                    if (t === theme) {
+                        card.classList.add('active');
+                    } else {
+                        card.classList.remove('active');
+                    }
+                }
+            });
+
+            const iconEl = document.getElementById('headerThemeIcon');
+            const textEl = document.getElementById('headerThemeText');
+            if (iconEl && textEl) {
+                if (theme === 'light-mode') {
+                    iconEl.className = 'fas fa-sun';
+                    iconEl.style.color = '#f59e0b';
+                    textEl.textContent = 'Light Mode';
+                } else if (theme === 'twilight') {
+                    iconEl.className = 'fas fa-cloud-moon';
+                    iconEl.style.color = '#60a5fa';
+                    textEl.textContent = 'Twilight';
+                } else {
+                    iconEl.className = 'fas fa-moon';
+                    iconEl.style.color = 'var(--yellow)';
+                    textEl.textContent = 'Full Night';
+                }
+            }
+
+            if (persist) {
+                localStorage.setItem('dash_theme_template', theme);
+                const token = localStorage.getItem('token');
+                if (token) {
+                    fetch('/api/auth/update-profile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ preferredTheme: theme })
+                    }).catch(() => {});
+                }
+            }
+        }
+
+        function cycleThemeTemplate() {
+            const current = localStorage.getItem('dash_theme_template') || 'full-night';
+            const nextIdx = (THEMES.indexOf(current) + 1) % THEMES.length;
+            const nextTheme = THEMES[nextIdx];
+            applyThemeTemplate(nextTheme, true);
+        }
+
+        function toggleHeaderLangMenu(e) {
+            if (e) e.stopPropagation();
+            const dd = document.getElementById('headerLangDropdown');
+            if (!dd) return;
+            const isOpen = dd.style.display === 'block';
+            dd.style.display = isOpen ? 'none' : 'block';
+        }
+
+        document.addEventListener('click', (e) => {
+            const dd = document.getElementById('headerLangDropdown');
+            const btn = document.getElementById('headerLangBtn');
+            if (dd && dd.style.display === 'block' && !dd.contains(e.target) && !btn.contains(e.target)) {
+                dd.style.display = 'none';
+            }
+        });
+
+        function changeLanguage(langCode, persist = true) {
+            if (!langCode || !LANG_META[langCode]) langCode = 'default';
+
+            if (persist) {
+                localStorage.setItem('dash_selected_lang', langCode);
+                const token = localStorage.getItem('token');
+                if (token) {
+                    fetch('/api/auth/update-profile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ preferredLanguage: langCode })
+                    }).catch(() => {});
+                }
+            }
+
+            const profSelect = document.getElementById('profileLanguageSelect');
+            if (profSelect) profSelect.value = langCode;
+
+            const headerLabel = document.getElementById('headerCurrentLangLabel');
+            if (headerLabel) {
+                headerLabel.textContent = LANG_META[langCode].label;
+            }
+
+            const ddItems = document.querySelectorAll('.lang-option-item');
+            ddItems.forEach(item => {
+                if (item.getAttribute('data-lang') === langCode) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            const dd = document.getElementById('headerLangDropdown');
+            if (dd) dd.style.display = 'none';
+
+            applyDictionaryTranslations(langCode);
+            triggerGoogleTranslate(langCode);
+        }
+
+        function applyDictionaryTranslations(langCode) {
+            const dict = I18N_LOCAL[langCode] || {};
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (langCode === 'default') {
+                    if (el._defaultText) {
+                        el.textContent = el._defaultText;
+                    }
+                } else if (dict[key]) {
+                    if (!el._defaultText) el._defaultText = el.textContent;
+                    el.textContent = dict[key];
+                }
+            });
+        }
+
+        let googleTranslateInitialized = false;
+
+        function setGoogleTranslateCookie(lang) {
+            const cookieVal = lang === 'default' ? '' : `/auto/${lang}`;
+            const domain = window.location.hostname;
+            const expires = lang === 'default' ? 'Thu, 01 Jan 1970 00:00:00 UTC' : 'Fri, 31 Dec 2030 23:59:59 UTC';
+            
+            document.cookie = `googtrans=${cookieVal}; expires=${expires}; path=/;`;
+            document.cookie = `googtrans=${cookieVal}; expires=${expires}; path=/; domain=${domain};`;
+            if (domain.indexOf('.') !== -1) {
+                const rootDomain = domain.split('.').slice(-2).join('.');
+                document.cookie = `googtrans=${cookieVal}; expires=${expires}; path=/; domain=.${rootDomain};`;
+            }
+        }
+
+        function triggerGoogleTranslate(langCode) {
+            setGoogleTranslateCookie(langCode);
+
+            if (langCode === 'default') {
+                const hadTranslation = sessionStorage.getItem('dash_was_translated');
+                if (hadTranslation === 'true') {
+                    sessionStorage.removeItem('dash_was_translated');
+                    window.location.reload();
+                }
+                return;
+            }
+
+            sessionStorage.setItem('dash_was_translated', 'true');
+
+            if (!googleTranslateInitialized && !window.google?.translate) {
+                initGoogleTranslateScript();
+            } else {
+                const combo = document.querySelector('.goog-te-combo');
+                if (combo) {
+                    combo.value = langCode;
+                    combo.dispatchEvent(new Event('change'));
+                } else {
+                    window.location.reload();
+                }
+            }
+        }
+
+        function googleTranslateElementInit() {
+            googleTranslateInitialized = true;
+            if (window.google && window.google.translate) {
+                new window.google.translate.TranslateElement({
+                    pageLanguage: 'bn',
+                    includedLanguages: 'en,hi,ar,es,fr,pt,id,ru,tr,vi,zh-CN,bn',
+                    autoDisplay: false
+                }, 'google_translate_element');
+            }
+        }
+
+        function initGoogleTranslateScript() {
+            if (document.getElementById('google-translate-script')) return;
+            window.googleTranslateElementInit = googleTranslateElementInit;
+            const script = document.createElement('script');
+            script.id = 'google-translate-script';
+            script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+            script.async = true;
+            document.body.appendChild(script);
+        }
+
         // Init on load
         window.addEventListener('DOMContentLoaded', () => {
+            // Apply Theme & Language on load
+            const savedTheme = localStorage.getItem('dash_theme_template') || 'full-night';
+            applyThemeTemplate(savedTheme, false);
+
+            const savedLang = localStorage.getItem('dash_selected_lang') || 'default';
+            changeLanguage(savedLang, false);
+            if (savedLang !== 'default') {
+                initGoogleTranslateScript();
+            }
+
             // Set today's date in form
-            document.getElementById('subDate').value = new Date().toISOString().split('T')[0];
+            const subDateEl = document.getElementById('subDate');
+            if (subDateEl) subDateEl.value = new Date().toISOString().split('T')[0];
 
             fetchUserProfile();
             fetchChallenges();
@@ -9740,5 +10508,6 @@
             setInterval(fetchUserSyncedTrades, 15000);
         });
     </script>
+    <div id="google_translate_element" style="display:none;"></div>
 </body>
 </html>

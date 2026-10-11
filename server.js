@@ -3744,6 +3744,8 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
       preferredBroker: user.preferredBroker,
       payoutWallet: user.payoutWallet,
       brokerAccountId: user.brokerAccountId,
+      preferredLanguage: user.preferredLanguage || 'default',
+      preferredTheme: user.preferredTheme || 'full-night',
       profilePicture: user.profilePicture || null,
       isEmailVerified: user.isEmailVerified !== undefined ? user.isEmailVerified : true,
       createdAt: user.createdAt
@@ -3756,9 +3758,9 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
   });
 });
 
-// Update Profile
-app.post('/api/auth/update-profile', authenticateToken, (req, res) => {
-  const { name, telegram, preferredBroker, payoutWallet, brokerAccountId } = req.body;
+// Update Profile (supports POST and PUT)
+const handleProfileUpdateEndpoint = (req, res) => {
+  const { name, telegram, preferredBroker, payoutWallet, brokerAccountId, preferredLanguage, preferredTheme } = req.body;
   const users = readJson(USERS_FILE);
   const idx = users.findIndex(u => u.id === req.user.id);
   if (idx === -1) return res.status(404).json({ success: false, message: 'User not found.' });
@@ -3768,6 +3770,8 @@ app.post('/api/auth/update-profile', authenticateToken, (req, res) => {
   if (preferredBroker) users[idx].preferredBroker = preferredBroker;
   if (payoutWallet !== undefined) users[idx].payoutWallet = payoutWallet.trim();
   if (brokerAccountId !== undefined) users[idx].brokerAccountId = brokerAccountId.trim();
+  if (preferredLanguage !== undefined) users[idx].preferredLanguage = preferredLanguage;
+  if (preferredTheme !== undefined) users[idx].preferredTheme = preferredTheme;
   users[idx].updatedAt = new Date().toISOString();
 
   writeJson(USERS_FILE, users);
@@ -3787,11 +3791,15 @@ app.post('/api/auth/update-profile', authenticateToken, (req, res) => {
       preferredBroker: users[idx].preferredBroker,
       payoutWallet: users[idx].payoutWallet,
       brokerAccountId: users[idx].brokerAccountId,
+      preferredLanguage: users[idx].preferredLanguage || 'default',
+      preferredTheme: users[idx].preferredTheme || 'full-night',
       profilePicture: users[idx].profilePicture || null,
       isEmailVerified: users[idx].isEmailVerified !== undefined ? users[idx].isEmailVerified : true
     }
   });
-});
+};
+app.post('/api/auth/update-profile', authenticateToken, handleProfileUpdateEndpoint);
+app.put('/api/auth/update-profile', authenticateToken, handleProfileUpdateEndpoint);
 
 // Upload User Profile Picture (Avatar)
 app.post('/api/user/upload-avatar', authenticateToken, uploadAvatar.single('avatar'), (req, res) => {
