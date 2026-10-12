@@ -2400,7 +2400,7 @@
         <ul class="nav-links" id="navLinks">
             <li><a href="#brokers" onclick="closeMobileMenu()">Supported Brokers</a></li>
             <li><a href="#challenges" onclick="closeMobileMenu()">Challenges</a></li>
-            <li><a href="#rules" onclick="closeMobileMenu()">10 Golden Rules</a></li>
+            <li><a href="#rules" onclick="closeMobileMenu()">3 Golden Rules</a></li>
             <li><a href="#how-it-works" onclick="closeMobileMenu()">How It Works</a></li>
             <li><a href="/dashboard" onclick="closeMobileMenu()">Dashboard</a></li>
         </ul>
@@ -2435,7 +2435,7 @@
                     <i class="fas fa-rocket"></i> Start Challenge →
                 </a>
                 <a href="#rules" class="btn-secondary">
-                    <i class="fas fa-book-open"></i> 10 Golden Rules
+                    <i class="fas fa-book-open"></i> 3 Golden Rules
                 </a>
             </div>
 
@@ -2599,13 +2599,13 @@
         </div>
     </section>
 
-    <!-- ========== 10 GOLDEN RULES ========== -->
+    <!-- ========== 3 GOLDEN RULES ========== -->
     <section id="rules" class="rules-section">
         <div style="text-align:center;">
             <span class="rules-badge"><i class="fas fa-star"></i> Rules</span>
-            <h2 class="section-title">The 10 Golden Rules</h2>
+            <h2 class="section-title">The 3 Golden Rules</h2>
             <p class="section-subtitle">
-                শৃঙ্খলাবদ্ধ ট্রেডিংয়ের ১০টি সুনির্দিষ্ট নিয়ম। নিয়ম মেনে সফল হলেই ফান্ডেড অ্যাকাউন্ট।
+                শৃঙ্খলাবদ্ধ ট্রেডিংয়ের ৩টি সুনির্দিষ্ট নিয়ম। নিয়ম মেনে সফল হলেই ফান্ডেড অ্যাকাউন্ট।
             </p>
         </div>
 
@@ -2627,7 +2627,7 @@
             <div class="step-card glass">
                 <div class="step-icon-box">2</div>
                 <h3>ডেমো ট্রেড ও প্রমাণ জমা</h3>
-                <p>১০টি নিয়ম মেনে ১৫ সেশন ট্রেড করুন এবং ভিডিও প্রমাণ ড্যাশবোর্ডে জমা দিন।</p>
+                <p>৩টি নিয়ম মেনে ১৫ সেশন ট্রেড করুন এবং ভিডিও প্রমাণ ড্যাশবোর্ডে জমা দিন।</p>
             </div>
             <div class="step-card glass">
                 <div class="step-icon-box">3</div>
@@ -2998,7 +2998,7 @@
                 <ul>
                     <li><a href="#brokers">Supported Brokers</a></li>
                     <li><a href="#challenges">Challenge Packages</a></li>
-                    <li><a href="#rules">10 Golden Rules</a></li>
+                    <li><a href="#rules">3 Golden Rules</a></li>
                     <li><a href="#how-it-works">How It Works</a></li>
                     <li><a href="/dashboard">Trader Dashboard</a></li>
                 </ul>
@@ -4249,30 +4249,35 @@
             promoCountdownTimerInterval = setInterval(update, 1000);
         }
 
-        // Render 10 Golden Rules (Concise & Classic)
+        // Render 3 Golden Rules (Official Rules Provided by User)
         const conciseRules = [
-            { id: 1, title: '১৫ সেশন কমপ্লিট', desc: 'মানি ম্যানেজমেন্ট শিট অনুযায়ী নির্ধারিত ১৫টি সেশন সফলভাবে সম্পন্ন করতে হবে।' },
-            { id: 2, title: '৬ উইন ও ২৫% লস লিমিট', desc: 'প্রতি সেশনে ১৬ ট্রেডের মধ্যে ৬টি উইন করতে হবে; সর্বোচ্চ লস লিমিট ২৫%।' },
-            { id: 3, title: 'অতিরিক্ত ট্রেড নিষিদ্ধ', desc: 'চ্যালেঞ্জ চলাকালীন শিটের বাইরে ডেমোতে কোনো অতিরিক্ত ট্রেড নেওয়া সম্পূর্ণ নিষেধ।' },
-            { id: 4, title: 'দৈনিক সর্বোচ্চ ৩ সেশন', desc: 'প্রতিদিন সর্বোচ্চ ৩টি সেশন জমা দেওয়া যাবে; রাত ১১টার মধ্যে রেজাল্ট রিভিউ।' },
-            { id: 5, title: 'সেশন ক্লোজ নিয়ম', desc: '৬টি উইন হলে সেশন সম্পন্ন; ব্যালেন্স $০.৫০ নিচে নামলে সেশন ক্লোজ করতে হবে।' },
-            { id: 6, title: '৮৫%+ পেআউট মার্কেট', desc: 'সকল ট্রেড অবশ্যই ৮৫% বা তার বেশি রিটার্ন দেওয়া মার্কেটে এক্সিকিউট করতে হবে।' },
-            { id: 7, title: 'ট্রেড সাইজ রাউন্ডিং', desc: '৫০ সেন্ট বা নিচে বেস ডলার ($৪.৫০ = $৪); ৫১ সেন্টে রাউন্ড আপ ($৪.৫১ = $৫)।' },
-            { id: 8, title: 'প্রফিট কম্পাউন্ডিং', desc: 'প্রতিটি সেশনের প্রফিট পরবর্তী সেশনের স্টার্টিং ক্যাপিটালে যুক্ত হবে।' },
-            { id: 9, title: 'ভিডিও প্রুফ ভেরিফিকেশন', desc: 'ভিডিওতে ট্রেডার আইডি ও সেশন শুরুর পূর্বের ১টি ট্রেড রেকর্ড দেখাতে হবে।' },
-            { id: 10, title: '১৫ দিন সময়সীমা', desc: 'সম্পূর্ণ ১৫ সেশনের মূল্যায়ন সর্বোচ্চ ১৫ দিনের মধ্যে শেষ করতে হবে।' }
+            {
+                id: 1,
+                title: '১৫ সেশন ও ২৫% ব্যালেন্স ব্যবহার',
+                desc: 'মানি ম্যানেজমেন্ট শিট অনুযায়ী সর্বোচ্চ ২৫% ব্যালেন্স ব্যবহার করে ১৫ টি সেশন কমপ্লিট করতে হবে।'
+            },
+            {
+                id: 2,
+                title: 'দৈনিক ৩ সেশন ও সময়সীমা',
+                desc: 'একদিনে সর্বোচ্চ তিনটা সেশন করতে পারবেন। আপনার সুবিধা অনুযায়ী ৫ দিন থেকে ১৫ দিনের মধ্যে চ্যালেঞ্জ কমপ্লিট করলেই হবে।'
+            },
+            {
+                id: 3,
+                title: '৮৫%+ পেআউট মার্কেট ও শিট অনুশাসন',
+                desc: 'সকল ট্রেড অবশ্যই ৮৫% বা তার বেশি রিটার্ন দেওয়া মার্কেটে এক্সিকিউট করতে হবে। চ্যালেঞ্জ চলাকালীন মানি ম্যানেজমেন্ট শীটের বাহিরে কোন ট্রেড করা যাবে না।'
+            }
         ];
 
         function renderRules(rules) {
             const container = document.getElementById('rulesContainer');
             if (!container) return;
 
-            const list = (rules && rules.length === 10) ? rules.map((r, idx) => {
+            const list = (rules && Array.isArray(rules) && rules.length === 3) ? rules.map((r, idx) => {
                 const c = conciseRules[idx] || {};
                 return {
                     id: r.id || (idx + 1),
                     title: c.title || r.titleBn || r.titleEn,
-                    desc: c.desc || r.descBn || r.descEn
+                    desc: r.descBn || c.desc || r.descEn
                 };
             }) : conciseRules;
 

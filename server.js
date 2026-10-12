@@ -3023,79 +3023,31 @@ const SUPPORTED_BROKERS = [
   { id: "iqoption", name: "IQ Option", icon: "/assets/brokers/iqoption.png", desc: "Classic multi-asset trading platform with rich technical indicators." }
 ];
 
-// 10 Golden Rules Data (Official Rules Provided by User)
-const TEN_RULES = [
+// 3 Golden Rules Data (Official Rules Provided by User)
+const THREE_RULES = [
   {
     id: 1,
-    titleEn: "Complete 15 Sessions According to Money Management Sheet",
-    titleBn: "মানি ম্যানেজমেন্ট শিট অনুযায়ী ১৫টি সেশন কমপ্লিট করতে হবে",
-    descEn: "You must strictly follow the official money management sheet and successfully complete 15 sessions.",
-    descBn: "মানি ম্যানেজমেন্ট শিট অনুযায়ী ১৫ টি সেশন কমপ্লিট করতে হবে।"
+    titleEn: "Complete 15 Sessions with Max 25% Balance Usage",
+    titleBn: "১৫ সেশন ও ২৫% ব্যালেন্স ব্যবহার",
+    descEn: "You must complete 15 sessions according to the money management sheet using a maximum of 25% balance.",
+    descBn: "মানি ম্যানেজমেন্ট শিট অনুযায়ী সর্বোচ্চ ২৫% ব্যালেন্স ব্যবহার করে ১৫ টি সেশন কমপ্লিট করতে হবে।"
   },
   {
     id: 2,
-    titleEn: "Win 6 out of 16 Trades with Max 25% Loss",
-    titleBn: "১৬টি ট্রেডের মধ্যে ৬টি উইন এবং সর্বোচ্চ ২৫% লস লিমিট",
-    descEn: "In each session, you must profit on 6 trades out of 16, while keeping total losses within a maximum of 25%.",
-    descBn: "প্রতিটি সেশনে ১৬টি ট্রেড এর মধ্যে ৬ টি ট্রেড প্রফিট করতে হবে সর্বোচ্চ ২৫% লস করে।"
+    titleEn: "Max 3 Sessions/Day & 5 to 15 Days Timeframe",
+    titleBn: "দৈনিক ৩ সেশন ও সময়সীমা",
+    descEn: "You can do a maximum of 3 sessions per day. Complete the challenge conveniently within 5 to 15 days.",
+    descBn: "একদিনে সর্বোচ্চ তিনটা সেশন করতে পারবেন। আপনার সুবিধা অনুযায়ী ৫ দিন থেকে ১৫ দিনের মধ্যে চ্যালেঞ্জ কমপ্লিট করলেই হবে।"
   },
   {
     id: 3,
-    titleEn: "Strictly No Extra Trades on Demo Outside the Sheet",
-    titleBn: "চ্যালেঞ্জ চলাকালীন শীটের বাহিরে ডেমোতে কোনো ট্রেড নয়",
-    descEn: "During the challenge evaluation, taking even a single trade on demo outside the money management sheet is strictly prohibited.",
-    descBn: "চ্যালেঞ্জ চলাকালীন মানি ম্যানেজমেন্ট শীটের বাহিরে ডেমুতে একটি ট্রেড ও করা যাবে না।"
-  },
-  {
-    id: 4,
-    titleEn: "Max 3 Sessions Per Day (Results by 11:00 PM)",
-    titleBn: "প্রতিদিন সর্বোচ্চ ৩টি সেশন (রাত ১১টার মধ্যে রেজাল্ট)",
-    descEn: "Maximum of 3 sessions can be completed and submitted per day. Results will be reviewed and notified by 11:00 PM.",
-    descBn: "প্রতিদিন সর্বোচ্চ তিনটা সেশন করা যাবে, সেশন করে জমা দিয়ে রাখবেন এবং রাত ১১ টার মধ্যে রেজাল্ট জানিয়ে দেওয়া হবে।"
-  },
-  {
-    id: 5,
-    titleEn: "Session Goal (6 Wins) or Stop if Below $0.50",
-    titleBn: "৬টি প্রফিট হলে সেশন সম্পন্ন; $0.50 এর নিচে নামলে সেশন ক্লোজ",
-    descEn: "Session is complete once 6 trades are in profit. If balance drops below $0.50 before hitting 6 wins, the session must be immediately closed.",
-    descBn: "১৬ টা ট্রেডের মধ্যে ৬ টা ট্রেড প্রফিট হলে আপনার একটি সেশন কমপ্লিট হয়ে যাবে; যদি ৬ টা ট্রেড প্রফিট হওয়ার আগেই $0.50 এর নিচে নেমে যায় তাহলে সেশন ক্লোজ করে দিতে হবে।"
-  },
-  {
-    id: 6,
-    titleEn: "Trade Only on 85%+ Payout Return Markets",
-    titleBn: "প্রতিটি ট্রেড করতে হবে ৮৫%+ রিটার্ন দেওয়া মার্কেটে",
-    descEn: "Every trade during the challenge must be taken strictly in currency/asset pairs offering at least 85% or higher return payout.",
-    descBn: "চ্যালেঞ্জ চলাকালীন প্রতিটা ট্রেড করতে হবে ৮৫% এর উপরের রিটার্ন দিতেছে এরকম মার্কেটে।"
-  },
-  {
-    id: 7,
-    titleEn: "Decimal Rounding Rule (>50 Cents = +$1)",
-    titleBn: "ট্রেড সাইজের ডেসিমাল রাউন্ডিং নিয়ম (৫০ সেন্টের বেশি হলে ১ ডলার বৃদ্ধি)",
-    descEn: "If the sheet trade size has cents: for $4.50 or below, trade $4. If $4.51 or higher, round up and trade $5.",
-    descBn: "যত ডলারের ট্রেড নিতে বলবে তার সাথে যদি ৫০ সেন্টের উপরে থাকে তাহলে ১ ডলার বাড়িয়ে ট্রেড নিতে হবে। যেমন: $4.50 বা তার নিচে আসলে $4 ট্রেড নিবেন, আর যদি $4.51 বা তার উপরে ট্রেড নিতে বলে মানি ম্যানেজমেন্ট শীট তাহলে $5 ট্রেড নিবেন।"
-  },
-  {
-    id: 8,
-    titleEn: "Compound Profits into the Next Session",
-    titleBn: "প্রতি সেশনের প্রফিট পরবর্তী সেশনের ক্যাপিটালে যুক্ত হবে",
-    descEn: "Profit made in a session adds to the starting balance of the next session (e.g. start with $100, profit earned adds to the next session capital).",
-    descBn: "প্রতি সেশনে যত ডলার প্রফিট করবেন তা যুক্ত হবে পরবর্তী সেশনে। মানে প্রথম সেশন শুরু করলেন $100 দিয়ে এবং এই সেশনটি কমপ্লিটে যত ডলার প্রফিট হবে তা ২ নম্বর সেশনে যুক্ত হবে $100 এর সাথে।"
-  },
-  {
-    id: 9,
-    titleEn: "Video Proof: Show Trader ID & Previous Trade Before Session",
-    titleBn: "ভিডিওতে প্রথমে ট্রেডার আইডি ও সেশন শুরুর পূর্বের ১টি ট্রেড দেখানো",
-    descEn: "When screen recording trade history: first display your Trader ID, then show 1 trade executed prior to starting this session to verify no unrecorded trades were taken outside the sheet.",
-    descBn: "প্রতিদিন ট্রেডিং হিস্টোরি স্ক্রিন ভিডিও করে দেওয়ার সময় প্রথমে আপনার ট্রেডার আইডি দেখাবেন, তারপরে ট্রেডিং হিস্টোরি ভিডিও করার সময় সেশন শুরু করার আগের একটি ট্রেড দেখাবেন যেন আমরা বুঝতে পারি আপনি শীটের বাহিরে ট্রেড করেন নাই।"
-  },
-  {
-    id: 10,
-    titleEn: "Complete Challenge Within Maximum 15 Days",
-    titleBn: "সর্বোচ্চ ১৫ দিনের মধ্যে চ্যালেঞ্জটি কমপ্লিট করতে হবে",
-    descEn: "The full 15-session challenge evaluation must be completed within a maximum timeframe of 15 days.",
-    descBn: "সর্বোচ্চ ১৫ দিনের মধ্যে এই চ্যালেঞ্জটি কমপ্লিট করতে হবে।"
+    titleEn: "Trade 85%+ Payout Markets & Strictly No Outside Trades",
+    titleBn: "৮৫%+ পেআউট মার্কেট ও শিট অনুশাসন",
+    descEn: "All trades must be executed in markets offering 85% or higher return. Taking trades outside the sheet during the challenge is strictly prohibited.",
+    descBn: "সকল ট্রেড অবশ্যই ৮৫% বা তার বেশি রিটার্ন দেওয়া মার্কেটে এক্সিকিউট করতে হবে। চ্যালেঞ্জ চলাকালীন মানি ম্যানেজমেন্ট শীটের বাহিরে কোন ট্রেড করা যাবে না।"
   }
 ];
+const TEN_RULES = THREE_RULES; // Backward compatibility alias
 
 // Course Lessons Data
 const COURSE_LESSONS = [
