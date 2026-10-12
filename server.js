@@ -4599,6 +4599,18 @@ function buildServerMasanielloMatrix(N = 16, K = 6, Q = 1.85) {
   return mat;
 }
 
+// Cent Rounding Rule (মানি ম্যানেজমেন্ট সেন্ট রাউন্ডিং নিয়ম):
+// ৫১ সেন্ট এর কম (<= 50¢): Floor (যেমন: 17.48 -> $17, 60.24 -> $60, 25.50 -> $25)
+// ৫০ সেন্ট এর বেশি (> 50¢ / >= 51¢): Ceil (যেমন: 10.78 -> $11, 7.65 -> $8, 30.51 -> $31)
+function roundCentStake(val) {
+  const num = Math.round(Number(val) * 100) / 100;
+  if (isNaN(num) || num <= 0) return 0;
+  const floor = Math.floor(num);
+  const cents = Math.round((num - floor) * 100);
+  const rounded = (cents > 50) ? (floor + 1) : floor;
+  return Math.max(1, rounded);
+}
+
 function computeServerPlannedStake(mat, N, K, Q, m, k, curBal) {
   let stake = 0;
   if (K - k === N - m) {
@@ -4614,24 +4626,24 @@ function computeServerPlannedStake(mat, N, K, Q, m, k, curBal) {
       stake = factor * curBal;
     }
   }
-  return Math.max(0.01, Math.round(stake * 100) / 100);
+  const rawStake = Math.max(0.01, Math.round(stake * 100) / 100);
+  if (rawStake < 0.50) {
+    return rawStake;
+  }
+  return roundCentStake(rawStake);
 }
 
 // 50-Cent Mathematical Rounding Stake Validator
 function getValidStakesForPlanned(planned) {
   const p = Math.round(Number(planned) * 100) / 100;
+  if (isNaN(p) || p <= 0) return [1];
+  const rounded = roundCentStake(p);
+  const valid = [rounded];
+  if (!valid.includes(p)) valid.push(p);
   const floor = Math.floor(p);
   const ceil = Math.ceil(p);
-  const cents = Math.round((p - floor) * 100);
-  const valid = [p];
-  // Rule 7: ৫০ সেন্ট বা তার কম থাকলে ফ্লোর (যেমন: $35.49 হলে অবশ্যই $35, $36 নেওয়া যাবে না)
-  // ৫০ সেন্টের বেশি থাকলে পরবর্তী পূর্ণ ডলারে রাউন্ড (যেমন: $35.55 হলে $36)
-  if (cents <= 50) {
-    if (!valid.includes(floor)) valid.push(floor);
-  }
-  if (cents >= 50) {
-    if (!valid.includes(ceil)) valid.push(ceil);
-  }
+  if (floor >= 1 && !valid.includes(floor)) valid.push(floor);
+  if (ceil >= 1 && !valid.includes(ceil)) valid.push(ceil);
   return valid;
 }
 
@@ -4852,7 +4864,8 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       const expectedText = plannedStake % 1 === 0 ? `$${plannedStake}` : `$${getValidStakesForPlanned(plannedStake).join(' বা $')}`;
 
       if (!isCompliant) {
-        violations.push(`ট্রেড #${tradeNum}: Planned Stake ছিল $${plannedStake.toFixed(2)} (${expectedText}), কিন্তু কোটেক্সে ট্রেড ওপেন করা হয়েছে $${actualStake.toFixed(2)}।`);
+        const plannedStr = plannedStake % 1 === 0 ? `$${plannedStake}` : `$${plannedStake.toFixed(2)}`;
+        violations.push(`ট্রেড #${tradeNum}: Planned Stake ছিল ${plannedStr} (${expectedText}), কিন্তু কোটেক্সে ট্রেড ওপেন করা হয়েছে $${actualStake.toFixed(2)}।`);
       }
 
       // Check Quotex Payout rate (Minimum 85% required by platform rules)

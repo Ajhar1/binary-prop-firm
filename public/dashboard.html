@@ -6630,7 +6630,7 @@
                                     <tr><td colspan="8" style="padding:2rem; text-align:center; color:var(--text-secondary);">এই সেশনে কোনো অডিটেড ট্রেড রেকর্ড সংরক্ষিত নেই।</td></tr>
                                 ` : report.map((a, idx) => {
                                     const stepNum = a.tradeNum || a.stepIndex || (idx + 1);
-                                    const planned = Number(a.plannedStake || 0).toFixed(2);
+                                    const planned = (a.plannedStake != null && a.plannedStake % 1 === 0) ? String(a.plannedStake) : Number(a.plannedStake || 0).toFixed(0);
                                     const actual = Number(a.actualStake || 0).toFixed(2);
                                     const ticket = a.ticketId || a.ticket || 'N/A';
                                     const outcome = a.outcome || a.result || 'N/A';
@@ -7155,10 +7155,11 @@
 
                     // MICRO-STEP 1 (0ms): Planned Stake comes in (ইমেজ ১ এর লাল মার্ক)
                     const plannedEl = document.getElementById(`${rowId}-planned`);
+                    const plannedDisplay = (t.plannedStake != null && t.plannedStake % 1 === 0) ? `$${t.plannedStake}` : `$${Number(t.plannedStake || 0).toFixed(0)}`;
                     if (plannedEl) {
-                        plannedEl.innerHTML = `<span style="color:var(--yellow); font-weight:800; background:rgba(245,176,65,0.12); padding:2px 8px; border-radius:6px; border:1px solid rgba(245,176,65,0.3);">$${Number(t.plannedStake || 0).toFixed(2)}</span>`;
+                        plannedEl.innerHTML = `<span style="color:var(--yellow); font-weight:800; background:rgba(245,176,65,0.12); padding:2px 8px; border-radius:6px; border:1px solid rgba(245,176,65,0.3);">${plannedDisplay}</span>`;
                     }
-                    if (statusText) statusText.innerText = `🔍 ট্রেড #${tradeNum}: Planned Stake $${Number(t.plannedStake || 0).toFixed(2)} স্ক্যান করা হয়েছে...`;
+                    if (statusText) statusText.innerText = `🔍 ট্রেড #${tradeNum}: Planned Stake ${plannedDisplay} স্ক্যান করা হয়েছে...`;
 
                     // MICRO-STEP 2 (500ms): Amount comes in (ইমেজ ২ এর লাল মার্ক)
                     setTimeout(() => {
@@ -8073,6 +8074,18 @@
         };
         let masSessionStatus = 'RUNNING'; // 'RUNNING', 'WON', 'STAKE_BELOW_MIN', 'LIMIT_25_EXCEEDED', 'MAX_LOSS'
 
+        // 50-Cent Mathematical Rounding Stake Engine (মানি ম্যানেজমেন্ট সেন্ট রাউন্ডিং নিয়ম):
+        // ৫১ সেন্ট এর কম (<= 50¢): Floor (যেমন: 17.48 -> $17, 60.24 -> $60, 25.50 -> $25)
+        // ৫০ সেন্ট এর বেশি (> 50¢ / >= 51¢): Ceil (যেমন: 10.78 -> $11, 7.65 -> $8, 30.51 -> $31)
+        function roundCentStake(val) {
+            const num = Math.round(Number(val) * 100) / 100;
+            if (isNaN(num) || num <= 0) return 0;
+            const floor = Math.floor(num);
+            const cents = Math.round((num - floor) * 100);
+            const rounded = (cents > 50) ? (floor + 1) : floor;
+            return Math.max(1, rounded);
+        }
+
         function buildMasanielloMatrix(N, K, Q) {
             const mat = [];
             for (let m = 0; m <= N; m++) {
@@ -8470,7 +8483,11 @@
                         stake = factor * curBal;
                     }
                 }
-                stake = Math.max(0.01, Math.round(stake * 100) / 100);
+                const rawStake = Math.max(0.01, Math.round(stake * 100) / 100);
+                stake = roundCentStake(rawStake);
+                if (curBal > 0 && stake > curBal) {
+                    stake = Math.round(curBal);
+                }
 
                 const outcome = masState.history[i];
                 if (outcome === 'w') {
@@ -8528,7 +8545,7 @@
             ];
 
             sessionData.tradeLogs.forEach(t => {
-                lines.push(`Trade #${t.num}: $${t.stake.toFixed(2)} ➔ ${t.outcome} (${t.returnAmt})`);
+                lines.push(`Trade #${t.num}: $${t.stake} ➔ ${t.outcome} (${t.returnAmt})`);
             });
 
             lines.push(`----------------------------------------`);
@@ -8833,18 +8850,19 @@
                         stake = factor * curBal;
                     }
                 }
-                stake = Math.max(0.01, Math.round(stake * 100) / 100);
+                const rawStake = Math.max(0.01, Math.round(stake * 100) / 100);
 
                 const outcome = masState.history[i];
 
                 if (outcome === 'w') {
+                    stake = roundCentStake(rawStake);
                     const returnAmt = Math.round(stake * (quota - 1) * 100) / 100;
                     curBal = Math.round((curBal + returnAmt) * 100) / 100;
                     wins++;
                     rowsHtml += `
                         <tr class="mas-completed-row">
                             <td><strong>${tradeNum}</strong></td>
-                            <td style="font-weight:700; color:#ddd;">$${stake.toFixed(2)}</td>
+                            <td style="font-weight:700; color:#ddd;">$${stake}</td>
                             <td style="text-align:center;">
                                 <span class="mas-outcome-badge mas-outcome-w">
                                     <i class="fas fa-check-circle"></i> WIN
@@ -8861,13 +8879,14 @@
                         </tr>
                     `;
                 } else if (outcome === 'l') {
+                    stake = roundCentStake(rawStake);
                     const returnAmt = -stake;
                     curBal = Math.round((curBal - stake) * 100) / 100;
                     losses++;
                     rowsHtml += `
                         <tr class="mas-completed-row">
                             <td><strong>${tradeNum}</strong></td>
-                            <td style="font-weight:700; color:#ddd;">$${stake.toFixed(2)}</td>
+                            <td style="font-weight:700; color:#ddd;">$${stake}</td>
                             <td style="text-align:center;">
                                 <span class="mas-outcome-badge mas-outcome-l">
                                     <i class="fas fa-times-circle"></i> LOSS
@@ -8887,12 +8906,12 @@
                     // This trade has NOT been played yet. Check Rule 2 and Rule 3:
 
                     // REQUIREMENT 2: Stake drops below $0.50 -> Session completes successfully!
-                    if (stake < 0.50) {
+                    if (rawStake < 0.50) {
                         sessionStatus = 'STAKE_BELOW_MIN';
                         rowsHtml += `
                             <tr class="mas-completed-row" style="background:rgba(46,204,113,0.08); border-left:4px solid var(--neon-green);">
                                 <td><strong style="color:var(--neon-green); font-size:1.05rem;">#${tradeNum}</strong></td>
-                                <td style="color:#ddd; font-weight:700;">$${stake.toFixed(2)}</td>
+                                <td style="color:#ddd; font-weight:700;">$${roundCentStake(rawStake)}</td>
                                 <td style="text-align:center;">
                                     <span class="badge" style="background:rgba(46,204,113,0.2); color:var(--neon-green); border:1px solid rgba(46,204,113,0.4); font-size:0.8rem; padding:6px 12px; border-radius:12px; font-weight:800;">
                                         <i class="fas fa-check-circle"></i> সেশন সম্পন্ন (&lt; $0.50 প্রফিট সুরক্ষিত)
@@ -8913,13 +8932,15 @@
                         continue;
                     }
 
+                    stake = roundCentStake(rawStake);
+
                     // REQUIREMENT 3: Stake violates 25% max loss boundary -> Session stops, disqualified!
                     if ((curBal - stake) < (stopLossFloor - 0.001) || stake > (remainingBuffer + 0.001) || stake > maxLossDollar) {
                         sessionStatus = 'LIMIT_25_EXCEEDED';
                         rowsHtml += `
                             <tr class="mas-completed-row" style="background:rgba(239,68,68,0.08); border-left:4px solid var(--danger-red);">
                                 <td><strong style="color:var(--danger-red); font-size:1.05rem;">#${tradeNum}</strong></td>
-                                <td style="color:var(--danger-red); font-weight:800;">$${stake.toFixed(2)}</td>
+                                <td style="color:var(--danger-red); font-weight:800;">$${stake}</td>
                                 <td style="text-align:center;">
                                     <span class="badge" style="background:rgba(239,68,68,0.2); color:var(--danger-red); border:1px solid rgba(239,68,68,0.4); font-size:0.8rem; padding:6px 12px; border-radius:12px; font-weight:800;">
                                         <i class="fas fa-ban"></i> ২৫% লিমিটের বাইরে (চ্যালেঞ্জ সমাপ্ত)
@@ -8950,7 +8971,7 @@
                                 <td>
                                     ${window.isExtensionLiveConnected ? `
                                         <div style="font-size:1.2rem; font-weight:900; color:var(--yellow); text-shadow:0 0 10px rgba(245,176,65,0.4);">
-                                            $${stake.toFixed(2)}
+                                            $${stake}
                                         </div>
                                         <small style="color:var(--text-secondary); font-size:0.72rem;">পরবর্তী এন্ট্রি সাইজ</small>
                                     ` : `
@@ -8986,7 +9007,7 @@
                         rowsHtml += `
                             <tr class="mas-pending-row">
                                 <td><strong>${tradeNum}</strong></td>
-                                <td style="color:var(--text-secondary);">~$${stake.toFixed(2)}</td>
+                                <td style="color:var(--text-secondary);">~$${stake}</td>
                                 <td style="text-align:center; color:var(--text-secondary); font-size:0.85rem;">
                                     <span>⏳ অপেক্ষমান</span>
                                 </td>
@@ -9026,9 +9047,9 @@
             const kpiNextStake = document.getElementById('masKpiNextStake');
             if (kpiNextStake) {
                 if (sessionStatus === 'RUNNING') {
-                    kpiNextStake.innerText = `$${nextPlannedStake.toFixed(2)}`;
+                    kpiNextStake.innerText = `$${nextPlannedStake}`;
                 } else {
-                    kpiNextStake.innerText = `$0.00`;
+                    kpiNextStake.innerText = `$0`;
                 }
             }
 
@@ -9367,9 +9388,10 @@
                     stake = firstStakeFactor * curBal;
                 }
 
-                stake = Math.max(0.1, Math.round(stake * 100) / 100);
+                const rawStake = Math.max(0.1, Math.round(stake * 100) / 100);
+                stake = roundCentStake(rawStake);
                 if (curBal > 0 && stake > curBal) {
-                    stake = Math.round(curBal * 100) / 100;
+                    stake = Math.round(curBal);
                 }
 
                 if (i < freeMasState.history.length) {
@@ -9397,7 +9419,7 @@
                     rowsHtml += `
                         <tr class="mas-completed-row">
                             <td><strong>${tradeNum}</strong></td>
-                            <td style="font-weight:800; color:var(--yellow);">$${stake.toFixed(2)}</td>
+                            <td style="font-weight:800; color:var(--yellow);">$${stake}</td>
                             <td style="text-align:center;">
                                 <div style="display:inline-flex; align-items:center; gap:8px;">
                                     ${outcomeBadge}
@@ -9421,7 +9443,7 @@
                     rowsHtml += `
                         <tr class="mas-active-row">
                             <td><strong style="color:var(--yellow);">${tradeNum}</strong></td>
-                            <td style="font-weight:900; font-size:1.15rem; color:var(--yellow);">$${stake.toFixed(2)}</td>
+                            <td style="font-weight:900; font-size:1.15rem; color:var(--yellow);">$${stake}</td>
                             <td style="text-align:center;">
                                 <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
                                     <button class="btn-mas-w" onclick="freeMasRecordTrade('w')" title="ট্রেড উইন হলে চাপুন (কীবোর্ড: W)">
@@ -9449,7 +9471,7 @@
                     rowsHtml += `
                         <tr class="mas-pending-row">
                             <td><strong>${tradeNum}</strong></td>
-                            <td style="color:var(--text-secondary);">~$${stake.toFixed(2)}</td>
+                            <td style="color:var(--text-secondary);">~$${stake}</td>
                             <td style="text-align:center; color:var(--text-secondary); font-size:0.85rem;">
                                 <span>⏳ অপেক্ষমান</span>
                             </td>

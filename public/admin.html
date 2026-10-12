@@ -5850,7 +5850,7 @@
                                                     <tbody>
                                                         ${(sub.auditReport || []).slice(0, 6).map((a, idx) => {
                                                             const stepNum = a.tradeNum || a.stepIndex || (idx + 1);
-                                                            const planned = Number(a.plannedStake || 0).toFixed(2);
+                                                            const planned = (a.plannedStake != null && a.plannedStake % 1 === 0) ? String(a.plannedStake) : Number(a.plannedStake || 0).toFixed(0);
                                                             const actual = Number(a.actualStake || 0).toFixed(2);
                                                             const ticket = a.ticketId || a.ticket || 'N/A';
                                                             const outcome = a.outcome || a.result || 'N/A';
@@ -6311,7 +6311,7 @@
                                     <tr><td colspan="8" style="padding:2rem; text-align:center; color:var(--text-secondary);">এই সাবমিশনে কোনো অডিট রেকর্ড নেই।</td></tr>
                                 ` : report.map((a, idx) => {
                                     const stepNum = a.tradeNum || a.stepIndex || (idx + 1);
-                                    const planned = Number(a.plannedStake || 0).toFixed(2);
+                                    const planned = (a.plannedStake != null && a.plannedStake % 1 === 0) ? String(a.plannedStake) : Number(a.plannedStake || 0).toFixed(0);
                                     const actual = Number(a.actualStake || 0).toFixed(2);
                                     const ticket = a.ticketId || a.ticket || 'N/A';
                                     const outcome = a.outcome || a.result || 'N/A';
