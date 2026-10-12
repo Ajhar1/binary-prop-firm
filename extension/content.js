@@ -423,7 +423,44 @@
     fetchChallengeStatus();
   }
 
-  // Helper to parse Quotex browser timestamps in local browser timezone
+  // Detect Quotex Broker Display Timezone (e.g. UTC-6 as seen in Quotex header/clock)
+  function detectQuotexBrokerUtcOffset() {
+    try {
+      // 1. Direct text search in header, clock or top-bar elements (e.g., "10:51:23 UTC-6")
+      const headerEls = document.querySelectorAll('header, .header, .top-bar, [class*="header"], [class*="time"], [class*="clock"]');
+      for (const el of headerEls) {
+        const text = el.innerText || '';
+        const m = text.match(/UTC\s*([+-]\d{1,2})/i);
+        if (m) {
+          return parseInt(m[1], 10);
+        }
+      }
+
+      // 2. Search first 3500 chars of page text
+      const bodyText = (document.body && document.body.innerText ? document.body.innerText.substring(0, 3500) : '');
+      const bodyMatch = bodyText.match(/UTC\s*([+-]\d{1,2})/i);
+      if (bodyMatch) {
+        return parseInt(bodyMatch[1], 10);
+      }
+
+      // 3. Fallback: Compare Quotex live clock with current UTC hour
+      const timeMatch = bodyText.match(/(\d{1,2}):(\d{2}):(\d{2})/);
+      if (timeMatch) {
+        const qHour = parseInt(timeMatch[1], 10);
+        const nowUtcHour = new Date().getUTCHours();
+        let diff = qHour - nowUtcHour;
+        if (diff > 12) diff -= 24;
+        if (diff < -12) diff += 24;
+        if (diff >= -12 && diff <= 14) {
+          return diff;
+        }
+      }
+    } catch (e) {}
+
+    return null;
+  }
+
+  // Helper to parse Quotex browser timestamps accurately in UTC
   function parseQuotexTimestampInBrowser(str) {
     if (!str) return 0;
     const clean = String(str).trim();
@@ -435,6 +472,14 @@
       const hour = parseInt(m[4] || '0', 10);
       const min = parseInt(m[5] || '0', 10);
       const sec = parseInt(m[6] || '0', 10);
+
+      const brokerOffsetHours = detectQuotexBrokerUtcOffset();
+      if (brokerOffsetHours !== null && !isNaN(brokerOffsetHours)) {
+        // Correctly calculate UTC timestamp according to Quotex's broker display timezone
+        return Date.UTC(year, month, day, hour, min, sec) - (brokerOffsetHours * 60 * 60 * 1000);
+      }
+
+      // Fallback: local browser timezone
       const d = new Date(year, month, day, hour, min, sec);
       return d.getTime();
     }
@@ -462,99 +507,109 @@
     const trades = [];
     const accountType = forcedAccountType || detectAccountType();
 
-    // Identify Table Rows (supports standard table or custom div-row grid)
-    const rows = Array.from(doc.querySelectorAll('table tbody tr, .trades-table__row, [class*="table"] [class*="row"]'));
+    // Identify Table Rows (supports standard table or custom div-row grid & mobile cards)
+    let rows = Array.from(doc.querySelectorAll('table tbody tr, .trades-table__row, [class*="trades-table"] [class*="row"], [class*="trade-item"], [class*="trades-list"] > div, [class*="trade-history"] [class*="item"]'));
+    if (rows.length === 0) {
+      rows = Array.from(doc.querySelectorAll('[class*="table"] [class*="row"]'));
+    }
 
     rows.forEach((row) => {
       const text = row.innerText || '';
-      // Skip header row
-      if (text.includes('Asset') && text.includes('Profit')) return;
+      // Skip pure header row
+      if (text.includes('Asset') && text.includes('Profit') && !text.includes('$') && !text.includes('€') && !text.includes('OTC')) return;
 
       const cells = Array.from(row.querySelectorAll('td, [class*="col"], [class*="cell"]'));
-      if (cells.length < 5) return;
+      const hasTradeCurrency = /([A-Z]{3}\/[A-Z]{3}|OTC)/i.test(text);
+      const hasQuoteOrAmount = /\d+\.?\d*\s*[$€₹৳]/.test(text) || /[$€₹৳]\s*\d+\.?\d*/.test(text);
+
+      if (cells.length < 5 && (!hasTradeCurrency || !hasQuoteOrAmount)) return;
 
       try {
         // A. Asset (e.g. EUR/JPY, AUD/CAD OTC)
         let asset = '';
-        const assetCell = cells[0];
-        if (assetCell) {
-          const pairMatch = assetCell.innerText.match(/([A-Z]{3}\/[A-Z]{3}(\s*\(?OTC\)?)?|[A-Z]{6})/i);
-          asset = pairMatch ? pairMatch[0].trim() : assetCell.innerText.trim();
+        const pairMatch = text.match(/([A-Z]{3}\/[A-Z]{3}(\s*\(?OTC\)?)?|[A-Z]{6}(\s*\(?OTC\)?)?)/i);
+        if (pairMatch) {
+          asset = pairMatch[0].trim();
+        } else if (cells[0]) {
+          asset = cells[0].innerText.trim();
         }
 
         // B. Info: UUID Ticket Hash and Payout %
         let ticketId = '';
         let payout = '';
-        const infoCell = cells[1] || cells[0];
-        if (infoCell) {
-          const uuidMatch = infoCell.innerText.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i);
-          if (uuidMatch) ticketId = uuidMatch[0].toLowerCase();
-          const payoutMatch = infoCell.innerText.match(/\d{1,3}%/);
-          if (payoutMatch) payout = payoutMatch[0];
-        }
+        const uuidMatch = text.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i);
+        if (uuidMatch) ticketId = uuidMatch[0].toLowerCase();
+        const payoutMatch = text.match(/\b\d{1,3}%\b/);
+        if (payoutMatch) payout = payoutMatch[0];
 
-        // C. Opening Quote: price & timestamp
+        // C & D. Opening & Closing Quotes and Timestamps
         let openQuote = '';
         let openTime = '';
+        let closeQuote = '';
+        let closeTime = '';
+
+        const allTimeMatches = Array.from(text.matchAll(/\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{4},?\s*\d{1,2}:\d{1,2}:\d{1,2}/g)).map(m => m[0]);
+        if (allTimeMatches.length >= 1) openTime = allTimeMatches[0];
+        if (allTimeMatches.length >= 2) closeTime = allTimeMatches[1];
+
+        // Search in cells for quotes if not parsed from text
         cells.forEach(c => {
           const timeMatch = c.innerText.match(/\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{4},?\s*\d{1,2}:\d{1,2}:\d{1,2}/);
           if (timeMatch && !openTime) {
             openTime = timeMatch[0];
-            const lines = c.innerText.split('\n').map(s => s.trim()).filter(Boolean);
-            openQuote = lines.find(l => /^\d+\.?\d*$/.test(l)) || lines[0] || '';
+          } else if (timeMatch && !closeTime && timeMatch[0] !== openTime) {
+            closeTime = timeMatch[0];
           }
         });
 
-        // D. Closing Quote
-        let closeQuote = '';
-        let closeTime = '';
-        let foundFirst = false;
-        cells.forEach(c => {
-          const timeMatch = c.innerText.match(/\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{4},?\s*\d{1,2}:\d{1,2}:\d{1,2}/);
-          if (timeMatch) {
-            if (!foundFirst) {
-              foundFirst = true;
-            } else if (!closeTime) {
-              closeTime = timeMatch[0];
-              const lines = c.innerText.split('\n').map(s => s.trim()).filter(Boolean);
-              closeQuote = lines.find(l => /^\d+\.?\d*$/.test(l)) || lines[0] || '';
-            }
-          }
-        });
+        const openQMatch = text.match(/Opening quote:?\s*(\d+\.?\d*)/i);
+        if (openQMatch) openQuote = openQMatch[1];
+        const closeQMatch = text.match(/Closing quote:?\s*(\d+\.?\d*)/i);
+        if (closeQMatch) closeQuote = closeQMatch[1];
 
         // E. Amount & Direction (CALL vs PUT)
         let amount = 0;
         let direction = 'CALL';
-        cells.forEach(c => {
-          const cText = c.innerText;
-          if (cText.includes('$') || cText.includes('€') || cText.includes('₹') || cText.includes('৳')) {
-            const amtMatch = cText.match(/(\d+\.?\d*)\s*[$€₹৳]/) || cText.match(/[$€₹৳]\s*(\d+\.?\d*)/);
-            if (amtMatch && !amount) {
-              amount = parseFloat(amtMatch[1]);
-              if (cText.includes('↓') || c.innerHTML.includes('down') || c.innerHTML.includes('arrow-down') || c.innerHTML.includes('red')) {
-                direction = 'PUT';
-              } else if (cText.includes('↑') || c.innerHTML.includes('up') || c.innerHTML.includes('arrow-up') || c.innerHTML.includes('green')) {
-                direction = 'CALL';
-              }
+        const amtMatch = text.match(/Amount:?\s*(\d+\.?\d*)\s*[$€₹৳]/i) || text.match(/Amount:?\s*[$€₹৳]\s*(\d+\.?\d*)/i);
+        if (amtMatch) {
+          amount = parseFloat(amtMatch[1]);
+        } else {
+          cells.forEach(c => {
+            const cText = c.innerText;
+            if ((cText.includes('$') || cText.includes('€') || cText.includes('₹') || cText.includes('৳')) && !amount) {
+              const m = cText.match(/(\d+\.?\d*)\s*[$€₹৳]/) || cText.match(/[$€₹৳]\s*(\d+\.?\d*)/);
+              if (m) amount = parseFloat(m[1]);
             }
-          }
-        });
+          });
+        }
+
+        if (text.includes('↓') || row.innerHTML.includes('down') || row.innerHTML.includes('arrow-down') || row.innerHTML.includes('red')) {
+          direction = 'PUT';
+        } else if (text.includes('↑') || row.innerHTML.includes('up') || row.innerHTML.includes('arrow-up') || row.innerHTML.includes('green')) {
+          direction = 'CALL';
+        }
 
         // F. Profit & Result (WIN / LOSS / REFUND)
         let profit = 0;
         let result = 'LOSS';
+        const allMoneyMatches = Array.from(text.matchAll(/(\d+\.?\d*)\s*[$€₹৳]/g)).map(m => parseFloat(m[1]));
+        if (allMoneyMatches.length > 0) {
+          if (allMoneyMatches.length >= 2) {
+            profit = allMoneyMatches[0];
+          } else if (allMoneyMatches.length === 1 && allMoneyMatches[0] !== amount) {
+            profit = allMoneyMatches[0];
+          }
+        }
         const lastCell = cells[cells.length - 1];
         if (lastCell) {
           const profMatch = lastCell.innerText.match(/(\d+\.?\d*)\s*[$€₹৳]/) || lastCell.innerText.match(/[$€₹৳]\s*(\d+\.?\d*)/);
-          if (profMatch) {
-            profit = parseFloat(profMatch[1]);
-            if (profit > 0 || lastCell.style.color?.includes('green') || lastCell.className?.includes('green') || lastCell.className?.includes('success')) {
-              result = 'WIN';
-            }
-          }
-          if (lastCell.innerText.toLowerCase().includes('refund') || lastCell.innerText.toLowerCase().includes('tie')) {
-            result = 'REFUND';
-          }
+          if (profMatch) profit = parseFloat(profMatch[1]);
+        }
+        if (profit > 0 || row.innerHTML.includes('green') || row.innerHTML.includes('success')) {
+          result = 'WIN';
+        }
+        if (text.toLowerCase().includes('refund') || text.toLowerCase().includes('tie')) {
+          result = 'REFUND';
         }
 
         // Check if trade is a Refund (entry quote equals exit quote or net profit is zero)
@@ -616,8 +671,8 @@
 
     for (const t of page1.trades) {
       if (!t.ticketId) continue;
-      // Filter out trades older than challenge start time
-      if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - 1000)) {
+      // Filter out trades older than challenge start time (with 60-second safety buffer for network/clock variance)
+      if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - 60000)) {
         reachedOlderTrades = true;
         continue;
       }
@@ -655,7 +710,7 @@
 
         for (const t of pageResult.trades) {
           if (!t.ticketId) continue;
-          if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - 1000)) {
+          if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - 60000)) {
             pageHasOlder = true;
             continue;
           }
@@ -697,6 +752,7 @@
         traderId: config.traderId,
         accountType,
         source: 'quotex',
+        brokerTzOffset: detectQuotexBrokerUtcOffset(),
         clientTzOffset: new Date().getTimezoneOffset(),
         clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Dhaka',
         trades
@@ -711,7 +767,7 @@
     let attempts = 0;
     const interval = setInterval(() => {
       attempts++;
-      const rows = document.querySelectorAll('table tbody tr, .trades-table__row');
+      const rows = document.querySelectorAll('table tbody tr, .trades-table__row, [class*="trades-table"] [class*="row"]');
       const noData = document.querySelector('.no-data, [class*="no-data"]');
 
       if (rows.length > 0 || noData || attempts >= maxAttempts) {
@@ -748,7 +804,7 @@
       const { trades, pagesScanned } = await collectAllChallengeTrades(acctType, currentChallengeStartTime);
 
       if (!trades || trades.length === 0) {
-        showToast('চ্যালেঞ্জ শুরু হওয়ার পর কোনো ট্রেড পাওয়া যায়নি। নতুন ট্রেড নেওয়ার পর পুনরায় চেষ্টা করুন।', 'info');
+        showToast('ℹ️ চ্যালেঞ্জ শুরু হওয়ার পরের কোনো নতুন ট্রেড পাওয়া যায়নি। নতুন ট্রেড নেওয়ার পর পুনরায় চেষ্টা করুন।', 'info');
         if (btn) {
           btn.disabled = false;
           setSyncBtnText('⚡ Sync Trades');
@@ -780,15 +836,17 @@
           if (result.addedCount > 0) {
             toastMsg = `✅ ${result.addedCount} টি নতুন চ্যালেঞ্জ ট্রেড সফলভাবে সিঙ্ক হয়েছে! ${pagesScanned > 1 ? `(${pagesScanned} টি পেজ স্ক্যান করা হয়েছে)` : ''}`;
             if (result.filteredOldCount > 0) {
-              toastMsg += ` (পুরনো ${result.filteredOldCount} টি ট্রেড বাদ দেওয়া হয়েছে)`;
+              toastMsg += ` (চ্যালেঞ্জ শুরুর পূর্বের পুরনো ${result.filteredOldCount} টি ট্রেড বাদ দেওয়া হয়েছে)`;
             }
-          } else if (result.duplicateCount > 0 || trades.length > 0) {
+          } else if (result.filteredOldCount > 0 && result.addedCount === 0) {
+            toastMsg = `ℹ️ কোনো নতুন ট্রেড পাওয়া যায়নি। প্রাপ্ত ${result.filteredOldCount}টি ট্রেড চ্যালেঞ্জ সক্রিয় হওয়ার পূর্বের পুরনো ট্রেড। চ্যালেঞ্জে কাউন্ট হতে নতুন ট্রেড নিন।`;
+          } else if (result.duplicateCount > 0 && result.addedCount === 0) {
             toastMsg = `✅ সকল ${trades.length} টি ট্রেড ইতিমধ্যে সেভ রয়েছে (ডুপ্লিকেট এড়ানো হয়েছে)।`;
           } else {
             toastMsg = result.message || 'ট্রেড হিস্টোরি সিঙ্ক সম্পন্ন হয়েছে!';
           }
 
-          showToast(toastMsg, 'success');
+          showToast(toastMsg, result.addedCount > 0 ? 'success' : 'info');
         } else {
           showToast(result?.message || 'সিঙ্ক ব্যর্থ হয়েছে।', 'error');
         }

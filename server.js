@@ -5260,7 +5260,7 @@ app.post('/api/submissions/:id/resubmit', authenticateToken, upload.fields([
 const traderHeartbeats = new Map();
 
 // Helper to parse Quotex and broker timestamps (DD/MM/YYYY, HH:MM:SS or ISO)
-function parseQuotexDate(str, clientTzOffset) {
+function parseQuotexDate(str, clientTzOffset, brokerTzOffset) {
   if (!str) return 0;
   if (typeof str === 'number') return str;
   const clean = String(str).trim();
@@ -5279,6 +5279,11 @@ function parseQuotexDate(str, clientTzOffset) {
     const hour = parseInt(m[4] || '0', 10);
     const min = parseInt(m[5] || '0', 10);
     const sec = parseInt(m[6] || '0', 10);
+
+    // If explicit broker UTC offset is provided (e.g. -6 for UTC-6)
+    if (typeof brokerTzOffset === 'number' && !isNaN(brokerTzOffset)) {
+      return Date.UTC(year, month, day, hour, min, sec) - (brokerTzOffset * 60 * 60 * 1000);
+    }
 
     // If client timezone offset is provided (in minutes, e.g. -360 for UTC+6)
     if (typeof clientTzOffset === 'number' && !isNaN(clientTzOffset)) {
@@ -5299,7 +5304,7 @@ function parseQuotexDate(str, clientTzOffset) {
 }
 
 // Consistent trade timestamp resolver across all formats
-function getTradeExecutionTime(t, clientTzOffset) {
+function getTradeExecutionTime(t, clientTzOffset, brokerTzOffset) {
   if (!t) return 0;
   if (typeof t.openTimestamp === 'number' && t.openTimestamp > 0) return t.openTimestamp;
   if (t.openTimeIso) {
@@ -5311,7 +5316,9 @@ function getTradeExecutionTime(t, clientTzOffset) {
     const d = new Date(t.closeTimeIso).getTime();
     if (!isNaN(d) && d > 0) return d;
   }
-  return parseQuotexDate(t.openTime, clientTzOffset) || parseQuotexDate(t.closeTime, clientTzOffset) || new Date(t.syncedAt || 0).getTime() || 0;
+  return parseQuotexDate(t.openTime, clientTzOffset, brokerTzOffset || t.brokerTzOffset) || 
+         parseQuotexDate(t.closeTime, clientTzOffset, brokerTzOffset || t.brokerTzOffset) || 
+         new Date(t.syncedAt || 0).getTime() || 0;
 }
 
 // 0. Extension Heartbeat Ping (Called every 30s by active extension)
@@ -5448,12 +5455,19 @@ app.get('/api/user/extension-status', authenticateToken, (req, res) => {
                (cleanId && traderHeartbeats.get(cleanId));
 
     const now = Date.now();
-    // Connected only if heartbeat received within last 65s AND has an active challenge
-    const isConnected = !!(activeChallenge && hb && hb.isActiveChallenge && (now - hb.lastPing) < 65000);
+    // Live Active: ping within last 120s (active tab on Quotex)
+    const isLiveActive = !!(activeChallenge && hb && hb.isActiveChallenge && (now - hb.lastPing) < 120000);
+    // Paired: ping within last 24h (extension is set up and working, even if backgrounded on mobile)
+    const isPaired = !!(activeChallenge && hb && hb.isActiveChallenge && (now - hb.lastPing) < (24 * 60 * 60 * 1000));
+    const isConnected = isLiveActive || isPaired;
+    const statusType = isLiveActive ? 'live' : (isPaired ? 'paired' : 'disconnected');
 
     res.json({
       success: true,
       connected: isConnected,
+      isLiveActive,
+      isPaired,
+      statusType,
       hasActiveChallenge: !!activeChallenge,
       isDisqualified,
       challengeStatus: activeChallenge ? activeChallenge.status : (isDisqualified ? 'failed' : 'none'),
@@ -5470,7 +5484,7 @@ app.get('/api/user/extension-status', authenticateToken, (req, res) => {
 // 1. Sync Trades from Quotex Extension (With Challenge Time-Lock Filter)
 app.post('/api/extension/sync-trades', (req, res) => {
   try {
-    const { traderId, accountType = 'demo', source = 'quotex', trades = [] } = req.body;
+    const { traderId, accountType = 'demo', source = 'quotex', brokerTzOffset, trades = [] } = req.body;
     if (!traderId) {
       return res.status(400).json({ success: false, message: 'Trader ID প্রয়োজন।' });
     }
@@ -5564,11 +5578,12 @@ app.post('/api/extension/sync-trades', (req, res) => {
       seenBatchTickets.add(ticketId);
 
       // Parse accurate trade execution time
-      const tradeTime = getTradeExecutionTime(t, clientTzOffset);
+      const tradeTime = getTradeExecutionTime(t, clientTzOffset, brokerTzOffset);
 
       // Check Time-Lock Filter: Must be executed on or after challenge activation time
       // Any trade done before challenge became active or while challenge was closed/inactive is STRICTLY rejected!
-      if (effectiveStartTime && tradeTime < (effectiveStartTime - 1000)) {
+      // Includes 60s safety buffer for minor network/clock variance
+      if (effectiveStartTime && tradeTime < (effectiveStartTime - 60000)) {
         filteredOldCount++;
         return; // Filter out older / closed-period trades!
       }
@@ -5709,7 +5724,7 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
     const userTrades = activeChallenge ? allSynced.filter(t => 
       (t.userId === req.user.id || (t.userEmail && t.userEmail.toLowerCase() === (req.user.email || '').toLowerCase())) &&
       (t.challengeId === activeChallenge.id) &&
-      (!effectiveStartTime || getTradeExecutionTime(t) >= (effectiveStartTime - 1000))
+      (!effectiveStartTime || getTradeExecutionTime(t) >= (effectiveStartTime - 60000))
     ) : [];
 
     // Strict sort newest-first (latest trade on top)

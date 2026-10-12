@@ -4785,7 +4785,10 @@
                     }
                     profStatChallenge.innerHTML = `<span style="color:#2ecc71; font-weight:800;">${escapeHtml(runningCh.brokerName || 'Quotex')} $${Number(runningCh.fundedAmount || 0).toLocaleString()}</span>`;
                     if (profStatChallengeSub) {
-                        profStatChallengeSub.innerHTML = `<span style="color:var(--text-secondary);">${runningCh.sessionsCompleted || 0}/15 সেশন সম্পন্ন (সক্রিয়)</span>`;
+                        const isPrac = (runningCh.challengePhase === 'practice' && (runningCh.practiceSessionsCompleted || 0) < 3);
+                        profStatChallengeSub.innerHTML = isPrac
+                            ? `<span style="color:#60a5fa;"><i class="fas fa-check-circle"></i> অনুমোদিত ও সক্রিয় (ঐচ্ছিক প্র্যাকটিস মোড)</span>`
+                            : `<span style="color:var(--text-secondary);">${runningCh.sessionsCompleted || 0}/15 সেশন সম্পন্ন (সক্রিয়)</span>`;
                     }
                 } else if (pendingCh) {
                     // Pending Approval
@@ -4848,7 +4851,7 @@
                     }
                     profStatSessions.innerHTML = `<span style="color:#fff; font-weight:800;">${completed} / ${required}</span>`;
                     if (profStatSessionsSub) {
-                        profStatSessionsSub.innerHTML = `<span style="color:#2ecc71;">${isPractice ? 'প্র্যাকটিস সেশন সম্পন্ন' : 'সফল সেশন সম্পন্ন (Active)'}</span>`;
+                        profStatSessionsSub.innerHTML = `<span style="color:#2ecc71;">${isPractice ? 'প্র্যাকটিস সেশন সম্পন্ন (ঐচ্ছিক)' : 'সফল সেশন সম্পন্ন (Active)'}</span>`;
                     }
                 } else {
                     // NO active challenge -> User specifically requested:
@@ -5468,23 +5471,23 @@
             let practiceBannerHtml = '';
             if (isPracticeMode) {
                 practiceBannerHtml = `
-                    <div style="background:linear-gradient(135deg, rgba(37,99,235,0.2), rgba(30,58,138,0.28)); border:1.5px solid #3b82f6; border-radius:16px; padding:1.2rem 1.3rem; margin-bottom:1.4rem; box-shadow:0 8px 30px rgba(59,130,246,0.18);">
+                    <div style="background:linear-gradient(135deg, rgba(37,99,235,0.22), rgba(30,58,138,0.32)); border:1.5px solid #3b82f6; border-radius:16px; padding:1.2rem 1.3rem; margin-bottom:1.4rem; box-shadow:0 8px 30px rgba(59,130,246,0.18);">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px;">
                             <div style="flex:1; min-width:280px;">
                                 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                                    <span style="background:linear-gradient(135deg, #3b82f6, #1d4ed8); color:#fff; font-weight:800; font-size:0.82rem; padding:4px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
-                                        <i class="fas fa-graduation-cap"></i> ৪৮ ঘণ্টার প্র্যাকটিস পর্ব (Sandbox)
+                                    <span style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:800; font-size:0.82rem; padding:4px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-check-circle"></i> চ্যালেঞ্জ অনুমোদিত ও সক্রিয় (${escapeHtml(challenge.packageName || 'Bronze')} $${Number(challenge.fundedAmount || 100).toLocaleString()})
                                     </span>
-                                    <span style="background:rgba(46,204,113,0.15); color:var(--neon-green); border:1px solid rgba(46,204,113,0.3); padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">
-                                        <i class="fas fa-shield-alt"></i> ১০০% রিস্ক ফ্রি
+                                    <span style="background:rgba(59,130,246,0.2); color:#93c5fd; border:1px solid rgba(59,130,246,0.4); padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">
+                                        <i class="fas fa-graduation-cap"></i> প্র্যাকটিস পর্ব (ঐচ্ছিক)
                                     </span>
                                 </div>
                                 <p style="color:#cbd5e1; font-size:0.86rem; margin:8px 0; line-height:1.5;">
-                                    মূল চ্যালেঞ্জের পূর্বে নিজেকে প্রস্তুত করতে সর্বোচ্চ ৩টি প্র্যাকটিস সেশন জমা দিন। ভুল হলে শুধরে দেওয়া হবে।
+                                    আপনার চ্যালেঞ্জটি সফলভাবে সক্রিয় করা হয়েছে! আপনি চাইলে মূল চ্যালেঞ্জের পূর্বে সর্বোচ্চ ৩টি প্র্যাকটিস সেশন জমা দিয়ে নিজেকে প্রস্তুত করে নিতে পারেন, অথবা যেকোনো সময় নিচের বাটনে চাপ দিয়ে <strong>সরাসরি মূল ১৫ দিনের অফিশিয়াল মূল্যায়ন চ্যালেঞ্জ শুরু করতে পারেন</strong> (এটি সম্পূর্ণ আপনার পছন্দের উপর নির্ভর করে)।
                                 </p>
                                 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:6px;">
                                     <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:5px 10px; font-size:0.8rem;">
-                                        <span style="color:var(--text-secondary);">সম্পন্ন:</span> 
+                                        <span style="color:var(--text-secondary);">প্র্যাকটিস সম্পন্ন:</span> 
                                         <strong style="color:#60a5fa; font-size:0.9rem; margin-left:4px;">${challenge.practiceSessionsCompleted || 0} / 3</strong>
                                     </div>
                                     <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(59,130,246,0.4); border-radius:6px; padding:5px 10px; font-size:0.8rem; color:#93c5fd;">
@@ -5493,15 +5496,15 @@
                                 </div>
                             </div>
 
-                            <div style="display:flex; flex-direction:column; gap:8px; min-width:220px; align-self:center;">
-                                <button type="button" class="btn-gold" style="padding:9px 14px; font-weight:800; font-size:0.86rem; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;" onclick="promptStartOfficialChallenge('${challenge.id}')">
-                                    <i class="fas fa-bolt"></i> মূল চ্যালেঞ্জ শুরু করুন
+                            <div style="display:flex; flex-direction:column; gap:8px; min-width:230px; align-self:center;">
+                                <button type="button" class="btn-gold" style="padding:10px 16px; font-weight:800; font-size:0.88rem; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;" onclick="promptStartOfficialChallenge('${challenge.id}')">
+                                    <i class="fas fa-bolt"></i> সরাসরি মূল চ্যালেঞ্জ শুরু করুন
                                 </button>
                                 <button type="button" class="btn-outline" style="padding:7px 12px; font-size:0.8rem; border-color:rgba(59,130,246,0.5); color:#93c5fd; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px;" onclick="switchTab('submission')">
-                                    <i class="fas fa-cloud-upload-alt"></i> প্র্যাকটিস প্রুফ আপলোড
+                                    <i class="fas fa-cloud-upload-alt"></i> প্র্যাকটিস সেশন প্রুফ আপলোড
                                 </button>
                                 <div style="font-size:0.72rem; color:var(--text-secondary); text-align:center;">
-                                    (৪৮ ঘণ্টা পর স্বয়ংক্রিয়ভাবে মূল চ্যালেঞ্জ শুরু হবে)
+                                    (৪৮ ঘণ্টার মধ্যে নিজে শুরু না করলে এরপর অটোমেটিক মূল চ্যালেঞ্জ শুরু হবে)
                                 </div>
                             </div>
                         </div>
@@ -10041,42 +10044,48 @@
                     }
                 } else if (data.success && data.connected) {
                     window.isExtensionLiveConnected = true;
+                    const isLive = (data.statusType === 'live') || (data.secondsAgo !== null && data.secondsAgo < 120);
+
                     banner.style.borderColor = 'rgba(0, 230, 118, 0.45)';
                     banner.style.background = 'linear-gradient(135deg, rgba(0,230,118,0.06), #12151d)';
                     dot.style.background = '#00e676';
                     dot.style.boxShadow = '0 0 12px #00e676';
                     title.style.color = '#00e676';
-                    title.innerHTML = '🟢 Extension Connected (লাইভ ট্রেড ট্র্যাকিং সক্রিয় রয়েছে)';
+                    title.innerHTML = isLive
+                        ? '🟢 Extension Active (Quotex স্ক্রিন সক্রিয় • রিয়েল-টাইম ট্র্যাকিং রানিং)'
+                        : '🟢 Extension Paired & Ready (এক্সটেনশন কানেক্টেড রয়েছে • কোটেক্সে ট্রেড করলেই সিঙ্ক হবে)';
 
                     if (badge) {
                         badge.style.display = 'inline-block';
-                        const isLive = (data.accountType === 'live');
-                        badge.style.background = isLive ? 'rgba(0,230,118,0.2)' : 'rgba(255,184,0,0.2)';
-                        badge.style.color = isLive ? '#00e676' : '#ffb800';
-                        badge.style.border = isLive ? '1px solid rgba(0,230,118,0.4)' : '1px solid rgba(255,184,0,0.4)';
-                        badge.innerText = isLive ? 'রিয়েল অ্যাকাউন্ট (LIVE)' : 'ডেমো অ্যাকাউন্ট (DEMO)';
+                        const isLiveAcct = (data.accountType === 'live');
+                        badge.style.background = isLiveAcct ? 'rgba(0,230,118,0.2)' : 'rgba(255,184,0,0.2)';
+                        badge.style.color = isLiveAcct ? '#00e676' : '#ffb800';
+                        badge.style.border = isLiveAcct ? '1px solid rgba(0,230,118,0.4)' : '1px solid rgba(255,184,0,0.4)';
+                        badge.innerText = isLiveAcct ? 'রিয়েল অ্যাকাউন্ট (LIVE)' : 'ডেমো অ্যাকাউন্ট (DEMO)';
                     }
 
                     const ago = (data.secondsAgo !== null && data.secondsAgo !== undefined) ? `${data.secondsAgo} সেকেন্ড আগে` : 'কয়েক সেকেন্ড আগে';
-                    sub.innerHTML = `ব্রোকার স্ক্রিন সক্রিয় • লাস্ট হার্টবিট: ${ago} • ব্রোকারে ট্রেড সম্পন্ন হওয়া মাত্রই স্বয়ংক্রিয়ভাবে ডাটা সিঙ্ক হচ্ছে।`;
+                    sub.innerHTML = isLive
+                        ? `ব্রোকার স্ক্রিন সক্রিয় • লাস্ট হার্টবিট: ${ago} • কোটেক্সে ট্রেড নেওয়া মাত্রই স্বয়ংক্রিয়ভাবে ডাটা সিঙ্ক হচ্ছে।`
+                        : `এক্সটেনশন পেয়ার করা রয়েছে • কোটেক্সে গিয়ে ট্রেড করলেই রিয়েল-টাইমে ডাটা এই ড্যাশবোর্ডে যোগ হবে।`;
 
                     if (btnWrap) {
                         btnWrap.innerHTML = `
                             <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-outline" style="padding:8px 16px; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                                <i class="fas fa-external-link-alt"></i> Quotex লাইভ চার্ট
+                                <i class="fas fa-external-link-alt"></i> Quotex ট্রেড চার্ট
                             </a>
                         `;
                     }
                 } else {
                     window.isExtensionLiveConnected = false;
-                    banner.style.borderColor = 'rgba(255, 82, 82, 0.35)';
+                    banner.style.borderColor = 'rgba(245, 176, 65, 0.4)';
                     banner.style.background = '#12151d';
-                    dot.style.background = '#ff5252';
-                    dot.style.boxShadow = '0 0 10px #ff5252';
-                    title.style.color = '#ff5252';
-                    title.innerText = '⚠️ Extension Disconnected! ট্রেড শুরু করার আগে ব্রাউজারে এক্সটেনশনটি কানেক্ট করুন।';
+                    dot.style.background = '#f59e0b';
+                    dot.style.boxShadow = '0 0 10px #f59e0b';
+                    title.style.color = '#f59e0b';
+                    title.innerText = '⚠️ Extension Not Connected! ব্রাউজারে এক্সটেনশনটি সেটআপ করুন';
                     if (badge) badge.style.display = 'none';
-                    sub.innerText = 'এক্সটেনশন চালু থাকলে Quotex লাইভ চার্ট স্ক্রিন (/en/demo-trade ও /en/trade) থেকে স্বয়ংক্রিয়ভাবে রিয়েল-টাইমে ট্রেড সিঙ্ক হবে।';
+                    sub.innerText = 'এক্সটেনশন ইনস্টল করে আপনার Trader ID দিলেই Quotex থেকে স্বয়ংক্রিয়ভাবে রিয়েল-টাইমে ট্রেড সিঙ্ক হবে।';
 
                     if (btnWrap) {
                         btnWrap.innerHTML = `

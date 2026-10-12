@@ -9,9 +9,39 @@ document.addEventListener('DOMContentLoaded', async () => {
   const openHistoryBtn = document.getElementById('openHistoryBtn');
   const openDashBtn = document.getElementById('openDashBtn');
 
+  async function pingServerHeartbeat(tId, sUrl) {
+    const tid = (tId || traderIdInput.value).trim();
+    if (!tid) return;
+    const surl = (sUrl || serverUrlInput.value || 'https://binarypropfirm.com').trim().replace(/\/+$/, '');
+    try {
+      const res = await fetch(surl + '/api/extension/heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          traderId: tid,
+          status: 'online',
+          accountType: 'demo',
+          url: 'popup',
+          timestamp: Date.now()
+        })
+      });
+      const data = await res.json();
+      if (data && data.active) {
+        connBadge.className = 'badge badge-active';
+        connBadge.innerText = '● Connected';
+      } else if (data && data.isDisqualified) {
+        connBadge.className = 'badge badge-locked';
+        connBadge.innerText = '● Locked';
+      }
+    } catch (e) {}
+  }
+
   // Load saved settings
   chrome.storage.local.get(['traderId', 'serverUrl', 'autoSync', 'lastSynced', 'lastCount'], (res) => {
-    if (res.traderId) traderIdInput.value = res.traderId;
+    if (res.traderId) {
+      traderIdInput.value = res.traderId;
+      pingServerHeartbeat(res.traderId, res.serverUrl);
+    }
     if (res.serverUrl) serverUrlInput.value = res.serverUrl;
     if (res.autoSync !== undefined) autoSyncCheckbox.checked = res.autoSync;
     if (res.lastSynced) {
@@ -23,12 +53,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Save settings on input
+  let saveTimer = null;
   function saveSettings() {
+    const tId = traderIdInput.value.trim();
+    const sUrl = serverUrlInput.value.trim() || 'https://binarypropfirm.com';
     chrome.storage.local.set({
-      traderId: traderIdInput.value.trim(),
-      serverUrl: serverUrlInput.value.trim() || 'https://binarypropfirm.com',
+      traderId: tId,
+      serverUrl: sUrl,
       autoSync: autoSyncCheckbox.checked
     });
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => pingServerHeartbeat(tId, sUrl), 400);
   }
   traderIdInput.addEventListener('input', saveSettings);
   serverUrlInput.addEventListener('input', saveSettings);
