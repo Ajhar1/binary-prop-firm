@@ -603,8 +603,18 @@
         let payout = '';
         const uuidMatch = text.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i);
         if (uuidMatch) ticketId = uuidMatch[0].toLowerCase();
-        const payoutMatch = text.match(/\b\d{1,3}%\b/);
-        if (payoutMatch) payout = payoutMatch[0];
+        
+        // Match exact Quotex payout percentage (e.g. 93%, 92%, 85%)
+        // Do NOT use trailing \b after '%' because '%' is non-word character!
+        const payoutMatch = text.match(/\b(\d{1,3})\s*%/);
+        if (payoutMatch) payout = `${payoutMatch[1]}%`;
+
+        if (!payout) {
+          cells.forEach(c => {
+            const m = (c.innerText || '').match(/\b(\d{1,3})\s*%/);
+            if (m && !payout) payout = `${m[1]}%`;
+          });
+        }
 
         // C & D. Opening & Closing Quotes and Timestamps
         let openQuote = '';
@@ -680,6 +690,21 @@
           result = 'REFUND';
         }
 
+        // Calculate exact payout % from actual profit/amount if DOM percentage was not found
+        if (!payout && amount > 0 && profit > 0) {
+          let calculatedRate = 0;
+          if (profit > amount) {
+            // Gross return format: e.g. $1.93 on $1.00 stake = 93%, $3.86 on $2.00 = 93%, $5.76 on $3.00 = 92%
+            calculatedRate = Math.round(((profit - amount) / amount) * 100);
+          } else {
+            // Net profit format: e.g. $0.93 on $1.00 stake = 93%
+            calculatedRate = Math.round((profit / amount) * 100);
+          }
+          if (calculatedRate >= 40 && calculatedRate <= 100) {
+            payout = `${calculatedRate}%`;
+          }
+        }
+
         // Fallback unique ticketId
         if (!ticketId && openTime && asset) {
           ticketId = 'qx_' + btoa(`${asset}_${openTime}_${amount}`).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24);
@@ -702,7 +727,7 @@
           trades.push({
             ticketId,
             asset,
-            payout: payout || '90%',
+            payout: payout || '85%',
             direction,
             openQuote: openQuote || '0.00',
             openTime: openTime || new Date().toLocaleString(),

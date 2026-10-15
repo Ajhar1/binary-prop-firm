@@ -10283,6 +10283,22 @@
                     : `<span style="background:rgba(255,82,82,0.12); color:#ff5252; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; border:1px solid rgba(255,82,82,0.3); margin-left:6px;">LOSS</span>`;
 
                 const isLiveAcct = (t.accountType === 'live');
+                let resolvedPayout = (t.payout || '').trim();
+                if (!resolvedPayout || resolvedPayout === '90%') {
+                    const amt = parseFloat(t.amount) || 0;
+                    const prof = parseFloat(t.profit) || 0;
+                    if (amt > 0 && prof > 0) {
+                        if (prof > amt) {
+                            const calcP = Math.round(((prof - amt) / amt) * 100);
+                            if (calcP >= 40 && calcP <= 100) resolvedPayout = `${calcP}%`;
+                        } else {
+                            const calcP = Math.round((prof / amt) * 100);
+                            if (calcP >= 40 && calcP <= 100) resolvedPayout = `${calcP}%`;
+                        }
+                    }
+                }
+                if (!resolvedPayout) resolvedPayout = '85%';
+
                 const accountBadge = isLiveAcct
                     ? `<span style="background:rgba(0,230,118,0.14); color:#00e676; padding:3px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; border:1px solid rgba(0,230,118,0.4); display:inline-flex; align-items:center; gap:4px;">
                         <span style="width:6px; height:6px; border-radius:50%; background:#00e676;"></span> রিয়েল ব্যালেন্স (LIVE)
@@ -10302,7 +10318,7 @@
                             ${t.timeframe ? `<span style="font-size:0.68rem; background:rgba(255,255,255,0.08); color:#94a3b8; border:1px solid rgba(255,255,255,0.15); padding:1px 5px; border-radius:4px; font-family:monospace;">${escapeHtml(t.timeframe)}</span>` : ''}
                         </td>
                         <td style="padding:12px;">
-                            <div style="font-size:0.78rem; font-weight:700; color:#cbd5e1;">Payout: ${escapeHtml(t.payout || '90%')}</div>
+                            <div style="font-size:0.78rem; font-weight:700; color:#cbd5e1;">Payout: ${escapeHtml(resolvedPayout)}</div>
                             <div style="font-size:0.72rem; color:var(--text-secondary); font-family:monospace; margin-top:2px;" title="${escapeHtml(t.ticketId)}">
                                 ${escapeHtml((t.ticketId || '').substring(0, 16))}...
                             </div>

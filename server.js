@@ -5655,15 +5655,34 @@ app.post('/api/extension/sync-trades', (req, res) => {
         return; // Filter out trades after challenge expiry
       }
 
+      // Compute exact payout percentage if missing or placeholder 90%
+      let payout = (t.payout || '').trim();
+      const tradeAmt = parseFloat(t.amount) || 0;
+      const tradeProf = parseFloat(t.profit) || 0;
+      if ((!payout || payout === '90%') && tradeAmt > 0 && tradeProf > 0) {
+        if (tradeProf > tradeAmt) {
+          const calcP = Math.round(((tradeProf - tradeAmt) / tradeAmt) * 100);
+          if (calcP >= 40 && calcP <= 100) payout = `${calcP}%`;
+        } else {
+          const calcP = Math.round((tradeProf / tradeAmt) * 100);
+          if (calcP >= 40 && calcP <= 100) payout = `${calcP}%`;
+        }
+      }
+      if (!payout) payout = '85%';
+
       // Permanent duplicate guard: check ticketId or identical trade execution attributes
-      const exists = allSynced.some(existing => 
+      const existingTrade = allSynced.find(existing => 
         existing.userId === user.id && (
           (existing.ticketId && existing.ticketId === ticketId) ||
           (existing.id && existing.id === ticketId) ||
           (existing.asset === t.asset && existing.openTime === t.openTime && Math.abs(existing.amount - t.amount) < 0.001)
         )
       );
-      if (exists) {
+      if (existingTrade) {
+        if (payout && payout !== '90%' && (!existingTrade.payout || existingTrade.payout === '90%')) {
+          existingTrade.payout = payout;
+          newCount++;
+        }
         duplicateCount++;
         return;
       }
@@ -5679,7 +5698,7 @@ app.post('/api/extension/sync-trades', (req, res) => {
         challengeStartedAt: new Date(effectiveStartTime).toISOString(),
         ticketId,
         asset: t.asset || 'N/A',
-        payout: t.payout || '90%',
+        payout,
         direction: t.direction || 'CALL',
         openQuote: t.openQuote || '0.00',
         openTime: t.openTime || nowIso,
