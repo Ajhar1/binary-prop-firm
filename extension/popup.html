@@ -10,10 +10,10 @@
     <!-- Header -->
     <header class="header">
       <div class="logo-wrap">
-        <div class="logo-badge">BPF</div>
+        <img src="icon48.png" style="width:34px; height:34px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.4);" alt="PB" />
         <div>
           <h1 class="title">Binary Prop Firm</h1>
-          <p class="subtitle">Quotex Live Trade Synchronizer</p>
+          <p class="subtitle">Quotex Live Trade Synchronizer v1.0.5</p>
         </div>
       </div>
       <div id="connBadge" class="badge badge-idle">● Idle</div>
@@ -30,6 +30,15 @@
       <div class="form-group">
         <label for="serverUrl">সার্ভার ইউআরএল (Server URL):</label>
         <input type="text" id="serverUrl" value="https://binarypropfirm.com" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label>শনাক্তকৃত ব্রোকার টাইমজোন (Broker Timezone):</label>
+        <div id="tzInfoBox" style="background:#181b21; border:1px solid #2a303c; border-radius:6px; padding:7px 10px; font-size:11px; color:#ffb800; display:flex; align-items:center; justify-content:space-between;">
+          <span id="brokerTzText">🌐 অটো-ডিটেকশন সক্রিয় (UTC Auto)</span>
+          <span id="brokerTzTag" style="font-size:10px; background:rgba(255,184,0,0.15); padding:2px 6px; border-radius:4px; font-weight:700;">AUTO</span>
+        </div>
+        <small class="hint">কোটেক্সে যে দেশের টাইমজোনই থাকুক না কেন, তা স্বয়ংক্রিয়ভাবে নিখুঁত UTC তে কনভার্ট হবে।</small>
       </div>
 
       <div class="toggle-group">

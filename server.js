@@ -5271,18 +5271,28 @@ function parseQuotexDate(str, clientTzOffset, brokerTzOffset) {
     if (!isNaN(parsedIso)) return parsedIso;
   }
 
-  const m = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:,?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
-  if (m) {
-    const day = parseInt(m[1], 10);
-    const month = parseInt(m[2], 10) - 1; // 0-indexed
-    const year = parseInt(m[3], 10);
-    const hour = parseInt(m[4] || '0', 10);
-    const min = parseInt(m[5] || '0', 10);
-    const sec = parseInt(m[6] || '0', 10);
+  // Support DD/MM/YYYY, DD.MM.YYYY, DD-MM-YYYY
+  const mDmy = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:,?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+  if (mDmy) {
+    let day = parseInt(mDmy[1], 10);
+    let month = parseInt(mDmy[2], 10) - 1; // 0-indexed
+    let year = parseInt(mDmy[3], 10);
+    let hour = parseInt(mDmy[4] || '0', 10);
+    let min = parseInt(mDmy[5] || '0', 10);
+    let sec = parseInt(mDmy[6] || '0', 10);
 
-    // If explicit broker UTC offset is provided (e.g. -6 for UTC-6)
+    if (month > 11 && day <= 12) {
+      const temp = day;
+      day = month + 1;
+      month = temp - 1;
+    }
+
+    // If explicit broker UTC offset is provided (in minutes, e.g. -360 for UTC-6 or hours, e.g. -6)
     if (typeof brokerTzOffset === 'number' && !isNaN(brokerTzOffset)) {
-      return Date.UTC(year, month, day, hour, min, sec) - (brokerTzOffset * 60 * 60 * 1000);
+      const offsetMs = Math.abs(brokerTzOffset) > 24
+        ? (brokerTzOffset * 60 * 1000)
+        : (brokerTzOffset * 60 * 60 * 1000);
+      return Date.UTC(year, month, day, hour, min, sec) - offsetMs;
     }
 
     // If client timezone offset is provided (in minutes, e.g. -360 for UTC+6)
@@ -5290,15 +5300,34 @@ function parseQuotexDate(str, clientTzOffset, brokerTzOffset) {
       return Date.UTC(year, month, day, hour, min, sec) + (clientTzOffset * 60 * 1000);
     }
 
-    // If the server runs in UTC (offset === 0), Quotex broker timestamps from Bangladesh traders are UTC+6 (-360 min)
     const serverOffset = new Date().getTimezoneOffset();
     if (serverOffset === 0) {
-      // Offset by 6 hours for Asia/Dhaka
       return Date.UTC(year, month, day, hour, min, sec) - (6 * 60 * 60 * 1000);
     }
 
     return new Date(year, month, day, hour, min, sec).getTime();
   }
+
+  // Support YYYY-MM-DD
+  const mYmd = clean.match(/^(\d{4})[\/\.-](\d{1,2})[\/\.-](\d{1,2})(?:[T\s](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+  if (mYmd) {
+    let year = parseInt(mYmd[1], 10);
+    let month = parseInt(mYmd[2], 10) - 1;
+    let day = parseInt(mYmd[3], 10);
+    let hour = parseInt(mYmd[4] || '0', 10);
+    let min = parseInt(mYmd[5] || '0', 10);
+    let sec = parseInt(mYmd[6] || '0', 10);
+
+    if (typeof brokerTzOffset === 'number' && !isNaN(brokerTzOffset)) {
+      const offsetMs = Math.abs(brokerTzOffset) > 24
+        ? (brokerTzOffset * 60 * 1000)
+        : (brokerTzOffset * 60 * 60 * 1000);
+      return Date.UTC(year, month, day, hour, min, sec) - offsetMs;
+    }
+
+    return new Date(year, month, day, hour, min, sec).getTime();
+  }
+
   const parsed = new Date(clean).getTime();
   return isNaN(parsed) ? 0 : parsed;
 }
@@ -5458,7 +5487,25 @@ app.get('/api/user/extension-status', authenticateToken, (req, res) => {
     // Live Active: ping within last 120s (active tab on Quotex)
     const isLiveActive = !!(activeChallenge && hb && hb.isActiveChallenge && (now - hb.lastPing) < 120000);
     // Paired: ping within last 24h (extension is set up and working, even if backgrounded on mobile)
-    const isPaired = !!(activeChallenge && hb && hb.isActiveChallenge && (now - hb.lastPing) < (24 * 60 * 60 * 1000));
+    let isPaired = !!(activeChallenge && hb && hb.isActiveChallenge && (now - hb.lastPing) < (24 * 60 * 60 * 1000));
+
+    // Resilience check: if in-memory heartbeat was reset (e.g. server restart) or tab backgrounded, check recent trade syncs
+    if (!isPaired && activeChallenge) {
+      try {
+        const syncedTrades = readJson(SYNCED_TRADES_FILE, []);
+        const recentSync = syncedTrades.find(t => 
+          (t.userId === user.id || (cleanTraderId && (t.traderId || '').toLowerCase() === cleanTraderId)) &&
+          t.challengeId === activeChallenge.id
+        );
+        if (recentSync && recentSync.syncedAt) {
+          const syncMs = new Date(recentSync.syncedAt).getTime();
+          if (!isNaN(syncMs) && (now - syncMs) < (48 * 60 * 60 * 1000)) {
+            isPaired = true;
+          }
+        }
+      } catch (e) {}
+    }
+
     const isConnected = isLiveActive || isPaired;
     const statusType = isLiveActive ? 'live' : (isPaired ? 'paired' : 'disconnected');
 
@@ -5530,6 +5577,20 @@ app.post('/api/extension/sync-trades', (req, res) => {
       });
     }
 
+    // Instantly register/refresh active extension heartbeat on every trade sync
+    const hbEntry = {
+      lastPing: Date.now(),
+      status: 'online',
+      accountType: (accountType || 'demo').toLowerCase(),
+      url: 'trades_sync',
+      isActiveChallenge: true,
+      challengeId: activeChallenge.id
+    };
+    traderHeartbeats.set(cleanId, hbEntry);
+    if (user.id) traderHeartbeats.set(user.id.toLowerCase(), hbEntry);
+    if (user.email) traderHeartbeats.set(user.email.toLowerCase(), hbEntry);
+    if (user.traderId) traderHeartbeats.set(user.traderId.toLowerCase(), hbEntry);
+
     // Determine the exact activation timestamp:
     // If reactivated: use reactivatedAt
     // If evaluation started: use evaluationStartedAt
@@ -5565,6 +5626,7 @@ app.post('/api/extension/sync-trades', (req, res) => {
     const nowIso = new Date().toISOString();
     const clientTzOffset = req.body.clientTzOffset;
     const seenBatchTickets = new Set();
+    const SAFETY_BUFFER_MS = 5 * 60 * 1000; // 5-minute safety grace window for clock/timezone variance
 
     trades.forEach(t => {
       // Clean ticket ID
@@ -5581,9 +5643,8 @@ app.post('/api/extension/sync-trades', (req, res) => {
       const tradeTime = getTradeExecutionTime(t, clientTzOffset, brokerTzOffset);
 
       // Check Time-Lock Filter: Must be executed on or after challenge activation time
-      // Any trade done before challenge became active or while challenge was closed/inactive is STRICTLY rejected!
-      // Includes 60s safety buffer for minor network/clock variance
-      if (effectiveStartTime && tradeTime < (effectiveStartTime - 60000)) {
+      // Includes 5-minute safety buffer for minor network/clock variance
+      if (effectiveStartTime && tradeTime < (effectiveStartTime - SAFETY_BUFFER_MS)) {
         filteredOldCount++;
         return; // Filter out older / closed-period trades!
       }
@@ -5628,11 +5689,15 @@ app.post('/api/extension/sync-trades', (req, res) => {
         closeTime: t.closeTime || nowIso,
         closeTimestamp: t.closeTimestamp || 0,
         closeTimeIso: t.closeTimeIso || '',
+        durationSeconds: t.durationSeconds || 60,
+        timeframe: t.timeframe || '1m',
         amount: parseFloat(t.amount) || 0,
         profit: parseFloat(t.profit) || 0,
         result: t.result || (parseFloat(t.profit) > 0 ? 'WIN' : 'LOSS'),
         accountType: (t.accountType || accountType || 'demo').toLowerCase(),
         source: source || 'quotex',
+        brokerTzOffset: (typeof brokerTzOffset === 'number') ? brokerTzOffset : (t.brokerTzOffset || null),
+        brokerTzStr: t.brokerTzStr || req.body.brokerTzStr || 'UTC',
         clientTzOffset: (typeof clientTzOffset === 'number') ? clientTzOffset : null,
         syncedAt: nowIso
       });
@@ -8227,6 +8292,54 @@ app.get(['/admin', '/admin/*'], (req, res) => {
 
 app.get(['/landing', '/ad'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+});
+
+// ==========================================
+// SECURE AUTO-DEPLOYMENT WEBHOOK (METHOD 1)
+// ==========================================
+const { exec } = require('child_process');
+const DEPLOY_SECRET = process.env.DEPLOY_SECRET || 'bpf_deploy_master_key_ajhar1_2026';
+
+app.all('/api/system/auto-deploy', (req, res) => {
+  const providedKey = req.query.secret || req.headers['x-deploy-secret'] || (req.body && req.body.secret);
+  if (!providedKey || providedKey !== DEPLOY_SECRET) {
+    return res.status(401).json({ success: false, message: 'Unauthorized: Invalid or missing deploy secret key.' });
+  }
+
+  console.log(`[AUTO-DEPLOY] Live deployment triggered at ${new Date().toISOString()}`);
+
+  exec('git pull origin main', { cwd: __dirname }, (err, stdout, stderr) => {
+    if (err) {
+      console.error('[AUTO-DEPLOY ERROR]:', err);
+      return res.status(500).json({
+        success: false,
+        message: 'Git pull failed during auto-deployment.',
+        error: err.message,
+        stderr
+      });
+    }
+
+    console.log('[AUTO-DEPLOY OUTPUT]:', stdout);
+
+    res.json({
+      success: true,
+      message: 'Code pulled successfully from origin/main. Server reload initiated.',
+      gitOutput: stdout.trim(),
+      timestamp: new Date().toISOString()
+    });
+
+    // Gracefully reload server via PM2 or node restart
+    setTimeout(() => {
+      exec('pm2 reload all || pm2 restart all', (pm2Err) => {
+        if (pm2Err) {
+          console.log('[AUTO-DEPLOY] PM2 not present. Restarting Node process via exit(0)...');
+          process.exit(0);
+        } else {
+          console.log('[AUTO-DEPLOY] PM2 reload completed successfully.');
+        }
+      });
+    }, 800);
+  });
 });
 
 app.get('*', (req, res) => {

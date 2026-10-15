@@ -1,22 +1,39 @@
-// Binary Prop Firm - Quotex Trade Synchronizer Content Script
+// Binary Prop Firm - Quotex Trade Synchronizer Content Script v1.0.5
+// Enhanced: Universal Broker Timezone Auto-Detection, Turbo 5s Timeframes, Multi-Page Challenge Capture
 (function () {
   let config = {
     traderId: '',
     serverUrl: 'https://binarypropfirm.com',
-    autoSync: true
+    autoSync: true,
+    brokerTzOffsetMin: null, // in minutes, e.g. -360 for UTC-6, +360 for UTC+6
+    brokerTzStr: 'UTC'
   };
 
   const syncedTicketsCache = new Set();
   let isSyncing = false;
   let heartbeatTimer = null;
+  let tzScanTimer = null;
 
   // 1. Load config from chrome.storage.local
   function loadConfig(cb) {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get(['traderId', 'serverUrl', 'autoSync', 'syncedCache'], (res) => {
+      chrome.storage.local.get([
+        'traderId',
+        'serverUrl',
+        'autoSync',
+        'syncedCache',
+        'quotex_broker_tz_offset_min',
+        'quotex_broker_tz_str'
+      ], (res) => {
         if (res.traderId) config.traderId = res.traderId;
         if (res.serverUrl) config.serverUrl = res.serverUrl;
         if (res.autoSync !== undefined) config.autoSync = res.autoSync;
+        if (typeof res.quotex_broker_tz_offset_min === 'number') {
+          config.brokerTzOffsetMin = res.quotex_broker_tz_offset_min;
+        }
+        if (res.quotex_broker_tz_str) {
+          config.brokerTzStr = res.quotex_broker_tz_str;
+        }
         if (Array.isArray(res.syncedCache)) {
           res.syncedCache.forEach(id => syncedTicketsCache.add(id));
         }
@@ -29,36 +46,176 @@
 
   function saveSyncedCache() {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      const arr = Array.from(syncedTicketsCache).slice(-500);
+      const arr = Array.from(syncedTicketsCache).slice(-600);
       chrome.storage.local.set({ syncedCache: arr });
     }
   }
 
-  // 2. Detect Account Type (Demo vs Live)
+  function saveBrokerTz(offsetMin, tzStr) {
+    config.brokerTzOffsetMin = offsetMin;
+    config.brokerTzStr = tzStr;
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.set({
+        quotex_broker_tz_offset_min: offsetMin,
+        quotex_broker_tz_str: tzStr
+      });
+    }
+    updateWidgetStatus();
+  }
+
+  // 2. Universal Broker Timezone Auto-Detection Engine
+  function parseUtcOffsetString(str) {
+    if (!str) return null;
+    // Matches: UTC-6, UTC -6, UTC+06:00, UTC+5:30, GMT-6, UTC+6.5, UTC-05:00
+    const m = String(str).match(/(?:UTC|GMT)\s*([+-])\s*(\d{1,2})(?::(\d{2})|\.(\d+))?/i);
+    if (!m) return null;
+    const sign = m[1] === '-' ? -1 : 1;
+    const hours = parseInt(m[2], 10);
+    let minutes = 0;
+    if (m[3]) {
+      minutes = parseInt(m[3], 10);
+    } else if (m[4]) {
+      minutes = Math.round(parseFloat('0.' + m[4]) * 60);
+    }
+    return sign * (hours * 60 + minutes);
+  }
+
+  function getOffsetMinutesFromIana(tzName) {
+    try {
+      const now = new Date();
+      const invDate = new Date(now.toLocaleString('en-US', { timeZone: tzName }));
+      return Math.round((invDate.getTime() - now.getTime()) / 60000);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function scanQuotexBrokerTimezone() {
+    try {
+      // Method A: Check header, clock, profile bar, or top-bar elements
+      const targetEls = document.querySelectorAll('header, .header, .top-bar, [class*="header"], [class*="time"], [class*="clock"], [class*="profile"]');
+      for (const el of targetEls) {
+        const text = el.innerText || '';
+        const offsetMin = parseUtcOffsetString(text);
+        if (offsetMin !== null) {
+          const m = text.match(/(?:UTC|GMT)\s*[+-]\s*\d{1,2}(?::\d{2})?/i);
+          const tzStr = m ? m[0].toUpperCase().replace(/\s+/g, '') : `UTC${offsetMin >= 0 ? '+' : ''}${Math.round(offsetMin / 60)}`;
+          saveBrokerTz(offsetMin, tzStr);
+          return offsetMin;
+        }
+      }
+
+      // Method B: Check Quotex LocalStorage preferences
+      try {
+        const keys = ['time_zone', 'timezone', 'settings', 'user_settings', 'profile', 'app_state'];
+        for (const k of keys) {
+          const val = localStorage.getItem(k);
+          if (!val) continue;
+          const offsetMin = parseUtcOffsetString(val);
+          if (offsetMin !== null) {
+            saveBrokerTz(offsetMin, `UTC${offsetMin >= 0 ? '+' : ''}${Math.round(offsetMin / 60)}`);
+            return offsetMin;
+          }
+          const ianaMatch = val.match(/([A-Za-z]+(?:\/[A-Za-z_]+)+)/);
+          if (ianaMatch) {
+            const min = getOffsetMinutesFromIana(ianaMatch[1]);
+            if (min !== null) {
+              saveBrokerTz(min, `UTC${min >= 0 ? '+' : ''}${Math.round(min / 60)}`);
+              return min;
+            }
+          }
+        }
+      } catch (e) {}
+
+      // Method C: Search first 4000 characters of body text
+      const bodyText = (document.body && document.body.innerText ? document.body.innerText.substring(0, 4000) : '');
+      const bodyOffsetMin = parseUtcOffsetString(bodyText);
+      if (bodyOffsetMin !== null) {
+        const m = bodyText.match(/(?:UTC|GMT)\s*[+-]\s*\d{1,2}(?::\d{2})?/i);
+        const tzStr = m ? m[0].toUpperCase().replace(/\s+/g, '') : `UTC${bodyOffsetMin >= 0 ? '+' : ''}${Math.round(bodyOffsetMin / 60)}`;
+        saveBrokerTz(bodyOffsetMin, tzStr);
+        return bodyOffsetMin;
+      }
+    } catch (err) {}
+
+    // Method D: If already loaded from chrome.storage, keep it
+    if (config.brokerTzOffsetMin !== null) {
+      return config.brokerTzOffsetMin;
+    }
+
+    return null;
+  }
+
+  // 3. Robust Trade Timestamp Parser in Absolute UTC Epoch Milliseconds
+  function parseQuotexTimestampInUtc(str, brokerOffsetMin) {
+    if (!str) return 0;
+    const clean = String(str).trim();
+
+    // 1. Format: DD[/.-]MM[/.-]YYYY[,] HH:mm:ss
+    const mDmy = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:,?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+    if (mDmy) {
+      let day = parseInt(mDmy[1], 10);
+      let month = parseInt(mDmy[2], 10) - 1; // 0-indexed
+      let year = parseInt(mDmy[3], 10);
+      let hour = parseInt(mDmy[4] || '0', 10);
+      let min = parseInt(mDmy[5] || '0', 10);
+      let sec = parseInt(mDmy[6] || '0', 10);
+
+      // Guard against swapped month/day if day is <= 12 and month > 12
+      if (month > 11 && day <= 12) {
+        const temp = day;
+        day = month + 1;
+        month = temp - 1;
+      }
+
+      const activeOffset = (typeof brokerOffsetMin === 'number' && !isNaN(brokerOffsetMin))
+        ? brokerOffsetMin
+        : (config.brokerTzOffsetMin !== null ? config.brokerTzOffsetMin : -new Date().getTimezoneOffset());
+
+      // Formula: Date.UTC(y, m, d, h, min, sec) - (offsetMinutes * 60000)
+      return Date.UTC(year, month, day, hour, min, sec) - (activeOffset * 60 * 1000);
+    }
+
+    // 2. Format: YYYY-MM-DD HH:mm:ss
+    const mYmd = clean.match(/^(\d{4})[\/\.-](\d{1,2})[\/\.-](\d{1,2})(?:[T\s](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+    if (mYmd) {
+      let year = parseInt(mYmd[1], 10);
+      let month = parseInt(mYmd[2], 10) - 1;
+      let day = parseInt(mYmd[3], 10);
+      let hour = parseInt(mYmd[4] || '0', 10);
+      let min = parseInt(mYmd[5] || '0', 10);
+      let sec = parseInt(mYmd[6] || '0', 10);
+
+      const activeOffset = (typeof brokerOffsetMin === 'number' && !isNaN(brokerOffsetMin))
+        ? brokerOffsetMin
+        : (config.brokerTzOffsetMin !== null ? config.brokerTzOffsetMin : -new Date().getTimezoneOffset());
+
+      return Date.UTC(year, month, day, hour, min, sec) - (activeOffset * 60 * 1000);
+    }
+
+    const d = new Date(clean).getTime();
+    return isNaN(d) ? 0 : d;
+  }
+
+  // 4. Detect Account Type (Demo vs Live)
   function detectAccountType() {
     const path = window.location.pathname.toLowerCase();
     const search = window.location.search.toLowerCase();
 
-    // Check URL parameters
     if (search.includes('account=live')) return 'live';
     if (search.includes('account=demo')) return 'demo';
-
-    // Check live chart paths
     if (path.includes('/demo-trade')) return 'demo';
 
-    // Check page header / account dropdown for DEMO or LIVE
     const headerEl = document.querySelector('header, .header, .top-bar, [class*="header"], [class*="account"]');
     const headerText = headerEl ? headerEl.innerText.toUpperCase() : '';
     if (headerText.includes('DEMO')) return 'demo';
     if (headerText.includes('LIVE')) return 'live';
 
-    // If pathname is /en/trade and no DEMO is visible, it's live
     if (path.includes('/trade') && !path.includes('demo')) return 'live';
-
     return 'demo';
   }
 
-  // 3. Floating Toast Notification
+  // 5. Floating Toast Notification
   function showToast(message, type = 'success') {
     const oldToast = document.getElementById('bpf-toast');
     if (oldToast) oldToast.remove();
@@ -74,17 +231,16 @@
     document.body.appendChild(toast);
     setTimeout(() => {
       if (toast && toast.parentNode) toast.remove();
-    }, 5000);
+    }, 5500);
   }
 
-  // Helper to safely update Sync button text while keeping mobile indicator dot
   function setSyncBtnText(text) {
     const btn = document.getElementById('bpfSyncBtn');
     if (!btn) return;
     btn.innerHTML = `<span class="bpf-mobile-dot"></span><span>${text}</span>`;
   }
 
-  // Draggable Engine for Floating Widget (Supports PC Mouse & Mobile Phone Touch)
+  // 6. Draggable Engine for Floating Widget
   function makeWidgetDraggable(root) {
     let isDragging = false;
     let startX = 0;
@@ -93,7 +249,6 @@
     let initialTop = 0;
     let dragThresholdPassed = false;
 
-    // Restore previously saved position from localStorage
     try {
       const savedPos = localStorage.getItem('bpf_widget_pos');
       if (savedPos) {
@@ -130,7 +285,7 @@
       }
 
       if (dragThresholdPassed) {
-        if (e && e.cancelable) e.preventDefault(); // prevent touch scroll
+        if (e && e.cancelable) e.preventDefault();
         let newLeft = initialLeft + dx;
         let newTop = initialTop + dy;
 
@@ -163,15 +318,11 @@
       }
     };
 
-    // Mouse Listeners (Desktop Computer)
     root.addEventListener('mousedown', (e) => {
-      if (e.button !== 0) return; // only left click
+      if (e.button !== 0) return;
       onStart(e.clientX, e.clientY);
 
-      const moveHandler = (moveEvent) => {
-        onMove(moveEvent.clientX, moveEvent.clientY, moveEvent);
-      };
-
+      const moveHandler = (moveEvent) => onMove(moveEvent.clientX, moveEvent.clientY, moveEvent);
       const upHandler = () => {
         window.removeEventListener('mousemove', moveHandler);
         window.removeEventListener('mouseup', upHandler);
@@ -182,7 +333,6 @@
       window.addEventListener('mouseup', upHandler);
     });
 
-    // Touch Listeners (Mobile Phone)
     root.addEventListener('touchstart', (e) => {
       if (e.touches && e.touches[0]) {
         onStart(e.touches[0].clientX, e.touches[0].clientY);
@@ -195,15 +345,9 @@
       }
     }, { passive: false });
 
-    root.addEventListener('touchend', () => {
-      onEnd();
-    }, { passive: true });
+    root.addEventListener('touchend', () => onEnd(), { passive: true });
+    root.addEventListener('touchcancel', () => onEnd(), { passive: true });
 
-    root.addEventListener('touchcancel', () => {
-      onEnd();
-    }, { passive: true });
-
-    // Prevent button click if dragged
     root.addEventListener('click', (e) => {
       if (dragThresholdPassed) {
         e.preventDefault();
@@ -212,7 +356,6 @@
       }
     }, true);
 
-    // Keep clamped inside viewport on screen resize or mobile orientation change
     window.addEventListener('resize', () => {
       if (!root.style.left) return;
       const rect = root.getBoundingClientRect();
@@ -223,7 +366,7 @@
     });
   }
 
-  // 4. Inject Floating Widget onto Quotex Page
+  // 7. Inject Floating Widget onto Quotex Page with New PB Logo & Timezone Tag
   function injectWidget() {
     if (document.getElementById('bpf-sync-widget-root')) {
       updateWidgetStatus();
@@ -235,13 +378,19 @@
 
     const accountType = detectAccountType();
     const isHistoryPage = window.location.pathname.includes('/trades');
+    const iconUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+      ? chrome.runtime.getURL('icon48.png')
+      : '';
 
     root.innerHTML = `
       <div class="bpf-pill" id="bpfPill" title="Binary Prop Firm — ড্র্যাগ করে যেকোনো জায়গায় নিয়ে রাখুন">
         <span class="bpf-drag-handle" title="ড্র্যাগ করুন">⋮⋮</span>
-        <span class="bpf-logo-badge">BPF</span>
+        ${iconUrl ? `<img src="${iconUrl}" style="width:20px; height:20px; border-radius:4px; box-shadow:0 1px 4px rgba(0,0,0,0.4); display:inline-block; vertical-align:middle;" alt="PB" />` : '<span class="bpf-logo-badge">PB</span>'}
         <span class="bpf-account-tag ${accountType === 'live' ? 'live' : 'demo'}" id="bpfAcctTag">
           ${accountType === 'live' ? 'LIVE' : 'DEMO'}
+        </span>
+        <span id="bpfTzTag" style="font-size:10px; font-weight:700; background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); padding:2px 6px; border-radius:10px;" title="শনাক্তকৃত ব্রোকার টাইমজোন">
+          ${config.brokerTzStr || 'UTC'}
         </span>
         <div class="bpf-indicator-wrap" id="bpfIndicatorWrap" title="এক্সটেনশন কানেক্টেড রয়েছে">
           <span class="bpf-pulse-dot"></span>
@@ -262,8 +411,6 @@
     document.body.appendChild(root);
     makeWidgetDraggable(root);
 
-    // Sync Trades Click Handler:
-    // User Requirement: "Sync Trades এর মধ্যে চাপ দিলে সোজা যেন ইউজাররা Trades অপশনে চলে যাই তারপর ট্রেডিং হিস্টোরি আমাদের সার্ভারে চলে আসে।"
     document.getElementById('bpfSyncBtn').addEventListener('click', () => {
       if (isExtensionLocked) {
         showToast(lockReason || '⚠️ আপনার চ্যালেঞ্জটি বর্তমানে বন্ধ/নিষ্ক্রিয় রয়েছে। এক্সটেনশন কোনো ট্রেড সিঙ্ক করবে না।', 'error');
@@ -276,10 +423,8 @@
       }
 
       if (window.location.pathname.includes('/trades')) {
-        // Already on Trades page -> Sync now
         runManualTradeSync();
       } else {
-        // On Live Chart or other page -> Navigate directly to Trades page with correct account, and auto-sync on load!
         const acct = detectAccountType();
         sessionStorage.setItem('bpf_auto_sync_target', 'true');
         sessionStorage.setItem('bpf_account_type', acct);
@@ -291,13 +436,10 @@
         }
 
         showToast('🚀 Trades হিস্টোরি পেজে নিয়ে যাওয়া হচ্ছে, সেখানে স্বয়ংক্রিয়ভাবে সিঙ্ক হবে...', 'info');
-
-        // Navigate straight to Quotex Trades page with account query
         window.location.href = `${window.location.origin}/en/trades?page=1&account=${acct}`;
       }
     });
 
-    // Back to Chart Click Handler (if present)
     const backBtn = document.getElementById('bpfBackChartBtn');
     if (backBtn) {
       backBtn.addEventListener('click', () => {
@@ -315,9 +457,9 @@
       acctTag.className = `bpf-account-tag ${acct === 'live' ? 'live' : 'demo'}`;
       acctTag.innerText = acct === 'live' ? 'LIVE' : 'DEMO';
     }
-    const traderDisp = document.getElementById('bpfTraderIdDisplay');
-    if (traderDisp && config.traderId) {
-      traderDisp.innerText = config.traderId;
+    const tzTag = document.getElementById('bpfTzTag');
+    if (tzTag && config.brokerTzStr) {
+      tzTag.innerText = config.brokerTzStr;
     }
   }
 
@@ -393,7 +535,7 @@
     }
   }
 
-  // 5. Heartbeat Engine (Sends ping every 30s to keep dashboard connected)
+  // 8. Heartbeat Engine (Sends ping every 30s to keep dashboard connected)
   async function fetchChallengeStatus() {
     if (!config.traderId) return null;
     const targetUrl = (config.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '') + '/api/extension/heartbeat';
@@ -408,6 +550,8 @@
           status: 'online',
           accountType,
           url: window.location.href,
+          brokerTzOffset: config.brokerTzOffsetMin,
+          brokerTzStr: config.brokerTzStr,
           timestamp: Date.now()
         })
       });
@@ -423,91 +567,12 @@
     fetchChallengeStatus();
   }
 
-  // Detect Quotex Broker Display Timezone (e.g. UTC-6 as seen in Quotex header/clock)
-  function detectQuotexBrokerUtcOffset() {
-    try {
-      // 1. Direct text search in header, clock or top-bar elements (e.g., "10:51:23 UTC-6")
-      const headerEls = document.querySelectorAll('header, .header, .top-bar, [class*="header"], [class*="time"], [class*="clock"]');
-      for (const el of headerEls) {
-        const text = el.innerText || '';
-        const m = text.match(/UTC\s*([+-]\d{1,2})/i);
-        if (m) {
-          return parseInt(m[1], 10);
-        }
-      }
-
-      // 2. Search first 3500 chars of page text
-      const bodyText = (document.body && document.body.innerText ? document.body.innerText.substring(0, 3500) : '');
-      const bodyMatch = bodyText.match(/UTC\s*([+-]\d{1,2})/i);
-      if (bodyMatch) {
-        return parseInt(bodyMatch[1], 10);
-      }
-
-      // 3. Fallback: Compare Quotex live clock with current UTC hour
-      const timeMatch = bodyText.match(/(\d{1,2}):(\d{2}):(\d{2})/);
-      if (timeMatch) {
-        const qHour = parseInt(timeMatch[1], 10);
-        const nowUtcHour = new Date().getUTCHours();
-        let diff = qHour - nowUtcHour;
-        if (diff > 12) diff -= 24;
-        if (diff < -12) diff += 24;
-        if (diff >= -12 && diff <= 14) {
-          return diff;
-        }
-      }
-    } catch (e) {}
-
-    return null;
-  }
-
-  // Helper to parse Quotex browser timestamps accurately in UTC
-  function parseQuotexTimestampInBrowser(str) {
-    if (!str) return 0;
-    const clean = String(str).trim();
-    const m = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:,?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
-    if (m) {
-      const day = parseInt(m[1], 10);
-      const month = parseInt(m[2], 10) - 1;
-      const year = parseInt(m[3], 10);
-      const hour = parseInt(m[4] || '0', 10);
-      const min = parseInt(m[5] || '0', 10);
-      const sec = parseInt(m[6] || '0', 10);
-
-      const brokerOffsetHours = detectQuotexBrokerUtcOffset();
-      if (brokerOffsetHours !== null && !isNaN(brokerOffsetHours)) {
-        // Correctly calculate UTC timestamp according to Quotex's broker display timezone
-        return Date.UTC(year, month, day, hour, min, sec) - (brokerOffsetHours * 60 * 60 * 1000);
-      }
-
-      // Fallback: local browser timezone
-      const d = new Date(year, month, day, hour, min, sec);
-      return d.getTime();
-    }
-    const d = new Date(clean).getTime();
-    return isNaN(d) ? 0 : d;
-  }
-
-  // Helper to build Quotex paginated URL
-  function buildQuotexPageUrl(currentUrl, page, acctType) {
-    try {
-      const u = new URL(currentUrl);
-      u.searchParams.set('page', String(page));
-      if (acctType) {
-        u.searchParams.set('account', acctType);
-      }
-      return u.toString();
-    } catch (e) {
-      const origin = window.location.origin;
-      return `${origin}/en/trades?page=${page}&account=${acctType || 'demo'}`;
-    }
-  }
-
-  // 6. Parse Quotex Trade History Table from Document
+  // 9. Parse Quotex Trade History Table from Document with Turbo/Timeframe Support
   function parseQuotexTradesFromDoc(doc, forcedAccountType) {
     const trades = [];
     const accountType = forcedAccountType || detectAccountType();
+    const activeOffsetMin = scanQuotexBrokerTimezone();
 
-    // Identify Table Rows (supports standard table or custom div-row grid & mobile cards)
     let rows = Array.from(doc.querySelectorAll('table tbody tr, .trades-table__row, [class*="trades-table"] [class*="row"], [class*="trade-item"], [class*="trades-list"] > div, [class*="trade-history"] [class*="item"]'));
     if (rows.length === 0) {
       rows = Array.from(doc.querySelectorAll('[class*="table"] [class*="row"]'));
@@ -515,7 +580,6 @@
 
     rows.forEach((row) => {
       const text = row.innerText || '';
-      // Skip pure header row
       if (text.includes('Asset') && text.includes('Profit') && !text.includes('$') && !text.includes('€') && !text.includes('OTC')) return;
 
       const cells = Array.from(row.querySelectorAll('td, [class*="col"], [class*="cell"]'));
@@ -525,7 +589,7 @@
       if (cells.length < 5 && (!hasTradeCurrency || !hasQuoteOrAmount)) return;
 
       try {
-        // A. Asset (e.g. EUR/JPY, AUD/CAD OTC)
+        // A. Asset
         let asset = '';
         const pairMatch = text.match(/([A-Z]{3}\/[A-Z]{3}(\s*\(?OTC\)?)?|[A-Z]{6}(\s*\(?OTC\)?)?)/i);
         if (pairMatch) {
@@ -534,7 +598,7 @@
           asset = cells[0].innerText.trim();
         }
 
-        // B. Info: UUID Ticket Hash and Payout %
+        // B. Ticket ID & Payout %
         let ticketId = '';
         let payout = '';
         const uuidMatch = text.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i);
@@ -552,7 +616,6 @@
         if (allTimeMatches.length >= 1) openTime = allTimeMatches[0];
         if (allTimeMatches.length >= 2) closeTime = allTimeMatches[1];
 
-        // Search in cells for quotes if not parsed from text
         cells.forEach(c => {
           const timeMatch = c.innerText.match(/\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{4},?\s*\d{1,2}:\d{1,2}:\d{1,2}/);
           if (timeMatch && !openTime) {
@@ -567,7 +630,7 @@
         const closeQMatch = text.match(/Closing quote:?\s*(\d+\.?\d*)/i);
         if (closeQMatch) closeQuote = closeQMatch[1];
 
-        // E. Amount & Direction (CALL vs PUT)
+        // E. Amount & Direction
         let amount = 0;
         let direction = 'CALL';
         const amtMatch = text.match(/Amount:?\s*(\d+\.?\d*)\s*[$€₹৳]/i) || text.match(/Amount:?\s*[$€₹৳]\s*(\d+\.?\d*)/i);
@@ -583,9 +646,9 @@
           });
         }
 
-        if (text.includes('↓') || row.innerHTML.includes('down') || row.innerHTML.includes('arrow-down') || row.innerHTML.includes('red')) {
+        if (text.includes('↓') || row.innerHTML.includes('down') || row.innerHTML.includes('arrow-down') || row.innerHTML.includes('red') || /put/i.test(text)) {
           direction = 'PUT';
-        } else if (text.includes('↑') || row.innerHTML.includes('up') || row.innerHTML.includes('arrow-up') || row.innerHTML.includes('green')) {
+        } else if (text.includes('↑') || row.innerHTML.includes('up') || row.innerHTML.includes('arrow-up') || row.innerHTML.includes('green') || /call/i.test(text)) {
           direction = 'CALL';
         }
 
@@ -611,23 +674,29 @@
         if (text.toLowerCase().includes('refund') || text.toLowerCase().includes('tie')) {
           result = 'REFUND';
         }
-
-        // Check if trade is a Refund (entry quote equals exit quote or net profit is zero)
         if (openQuote && closeQuote && openQuote !== '0.00' && parseFloat(openQuote) === parseFloat(closeQuote)) {
           result = 'REFUND';
         } else if (amount > 0 && Math.abs(profit - amount) < 0.01 && result !== 'WIN') {
           result = 'REFUND';
         }
 
-        // Fallback unique ticketId if Quotex didn't show full UUID
+        // Fallback unique ticketId
         if (!ticketId && openTime && asset) {
           ticketId = 'qx_' + btoa(`${asset}_${openTime}_${amount}`).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24);
         }
 
-        const openTimestamp = parseQuotexTimestampInBrowser(openTime);
-        const closeTimestamp = parseQuotexTimestampInBrowser(closeTime);
+        // Calculate accurate UTC timestamps
+        const openTimestamp = parseQuotexTimestampInUtc(openTime, activeOffsetMin);
+        const closeTimestamp = parseQuotexTimestampInUtc(closeTime, activeOffsetMin);
         const openTimeIso = openTimestamp > 0 ? new Date(openTimestamp).toISOString() : '';
         const closeTimeIso = closeTimestamp > 0 ? new Date(closeTimestamp).toISOString() : '';
+
+        // Calculate trade duration & timeframe (e.g. 5s turbo, 15s, 1m)
+        let durationSeconds = 60;
+        if (openTimestamp > 0 && closeTimestamp > 0 && closeTimestamp >= openTimestamp) {
+          durationSeconds = Math.max(1, Math.round((closeTimestamp - openTimestamp) / 1000));
+        }
+        const timeframe = durationSeconds < 60 ? `${durationSeconds}s` : `${Math.round(durationSeconds / 60)}m`;
 
         if (asset && (openTime || amount > 0)) {
           trades.push({
@@ -643,10 +712,14 @@
             closeTime: closeTime || new Date().toLocaleString(),
             closeTimestamp: closeTimestamp || 0,
             closeTimeIso: closeTimeIso || '',
+            durationSeconds,
+            timeframe,
             amount: amount || 1.0,
             profit: profit || 0.0,
             result,
-            accountType
+            accountType,
+            brokerTzOffset: activeOffsetMin,
+            brokerTzStr: config.brokerTzStr
           });
         }
       } catch (rowErr) {
@@ -657,13 +730,28 @@
     return { trades, accountType };
   }
 
-  // Multi-Page Auto-Pagination Scanner for Quotex Trade History
+  function buildQuotexPageUrl(currentUrl, page, acctType) {
+    try {
+      const u = new URL(currentUrl);
+      u.searchParams.set('page', String(page));
+      if (acctType) {
+        u.searchParams.set('account', acctType);
+      }
+      return u.toString();
+    } catch (e) {
+      const origin = window.location.origin;
+      return `${origin}/en/trades?page=${page}&account=${acctType || 'demo'}`;
+    }
+  }
+
+  // 10. Multi-Page Auto-Pagination Scanner (With 5-Minute Intelligent Grace Buffer)
   async function collectAllChallengeTrades(acctType, challengeStartTime) {
     const allCollectedTrades = [];
     const seenTicketIds = new Set();
     let pagesScanned = 0;
+    const SAFETY_GRACE_BUFFER_MS = 5 * 60 * 1000; // 5 minutes grace window
 
-    // A. Parse Page 1 from currently rendered DOM (instant)
+    // Parse Page 1 from currently rendered DOM
     const page1 = parseQuotexTradesFromDoc(document, acctType);
     pagesScanned++;
 
@@ -671,8 +759,8 @@
 
     for (const t of page1.trades) {
       if (!t.ticketId) continue;
-      // Filter out trades older than challenge start time (with 60-second safety buffer for network/clock variance)
-      if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - 60000)) {
+      // Filter out trades strictly older than challenge start time minus grace buffer
+      if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - SAFETY_GRACE_BUFFER_MS)) {
         reachedOlderTrades = true;
         continue;
       }
@@ -682,15 +770,13 @@
       }
     }
 
-    // If Page 1 already encountered a trade before challenge start time,
-    // all challenge trades are strictly on Page 1! No need to fetch older pages.
-    if (reachedOlderTrades || page1.trades.length < 20) {
+    // If Page 1 already encountered older trades or has few trades, no need to paginate
+    if (reachedOlderTrades || page1.trades.length < 15) {
       return { trades: allCollectedTrades, pagesScanned };
     }
 
-    // B. If Page 1 has 20+ trades and none were older than challenge start,
-    // fetch older pages (page=2, page=3, ...) until reaching trades before challenge start!
-    const maxPages = 20; // Safe ceiling: up to 500 trades across pages
+    // Fetch older pages (page 2 up to 20) until reaching trades before challenge start
+    const maxPages = 20;
     for (let page = 2; page <= maxPages; page++) {
       try {
         const pageUrl = buildQuotexPageUrl(window.location.href, page, acctType);
@@ -702,7 +788,7 @@
         const pageResult = parseQuotexTradesFromDoc(doc, acctType);
 
         if (!pageResult.trades || pageResult.trades.length === 0) {
-          break; // End of history
+          break;
         }
 
         pagesScanned++;
@@ -710,7 +796,7 @@
 
         for (const t of pageResult.trades) {
           if (!t.ticketId) continue;
-          if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - 60000)) {
+          if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - SAFETY_GRACE_BUFFER_MS)) {
             pageHasOlder = true;
             continue;
           }
@@ -721,11 +807,9 @@
         }
 
         if (pageHasOlder) {
-          // Reached trades from before challenge start -> Stop pagination!
-          break;
+          break; // Reached trades before challenge start
         }
 
-        // Polite throttle between background fetches (150ms)
         await new Promise(r => setTimeout(r, 150));
       } catch (err) {
         console.warn(`[BPF Sync] Error during pagination scan on page ${page}:`, err);
@@ -736,7 +820,7 @@
     return { trades: allCollectedTrades, pagesScanned };
   }
 
-  // 7. Send Trades to Prop Firm Server
+  // 11. Send Trades to Prop Firm Server
   async function postTradesToServer(trades, accountType) {
     if (!config.traderId) {
       showToast('ত্রুটি: Trader ID সেট করা নেই! এক্সটেনশনে Trader ID লিখুন।', 'error');
@@ -752,7 +836,8 @@
         traderId: config.traderId,
         accountType,
         source: 'quotex',
-        brokerTzOffset: detectQuotexBrokerUtcOffset(),
+        brokerTzOffset: config.brokerTzOffsetMin,
+        brokerTzStr: config.brokerTzStr,
         clientTzOffset: new Date().getTimezoneOffset(),
         clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Dhaka',
         trades
@@ -762,7 +847,6 @@
     return await res.json();
   }
 
-  // 8. Wait for SPA Trade Table to Render
   function waitForTradesTable(callback, maxAttempts = 30) {
     let attempts = 0;
     const interval = setInterval(() => {
@@ -777,7 +861,7 @@
     }, 250);
   }
 
-  // 9. Manual / Auto Sync Handler on /en/trades Page
+  // 12. Manual / Auto Sync Handler on /en/trades Page
   async function runManualTradeSync() {
     if (isSyncing) return;
     if (isExtensionLocked) {
@@ -793,11 +877,12 @@
     }
 
     loadConfig(async () => {
-      // If challenge start time not yet cached, fetch latest heartbeat first
+      scanQuotexBrokerTimezone();
+
       if (!currentChallengeStartTime) {
         try {
           await fetchChallengeStatus();
-        } catch(e) {}
+        } catch (e) {}
       }
 
       const acctType = detectAccountType();
@@ -832,6 +917,9 @@
           trades.forEach(t => syncedTicketsCache.add(t.ticketId));
           saveSyncedCache();
 
+          // Immediately send updated heartbeat so dashboard shows online & paired instantly
+          sendHeartbeat();
+
           let toastMsg = '';
           if (result.addedCount > 0) {
             toastMsg = `✅ ${result.addedCount} টি নতুন চ্যালেঞ্জ ট্রেড সফলভাবে সিঙ্ক হয়েছে! ${pagesScanned > 1 ? `(${pagesScanned} টি পেজ স্ক্যান করা হয়েছে)` : ''}`;
@@ -839,7 +927,7 @@
               toastMsg += ` (চ্যালেঞ্জ শুরুর পূর্বের পুরনো ${result.filteredOldCount} টি ট্রেড বাদ দেওয়া হয়েছে)`;
             }
           } else if (result.filteredOldCount > 0 && result.addedCount === 0) {
-            toastMsg = `ℹ️ কোনো নতুন ট্রেড পাওয়া যায়নি। প্রাপ্ত ${result.filteredOldCount}টি ট্রেড চ্যালেঞ্জ সক্রিয় হওয়ার পূর্বের পুরনো ট্রেড। চ্যালেঞ্জে কাউন্ট হতে নতুন ট্রেড নিন।`;
+            toastMsg = `ℹ️ কোনো নতুন ট্রেড পাওয়া যায়নি। প্রাপ্ত ${result.filteredOldCount}টি ট্রেড চ্যালেঞ্জ সক্রিয় হওয়ার পূর্বের। নতুন ট্রেড নিন।`;
           } else if (result.duplicateCount > 0 && result.addedCount === 0) {
             toastMsg = `✅ সকল ${trades.length} টি ট্রেড ইতিমধ্যে সেভ রয়েছে (ডুপ্লিকেট এড়ানো হয়েছে)।`;
           } else {
@@ -862,7 +950,7 @@
     });
   }
 
-  // 10. Check and Auto-Sync on /en/trades Page
+  // 13. Auto-Sync on /en/trades Page Load
   function handleTradesPageAutoSync() {
     if (!window.location.pathname.includes('/trades')) return;
     if (isExtensionLocked) return;
@@ -885,7 +973,7 @@
     }
   }
 
-  // 11. Listen for messages from popup
+  // 14. Message Listener from Popup
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
     chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
       if (req.action === 'TRIGGER_SYNC') {
@@ -910,6 +998,7 @@
               if (res && res.success) {
                 trades.forEach(t => syncedTicketsCache.add(t.ticketId));
                 saveSyncedCache();
+                sendHeartbeat();
               }
               sendResponse({ ...res, count: trades.length, pagesScanned });
             }).catch(err => {
@@ -924,17 +1013,19 @@
     });
   }
 
-  // 12. Initialization
+  // 15. Initialization
   function startExtension() {
     loadConfig(() => {
+      scanQuotexBrokerTimezone();
       injectWidget();
       sendHeartbeat();
 
-      // Start 30s Heartbeat Engine
       if (heartbeatTimer) clearInterval(heartbeatTimer);
       heartbeatTimer = setInterval(sendHeartbeat, 30000);
 
-      // If on Trade History page, check for auto-sync after status verified
+      if (tzScanTimer) clearInterval(tzScanTimer);
+      tzScanTimer = setInterval(scanQuotexBrokerTimezone, 15000);
+
       if (window.location.pathname.includes('/trades')) {
         setTimeout(() => {
           if (!isExtensionLocked) {

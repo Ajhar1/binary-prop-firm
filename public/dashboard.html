@@ -10299,6 +10299,7 @@
                         <td style="padding:12px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px;">
                             <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${isWin ? '#00e676' : '#ff5252'};"></span>
                             ${escapeHtml(t.asset || 'N/A')}
+                            ${t.timeframe ? `<span style="font-size:0.68rem; background:rgba(255,255,255,0.08); color:#94a3b8; border:1px solid rgba(255,255,255,0.15); padding:1px 5px; border-radius:4px; font-family:monospace;">${escapeHtml(t.timeframe)}</span>` : ''}
                         </td>
                         <td style="padding:12px;">
                             <div style="font-size:0.78rem; font-weight:700; color:#cbd5e1;">Payout: ${escapeHtml(t.payout || '90%')}</div>

@@ -37,13 +37,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Load saved settings
-  chrome.storage.local.get(['traderId', 'serverUrl', 'autoSync', 'lastSynced', 'lastCount'], (res) => {
+  chrome.storage.local.get(['traderId', 'serverUrl', 'autoSync', 'lastSynced', 'lastCount', 'quotex_broker_tz_str'], (res) => {
     if (res.traderId) {
       traderIdInput.value = res.traderId;
       pingServerHeartbeat(res.traderId, res.serverUrl);
     }
     if (res.serverUrl) serverUrlInput.value = res.serverUrl;
     if (res.autoSync !== undefined) autoSyncCheckbox.checked = res.autoSync;
+    if (res.quotex_broker_tz_str) {
+      const tzText = document.getElementById('brokerTzText');
+      const tzTag = document.getElementById('brokerTzTag');
+      if (tzText) tzText.innerText = `⏱️ ব্রোকার টাইম: ${res.quotex_broker_tz_str}`;
+      if (tzTag) tzTag.innerText = res.quotex_broker_tz_str;
+    }
     if (res.lastSynced) {
       const d = new Date(res.lastSynced);
       lastSyncedText.innerText = `Last: ${d.toLocaleTimeString()} (${res.lastCount || 0} trades)`;
