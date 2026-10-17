@@ -1,9 +1,9 @@
 {
-  "smtpHost": "smtp.gmail.com",
+  "smtpHost": "smtp.hostinger.com",
   "smtpPort": 465,
   "smtpSecure": true,
-  "smtpUser": "atharajhar6@gmail.com",
-  "smtpPass": "wbpnuzkgjjncmesy",
+  "smtpUser": "support@binarypropfirm.com",
+  "smtpPass": "Ajhar1@2#3$",
   "fromName": "Binary Prop Firm Support",
-  "fromEmail": "atharajhar6@gmail.com"
+  "fromEmail": "support@binarypropfirm.com"
 }
