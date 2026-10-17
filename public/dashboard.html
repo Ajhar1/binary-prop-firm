@@ -2435,12 +2435,14 @@
             padding-top: 1rem;
         }
 
-        /* Synced Stats Grid (Desktop 4-in-a-row, Mobile 4-in-a-row Compact Classic) */
+        /* Synced Stats Grid (Desktop 4-in-a-row, Mobile 4-in-a-row Ultra-Compact Minimal) */
         .sync-stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 16px;
-            margin-bottom: 1.8rem;
+            margin-bottom: 1.5rem;
+            width: 100%;
+            box-sizing: border-box;
         }
         .sync-stat-card {
             background: #171922;
@@ -2451,6 +2453,10 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
+            min-width: 0;
+            overflow: hidden;
+            box-sizing: border-box;
             transition: transform 0.2s ease, border-color 0.2s ease;
         }
         .sync-stat-title {
@@ -2460,57 +2466,78 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
         .sync-stat-value {
             font-size: 1.8rem;
             font-weight: 800;
             color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
         .sync-stat-sub {
             font-size: 0.75rem;
             color: var(--text-secondary);
             margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
 
         @media (max-width: 768px) {
             .sync-stats-grid {
-                display: grid !important;
-                grid-template-columns: repeat(4, 1fr) !important;
-                gap: 6px !important;
-                margin-bottom: 1.2rem !important;
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                gap: 5px !important;
+                margin-bottom: 1rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
             }
             .sync-stat-card {
-                padding: 10px 4px !important;
+                padding: 8px 2px !important;
                 border-radius: 10px !important;
                 background: #151821 !important;
-                min-height: 82px !important;
-                justify-content: space-between !important;
+                min-width: 0 !important;
+                width: 100% !important;
+                min-height: 54px !important;
+                box-sizing: border-box !important;
             }
             .sync-stat-title {
-                font-size: 0.62rem !important;
-                line-height: 1.15 !important;
+                font-size: 0.65rem !important;
+                font-weight: 700 !important;
+                color: #94a3b8 !important;
                 letter-spacing: 0 !important;
                 margin-bottom: 2px !important;
-                height: 24px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                text-align: center !important;
+                line-height: 1.1 !important;
             }
             .sync-stat-value {
-                font-size: 1.1rem !important;
+                font-size: 1.05rem !important;
                 font-weight: 800 !important;
-                line-height: 1.2 !important;
-                margin: 2px 0 !important;
+                line-height: 1.1 !important;
+                margin: 0 !important;
             }
             .sync-stat-sub {
-                font-size: 0.56rem !important;
-                margin-top: 2px !important;
-                line-height: 1.1 !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                opacity: 0.85 !important;
+                display: none !important; /* Hide redundant clutter text on mobile completely! */
+            }
+            #extStatusBanner {
+                padding: 10px 14px !important;
+                gap: 10px !important;
+            }
+            #extStatusTitle {
+                font-size: 0.88rem !important;
+            }
+            #extStatusSub {
+                font-size: 0.74rem !important;
+            }
+            #extChallengeFilterInfo {
+                padding: 8px 12px !important;
+                gap: 8px !important;
             }
         }
     </style>
@@ -3867,45 +3894,43 @@
         ============================================== -->
         <section class="tab-pane" id="pane-trade-history">
             <!-- Module 3: Live Extension Connection Status Banner -->
-            <div id="extStatusBanner" style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; background:#12151d; border:1px solid rgba(255,82,82,0.35); border-radius:14px; padding:14px 20px; margin-bottom:1.2rem; transition:all 0.3s ease; box-shadow:0 4px 20px rgba(0,0,0,0.4);">
-                <div style="display:flex; align-items:center; gap:14px;">
-                    <div id="extStatusDot" style="width:14px; height:14px; border-radius:50%; background:#ff5252; box-shadow:0 0 10px #ff5252; flex-shrink:0;"></div>
+            <div id="extStatusBanner" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; background:#12151d; border:1px solid rgba(255,82,82,0.35); border-radius:12px; padding:10px 16px; margin-bottom:1rem; transition:all 0.3s ease; box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div id="extStatusDot" style="width:12px; height:12px; border-radius:50%; background:#ff5252; box-shadow:0 0 10px #ff5252; flex-shrink:0;"></div>
                     <div>
-                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                            <h4 id="extStatusTitle" style="margin:0; font-size:1rem; font-weight:800; color:#ff5252;">
-                                ⚠️ Extension Disconnected! ট্রেড শুরু করার আগে ব্রাউজারে এক্সটেনশনটি কানেক্ট করুন।
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <h4 id="extStatusTitle" style="margin:0; font-size:0.92rem; font-weight:800; color:#ff5252;">
+                                ⚠️ এক্সটেনশন ডিসকানেক্টেড
                             </h4>
-                            <span id="extStatusBadge" style="display:none; font-size:0.75rem; font-weight:800; padding:2px 8px; border-radius:10px;"></span>
+                            <span id="extStatusBadge" style="display:none; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:10px;"></span>
                         </div>
-                        <p id="extStatusSub" style="margin:2px 0 0 0; font-size:0.8rem; color:#94a3b8;">
-                            এক্সটেনশন চালু থাকলে Quotex লাইভ চার্ট স্ক্রিন (/en/demo-trade ও /en/trade) থেকে স্বয়ংক্রিয়ভাবে রিয়েল-টাইমে ট্রেড সিঙ্ক হবে।
+                        <p id="extStatusSub" style="margin:2px 0 0 0; font-size:0.76rem; color:#94a3b8;">
+                            ট্রেড সিঙ্ক করতে এক্সটেনশন চালু করুন।
                         </p>
                     </div>
                 </div>
-                <div id="extActionBtnWrap" style="display:flex; gap:10px; flex-wrap:wrap;">
-                    <a href="/api/extension/download" class="btn-gold" style="padding:8px 16px; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                        <i class="fas fa-download"></i> এক্সটেনশন ডাউনলোড (ZIP)
+                <div id="extActionBtnWrap" style="display:flex; gap:8px;">
+                    <a href="/api/extension/download" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-download"></i> এক্সটেনশন (ZIP)
                     </a>
                 </div>
             </div>
 
             <!-- Module 1: Challenge Time-Lock Filter Info Bar -->
-            <div id="extChallengeFilterInfo" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; background:rgba(255,184,0,0.06); border:1px solid rgba(255,184,0,0.25); border-radius:12px; padding:10px 16px; margin-bottom:1.5rem;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width:28px; height:28px; border-radius:8px; background:rgba(255,184,0,0.15); display:flex; align-items:center; justify-content:center; color:var(--yellow); font-size:0.9rem; flex-shrink:0;">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <div style="font-size:0.82rem; color:#e2e8f0;">
-                        <strong style="color:var(--yellow);">Time-Lock ফিল্টার:</strong> 
-                        <span id="extChallengeTimeLockStatus">সক্রিয় চ্যালেঞ্জ ডাটা লোড হচ্ছে...</span>
+            <div id="extChallengeFilterInfo" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; background:rgba(255,184,0,0.06); border:1px solid rgba(255,184,0,0.25); border-radius:12px; padding:8px 14px; margin-bottom:1.2rem;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-lock" style="color:var(--yellow); font-size:0.85rem;"></i>
+                    <div style="font-size:0.8rem; color:#e2e8f0;">
+                        <strong style="color:var(--yellow);">Time-Lock:</strong> 
+                        <span id="extChallengeTimeLockStatus">লোড হচ্ছে...</span>
                     </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                    <div style="font-size:0.78rem; color:#cbd5e1; background:rgba(255,255,255,0.05); padding:4px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.1);" id="extChallengeActiveBadge">
-                        প্যাকেজ: যাচাই হচ্ছে...
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="font-size:0.75rem; color:#cbd5e1; background:rgba(255,255,255,0.05); padding:3px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.1);" id="extChallengeActiveBadge">
+                        যাচাই হচ্ছে...
                     </div>
-                    <button type="button" onclick="openSetupVideoModal()" style="background:linear-gradient(135deg, rgba(255,184,0,0.22), rgba(255,145,0,0.32)); border:1px solid rgba(255,184,0,0.6); color:#ffb800; padding:5px 14px; border-radius:20px; font-weight:800; font-size:0.8rem; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 0 14px rgba(255,184,0,0.25); transition:all 0.25s ease;" onmouseover="this.style.background='linear-gradient(135deg, rgba(255,184,0,0.35), rgba(255,145,0,0.45))'; this.style.boxShadow='0 0 20px rgba(255,184,0,0.4)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(255,184,0,0.22), rgba(255,145,0,0.32))'; this.style.boxShadow='0 0 14px rgba(255,184,0,0.25)';">
-                        <i class="fas fa-play-circle" style="font-size:0.95rem; color:#ffb800;"></i> Setup Video
+                    <button type="button" onclick="openSetupVideoModal()" style="background:linear-gradient(135deg, rgba(255,184,0,0.22), rgba(255,145,0,0.32)); border:1px solid rgba(255,184,0,0.6); color:#ffb800; padding:4px 12px; border-radius:20px; font-weight:800; font-size:0.78rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 0 12px rgba(255,184,0,0.2); transition:all 0.25s ease;">
+                        <i class="fas fa-play-circle" style="font-size:0.9rem; color:#ffb800;"></i> Setup Video
                     </button>
                 </div>
             </div>
@@ -3913,37 +3938,34 @@
             <!-- Performance Overview Stats -->
             <div class="sync-stats-grid">
                 <div class="sync-stat-card">
-                    <div class="sync-stat-title">মোট সিঙ্ক হওয়া ট্রেড</div>
+                    <div class="sync-stat-title">মোট ট্রেড</div>
                     <div id="syncStatTotal" class="sync-stat-value">0</div>
-                    <div class="sync-stat-sub" id="syncStatAccountBreakdown">ডেমো ট্রেড: 0টি | রিয়েল ট্রেড: 0টি</div>
+                    <div class="sync-stat-sub" id="syncStatAccountBreakdown">ডেমো 0 | রিয়েল 0</div>
                 </div>
                 <div class="sync-stat-card">
-                    <div class="sync-stat-title">উইন রেট (Win Rate)</div>
+                    <div class="sync-stat-title">উইন রেট</div>
                     <div id="syncStatWinRate" class="sync-stat-value" style="color:#00e676;">0.0%</div>
                     <div class="sync-stat-sub" id="syncStatWinLoss">0 Win / 0 Loss</div>
                 </div>
                 <div class="sync-stat-card">
-                    <div class="sync-stat-title">মোট ইনভেস্টমেন্ট</div>
+                    <div class="sync-stat-title">ইনভেস্ট</div>
                     <div id="syncStatInvested" class="sync-stat-value">$0.00</div>
-                    <div class="sync-stat-sub">Total Volume</div>
+                    <div class="sync-stat-sub">Volume: $0.00</div>
                 </div>
                 <div class="sync-stat-card">
-                    <div class="sync-stat-title">নিট প্রফিট / লস (Net PnL)</div>
+                    <div class="sync-stat-title">নিট PnL</div>
                     <div id="syncStatNetProfit" class="sync-stat-value" style="color:#ffb800;">$0.00</div>
-                    <div class="sync-stat-sub" id="syncStatGrossReturn">Gross Return: $0.00</div>
+                    <div class="sync-stat-sub" id="syncStatGrossReturn">Return: $0.00</div>
                 </div>
             </div>
 
             <!-- Trade History Records Table -->
-            <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:1.5rem; box-shadow:0 8px 30px rgba(0,0,0,0.3);">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.2rem;">
+            <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem;">
                     <div>
-                        <h3 style="font-size:1.15rem; font-weight:800; color:#fff; margin:0 0 2px 0;">
-                            <i class="fas fa-list-alt" style="color:var(--yellow); margin-right:6px;"></i> Quotex থেকে সিঙ্ক হওয়া ট্রেড রেকর্ড
+                        <h3 style="font-size:1.05rem; font-weight:800; color:#fff; margin:0;">
+                            <i class="fas fa-chart-line" style="color:var(--yellow); margin-right:6px;"></i> লাইভ ট্রেড রেকর্ড
                         </h3>
-                        <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">
-                            Asset, Ticket ID, Opening/Closing Quotes, Amount ও PnL লাইভ রেকর্ড
-                        </p>
                     </div>
                     <div style="display:flex; gap:8px;">
                         <button class="btn-outline" style="padding:7px 14px; font-size:0.8rem; border-radius:8px; cursor:pointer;" onclick="fetchUserSyncedTrades()">
@@ -10216,7 +10238,7 @@
                     dot.style.background = '#ff5252';
                     dot.style.boxShadow = '0 0 12px #ff5252';
                     title.style.color = '#ff5252';
-                    title.innerHTML = '🚫 Extension Disabled: আপনার চ্যালেঞ্জটি বাতিল/ডিসকোয়ালিফাই করা হয়েছে।';
+                    title.innerHTML = '🚫 চ্যালেঞ্জ নিষ্ক্রিয়';
                     if (badge) {
                         badge.style.display = 'inline-block';
                         badge.style.background = 'rgba(255,82,82,0.2)';
@@ -10224,11 +10246,11 @@
                         badge.style.border = '1px solid rgba(255,82,82,0.4)';
                         badge.innerText = 'চ্যালেঞ্জ বাতিল';
                     }
-                    sub.innerText = 'চ্যালেঞ্জ বন্ধ থাকায় এক্সটেনশন স্বয়ংক্রিয়ভাবে লক করা হয়েছে। পুনরায় কোনো সক্রিয় চ্যালেঞ্জ না পাওয়া পর্যন্ত কোনো ট্রেড সিঙ্ক হবে না।';
+                    sub.innerText = 'সক্রিয় চ্যালেঞ্জ না থাকায় ট্রেড সিঙ্ক বন্ধ রয়েছে।';
                     if (btnWrap) {
                         btnWrap.innerHTML = `
-                            <a href="#pane-buy-challenge" onclick="switchTab('pane-buy-challenge')" class="btn-gold" style="padding:8px 16px; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                                <i class="fas fa-shopping-cart"></i> নতুন চ্যালেঞ্জ ক্রয় করুন
+                            <a href="#pane-buy-challenge" onclick="switchTab('pane-buy-challenge')" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                <i class="fas fa-shopping-cart"></i> চ্যালেঞ্জ কিনুন
                             </a>
                         `;
                     }
@@ -10242,8 +10264,8 @@
                     dot.style.boxShadow = '0 0 12px #00e676';
                     title.style.color = '#00e676';
                     title.innerHTML = isLive
-                        ? '🟢 Extension Active (Quotex স্ক্রিন সক্রিয় • রিয়েল-টাইম ট্র্যাকিং রানিং)'
-                        : '🟢 Extension Paired & Ready (এক্সটেনশন কানেক্টেড রয়েছে • কোটেক্সে ট্রেড করলেই সিঙ্ক হবে)';
+                        ? '🟢 এক্সটেনশন অ্যাক্টিভ'
+                        : '🟢 এক্সটেনশন কানেক্টেড';
 
                     if (badge) {
                         badge.style.display = 'inline-block';
@@ -10251,18 +10273,18 @@
                         badge.style.background = isLiveAcct ? 'rgba(0,230,118,0.2)' : 'rgba(255,184,0,0.2)';
                         badge.style.color = isLiveAcct ? '#00e676' : '#ffb800';
                         badge.style.border = isLiveAcct ? '1px solid rgba(0,230,118,0.4)' : '1px solid rgba(255,184,0,0.4)';
-                        badge.innerText = isLiveAcct ? 'রিয়েল অ্যাকাউন্ট (LIVE)' : 'ডেমো অ্যাকাউন্ট (DEMO)';
+                        badge.innerText = isLiveAcct ? 'LIVE Account' : 'DEMO Account';
                     }
 
-                    const ago = (data.secondsAgo !== null && data.secondsAgo !== undefined) ? `${data.secondsAgo} সেকেন্ড আগে` : 'কয়েক সেকেন্ড আগে';
+                    const ago = (data.secondsAgo !== null && data.secondsAgo !== undefined) ? `${data.secondsAgo}s আগে` : 'সক্রিয়';
                     sub.innerHTML = isLive
-                        ? `ব্রোকার স্ক্রিন সক্রিয় • লাস্ট হার্টবিট: ${ago} • কোটেক্সে ট্রেড নেওয়া মাত্রই স্বয়ংক্রিয়ভাবে ডাটা সিঙ্ক হচ্ছে।`
-                        : `এক্সটেনশন পেয়ার করা রয়েছে • কোটেক্সে গিয়ে ট্রেড করলেই রিয়েল-টাইমে ডাটা এই ড্যাশবোর্ডে যোগ হবে।`;
+                        ? `লাইভ চার্ট থেকে স্বয়ংক্রিয় সিঙ্ক চলছে (লাস্ট হার্টবিট: ${ago})`
+                        : `কোটেক্সে ট্রেড করলেই রিয়েল-টাইমে সিঙ্ক হবে।`;
 
                     if (btnWrap) {
                         btnWrap.innerHTML = `
-                            <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-outline" style="padding:8px 16px; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                                <i class="fas fa-external-link-alt"></i> Quotex ট্রেড চার্ট
+                            <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                <i class="fas fa-external-link-alt"></i> Quotex চার্ট
                             </a>
                         `;
                     }
@@ -10273,14 +10295,14 @@
                     dot.style.background = '#f59e0b';
                     dot.style.boxShadow = '0 0 10px #f59e0b';
                     title.style.color = '#f59e0b';
-                    title.innerText = '⚠️ Extension Not Connected! ব্রাউজারে এক্সটেনশনটি সেটআপ করুন';
+                    title.innerText = '⚠️ এক্সটেনশন ডিসকানেক্টেড';
                     if (badge) badge.style.display = 'none';
-                    sub.innerText = 'এক্সটেনশন ইনস্টল করে আপনার Trader ID দিলেই Quotex থেকে স্বয়ংক্রিয়ভাবে রিয়েল-টাইমে ট্রেড সিঙ্ক হবে।';
+                    sub.innerText = 'ট্রেড সিঙ্ক করতে ব্রাউজারে এক্সটেনশন চালু করুন।';
 
                     if (btnWrap) {
                         btnWrap.innerHTML = `
-                            <a href="/api/extension/download" class="btn-gold" style="padding:8px 16px; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                                <i class="fas fa-download"></i> এক্সটেনশন ডাউনলোড (ZIP)
+                            <a href="/api/extension/download" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                <i class="fas fa-download"></i> এক্সটেনশন (ZIP)
                             </a>
                         `;
                     }
@@ -10339,21 +10361,21 @@
                             : 'তারিখ নির্ধারণ হয়েছে';
                         
                         if (filterStatusEl) {
-                            filterStatusEl.innerHTML = `চ্যালেঞ্জ শুরু: <strong>${formattedDate}</strong> (এই সময়ের পরবর্তী সকল ট্রেড ট্র্যাক করা হচ্ছে)`;
+                            filterStatusEl.innerHTML = `শুরু: <strong>${formattedDate}</strong>`;
                         }
                         if (filterBadgeEl) {
-                            filterBadgeEl.innerHTML = `প্যাকেজ: <strong style="color:var(--yellow);">${escapeHtml(data.activeChallenge.packageName || 'Bronze')}</strong> • স্ট্যাটাস: <span style="color:#00e676; font-weight:700;">Active</span>`;
+                            filterBadgeEl.innerHTML = `<strong style="color:var(--yellow);">${escapeHtml(data.activeChallenge.packageName || 'Bronze')}</strong> • <span style="color:#00e676; font-weight:700;">Active</span>`;
                         }
                     } else {
                         if (filterStatusEl) {
                             filterStatusEl.innerHTML = data.isDisqualified
-                                ? `<span style="color:#f87171; font-weight:700;">⚠️ চ্যালেঞ্জ বাতিল/নিষ্ক্রিয় রয়েছে (চ্যালেঞ্জ বন্ধ থাকা অবস্থায় কোনো ট্রেড সিঙ্ক হবে না)</span>`
-                                : `<span style="color:#f87171; font-weight:700;">কোনো সক্রিয় চ্যালেঞ্জ চালু নেই (নতুন কোনো ট্রেড সিঙ্ক হবে না)</span>`;
+                                ? `<span style="color:#f87171; font-weight:700;">⚠️ চ্যালেঞ্জ বাতিল</span>`
+                                : `<span style="color:#f87171; font-weight:700;">সক্রিয় চ্যালেঞ্জ নেই</span>`;
                         }
                         if (filterBadgeEl) {
                             filterBadgeEl.innerHTML = data.isDisqualified
-                                ? `<span style="color:#ff5252; font-weight:700; background:rgba(255,82,82,0.15); padding:3px 8px; border-radius:6px; border:1px solid rgba(255,82,82,0.3);">চ্যালেঞ্জ বাতিল</span>`
-                                : `<a href="#pane-buy-challenge" style="color:var(--yellow); text-decoration:none; font-weight:700;" onclick="switchTab('pane-buy-challenge')">চ্যালেঞ্জ সক্রিয় করুন &rarr;</a>`;
+                                ? `<span style="color:#ff5252; font-weight:700;">বাতিল</span>`
+                                : `<a href="#pane-buy-challenge" style="color:var(--yellow); text-decoration:none; font-weight:700;" onclick="switchTab('pane-buy-challenge')">কিনুন &rarr;</a>`;
                         }
                     }
                 } else {
@@ -10418,13 +10440,13 @@
             if (totalEl) totalEl.innerText = stats.totalTrades || 0;
 
             const acctEl = document.getElementById('syncStatAccountBreakdown');
-            if (acctEl) acctEl.innerText = `ডেমো ট্রেড: ${stats.demoCount || 0}টি | রিয়েল ট্রেড: ${stats.liveCount || 0}টি`;
+            if (acctEl) acctEl.innerText = `${stats.demoCount || 0} ডেমো | ${stats.liveCount || 0} রিয়েল`;
 
             const winRateEl = document.getElementById('syncStatWinRate');
             if (winRateEl) winRateEl.innerText = stats.winRate || '0.0%';
 
             const winLossEl = document.getElementById('syncStatWinLoss');
-            if (winLossEl) winLossEl.innerText = `${stats.wins || 0} Win / ${stats.losses || 0} Loss`;
+            if (winLossEl) winLossEl.innerText = `${stats.wins || 0}W / ${stats.losses || 0}L`;
 
             const investedEl = document.getElementById('syncStatInvested');
             if (investedEl) investedEl.innerText = `$${(stats.totalInvested || 0).toFixed(2)}`;
@@ -10437,7 +10459,7 @@
             }
 
             const grossEl = document.getElementById('syncStatGrossReturn');
-            if (grossEl) grossEl.innerText = `Gross Return: $${(stats.grossReturn || 0).toFixed(2)}`;
+            if (grossEl) grossEl.innerText = `Return: $${(stats.grossReturn || 0).toFixed(2)}`;
 
             const tbody = document.getElementById('syncedTradesTableBody');
             if (!tbody) return;
