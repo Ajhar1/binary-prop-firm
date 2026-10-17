@@ -1704,21 +1704,34 @@
                     </div>
 
                     <!-- Serial Sessions Section Header -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); padding:12px 16px; border-radius:14px;">
                         <div>
-                            <h3 style="font-size:1.18rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <h3 style="font-size:1.12rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px; margin:0;">
                                 <i class="fas fa-list-ol" style="color:var(--gold);"></i> 
-                                <span>ট্রেডারের সকল সেশন হিস্টোরি (Session History 1, 2, 3...)</span>
+                                <span id="traderSessionSectionTitle">ট্রেডারের সেশন হিস্টোরি (Challenge & Session History)</span>
                             </h3>
-                            <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:2px;">
-                                নিচে প্রতিটি সেশন সিরিয়াল অনুযায়ী রয়েছে। যেকোনো সেশনের উপর চাপ দিলে সকল ডাটা ও প্রুফ ওপেন হবে।
+                            <p id="traderSessionSectionDesc" style="font-size:0.8rem; color:var(--text-secondary); margin:3px 0 0 0;">
+                                চ্যালেঞ্জ অনুযায়ী আলাদাভাবে রানিং, বাদ পড়া কিংবা সকল সেশনের বিস্তারিত হিস্টোরি দেখুন।
                             </p>
                         </div>
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn-outline" onclick="expandAllSessions()" style="font-size:0.78rem; padding:5px 12px; border-radius:6px; cursor:pointer;">
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                            <!-- 3 Challenge Session Filter Buttons -->
+                            <button id="traderSessionFilterBtn_running" type="button" onclick="setTraderSessionHistoryFilter('running')" style="font-size:0.8rem; font-weight:800; padding:7px 13px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(46,204,113,0.45); background:rgba(46,204,113,0.16); color:#2ecc71; transition:all 0.2s ease;">
+                                <i class="fas fa-play-circle"></i> রানিং চ্যালেঞ্জ সেশন
+                            </button>
+                            <button id="traderSessionFilterBtn_failed" type="button" onclick="setTraderSessionHistoryFilter('failed')" style="font-size:0.8rem; font-weight:800; padding:7px 13px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(239,68,68,0.35); background:rgba(239,68,68,0.08); color:#f87171; transition:all 0.2s ease;">
+                                <i class="fas fa-ban"></i> বাদ পড়া চ্যালেঞ্জ হিস্টোরি
+                            </button>
+                            <button id="traderSessionFilterBtn_all" type="button" onclick="setTraderSessionHistoryFilter('all')" style="font-size:0.8rem; font-weight:800; padding:7px 13px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(245,176,65,0.35); background:rgba(245,176,65,0.08); color:var(--gold); transition:all 0.2s ease;">
+                                <i class="fas fa-layer-group"></i> অল ট্রেডিং সেশন হিস্টোরি
+                            </button>
+
+                            <span style="width:1px; height:24px; background:rgba(255,255,255,0.12); margin:0 2px;"></span>
+
+                            <button class="btn-outline" onclick="expandAllSessions()" style="font-size:0.78rem; padding:6px 11px; border-radius:7px; cursor:pointer;">
                                 <i class="fas fa-angles-down"></i> সবগুলো খুলুন (Expand All)
                             </button>
-                            <button class="btn-outline" onclick="collapseAllSessions()" style="font-size:0.78rem; padding:5px 12px; border-radius:6px; cursor:pointer;">
+                            <button class="btn-outline" onclick="collapseAllSessions()" style="font-size:0.78rem; padding:6px 11px; border-radius:7px; cursor:pointer;">
                                 <i class="fas fa-angles-up"></i> সবগুলো বন্ধ করুন (Collapse All)
                             </button>
                         </div>
@@ -5227,11 +5240,163 @@
 
         // ==================== SUBMISSIONS & RUNNING TRADERS CONTROLLER ====================
         let activeTraderDetailId = null; // { userId, challengeId }
+        let traderSessionHistoryFilter = 'running'; // 'running' | 'failed' | 'all'
         const openSessionCards = new Set();
+
+        function toBanglaDigits(num) {
+            const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            return String(num ?? 0).replace(/\d/g, d => bnDigits[d]);
+        }
 
         function getBanglaOrdinal(n) {
             const ordinals = ['', '১ম', '২য়', '৩য়', '৪র্থ', '৫ম', '৬ষ্ঠ', '৭ম', '৮ম', '৯ম', '১০ম', '১১তম', '১২তম', '১৩তম', '১৪তম', '১৫তম', '১৬তম', '১৭তম', '১৮তম', '১৯তম', '২০তম'];
-            return ordinals[n] || `${n}তম`;
+            return ordinals[n] || `${toBanglaDigits(n)}তম`;
+        }
+
+        function setTraderSessionHistoryFilter(mode) {
+            traderSessionHistoryFilter = mode || 'running';
+            renderTraderSerialSessions();
+        }
+
+        /**
+         * Builds a chronological list of all challenges for a given trader (1st Challenge, 2nd Challenge, ...)
+         * and maps each session submission to its exact challenge so sessions from different challenges never mix.
+         */
+        function getTraderStructuredChallenges(userId, primaryChallengeId) {
+            const primaryCh = (adminChallenges || []).find(c => c.id === primaryChallengeId) ||
+                              (adminChallenges || []).find(c => c.userId === userId);
+            const u = (adminUsers || []).find(user =>
+                (userId && user.id === userId) ||
+                (primaryCh?.userId && user.id === primaryCh.userId) ||
+                (primaryCh?.userEmail && user.email && user.email.trim().toLowerCase() === primaryCh.userEmail.trim().toLowerCase())
+            ) || {};
+
+            const targetUserId = userId || primaryCh?.userId || u.id || '';
+            const targetEmail = (primaryCh?.userEmail || u.email || '').trim().toLowerCase();
+
+            // 1. Collect all real challenge objects of this trader
+            const rawChallenges = (adminChallenges || []).filter(c =>
+                (targetUserId && c.userId === targetUserId) ||
+                (targetEmail && c.userEmail && c.userEmail.trim().toLowerCase() === targetEmail)
+            );
+
+            const challengeMap = new Map();
+            rawChallenges.forEach(c => {
+                if (c && c.id) challengeMap.set(c.id, { ...c, isSynthetic: false });
+            });
+
+            // 2. Collect all submissions belonging to this trader
+            const traderSubs = (adminSubmissions || []).filter(s =>
+                (s.challengeId && challengeMap.has(s.challengeId)) ||
+                (targetUserId && s.userId === targetUserId) ||
+                (targetEmail && s.userEmail && s.userEmail.trim().toLowerCase() === targetEmail)
+            ).sort((a, b) => new Date(a.submittedAt || a.sessionDate || 0) - new Date(b.submittedAt || b.sessionDate || 0));
+
+            // 3. Assign each submission to its exact challenge (or synthesize a past challenge if its challengeId was archived/missing)
+            const subsByChallengeId = new Map();
+            challengeMap.forEach((_, cid) => subsByChallengeId.set(cid, []));
+
+            // Find earliest running challenge timestamp if needed for legacy unassigned submissions
+            const runningChallenges = Array.from(challengeMap.values()).filter(c => c.status === 'in_progress');
+            const latestRunningCh = runningChallenges.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0] || null;
+
+            traderSubs.forEach(sub => {
+                let cid = sub.challengeId;
+                if (cid && challengeMap.has(cid)) {
+                    subsByChallengeId.get(cid).push(sub);
+                } else {
+                    // Legacy or archived challenge ID not in current adminChallenges
+                    const fallbackCid = cid || 'archived_past_challenge';
+                    if (!challengeMap.has(fallbackCid)) {
+                        challengeMap.set(fallbackCid, {
+                            id: fallbackCid,
+                            userId: targetUserId,
+                            userEmail: targetEmail || sub.userEmail || '',
+                            userName: sub.userName || primaryCh?.userName || u.name || 'Trader',
+                            userTraderId: sub.userTraderId || primaryCh?.userTraderId || u.traderId || 'AJ-1001',
+                            packageName: sub.packageName || primaryCh?.packageName || 'Master',
+                            fundedAmount: sub.fundedAmount || primaryCh?.fundedAmount || 32000,
+                            brokerName: sub.brokerName || primaryCh?.brokerName || 'Quotex',
+                            brokerAccountId: sub.brokerAccountId || primaryCh?.brokerAccountId || 'N/A',
+                            sessionsRequired: 15,
+                            status: 'failed',
+                            failReason: 'পূর্ববর্তী চ্যালেঞ্জ (আর্কাইভকৃত)',
+                            createdAt: sub.submittedAt || sub.sessionDate || '2020-01-01T00:00:00.000Z',
+                            isSynthetic: true
+                        });
+                        subsByChallengeId.set(fallbackCid, []);
+                    }
+                    subsByChallengeId.get(fallbackCid).push(sub);
+                }
+            });
+
+            // 4. Sort all challenges of this trader chronologically (Oldest = চ্যালেঞ্জ #১, Next = চ্যালেঞ্জ #২, ...)
+            const sortedChallenges = Array.from(challengeMap.values()).sort((a, b) => {
+                const subsA = subsByChallengeId.get(a.id) || [];
+                const subsB = subsByChallengeId.get(b.id) || [];
+                const timeA = new Date(a.createdAt || a.approvedAt || subsA[0]?.submittedAt || 0).getTime();
+                const timeB = new Date(b.createdAt || b.approvedAt || subsB[0]?.submittedAt || 0).getTime();
+                if (timeA !== timeB) return timeA - timeB;
+                // If timestamps tie, put non-running before running
+                if (a.status !== 'in_progress' && b.status === 'in_progress') return -1;
+                if (a.status === 'in_progress' && b.status !== 'in_progress') return 1;
+                return 0;
+            });
+
+            const structuredList = sortedChallenges.map((c, idx) => {
+                const cNum = idx + 1;
+                const cSubs = (subsByChallengeId.get(c.id) || []).sort(
+                    (a, b) => new Date(a.submittedAt || a.sessionDate || 0) - new Date(b.submittedAt || b.sessionDate || 0)
+                );
+                const pendingReviews = cSubs.filter(s => s.status === 'under_review').length;
+                const verifiedSubs = cSubs.filter(s => (s.status === 'verified' || s.status === 'auto_verified') && !s.isPractice).length;
+                const practiceSubs = cSubs.filter(s => s.isPractice).length;
+                const totalPnl = cSubs.reduce((sum, s) => sum + (parseFloat(s.profitLoss) || 0), 0);
+                const winTrades = cSubs.reduce((sum, s) => sum + (parseInt(s.winTrades) || 0), 0);
+                const lossTrades = cSubs.reduce((sum, s) => sum + (parseInt(s.lossTrades) || 0), 0);
+                const totalTrades = cSubs.reduce((sum, s) => sum + (parseInt(s.tradesCount) || 0), 0);
+
+                return {
+                    challenge: c,
+                    challengeId: c.id,
+                    challengeNumber: cNum,
+                    challengeNumberBn: toBanglaDigits(cNum),
+                    challengeOrdinalBn: getBanglaOrdinal(cNum),
+                    isRunning: c.status === 'in_progress',
+                    isFailed: c.status === 'failed' || (c.status !== 'in_progress' && c.status !== 'passed'),
+                    isPassed: c.status === 'passed',
+                    submissions: cSubs,
+                    submissionsCount: cSubs.length,
+                    pendingReviews,
+                    verifiedSubs,
+                    practiceSubs,
+                    totalPnl,
+                    winTrades,
+                    lossTrades,
+                    totalTrades
+                };
+            });
+
+            const runningGroups = structuredList.filter(g => g.isRunning);
+            const failedGroups = structuredList.filter(g => g.isFailed);
+            const passedGroups = structuredList.filter(g => g.isPassed);
+
+            const activeGroup = structuredList.find(g => g.challengeId === primaryChallengeId) ||
+                                runningGroups[runningGroups.length - 1] ||
+                                structuredList[structuredList.length - 1] || null;
+
+            return {
+                user: u,
+                primaryChallenge: activeGroup ? activeGroup.challenge : primaryCh,
+                activeGroup,
+                allGroups: structuredList,
+                runningGroups,
+                failedGroups,
+                passedGroups,
+                allSubmissions: traderSubs,
+                runningSubmissions: runningGroups.flatMap(g => g.submissions),
+                failedSubmissions: failedGroups.flatMap(g => g.submissions)
+            };
         }
 
         function renderSubmissionsTable() {
@@ -5292,15 +5457,15 @@
                 });
             }
 
-            // Map each unique trader to a Trader Profile Card
+            // Map each unique trader to a Trader Profile Card (strictly using active challenge's sessions for main KPIs)
             let traderCards = challengeList.map(ch => {
                 const u = (adminUsers || []).find(user => user.id === ch.userId || (user.email && ch.userEmail && user.email.toLowerCase() === ch.userEmail.toLowerCase())) || {};
-                const subs = (adminSubmissions || [])
-                    .filter(s => (ch && s.challengeId === ch.id) || s.userId === ch.userId || (s.userEmail && ch.userEmail && s.userEmail.toLowerCase() === ch.userEmail.toLowerCase()))
-                    .sort((a, b) => new Date(a.submittedAt || a.sessionDate) - new Date(b.submittedAt || b.sessionDate));
+                const structured = getTraderStructuredChallenges(ch.userId || u.id, ch.id);
+                const currentGroup = structured.activeGroup;
+                const subs = currentGroup ? currentGroup.submissions : [];
 
-                const pendingReviews = subs.filter(s => s.status === 'under_review').length;
-                const verifiedSubs = subs.filter(s => s.status === 'verified' || s.status === 'auto_verified').length;
+                const pendingReviews = structured.allSubmissions.filter(s => s.status === 'under_review').length;
+                const verifiedSubs = subs.filter(s => (s.status === 'verified' || s.status === 'auto_verified') && !s.isPractice).length;
                 const totalPnl = subs.reduce((sum, s) => sum + (parseFloat(s.profitLoss) || 0), 0);
                 const winTradesTotal = subs.reduce((sum, s) => sum + (parseInt(s.winTrades) || 0), 0);
                 const lossTradesTotal = subs.reduce((sum, s) => sum + (parseInt(s.lossTrades) || 0), 0);
@@ -5310,6 +5475,12 @@
                     user: u,
                     userId: ch.userId || u.id,
                     challengeId: ch.id,
+                    challengeNumber: currentGroup ? currentGroup.challengeNumber : 1,
+                    challengeNumberBn: currentGroup ? currentGroup.challengeNumberBn : '১',
+                    totalChallengesCount: structured.allGroups.length,
+                    failedChallengesCount: structured.failedGroups.length,
+                    pastSubmissionsCount: structured.failedSubmissions.length,
+                    allSubmissionsCount: structured.allSubmissions.length,
                     userName: ch.userName || u.name || 'Unknown Trader',
                     userEmail: ch.userEmail || u.email || 'N/A',
                     userTraderId: ch.userTraderId || u.traderId || 'AJ-1001',
@@ -5436,6 +5607,14 @@
 
                                 <!-- Challenge & Broker Meta Badges -->
                                 <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:1rem;">
+                                    <span style="background:rgba(46,204,113,0.14); color:#2ecc71; border:1px solid rgba(46,204,113,0.35); font-size:0.75rem; padding:3px 8px; border-radius:6px; font-weight:800;">
+                                        <i class="fas fa-hashtag"></i> চ্যালেঞ্জ #${t.challengeNumberBn}
+                                    </span>
+                                    ${t.failedChallengesCount > 0 ? `
+                                        <span style="background:rgba(239,68,68,0.12); color:#f87171; border:1px solid rgba(239,68,68,0.28); font-size:0.73rem; padding:3px 8px; border-radius:6px; font-weight:700;" title="পূর্বে বাদ পড়া চ্যালেঞ্জ সংখ্যা">
+                                            পূর্বের বাদ পড়া: ${toBanglaDigits(t.failedChallengesCount)}টি
+                                        </span>
+                                    ` : ''}
                                     <span style="background:rgba(255,255,255,0.06); color:#fff; border:1px solid rgba(255,255,255,0.1); font-size:0.76rem; padding:3px 8px; border-radius:6px; font-weight:700;">
                                         <i class="fas fa-shield-alt" style="color:var(--gold); margin-right:4px;"></i> ${t.packageName} ($${t.fundedAmount.toLocaleString()})
                                     </span>
@@ -5447,7 +5626,7 @@
                                 <!-- Progress Bar & Target -->
                                 <div style="background:rgba(0,0,0,0.3); border-radius:10px; padding:10px 12px; margin-bottom:1rem; border:1px solid rgba(255,255,255,0.05);">
                                     <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; margin-bottom:6px;">
-                                        <span style="color:var(--text-secondary);">চ্যালেঞ্জ অগ্রগতি (Sessions):</span>
+                                        <span style="color:var(--text-secondary);">রানিং চ্যালেঞ্জ অগ্রগতি:</span>
                                         <strong style="color:var(--gold); font-size:0.85rem;">${t.sessionsCompleted} / ${t.sessionsRequired} সম্পন্ন (${progressPct}%)</strong>
                                     </div>
                                     <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
@@ -5458,11 +5637,12 @@
                                 <!-- Submissions Count & Total P&L Footer -->
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06); font-size:0.8rem;">
                                     <div>
-                                        <span style="color:var(--text-secondary);">মোট সেশন জমা:</span>
+                                        <span style="color:var(--text-secondary);">রানিং সেশন:</span>
                                         <strong style="color:#fff; margin-left:4px;">${t.submissionsCount}টি</strong>
+                                        ${t.pastSubmissionsCount > 0 ? `<span style="color:var(--text-secondary); font-size:0.73rem; margin-left:4px;">(অল: ${t.allSubmissionsCount}টি)</span>` : ''}
                                     </div>
                                     <div>
-                                        <span style="color:var(--text-secondary);">মোট লাভ/ক্ষতি:</span>
+                                        <span style="color:var(--text-secondary);">রানিং লাভ/ক্ষতি:</span>
                                         <strong style="color:${pnlColor}; margin-left:4px;">${pnlSign}$${t.totalPnl.toFixed(2)}</strong>
                                     </div>
                                 </div>
@@ -5470,7 +5650,7 @@
                                 <!-- Action Button -->
                                 <div style="margin-top:12px;">
                                     <button class="btn-gold" style="width:100%; justify-content:center; padding:8px 12px; font-size:0.84rem; border-radius:8px;" onclick="event.stopPropagation(); openTraderSessionsView('${t.userId}', '${t.challengeId}')">
-                                        <i class="fas fa-folder-open"></i> অ্যাকাউন্টে প্রবেশ করুন ও সেশন দেখুন (${t.submissionsCount}) ➔
+                                        <i class="fas fa-folder-open"></i> অ্যাকাউন্টে প্রবেশ করুন (রানিং: ${t.submissionsCount} / অল: ${t.allSubmissionsCount}) ➔
                                     </button>
                                 </div>
                             </div>
@@ -5482,6 +5662,14 @@
 
         function openTraderSessionsView(userId, challengeId) {
             activeTraderDetailId = { userId, challengeId };
+            const structured = getTraderStructuredChallenges(userId, challengeId);
+            if (structured.runningGroups.length > 0) {
+                traderSessionHistoryFilter = 'running';
+            } else if (structured.failedGroups.length > 0) {
+                traderSessionHistoryFilter = 'failed';
+            } else {
+                traderSessionHistoryFilter = 'all';
+            }
             const listView = document.getElementById('runningTradersListView');
             const detailView = document.getElementById('runningTraderSessionsDetailView');
             if (listView) listView.style.display = 'none';
@@ -5499,44 +5687,614 @@
             renderRunningTradersList();
         }
 
+        function renderSingleSessionCardHtml(sub, idx, officialIndex, ch, chGroup) {
+            let sessionNum;
+            let sessionOrdinal;
+            if (sub.isPractice) {
+                sessionNum = sub.practiceSessionNumber || (idx + 1);
+            } else {
+                sessionNum = sub.sessionNumber || officialIndex;
+                sessionOrdinal = getBanglaOrdinal(sessionNum);
+            }
+            const isOpen = openSessionCards.has(sub.id) || (sub.status === 'under_review');
+            const subPnl = parseFloat(sub.profitLoss) || 0;
+            const pnlSign = subPnl >= 0 ? '+' : '';
+            const pnlColor = subPnl >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
+
+            const isScreenshotVideo = /\.(mp4|webm|mov|mkv|avi)($|\?)/i.test(sub.screenshotUrl || '');
+            const isVideoUrlPlayable = /\.(mp4|webm|mov|mkv|avi)($|\?)/i.test(sub.videoUrl || '');
+
+            const videoSrc = isVideoUrlPlayable ? sub.videoUrl : (isScreenshotVideo ? sub.screenshotUrl : (sub.fileType === 'video' ? (sub.videoUrl || sub.screenshotUrl) : (sub.videoUrl && !sub.screenshotUrl ? sub.videoUrl : null)));
+            const imageSrc = (!isScreenshotVideo && sub.screenshotUrl) ? sub.screenshotUrl : null;
+            const externalVideoLink = (sub.videoUrl && sub.videoUrl !== videoSrc && sub.videoUrl !== imageSrc) ? sub.videoUrl : (!videoSrc && sub.videoUrl ? sub.videoUrl : null);
+
+            const chNumBn = chGroup ? chGroup.challengeNumberBn : '১';
+            const isChRunning = chGroup ? chGroup.isRunning : (ch?.status === 'in_progress');
+            const chBadgeBg = isChRunning ? 'rgba(46,204,113,0.16)' : 'rgba(239,68,68,0.16)';
+            const chBadgeBorder = isChRunning ? 'rgba(46,204,113,0.4)' : 'rgba(239,68,68,0.4)';
+            const chBadgeColor = isChRunning ? '#2ecc71' : '#f87171';
+            const chStatusShort = isChRunning ? 'রানিং' : (chGroup?.isPassed ? 'পাসড' : 'বাদ পড়া');
+
+            return `
+                <div class="serial-session-card" id="sessionCard_${sub.id}" style="background:rgba(22,22,26,0.85); border:1px solid ${sub.status === 'under_review' ? 'rgba(245,176,65,0.45)' : 'rgba(255,255,255,0.08)'}; border-radius:14px; overflow:hidden; transition:all 0.25s ease;">
+                    
+                    <!-- Session Header Bar (Clickable) -->
+                    <div onclick="toggleSessionCard('${sub.id}')" style="padding:1rem 1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; cursor:pointer; background:rgba(255,255,255,0.02); border-bottom:${isOpen ? '1px solid rgba(255,255,255,0.08)' : 'none'}; user-select:none;">
+                        
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <span style="background:${chBadgeBg}; color:${chBadgeColor}; border:1px solid ${chBadgeBorder}; font-weight:800; font-size:0.76rem; padding:4px 10px; border-radius:7px; display:inline-flex; align-items:center; gap:5px;">
+                                <i class="fas fa-layer-group"></i> চ্যালেঞ্জ #${chNumBn} (${chStatusShort})
+                            </span>
+                            ${sub.isPractice ? `
+                                <span style="background:linear-gradient(135deg, #3b82f6, #1d4ed8); color:#fff; font-weight:900; font-size:0.85rem; padding:4px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                                    <i class="fas fa-graduation-cap"></i> প্র্যাকটিস #${sub.practiceSessionNumber || sessionNum}
+                                </span>
+                                <span style="background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">
+                                    অনুশীলন পর্ব (ভুল হলেও বাদ পড়বে না)
+                                </span>
+                            ` : `
+                                <span style="background:linear-gradient(135deg, var(--gold), #d48817); color:#000; font-weight:900; font-size:0.85rem; padding:4px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                                    <i class="fas fa-hashtag"></i> সেশন #${sessionNum} (${sessionOrdinal} সেশন)
+                                </span>
+                            `}
+                            <div>
+                                <strong style="color:#fff; font-size:0.95rem;">${sub.sessionDate}</strong>
+                                <span style="color:var(--text-secondary); font-size:0.8rem; margin-left:6px;">(${new Date(sub.submittedAt).toLocaleTimeString()})</span>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                            <div style="font-size:0.85rem;">
+                                <span style="color:var(--text-secondary);">ট্রেড:</span>
+                                <strong style="color:#fff; margin-left:4px;">${sub.tradesCount}টি</strong> 
+                                <span style="color:var(--gold); margin-left:4px;">(${sub.winTrades || 0}W / ${sub.lossTrades || 0}L)</span>
+                            </div>
+
+                            <div style="font-size:0.95rem; font-weight:800; color:${pnlColor};">
+                                ${pnlSign}$${subPnl.toFixed(2)}
+                            </div>
+
+                            <span class="badge ${getStatusBadgeClass(sub.status)}">
+                                ${sub.status.replace('_', ' ').toUpperCase()}
+                            </span>
+                            ${sub.isResubmitted ? `<span class="badge" style="background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.5); font-size:0.75rem;"><i class="fas fa-sync-alt"></i> পুনরায় আপলোডকৃত</span>` : ''}
+
+                            <div style="width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:0.85rem;">
+                                <i class="fas fa-chevron-down" id="chevron_${sub.id}" style="transition:transform 0.25s ease; transform:${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Session Body Details (Expandable) -->
+                    <div id="sessionBody_${sub.id}" style="display:${isOpen ? 'block' : 'none'}; padding:1.25rem;">
+                        
+                        <!-- 4 Key Stat Blocks -->
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:1.2rem;">
+                            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
+                                <div style="font-size:0.72rem; color:var(--text-secondary);">ব্রোকার</div>
+                                <div style="font-weight:700; color:#fff; font-size:0.92rem; margin-top:2px;">${sub.brokerName || ch?.brokerName || 'Quotex'}</div>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
+                                <div style="font-size:0.72rem; color:var(--text-secondary);">মোট ট্রেড সংখ্যা</div>
+                                <div style="font-weight:700; color:#fff; font-size:0.92rem; margin-top:2px;">${sub.tradesCount} টি</div>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
+                                <div style="font-size:0.72rem; color:var(--text-secondary);">উইন রেট (Win Rate)</div>
+                                <div style="font-weight:700; color:var(--gold); font-size:0.92rem; margin-top:2px;">${sub.winRate || '0%'} (${sub.winTrades || 0}W / ${sub.lossTrades || 0}L)</div>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
+                                <div style="font-size:0.72rem; color:var(--text-secondary);">সেশন নেট লাভ/ক্ষতি</div>
+                                <div style="font-weight:800; color:${pnlColor}; font-size:0.95rem; margin-top:2px;">${pnlSign}$${subPnl.toFixed(2)}</div>
+                            </div>
+                        </div>
+
+                        <!-- Trader Notes if any -->
+                        ${sub.notes ? `
+                            <div style="background:rgba(212,175,55,0.08); border-left:3px solid var(--gold); padding:12px 16px; border-radius:8px; margin-bottom:1.2rem;">
+                                <div style="color:var(--gold); font-weight:750; font-size:0.82rem; margin-bottom:6px;"><i class="fas fa-clipboard-list"></i> ট্রেডার নোট ও সেশন শিট রেকর্ড:</div>
+                                <div style="color:#eee; font-size:0.86rem; white-space:pre-wrap; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace; line-height:1.6;">${escapeHtml(sub.notes)}</div>
+                            </div>
+                        ` : ''}
+
+                        <!-- Needs Resubmission Banner if active -->
+                        ${sub.status === 'needs_resubmission' ? `
+                            <div style="background:rgba(217,119,6,0.12); border-left:4px solid #f59e0b; padding:12px 16px; border-radius:8px; margin-bottom:1.2rem;">
+                                <div style="color:#fbbf24; font-weight:800; font-size:0.86rem; display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                                    <i class="fas fa-exclamation-triangle"></i> ট্রেডারকে পুনরায় আপলোডের নির্দেশনা পাঠানো হয়েছে (ট্রেডারের অ্যাকশনের অপেক্ষায়):
+                                </div>
+                                <div style="color:#fff; font-size:0.88rem; line-height:1.5;">"${escapeHtml(sub.adminFeedback || '')}"</div>
+                                ${sub.resubmissionRequestedAt ? `<div style="color:var(--text-secondary); font-size:0.75rem; margin-top:4px;">পাঠানোর সময়: ${new Date(sub.resubmissionRequestedAt).toLocaleString()}</div>` : ''}
+                            </div>
+                        ` : ''}
+
+                        <!-- Trader Resubmitted Proof Alert Banner -->
+                        ${sub.isResubmitted ? `
+                            <div style="background:rgba(59,130,246,0.12); border-left:4px solid #3b82f6; padding:12px 16px; border-radius:8px; margin-bottom:1.2rem;">
+                                <div style="color:#60a5fa; font-weight:800; font-size:0.86rem; display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                                    <i class="fas fa-sync-alt"></i> ট্রেডার এই সেশনটি সংশোধন করে পুনরায় আপলোড করেছেন
+                                </div>
+                                ${sub.userResubmitNote ? `<div style="color:#fff; font-size:0.88rem; line-height:1.5; margin-top:3px;"><strong>ট্রেডারের সংশোধনী নোট:</strong> "${escapeHtml(sub.userResubmitNote)}"</div>` : ''}
+                                ${sub.resubmittedAt ? `<div style="color:var(--text-secondary); font-size:0.75rem; margin-top:4px;">পুনরায় আপলোডের সময়: ${new Date(sub.resubmittedAt).toLocaleString()}</div>` : ''}
+                            </div>
+                        ` : ''}
+
+                        <!-- Trade Proof Media Area (Supports Both Video & Image Together) -->
+                        <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:16px; margin-bottom:1.2rem;">
+                            <div style="font-size:0.88rem; font-weight:750; color:#fff; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-file-shield" style="color:var(--gold);"></i> 
+                                    <span>ট্রেড হিস্টোরি প্রুফ ফাইল ও ভিডিও (Proof Verification Media)</span>
+                                </div>
+                                <button type="button" class="btn-outline" style="font-size:0.78rem; padding:4px 10px; border-radius:6px; color:var(--gold); border-color:rgba(212,175,55,0.4); display:inline-flex; align-items:center; gap:5px; cursor:pointer;" onclick="openUpdateProofMediaModal('${sub.id}', '${(sub.videoUrl || '').replace(/'/g, "\\'")}', '${(sub.screenshotUrl || '').replace(/'/g, "\\'")}')">
+                                    <i class="fas fa-edit"></i> প্রুফ মিডিয়া এডিট / আপডেট
+                                </button>
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; gap:16px;">
+                                ${sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0) ? `
+                                    <!-- Automated Audit Summary Card -->
+                                    <div style="background:rgba(0,230,118,0.05); border:1px solid rgba(0,230,118,0.3); border-radius:12px; padding:16px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                                            <div style="display:flex; align-items:center; gap:8px;">
+                                                <span style="background:rgba(0,230,118,0.2); color:#00e676; padding:4px 10px; border-radius:6px; font-weight:800; font-size:0.82rem; border:1px solid rgba(0,230,118,0.4);">
+                                                    <i class="fas fa-robot"></i> কোটেক্স অটোমেটিক অডিট সম্পন্ন
+                                                </span>
+                                                <span style="font-size:0.82rem; color:var(--text-secondary);">
+                                                    (ভিডিও বা ম্যানুয়াল স্ক্রিনশটের প্রয়োজন নেই)
+                                                </span>
+                                            </div>
+                                            <button type="button" class="btn-success" style="padding:5px 12px; font-size:0.8rem; border-radius:6px; background:rgba(0,230,118,0.2); color:#00e676; border:1px solid rgba(0,230,118,0.4); cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
+                                                <i class="fas fa-expand-alt"></i> পূর্ণাঙ্গ অডিট টেবিল দেখুন
+                                            </button>
+                                        </div>
+
+                                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:12px;">
+                                            <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
+                                                <div style="font-size:0.72rem; color:var(--text-secondary);">শুরুর ক্যাপিটাল</div>
+                                                <div style="font-weight:800; color:#fff; font-size:0.95rem; margin-top:2px;">$${(sub.startingCapital || 0).toFixed(2)}</div>
+                                            </div>
+                                            <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
+                                                <div style="font-size:0.72rem; color:var(--text-secondary);">সমাপ্তি ক্যাপিটাল</div>
+                                                <div style="font-weight:800; color:#00e676; font-size:0.95rem; margin-top:2px;">$${(sub.endingCapital || 0).toFixed(2)}</div>
+                                            </div>
+                                            <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
+                                                <div style="font-size:0.72rem; color:var(--text-secondary);">মোট অডিটেড ট্রেড</div>
+                                                <div style="font-weight:800; color:#fff; font-size:0.95rem; margin-top:2px;">${(sub.auditReport || []).length} টি</div>
+                                            </div>
+                                            <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
+                                                <div style="font-size:0.72rem; color:var(--text-secondary);">স্ট্যাটাস</div>
+                                                <div style="font-weight:800; color:${sub.disqualified ? '#ef4444' : '#00e676'}; font-size:0.95rem; margin-top:2px;">${sub.disqualified ? 'নিয়ম লঙ্ঘন' : '১০০% সঠিক ও রুল মান্য'}</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Mini preview of trades -->
+                                        <div style="overflow-x:auto; background:rgba(0,0,0,0.4); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                            <table style="width:100%; font-size:0.78rem; text-align:left; border-collapse:collapse;">
+                                                <thead>
+                                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
+                                                        <th style="padding:8px 10px;"># ধাপ</th>
+                                                        <th style="padding:8px 10px;">পরিকল্পিত স্টেক</th>
+                                                        <th style="padding:8px 10px;">কোটেক্স স্টেক</th>
+                                                        <th style="padding:8px 10px;">পেআউট %</th>
+                                                        <th style="padding:8px 10px;">অ্যাসেট ও টিকিট</th>
+                                                        <th style="padding:8px 10px;">ফলাফল</th>
+                                                        <th style="padding:8px 10px;">P&L</th>
+                                                        <th style="padding:8px 10px;">কমপ্লায়েন্স</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${(sub.auditReport || []).slice(0, 6).map((a, aIdx) => {
+                                                        const stepNum = a.tradeNum || a.stepIndex || (aIdx + 1);
+                                                        const planned = (a.plannedStake != null && a.plannedStake % 1 === 0) ? String(a.plannedStake) : Number(a.plannedStake || 0).toFixed(0);
+                                                        const actual = Number(a.actualStake || 0).toFixed(2);
+                                                        const ticket = a.ticketId || a.ticket || 'N/A';
+                                                        const outcome = a.outcome || a.result || 'N/A';
+                                                        const payout = a.payout || (a.payoutPercent ? a.payoutPercent + '%' : 'N/A');
+                                                        const pNum = parseFloat(String(payout).replace('%', '').trim()) || 0;
+                                                        const pGood = (pNum >= 85 || pNum === 0);
+                                                        const isPassed = (a.isPassed !== undefined ? a.isPassed : (a.isCompliant !== undefined ? a.isCompliant : true));
+                                                        const pnlNum = Number(a.pnl || 0);
+
+                                                        return `
+                                                            <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                                                                <td style="padding:7px 10px; font-weight:700;">ধাপ #${stepNum}</td>
+                                                                <td style="padding:7px 10px; color:var(--gold); font-weight:700;">$${planned}</td>
+                                                                <td style="padding:7px 10px; font-weight:700; color:#38bdf8;">$${actual}</td>
+                                                                <td style="padding:7px 10px;">
+                                                                    <span style="color:${pGood ? 'var(--neon-green)' : '#f87171'}; font-weight:700; background:${pGood ? 'rgba(0,230,118,0.1)' : 'rgba(239,68,68,0.1)'}; padding:2px 6px; border-radius:4px;">
+                                                                        ${payout}
+                                                                    </span>
+                                                                </td>
+                                                                <td style="padding:7px 10px; font-size:0.72rem; color:var(--text-secondary);">
+                                                                    <span style="color:#fff;">${a.asset || 'N/A'}</span> <span style="font-family:monospace; color:#aaa;">(${ticket})</span>
+                                                                </td>
+                                                                <td style="padding:7px 10px;">
+                                                                    <span class="badge ${outcome === 'WIN' ? 'badge-active' : (outcome === 'REFUND' ? 'badge-warning' : 'badge-rejected')}" style="padding:2px 6px; font-size:0.7rem;">
+                                                                        ${outcome}
+                                                                    </span>
+                                                                </td>
+                                                                <td style="padding:7px 10px; font-weight:700; color:${pnlNum >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'};">
+                                                                    ${pnlNum >= 0 ? '+' : ''}$${pnlNum.toFixed(2)}
+                                                                </td>
+                                                                <td style="padding:7px 10px;">
+                                                                    ${a.isRefund ? `
+                                                                        <span style="color:#f59e0b; font-weight:700;"><i class="fas fa-rotate"></i> রিফান্ড</span>
+                                                                    ` : isPassed ? `
+                                                                        <span style="color:#00e676; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-check-circle"></i> ✓ সঠিক</span>
+                                                                    ` : `
+                                                                        <span style="color:#ef4444; font-weight:700; display:inline-flex; align-items:center; gap:4px;" title="${escapeHtml(a.complianceStatus || a.reason || 'নিয়ম বহির্ভূত')}"><i class="fas fa-times-circle"></i> ✕ ত্রুটি</span>
+                                                                    `}
+                                                                </td>
+                                                            </tr>
+                                                        `;
+                                                    }).join('')}
+                                                    ${(sub.auditReport || []).length > 6 ? `
+                                                        <tr>
+                                                            <td colspan="8" style="padding:6px 10px; text-align:center; color:var(--gold); font-size:0.75rem; cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
+                                                                + আরও ${(sub.auditReport.length - 6)}টি ট্রেড দেখতে ক্লিক করুন...
+                                                            </td>
+                                                        </tr>
+                                                    ` : ''}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                ` : ''}
+
+                                ${videoSrc ? `
+                                    <!-- 1. Playable Video Player for Session Recording -->
+                                    <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:14px;">
+                                        <div style="font-size:0.82rem; color:var(--neon-blue); font-weight:750; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                                            <i class="fas fa-play-circle" style="font-size:1.05rem;"></i> আপলোডকৃত সেশন ভিডিও প্রুফ (Playable Video):
+                                        </div>
+                                        <video controls playsinline preload="metadata" style="width:100%; max-width:720px; max-height:440px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); display:block; background:#000;">
+                                            <source src="${videoSrc}">
+                                            আপনার ব্রাউজারে ভিডিও প্লেয়ার সমর্থিত নয়।
+                                        </video>
+                                        <div style="margin-top:10px;">
+                                            <a href="${videoSrc}" target="_blank" class="btn-outline" style="font-size:0.8rem; padding:5px 12px; display:inline-flex; align-items:center; gap:6px; border-color:var(--neon-blue); color:var(--neon-blue); border-radius:6px;">
+                                                <i class="fas fa-external-link-alt"></i> নতুন ট্যাবে ফুলস্ক্রিন ভিডিও দেখুন
+                                            </a>
+                                        </div>
+                                    </div>
+                                ` : ''}
+
+                                ${imageSrc ? `
+                                    <!-- 2. Screenshot Image Preview for Trade History -->
+                                    <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(212,175,55,0.3); border-radius:12px; padding:14px;">
+                                        <div style="font-size:0.82rem; color:var(--gold); font-weight:750; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                                            <i class="fas fa-image" style="font-size:1.05rem;"></i> আপলোডকৃত ট্রেড হিস্টোরি স্ক্রিনশট ছবি (Trade History Screenshot):
+                                        </div>
+                                        <div style="position:relative; display:inline-block; max-width:100%; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.15);">
+                                            <img src="${imageSrc}" style="max-width:100%; max-height:420px; display:block; cursor:pointer;" onclick="openScreenshot('${imageSrc}')" title="ক্লিক করে বড় করে দেখুন" />
+                                            <div style="position:absolute; bottom:8px; right:8px;">
+                                                <button class="btn-gold" style="font-size:0.75rem; padding:5px 12px; border-radius:6px;" onclick="openScreenshot('${imageSrc}')">
+                                                    <i class="fas fa-search-plus"></i> সম্পূর্ণ ছবি বড় করে দেখুন
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+
+                                ${externalVideoLink ? `
+                                    <!-- 3. External Video Link -->
+                                    <div>
+                                        <a href="${externalVideoLink}" target="_blank" class="btn-outline" style="border-color:var(--neon-blue); color:var(--neon-blue); font-size:0.82rem; padding:6px 14px; display:inline-flex; align-items:center; gap:6px; border-radius:8px;">
+                                            <i class="fas fa-video"></i> এক্সটার্নাল ভিডিও প্রুফ লিংক দেখুন (${externalVideoLink})
+                                        </a>
+                                    </div>
+                                ` : ''}
+
+                                ${(!videoSrc && !imageSrc && !externalVideoLink) ? `
+                                    ${sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0) ? `
+                                        <div style="padding:1rem; text-align:center; background:rgba(0,230,118,0.03); border-radius:10px; border:1px dashed rgba(0,230,118,0.25);">
+                                            <div style="color:#00e676; font-weight:700; font-size:0.85rem;"><i class="fas fa-check-circle"></i> ব্রোকার রিয়েল-টাইম ট্রেডস ও ম্যাথমেটিক্যাল ফর্মুলা অটোমেটিক অডিটকৃত</div>
+                                            <div style="color:var(--text-secondary); font-size:0.78rem; margin-top:2px;">এই সেশনের জন্য ম্যানুয়াল ভিডিও রেকর্ডিং বা ছবি দেওয়ার প্রয়োজন নেই।</div>
+                                        </div>
+                                    ` : `
+                                        <div style="padding:1.5rem; text-align:center; background:rgba(255,255,255,0.02); border-radius:10px; border:1px dashed rgba(255,255,255,0.15);">
+                                            <i class="fas fa-photo-video" style="font-size:1.8rem; color:var(--text-secondary); margin-bottom:8px; display:block;"></i>
+                                            <div style="color:#fff; font-weight:700; font-size:0.9rem;">কোনো প্রুফ ফাইল বা ভিডিও লিংক যুক্ত নেই</div>
+                                            <div style="color:var(--text-secondary); font-size:0.8rem; margin-top:4px; margin-bottom:12px;">ট্রেডারের মূল ভিডিও/ইমেজ লিংক এখানে সেট করুন অথবা ট্রেডারকে পুনরায় আপলোডের অনুরোধ পাঠান।</div>
+                                            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                                                <button type="button" class="btn-gold" style="font-size:0.8rem; padding:6px 14px; border-radius:6px;" onclick="openUpdateProofMediaModal('${sub.id}', '', '')">
+                                                    <i class="fas fa-plus-circle"></i> ভিডিও / স্ক্রিনশট লিংক যুক্ত করুন
+                                                </button>
+                                                <button type="button" class="btn-warning" style="background:#d97706; font-size:0.8rem; padding:6px 14px; border-radius:6px; color:#fff; border:none;" onclick="openResubmitModal('${sub.id}', '${sessionNum}')">
+                                                    <i class="fas fa-redo-alt"></i> পুনরায় আপলোডের অনুরোধ পাঠান
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `}
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Admin Verification & Action Controls -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
+                            
+                            ${sub.status === 'under_review' ? `
+                                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                                    <button class="btn-success" style="padding:7px 16px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px;" onclick="reviewSubmission('${sub.id}', 'verified')">
+                                        <i class="fas fa-check-circle"></i> ${sub.isPractice ? `প্র্যাকটিস #${sub.practiceSessionNumber || sessionNum} অনুমোদন করুন` : `সেশন #${sessionNum} অনুমোদন করুন (Verify +1 Day)`}
+                                    </button>
+                                    <button class="btn-danger" style="padding:7px 16px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px;" onclick="reviewSubmission('${sub.id}', 'rejected')">
+                                        <i class="fas fa-times-circle"></i> ${sub.isPractice ? 'প্র্যাকটিস বাতিল ও ফিডব্যাক দিন' : 'বাতিল করুন (Reject)'}
+                                    </button>
+                                    <button class="btn-warning" style="background:linear-gradient(135deg, #d97706, #b45309); color:#fff; border:none; padding:7px 16px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; border-radius:8px; cursor:pointer;" onclick="openResubmitModal('${sub.id}', '${sessionNum}')">
+                                        <i class="fas fa-redo-alt"></i> পুনরায় আপলোডের অনুরোধ (Request Re-upload)
+                                    </button>
+                                    <button type="button" class="btn-outline" style="padding:7px 14px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; border-color:rgba(212,175,55,0.4); color:var(--gold); border-radius:8px; cursor:pointer;" onclick="openUpdateProofMediaModal('${sub.id}', '${(sub.videoUrl || '').replace(/'/g, "\\'")}', '${(sub.screenshotUrl || '').replace(/'/g, "\\'")}')">
+                                        <i class="fas fa-link"></i> প্রুফ মিডিয়া লিংক আপডেট
+                                    </button>
+                                    ${!sub.isPractice ? `
+                                        <button class="btn-danger" style="background:#dc2626; border:none; padding:7px 14px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; border-radius:8px; cursor:pointer;" onclick="openDisqualifyModal('${ch?.id}', '${sub.id}')" title="এই সেশনে রুলস লঙ্ঘনের কারণে সম্পূর্ণ চ্যালেঞ্জ বাতিল ও বাদ দিন">
+                                            <i class="fas fa-ban"></i> রুল ভঙ্গে চ্যালেঞ্জ বাতিল
+                                        </button>
+                                    ` : `
+                                        <span style="font-size:0.75rem; color:#93c5fd; background:rgba(59,130,246,0.12); padding:5px 10px; border-radius:6px; border:1px solid rgba(59,130,246,0.25);">
+                                            🛡️ প্র্যাকটিসে ভুল করলেও চ্যালেঞ্জ বাতিল হবে না
+                                        </span>
+                                    `}
+                                </div>
+                            ` : sub.status === 'needs_resubmission' ? `
+                                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                                    <div style="background:rgba(217,119,6,0.18); border:1px solid rgba(217,119,6,0.4); padding:6px 12px; border-radius:6px; color:#fbbf24; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; font-weight:700;">
+                                        <i class="fas fa-clock"></i> ট্রেডারের নিকট পুনরায় আপলোডের অনুরোধ পাঠানো হয়েছে
+                                    </div>
+                                    <button class="btn-warning" style="background:#d97706; color:#fff; border:none; padding:6px 14px; font-size:0.8rem; font-weight:700; border-radius:6px; cursor:pointer;" onclick="openResubmitModal('${sub.id}', '${sessionNum}', \`${escapeHtml(sub.adminFeedback || '').replace(/`/g, '\\`')}\`)">
+                                        <i class="fas fa-edit"></i> নির্দেশনা এডিট
+                                    </button>
+                                    <button class="btn-success" style="padding:6px 14px; font-size:0.8rem; font-weight:700; border-radius:6px;" onclick="reviewSubmission('${sub.id}', 'verified')">
+                                        <i class="fas fa-check"></i> সরাসরি অনুমোদন
+                                    </button>
+                                    <button class="btn-danger" style="padding:6px 14px; font-size:0.8rem; font-weight:700; border-radius:6px;" onclick="reviewSubmission('${sub.id}', 'rejected')">
+                                        <i class="fas fa-times"></i> বাতিল
+                                    </button>
+                                    ${!sub.isPractice ? `
+                                        <button class="btn-danger" style="background:#dc2626; border:none; padding:6px 12px; font-size:0.8rem; font-weight:700; border-radius:6px; cursor:pointer;" onclick="openDisqualifyModal('${ch?.id}', '${sub.id}')">
+                                            <i class="fas fa-ban"></i> রুল ভঙ্গে বাদ দিন
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            ` : (sub.status === 'verified' || sub.status === 'auto_verified') ? `
+                                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                    <div style="color:var(--neon-green); font-weight:700; font-size:0.86rem; display:inline-flex; align-items:center; gap:6px;">
+                                        <i class="fas ${sub.status === 'auto_verified' ? 'fa-robot' : 'fa-check-double'}"></i> 
+                                        ${sub.status === 'auto_verified' ? `স্বয়ংক্রিয় অডিট দ্বারা সেশন #${sessionNum} ভেরিফাইড (+১ দিন সম্পন্ন)` : (sub.isPractice ? `প্র্যাকটিস #${sub.practiceSessionNumber || sessionNum} যাচাই ও অনুমোদন সম্পন্ন` : `সেশন #${sessionNum} অনুমোদিত ও চ্যালেঞ্জ অগ্রগতিতে যুক্ত হয়েছে (+১ দিন সম্পন্ন)`)}
+                                    </div>
+                                    ${(sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0)) ? `
+                                        <button type="button" class="btn-success" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.4); cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
+                                            <i class="fas fa-bolt"></i> অডিট রিপোর্ট (${(sub.auditReport || []).length} ট্রেডস)
+                                        </button>
+                                    ` : ''}
+                                    ${!sub.isPractice ? `
+                                        <button class="btn-outline" style="border-color:rgba(239,68,68,0.4); color:#f87171; padding:4px 10px; font-size:0.75rem; border-radius:6px;" onclick="openDisqualifyModal('${ch?.id}', '${sub.id}')" title="পরবর্তী পর্যালোচনায় রুল ভঙ্গ ধরা পড়লে বাদ দিন">
+                                            <i class="fas fa-ban"></i> রুল ভঙ্গে বাতিল
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            ` : `
+                                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                    <div style="color:var(--neon-red); font-weight:700; font-size:0.86rem; display:inline-flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-times-circle"></i> ${sub.isPractice ? `প্র্যাকটিস #${sub.practiceSessionNumber || sessionNum} বাতিল করা হয়েছে (ট্রেডার বাদ পড়েননি)` : `সেশন #${sessionNum} বাতিল করা হয়েছে`} ${sub.adminFeedback ? `(কারণ: ${escapeHtml(sub.adminFeedback)})` : ''}
+                                    </div>
+                                    <button class="btn-warning" style="background:#d97706; color:#fff; border:none; padding:4px 10px; font-size:0.75rem; font-weight:700; border-radius:6px; cursor:pointer;" onclick="openResubmitModal('${sub.id}', '${sessionNum}')">
+                                        <i class="fas fa-redo-alt"></i> পুনরায় আপলোডের সুযোগ দিন
+                                    </button>
+                                    ${!sub.isPractice ? `
+                                        <button class="btn-danger" style="background:#dc2626; border:none; padding:4px 10px; font-size:0.75rem; font-weight:700; border-radius:6px; cursor:pointer;" onclick="openDisqualifyModal('${ch?.id}', '${sub.id}')">
+                                            <i class="fas fa-ban"></i> রুল ভঙ্গে বাদ দিন
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            `}
+
+                            <button class="btn-outline" style="border-color:rgba(239,68,68,0.4); color:#f87171; padding:6px 12px; font-size:0.8rem; border-radius:6px;" onclick="handleDeleteSubmission('${sub.id}')" title="ডিলিট করুন">
+                                <i class="fas fa-trash-alt"></i> মুছে ফেলুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderChallengeGroupBlockHtml(chGroup) {
+            const c = chGroup.challenge || {};
+            const isRunning = chGroup.isRunning;
+            const isPassed = chGroup.isPassed;
+            const borderColor = isRunning ? 'rgba(46,204,113,0.4)' : (isPassed ? 'rgba(245,176,65,0.45)' : 'rgba(239,68,68,0.38)');
+            const headerBg = isRunning
+                ? 'linear-gradient(135deg, rgba(46,204,113,0.12), rgba(16,185,129,0.04))'
+                : (isPassed
+                    ? 'linear-gradient(135deg, rgba(245,176,65,0.14), rgba(212,175,55,0.04))'
+                    : 'linear-gradient(135deg, rgba(239,68,68,0.13), rgba(185,28,28,0.04))');
+            const badgeBg = isRunning ? 'rgba(46,204,113,0.2)' : (isPassed ? 'rgba(245,176,65,0.2)' : 'rgba(239,68,68,0.22)');
+            const badgeColor = isRunning ? '#2ecc71' : (isPassed ? 'var(--gold)' : '#f87171');
+            const statusLabel = isRunning
+                ? '🟢 রানিং চ্যালেঞ্জ (Running Challenge)'
+                : (isPassed ? '🏆 পাসকৃত চ্যালেঞ্জ (Passed)' : '🔴 বাদ পড়া চ্যালেঞ্জ (Disqualified / Past Challenge)');
+
+            const pnlColor = chGroup.totalPnl >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
+            const pnlSign = chGroup.totalPnl >= 0 ? '+' : '';
+            const createdDateStr = c.createdAt ? new Date(c.createdAt).toLocaleDateString('bn-BD', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+            const failedDateStr = c.failedAt ? new Date(c.failedAt).toLocaleDateString('bn-BD', { year: 'numeric', month: 'short', day: 'numeric' }) : null;
+            const failReasonText = c.violatedRule || c.failReason || '';
+
+            let officialIndex = 0;
+            const sessionsHtml = chGroup.submissions.length > 0
+                ? chGroup.submissions.map((sub, idx) => {
+                    if (!sub.isPractice) officialIndex++;
+                    return renderSingleSessionCardHtml(sub, idx, officialIndex, c, chGroup);
+                }).join('')
+                : `
+                    <div style="text-align:center; padding:2rem 1.2rem; background:rgba(0,0,0,0.25); border-radius:12px; border:1px dashed rgba(255,255,255,0.1);">
+                        <i class="fas fa-folder-open" style="font-size:2rem; color:var(--text-secondary); opacity:0.45; margin-bottom:8px;"></i>
+                        <div style="color:#fff; font-weight:700; font-size:0.95rem;">চ্যালেঞ্জ #${chGroup.challengeNumberBn} (${chGroup.challengeOrdinalBn} চ্যালেঞ্জ)-এ এখনো কোনো সেশন জমা পড়েনি</div>
+                        <div style="color:var(--text-secondary); font-size:0.8rem; margin-top:4px;">এই চ্যালেঞ্জের অধীনে ট্রেডার সেশন সাবমিট করলে এখানে ক্রমানুসারে সেশন #1, সেশন #2... হিসেবে যুক্ত হবে।</div>
+                    </div>
+                `;
+
+            return `
+                <div style="border:1px solid ${borderColor}; border-radius:16px; background:rgba(15,15,20,0.65); overflow:hidden; margin-bottom:8px;">
+                    <!-- Challenge Group Header Banner -->
+                    <div style="background:${headerBg}; padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <span style="background:linear-gradient(135deg, var(--gold), #d48817); color:#000; font-weight:900; font-size:0.9rem; padding:5px 13px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 10px rgba(245,176,65,0.25);">
+                                <i class="fas fa-trophy"></i> চ্যালেঞ্জ #${chGroup.challengeNumberBn} (${chGroup.challengeOrdinalBn} চ্যালেঞ্জ)
+                            </span>
+                            <span style="background:${badgeBg}; color:${badgeColor}; border:1px solid ${borderColor}; font-weight:800; font-size:0.8rem; padding:4px 11px; border-radius:8px;">
+                                ${statusLabel}
+                            </span>
+                            <span style="background:rgba(255,255,255,0.06); color:#fff; border:1px solid rgba(255,255,255,0.12); font-size:0.78rem; padding:4px 10px; border-radius:7px; font-weight:700;">
+                                <i class="fas fa-shield-alt" style="color:var(--gold); margin-right:4px;"></i> ${c.packageName || 'Master'} ($${(c.fundedAmount || 32000).toLocaleString()})
+                            </span>
+                            <span style="background:rgba(59,130,246,0.12); color:#60a5fa; border:1px solid rgba(59,130,246,0.28); font-size:0.78rem; padding:4px 10px; border-radius:7px; font-weight:700;">
+                                <i class="fas fa-chart-line" style="margin-right:4px;"></i> ${c.brokerName || 'Quotex'} (ID: ${c.brokerAccountId || 'N/A'})
+                            </span>
+                            <span style="color:var(--text-secondary); font-size:0.76rem;">
+                                <i class="far fa-calendar-alt"></i> শুরু: ${createdDateStr}${failedDateStr ? ` • সমাপ্তি: ${failedDateStr}` : ''}
+                            </span>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); padding:5px 11px; border-radius:8px; font-size:0.8rem;">
+                                <span style="color:var(--text-secondary);">সেশন:</span>
+                                <strong style="color:#fff; margin-left:4px;">${chGroup.submissionsCount}টি</strong>
+                                <span style="color:var(--gold); margin-left:5px;">(${chGroup.winTrades}W / ${chGroup.lossTrades}L)</span>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); padding:5px 11px; border-radius:8px; font-size:0.82rem; font-weight:800; color:${pnlColor};">
+                                P&L: ${pnlSign}$${chGroup.totalPnl.toFixed(2)}
+                            </div>
+                            ${(!isRunning && !c.isSynthetic && c.id) ? `
+                                <button class="btn-success" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; padding:5px 11px; font-size:0.76rem; font-weight:750; border-radius:7px; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" onclick="reactivateChallenge('${c.id}')" title="এই চ্যালেঞ্জটি পুনরায় চালু করুন">
+                                    <i class="fas fa-undo"></i> চ্যালেঞ্জ #${chGroup.challengeNumberBn} চালু করুন
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    ${(!isRunning && failReasonText) ? `
+                        <div style="background:rgba(239,68,68,0.1); border-bottom:1px solid rgba(239,68,68,0.22); padding:8px 18px; font-size:0.8rem; color:#fca5a5; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i>
+                            <span><strong>বাদ পড়ার কারণ (Disqualification Reason):</strong> ${escapeHtml(failReasonText)}</span>
+                        </div>
+                    ` : ''}
+
+                    <!-- Sessions inside this Challenge -->
+                    <div style="padding:14px; display:flex; flex-direction:column; gap:12px;">
+                        ${sessionsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
         function renderTraderSerialSessions() {
             if (!activeTraderDetailId) return;
 
-            const ch = (adminChallenges || []).find(c => c.id === activeTraderDetailId.challengeId) || 
-                       (adminChallenges || []).find(c => c.userId === activeTraderDetailId.userId);
-            const u = (adminUsers || []).find(user => user.id === activeTraderDetailId.userId) || {};
+            const structured = getTraderStructuredChallenges(activeTraderDetailId.userId, activeTraderDetailId.challengeId);
+            const ch = structured.primaryChallenge;
+            const u = structured.user || {};
+            const activeGroup = structured.activeGroup;
 
             const bannerContainer = document.getElementById('traderSessionsHeaderBanner');
             const topBadges = document.getElementById('traderDetailTopBadges');
             const sessionsContainer = document.getElementById('traderSerialSessionsContainer');
 
-            // Find all submissions of this trader sorted chronologically (earliest first: Session 1, Session 2, ...)
-            const subs = (adminSubmissions || [])
-                .filter(s => (ch && s.challengeId === ch.id) || s.userId === activeTraderDetailId.userId)
-                .sort((a, b) => new Date(a.submittedAt || a.sessionDate) - new Date(b.submittedAt || b.sessionDate));
+            // Update the 3 filter buttons UI and live counts
+            const runningSessCount = structured.runningSubmissions.length;
+            const failedSessCount = structured.failedSubmissions.length;
+            const allSessCount = structured.allSubmissions.length;
+            const runningChCount = structured.runningGroups.length;
+            const failedChCount = structured.failedGroups.length;
+            const allChCount = structured.allGroups.length;
 
-            const totalTrades = subs.reduce((sum, s) => sum + (parseInt(s.tradesCount) || 0), 0);
-            const winTrades = subs.reduce((sum, s) => sum + (parseInt(s.winTrades) || 0), 0);
-            const lossTrades = subs.reduce((sum, s) => sum + (parseInt(s.lossTrades) || 0), 0);
-            const totalPnl = subs.reduce((sum, s) => sum + (parseFloat(s.profitLoss) || 0), 0);
-            const verifiedCount = subs.filter(s => s.status === 'verified' || s.status === 'auto_verified').length;
-            const pendingCount = subs.filter(s => s.status === 'under_review').length;
+            const btnRunning = document.getElementById('traderSessionFilterBtn_running');
+            const btnFailed = document.getElementById('traderSessionFilterBtn_failed');
+            const btnAll = document.getElementById('traderSessionFilterBtn_all');
+            const secTitle = document.getElementById('traderSessionSectionTitle');
+            const secDesc = document.getElementById('traderSessionSectionDesc');
+
+            if (btnRunning) {
+                const isAct = traderSessionHistoryFilter === 'running';
+                btnRunning.style.background = isAct ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(46,204,113,0.08)';
+                btnRunning.style.color = isAct ? '#fff' : '#2ecc71';
+                btnRunning.style.borderColor = isAct ? '#10b981' : 'rgba(46,204,113,0.35)';
+                btnRunning.style.boxShadow = isAct ? '0 4px 14px rgba(16,185,129,0.35)' : 'none';
+                btnRunning.innerHTML = `<i class="fas fa-play-circle"></i> রানিং চ্যালেঞ্জ সেশন (${toBanglaDigits(runningSessCount)})`;
+            }
+            if (btnFailed) {
+                const isAct = traderSessionHistoryFilter === 'failed';
+                btnFailed.style.background = isAct ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'rgba(239,68,68,0.08)';
+                btnFailed.style.color = isAct ? '#fff' : '#f87171';
+                btnFailed.style.borderColor = isAct ? '#ef4444' : 'rgba(239,68,68,0.35)';
+                btnFailed.style.boxShadow = isAct ? '0 4px 14px rgba(239,68,68,0.35)' : 'none';
+                btnFailed.innerHTML = `<i class="fas fa-ban"></i> বাদ পড়া চ্যালেঞ্জ হিস্টোরি (${toBanglaDigits(failedChCount)}টি চ্যালেঞ্জ • ${toBanglaDigits(failedSessCount)} সেশন)`;
+            }
+            if (btnAll) {
+                const isAct = traderSessionHistoryFilter === 'all';
+                btnAll.style.background = isAct ? 'linear-gradient(135deg, var(--gold), #d48817)' : 'rgba(245,176,65,0.08)';
+                btnAll.style.color = isAct ? '#000' : 'var(--gold)';
+                btnAll.style.borderColor = isAct ? 'var(--gold)' : 'rgba(245,176,65,0.35)';
+                btnAll.style.boxShadow = isAct ? '0 4px 14px rgba(245,176,65,0.35)' : 'none';
+                btnAll.innerHTML = `<i class="fas fa-layer-group"></i> অল ট্রেডিং সেশন হিস্টোরি (${toBanglaDigits(allChCount)}টি চ্যালেঞ্জ • ${toBanglaDigits(allSessCount)} সেশন)`;
+            }
+
+            // Select which challenge groups & submissions to display based on active filter
+            let targetGroups = [];
+            let filterSubs = [];
+            let kpiModeLabel = '';
+            if (traderSessionHistoryFilter === 'running') {
+                targetGroups = structured.runningGroups;
+                filterSubs = structured.runningSubmissions;
+                kpiModeLabel = activeGroup && activeGroup.isRunning
+                    ? `চ্যালেঞ্জ #${activeGroup.challengeNumberBn} (রানিং)`
+                    : 'রানিং চ্যালেঞ্জ';
+                if (secTitle) secTitle.textContent = `রানিং চ্যালেঞ্জের সেশনসমূহ (${kpiModeLabel})`;
+                if (secDesc) secDesc.textContent = 'শুধুমাত্র বর্তমানে চলমান (Running) চ্যালেঞ্জের সেশনগুলো নিচে সিরিয়াল অনুযায়ী দেখানো হচ্ছে।';
+            } else if (traderSessionHistoryFilter === 'failed') {
+                targetGroups = structured.failedGroups;
+                filterSubs = structured.failedSubmissions;
+                kpiModeLabel = `বাদ পড়া চ্যালেঞ্জ (${toBanglaDigits(failedChCount)}টি)`;
+                if (secTitle) secTitle.textContent = `পূর্বে বাদ পড়া চ্যালেঞ্জের সেশন ও হিস্টোরি (${toBanglaDigits(failedChCount)}টি চ্যালেঞ্জ)`;
+                if (secDesc) secDesc.textContent = 'ট্রেডার পূর্বে যে চ্যালেঞ্জগুলো থেকে বাদ পড়েছেন, সেগুলোর চ্যালেঞ্জ নাম্বার ও সেশন হিস্টোরি নিচে আলাদাভাবে সাজানো রয়েছে।';
+            } else {
+                targetGroups = structured.allGroups;
+                filterSubs = structured.allSubmissions;
+                kpiModeLabel = `সকল চ্যালেঞ্জ (${toBanglaDigits(allChCount)}টি)`;
+                if (secTitle) secTitle.textContent = `অল ট্রেডিং সেশন হিস্টোরি (চ্যালেঞ্জ #১ থেকে #${toBanglaDigits(allChCount)})`;
+                if (secDesc) secDesc.textContent = 'ট্রেডারের ১ম চ্যালেঞ্জ থেকে শুরু করে বর্তমান পর্যন্ত সকল চ্যালেঞ্জ ও সেগুলোর সেশন আলাদা আলাদাভাবে দেখানো হচ্ছে।';
+            }
+
+            const winTrades = filterSubs.reduce((sum, s) => sum + (parseInt(s.winTrades) || 0), 0);
+            const lossTrades = filterSubs.reduce((sum, s) => sum + (parseInt(s.lossTrades) || 0), 0);
+            const totalPnl = filterSubs.reduce((sum, s) => sum + (parseFloat(s.profitLoss) || 0), 0);
+            const pendingCount = structured.allSubmissions.filter(s => s.status === 'under_review').length;
             const pnlColor = totalPnl >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
             const pnlSign = totalPnl >= 0 ? '+' : '';
+
+            const runningVerifiedSubs = structured.runningSubmissions.filter(s => (s.status === 'verified' || s.status === 'auto_verified') && !s.isPractice).length;
+            const activeSessionsDone = (ch?.status === 'in_progress')
+                ? ((ch?.sessionsCompleted !== undefined && ch?.sessionsCompleted !== null) ? ch.sessionsCompleted : runningVerifiedSubs)
+                : ((ch?.sessionsCompleted !== undefined && ch?.sessionsCompleted !== null) ? ch.sessionsCompleted : 0);
 
             // Top Badges
             if (topBadges) {
                 let chBadge = '';
+                const chNumTag = activeGroup ? `চ্যালেঞ্জ #${activeGroup.challengeNumberBn} • ` : '';
                 if (ch?.status === 'passed') {
-                    chBadge = `<span class="badge" style="background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid rgba(46,204,113,0.5);"><i class="fas fa-award"></i> CHALLENGE PASSED (১৫/১৫ সেশন সম্পন্ন)</span>`;
+                    chBadge = `<span class="badge" style="background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid rgba(46,204,113,0.5);"><i class="fas fa-award"></i> ${chNumTag}CHALLENGE PASSED (১৫/১৫ সেশন সম্পন্ন)</span>`;
                 } else if (ch?.status === 'failed') {
-                    chBadge = `<span class="badge" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.5);"><i class="fas fa-ban"></i> FAILED / DISQUALIFIED (${ch?.violatedRule || ch?.failReason || 'CLOSED'})</span>`;
+                    chBadge = `<span class="badge" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.5);"><i class="fas fa-ban"></i> ${chNumTag}FAILED / DISQUALIFIED (${ch?.violatedRule || ch?.failReason || 'CLOSED'})</span>`;
                 } else {
-                    chBadge = `<span class="badge ${getStatusBadgeClass(ch?.status || 'in_progress')}">${(ch?.status || 'in_progress').replace('_', ' ').toUpperCase()}</span>`;
+                    chBadge = `<span class="badge ${getStatusBadgeClass(ch?.status || 'in_progress')}">${chNumTag}${(ch?.status || 'in_progress').replace('_', ' ').toUpperCase()}</span>`;
                 }
 
                 topBadges.innerHTML = `
                     ${chBadge}
+                    <span class="badge" style="background:rgba(255,255,255,0.07); color:#fff; border:1px solid rgba(255,255,255,0.15);">
+                        মোট চ্যালেঞ্জ: ${toBanglaDigits(allChCount)}টি (রানিং: ${toBanglaDigits(runningChCount)}, বাদ পড়া: ${toBanglaDigits(failedChCount)})
+                    </span>
                     ${pendingCount > 0 ? `
                         <span class="badge badge-pending">
                             <i class="fas fa-bell"></i> ${pendingCount}টি সেশন রিভিউর অপেক্ষায়
@@ -5560,6 +6318,11 @@
                                             ${ch?.userTraderId || u.traderId || 'AJ-1001'}
                                         </span>
                                         <h2 style="font-size:1.35rem; font-weight:900; color:#fff; margin:0;">${ch?.userName || u.name || 'Unknown Trader'}</h2>
+                                        ${activeGroup ? `
+                                            <span style="background:rgba(46,204,113,0.15); color:#2ecc71; border:1px solid rgba(46,204,113,0.35); font-size:0.78rem; font-weight:800; padding:2px 9px; border-radius:6px;">
+                                                বর্তমান চ্যালেঞ্জ #${activeGroup.challengeNumberBn} (${activeGroup.challengeOrdinalBn})
+                                            </span>
+                                        ` : ''}
                                     </div>
                                     <div style="font-size:0.84rem; color:var(--text-secondary); margin-top:4px;">
                                         <i class="fas fa-envelope" style="margin-right:4px;"></i> ${ch?.userEmail || u.email || 'N/A'}
@@ -5585,7 +6348,7 @@
                                         </button>
                                     ` : `
                                         <span style="background:rgba(245,176,65,0.2); color:var(--gold); border:1px solid rgba(245,176,65,0.5); padding:6px 12px; border-radius:8px; font-size:0.85rem; font-weight:750;">
-                                            ⚡ মূল মূল্যায়ন (${ch?.sessionsCompleted || 0}/15)
+                                            ⚡ মূল মূল্যায়ন (${activeSessionsDone}/15)
                                         </span>
                                         <button class="btn-outline" style="border-color:#8b5cf6; color:#a78bfa; padding:6px 12px; font-size:0.82rem; font-weight:750; border-radius:8px; cursor:pointer;" onclick="switchChallengePhase('${ch.id}', 'practice')" title="৪৮ ঘণ্টার প্র্যাকটিস পর্বে ফেরত নিন">
                                             <i class="fas fa-undo"></i> প্র্যাকটিসে নিন
@@ -5615,21 +6378,21 @@
                         <!-- 4 Summary KPI Grid -->
                         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin-top:1.4rem; padding-top:1.2rem; border-top:1px solid rgba(255,255,255,0.06);">
                             <div style="background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:10px;">
-                                <div style="font-size:0.75rem; color:var(--text-secondary);">চ্যালেঞ্জ অগ্রগতি (Sessions)</div>
-                                <div style="font-size:1.15rem; font-weight:800; color:var(--gold); margin-top:2px;">${(ch?.sessionsCompleted !== undefined && ch?.sessionsCompleted !== null) ? ch.sessionsCompleted : subs.length} / ${ch?.sessionsRequired || 15} সেশন</div>
+                                <div style="font-size:0.75rem; color:var(--text-secondary);">রানিং চ্যালেঞ্জ অগ্রগতি</div>
+                                <div style="font-size:1.15rem; font-weight:800; color:var(--gold); margin-top:2px;">${activeSessionsDone} / ${ch?.sessionsRequired || 15} সেশন</div>
                             </div>
                             <div style="background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:10px;">
-                                <div style="font-size:0.75rem; color:var(--text-secondary);">মোট জমা পড়া সেশন</div>
-                                <div style="font-size:1.15rem; font-weight:800; color:#fff; margin-top:2px;">${subs.length}টি সেশন</div>
+                                <div style="font-size:0.75rem; color:var(--text-secondary);">জমা পড়া সেশন (${kpiModeLabel})</div>
+                                <div style="font-size:1.15rem; font-weight:800; color:#fff; margin-top:2px;">${filterSubs.length}টি সেশন</div>
                             </div>
                             <div style="background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:10px;">
-                                <div style="font-size:0.75rem; color:var(--text-secondary);">ট্রেড পারফরম্যান্স</div>
+                                <div style="font-size:0.75rem; color:var(--text-secondary);">ট্রেড পারফরম্যান্স (${kpiModeLabel})</div>
                                 <div style="font-size:1.15rem; font-weight:800; color:#fff; margin-top:2px;">
                                     <span style="color:var(--neon-green)">${winTrades}W</span> - <span style="color:var(--neon-red)">${lossTrades}L</span>
                                 </div>
                             </div>
                             <div style="background:rgba(0,0,0,0.3); padding:10px 14px; border-radius:10px;">
-                                <div style="font-size:0.75rem; color:var(--text-secondary);">মোট অর্জিত P&L</div>
+                                <div style="font-size:0.75rem; color:var(--text-secondary);">মোট অর্জিত P&L (${kpiModeLabel})</div>
                                 <div style="font-size:1.15rem; font-weight:800; color:${pnlColor}; margin-top:2px;">${pnlSign}$${totalPnl.toFixed(2)}</div>
                             </div>
                         </div>
@@ -5639,423 +6402,55 @@
 
             if (!sessionsContainer) return;
 
-            if (subs.length === 0) {
-                sessionsContainer.innerHTML = `
-                    <div style="text-align:center; padding:3.5rem 1.5rem; background:rgba(255,255,255,0.02); border-radius:16px; border:1px dashed rgba(255,255,255,0.1);">
-                        <i class="fas fa-calendar-times" style="font-size:3rem; color:var(--text-secondary); opacity:0.4; margin-bottom:1rem;"></i>
-                        <h4 style="font-size:1.15rem; color:#fff; font-weight:700; margin-bottom:6px;">এই ট্রেডার এখনো কোনো ডেইলি সেশন জমা দেননি</h4>
-                        <p style="color:var(--text-secondary); font-size:0.88rem; max-width:520px; margin:0 auto;">
-                            ট্রেডার প্রতিদিনের ব্রোকার ট্রেড সম্পন্ন করার পর ড্যাশবোর্ড থেকে প্রুফ আপলোড দিলে এখানে ক্রমানুসারে Session #1, Session #2, Session #3... হিসেবে স্বয়ংক্রিয়ভাবে সিরিয়াল অনুযায়ী প্রদর্শিত হবে।
-                        </p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Render Chronological Serial Sessions (Session #1, Session #2, ...)
-            let officialIndex = 0;
-            sessionsContainer.innerHTML = subs.map((sub, idx) => {
-                let sessionNum;
-                let sessionOrdinal;
-                if (sub.isPractice) {
-                    sessionNum = sub.practiceSessionNumber || (idx + 1);
-                } else {
-                    officialIndex++;
-                    sessionNum = sub.sessionNumber || officialIndex;
-                    sessionOrdinal = getBanglaOrdinal(sessionNum);
-                }
-                const isOpen = openSessionCards.has(sub.id) || (sub.status === 'under_review');
-                const subPnl = parseFloat(sub.profitLoss) || 0;
-                const pnlSign = subPnl >= 0 ? '+' : '';
-                const pnlColor = subPnl >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
-                // Media detection (Independent checks for both Video and Image)
-                const isScreenshotVideo = /\.(mp4|webm|mov|mkv|avi)($|\?)/i.test(sub.screenshotUrl || '');
-                const isVideoUrlPlayable = /\.(mp4|webm|mov|mkv|avi)($|\?)/i.test(sub.videoUrl || '');
-
-                const videoSrc = isVideoUrlPlayable ? sub.videoUrl : (isScreenshotVideo ? sub.screenshotUrl : (sub.fileType === 'video' ? (sub.videoUrl || sub.screenshotUrl) : (sub.videoUrl && !sub.screenshotUrl ? sub.videoUrl : null)));
-                const imageSrc = (!isScreenshotVideo && sub.screenshotUrl) ? sub.screenshotUrl : null;
-                const externalVideoLink = (sub.videoUrl && sub.videoUrl !== videoSrc && sub.videoUrl !== imageSrc) ? sub.videoUrl : (!videoSrc && sub.videoUrl ? sub.videoUrl : null);
-
-                return `
-                    <div class="serial-session-card" id="sessionCard_${sub.id}" style="background:rgba(22,22,26,0.85); border:1px solid ${sub.status === 'under_review' ? 'rgba(245,176,65,0.45)' : 'rgba(255,255,255,0.08)'}; border-radius:14px; overflow:hidden; transition:all 0.25s ease;">
-                        
-                        <!-- Session Header Bar (Clickable) -->
-                        <div onclick="toggleSessionCard('${sub.id}')" style="padding:1rem 1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; cursor:pointer; background:rgba(255,255,255,0.02); border-bottom:${isOpen ? '1px solid rgba(255,255,255,0.08)' : 'none'}; user-select:none;">
-                            
-                            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-                                ${sub.isPractice ? `
-                                    <span style="background:linear-gradient(135deg, #3b82f6, #1d4ed8); color:#fff; font-weight:900; font-size:0.85rem; padding:4px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
-                                        <i class="fas fa-graduation-cap"></i> প্র্যাকটিস #${sub.practiceSessionNumber || sessionNum}
-                                    </span>
-                                    <span style="background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">
-                                        অনুশীলন পর্ব (ভুল হলেও বাদ পড়বে না)
-                                    </span>
-                                ` : `
-                                    <span style="background:linear-gradient(135deg, var(--gold), #d48817); color:#000; font-weight:900; font-size:0.85rem; padding:4px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
-                                        <i class="fas fa-hashtag"></i> সেশন #${sessionNum} (${sessionOrdinal} সেশন)
-                                    </span>
-                                `}
-                                <div>
-                                    <strong style="color:#fff; font-size:0.95rem;">${sub.sessionDate}</strong>
-                                    <span style="color:var(--text-secondary); font-size:0.8rem; margin-left:6px;">(${new Date(sub.submittedAt).toLocaleTimeString()})</span>
-                                </div>
-                            </div>
-
-                            <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-                                <div style="font-size:0.85rem;">
-                                    <span style="color:var(--text-secondary);">ট্রেড:</span>
-                                    <strong style="color:#fff; margin-left:4px;">${sub.tradesCount}টি</strong> 
-                                    <span style="color:var(--gold); margin-left:4px;">(${sub.winTrades || 0}W / ${sub.lossTrades || 0}L)</span>
-                                </div>
-
-                                <div style="font-size:0.95rem; font-weight:800; color:${pnlColor};">
-                                    ${pnlSign}$${subPnl.toFixed(2)}
-                                </div>
-
-                                <span class="badge ${getStatusBadgeClass(sub.status)}">
-                                    ${sub.status.replace('_', ' ').toUpperCase()}
-                                </span>
-                                ${sub.isResubmitted ? `<span class="badge" style="background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.5); font-size:0.75rem;"><i class="fas fa-sync-alt"></i> পুনরায় আপলোডকৃত</span>` : ''}
-
-                                <div style="width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:0.85rem;">
-                                    <i class="fas fa-chevron-down" id="chevron_${sub.id}" style="transition:transform 0.25s ease; transform:${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};"></i>
-                                </div>
-                            </div>
+            // Empty states per filter mode
+            if (traderSessionHistoryFilter === 'running') {
+                if (targetGroups.length === 0) {
+                    sessionsContainer.innerHTML = `
+                        <div style="text-align:center; padding:3rem 1.5rem; background:rgba(255,255,255,0.02); border-radius:16px; border:1px dashed rgba(255,255,255,0.1);">
+                            <i class="fas fa-pause-circle" style="font-size:2.8rem; color:var(--text-secondary); opacity:0.45; margin-bottom:12px;"></i>
+                            <h4 style="font-size:1.12rem; color:#fff; font-weight:700; margin-bottom:6px;">এই ট্রেডারের বর্তমানে কোনো রানিং চ্যালেঞ্জ নেই</h4>
+                            <p style="color:var(--text-secondary); font-size:0.86rem; max-width:520px; margin:0 auto;">
+                                পূর্বের বাদ পড়া চ্যালেঞ্জের সেশনগুলো দেখতে উপরের <strong>"বাদ পড়া চ্যালেঞ্জ হিস্টোরি"</strong> বাটনে চাপ দিন।
+                            </p>
                         </div>
-
-                        <!-- Session Body Details (Expandable) -->
-                        <div id="sessionBody_${sub.id}" style="display:${isOpen ? 'block' : 'none'}; padding:1.25rem;">
-                            
-                            <!-- 4 Key Stat Blocks -->
-                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:1.2rem;">
-                                <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
-                                    <div style="font-size:0.72rem; color:var(--text-secondary);">ব্রোকার</div>
-                                    <div style="font-weight:700; color:#fff; font-size:0.92rem; margin-top:2px;">${sub.brokerName || ch?.brokerName || 'Quotex'}</div>
+                    `;
+                    return;
+                }
+                if (filterSubs.length === 0) {
+                    const rGroup = targetGroups[targetGroups.length - 1];
+                    sessionsContainer.innerHTML = `
+                        ${renderChallengeGroupBlockHtml(rGroup)}
+                        ${failedSessCount > 0 ? `
+                            <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.28); border-radius:12px; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                                <div style="font-size:0.86rem; color:#fca5a5;">
+                                    <i class="fas fa-info-circle" style="color:#f87171; margin-right:6px;"></i>
+                                    এই ট্রেডারের পূর্ববর্তী <strong>${toBanglaDigits(failedChCount)}টি বাদ পড়া চ্যালেঞ্জে মোট ${toBanglaDigits(failedSessCount)}টি সেশন</strong> রয়েছে, যা রানিং চ্যালেঞ্জ থেকে আলাদা রাখা হয়েছে।
                                 </div>
-                                <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
-                                    <div style="font-size:0.72rem; color:var(--text-secondary);">মোট ট্রেড সংখ্যা</div>
-                                    <div style="font-weight:700; color:#fff; font-size:0.92rem; margin-top:2px;">${sub.tradesCount} টি</div>
-                                </div>
-                                <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
-                                    <div style="font-size:0.72rem; color:var(--text-secondary);">উইন রেট (Win Rate)</div>
-                                    <div style="font-weight:700; color:var(--gold); font-size:0.92rem; margin-top:2px;">${sub.winRate || '0%'} (${sub.winTrades || 0}W / ${sub.lossTrades || 0}L)</div>
-                                </div>
-                                <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
-                                    <div style="font-size:0.72rem; color:var(--text-secondary);">সেশন নেট লাভ/ক্ষতি</div>
-                                    <div style="font-weight:800; color:${pnlColor}; font-size:0.95rem; margin-top:2px;">${pnlSign}$${subPnl.toFixed(2)}</div>
-                                </div>
-                            </div>
-
-                            <!-- Trader Notes if any -->
-                            ${sub.notes ? `
-                                <div style="background:rgba(212,175,55,0.08); border-left:3px solid var(--gold); padding:12px 16px; border-radius:8px; margin-bottom:1.2rem;">
-                                    <div style="color:var(--gold); font-weight:750; font-size:0.82rem; margin-bottom:6px;"><i class="fas fa-clipboard-list"></i> ট্রেডার নোট ও সেশন শিট রেকর্ড:</div>
-                                    <div style="color:#eee; font-size:0.86rem; white-space:pre-wrap; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace; line-height:1.6;">${escapeHtml(sub.notes)}</div>
-                                </div>
-                            ` : ''}
-
-                            <!-- Needs Resubmission Banner if active -->
-                            ${sub.status === 'needs_resubmission' ? `
-                                <div style="background:rgba(217,119,6,0.12); border-left:4px solid #f59e0b; padding:12px 16px; border-radius:8px; margin-bottom:1.2rem;">
-                                    <div style="color:#fbbf24; font-weight:800; font-size:0.86rem; display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-                                        <i class="fas fa-exclamation-triangle"></i> ট্রেডারকে পুনরায় আপলোডের নির্দেশনা পাঠানো হয়েছে (ট্রেডারের অ্যাকশনের অপেক্ষায়):
-                                    </div>
-                                    <div style="color:#fff; font-size:0.88rem; line-height:1.5;">"${escapeHtml(sub.adminFeedback || '')}"</div>
-                                    ${sub.resubmissionRequestedAt ? `<div style="color:var(--text-secondary); font-size:0.75rem; margin-top:4px;">পাঠানোর সময়: ${new Date(sub.resubmissionRequestedAt).toLocaleString()}</div>` : ''}
-                                </div>
-                            ` : ''}
-
-                            <!-- Trader Resubmitted Proof Alert Banner -->
-                            ${sub.isResubmitted ? `
-                                <div style="background:rgba(59,130,246,0.12); border-left:4px solid #3b82f6; padding:12px 16px; border-radius:8px; margin-bottom:1.2rem;">
-                                    <div style="color:#60a5fa; font-weight:800; font-size:0.86rem; display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-                                        <i class="fas fa-sync-alt"></i> ট্রেডার এই সেশনটি সংশোধন করে পুনরায় আপলোড করেছেন
-                                    </div>
-                                    ${sub.userResubmitNote ? `<div style="color:#fff; font-size:0.88rem; line-height:1.5; margin-top:3px;"><strong>ট্রেডারের সংশোধনী নোট:</strong> "${escapeHtml(sub.userResubmitNote)}"</div>` : ''}
-                                    ${sub.resubmittedAt ? `<div style="color:var(--text-secondary); font-size:0.75rem; margin-top:4px;">পুনরায় আপলোডের সময়: ${new Date(sub.resubmittedAt).toLocaleString()}</div>` : ''}
-                                </div>
-                            ` : ''}
-
-                            <!-- Trade Proof Media Area (Supports Both Video & Image Together) -->
-                            <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:16px; margin-bottom:1.2rem;">
-                                <div style="font-size:0.88rem; font-weight:750; color:#fff; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <i class="fas fa-file-shield" style="color:var(--gold);"></i> 
-                                        <span>ট্রেড হিস্টোরি প্রুফ ফাইল ও ভিডিও (Proof Verification Media)</span>
-                                    </div>
-                                    <button type="button" class="btn-outline" style="font-size:0.78rem; padding:4px 10px; border-radius:6px; color:var(--gold); border-color:rgba(212,175,55,0.4); display:inline-flex; align-items:center; gap:5px; cursor:pointer;" onclick="openUpdateProofMediaModal('${sub.id}', '${(sub.videoUrl || '').replace(/'/g, "\\'")}', '${(sub.screenshotUrl || '').replace(/'/g, "\\'")}')">
-                                        <i class="fas fa-edit"></i> প্রুফ মিডিয়া এডিট / আপডেট
-                                    </button>
-                                </div>
-
-                                <div style="display:flex; flex-direction:column; gap:16px;">
-                                    ${sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0) ? `
-                                        <!-- Automated Audit Summary Card -->
-                                        <div style="background:rgba(0,230,118,0.05); border:1px solid rgba(0,230,118,0.3); border-radius:12px; padding:16px;">
-                                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
-                                                <div style="display:flex; align-items:center; gap:8px;">
-                                                    <span style="background:rgba(0,230,118,0.2); color:#00e676; padding:4px 10px; border-radius:6px; font-weight:800; font-size:0.82rem; border:1px solid rgba(0,230,118,0.4);">
-                                                        <i class="fas fa-robot"></i> কোটেক্স অটোমেটিক অডিট সম্পন্ন
-                                                    </span>
-                                                    <span style="font-size:0.82rem; color:var(--text-secondary);">
-                                                        (ভিডিও বা ম্যানুয়াল স্ক্রিনশটের প্রয়োজন নেই)
-                                                    </span>
-                                                </div>
-                                                <button type="button" class="btn-success" style="padding:5px 12px; font-size:0.8rem; border-radius:6px; background:rgba(0,230,118,0.2); color:#00e676; border:1px solid rgba(0,230,118,0.4); cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
-                                                    <i class="fas fa-expand-alt"></i> পূর্ণাঙ্গ অডিট টেবিল দেখুন
-                                                </button>
-                                            </div>
-
-                                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:12px;">
-                                                <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
-                                                    <div style="font-size:0.72rem; color:var(--text-secondary);">শুরুর ক্যাপিটাল</div>
-                                                    <div style="font-weight:800; color:#fff; font-size:0.95rem; margin-top:2px;">$${(sub.startingCapital || 0).toFixed(2)}</div>
-                                                </div>
-                                                <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
-                                                    <div style="font-size:0.72rem; color:var(--text-secondary);">সমাপ্তি ক্যাপিটাল</div>
-                                                    <div style="font-weight:800; color:#00e676; font-size:0.95rem; margin-top:2px;">$${(sub.endingCapital || 0).toFixed(2)}</div>
-                                                </div>
-                                                <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
-                                                    <div style="font-size:0.72rem; color:var(--text-secondary);">মোট অডিটেড ট্রেড</div>
-                                                    <div style="font-weight:800; color:#fff; font-size:0.95rem; margin-top:2px;">${(sub.auditReport || []).length} টি</div>
-                                                </div>
-                                                <div style="background:rgba(0,0,0,0.35); padding:8px 12px; border-radius:8px;">
-                                                    <div style="font-size:0.72rem; color:var(--text-secondary);">স্ট্যাটাস</div>
-                                                    <div style="font-weight:800; color:${sub.disqualified ? '#ef4444' : '#00e676'}; font-size:0.95rem; margin-top:2px;">${sub.disqualified ? 'নিয়ম লঙ্ঘন' : '১০০% সঠিক ও রুল মান্য'}</div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Mini preview of trades -->
-                                            <div style="overflow-x:auto; background:rgba(0,0,0,0.4); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-                                                <table style="width:100%; font-size:0.78rem; text-align:left; border-collapse:collapse;">
-                                                    <thead>
-                                                        <tr style="border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
-                                                            <th style="padding:8px 10px;"># ধাপ</th>
-                                                            <th style="padding:8px 10px;">পরিকল্পিত স্টেক</th>
-                                                            <th style="padding:8px 10px;">কোটেক্স স্টেক</th>
-                                                            <th style="padding:8px 10px;">পেআউট %</th>
-                                                            <th style="padding:8px 10px;">অ্যাসেট ও টিকিট</th>
-                                                            <th style="padding:8px 10px;">ফলাফল</th>
-                                                            <th style="padding:8px 10px;">P&L</th>
-                                                            <th style="padding:8px 10px;">কমপ্লায়েন্স</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        ${(sub.auditReport || []).slice(0, 6).map((a, idx) => {
-                                                            const stepNum = a.tradeNum || a.stepIndex || (idx + 1);
-                                                            const planned = (a.plannedStake != null && a.plannedStake % 1 === 0) ? String(a.plannedStake) : Number(a.plannedStake || 0).toFixed(0);
-                                                            const actual = Number(a.actualStake || 0).toFixed(2);
-                                                            const ticket = a.ticketId || a.ticket || 'N/A';
-                                                            const outcome = a.outcome || a.result || 'N/A';
-                                                            const payout = a.payout || (a.payoutPercent ? a.payoutPercent + '%' : 'N/A');
-                                                            const pNum = parseFloat(String(payout).replace('%', '').trim()) || 0;
-                                                            const pGood = (pNum >= 85 || pNum === 0);
-                                                            const isPassed = (a.isPassed !== undefined ? a.isPassed : (a.isCompliant !== undefined ? a.isCompliant : true));
-                                                            const pnlNum = Number(a.pnl || 0);
-
-                                                            return `
-                                                                <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
-                                                                    <td style="padding:7px 10px; font-weight:700;">ধাপ #${stepNum}</td>
-                                                                    <td style="padding:7px 10px; color:var(--gold); font-weight:700;">$${planned}</td>
-                                                                    <td style="padding:7px 10px; font-weight:700; color:#38bdf8;">$${actual}</td>
-                                                                    <td style="padding:7px 10px;">
-                                                                        <span style="color:${pGood ? 'var(--neon-green)' : '#f87171'}; font-weight:700; background:${pGood ? 'rgba(0,230,118,0.1)' : 'rgba(239,68,68,0.1)'}; padding:2px 6px; border-radius:4px;">
-                                                                            ${payout}
-                                                                        </span>
-                                                                    </td>
-                                                                    <td style="padding:7px 10px; font-size:0.72rem; color:var(--text-secondary);">
-                                                                        <span style="color:#fff;">${a.asset || 'N/A'}</span> <span style="font-family:monospace; color:#aaa;">(${ticket})</span>
-                                                                    </td>
-                                                                    <td style="padding:7px 10px;">
-                                                                        <span class="badge ${outcome === 'WIN' ? 'badge-active' : (outcome === 'REFUND' ? 'badge-warning' : 'badge-rejected')}" style="padding:2px 6px; font-size:0.7rem;">
-                                                                            ${outcome}
-                                                                        </span>
-                                                                    </td>
-                                                                    <td style="padding:7px 10px; font-weight:700; color:${pnlNum >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'};">
-                                                                        ${pnlNum >= 0 ? '+' : ''}$${pnlNum.toFixed(2)}
-                                                                    </td>
-                                                                    <td style="padding:7px 10px;">
-                                                                        ${a.isRefund ? `
-                                                                            <span style="color:#f59e0b; font-weight:700;"><i class="fas fa-rotate"></i> রিফান্ড</span>
-                                                                        ` : isPassed ? `
-                                                                            <span style="color:#00e676; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-check-circle"></i> ✓ সঠিক</span>
-                                                                        ` : `
-                                                                            <span style="color:#ef4444; font-weight:700; display:inline-flex; align-items:center; gap:4px;" title="${escapeHtml(a.complianceStatus || a.reason || 'নিয়ম বহির্ভূত')}"><i class="fas fa-times-circle"></i> ✕ ত্রুটি</span>
-                                                                        `}
-                                                                    </td>
-                                                                </tr>
-                                                            `;
-                                                        }).join('')}
-                                                        ${(sub.auditReport || []).length > 6 ? `
-                                                            <tr>
-                                                                <td colspan="8" style="padding:6px 10px; text-align:center; color:var(--gold); font-size:0.75rem; cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
-                                                                    + আরও ${(sub.auditReport.length - 6)}টি ট্রেড দেখতে ক্লিক করুন...
-                                                                </td>
-                                                            </tr>
-                                                        ` : ''}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    ` : ''}
-
-                                    ${videoSrc ? `
-                                        <!-- 1. Playable Video Player for Session Recording -->
-                                        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:14px;">
-                                            <div style="font-size:0.82rem; color:var(--neon-blue); font-weight:750; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-                                                <i class="fas fa-play-circle" style="font-size:1.05rem;"></i> আপলোডকৃত সেশন ভিডিও প্রুফ (Playable Video):
-                                            </div>
-                                            <video controls playsinline preload="metadata" style="width:100%; max-width:720px; max-height:440px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); display:block; background:#000;">
-                                                <source src="${videoSrc}">
-                                                আপনার ব্রাউজারে ভিডিও প্লেয়ার সমর্থিত নয়।
-                                            </video>
-                                            <div style="margin-top:10px;">
-                                                <a href="${videoSrc}" target="_blank" class="btn-outline" style="font-size:0.8rem; padding:5px 12px; display:inline-flex; align-items:center; gap:6px; border-color:var(--neon-blue); color:var(--neon-blue); border-radius:6px;">
-                                                    <i class="fas fa-external-link-alt"></i> নতুন ট্যাবে ফুলস্ক্রিন ভিডিও দেখুন
-                                                </a>
-                                            </div>
-                                        </div>
-                                    ` : ''}
-
-                                    ${imageSrc ? `
-                                        <!-- 2. Screenshot Image Preview for Trade History -->
-                                        <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(212,175,55,0.3); border-radius:12px; padding:14px;">
-                                            <div style="font-size:0.82rem; color:var(--gold); font-weight:750; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-                                                <i class="fas fa-image" style="font-size:1.05rem;"></i> আপলোডকৃত ট্রেড হিস্টোরি স্ক্রিনশট ছবি (Trade History Screenshot):
-                                            </div>
-                                            <div style="position:relative; display:inline-block; max-width:100%; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.15);">
-                                                <img src="${imageSrc}" style="max-width:100%; max-height:420px; display:block; cursor:pointer;" onclick="openScreenshot('${imageSrc}')" title="ক্লিক করে বড় করে দেখুন" />
-                                                <div style="position:absolute; bottom:8px; right:8px;">
-                                                    <button class="btn-gold" style="font-size:0.75rem; padding:5px 12px; border-radius:6px;" onclick="openScreenshot('${imageSrc}')">
-                                                        <i class="fas fa-search-plus"></i> সম্পূর্ণ ছবি বড় করে দেখুন
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ` : ''}
-
-                                    ${externalVideoLink ? `
-                                        <!-- 3. External Video Link -->
-                                        <div>
-                                            <a href="${externalVideoLink}" target="_blank" class="btn-outline" style="border-color:var(--neon-blue); color:var(--neon-blue); font-size:0.82rem; padding:6px 14px; display:inline-flex; align-items:center; gap:6px; border-radius:8px;">
-                                                <i class="fas fa-video"></i> এক্সটার্নাল ভিডিও প্রুফ লিংক দেখুন (${externalVideoLink})
-                                            </a>
-                                        </div>
-                                    ` : ''}
-
-                                    ${(!videoSrc && !imageSrc && !externalVideoLink) ? `
-                                        ${sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0) ? `
-                                            <div style="padding:1rem; text-align:center; background:rgba(0,230,118,0.03); border-radius:10px; border:1px dashed rgba(0,230,118,0.25);">
-                                                <div style="color:#00e676; font-weight:700; font-size:0.85rem;"><i class="fas fa-check-circle"></i> ব্রোকার রিয়েল-টাইম ট্রেডস ও ম্যাথমেটিক্যাল ফর্মুলা অটোমেটিক অডিটকৃত</div>
-                                                <div style="color:var(--text-secondary); font-size:0.78rem; margin-top:2px;">এই সেশনের জন্য ম্যানুয়াল ভিডিও রেকর্ডিং বা ছবি দেওয়ার প্রয়োজন নেই।</div>
-                                            </div>
-                                        ` : `
-                                            <div style="padding:1.5rem; text-align:center; background:rgba(255,255,255,0.02); border-radius:10px; border:1px dashed rgba(255,255,255,0.15);">
-                                                <i class="fas fa-photo-video" style="font-size:1.8rem; color:var(--text-secondary); margin-bottom:8px; display:block;"></i>
-                                                <div style="color:#fff; font-weight:700; font-size:0.9rem;">কোনো প্রুফ ফাইল বা ভিডিও লিংক যুক্ত নেই</div>
-                                                <div style="color:var(--text-secondary); font-size:0.8rem; margin-top:4px; margin-bottom:12px;">ট্রেডারের মূল ভিডিও/ইমেজ লিংক এখানে সেট করুন অথবা ট্রেডারকে পুনরায় আপলোডের অনুরোধ পাঠান।</div>
-                                                <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-                                                    <button type="button" class="btn-gold" style="font-size:0.8rem; padding:6px 14px; border-radius:6px;" onclick="openUpdateProofMediaModal('${sub.id}', '', '')">
-                                                        <i class="fas fa-plus-circle"></i> ভিডিও / স্ক্রিনশট লিংক যুক্ত করুন
-                                                    </button>
-                                                    <button type="button" class="btn-warning" style="background:#d97706; font-size:0.8rem; padding:6px 14px; border-radius:6px; color:#fff; border:none;" onclick="openResubmitModal('${sub.id}', '${sessionNum}')">
-                                                        <i class="fas fa-redo-alt"></i> পুনরায় আপলোডের অনুরোধ পাঠান
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        `}
-                                    ` : ''}
-                                </div>
-                            </div>
-
-                            <!-- Admin Verification & Action Controls -->
-                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
-                                
-                                ${sub.status === 'under_review' ? `
-                                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                                        <button class="btn-success" style="padding:7px 16px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px;" onclick="reviewSubmission('${sub.id}', 'verified')">
-                                            <i class="fas fa-check-circle"></i> ${sub.isPractice ? `প্র্যাকটিস #${sub.practiceSessionNumber || sessionNum} অনুমোদন করুন` : `সেশন #${sessionNum} অনুমোদন করুন (Verify +1 Day)`}
-                                        </button>
-                                        <button class="btn-danger" style="padding:7px 16px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px;" onclick="reviewSubmission('${sub.id}', 'rejected')">
-                                            <i class="fas fa-times-circle"></i> ${sub.isPractice ? 'প্র্যাকটিস বাতিল ও ফিডব্যাক দিন' : 'বাতিল করুন (Reject)'}
-                                        </button>
-                                        <button class="btn-warning" style="background:linear-gradient(135deg, #d97706, #b45309); color:#fff; border:none; padding:7px 16px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; border-radius:8px; cursor:pointer;" onclick="openResubmitModal('${sub.id}', '${sessionNum}')">
-                                            <i class="fas fa-redo-alt"></i> পুনরায় আপলোডের অনুরোধ (Request Re-upload)
-                                        </button>
-                                        <button type="button" class="btn-outline" style="padding:7px 14px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; border-color:rgba(212,175,55,0.4); color:var(--gold); border-radius:8px; cursor:pointer;" onclick="openUpdateProofMediaModal('${sub.id}', '${(sub.videoUrl || '').replace(/'/g, "\\'")}', '${(sub.screenshotUrl || '').replace(/'/g, "\\'")}')">
-                                            <i class="fas fa-link"></i> প্রুফ মিডিয়া লিংক আপডেট
-                                        </button>
-                                        ${!sub.isPractice ? `
-                                            <button class="btn-danger" style="background:#dc2626; border:none; padding:7px 14px; font-weight:700; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; border-radius:8px; cursor:pointer;" onclick="openDisqualifyModal('${ch?.id}', '${sub.id}')" title="এই সেশনে রুলস লঙ্ঘনের কারণে সম্পূর্ণ চ্যালেঞ্জ বাতিল ও বাদ দিন">
-                                                <i class="fas fa-ban"></i> রুল ভঙ্গে চ্যালেঞ্জ বাতিল
-                                            </button>
-                                        ` : `
-                                            <span style="font-size:0.75rem; color:#93c5fd; background:rgba(59,130,246,0.12); padding:5px 10px; border-radius:6px; border:1px solid rgba(59,130,246,0.25);">
-                                                🛡️ প্র্যাকটিসে ভুল করলেও চ্যালেঞ্জ বাতিল হবে না
-                                            </span>
-                                        `}
-                                    </div>
-                                ` : sub.status === 'needs_resubmission' ? `
-                                    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                                        <div style="background:rgba(217,119,6,0.18); border:1px solid rgba(217,119,6,0.4); padding:6px 12px; border-radius:6px; color:#fbbf24; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; font-weight:700;">
-                                            <i class="fas fa-clock"></i> ট্রেডারের নিকট পুনরায় আপলোডের অনুরোধ পাঠানো হয়েছে
-                                        </div>
-                                        <button class="btn-warning" style="background:#d97706; color:#fff; border:none; padding:6px 14px; font-size:0.8rem; font-weight:700; border-radius:6px; cursor:pointer;" onclick="openResubmitModal('${sub.id}', '${sessionNum}', \`${escapeHtml(sub.adminFeedback || '').replace(/`/g, '\\`')}\`)">
-                                            <i class="fas fa-edit"></i> নির্দেশনা এডিট
-                                        </button>
-                                        <button class="btn-success" style="padding:6px 14px; font-size:0.8rem; font-weight:700; border-radius:6px;" onclick="reviewSubmission('${sub.id}', 'verified')">
-                                            <i class="fas fa-check"></i> সরাসরি অনুমোদন
-                                        </button>
-                                        <button class="btn-danger" style="padding:6px 14px; font-size:0.8rem; font-weight:700; border-radius:6px;" onclick="reviewSubmission('${sub.id}', 'rejected')">
-                                            <i class="fas fa-times"></i> বাতিল
-                                        </button>
-                                        ${!sub.isPractice ? `
-                                            <button class="btn-danger" style="background:#dc2626; border:none; padding:6px 12px; font-size:0.8rem; font-weight:700; border-radius:6px; cursor:pointer;" onclick="openDisqualifyModal('${ch?.id}', '${sub.id}')">
-                                                <i class="fas fa-ban"></i> রুল ভঙ্গে বাদ দিন
-                                            </button>
-                                        ` : ''}
-                                    </div>
-                                ` : (sub.status === 'verified' || sub.status === 'auto_verified') ? `
-                                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                                        <div style="color:var(--neon-green); font-weight:700; font-size:0.86rem; display:inline-flex; align-items:center; gap:6px;">
-                                            <i class="fas ${sub.status === 'auto_verified' ? 'fa-robot' : 'fa-check-double'}"></i> 
-                                            ${sub.status === 'auto_verified' ? `স্বয়ংক্রিয় অডিট দ্বারা সেশন #${sessionNum} ভেরিফাইড (+১ দিন সম্পন্ন)` : (sub.isPractice ? `প্র্যাকটিস #${sub.practiceSessionNumber || sessionNum} যাচাই ও অনুমোদন সম্পন্ন` : `সেশন #${sessionNum} অনুমোদিত ও চ্যালেঞ্জ অগ্রগতিতে যুক্ত হয়েছে (+১ দিন সম্পন্ন)`)}
-                                        </div>
-                                        ${(sub.fileType === 'auto_audit' || (sub.auditReport && sub.auditReport.length > 0)) ? `
-                                            <button type="button" class="btn-success" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.4); cursor:pointer;" onclick="openAuditReportModal('${sub.id}')">
-                                                <i class="fas fa-bolt"></i> অডিট রিপোর্ট (${(sub.auditReport || []).length} ট্রেডস)
-                                            </button>
-                                        ` : ''}
-                                        ${!sub.isPractice ? `
-                                            <button class="btn-outline" style="border-color:rgba(239,68,68,0.4); color:#f87171; padding:4px 10px; font-size:0.75rem; border-radius:6px;" onclick="openDisqualifyModal('${ch?.id}', '${sub.id}')" title="পরবর্তী পর্যালোচনায় রুল ভঙ্গ ধরা পড়লে বাদ দিন">
-                                                <i class="fas fa-ban"></i> রুল ভঙ্গে বাতিল
-                                            </button>
-                                        ` : ''}
-                                    </div>
-                                ` : `
-                                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                                        <div style="color:var(--neon-red); font-weight:700; font-size:0.86rem; display:inline-flex; align-items:center; gap:6px;">
-                                            <i class="fas fa-times-circle"></i> ${sub.isPractice ? `প্র্যাকটিস #${sub.practiceSessionNumber || sessionNum} বাতিল করা হয়েছে (ট্রেডার বাদ পড়েননি)` : `সেশন #${sessionNum} বাতিল করা হয়েছে`} ${sub.adminFeedback ? `(কারণ: ${escapeHtml(sub.adminFeedback)})` : ''}
-                                        </div>
-                                        <button class="btn-warning" style="background:#d97706; color:#fff; border:none; padding:4px 10px; font-size:0.75rem; font-weight:700; border-radius:6px; cursor:pointer;" onclick="openResubmitModal('${sub.id}', '${sessionNum}')">
-                                            <i class="fas fa-redo-alt"></i> পুনরায় আপলোডের সুযোগ দিন
-                                        </button>
-                                        ${!sub.isPractice ? `
-                                            <button class="btn-danger" style="background:#dc2626; border:none; padding:4px 10px; font-size:0.75rem; font-weight:700; border-radius:6px; cursor:pointer;" onclick="openDisqualifyModal('${ch?.id}', '${sub.id}')">
-                                                <i class="fas fa-ban"></i> রুল ভঙ্গে বাদ দিন
-                                            </button>
-                                        ` : ''}
-                                    </div>
-                                `}
-
-                                <button class="btn-outline" style="border-color:rgba(239,68,68,0.4); color:#f87171; padding:6px 12px; font-size:0.8rem; border-radius:6px;" onclick="handleDeleteSubmission('${sub.id}')" title="ডিলিট করুন">
-                                    <i class="fas fa-trash-alt"></i> মুছে ফেলুন
+                                <button type="button" onclick="setTraderSessionHistoryFilter('failed')" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.45); padding:6px 14px; border-radius:8px; font-size:0.8rem; font-weight:800; cursor:pointer;">
+                                    <i class="fas fa-ban"></i> বাদ পড়া চ্যালেঞ্জের সেশন দেখুন (${toBanglaDigits(failedSessCount)}) ➔
                                 </button>
                             </div>
+                        ` : ''}
+                    `;
+                    return;
+                }
+            } else if (traderSessionHistoryFilter === 'failed') {
+                if (targetGroups.length === 0) {
+                    sessionsContainer.innerHTML = `
+                        <div style="text-align:center; padding:3rem 1.5rem; background:rgba(255,255,255,0.02); border-radius:16px; border:1px dashed rgba(255,255,255,0.1);">
+                            <i class="fas fa-check-circle" style="font-size:2.8rem; color:var(--neon-green); opacity:0.5; margin-bottom:12px;"></i>
+                            <h4 style="font-size:1.12rem; color:#fff; font-weight:700; margin-bottom:6px;">এই ট্রেডারের পূর্বে বাদ পড়া কোনো চ্যালেঞ্জ নেই</h4>
+                            <p style="color:var(--text-secondary); font-size:0.86rem; max-width:500px; margin:0 auto;">
+                                ট্রেডার এখনো কোনো চ্যালেঞ্জ থেকে ডিসকোয়ালিফাই বা বাদ পড়েননি। রানিং সেশন দেখতে <strong>"রানিং চ্যালেঞ্জ সেশন"</strong> বাটনে চাপ দিন।
+                            </p>
                         </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                    return;
+                }
+            }
+
+            // Render Challenge Group Blocks (Challenge #1, Challenge #2, ...)
+            sessionsContainer.innerHTML = targetGroups.map(grp => renderChallengeGroupBlockHtml(grp)).join('');
         }
 
         function toggleSessionCard(subId) {
