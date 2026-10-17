@@ -587,42 +587,53 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 2rem;
-            padding-bottom: 1.2rem;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
             border-bottom: 1px solid var(--card-border);
         }
 
         .header-title h1 {
-            font-size: 1.8rem;
-            font-weight: 900;
-            letter-spacing: -0.5px;
+            font-size: 1.38rem;
+            font-weight: 850;
+            letter-spacing: -0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
         }
 
         .header-title p {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
-            margin-top: 3px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 8px;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .btn-gold {
             background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
             color: #0a0a0a;
             border: none;
-            padding: 10px 20px;
+            padding: 9px 16px;
             border-radius: 10px;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             text-decoration: none;
+            white-space: nowrap;
             transition: all 0.2s;
         }
 
@@ -635,15 +646,16 @@
             background: transparent;
             border: 1px solid var(--card-border);
             color: var(--text-primary);
-            padding: 10px 18px;
+            padding: 8px 14px;
             border-radius: 10px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.84rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 6px;
             text-decoration: none;
+            white-space: nowrap;
         }
 
         .btn-outline-header:hover {
@@ -655,16 +667,17 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: var(--text-primary);
-            padding: 8px 16px;
+            padding: 7px 14px;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 6px;
             transition: all 0.2s ease;
             text-decoration: none;
+            white-space: nowrap;
         }
 
         .btn-outline:hover {
@@ -704,40 +717,46 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ---------- OVERVIEW TAB: RUNNING CHALLENGES ---------- */
+        /* ---------- OVERVIEW & CHALLENGES STATS GRID (4-IN-A-ROW) ---------- */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .stat-card {
             display: flex;
             align-items: center;
-            gap: 1.2rem;
+            gap: 0.9rem;
+            padding: 1.1rem 1.2rem;
+            min-width: 0;
         }
 
         .stat-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
+            flex-shrink: 0;
         }
 
         .stat-val {
-            font-size: 1.7rem;
-            font-weight: 900;
+            font-size: 1.5rem;
+            font-weight: 850;
             line-height: 1.1;
         }
 
         .stat-lbl {
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             color: var(--text-secondary);
-            margin-top: 4px;
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* Running Challenge Hero Card */
@@ -842,10 +861,16 @@
         .submission-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            gap: 1.5rem;
+            align-items: start;
             min-width: 0;
             width: 100%;
             max-width: 100%;
+        }
+
+        .submission-container:has(#submissionFormCard[style*="display: none"]),
+        .submission-container:has(#submissionFormCard[style*="display:none"]) {
+            grid-template-columns: 1fr;
         }
 
         .submission-container > * {
@@ -861,25 +886,25 @@
         }
 
         .form-group {
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
         }
 
         .form-group label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 600;
             color: var(--text-secondary);
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .form-control {
             width: 100%;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 12px 14px;
+            border-radius: 10px;
+            padding: 10px 13px;
             color: #fff;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-family: inherit;
             outline: none;
             transition: border-color 0.2s;
@@ -952,26 +977,29 @@
         /* Table */
         .table-responsive {
             overflow-x: auto;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
         }
 
         .styled-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
         }
 
         .styled-table th {
             text-align: left;
-            padding: 12px 16px;
+            padding: 10px 14px;
             background: rgba(255, 255, 255, 0.04);
             color: var(--text-secondary);
             font-weight: 700;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
             border-bottom: 1px solid var(--card-border);
         }
 
         .styled-table td {
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-bottom: 1px solid var(--card-border);
             color: var(--text-primary);
         }
@@ -995,9 +1023,13 @@
         /* ---------- MONEY MANAGEMENT TAB & MASANIELLO (AJ@0-4) ---------- */
         .mm-inputs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.2rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0.85rem;
+            margin-bottom: 0;
+        }
+
+        .mm-inputs-grid.free-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
         }
 
         .mm-summary-banner {
@@ -1031,12 +1063,12 @@
             color: var(--yellow);
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 800;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
         }
         .mas-presets-bar {
             display: flex;
@@ -1066,15 +1098,15 @@
         }
         .mas-kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.9rem;
+            margin-bottom: 1.2rem;
         }
         .mas-kpi-card {
-            background: rgba(255,255,255,0.025);
+            background: #151821;
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 14px;
-            padding: 1.1rem;
+            border-radius: 13px;
+            padding: 0.95rem 1.1rem;
             position: relative;
             overflow: hidden;
             transition: all 0.25s ease;
@@ -1085,35 +1117,38 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
         .mas-kpi-card.highlight-stake {
-            background: linear-gradient(135deg, rgba(245,176,65,0.18), rgba(245,176,65,0.05));
+            background: linear-gradient(135deg, rgba(245,176,65,0.16), rgba(245,176,65,0.04));
             border: 1.5px solid var(--yellow);
-            box-shadow: 0 0 20px rgba(245,176,65,0.22);
+            box-shadow: 0 0 18px rgba(245,176,65,0.18);
             animation: masPulseStake 2.5s infinite;
         }
         @keyframes masPulseStake {
-            0%, 100% { box-shadow: 0 0 15px rgba(245,176,65,0.18); }
-            50% { box-shadow: 0 0 28px rgba(245,176,65,0.45); }
+            0%, 100% { box-shadow: 0 0 14px rgba(245,176,65,0.15); }
+            50% { box-shadow: 0 0 24px rgba(245,176,65,0.38); }
         }
         .mas-kpi-lbl {
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 6px;
         }
         .mas-kpi-val {
-            font-size: 1.7rem;
-            font-weight: 900;
+            font-size: 1.5rem;
+            font-weight: 850;
             color: #fff;
-            line-height: 1.1;
-            margin-bottom: 4px;
+            line-height: 1.15;
+            margin-bottom: 3px;
         }
         .mas-kpi-sub {
-            font-size: 0.78rem;
+            font-size: 0.74rem;
             color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .mas-active-row {
             background: linear-gradient(90deg, rgba(245,176,65,0.18), rgba(245,176,65,0.04)) !important;
@@ -1130,10 +1165,10 @@
             background: linear-gradient(135deg, #10b981, #059669);
             color: #fff;
             border: none;
-            padding: 7px 16px;
+            padding: 6px 14px;
             border-radius: 8px;
             font-weight: 800;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(16,185,129,0.3);
             transition: all 0.2s ease;
@@ -1150,10 +1185,10 @@
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: #fff;
             border: none;
-            padding: 7px 16px;
+            padding: 6px 14px;
             border-radius: 8px;
             font-weight: 800;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(239,68,68,0.3);
             transition: all 0.2s ease;
@@ -1173,7 +1208,7 @@
             padding: 4px 10px;
             border-radius: 6px;
             font-weight: 800;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
         }
         .mas-outcome-w {
             background: rgba(16,185,129,0.18);
@@ -1186,15 +1221,15 @@
             color: #ef4444;
         }
         .mas-status-banner {
-            border-radius: 14px;
-            padding: 1.1rem 1.4rem;
-            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            padding: 0.85rem 1.15rem;
+            margin-bottom: 1.2rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 1rem;
-            font-size: 0.92rem;
+            gap: 0.75rem;
+            font-size: 0.86rem;
         }
         .mas-banner-running {
             background: linear-gradient(135deg, rgba(245,176,65,0.12), rgba(0,0,0,0.5));
@@ -2153,40 +2188,60 @@
         }
 
         @media (max-width: 640px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 10px !important;
+            .stats-grid:not(#dashboardPackagesGrid) {
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                gap: 6px !important;
             }
-            .stat-card {
-                padding: 0.9rem !important;
-                gap: 10px !important;
+            .stats-grid:not(#dashboardPackagesGrid) .stat-card {
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                padding: 8px 4px !important;
+                gap: 4px !important;
+                border-radius: 10px !important;
             }
-            .stat-icon {
-                width: 38px !important;
-                height: 38px !important;
+            .stats-grid:not(#dashboardPackagesGrid) .stat-icon {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 0.85rem !important;
+                border-radius: 8px !important;
+            }
+            .stats-grid:not(#dashboardPackagesGrid) .stat-val {
                 font-size: 1.05rem !important;
             }
-            .stat-val {
-                font-size: 1.25rem !important;
+            .stats-grid:not(#dashboardPackagesGrid) .stat-lbl {
+                font-size: 0.62rem !important;
             }
-            .stat-lbl {
-                font-size: 0.7rem !important;
-            }
-            .mas-kpi-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
+            .mm-inputs-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                 gap: 8px !important;
             }
+            .mm-inputs-grid:not(.free-grid) > div:first-child {
+                grid-column: 1 / -1;
+            }
+            .mas-kpi-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 6px !important;
+            }
             .mas-kpi-card {
-                padding: 0.85rem !important;
+                padding: 8px 6px !important;
+                text-align: center;
+                border-radius: 10px !important;
             }
             .mas-kpi-val {
-                font-size: 1.35rem !important;
+                font-size: 1.05rem !important;
             }
             .mas-kpi-lbl {
-                font-size: 0.72rem !important;
+                font-size: 0.64rem !important;
+                justify-content: center !important;
+                margin-bottom: 3px !important;
+            }
+            .mas-kpi-lbl i {
+                display: none !important;
             }
             .mas-kpi-sub {
-                font-size: 0.7rem !important;
+                font-size: 0.6rem !important;
             }
             .mas-presets-bar {
                 flex-wrap: nowrap !important;
@@ -2200,8 +2255,8 @@
                 padding: 4px 10px;
             }
             .btn-mas-w, .btn-mas-l {
-                height: 52px !important;
-                font-size: 1.05rem !important;
+                height: 44px !important;
+                font-size: 0.95rem !important;
             }
             .styled-table th, .styled-table td {
                 padding: 9px 10px !important;
@@ -2618,13 +2673,13 @@
     <main class="main-wrapper">
         <!-- Top Header -->
         <header class="top-header">
-            <div class="header-title-row" style="display:flex; align-items:center; gap:12px; width:100%; min-width:0;">
+            <div class="header-title-row" style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
                 <button class="mobile-toggle" onclick="toggleSidebar()">
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="header-title" style="flex:1 1 0%; min-width:0; overflow:hidden;">
-                    <h1 id="pageHeading">📊 ড্যাশবোর্ড (Trader Dashboard)</h1>
-                    <p id="pageSubheading">আপনার সক্রিয় চ্যালেঞ্জ ও লাইভ পারফরম্যান্স ওভারভিউ।</p>
+                    <h1 id="pageHeading">📊 ড্যাশবোর্ড</h1>
+                    <p id="pageSubheading">অ্যাক্টিভ চ্যালেঞ্জ ও পারফরম্যান্স।</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -2700,9 +2755,9 @@
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
                 <div>
-                    <div style="font-weight:700; color:#fff; font-size:0.92rem;">ইমেইল আনভেরিফাইড (Email Unverified)</div>
+                    <div style="font-weight:700; color:#fff; font-size:0.92rem;">ইমেইল আনভেরিফাইড</div>
                     <div style="font-size:0.82rem; color:var(--text-secondary);">
-                        অ্যাকাউন্টের নিরাপত্তা ও পেআউট সুবিধা পেতে ইমেইল ভেরিফাই করুন।
+                        নিরাপত্তা ও পেআউট সুবিধা পেতে ইমেইল ভেরিফাই করুন।
                     </div>
                 </div>
             </div>
@@ -2731,7 +2786,7 @@
                     </div>
                     <div>
                         <div class="stat-val" id="statDaysCount">0 / 15</div>
-                        <div class="stat-lbl">Sessions Completed</div>
+                        <div class="stat-lbl">Sessions</div>
                     </div>
                 </div>
                 <div class="glass-card stat-card">
@@ -2740,7 +2795,7 @@
                     </div>
                     <div>
                         <div class="stat-val" id="statDrawdown">0.0%</div>
-                        <div class="stat-lbl">Max Drawdown (Limit 25%)</div>
+                        <div class="stat-lbl">Max Drawdown</div>
                     </div>
                 </div>
                 <div class="glass-card stat-card">
@@ -2749,7 +2804,7 @@
                     </div>
                     <div>
                         <div class="stat-val" id="statSubmissions">0</div>
-                        <div class="stat-lbl">Proofs Submitted</div>
+                        <div class="stat-lbl">Proofs</div>
                     </div>
                 </div>
                 <div class="glass-card stat-card">
@@ -2758,29 +2813,29 @@
                     </div>
                     <div>
                         <div class="stat-val" id="statProfitSplit">85%</div>
-                        <div class="stat-lbl">Profit Split Share</div>
+                        <div class="stat-lbl">Profit Split</div>
                     </div>
                 </div>
             </div>
 
             <!-- Official 3 Rules Card in Dashboard -->
-            <div class="glass-card" style="margin-top:1.5rem; background:rgba(245,176,65,0.04); border-color:rgba(245,176,65,0.25);">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:8px;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <i class="fas fa-scroll" style="color:var(--yellow); font-size:1.2rem;"></i>
-                        <h3 style="font-size:1.15rem; font-weight:800; color:#fff;">চ্যালেঞ্জের ৩টি নিয়ম (Official Rules)</h3>
+            <div class="glass-card" style="margin-top:1.25rem; background:rgba(245,176,65,0.04); border-color:rgba(245,176,65,0.25);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.85rem; flex-wrap:wrap; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-scroll" style="color:var(--yellow); font-size:1.1rem;"></i>
+                        <h3 style="font-size:1.05rem; font-weight:800; color:#fff; margin:0;">চ্যালেঞ্জের ৩টি নিয়ম</h3>
                     </div>
-                    <span style="font-size:0.75rem; background:rgba(245,176,65,0.15); color:var(--yellow); padding:3px 10px; border-radius:20px; font-weight:700;">Strict Rules</span>
+                    <span style="font-size:0.72rem; background:rgba(245,176,65,0.15); color:var(--yellow); padding:3px 10px; border-radius:20px; font-weight:700;">Strict Rules</span>
                 </div>
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">
-                    <div style="background:rgba(255,255,255,0.02); padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-                        <strong style="color:var(--yellow); font-size:0.95rem;">১.</strong> মানি ম্যানেজমেন্ট শিট অনুযায়ী সর্বোচ্চ ২৫% ব্যালেন্স ব্যবহার করে ১৫ টি সেশন কমপ্লিট করতে হবে।
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:10px; font-size:0.84rem; color:var(--text-secondary); line-height:1.45;">
+                    <div style="background:rgba(255,255,255,0.02); padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+                        <strong style="color:var(--yellow);">১.</strong> মানি ম্যানেজমেন্ট শিট অনুযায়ী সর্বোচ্চ ২৫% রিস্কে ১৫টি সেশন সম্পন্ন করতে হবে।
                     </div>
-                    <div style="background:rgba(255,255,255,0.02); padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-                        <strong style="color:var(--yellow); font-size:0.95rem;">২.</strong> একদিনে সর্বোচ্চ তিনটা সেশন করতে পারবেন। আপনার সুবিধা অনুযায়ী ৫ দিন থেকে ১৫ দিনের মধ্যে চ্যালেঞ্জ কমপ্লিট করলেই হবে।
+                    <div style="background:rgba(255,255,255,0.02); padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+                        <strong style="color:var(--yellow);">২.</strong> দিনে সর্বোচ্চ ৩টি সেশন এবং ৫–১৫ দিনের মধ্যে চ্যালেঞ্জ সম্পন্ন করতে হবে।
                     </div>
-                    <div style="background:rgba(255,255,255,0.02); padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-                        <strong style="color:var(--yellow); font-size:0.95rem;">৩.</strong> সকল ট্রেড অবশ্যই ৮৫% বা তার বেশি রিটার্ন দেওয়া মার্কেটে এক্সিকিউট করতে হবে। চ্যালেঞ্জ চলাকালীন মানি ম্যানেজমেন্ট শীটের বাহিরে কোন ট্রেড করা যাবে না।
+                    <div style="background:rgba(255,255,255,0.02); padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+                        <strong style="color:var(--yellow);">৩.</strong> ন্যূনতম ৮৫%+ পেআউট মার্কেটে শিটের স্টেক সাইজ অনুযায়ী ট্রেড করতে হবে।
                     </div>
                 </div>
             </div>
@@ -2791,14 +2846,14 @@
         ============================================== -->
         <section class="tab-pane" id="pane-my-challenges">
             <!-- Top Summary Stats Grid -->
-            <div class="stats-grid" style="margin-bottom:1.5rem;">
+            <div class="stats-grid" style="margin-bottom:1.25rem;">
                 <div class="glass-card stat-card" style="cursor:pointer;" onclick="setMyChallengesFilter('all')">
                     <div class="stat-icon" style="background:rgba(245,176,65,0.15); color:var(--yellow);">
                         <i class="fas fa-layer-group"></i>
                     </div>
                     <div>
                         <div class="stat-val" id="myChStatTotal">0</div>
-                        <div class="stat-lbl">মোট চ্যালেঞ্জ (Total)</div>
+                        <div class="stat-lbl">মোট চ্যালেঞ্জ</div>
                     </div>
                 </div>
                 <div class="glass-card stat-card" style="cursor:pointer;" onclick="setMyChallengesFilter('in_progress')">
@@ -2807,7 +2862,7 @@
                     </div>
                     <div>
                         <div class="stat-val" id="myChStatRunning" style="color:var(--neon-green);">0</div>
-                        <div class="stat-lbl">রানিং চ্যালেঞ্জ (Active)</div>
+                        <div class="stat-lbl">রানিং</div>
                     </div>
                 </div>
                 <div class="glass-card stat-card" style="cursor:pointer;" onclick="setMyChallengesFilter('failed')">
@@ -2816,7 +2871,7 @@
                     </div>
                     <div>
                         <div class="stat-val" id="myChStatFailed" style="color:var(--danger-red);">0</div>
-                        <div class="stat-lbl">বাদ পড়া (Disqualified)</div>
+                        <div class="stat-lbl">বাদ পড়া</div>
                     </div>
                 </div>
                 <div class="glass-card stat-card" style="cursor:pointer;" onclick="setMyChallengesFilter('passed')">
@@ -2825,37 +2880,37 @@
                     </div>
                     <div>
                         <div class="stat-val" id="myChStatPassed" style="color:#60a5fa;">0</div>
-                        <div class="stat-lbl">উত্তীর্ণ (Passed)</div>
+                        <div class="stat-lbl">উত্তীর্ণ</div>
                     </div>
                 </div>
             </div>
 
             <!-- Filter Controls Bar -->
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1.2rem;">
-                <div style="display:flex; gap:8px; flex-wrap:wrap;" id="myChallengesFilterBar">
-                    <button type="button" class="btn-outline active-filter-btn" id="filterBtn-all" onclick="setMyChallengesFilter('all', this)" style="padding:6px 14px; font-size:0.82rem; border-radius:8px;">
-                        সকল চ্যালেঞ্জ
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:1.1rem;">
+                <div style="display:flex; gap:6px; flex-wrap:wrap;" id="myChallengesFilterBar">
+                    <button type="button" class="btn-outline active-filter-btn" id="filterBtn-all" onclick="setMyChallengesFilter('all', this)" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;">
+                        সকল
                     </button>
-                    <button type="button" class="btn-outline" id="filterBtn-in_progress" onclick="setMyChallengesFilter('in_progress', this)" style="padding:6px 14px; font-size:0.82rem; border-radius:8px;">
-                        🟢 রানিং (Active)
+                    <button type="button" class="btn-outline" id="filterBtn-in_progress" onclick="setMyChallengesFilter('in_progress', this)" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;">
+                        🟢 রানিং
                     </button>
-                    <button type="button" class="btn-outline" id="filterBtn-failed" onclick="setMyChallengesFilter('failed', this)" style="padding:6px 14px; font-size:0.82rem; border-radius:8px;">
-                        🔴 বাদ পড়া (Disqualified)
+                    <button type="button" class="btn-outline" id="filterBtn-failed" onclick="setMyChallengesFilter('failed', this)" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;">
+                        🔴 বাদ পড়া
                     </button>
-                    <button type="button" class="btn-outline" id="filterBtn-passed" onclick="setMyChallengesFilter('passed', this)" style="padding:6px 14px; font-size:0.82rem; border-radius:8px;">
-                        🏆 উত্তীর্ণ (Passed)
+                    <button type="button" class="btn-outline" id="filterBtn-passed" onclick="setMyChallengesFilter('passed', this)" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;">
+                        🏆 উত্তীর্ণ
                     </button>
-                    <button type="button" class="btn-outline" id="filterBtn-pending_approval" onclick="setMyChallengesFilter('pending_approval', this)" style="padding:6px 14px; font-size:0.82rem; border-radius:8px;">
-                        ⏳ পেন্ডিং (Pending)
+                    <button type="button" class="btn-outline" id="filterBtn-pending_approval" onclick="setMyChallengesFilter('pending_approval', this)" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;">
+                        ⏳ পেন্ডিং
                     </button>
                 </div>
-                <button type="button" class="btn-gold" onclick="switchTab('buy-challenge')" style="padding:7px 16px; font-size:0.84rem; font-weight:800; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
-                    <i class="fas fa-shopping-cart"></i> নতুন চ্যালেঞ্জ নিন
+                <button type="button" class="btn-gold" onclick="switchTab('buy-challenge')" style="padding:6px 14px; font-size:0.82rem; font-weight:800; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fas fa-plus"></i> নতুন চ্যালেঞ্জ
                 </button>
             </div>
 
             <!-- List Container -->
-            <div id="myChallengesListContainer" style="display:flex; flex-direction:column; gap:1.2rem;">
+            <div id="myChallengesListContainer" style="display:flex; flex-direction:column; gap:1rem;">
                 <!-- Populated dynamically -->
             </div>
         </section>
@@ -2864,149 +2919,125 @@
              TAB 2: DAILY TRADE PROOF (VIDEO & SCREENSHOT)
         ============================================== -->
         <section class="tab-pane" id="pane-submission">
+            <!-- Dedicated Resubmission Alert Container (Outside grid so it never occupies a column) -->
+            <div id="submissionResubmissionAlertContainer"></div>
+
+            <!-- Locked Notice Card (Displayed when no active in_progress challenge exists) -->
+            <div id="submissionLockedCard" style="display:none; margin-bottom:1.5rem;"></div>
+
             <div class="submission-container">
-                <!-- Dedicated Resubmission Alert Container -->
-                <div id="submissionResubmissionAlertContainer"></div>
-
-                <!-- Locked Notice Card (Displayed when no active in_progress challenge exists) -->
-                <!-- Locked Notice Container (Displayed when no active in_progress challenge exists) -->
-                <div id="submissionLockedCard" style="display:none; margin-bottom:2rem;"></div>
-
                 <!-- Upload Form Card (Displayed only when challenge is active/in_progress) -->
                 <div class="glass-card" id="submissionFormCard">
-                    <div id="subActiveChallengeNotice" style="display:none; background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); border-radius:10px; padding:10px 14px; margin-bottom:1.2rem; font-size:0.86rem; color:#fff;">
+                    <div id="subActiveChallengeNotice" style="display:none; background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); border-radius:10px; padding:10px 14px; margin-bottom:1rem; font-size:0.85rem; color:#fff;">
                         <!-- Active challenge info injected -->
                     </div>
 
-                    <!-- Official Session Limits & Duration Notice Banner -->
-                    <div style="background:rgba(245,176,65,0.06); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px 16px; margin-bottom:1.4rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <div style="width:36px; height:36px; border-radius:8px; background:rgba(245,176,65,0.18); color:var(--yellow); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">
-                                <i class="fas fa-calendar-check"></i>
-                            </div>
-                            <div>
-                                <div style="font-weight:800; color:#fff; font-size:0.95rem;">সেশন সাবমিশন নির্দেশিকা</div>
-                                <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:2px;">
-                                    দিনে সর্বোচ্চ ৩ সেশন • মোট ১৫ সেশন (৫-১৫ দিন) • রাত ১১টার মধ্যে রেজাল্ট
-                                </div>
-                            </div>
-                        </div>
-                        <span class="badge" style="background:rgba(245,176,65,0.15); color:var(--yellow); font-size:0.75rem; padding:4px 10px; border-radius:6px; font-weight:700;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:1rem;">
+                        <h2 style="font-size:1.15rem; font-weight:800; margin:0;">
+                            <i class="fas fa-cloud-upload-alt" style="color:var(--yellow);"></i> সেশন প্রুফ সাবমিশন
+                        </h2>
+                        <span class="badge" style="background:rgba(245,176,65,0.15); color:var(--yellow); font-size:0.74rem; padding:4px 10px; border-radius:6px; font-weight:700;">
                             সর্বোচ্চ ৩ সেশন/দিন
                         </span>
                     </div>
 
-                    <h2 style="font-size:1.25rem; font-weight:800; margin-bottom:0.3rem;">
-                        <i class="fas fa-cloud-upload-alt" style="color:var(--yellow);"></i> ট্রেড প্রুফ সাবমিশন (Session Proof)
-                    </h2>
-                    <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:1.2rem;">
-                        ব্রোকারের ট্রেড হিস্টোরি স্ক্রিনশট ও ভিডিও ফাইল বা লিংক দিয়ে সেশন প্রুফ জমা দিন।
-                    </p>
                     <!-- Auto-Sync from Money Management Sheet Notice -->
-                    <div id="subSheetSyncNotice" style="display:none; background:rgba(46,204,113,0.08); border:1px solid rgba(46,204,113,0.35); border-radius:10px; padding:10px 14px; margin-bottom:1.2rem;">
+                    <div id="subSheetSyncNotice" style="display:none; background:rgba(46,204,113,0.08); border:1px solid rgba(46,204,113,0.35); border-radius:10px; padding:9px 12px; margin-bottom:1rem;">
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <i class="fas fa-check-circle" style="color:var(--neon-green); font-size:1rem;"></i>
-                                <strong style="color:#fff; font-size:0.88rem;">মানি ম্যানেজমেন্ট শিট থেকে ডাটা স্বয়ংক্রিয়ভাবে লোড হয়েছে</strong>
+                            <div style="display:flex; align-items:center; gap:7px;">
+                                <i class="fas fa-check-circle" style="color:var(--neon-green); font-size:0.95rem;"></i>
+                                <strong style="color:#fff; font-size:0.84rem;">মানি ম্যানেজমেন্ট শিট থেকে ডাটা লোড হয়েছে</strong>
                             </div>
-                            <span id="subSheetSyncSummary" style="font-size:0.78rem; color:var(--yellow); font-weight:800; background:rgba(245,176,65,0.15); padding:2px 8px; border-radius:6px;"></span>
+                            <span id="subSheetSyncSummary" style="font-size:0.76rem; color:var(--yellow); font-weight:800; background:rgba(245,176,65,0.15); padding:2px 8px; border-radius:6px;"></span>
                         </div>
                     </div>
 
                     <form id="submissionForm" onsubmit="event.preventDefault(); runAutomatedSessionAudit();">
-                        <div class="form-group">
-                            <label>Session Date</label>
-                            <input type="date" class="form-control" id="subDate" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label>External Broker Used</label>
-                            <select class="form-control" id="subBroker">
-                                <option value="Quotex">Quotex</option>
-                                <option value="Pocket Option">Pocket Option</option>
-                                <option value="Olymp Trade">Olymp Trade</option>
-                                <option value="Binomo">Binomo</option>
-                                <option value="IQ Option">IQ Option</option>
-                            </select>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; margin-bottom:0.85rem;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Session Date</label>
+                                <input type="date" class="form-control" id="subDate" required />
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Broker</label>
+                                <select class="form-control" id="subBroker">
+                                    <option value="Quotex">Quotex</option>
+                                    <option value="Pocket Option">Pocket Option</option>
+                                    <option value="Olymp Trade">Olymp Trade</option>
+                                    <option value="Binomo">Binomo</option>
+                                    <option value="IQ Option">IQ Option</option>
+                                </select>
+                            </div>
                         </div>
 
                         <!-- Win Trades & Loss Trades Inputs -->
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; margin-bottom:0.85rem;">
                             <div class="form-group" style="margin-bottom:0;">
                                 <label style="color:#2ecc71; font-weight:700;">
-                                    <i class="fas fa-arrow-trend-up"></i> উইন ট্রেড (Wins)
+                                    <i class="fas fa-arrow-trend-up"></i> উইন (Wins)
                                 </label>
-                                <input type="number" class="form-control" id="subWinTrades" min="0" placeholder="e.g. 4" oninput="calculateTradeCounts()" required style="border-color:rgba(46,204,113,0.35); font-weight:700;" />
+                                <input type="number" class="form-control" id="subWinTrades" min="0" placeholder="e.g. 6" oninput="calculateTradeCounts()" required style="border-color:rgba(46,204,113,0.35); font-weight:700;" />
                             </div>
                             <div class="form-group" style="margin-bottom:0;">
                                 <label style="color:#e74c3c; font-weight:700;">
-                                    <i class="fas fa-arrow-trend-down"></i> লস ট্রেড (Losses)
+                                    <i class="fas fa-arrow-trend-down"></i> লস (Losses)
                                 </label>
-                                <input type="number" class="form-control" id="subLossTrades" min="0" placeholder="e.g. 1" oninput="calculateTradeCounts()" required style="border-color:rgba(231,76,60,0.35); font-weight:700;" />
+                                <input type="number" class="form-control" id="subLossTrades" min="0" placeholder="e.g. 2" oninput="calculateTradeCounts()" required style="border-color:rgba(231,76,60,0.35); font-weight:700;" />
                             </div>
                         </div>
 
                         <!-- Auto-calculated Total Trades & Net P&L -->
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                            <div class="form-group">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; margin-bottom:0.85rem;">
+                            <div class="form-group" style="margin-bottom:0;">
                                 <label>
-                                    <i class="fas fa-calculator" style="color:var(--yellow);"></i> মোট ট্রেড (Total Trades)
+                                    <i class="fas fa-calculator" style="color:var(--yellow);"></i> মোট ট্রেড
                                 </label>
-                                <input type="number" class="form-control" id="subTradesCount" min="1" placeholder="অটোমেটিক হিসাব হবে" readonly required style="background:rgba(255,255,255,0.06); font-weight:800; color:var(--yellow); cursor:not-allowed;" />
-                                <small id="subWinRateDisplay" style="color:var(--neon-green); font-size:0.78rem; margin-top:4px; display:block; font-weight:600;">
+                                <input type="number" class="form-control" id="subTradesCount" min="1" placeholder="অটোমেটিক" readonly required style="background:rgba(255,255,255,0.06); font-weight:800; color:var(--yellow); cursor:not-allowed;" />
+                                <small id="subWinRateDisplay" style="color:var(--neon-green); font-size:0.74rem; margin-top:3px; display:block; font-weight:600;">
                                     Win Rate: 0%
                                 </small>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="margin-bottom:0;">
                                 <label>
-                                    <i class="fas fa-dollar-sign" style="color:var(--yellow);"></i> সেশন নিট P&L ($)
+                                    <i class="fas fa-dollar-sign" style="color:var(--yellow);"></i> নিট P&L ($)
                                 </label>
-                                <input type="number" step="0.01" class="form-control" id="subProfitLoss" placeholder="e.g. +14.50 বা -5.00" required />
-                                <small style="color:var(--text-secondary); font-size:0.75rem; margin-top:3px; display:block;">মোট লাভ বা লস (উদা: +14.50 বা -5.00)</small>
+                                <input type="number" step="0.01" class="form-control" id="subProfitLoss" placeholder="+14.50 বা -5.00" required />
                             </div>
                         </div>
 
                         <!-- AUTOMATED QUOTEX AUDIT & ZERO-VIDEO SUBMISSION ENGINE -->
-                        <div style="background:linear-gradient(135deg, rgba(245,176,65,0.08), rgba(0,230,118,0.05)); border:1px solid rgba(245,176,65,0.3); border-radius:12px; padding:18px; margin-bottom:1.2rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                        <div style="background:linear-gradient(135deg, rgba(245,176,65,0.07), rgba(0,230,118,0.04)); border:1px solid rgba(245,176,65,0.28); border-radius:12px; padding:14px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
                                 <div style="display:flex; align-items:center; gap:8px;">
-                                    <span style="font-size:1.4rem;">⚡</span>
-                                    <div>
-                                        <h4 style="margin:0; font-size:1rem; font-weight:800; color:#fff;">Quotex অটোমেটিক ট্রেড অডিট ও ভেরিফিকেশন</h4>
-                                        <small style="color:var(--text-secondary); font-size:0.75rem;">কোনো ভিডিও বা স্ক্রিনশট আপলোড করার প্রয়োজন নেই (Zero Video)</small>
-                                    </div>
+                                    <span style="font-size:1.2rem;">⚡</span>
+                                    <h4 style="margin:0; font-size:0.95rem; font-weight:800; color:#fff;">অটোমেটিক ট্রেড অডিট</h4>
                                 </div>
-                                <span class="badge" style="background:rgba(0,230,118,0.15); color:var(--neon-green); border:1px solid rgba(0,230,118,0.3); padding:4px 10px; border-radius:8px; font-weight:700; font-size:0.78rem;">
-                                    <i class="fas fa-robot"></i> Auto-Audit Engine
+                                <span class="badge" style="background:rgba(0,230,118,0.15); color:var(--neon-green); border:1px solid rgba(0,230,118,0.3); padding:3px 9px; border-radius:8px; font-weight:700; font-size:0.72rem;">
+                                    <i class="fas fa-robot"></i> Auto-Audit
                                 </span>
                             </div>
 
-                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:14px;">
-                                <div style="background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-                                    <span style="color:var(--text-secondary); font-size:0.75rem; display:block;">চলমান সেশন নম্বর:</span>
-                                    <strong id="auditCardSessionNum" style="color:var(--yellow); font-size:1.05rem;">সেশন #১</strong>
+                            <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin-bottom:12px;">
+                                <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                    <span style="color:var(--text-secondary); font-size:0.7rem; display:block;">সেশন</span>
+                                    <strong id="auditCardSessionNum" style="color:var(--yellow); font-size:0.92rem;">সেশন #১</strong>
                                 </div>
-                                <div style="background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-                                    <span style="color:var(--text-secondary); font-size:0.75rem; display:block;">সেশন প্রারম্ভিক ক্যাপিটাল:</span>
-                                    <strong id="auditCardStartingCap" style="color:#fff; font-size:1.05rem;">$100.00</strong>
+                                <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                    <span style="color:var(--text-secondary); font-size:0.7rem; display:block;">ক্যাপিটাল</span>
+                                    <strong id="auditCardStartingCap" style="color:#fff; font-size:0.92rem;">$100.00</strong>
                                 </div>
-                                <div style="background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-                                    <span style="color:var(--text-secondary); font-size:0.75rem; display:block;">এক্সটেনশন স্ট্যাটাস:</span>
-                                    <strong id="auditCardExtensionStatus" style="color:var(--neon-green); font-size:0.95rem;">কানেক্টেড</strong>
+                                <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                    <span style="color:var(--text-secondary); font-size:0.7rem; display:block;">এক্সটেনশন</span>
+                                    <strong id="auditCardExtensionStatus" style="color:var(--neon-green); font-size:0.85rem;">কানেক্টেড</strong>
                                 </div>
                             </div>
 
-                            <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.5; margin-bottom:14px; background:rgba(0,0,0,0.25); padding:10px 12px; border-radius:8px; border-left:3px solid var(--yellow);">
-                                📌 <strong>স্বয়ংক্রিয় অডিট নিয়ম:</strong> কোটেক্সে সিঙ্ক হওয়া প্রতিটি ট্রেডের Planned Stake সাইজ, রিফান্ড ট্রেড ফিল্টারিং এবং ২৫% ড্রডাউন লিমিট স্বয়ংক্রিয়ভাবে অডিট হয়ে সেশন ভেরিফাই হবে।
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <input type="text" class="form-control" id="subNotes" placeholder="ট্রেডার নোট (ঐচ্ছিক)..." style="height:38px; font-size:0.84rem;" />
                             </div>
 
-                            <div class="form-group" style="margin-bottom:14px;">
-                                <label style="font-size:0.85rem; color:#ccc;">ট্রেডার নোট (ঐচ্ছিক)</label>
-                                <textarea class="form-control" id="subNotes" rows="2" placeholder="মার্কেট অবস্থা বা স্ট্র্যাটেজি সংক্ষেপে লিখুন..."></textarea>
-                            </div>
-
-                            <button type="button" class="btn-gold" style="width:100%; justify-content:center; padding:12px; font-size:0.95rem; font-weight:800; border-radius:10px; box-shadow:0 4px 15px rgba(245,176,65,0.25);" id="submitProofBtn" onclick="runAutomatedSessionAudit()">
-                                <i class="fas fa-bolt"></i> সেশন আপলোড ও অটোমেটিক অডিট করুন
+                            <button type="button" class="btn-gold" style="width:100%; justify-content:center; padding:11px; font-size:0.9rem; font-weight:800; border-radius:10px; box-shadow:0 4px 15px rgba(245,176,65,0.25);" id="submitProofBtn" onclick="runAutomatedSessionAudit()">
+                                <i class="fas fa-bolt"></i> সেশন অডিট ও সাবমিট করুন
                             </button>
                         </div>
                     </form>
@@ -3014,12 +3045,9 @@
 
                 <!-- Past Submissions History Card -->
                 <div class="glass-card">
-                    <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:0.4rem;">
+                    <h2 style="font-size:1.15rem; font-weight:800; margin-bottom:0.85rem;">
                         <i class="fas fa-history" style="color:var(--yellow);"></i> Submission Logs
                     </h2>
-                    <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1rem;">
-                        আপনার জমা দেওয়া দৈনিক সেশনের রেকর্ড এবং ভেরিফিকেশন স্ট্যাটাস
-                    </p>
 
                     <div class="table-responsive">
                         <table class="styled-table">
@@ -3049,40 +3077,32 @@
             <!-- Top Subtab Switcher: Option 1 vs Option 2 -->
             <div class="mm-subtab-bar">
                 <button type="button" id="tabBtnChallengeMm" class="mm-subtab-btn active" onclick="switchMmSubTab('challenge')">
-                    <i class="fas fa-trophy" style="color:var(--yellow);"></i> ১. চ্যালেঞ্জ মানি ম্যানেজমেন্ট
+                    <i class="fas fa-trophy" style="color:var(--yellow);"></i> চ্যালেঞ্জ শিট
                 </button>
                 <button type="button" id="tabBtnFreeMm" class="mm-subtab-btn" onclick="switchMmSubTab('free')">
-                    <i class="fas fa-gift" style="color:var(--neon-green);"></i> ২. ফ্রী মানি ম্যানেজমেন্ট
+                    <i class="fas fa-gift" style="color:var(--neon-green);"></i> ফ্রী প্র্যাকটিস শিট
                 </button>
             </div>
 
             <!-- ==============================================
-                 OPTION 1: CHALLENGE MONEY MANAGEMENT (ORIGINAL INTACT)
+                 OPTION 1: CHALLENGE MONEY MANAGEMENT
             ============================================== -->
             <div id="mmChallengeContainer">
                 <!-- 1. Locked State Container (Shown when user has NO active challenge) -->
-                <div id="masSheetLockedCard" style="display:none; margin-bottom:2rem;"></div>
+                <div id="masSheetLockedCard" style="display:none; margin-bottom:1.5rem;"></div>
 
                 <!-- 2. Active Masaniello Sheet (Shown when user has active approved challenge) -->
                 <div id="masSheetActiveContainer" style="display:none;">
-                <div class="glass-card" style="margin-bottom:2rem; position:relative; overflow:hidden;">
+                <div class="glass-card" style="margin-bottom:1.5rem; position:relative; overflow:hidden;">
                     <!-- Card Header -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
-                        <div>
-                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;">
-                                <span class="mas-header-badge">
-                                    <i class="fas fa-microchip"></i> AJ@0-4 Mathematical Engine
-                                </span>
-                                <span class="badge" id="masActiveChallengeBadge" style="background:rgba(46,204,113,0.15); color:var(--neon-green); border:1px solid rgba(46,204,113,0.3); padding:4px 10px; border-radius:12px; font-size:0.78rem; font-weight:800;">
-                                    <i class="fas fa-check-circle"></i> এক্টিভ চ্যালেঞ্জ
-                                </span>
-                            </div>
-                            <h2 style="font-size:1.35rem; font-weight:900; margin-bottom:4px; color:#fff;">
-                                <i class="fas fa-calculator" style="color:var(--yellow);"></i> Masaniello Money Management Pro
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.1rem;">
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <h2 style="font-size:1.2rem; font-weight:800; margin:0; color:#fff;">
+                                <i class="fas fa-calculator" style="color:var(--yellow);"></i> মানি ম্যানেজমেন্ট শিট
                             </h2>
-                            <p style="font-size:0.84rem; color:var(--text-secondary); margin:0;">
-                                নির্দিষ্ট সংখ্যক উইনে সেশন প্রফিটেবল রাখার গাণিতিক শিট।
-                            </p>
+                            <span class="badge" id="masActiveChallengeBadge" style="background:rgba(46,204,113,0.15); color:var(--neon-green); border:1px solid rgba(46,204,113,0.3); padding:3px 10px; border-radius:12px; font-size:0.74rem; font-weight:800;">
+                                <i class="fas fa-check-circle"></i> এক্টিভ চ্যালেঞ্জ
+                            </span>
                         </div>
                         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                             <button class="btn-outline-header" onclick="masResetSession()" title="সেশন রিসেট করুন">
@@ -3095,76 +3115,51 @@
                     </div>
 
                     <!-- Parameters Controls Box (Only Capital Editable, Others Locked) -->
-                    <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:1.2rem; margin-bottom:1.5rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:1rem;">
-                            <span style="font-size:0.85rem; font-weight:800; color:var(--yellow); text-transform:uppercase; letter-spacing:0.5px;">
+                    <div style="background:rgba(0,0,0,0.32); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:1rem; margin-bottom:1.1rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:0.75rem;">
+                            <span style="font-size:0.8rem; font-weight:800; color:var(--yellow); text-transform:uppercase; letter-spacing:0.5px;">
                                 <i class="fas fa-sliders-h"></i> সেশন প্যারামিটার
                             </span>
-                            <span class="badge" style="background:rgba(245,176,65,0.12); color:var(--yellow); border:1px solid rgba(245,176,65,0.3); padding:4px 12px; border-radius:14px; font-size:0.75rem; font-weight:700;">
-                                <i class="fas fa-lock"></i> ফিক্সড অ্যালগরিদম
+                            <span class="badge" style="background:rgba(245,176,65,0.12); color:var(--yellow); border:1px solid rgba(245,176,65,0.3); padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700;">
+                                <i class="fas fa-lock"></i> 16T • 6W • 85%
                             </span>
                         </div>
 
-                        <div class="mm-inputs-grid" style="margin-bottom:0.4rem;">
+                        <div class="mm-inputs-grid">
                             <!-- 1. Total Capital (Editable) -->
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:0.82rem; font-weight:800; color:var(--yellow);"><i class="fas fa-wallet"></i> Total Capital ($)</label>
-                                <input type="number" class="form-control" id="masCapital" value="1000" min="10" step="10" oninput="handleMasConfigChange()" style="border-color:var(--yellow); font-weight:800; font-size:1.05rem; background:rgba(245,176,65,0.06); color:#fff;" />
-                                <small style="color:var(--neon-green); font-size:0.72rem; margin-top:3px; display:block;" id="masCapitalSubtext">🎯 এক্টিভ চ্যালেঞ্জ ব্যালেন্স</small>
+                                <label style="font-size:0.78rem; font-weight:800; color:var(--yellow);"><i class="fas fa-wallet"></i> Capital ($)</label>
+                                <input type="number" class="form-control" id="masCapital" value="1000" min="10" step="10" oninput="handleMasConfigChange()" style="border-color:var(--yellow); font-weight:800; font-size:1rem; background:rgba(245,176,65,0.06); color:#fff; height:40px;" />
                             </div>
                             <!-- 2. Total Trades (Locked) -->
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Total Trades (N°)</label>
-                                <input type="number" class="form-control" id="masTotalTrades" value="16" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed;" />
-                                <small style="color:var(--text-secondary); font-size:0.72rem; margin-top:3px; display:block;">🔒 ১৬ ট্রেড</small>
+                                <label style="font-size:0.78rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Total Trades</label>
+                                <input type="number" class="form-control" id="masTotalTrades" value="16" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed; height:40px;" />
                             </div>
                             <!-- 3. Target Win Trades (Locked) -->
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Target Win Trades (K)</label>
-                                <input type="number" class="form-control" id="masWinTrades" value="6" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed;" />
-                                <small style="color:var(--text-secondary); font-size:0.72rem; margin-top:3px; display:block;">🔒 ৬ উইন টার্গেট</small>
+                                <label style="font-size:0.78rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Target Wins</label>
+                                <input type="number" class="form-control" id="masWinTrades" value="6" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed; height:40px;" />
                             </div>
                             <!-- 4. Broker Quota / Payout (Locked) -->
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Broker Quota / Payout</label>
-                                <input type="number" class="form-control" id="masPayoutQuota" value="1.85" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed;" />
-                                <small style="color:var(--text-secondary); font-size:0.72rem; margin-top:3px; display:block;" id="masQuotaHelper">🔒 ৮৫% পেআউট</small>
+                                <label style="font-size:0.78rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Payout</label>
+                                <input type="number" class="form-control" id="masPayoutQuota" value="1.85" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed; height:40px;" />
                             </div>
                             <!-- 5. Stop Session Loss (Locked) -->
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Stop Session Loss (%)</label>
-                                <input type="number" class="form-control" id="masStopLossPct" value="25" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed;" />
-                                <small style="color:var(--danger-red); font-size:0.72rem; margin-top:3px; display:block;" id="masStopLossDollarText">🔒 ২৫% ম্যাক্স লস</small>
+                                <label style="font-size:0.78rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Max Loss (%)</label>
+                                <input type="number" class="form-control" id="masStopLossPct" value="25" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed; height:40px;" />
                             </div>
                         </div>
                     </div>
 
-                    <!-- Session Limits & Duration Guideline Banner -->
-                    <div style="background:rgba(245,176,65,0.06); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:10px 14px; margin-bottom:1.4rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div style="width:34px; height:34px; border-radius:8px; background:rgba(245,176,65,0.18); color:var(--yellow); display:flex; align-items:center; justify-content:center; font-size:1.05rem; flex-shrink:0;">
-                                <i class="fas fa-stopwatch"></i>
-                            </div>
-                            <div>
-                                <div style="font-size:0.88rem; font-weight:800; color:#fff;">
-                                    <span style="color:var(--yellow);">সেশন গাইডলাইন:</span> দিনে সর্বোচ্চ ৩ সেশন • মোট ১৫ সেশন (৫–১৫ দিন)
-                                </div>
-                                <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:1px;">
-                                    প্রতি সেশনের পর বিরতি নিন এবং শিট অনুযায়ী নির্ধারিত স্টেকে ট্রেড করুন।
-                                </div>
-                            </div>
-                        </div>
-                        <span class="badge" style="background:rgba(245,176,65,0.15); color:var(--yellow); border:1px solid rgba(245,176,65,0.3); padding:4px 10px; border-radius:16px; font-size:0.72rem; font-weight:750; white-space:nowrap;">
-                            সর্বোচ্চ ৩ সেশন/দিন
-                        </span>
-                    </div>
-
-                    <!-- Live KPI Summary Metrics Grid (6 Boxes) -->
+                    <!-- Live KPI Summary Metrics Grid (6 Boxes in 3x2 Grid) -->
                     <div class="mas-kpi-grid">
                         <!-- 1. Current Balance -->
                         <div class="mas-kpi-card">
                             <div class="mas-kpi-lbl">
-                                <span>বর্তমান ব্যালেন্স (Cashier)</span>
+                                <span>বর্তমান ব্যালেন্স</span>
                                 <i class="fas fa-coins" style="color:var(--yellow);"></i>
                             </div>
                             <div class="mas-kpi-val" id="masKpiBalance">$0.00</div>
@@ -3174,72 +3169,72 @@
                         <!-- 2. Next Stake / Episode (Prominently Highlighted) -->
                         <div class="mas-kpi-card highlight-stake">
                             <div class="mas-kpi-lbl">
-                                <span style="color:var(--yellow); font-weight:800;">পরবর্তী এন্ট্রি (Planned Stake)</span>
-                                <i class="fas fa-fire fa-beat" style="color:var(--yellow);"></i>
+                                <span style="color:var(--yellow); font-weight:800;">পরবর্তী এন্ট্রি</span>
+                                <i class="fas fa-fire" style="color:var(--yellow);"></i>
                             </div>
                             <div class="mas-kpi-val" id="masKpiNextStake" style="color:var(--yellow);">$0.00</div>
-                            <div class="mas-kpi-sub" id="masKpiStakeHelper" style="color:#fff;">পরবর্তী ট্রেডে এই সাইজ ধরুন</div>
+                            <div class="mas-kpi-sub" id="masKpiStakeHelper" style="color:#fff;">ট্রেড #১</div>
                         </div>
 
                         <!-- 3. Target Final Capital -->
                         <div class="mas-kpi-card">
                             <div class="mas-kpi-lbl">
-                                <span>টার্গেট ক্যাপিটাল (Target)</span>
+                                <span>টার্গেট ব্যালেন্স</span>
                                 <i class="fas fa-bullseye" style="color:var(--neon-green);"></i>
                             </div>
                             <div class="mas-kpi-val" id="masKpiTargetCap" style="color:var(--neon-green);">$0.00</div>
-                            <div class="mas-kpi-sub" id="masKpiTargetProfit" style="color:var(--neon-green);">নিট প্রফিট: +$0.00 (+6.03%)</div>
+                            <div class="mas-kpi-sub" id="masKpiTargetProfit" style="color:var(--neon-green);">প্রফিট: +$0.00 (+6.03%)</div>
                         </div>
 
                         <!-- 4. Required Win Rate -->
                         <div class="mas-kpi-card">
                             <div class="mas-kpi-lbl">
-                                <span>প্রয়োজনীয় উইন রেট</span>
+                                <span>উইন রেট</span>
                                 <i class="fas fa-chart-pie" style="color:#60a5fa;"></i>
                             </div>
                             <div class="mas-kpi-val" id="masKpiWinRate" style="color:#60a5fa;">37.50%</div>
-                            <div class="mas-kpi-sub" id="masKpiWinRateSub">১৬টিতে মাত্র ৬টি উইন দরকার</div>
+                            <div class="mas-kpi-sub" id="masKpiWinRateSub">১৬ ট্রেডে ৬ উইন</div>
                         </div>
 
                         <!-- 5. Session Score & Progress -->
                         <div class="mas-kpi-card">
                             <div class="mas-kpi-lbl">
-                                <span>সেশন স্কোর (W / L)</span>
+                                <span>সেশন স্কোর</span>
                                 <i class="fas fa-tasks" style="color:#a78bfa;"></i>
                             </div>
                             <div class="mas-kpi-val" id="masKpiScore">0W - 0L</div>
-                            <div class="mas-kpi-sub" id="masKpiRemaining">বাকি ট্রেড: ১৬ | বাকি উইন: ৬</div>
+                            <div class="mas-kpi-sub" id="masKpiRemaining">বাকি: ১৬T | ৬W</div>
                         </div>
 
                         <!-- 6. Stop Session Loss -->
                         <div class="mas-kpi-card">
                             <div class="mas-kpi-lbl">
-                                <span>স্টপ সেশন লস (Stop Loss)</span>
-                                <i class="fas fa-hand-paper" style="color:var(--danger-red);"></i>
+                                <span>স্টপ লস (২৫%)</span>
+                                <i class="fas fa-shield-alt" style="color:var(--danger-red);"></i>
                             </div>
                             <div class="mas-kpi-val" id="masKpiStopLoss" style="color:var(--danger-red);">$0.00</div>
-                            <div class="mas-kpi-sub" id="masKpiMinBalance">মিনিমাম ব্যালেন্স: $0.00</div>
+                            <div class="mas-kpi-sub" id="masKpiMinBalance">ফ্লোর: $0.00</div>
                         </div>
                     </div>
 
                     <!-- Live Dynamic Session Direction / Status Banner -->
                     <div id="masStatusBanner" class="mas-status-banner mas-banner-running">
-                        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-                            <div id="masBannerIcon" style="width:36px; height:36px; border-radius:50%; background:rgba(245,176,65,0.2); display:flex; align-items:center; justify-content:center; color:var(--yellow); font-size:1.1rem;">
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <div id="masBannerIcon" style="width:32px; height:32px; border-radius:50%; background:rgba(245,176,65,0.2); display:flex; align-items:center; justify-content:center; color:var(--yellow); font-size:0.95rem; flex-shrink:0;">
                                 <i class="fas fa-play"></i>
                             </div>
                             <div>
-                                <div id="masBannerTitle" style="font-weight:800; font-size:1rem; color:#fff;">
-                                    সেশন চলছে — ট্রেড #১
+                                <div id="masBannerTitle" style="font-weight:800; font-size:0.95rem; color:#fff;">
+                                    সেশন চলমান — ট্রেড #১
                                 </div>
-                                <div id="masBannerMessage" style="font-size:0.86rem; color:var(--text-secondary); margin-top:2px;">
-                                    ব্রোকারে <strong style="color:var(--yellow); font-size:0.95rem;" id="masBannerStake">$0.00</strong> এন্ট্রি নিন এবং টেবিলে <strong>WIN</strong> বা <strong>LOSS</strong> চাপুন।
+                                <div id="masBannerMessage" style="font-size:0.82rem; color:var(--text-secondary); margin-top:1px;">
+                                    এন্ট্রি সাইজ: <strong style="color:var(--yellow);" id="masBannerStake">$0.00</strong> • ফলাফল অনুযায়ী <strong>WIN</strong> বা <strong>LOSS</strong> চাপুন।
                                 </div>
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:0.8rem; color:var(--text-secondary);">
-                                শর্টকাট: <span class="mas-key-badge">W</span> উইন <span class="mas-key-badge">L</span> লস <span class="mas-key-badge">Z</span> আনডু
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span style="font-size:0.75rem; color:var(--text-secondary);">
+                                <span class="mas-key-badge">W</span> <span class="mas-key-badge">L</span> <span class="mas-key-badge">Z</span>
                             </span>
                         </div>
                         <!-- Win Progress Bar -->
@@ -3252,7 +3247,7 @@
                     <div class="mas-matrix-header">
                         <div class="mas-matrix-title-wrap">
                             <h3 class="mas-matrix-title">
-                                <i class="fas fa-list-ol" style="color:var(--yellow); margin-right:8px;"></i> লাইভ ট্রেড লগ (Interactive Trade Matrix)
+                                <i class="fas fa-list-ol" style="color:var(--yellow); margin-right:6px;"></i> লাইভ ট্রেড লগ
                             </h3>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span id="masLiveSyncPill" class="mas-sync-indicator" title="সকল ডিভাইসে রিয়েল-টাইম অটো-সিঙ্ক সক্রিয়">
@@ -3263,22 +3258,19 @@
                                 </button>
                             </div>
                         </div>
-                        <span class="mas-matrix-hint">
-                            * টেবিলে সরাসরি বাটনে ক্লিক করে ফলাফল আপডেট করুন
-                        </span>
                     </div>
 
-                    <div class="table-responsive" style="margin-bottom:0.5rem;">
+                    <div class="table-responsive" style="margin-bottom:0.25rem;">
                         <table class="styled-table" id="masanielloTable">
                             <thead>
                                 <tr>
-                                    <th style="width:60px;">N°</th>
-                                    <th>Planned Stake (এন্ট্রি সাইজ)</th>
-                                    <th style="min-width:200px; text-align:center;">ফলাফল ইনপুট (Outcome)</th>
-                                    <th>Return (লাভ/ক্ষতি)</th>
-                                    <th>Current Cashier (ব্যালেন্স)</th>
-                                    <th>Session Record</th>
-                                    <th>Status</th>
+                                    <th style="width:55px;">#</th>
+                                    <th>এন্ট্রি সাইজ</th>
+                                    <th style="min-width:180px; text-align:center;">ফলাফল (W / L)</th>
+                                    <th>লাভ / লস</th>
+                                    <th>ব্যালেন্স</th>
+                                    <th>স্কোর</th>
+                                    <th>স্ট্যাটাস</th>
                                 </tr>
                             </thead>
                             <tbody id="masanielloTableBody">
@@ -3292,31 +3284,23 @@
         <!-- End mmChallengeContainer -->
 
             <!-- ==============================================
-                 OPTION 2: FREE MONEY MANAGEMENT (BinaryPropFirm Test Money Management)
+                 OPTION 2: FREE MONEY MANAGEMENT
             ============================================== -->
             <div id="mmFreeContainer" style="display:none;">
-                <div class="glass-card" style="margin-bottom:2rem; position:relative; overflow:hidden;">
+                <div class="glass-card" style="margin-bottom:1.5rem; position:relative; overflow:hidden;">
                     <!-- Card Header -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
-                        <div>
-                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;">
-                                <span class="mas-header-badge" style="background:linear-gradient(135deg, rgba(59,130,246,0.2), rgba(59,130,246,0.05)); border-color:rgba(59,130,246,0.4); color:#60a5fa;">
-                                    <i class="fas fa-flask"></i> Free Simulation Engine
-                                </span>
-                                <span class="badge" style="background:rgba(46,204,113,0.15); color:var(--neon-green); border:1px solid rgba(46,204,113,0.3); padding:4px 10px; border-radius:12px; font-size:0.78rem; font-weight:800;">
-                                    <i class="fas fa-unlock-alt"></i> সম্পূর্ণ ফ্রী টেস্ট মোড (No Purchase Needed)
-                                </span>
-                            </div>
-                            <h2 style="font-size:1.35rem; font-weight:900; margin-bottom:4px; color:#fff;">
-                                <i class="fas fa-calculator" style="color:var(--yellow);"></i> BinaryPropFirm Test Money Management
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.1rem;">
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <h2 style="font-size:1.2rem; font-weight:800; margin:0; color:#fff;">
+                                <i class="fas fa-calculator" style="color:var(--yellow);"></i> ফ্রী প্র্যাকটিস শিট
                             </h2>
-                            <p style="font-size:0.84rem; color:var(--text-secondary); margin:0;">
-                                যেকোনো ব্রোকার বা ডেমোতে ১৬ ট্রেডে ৬ উইন টেস্ট ও যাচাই করার ফ্রী গাণিতিক শিট।
-                            </p>
+                            <span class="badge" style="background:rgba(46,204,113,0.15); color:var(--neon-green); border:1px solid rgba(46,204,113,0.3); padding:3px 10px; border-radius:12px; font-size:0.74rem; font-weight:800;">
+                                <i class="fas fa-unlock-alt"></i> ফ্রী টেস্ট মোড
+                            </span>
                         </div>
                         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                             <button class="btn-outline-header" onclick="resetFreeMasSession()" title="টেস্ট সেশন রিসেট করুন">
-                                <i class="fas fa-redo"></i> Reset Test
+                                <i class="fas fa-redo"></i> Reset
                             </button>
                             <button class="btn-outline-header" onclick="window.print()" title="প্রিন্ট বা PDF হিসেবে সেভ করুন">
                                 <i class="fas fa-print"></i> Print
@@ -3325,95 +3309,68 @@
                     </div>
 
                     <!-- Parameters Controls Box (Total Capital Open, Others Locked) -->
-                    <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:1.2rem; margin-bottom:1.5rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:1rem;">
-                            <span style="font-size:0.85rem; font-weight:800; color:var(--yellow); text-transform:uppercase; letter-spacing:0.5px;">
-                                <i class="fas fa-sliders-h"></i> টেস্ট সেশন প্যারামিটার
+                    <div style="background:rgba(0,0,0,0.32); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:1rem; margin-bottom:1.1rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:0.75rem;">
+                            <span style="font-size:0.8rem; font-weight:800; color:var(--yellow); text-transform:uppercase; letter-spacing:0.5px;">
+                                <i class="fas fa-sliders-h"></i> টেস্ট প্যারামিটার
                             </span>
-                            <span class="badge" style="background:rgba(245,176,65,0.12); color:var(--yellow); border:1px solid rgba(245,176,65,0.3); padding:4px 12px; border-radius:14px; font-size:0.75rem; font-weight:700;">
-                                <i class="fas fa-lock"></i> ফিক্সড অ্যালগরিদম (16T / 6W)
+                            <span class="badge" style="background:rgba(245,176,65,0.12); color:var(--yellow); border:1px solid rgba(245,176,65,0.3); padding:3px 10px; border-radius:12px; font-size:0.72rem; font-weight:700;">
+                                <i class="fas fa-lock"></i> 16T • 6W • 85%
                             </span>
                         </div>
 
-                        <div class="mm-inputs-grid" style="margin-bottom:0.4rem;">
+                        <div class="mm-inputs-grid free-grid">
                             <!-- 1. Total Capital (OPEN / EDITABLE) -->
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:0.82rem; font-weight:800; color:var(--yellow);"><i class="fas fa-wallet"></i> Total Capital ($)</label>
-                                <input type="number" class="form-control" id="freeMasCapital" value="100" min="1" step="10" oninput="handleFreeMasConfigChange()" style="border-color:var(--yellow); font-weight:800; font-size:1.05rem; background:rgba(245,176,65,0.06); color:#fff;" />
-                                <small style="color:var(--neon-green); font-size:0.72rem; margin-top:3px; display:block;">✍️ ওপেন — যেকোনো ব্যালেন্স লিখুন</small>
+                                <label style="font-size:0.78rem; font-weight:800; color:var(--yellow);"><i class="fas fa-wallet"></i> Capital ($)</label>
+                                <input type="number" class="form-control" id="freeMasCapital" value="100" min="1" step="10" oninput="handleFreeMasConfigChange()" style="border-color:var(--yellow); font-weight:800; font-size:1rem; background:rgba(245,176,65,0.06); color:#fff; height:40px;" />
                             </div>
                             <!-- 2. Total Trades (LOCKED) -->
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Total Trades (N°)</label>
-                                <input type="number" class="form-control" id="freeMasTotalTrades" value="16" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed;" />
-                                <small style="color:var(--text-secondary); font-size:0.72rem; margin-top:3px; display:block;">🔒 ১৬ ট্রেড (লকড)</small>
+                                <label style="font-size:0.78rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Total Trades</label>
+                                <input type="number" class="form-control" id="freeMasTotalTrades" value="16" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed; height:40px;" />
                             </div>
                             <!-- 3. Target Win Trades (LOCKED) -->
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Target Win Trades (K)</label>
-                                <input type="number" class="form-control" id="freeMasWinTrades" value="6" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed;" />
-                                <small style="color:var(--text-secondary); font-size:0.72rem; margin-top:3px; display:block;">🔒 ৬ উইন টার্গেট (লকড)</small>
+                                <label style="font-size:0.78rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Target Wins</label>
+                                <input type="number" class="form-control" id="freeMasWinTrades" value="6" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed; height:40px;" />
                             </div>
                             <!-- 4. Broker Quota / Payout (LOCKED) -->
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="font-size:0.82rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Broker Quota / Payout</label>
-                                <input type="number" class="form-control" id="freeMasPayoutQuota" value="1.85" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed;" />
-                                <small style="color:var(--text-secondary); font-size:0.72rem; margin-top:3px; display:block;" id="freeMasQuotaHelper">🔒 ৮৫% পেআউট (লকড)</small>
+                                <label style="font-size:0.78rem; font-weight:700; color:var(--text-secondary);"><i class="fas fa-lock"></i> Payout</label>
+                                <input type="number" class="form-control" id="freeMasPayoutQuota" value="1.85" readonly disabled style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#aaa; cursor:not-allowed; height:40px;" />
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Guidelines Banner -->
-                    <div style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.25); border-radius:12px; padding:10px 14px; margin-bottom:1.4rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div style="width:34px; height:34px; border-radius:8px; background:rgba(59,130,246,0.18); color:#60a5fa; display:flex; align-items:center; justify-content:center; font-size:1.05rem; flex-shrink:0;">
-                                <i class="fas fa-info-circle"></i>
-                            </div>
-                            <div>
-                                <div style="font-size:0.88rem; font-weight:800; color:#fff;">
-                                    <span style="color:#60a5fa;">ফ্রী টেস্ট গাইডলাইন:</span> যে-কোনো ব্রোকার বা ডেমো অ্যাকাউন্টে প্র্যাকটিস করুন
-                                </div>
-                                <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:1px;">
-                                    আপনার টেস্ট ব্যালেন্স বসিয়ে স্টেক সাইজ অনুযায়ী ট্রেড করুন ও WIN / LOSS দিয়ে কার্যকারিতা যাচাই করুন।
-                                </div>
-                            </div>
-                        </div>
-                        <span class="badge" style="background:rgba(46,204,113,0.15); color:var(--neon-green); border:1px solid rgba(46,204,113,0.3); padding:4px 10px; border-radius:16px; font-size:0.72rem; font-weight:750; white-space:nowrap;">
-                            ফ্রী ও আনলিমিটেড
-                        </span>
                     </div>
 
                     <!-- Interactive Trade Log Table Header with Universal Undo Icon Button -->
                     <div class="mas-matrix-header">
                         <div class="mas-matrix-title-wrap">
                             <h3 class="mas-matrix-title">
-                                <i class="fas fa-list-ol" style="color:var(--yellow); margin-right:8px;"></i> টেস্ট ট্রেড লগ (Interactive Test Matrix)
+                                <i class="fas fa-list-ol" style="color:var(--yellow); margin-right:6px;"></i> টেস্ট ট্রেড লগ
                             </h3>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span class="mas-sync-indicator" style="border-color:rgba(59,130,246,0.3); background:rgba(59,130,246,0.1); color:#93c5fd;" title="লোকাল স্টোরেজে সংরক্ষিত">
-                                    <span class="sync-dot" style="background:#60a5fa; box-shadow:0 0 8px #60a5fa;"></span> <span class="sync-label">টেস্ট মোড এক্টিভ</span>
+                                    <span class="sync-dot" style="background:#60a5fa; box-shadow:0 0 8px #60a5fa;"></span> <span class="sync-label">টেস্ট মোড</span>
                                 </span>
                                 <button type="button" id="btnFreeMasUndo" onclick="freeMasUndoLastTrade()" class="btn-mas-undo-icon no-history" title="শেষ ট্রেড আনডু করুন (Undo - Hotkey: Z)" aria-label="Undo">
                                     <i class="fas fa-undo"></i>
                                 </button>
                             </div>
                         </div>
-                        <span class="mas-matrix-hint">
-                            * টেবিলে সরাসরি WIN বা LOSS বাটনে ক্লিক করে ফলাফল ইনপুট দিন
-                        </span>
                     </div>
 
-                    <div class="table-responsive" style="margin-bottom:0.5rem;">
+                    <div class="table-responsive" style="margin-bottom:0.25rem;">
                         <table class="styled-table" id="freeMasanielloTable">
                             <thead>
                                 <tr>
-                                    <th style="width:60px;">N°</th>
-                                    <th>Planned Stake (এন্ট্রি সাইজ)</th>
-                                    <th style="min-width:200px; text-align:center;">ফলাফল ইনপুট (Outcome)</th>
-                                    <th>Return (লাভ/ক্ষতি)</th>
-                                    <th>Current Cashier (ব্যালেন্স)</th>
-                                    <th>Session Record</th>
-                                    <th>Status</th>
+                                    <th style="width:55px;">#</th>
+                                    <th>এন্ট্রি সাইজ</th>
+                                    <th style="min-width:180px; text-align:center;">ফলাফল (W / L)</th>
+                                    <th>লাভ / লস</th>
+                                    <th>ব্যালেন্স</th>
+                                    <th>স্কোর</th>
+                                    <th>স্ট্যাটাস</th>
                                 </tr>
                             </thead>
                             <tbody id="freeMasanielloTableBody">
@@ -4569,17 +4526,17 @@
             const mobItem = document.getElementById(`mobNav-${tabId}`);
             if (mobItem) mobItem.classList.add('active');
 
-            // Headings - Unified Bilingual Layout with Icons
+            // Headings - Clean & Concise Layout
             const headings = {
-                'overview': ['📊 ড্যাশবোর্ড (Dashboard)', 'আপনার সক্রিয় চ্যালেঞ্জ ও পারফরম্যান্স ওভারভিউ।'],
-                'my-challenges': ['📁 আমার চ্যালেঞ্জসমূহ (My Challenges)', 'আপনার রানিং, পূর্ববর্তী ও বাদ পড়া সকল চ্যালেঞ্জের বিস্তারিত রেকর্ড।'],
-                'submission': ['📤 ট্রেড প্রুফ ও অটো-অডিট (Trade Proof & Auto-Audit)', 'দৈনিক কোটেক্স ট্রেড হিস্টোরি অডিট ও সেশন ভেরিফিকেশন।'],
-                'money-management': ['📈 মানি ম্যানেজমেন্ট (Money Management)', 'অফিসিয়াল রিস্ক ও লট ক্যালকুলেটর শিট।'],
-                'course': ['🎓 ট্রেডিং একাডেমি (Trading Academy)', 'বাইনারি ট্রেডিং মাস্টারক্লাস ও ভিডিও গাইড।'],
-                'buy-challenge': ['🛒 চ্যালেঞ্জ প্যাকেজ (Challenge Packages)', 'পছন্দের ফান্ডেড প্যাকেজ বাছাই করুন।'],
-                'profile': ['👤 প্রোফাইল সেটিংস (Profile & Settings)', 'ব্যক্তিগত তথ্য ও পেআউট ওয়ালেট পরিচালনা।'],
-                'support': ['🎧 সাপোর্ট হেল্পডেস্ক (Support & Helpdesk)', 'এডমিন সহায়তা ও মেসেজ ইনবক্স।'],
-                'trade-history': ['📊 ট্রেডিং হিস্টোরি (Synced Trade History)', 'Quotex এক্সটেনশন থেকে সিঙ্ক হওয়া রিয়েল-টাইম ট্রেড রেকর্ড ও অ্যানালিটিক্স।']
+                'overview': ['📊 ড্যাশবোর্ড', 'অ্যাক্টিভ চ্যালেঞ্জ ও পারফরম্যান্স।'],
+                'my-challenges': ['📁 আমার চ্যালেঞ্জসমূহ', 'সকল চ্যালেঞ্জের স্ট্যাটাস ও রেকর্ড।'],
+                'submission': ['📤 ট্রেড প্রুফ সাবমিশন', 'দৈনিক সেশন প্রুফ ও অটো-অডিট।'],
+                'money-management': ['📈 মানি ম্যানেজমেন্ট', 'সেশন স্টেক ও রিস্ক ক্যালকুলেটর।'],
+                'course': ['🎓 ট্রেডিং একাডেমি', 'মাস্টারক্লাস ও ভিডিও গাইড।'],
+                'buy-challenge': ['🛒 চ্যালেঞ্জ প্যাকেজ', 'পছন্দের ফান্ডেড প্যাকেজ বাছাই করুন।'],
+                'profile': ['👤 প্রোফাইল সেটিংস', 'ব্যক্তিগত তথ্য ও পেআউট ওয়ালেট।'],
+                'support': ['🎧 সাপোর্ট হেল্পডেস্ক', 'এডমিন সহায়তা ও মেসেজ ইনবক্স।'],
+                'trade-history': ['📊 ট্রেডিং হিস্টোরি', 'Quotex লাইভ সিঙ্কড ট্রেড রেকর্ড।']
             };
 
             if (headings[tabId]) {
@@ -8907,16 +8864,6 @@
             const maxLossDollar = capital * stopLossPct; // 25% of starting capital
             const stopLossFloor = capital - maxLossDollar; // 75% of starting capital
 
-            // Update subtext
-            const stopLossText = document.getElementById('masStopLossDollarText');
-            if (stopLossText) {
-                stopLossText.innerText = `🔒 লকড: ২৫% ম্যাক্স লস ($${maxLossDollar.toFixed(2)})`;
-            }
-            const quotaHelper = document.getElementById('masQuotaHelper');
-            if (quotaHelper) {
-                quotaHelper.innerText = `🔒 লকড (85% Payout = 1.85)`;
-            }
-
             const mat = buildMasanielloMatrix(totalTrades, winTrades, quota);
             const targetCapital = capital * (mat[0] && mat[0][0] ? mat[0][0] : 1.06034);
             const targetProfit = targetCapital - capital;
@@ -8951,13 +8898,13 @@
                 if (sessionStatus !== 'RUNNING') {
                     // Session concluded early
                     let statusLabel = 'Closed';
-                    let actionText = 'সেশন সম্পন্ন (Not Required)';
+                    let actionText = 'সেশন সম্পন্ন';
                     if (sessionStatus === 'LIMIT_25_EXCEEDED') {
                         statusLabel = 'Disqualified ❌';
-                        actionText = 'চ্যালেঞ্জ থেকে বাদ (Disqualified)';
+                        actionText = 'চ্যালেঞ্জ সমাপ্ত';
                     } else if (sessionStatus === 'WON' || sessionStatus === 'STAKE_BELOW_MIN') {
                         statusLabel = 'Completed 🎉';
-                        actionText = 'টার্গেট সম্পন্ন (Target Reached)';
+                        actionText = 'টার্গেট সম্পন্ন';
                     }
                     rowsHtml += `
                         <tr class="mas-pending-row">
@@ -9014,7 +8961,7 @@
                                 <span style="color:var(--neon-green);">${wins}W</span> - <span style="color:var(--danger-red);">${losses}L</span>
                             </td>
                             <td>
-                                <span class="badge" style="background:rgba(46,204,113,0.15); color:var(--neon-green); font-size:0.75rem;">Completed</span>
+                                <span class="badge" style="background:rgba(46,204,113,0.15); color:var(--neon-green); font-size:0.75rem;">Done</span>
                             </td>
                         </tr>
                     `;
@@ -9038,13 +8985,11 @@
                                 <span style="color:var(--neon-green);">${wins}W</span> - <span style="color:var(--danger-red);">${losses}L</span>
                             </td>
                             <td>
-                                <span class="badge" style="background:rgba(239,68,68,0.15); color:var(--danger-red); font-size:0.75rem;">Completed</span>
+                                <span class="badge" style="background:rgba(239,68,68,0.15); color:var(--danger-red); font-size:0.75rem;">Done</span>
                             </td>
                         </tr>
                     `;
                 } else {
-                    // This trade has NOT been played yet. Check Rule 2 and Rule 3:
-
                     // REQUIREMENT 2: Stake drops below $0.50 -> Session completes successfully!
                     if (rawStake < 0.50) {
                         sessionStatus = 'STAKE_BELOW_MIN';
@@ -9053,8 +8998,8 @@
                                 <td><strong style="color:var(--neon-green); font-size:1.05rem;">#${tradeNum}</strong></td>
                                 <td style="color:#ddd; font-weight:700;">$${roundCentStake(rawStake)}</td>
                                 <td style="text-align:center;">
-                                    <span class="badge" style="background:rgba(46,204,113,0.2); color:var(--neon-green); border:1px solid rgba(46,204,113,0.4); font-size:0.8rem; padding:6px 12px; border-radius:12px; font-weight:800;">
-                                        <i class="fas fa-check-circle"></i> সেশন সম্পন্ন (&lt; $0.50 প্রফিট সুরক্ষিত)
+                                    <span class="badge" style="background:rgba(46,204,113,0.2); color:var(--neon-green); border:1px solid rgba(46,204,113,0.4); font-size:0.78rem; padding:5px 10px; border-radius:10px; font-weight:800;">
+                                        <i class="fas fa-check-circle"></i> সেশন সম্পন্ন (&lt; $0.50)
                                     </span>
                                 </td>
                                 <td style="color:var(--neon-green); font-weight:700;">প্রফিট সুরক্ষিত</td>
@@ -9082,8 +9027,8 @@
                                 <td><strong style="color:var(--danger-red); font-size:1.05rem;">#${tradeNum}</strong></td>
                                 <td style="color:var(--danger-red); font-weight:800;">$${stake}</td>
                                 <td style="text-align:center;">
-                                    <span class="badge" style="background:rgba(239,68,68,0.2); color:var(--danger-red); border:1px solid rgba(239,68,68,0.4); font-size:0.8rem; padding:6px 12px; border-radius:12px; font-weight:800;">
-                                        <i class="fas fa-ban"></i> ২৫% লিমিটের বাইরে (চ্যালেঞ্জ সমাপ্ত)
+                                    <span class="badge" style="background:rgba(239,68,68,0.2); color:var(--danger-red); border:1px solid rgba(239,68,68,0.4); font-size:0.78rem; padding:5px 10px; border-radius:10px; font-weight:800;">
+                                        <i class="fas fa-ban"></i> ২৫% লিমিট অতিক্রম
                                     </span>
                                 </td>
                                 <td style="color:var(--text-secondary); font-size:0.85rem;">নিষিদ্ধ</td>
@@ -9107,18 +9052,16 @@
                         nextPlannedStake = stake;
                         rowsHtml += `
                             <tr class="mas-active-row">
-                                <td><strong style="color:var(--yellow); font-size:1.1rem;">#${tradeNum}</strong></td>
+                                <td><strong style="color:var(--yellow); font-size:1.05rem;">#${tradeNum}</strong></td>
                                 <td>
                                     ${window.isExtensionLiveConnected ? `
-                                        <div style="font-size:1.2rem; font-weight:900; color:var(--yellow); text-shadow:0 0 10px rgba(245,176,65,0.4);">
+                                        <div style="font-size:1.15rem; font-weight:900; color:var(--yellow); text-shadow:0 0 10px rgba(245,176,65,0.4);">
                                             $${stake}
                                         </div>
-                                        <small style="color:var(--text-secondary); font-size:0.72rem;">পরবর্তী এন্ট্রি সাইজ</small>
                                     ` : `
-                                        <span class="badge" style="background:rgba(245,176,65,0.18); color:var(--yellow); border:1px solid rgba(245,176,65,0.45); font-size:0.85rem; padding:6px 12px; border-radius:8px; font-weight:800; display:inline-flex; align-items:center; gap:6px;">
-                                            <i class="fas fa-plug"></i> Connect Extension
+                                        <span class="badge" style="background:rgba(245,176,65,0.18); color:var(--yellow); border:1px solid rgba(245,176,65,0.45); font-size:0.78rem; padding:5px 10px; border-radius:8px; font-weight:800; display:inline-flex; align-items:center; gap:5px;">
+                                            <i class="fas fa-plug"></i> Connect Ext.
                                         </span>
-                                        <small style="color:#f87171; font-size:0.72rem; display:block; margin-top:3px;">এক্সটেনশন কানেক্ট করুন</small>
                                     `}
                                 </td>
                                 <td style="text-align:center;">
@@ -9131,14 +9074,14 @@
                                         </button>
                                     </div>
                                 </td>
-                                <td style="color:var(--text-secondary); font-size:0.85rem;">অপেক্ষমান</td>
+                                <td style="color:var(--text-secondary); font-size:0.82rem;">অপেক্ষমান</td>
                                 <td><strong>$${curBal.toFixed(2)}</strong></td>
                                 <td style="font-size:0.85rem; font-weight:700;">
                                     <span style="color:var(--neon-green);">${wins}W</span> - <span style="color:var(--danger-red);">${losses}L</span>
                                 </td>
                                 <td>
-                                    <span class="badge" style="background:rgba(245,176,65,0.2); color:var(--yellow); border:1px solid rgba(245,176,65,0.4); font-size:0.75rem; font-weight:800;">
-                                        <i class="fas fa-play"></i> Active Trade 🔥
+                                    <span class="badge" style="background:rgba(245,176,65,0.2); color:var(--yellow); border:1px solid rgba(245,176,65,0.4); font-size:0.74rem; font-weight:800;">
+                                        <i class="fas fa-play"></i> Active 🔥
                                     </span>
                                 </td>
                             </tr>
@@ -9148,7 +9091,7 @@
                             <tr class="mas-pending-row">
                                 <td><strong>${tradeNum}</strong></td>
                                 <td style="color:var(--text-secondary);">~$${stake}</td>
-                                <td style="text-align:center; color:var(--text-secondary); font-size:0.85rem;">
+                                <td style="text-align:center; color:var(--text-secondary); font-size:0.82rem;">
                                     <span>⏳ অপেক্ষমান</span>
                                 </td>
                                 <td style="color:var(--text-secondary);">-</td>
@@ -9196,13 +9139,13 @@
             const kpiStakeHelper = document.getElementById('masKpiStakeHelper');
             if (kpiStakeHelper) {
                 if (sessionStatus === 'RUNNING') {
-                    kpiStakeHelper.innerText = `ট্রেড #${activeTradeNum}-এর নির্ধারিত ব্রোকার এন্ট্রি সাইজ`;
+                    kpiStakeHelper.innerText = `ট্রেড #${activeTradeNum}`;
                 } else if (sessionStatus === 'STAKE_BELOW_MIN') {
-                    kpiStakeHelper.innerText = `ট্রেড সাইজ < $0.50 হওয়ায় সেশন সম্পন্ন`;
+                    kpiStakeHelper.innerText = `< $0.50 (সম্পন্ন)`;
                 } else if (sessionStatus === 'LIMIT_25_EXCEEDED') {
-                    kpiStakeHelper.innerText = `২৫% লিমিট অতিক্রম করায় চ্যালেঞ্জ সমাপ্ত`;
+                    kpiStakeHelper.innerText = `২৫% লিমিট অতিক্রম`;
                 } else {
-                    kpiStakeHelper.innerText = `সেশন সমাপ্ত হয়েছে`;
+                    kpiStakeHelper.innerText = `সেশন সমাপ্ত`;
                 }
             }
 
@@ -9211,7 +9154,7 @@
 
             const kpiTargetProfit = document.getElementById('masKpiTargetProfit');
             if (kpiTargetProfit) {
-                kpiTargetProfit.innerText = `নিট প্রফিট: +$${targetProfit.toFixed(2)} (+${targetGrowthPct.toFixed(2)}%)`;
+                kpiTargetProfit.innerText = `প্রফিট: +$${targetProfit.toFixed(2)} (+${targetGrowthPct.toFixed(2)}%)`;
             }
 
             const kpiWinRate = document.getElementById('masKpiWinRate');
@@ -9219,7 +9162,7 @@
 
             const kpiWinRateSub = document.getElementById('masKpiWinRateSub');
             if (kpiWinRateSub) {
-                kpiWinRateSub.innerText = `${totalTrades}টির মধ্যে মাত্র ${winTrades}টি উইন দরকার`;
+                kpiWinRateSub.innerText = `${totalTrades} ট্রেডে ${winTrades} উইন`;
             }
 
             const kpiScore = document.getElementById('masKpiScore');
@@ -9229,14 +9172,14 @@
             if (kpiRemaining) {
                 const remTrades = Math.max(0, totalTrades - (wins + losses));
                 const remWins = Math.max(0, winTrades - wins);
-                kpiRemaining.innerText = `বাকি ট্রেড: ${remTrades} | বাকি উইন: ${remWins}`;
+                kpiRemaining.innerText = `বাকি: ${remTrades}T | ${remWins}W`;
             }
 
             const kpiStopLoss = document.getElementById('masKpiStopLoss');
             if (kpiStopLoss) kpiStopLoss.innerText = `$${maxLossDollar.toFixed(2)}`;
 
             const kpiMinBalance = document.getElementById('masKpiMinBalance');
-            if (kpiMinBalance) kpiMinBalance.innerText = `মিনিমাম ব্যালেন্স: $${stopLossFloor.toFixed(2)}`;
+            if (kpiMinBalance) kpiMinBalance.innerText = `ফ্লোর: $${stopLossFloor.toFixed(2)}`;
 
             // Update Progress Bar
             const progressBar = document.getElementById('masProgressBar');
@@ -9273,31 +9216,31 @@
                     isSessionEnded = true;
                     banner.classList.add('mas-banner-won');
                     if (bIcon) bIcon.innerHTML = `<i class="fas fa-trophy" style="color:var(--neon-green);"></i>`;
-                    bTitle.innerHTML = `<span style="color:var(--neon-green); font-size:1.1rem;"><i class="fas fa-check-circle"></i> অভিনন্দন! সেশন সফলভাবে সম্পন্ন হয়েছে!</span>`;
-                    bMsg.innerHTML = `আলহামদুলিল্লাহ! আপনার টার্গেট <strong>${winTrades}টি উইন</strong> সম্পন্ন হয়েছে। মোট নিট প্রফিট: <strong style="color:var(--neon-green); font-size:1.1rem;">+$${pnl.toFixed(2)} (+${pnlPct.toFixed(2)}%)</strong>। ফাইনাল ব্যালেন্স: <strong>$${curBal.toFixed(2)}</strong>।`;
+                    bTitle.innerHTML = `<span style="color:var(--neon-green);"><i class="fas fa-check-circle"></i> সেশন সফলভাবে সম্পন্ন হয়েছে!</span>`;
+                    bMsg.innerHTML = `টার্গেট <strong>${winTrades}টি উইন</strong> পূর্ণ হয়েছে • নিট প্রফিট: <strong style="color:var(--neon-green);">+$${pnl.toFixed(2)} (+${pnlPct.toFixed(2)}%)</strong> • ব্যালেন্স: <strong>$${curBal.toFixed(2)}</strong>`;
                 } else if (sessionStatus === 'STAKE_BELOW_MIN') {
                     isSessionEnded = true;
                     banner.classList.add('mas-banner-won');
                     if (bIcon) bIcon.innerHTML = `<i class="fas fa-trophy" style="color:var(--neon-green);"></i>`;
-                    bTitle.innerHTML = `<span style="color:var(--neon-green); font-size:1.1rem;"><i class="fas fa-check-circle"></i> অভিনন্দন! সেশন সফলভাবে সম্পন্ন হয়েছে (Target Reached)!</span>`;
-                    bMsg.innerHTML = `পরবর্তী এন্ট্রি সাইজ ব্রোকার মিনিমাম লিমিট ($0.50) এর নিচে নেমে আসায় এবং আপনার ব্যালেন্স প্রফিটে থাকায় সেশনটি সফলভাবে সমাপ্ত ঘোষণা করা হলো! মোট নিট প্রফিট: <strong style="color:var(--neon-green); font-size:1.1rem;">+$${pnl.toFixed(2)} (+${pnlPct.toFixed(2)}%)</strong>। ফাইনাল ব্যালেন্স: <strong>$${curBal.toFixed(2)}</strong>।`;
+                    bTitle.innerHTML = `<span style="color:var(--neon-green);"><i class="fas fa-check-circle"></i> সেশন সম্পন্ন (Target Reached)!</span>`;
+                    bMsg.innerHTML = `পরবর্তী এন্ট্রি &lt; $0.50 হওয়ায় প্রফিট সুরক্ষিত • নিট প্রফিট: <strong style="color:var(--neon-green);">+$${pnl.toFixed(2)} (+${pnlPct.toFixed(2)}%)</strong> • ব্যালেন্স: <strong>$${curBal.toFixed(2)}</strong>`;
                 } else if (sessionStatus === 'LIMIT_25_EXCEEDED') {
                     isSessionEnded = true;
                     banner.classList.add('mas-banner-loss');
                     if (bIcon) bIcon.innerHTML = `<i class="fas fa-ban" style="color:var(--danger-red);"></i>`;
-                    bTitle.innerHTML = `<span style="color:var(--danger-red); font-size:1.1rem;"><i class="fas fa-exclamation-triangle"></i> চ্যালেঞ্জ থেকে বাদ / সেশন সমাপ্ত (২৫% লিমিট অতিক্রম)</span>`;
-                    bMsg.innerHTML = `পরবর্তী ট্রেড সাইজ আপনার মোট ক্যাপিটালের ২৫% ম্যাক্সিমাম রিস্ক সীমার বাইরে চলে গেছে (বাকি ড্রডাউন বাফার মাত্র $${Math.max(0, curBal - stopLossFloor).toFixed(2)})। নিয়ম অনুযায়ী আপনি এই চ্যালেঞ্জ থেকে বাদ পড়েছেন এবং পরবর্তী ট্রেড আর নেওয়া যাবে না। আজকের মতো সেশন বন্ধ রাখুন।`;
+                    bTitle.innerHTML = `<span style="color:var(--danger-red);"><i class="fas fa-exclamation-triangle"></i> ২৫% লিমিট অতিক্রম — সেশন সমাপ্ত</span>`;
+                    bMsg.innerHTML = `পরবর্তী এন্ট্রি ২৫% সর্বোচ্চ রিস্ক সীমার বাইরে চলে গেছে। আজকের সেশন এখানেই সমাপ্ত।`;
                 } else if (sessionStatus === 'MAX_LOSS') {
                     isSessionEnded = true;
                     banner.classList.add('mas-banner-loss');
                     if (bIcon) bIcon.innerHTML = `<i class="fas fa-hand-paper" style="color:var(--danger-red);"></i>`;
-                    bTitle.innerHTML = `<span style="color:var(--danger-red); font-size:1.1rem;"><i class="fas fa-exclamation-triangle"></i> সেশন সমাপ্ত: সর্বোচ্চ লস লিমিট স্পর্শ করেছে</span>`;
-                    bMsg.innerHTML = `সেশনের সর্বোচ্চ লস সীমা (${losses}টি লস) হয়েছে। বাকি ট্রেডগুলো দিয়ে নির্ধারিত টার্গেট রিকভার করা সম্ভব নয়। প্রফেশনাল মানি ম্যানেজমেন্ট ও ক্যাপিটাল সুরক্ষার জন্য আজকের মতো ট্রেডিং বন্ধ রাখুন।`;
+                    bTitle.innerHTML = `<span style="color:var(--danger-red);"><i class="fas fa-exclamation-triangle"></i> সর্বোচ্চ লস সীমা (${losses}L) — সেশন সমাপ্ত</span>`;
+                    bMsg.innerHTML = `ক্যাপিটাল সুরক্ষার জন্য আজকের সেশন এখানেই সমাপ্ত।`;
                 } else {
                     banner.classList.add('mas-banner-running');
                     if (bIcon) bIcon.innerHTML = `<i class="fas fa-play" style="color:var(--yellow);"></i>`;
                     bTitle.innerText = `সেশন চলমান — ট্রেড #${activeTradeNum}`;
-                    bMsg.innerHTML = `ব্রোকারে <strong style="color:var(--yellow); font-size:1.05rem;">$${nextPlannedStake.toFixed(2)}</strong> সাইজে ট্রেড ওপেন করুন। ট্রেডের রেজাল্ট অনুযায়ী টেবিলে <strong>WIN (W)</strong> অথবা <strong>LOSS (L)</strong> বাটন চাপুন।`;
+                    bMsg.innerHTML = `এন্ট্রি সাইজ: <strong style="color:var(--yellow);">$${nextPlannedStake.toFixed(2)}</strong> • ফলাফল অনুযায়ী <strong>WIN (W)</strong> বা <strong>LOSS (L)</strong> চাপুন।`;
                 }
 
                 if (isSessionEnded) {
@@ -9312,18 +9255,13 @@
                     }));
 
                     bMsg.innerHTML += `
-                        <div style="background:rgba(245,176,65,0.12); border:1.5px solid var(--yellow); border-radius:12px; padding:12px 16px; margin-top:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <div style="width:38px; height:38px; border-radius:50%; background:var(--yellow); color:#000; display:flex; align-items:center; justify-content:center; font-size:1.15rem; font-weight:900; flex-shrink:0;">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                </div>
-                                <div style="text-align:left;">
-                                    <strong style="color:#fff; font-size:0.92rem; display:block;">সেশন সম্পন্ন হয়েছে! ট্রেডিং প্রুফ আপলোড করুন</strong>
-                                    <span style="font-size:0.78rem; color:#cbd5e1;">পরবর্তী সেশন শুরু করার আগে প্রুফ আপলোড বাধ্যতামূলক। সব হিসাব অটো-পূরণ হবে।</span>
-                                </div>
+                        <div style="background:rgba(245,176,65,0.12); border:1.5px solid var(--yellow); border-radius:10px; padding:10px 14px; margin-top:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-cloud-upload-alt" style="color:var(--yellow); font-size:1.1rem;"></i>
+                                <strong style="color:#fff; font-size:0.86rem;">পরবর্তী সেশনের আগে প্রুফ সাবমিট করুন</strong>
                             </div>
-                            <button type="button" class="btn-gold" onclick="proceedToProofUploadFromSheet()" style="padding:9px 20px; font-weight:800; font-size:0.86rem; display:inline-flex; align-items:center; gap:8px; border-radius:8px; box-shadow:0 0 15px rgba(245,176,65,0.35);">
-                                <i class="fas fa-arrow-right"></i> প্রুফ আপলোড করুন (Upload Proof)
+                            <button type="button" class="btn-gold" onclick="proceedToProofUploadFromSheet()" style="padding:7px 16px; font-weight:800; font-size:0.82rem; display:inline-flex; align-items:center; gap:6px; border-radius:8px;">
+                                <i class="fas fa-arrow-right"></i> প্রুফ আপলোড
                             </button>
                         </div>
                     `;
@@ -10467,16 +10405,13 @@
             if (trades.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8" style="text-align:center; padding:3.5rem 1rem; color:var(--text-secondary);">
-                            <div style="width:60px; height:60px; border-radius:50%; background:rgba(255,184,0,0.1); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; font-size:1.6rem; color:var(--yellow);">
+                        <td colspan="8" style="text-align:center; padding:2.5rem 1rem; color:var(--text-secondary);">
+                            <div style="width:48px; height:48px; border-radius:50%; background:rgba(255,184,0,0.1); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem auto; font-size:1.3rem; color:var(--yellow);">
                                 <i class="fas fa-cloud-download-alt"></i>
                             </div>
-                            <h4 style="color:#fff; font-size:1.05rem; margin-bottom:4px;">এখনও কোনো সক্রিয় চ্যালেঞ্জ ট্রেড সিঙ্ক করা হয়নি</h4>
-                            <p style="font-size:0.82rem; color:var(--text-secondary); max-width:440px; margin:0 auto 1.2rem auto;">
-                                এক্সটেনশন কানেক্ট করে Quotex লাইভ চার্টে ট্রেড করলেই স্বয়ংক্রিয়ভাবে এখানে ট্রেড রেকর্ড জমা হবে।
-                            </p>
-                            <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-gold" style="padding:8px 18px; font-size:0.84rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                                <i class="fas fa-chart-line"></i> Quotex লাইভ চার্ট ওপেন করুন
+                            <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.8rem;">এখনও কোনো ট্রেড সিঙ্ক হয়নি</h4>
+                            <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-gold" style="padding:7px 16px; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                <i class="fas fa-chart-line"></i> Quotex চার্ট ওপেন করুন
                             </a>
                         </td>
                     </tr>
