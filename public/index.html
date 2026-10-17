@@ -2375,14 +2375,16 @@
             .promo-countdown-grid {
                 gap: 3px !important;
             }
+        }
+
         /* ====================================================
-           FREE MONEY MANAGEMENT SHEET (CENTERED CLASSIC LUXURY 3D)
+           MONEY MANAGEMENT SHEET (CENTERED LUXURY BOX - IMAGE 2)
         ==================================================== */
         .free-mm-cta-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 3rem auto 0 auto;
+            margin: 2.8rem auto 0 auto;
             text-align: center;
             width: 100%;
             position: relative;
@@ -2395,35 +2397,34 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            padding: 16px 42px;
+            padding: 15px 40px;
             background: linear-gradient(135deg, #F5B041 0%, #D48817 100%);
             color: #000000;
-            font-size: 1.08rem;
+            font-size: 1.05rem;
             font-weight: 900;
             letter-spacing: 0.8px;
             text-transform: uppercase;
             border: none;
             border-radius: 9999px;
             cursor: pointer;
-            box-shadow: 0 10px 32px rgba(245, 176, 65, 0.45), inset 0 2px 0 rgba(255, 255, 255, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.2);
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 10px 30px rgba(245, 176, 65, 0.45), inset 0 2px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             outline: none;
             user-select: none;
         }
 
         .btn-free-mm-cta:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 16px 45px rgba(245, 176, 65, 0.65), inset 0 2px 0 rgba(255, 255, 255, 0.75);
-            filter: brightness(1.08);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 16px 42px rgba(245, 176, 65, 0.65);
+            filter: brightness(1.06);
         }
 
         .btn-free-mm-cta:active {
-            transform: translateY(1px) scale(0.98);
-            box-shadow: 0 6px 18px rgba(245, 176, 65, 0.35);
+            transform: translateY(1px);
         }
 
         .btn-free-mm-cta #landingMmChevron {
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.35s ease;
             font-size: 0.95rem;
         }
 
@@ -2436,38 +2437,32 @@
             perspective: 1400px;
             transform-style: preserve-3d;
             display: none;
-            margin: 2.4rem auto 0 auto;
-            max-width: 1040px;
+            margin: 2rem auto 0 auto;
+            max-width: 1100px;
             width: 100%;
             position: relative;
             z-index: 5;
+            box-sizing: border-box;
         }
 
         .landing-mm-3d-wrapper.open {
-            display: block;
-            animation: foldOpen3D 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            display: block !important;
+            animation: foldOpen3D 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .landing-mm-3d-wrapper.closing {
-            display: block;
-            animation: foldClose3D 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            display: block !important;
+            animation: foldClose3D 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         @keyframes foldOpen3D {
             0% {
                 opacity: 0;
-                transform: perspective(1400px) rotateX(-24deg) scale(0.92) translateY(-40px);
-                filter: blur(6px);
-            }
-            60% {
-                opacity: 0.95;
-                transform: perspective(1400px) rotateX(3deg) scale(1.01) translateY(0);
-                filter: blur(0);
+                transform: perspective(1400px) rotateX(-20deg) scale(0.95) translateY(-25px);
             }
             100% {
                 opacity: 1;
                 transform: perspective(1400px) rotateX(0deg) scale(1) translateY(0);
-                filter: blur(0);
             }
         }
 
@@ -2478,19 +2473,17 @@
             }
             100% {
                 opacity: 0;
-                transform: perspective(1400px) rotateX(-20deg) scale(0.94) translateY(-30px);
+                transform: perspective(1400px) rotateX(-16deg) scale(0.96) translateY(-20px);
             }
         }
 
-        /* Classic Luxury Glass Card (Centered Box) */
+        /* Classic Luxury Card - matching Image 2 */
         .landing-mm-card {
-            background: linear-gradient(150deg, rgba(16, 21, 33, 0.95), rgba(9, 12, 20, 0.98));
-            border: 1px solid rgba(245, 176, 65, 0.4);
-            border-radius: 24px;
-            padding: 2.2rem;
-            box-shadow: 0 25px 65px -12px rgba(0, 0, 0, 0.85), 0 0 40px rgba(245, 176, 65, 0.14);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            background: #0f131c;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.8rem 2rem;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7);
             position: relative;
             box-sizing: border-box;
             width: 100%;
@@ -2498,76 +2491,51 @@
             text-align: left;
         }
 
-        /* Top Header inside the Box */
         .landing-mm-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
-            margin-bottom: 1.4rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .landing-mm-header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .landing-mm-icon-circle {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(245, 176, 65, 0.25), rgba(245, 176, 65, 0.08));
-            border: 1px solid rgba(245, 176, 65, 0.45);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--yellow);
-            font-size: 1.3rem;
-            box-shadow: 0 0 16px rgba(245, 176, 65, 0.25);
-            flex-shrink: 0;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.9rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         .landing-mm-header-title {
-            font-size: 1.25rem;
-            font-weight: 850;
+            font-size: 1.18rem;
+            font-weight: 800;
             color: #ffffff;
-            margin: 0 0 3px 0;
-            letter-spacing: -0.3px;
+            margin: 0;
         }
 
         .landing-mm-mode-badge {
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            background: rgba(46, 204, 113, 0.15);
-            color: var(--neon-green);
-            border: 1px solid rgba(46, 204, 113, 0.35);
-            padding: 2px 10px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            padding: 3px 10px;
             border-radius: 12px;
-            font-size: 0.72rem;
-            font-weight: 800;
+            font-size: 0.74rem;
+            font-weight: 750;
         }
 
         .landing-mm-header-actions {
             display: flex;
             gap: 8px;
             align-items: center;
-            flex-wrap: wrap;
         }
 
         .btn-mm-header-action {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.14);
             color: #e2e8f0;
-            padding: 7px 16px;
-            border-radius: 10px;
-            font-size: 0.82rem;
-            font-weight: 750;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             display: inline-flex;
@@ -2576,19 +2544,16 @@
         }
 
         .btn-mm-header-action:hover {
-            background: rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.12);
             color: #ffffff;
-            border-color: rgba(255, 255, 255, 0.35);
-            transform: translateY(-1px);
         }
 
-        /* Parameters Box */
         .landing-mm-params-box {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.09);
-            border-radius: 16px;
-            padding: 1.1rem 1.2rem;
-            margin-bottom: 1.4rem;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 1rem 1.1rem;
+            margin-bottom: 1.2rem;
         }
 
         .landing-mm-params-top {
@@ -2597,28 +2562,25 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 8px;
-            margin-bottom: 0.85rem;
+            margin-bottom: 0.75rem;
         }
 
         .landing-mm-params-label {
             font-size: 0.82rem;
-            font-weight: 850;
+            font-weight: 800;
             color: var(--yellow);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
         }
 
         .landing-mm-params-badge {
-            background: rgba(245, 176, 65, 0.14);
+            background: rgba(245, 176, 65, 0.12);
             color: var(--yellow);
-            border: 1px solid rgba(245, 176, 65, 0.35);
-            padding: 3px 12px;
+            border: 1px solid rgba(245, 176, 65, 0.3);
+            padding: 2px 10px;
             border-radius: 12px;
             font-size: 0.72rem;
-            font-weight: 750;
-            letter-spacing: 0.5px;
+            font-weight: 700;
         }
 
         .landing-mm-params-grid {
@@ -2630,7 +2592,7 @@
         .landing-param-item {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
         }
 
         .landing-param-item label {
@@ -2646,26 +2608,23 @@
         .landing-param-input-box {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 10px;
+            background: #0b0e14;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
             padding: 0 12px;
             height: 42px;
             box-sizing: border-box;
-            position: relative;
         }
 
-        .landing-param-input-box .param-curr {
-            color: var(--yellow);
-            font-weight: 850;
-            margin-right: 4px;
-            font-size: 0.95rem;
+        .landing-param-input-box.active-capital {
+            border: 1px solid rgba(245, 176, 65, 0.7) !important;
+            box-shadow: 0 0 10px rgba(245, 176, 65, 0.12);
         }
 
         .landing-param-input-box input {
             background: transparent !important;
             border: none !important;
-            color: #e2e8f0 !important;
+            color: #ffffff !important;
             font-size: 0.98rem !important;
             font-weight: 800 !important;
             width: 100% !important;
@@ -2674,25 +2633,16 @@
             padding: 0 !important;
         }
 
-        .landing-param-input-box .param-lock-icon {
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 0.8rem;
-            margin-left: auto;
-        }
-
-        /* Trade Log Section */
         .landing-mm-log-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 0.85rem;
         }
 
         .landing-mm-log-title {
-            font-size: 1.15rem;
-            font-weight: 850;
+            font-size: 1.1rem;
+            font-weight: 800;
             color: #ffffff;
             display: inline-flex;
             align-items: center;
@@ -2702,77 +2652,51 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 3px 10px;
+            border-radius: 12px;
             font-size: 0.72rem;
             font-weight: 750;
             border: 1px solid rgba(59, 130, 246, 0.35);
-            background: rgba(59, 130, 246, 0.12);
-            color: #93c5fd;
-            white-space: nowrap;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
             user-select: none;
         }
 
         .landing-sync-badge .sync-dot-live {
-            width: 7px;
-            height: 7px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: #60a5fa;
-            box-shadow: 0 0 8px #60a5fa;
-            flex-shrink: 0;
+            box-shadow: 0 0 6px #60a5fa;
         }
 
         .btn-mas-undo-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
-            background: rgba(245, 176, 65, 0.12);
-            border: 1px solid rgba(245, 176, 65, 0.45);
-            color: var(--yellow);
+            width: 34px;
+            height: 34px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #94a3b8;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            flex-shrink: 0;
-            outline: none;
+            transition: all 0.2s ease;
         }
 
         .btn-mas-undo-icon:hover {
-            background: rgba(245, 176, 65, 0.25);
+            background: rgba(245, 176, 65, 0.2);
             border-color: var(--yellow);
             color: #fff;
-            box-shadow: 0 0 14px rgba(245, 176, 65, 0.4);
-            transform: scale(1.08);
         }
 
-        .btn-mas-undo-icon.no-history {
-            opacity: 0.38;
-            border-color: rgba(255, 255, 255, 0.18);
-            color: rgba(255, 255, 255, 0.45);
-            background: rgba(255, 255, 255, 0.04);
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
-
-        .btn-mas-undo-icon.has-history {
-            opacity: 1;
-            border-color: var(--yellow);
-            color: var(--yellow);
-            background: rgba(245, 176, 65, 0.18);
-            box-shadow: 0 0 12px rgba(245, 176, 65, 0.25);
-            cursor: pointer;
-        }
-
-        /* Classic Luxury Table */
         .landing-mm-table-wrap {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.09);
-            background: rgba(0, 0, 0, 0.35);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(0, 0, 0, 0.25);
         }
 
         .landing-mm-table {
@@ -2784,32 +2708,25 @@
         }
 
         .landing-mm-table th {
-            background: rgba(14, 18, 28, 0.85);
+            background: #0c0f16;
             color: #94a3b8;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 0.74rem;
-            letter-spacing: 0.6px;
-            padding: 12px 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+            font-weight: 750;
+            font-size: 0.78rem;
+            padding: 11px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             white-space: nowrap;
         }
 
         .landing-mm-table td {
-            padding: 11px 14px;
+            padding: 10px 14px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             vertical-align: middle;
             white-space: nowrap;
         }
 
-        .landing-mm-table tr:last-child td {
-            border-bottom: none;
-        }
-
         .mas-active-row {
-            background: linear-gradient(90deg, rgba(245, 176, 65, 0.18), rgba(245, 176, 65, 0.03)) !important;
-            border-left: 4px solid var(--yellow) !important;
-            box-shadow: inset 0 0 16px rgba(245, 176, 65, 0.12);
+            background: rgba(245, 176, 65, 0.08) !important;
+            border-left: 3px solid var(--yellow) !important;
         }
 
         .mas-completed-row {
@@ -2821,15 +2738,14 @@
         }
 
         .btn-mas-w {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: #10b981;
             color: #fff;
             border: none;
-            padding: 6px 15px;
+            padding: 6px 16px;
             border-radius: 8px;
             font-weight: 800;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
@@ -2837,21 +2753,19 @@
         }
 
         .btn-mas-w:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.55);
-            background: linear-gradient(135deg, #34d399, #10b981);
+            background: #059669;
+            transform: scale(1.03);
         }
 
         .btn-mas-l {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: #ef4444;
             color: #fff;
             border: none;
-            padding: 6px 15px;
+            padding: 6px 16px;
             border-radius: 8px;
             font-weight: 800;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
@@ -2859,19 +2773,18 @@
         }
 
         .btn-mas-l:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.55);
-            background: linear-gradient(135deg, #f87171, #ef4444);
+            background: #dc2626;
+            transform: scale(1.03);
         }
 
         .mas-outcome-badge {
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 6px;
             font-weight: 800;
-            font-size: 0.78rem;
+            font-size: 0.76rem;
         }
 
         .mas-outcome-w {
@@ -2886,7 +2799,6 @@
             color: #ef4444;
         }
 
-        /* Mobile Optimization */
         @media (max-width: 820px) {
             .free-mm-cta-wrapper {
                 margin: 2rem auto 0 auto !important;
@@ -2894,24 +2806,23 @@
             .btn-free-mm-cta {
                 width: 100% !important;
                 max-width: 320px !important;
-                padding: 14px 24px !important;
-                font-size: 0.96rem !important;
+                padding: 14px 22px !important;
+                font-size: 0.95rem !important;
             }
             .landing-mm-card {
                 padding: 1.2rem 1rem !important;
-                border-radius: 18px !important;
             }
             .landing-mm-params-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                 gap: 8px !important;
             }
             .btn-mas-w, .btn-mas-l {
-                height: 42px !important;
-                font-size: 0.85rem !important;
-                padding: 4px 12px !important;
+                height: 40px !important;
+                font-size: 0.82rem !important;
+                padding: 4px 10px !important;
             }
             .landing-mm-table th, .landing-mm-table td {
-                padding: 9px 10px !important;
+                padding: 8px 10px !important;
                 font-size: 0.78rem !important;
             }
         }
@@ -3169,36 +3080,32 @@
             </div>
         </div>
 
-        <!-- Centered "FREE MONEY MANAGEMENT" Button (Green Marked Box) -->
+        <!-- Centered "MONEY MANAGEMENT SHEET" Button (Green Marked Box in Image 1) -->
         <div class="free-mm-cta-wrapper">
             <button type="button" class="btn-free-mm-cta" id="btnToggleLandingMm" onclick="toggleLandingMmSheet()">
                 <i class="fas fa-calculator"></i>
-                <span id="landingMmBtnText">FREE MONEY MANAGEMENT</span>
+                <span id="landingMmBtnText">MONEY MANAGEMENT SHEET</span>
                 <i class="fas fa-chevron-down" id="landingMmChevron"></i>
             </button>
         </div>
 
-        <!-- 3D Unfolding Container (Centered Luxury Glass Card) -->
-        <div class="landing-mm-3d-wrapper" id="landingMm3dWrapper">
+        <!-- 3D Unfolding Container (Centered Luxury Glass Card - Image 2) -->
+        <div class="landing-mm-3d-wrapper" id="landingMm3dWrapper" style="display:none;">
             <div class="landing-mm-card" id="landingMmSheetBox">
                 <!-- Header inside the Card -->
                 <div class="landing-mm-header">
-                    <div class="landing-mm-header-left">
-                        <div class="landing-mm-icon-circle">
-                            <i class="fas fa-calculator"></i>
-                        </div>
-                        <div>
-                            <h3 class="landing-mm-header-title">Free Money Management Sheet</h3>
-                            <span class="landing-mm-mode-badge">
-                                <i class="fas fa-unlock-alt"></i> FREE PRACTICE TOOL • NO LOGIN REQUIRED
-                            </span>
-                        </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <i class="fas fa-calculator" style="color:var(--yellow); font-size:1.2rem;"></i>
+                        <h3 class="landing-mm-header-title">ফ্রী প্র্যাকটিস শিট</h3>
+                        <span class="landing-mm-mode-badge">
+                            <i class="fas fa-unlock-alt" style="font-size:0.65rem;"></i> ফ্রী টেস্ট মোড
+                        </span>
                     </div>
                     <div class="landing-mm-header-actions">
-                        <button type="button" class="btn-mm-header-action" onclick="resetLandingFreeMasSession()" title="Reset Test Session">
+                        <button type="button" class="btn-mm-header-action" onclick="resetLandingFreeMasSession()" title="টেস্ট সেশন রিসেট করুন">
                             <i class="fas fa-redo"></i> Reset
                         </button>
-                        <button type="button" class="btn-mm-header-action" onclick="window.print()" title="Print / Save PDF">
+                        <button type="button" class="btn-mm-header-action" onclick="window.print()" title="প্রিন্ট করুন">
                             <i class="fas fa-print"></i> Print
                         </button>
                     </div>
@@ -3208,20 +3115,18 @@
                 <div class="landing-mm-params-box">
                     <div class="landing-mm-params-top">
                         <div class="landing-mm-params-label">
-                            <i class="fas fa-sliders-h" style="margin-right:7px;"></i> Session Parameters
+                            <i class="fas fa-sliders-h" style="margin-right:7px;"></i> টেস্ট প্যারামিটার
                         </div>
                         <div class="landing-mm-params-badge">
-                            <i class="fas fa-lock"></i> 16 Trades • 6 Wins • 85% Payout
+                            <i class="fas fa-lock" style="font-size:0.68rem; margin-right:3px;"></i> 16T • 6W • 85%
                         </div>
                     </div>
                     <div class="landing-mm-params-grid">
                         <!-- 1. Capital ($) - LOCKED -->
                         <div class="landing-param-item">
                             <label><i class="fas fa-lock"></i> Capital ($)</label>
-                            <div class="landing-param-input-box" title="Locked Parameter">
-                                <span class="param-curr">$</span>
+                            <div class="landing-param-input-box active-capital" title="Locked Parameter">
                                 <input type="number" id="landingFreeCapital" value="100" readonly disabled />
-                                <i class="fas fa-lock param-lock-icon"></i>
                             </div>
                         </div>
                         <!-- 2. Total Trades - LOCKED -->
@@ -3229,7 +3134,6 @@
                             <label><i class="fas fa-lock"></i> Total Trades</label>
                             <div class="landing-param-input-box" title="Locked Parameter">
                                 <input type="number" id="landingFreeTotalTrades" value="16" readonly disabled />
-                                <i class="fas fa-lock param-lock-icon"></i>
                             </div>
                         </div>
                         <!-- 3. Target Wins - LOCKED -->
@@ -3237,15 +3141,13 @@
                             <label><i class="fas fa-lock"></i> Target Wins</label>
                             <div class="landing-param-input-box" title="Locked Parameter">
                                 <input type="number" id="landingFreeWinTrades" value="6" readonly disabled />
-                                <i class="fas fa-lock param-lock-icon"></i>
                             </div>
                         </div>
                         <!-- 4. Payout - LOCKED -->
                         <div class="landing-param-item">
-                            <label><i class="fas fa-lock"></i> Broker Payout</label>
+                            <label><i class="fas fa-lock"></i> Payout</label>
                             <div class="landing-param-input-box" title="Locked Parameter">
                                 <input type="number" id="landingFreePayoutQuota" value="1.85" readonly disabled />
-                                <i class="fas fa-lock param-lock-icon"></i>
                             </div>
                         </div>
                     </div>
@@ -3253,14 +3155,14 @@
 
                 <!-- Trade Log Header -->
                 <div class="landing-mm-log-header">
-                    <div class="landing-mm-log-title">
-                        <i class="fas fa-list-ol" style="color:var(--yellow); margin-right:8px;"></i> Test Trade Log
-                    </div>
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <span class="landing-sync-badge">
-                            <span class="sync-dot-live"></span> Free Test Mode
+                        <span class="landing-mm-log-title">
+                            <i class="fas fa-list-ol" style="color:var(--yellow); margin-right:8px;"></i> টেস্ট ট্রেড লগ
                         </span>
-                        <button type="button" id="btnLandingFreeUndo" onclick="landingFreeMasUndoLastTrade()" class="btn-mas-undo-icon no-history" title="Undo Last Trade (Hotkey: Z)" aria-label="Undo">
+                        <span class="landing-sync-badge">
+                            <span class="sync-dot-live"></span> টেস্ট মোড
+                        </span>
+                        <button type="button" id="btnLandingFreeUndo" onclick="landingFreeMasUndoLastTrade()" class="btn-mas-undo-icon no-history" title="শেষ ট্রেড আনডু করুন (Undo - Hotkey: Z)" aria-label="Undo">
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
@@ -3272,12 +3174,12 @@
                         <thead>
                             <tr>
                                 <th style="width:50px; text-align:center;">#</th>
-                                <th>Entry Size</th>
-                                <th style="min-width:180px; text-align:center;">Outcome (W / L)</th>
-                                <th>Profit / Loss</th>
-                                <th>Balance</th>
-                                <th>Score</th>
-                                <th style="text-align:center;">Status</th>
+                                <th>এন্ট্রি সাইজ</th>
+                                <th style="min-width:180px; text-align:center;">ফলাফল (W / L)</th>
+                                <th>লাভ / লস</th>
+                                <th>ব্যালেন্স</th>
+                                <th>স্কোর</th>
+                                <th style="text-align:center;">স্ট্যাটাস</th>
                             </tr>
                         </thead>
                         <tbody id="landingFreeMasTableBody">
@@ -5367,10 +5269,11 @@
 
             landingMmOpen = !landingMmOpen;
             if (landingMmOpen) {
+                wrapper.style.display = 'block';
                 wrapper.classList.remove('closing');
                 wrapper.classList.add('open');
                 if (btn) btn.classList.add('active');
-                if (btnText) btnText.innerText = 'CLOSE MONEY MANAGEMENT';
+                if (btnText) btnText.innerText = 'CLOSE MONEY MANAGEMENT SHEET';
                 
                 calculateAndRenderLandingFreeMas();
 
@@ -5384,10 +5287,13 @@
                 wrapper.classList.remove('open');
                 wrapper.classList.add('closing');
                 if (btn) btn.classList.remove('active');
-                if (btnText) btnText.innerText = 'FREE MONEY MANAGEMENT';
+                if (btnText) btnText.innerText = 'MONEY MANAGEMENT SHEET';
                 setTimeout(() => {
-                    if (!landingMmOpen) wrapper.classList.remove('closing');
-                }, 450);
+                    if (!landingMmOpen) {
+                        wrapper.style.display = 'none';
+                        wrapper.classList.remove('closing');
+                    }
+                }, 400);
             }
         }
 
@@ -5611,14 +5517,14 @@
                                     </button>
                                 </div>
                             </td>
-                            <td style="color:var(--text-muted); font-size:0.85rem;">Pending</td>
+                            <td style="color:var(--text-muted); font-size:0.85rem;">অপেক্ষমান</td>
                             <td><strong>$${curBal.toFixed(2)}</strong></td>
                             <td style="font-size:0.85rem; font-weight:700;">
                                 <span style="color:var(--neon-green);">${wins}W</span> - <span style="color:var(--danger-red);">${losses}L</span>
                             </td>
                             <td style="text-align:center;">
                                 <span class="badge" style="background:rgba(245,176,65,0.2); color:var(--yellow); border:1px solid rgba(245,176,65,0.4); font-size:0.75rem; font-weight:800;">
-                                    Active Trade 🔥
+                                    ▶ Active Trade 🔥
                                 </span>
                             </td>
                         </tr>
@@ -5630,7 +5536,7 @@
                             <td style="text-align:center;"><strong>${tradeNum}</strong></td>
                             <td style="color:var(--text-muted);">~$${stake}</td>
                             <td style="text-align:center; color:var(--text-muted); font-size:0.85rem;">
-                                <span>⏳ Pending</span>
+                                <span>⏳ অপেক্ষমান</span>
                             </td>
                             <td style="color:var(--text-muted);">-</td>
                             <td style="color:var(--text-muted);">-</td>
