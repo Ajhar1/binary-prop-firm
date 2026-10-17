@@ -2434,6 +2434,85 @@
             border-top: 1px solid rgba(255, 255, 255, 0.08);
             padding-top: 1rem;
         }
+
+        /* Synced Stats Grid (Desktop 4-in-a-row, Mobile 4-in-a-row Compact Classic) */
+        .sync-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 1.8rem;
+        }
+        .sync-stat-card {
+            background: #171922;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 1.2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .sync-stat-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .sync-stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+        }
+        .sync-stat-sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .sync-stats-grid {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 6px !important;
+                margin-bottom: 1.2rem !important;
+            }
+            .sync-stat-card {
+                padding: 10px 4px !important;
+                border-radius: 10px !important;
+                background: #151821 !important;
+                min-height: 82px !important;
+                justify-content: space-between !important;
+            }
+            .sync-stat-title {
+                font-size: 0.62rem !important;
+                line-height: 1.15 !important;
+                letter-spacing: 0 !important;
+                margin-bottom: 2px !important;
+                height: 24px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+            }
+            .sync-stat-value {
+                font-size: 1.1rem !important;
+                font-weight: 800 !important;
+                line-height: 1.2 !important;
+                margin: 2px 0 !important;
+            }
+            .sync-stat-sub {
+                font-size: 0.56rem !important;
+                margin-top: 2px !important;
+                line-height: 1.1 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                opacity: 0.85 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -3813,7 +3892,7 @@
             <!-- Module 1: Challenge Time-Lock Filter Info Bar -->
             <div id="extChallengeFilterInfo" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; background:rgba(255,184,0,0.06); border:1px solid rgba(255,184,0,0.25); border-radius:12px; padding:10px 16px; margin-bottom:1.5rem;">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width:28px; height:28px; border-radius:8px; background:rgba(255,184,0,0.15); display:flex; align-items:center; justify-content:center; color:var(--yellow); font-size:0.9rem;">
+                    <div style="width:28px; height:28px; border-radius:8px; background:rgba(255,184,0,0.15); display:flex; align-items:center; justify-content:center; color:var(--yellow); font-size:0.9rem; flex-shrink:0;">
                         <i class="fas fa-lock"></i>
                     </div>
                     <div style="font-size:0.82rem; color:#e2e8f0;">
@@ -3821,86 +3900,37 @@
                         <span id="extChallengeTimeLockStatus">সক্রিয় চ্যালেঞ্জ ডাটা লোড হচ্ছে...</span>
                     </div>
                 </div>
-                <div style="font-size:0.78rem; color:#cbd5e1; background:rgba(255,255,255,0.05); padding:3px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.1);" id="extChallengeActiveBadge">
-                    প্যাকেজ: যাচাই হচ্ছে...
-                </div>
-            </div>
-
-            <!-- Extension Download & Quick Setup Card -->
-            <div style="background:linear-gradient(135deg, rgba(255,184,0,0.08), rgba(18,20,26,0.95)); border:1px solid rgba(255,184,0,0.3); border-radius:16px; padding:1.4rem; margin-bottom:1.8rem; box-shadow:0 8px 30px rgba(0,0,0,0.35);">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:1rem;">
-                    <div style="display:flex; align-items:center; gap:14px;">
-                        <div style="width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg, #ffb800, #ff8800); display:flex; align-items:center; justify-content:center; color:#000; font-size:1.35rem; font-weight:900; flex-shrink:0;">
-                            <i class="fas fa-plug"></i>
-                        </div>
-                        <div>
-                            <h3 style="font-size:1.15rem; font-weight:800; color:#fff; margin:0 0 3px 0;">
-                                Quotex লাইভ চার্ট অটো-সিঙ্ক এক্সটেনশন (Zero-Click Live Sync)
-                            </h3>
-                            <p style="font-size:0.83rem; color:var(--text-secondary); margin:0;">
-                                কোনো বাটনে ক্লিক করা লাগবে না! সাধারণ ট্রেডারের মতো Quotex লাইভ চার্টে ট্রেড করলেই পলকের মধ্যে হিস্টোরি সিঙ্ক হবে।
-                            </p>
-                        </div>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <div style="font-size:0.78rem; color:#cbd5e1; background:rgba(255,255,255,0.05); padding:4px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.1);" id="extChallengeActiveBadge">
+                        প্যাকেজ: যাচাই হচ্ছে...
                     </div>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <a href="/api/extension/download" class="btn-gold" style="padding:9px 18px; font-weight:800; font-size:0.86rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
-                            <i class="fas fa-download"></i> ডাউনলোড এক্সটেনশন (ZIP)
-                        </a>
-                        <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-outline" style="padding:9px 16px; font-size:0.84rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                            <i class="fas fa-chart-line"></i> Quotex লাইভ চার্ট ওপেন করুন
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 3-Step Setup Guide -->
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; background:rgba(0,0,0,0.25); padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
-                    <div style="display:flex; gap:10px;">
-                        <div style="width:28px; height:28px; border-radius:50%; background:var(--yellow); color:#000; font-weight:800; font-size:0.85rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">১</div>
-                        <div>
-                            <strong style="color:#fff; font-size:0.85rem;">ডাউনলোড ও আনজিপ করুন</strong>
-                            <p style="font-size:0.78rem; color:var(--text-secondary); margin:2px 0 0 0;">উপরের বাটন দিয়ে জিপ ফাইলটি ডাউনলোড করে যেকোনো ফোল্ডারে এক্সট্রাক্ট (Extract) করুন।</p>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:10px;">
-                        <div style="width:28px; height:28px; border-radius:50%; background:var(--yellow); color:#000; font-weight:800; font-size:0.85rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">২</div>
-                        <div>
-                            <strong style="color:#fff; font-size:0.85rem;">ব্রাউজারে ইন্সটল করুন</strong>
-                            <p style="font-size:0.78rem; color:var(--text-secondary); margin:2px 0 0 0;">কম্পিউটারে <code>chrome://extensions</code> এ Developer Mode অন করে <strong>Load unpacked</strong> দিন। মোবাইলে Kiwi Browser ব্যবহার করুন।</p>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:10px;">
-                        <div style="width:28px; height:28px; border-radius:50%; background:var(--yellow); color:#000; font-weight:800; font-size:0.85rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">৩</div>
-                        <div>
-                            <strong style="color:#fff; font-size:0.85rem;">Trader ID দিন ও চার্টে ট্রেড করুন</strong>
-                            <p style="font-size:0.78rem; color:var(--text-secondary); margin:2px 0 0 0;">
-                                এক্সটেনশনে আপনার Trader ID: <strong id="syncHelperTraderId" style="color:var(--yellow); cursor:pointer;" onclick="copySyncTraderId()" title="ক্লিক করে কপি করুন">AJ-xxxx</strong> বসান। এরপর লাইভ চার্টে নিশ্চিন্তে ট্রেড করুন।
-                            </p>
-                        </div>
-                    </div>
+                    <button type="button" onclick="openSetupVideoModal()" style="background:linear-gradient(135deg, rgba(255,184,0,0.22), rgba(255,145,0,0.32)); border:1px solid rgba(255,184,0,0.6); color:#ffb800; padding:5px 14px; border-radius:20px; font-weight:800; font-size:0.8rem; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 0 14px rgba(255,184,0,0.25); transition:all 0.25s ease;" onmouseover="this.style.background='linear-gradient(135deg, rgba(255,184,0,0.35), rgba(255,145,0,0.45))'; this.style.boxShadow='0 0 20px rgba(255,184,0,0.4)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(255,184,0,0.22), rgba(255,145,0,0.32))'; this.style.boxShadow='0 0 14px rgba(255,184,0,0.25)';">
+                        <i class="fas fa-play-circle" style="font-size:0.95rem; color:#ffb800;"></i> Setup Video
+                    </button>
                 </div>
             </div>
 
             <!-- Performance Overview Stats -->
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:16px; margin-bottom:1.8rem;">
-                <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; text-align:center;">
-                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">মোট সিঙ্ক হওয়া ট্রেড</div>
-                    <div id="syncStatTotal" style="font-size:1.8rem; font-weight:800; color:#fff;">0</div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;" id="syncStatAccountBreakdown">ডেমো ট্রেড: 0টি | রিয়েল ট্রেড: 0টি</div>
+            <div class="sync-stats-grid">
+                <div class="sync-stat-card">
+                    <div class="sync-stat-title">মোট সিঙ্ক হওয়া ট্রেড</div>
+                    <div id="syncStatTotal" class="sync-stat-value">0</div>
+                    <div class="sync-stat-sub" id="syncStatAccountBreakdown">ডেমো ট্রেড: 0টি | রিয়েল ট্রেড: 0টি</div>
                 </div>
-                <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; text-align:center;">
-                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">উইন রেট (Win Rate)</div>
-                    <div id="syncStatWinRate" style="font-size:1.8rem; font-weight:800; color:#00e676;">0.0%</div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;" id="syncStatWinLoss">0 Win / 0 Loss</div>
+                <div class="sync-stat-card">
+                    <div class="sync-stat-title">উইন রেট (Win Rate)</div>
+                    <div id="syncStatWinRate" class="sync-stat-value" style="color:#00e676;">0.0%</div>
+                    <div class="sync-stat-sub" id="syncStatWinLoss">0 Win / 0 Loss</div>
                 </div>
-                <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; text-align:center;">
-                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">মোট ইনভেস্টমেন্ট</div>
-                    <div id="syncStatInvested" style="font-size:1.8rem; font-weight:800; color:#fff;">$0.00</div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">Total Volume</div>
+                <div class="sync-stat-card">
+                    <div class="sync-stat-title">মোট ইনভেস্টমেন্ট</div>
+                    <div id="syncStatInvested" class="sync-stat-value">$0.00</div>
+                    <div class="sync-stat-sub">Total Volume</div>
                 </div>
-                <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; text-align:center;">
-                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">নিট প্রফিট / লস (Net PnL)</div>
-                    <div id="syncStatNetProfit" style="font-size:1.8rem; font-weight:800; color:#ffb800;">$0.00</div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;" id="syncStatGrossReturn">Gross Return: $0.00</div>
+                <div class="sync-stat-card">
+                    <div class="sync-stat-title">নিট প্রফিট / লস (Net PnL)</div>
+                    <div id="syncStatNetProfit" class="sync-stat-value" style="color:#ffb800;">$0.00</div>
+                    <div class="sync-stat-sub" id="syncStatGrossReturn">Gross Return: $0.00</div>
                 </div>
             </div>
 
@@ -3950,6 +3980,112 @@
             </div>
         </section>
     </main>
+
+    <!-- Setup Video Modal (Computer, Android, iPhone) -->
+    <div class="modal-overlay" id="setupVideoModal" onclick="if(event.target === this) closeSetupVideoModal();">
+        <div class="modal-box" style="max-width: 560px; padding: 2rem 1.6rem; border-radius: 20px; background: #131722; border: 1px solid rgba(255, 184, 0, 0.35); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);">
+            <button class="modal-close" onclick="closeSetupVideoModal()">&times;</button>
+            
+            <!-- Modal Header -->
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, rgba(255,184,0,0.2), rgba(255,145,0,0.3)); border: 1px solid rgba(255,184,0,0.5); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.8rem auto; font-size: 1.6rem; color: #ffb800; box-shadow: 0 0 20px rgba(255,184,0,0.25);">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+                <h2 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin: 0 0 6px 0;">এক্সটেনশন সেটআপ ভিডিও গাইড</h2>
+                <p style="font-size: 0.84rem; color: var(--text-secondary); margin: 0;">আপনার ব্যবহারের প্ল্যাটফর্ম বা ডিভাইসটি নির্বাচন করুন:</p>
+            </div>
+
+            <!-- View 1: Device Selection Options (Computer, Android, iPhone) -->
+            <div id="setupVideoDeviceSelector" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                <!-- Option 1: Computer -->
+                <div onclick="selectSetupDevice('computer')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(255,184,0,0.6)'; this.style.background='rgba(255,184,0,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.35); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.3rem; flex-shrink: 0;">
+                            <i class="fas fa-desktop"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px;">Computer</div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary);">Windows / Mac (Chrome, Brave, Edge)</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; color: var(--yellow); font-size: 0.85rem; font-weight: 700;">
+                        <span>ভিডিও দেখুন</span>
+                        <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i>
+                    </div>
+                </div>
+
+                <!-- Option 2: Android -->
+                <div onclick="selectSetupDevice('android')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(0,230,118,0.6)'; this.style.background='rgba(0,230,118,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 230, 118, 0.15); border: 1px solid rgba(0, 230, 118, 0.35); display: flex; align-items: center; justify-content: center; color: #00e676; font-size: 1.4rem; flex-shrink: 0;">
+                            <i class="fab fa-android"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px;">Android</div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary);">Kiwi Browser বা Chrome দিয়ে মোবাইল সেটআপ</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; color: #00e676; font-size: 0.85rem; font-weight: 700;">
+                        <span>ভিডিও দেখুন</span>
+                        <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i>
+                    </div>
+                </div>
+
+                <!-- Option 3: iPhone -->
+                <div onclick="selectSetupDevice('iphone')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(255,255,255,0.5)'; this.style.background='rgba(255,255,255,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.4rem; flex-shrink: 0;">
+                            <i class="fab fa-apple"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px;">iPhone</div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary);">iOS / Safari ও Orion Browser সেটআপ গাইড</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.85rem; font-weight: 700;">
+                        <span>ভিডিও দেখুন</span>
+                        <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View 2: Video Player Container (Hidden by default, shown when device selected) -->
+            <div id="setupVideoPlayerContainer" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <button type="button" onclick="backToSetupDevices()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-arrow-left"></i> অন্য ডিভাইস নির্বাচন করুন
+                    </button>
+                    <span id="setupVideoCurrentDeviceBadge" style="font-size: 0.8rem; font-weight: 800; color: var(--yellow); background: rgba(255,184,0,0.12); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(255,184,0,0.3);"></span>
+                </div>
+
+                <!-- Video Frame Area -->
+                <div style="position: relative; width: 100%; padding-top: 56.25%; background: #0a0d14; border: 1px solid rgba(255,184,0,0.3); border-radius: 14px; overflow: hidden; margin-bottom: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <div id="setupVideoIframeHolder" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1.5rem;">
+                        <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(255,184,0,0.15); border: 1px solid var(--yellow); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--yellow); margin-bottom: 10px; box-shadow: 0 0 20px rgba(255,184,0,0.3);">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <h4 id="setupVideoTitle" style="color: #fff; font-size: 1.05rem; font-weight: 800; margin: 0 0 6px 0;">সেটআপ ভিডিও</h4>
+                        <p id="setupVideoDesc" style="color: var(--text-secondary); font-size: 0.82rem; max-width: 400px; margin: 0 0 10px 0;">
+                            ভিডিও টিউটোরিয়াল শীঘ্রই এখানে যুক্ত করা হবে।
+                        </p>
+                        <span style="font-size: 0.75rem; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="fas fa-video"></i> ভিডিও লিংক শীঘ্রই যুক্ত করা হবে
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Quick actions below video: Download ZIP and Copy Trader ID -->
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 12px;">
+                    <a href="/api/extension/download" class="btn-gold" style="padding: 8px 16px; font-size: 0.84rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-download"></i> ডাউনলোড এক্সটেনশন (ZIP)
+                    </a>
+                    <button type="button" onclick="copySyncTraderId()" class="btn-outline" style="padding: 8px 16px; font-size: 0.84rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-copy"></i> Trader ID কপি করুন: <span id="syncHelperTraderId">AJ-1008</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Email Verification Modal in Dashboard -->
     <div class="modal-overlay" id="dashVerifyModal">
@@ -9994,6 +10130,60 @@
             }).catch(() => {
                 showToast(`Trader ID: ${traderId}`, 'info');
             });
+        }
+
+        // Setup Video Modal Functions
+        function openSetupVideoModal() {
+            const modal = document.getElementById('setupVideoModal');
+            if (!modal) return;
+            backToSetupDevices();
+            modal.classList.add('active');
+        }
+
+        function closeSetupVideoModal() {
+            const modal = document.getElementById('setupVideoModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function selectSetupDevice(device) {
+            const selector = document.getElementById('setupVideoDeviceSelector');
+            const playerContainer = document.getElementById('setupVideoPlayerContainer');
+            const badge = document.getElementById('setupVideoCurrentDeviceBadge');
+            const title = document.getElementById('setupVideoTitle');
+            const descEl = document.getElementById('setupVideoDesc');
+            
+            if (selector) selector.style.display = 'none';
+            if (playerContainer) playerContainer.style.display = 'block';
+
+            const deviceMap = {
+                'computer': { 
+                    name: '💻 Computer', 
+                    title: 'Computer (Windows / Mac) এক্সটেনশন সেটআপ টিউটোরিয়াল',
+                    desc: 'কম্পিউটারে Chrome, Brave বা Edge ব্রাউজারে কীভাবে আনপ্যাকড এক্সটেনশন লোড করে আপনার Trader ID দিয়ে লাইভ চার্ট সিঙ্ক করবেন।'
+                },
+                'android': { 
+                    name: '🤖 Android Mobile', 
+                    title: 'Android মোবাইল (Kiwi Browser) সেটআপ টিউটোরিয়াল',
+                    desc: 'অ্যান্ড্রয়েড ফোনে Kiwi Browser দিয়ে জিপ এক্সটেনশন ইনস্টল করে খুব সহজে কোটেক্স লাইভ ট্রেড ট্র্যাক করার পদ্ধতি।'
+                },
+                'iphone': { 
+                    name: '🍏 iPhone / iOS', 
+                    title: 'iPhone / iOS ডিভাইস সেটআপ টিউটোরিয়াল',
+                    desc: 'আইফোনে সাফারি বা ওরিয়ন ব্রাউজার দিয়ে এক্সটেনশন কনফিগার করে লাইভ ট্রেড সিঙ্ক করার গাইড।'
+                }
+            };
+
+            const selected = deviceMap[device] || deviceMap['computer'];
+            if (badge) badge.innerText = selected.name;
+            if (title) title.innerText = selected.title;
+            if (descEl) descEl.innerText = selected.desc;
+        }
+
+        function backToSetupDevices() {
+            const selector = document.getElementById('setupVideoDeviceSelector');
+            const playerContainer = document.getElementById('setupVideoPlayerContainer');
+            if (selector) selector.style.display = 'grid';
+            if (playerContainer) playerContainer.style.display = 'none';
         }
 
         let extensionPollInterval = null;
