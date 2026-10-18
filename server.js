@@ -4152,6 +4152,19 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
   if (db && db.isMySqlActive()) {
     db.saveChallenge(newChallenge).catch(e => console.error('[MYSQL CHALLENGE SAVE ERROR]:', e.message));
   }
+  // Auto-sync user profile brokerAccountId if valid ID was entered
+  if (brokerAccountId && typeof brokerAccountId === 'string' && brokerAccountId.trim() && brokerAccountId.trim() !== 'Demo Account') {
+    const cleanBrokerId = brokerAccountId.trim();
+    const uIdx = users.findIndex(u => u.id === req.user.id);
+    if (uIdx !== -1) {
+      users[uIdx].brokerAccountId = cleanBrokerId;
+      users[uIdx].preferredBroker = broker.name;
+      saveUsers(users);
+      if (db && db.isMySqlActive()) {
+        db.saveUser(users[uIdx]).catch(e => console.error('[MYSQL USER SAVE ERROR]:', e.message));
+      }
+    }
+  }
   logUserArchive('CHALLENGE_PURCHASED', { id: req.user.id, name: req.user.name, email: req.user.email }, {
     challengeId: newChallenge.id,
     packageName: pkg.name,
@@ -5407,6 +5420,7 @@ app.post('/api/extension/heartbeat', (req, res) => {
         active: false,
         isDisqualified,
         noActiveChallenge: true,
+        registeredBrokerAccountId: (matchedUser.brokerAccountId || '').trim(),
         message: isDisqualified
           ? 'আপনার চ্যালেঞ্জটি বাতিল/ডিসকোয়ালিফাই করা হয়েছে। এক্সটেনশন বর্তমানে সম্পূর্ণ নিষ্ক্রিয়।'
           : 'কোনো সক্রিয় চ্যালেঞ্জ চালু নেই। এক্সটেনশন নিষ্ক্রিয়।'
@@ -5428,6 +5442,8 @@ app.post('/api/extension/heartbeat', (req, res) => {
       effectiveStartTime = new Date(activeChallenge.createdAt).getTime();
     }
 
+    const registeredBrokerAccountId = (activeChallenge.brokerAccountId || matchedUser.brokerAccountId || '').trim();
+
     const entry = {
       lastPing: Date.now(),
       status,
@@ -5447,6 +5463,8 @@ app.post('/api/extension/heartbeat', (req, res) => {
       challengeId: activeChallenge.id,
       challengeStartTime: effectiveStartTime,
       challengeStartedAt: new Date(effectiveStartTime).toISOString(),
+      registeredBrokerAccountId,
+      brokerName: activeChallenge.brokerName || 'Quotex',
       timestamp: Date.now()
     });
   } catch (err) {
@@ -5531,7 +5549,7 @@ app.get('/api/user/extension-status', authenticateToken, (req, res) => {
 // 1. Sync Trades from Quotex Extension (With Challenge Time-Lock Filter)
 app.post('/api/extension/sync-trades', (req, res) => {
   try {
-    const { traderId, accountType = 'demo', source = 'quotex', brokerTzOffset, trades = [] } = req.body;
+    const { traderId, accountType = 'demo', source = 'quotex', brokerTzOffset, detectedBrokerAccountId, trades = [] } = req.body;
     if (!traderId) {
       return res.status(400).json({ success: false, message: 'Trader ID প্রয়োজন।' });
     }
@@ -5574,6 +5592,22 @@ app.post('/api/extension/sync-trades', (req, res) => {
         message: isDisqualified
           ? 'আপনার চ্যালেঞ্জটি বাতিল/ডিসকোয়ালিফাই করা হয়েছে। এক্সটেনশন বর্তমানে সম্পূর্ণ নিষ্ক্রিয় এবং কোনো ট্রেড সিঙ্ক করবে না।'
           : 'কোনো সক্রিয় চ্যালেঞ্জ পাওয়া যায়নি। ট্রেড রেকর্ড করার জন্য আপনার অ্যাকাউন্টে একটি সক্রিয় চ্যালেঞ্জ (in_progress) থাকা আবশ্যক।' 
+      });
+    }
+
+    // Module 1.1: Quotex Account ID Verification
+    const registeredBrokerAccountId = (activeChallenge.brokerAccountId || user.brokerAccountId || '').trim();
+    const cleanRegisteredDigits = registeredBrokerAccountId.replace(/[^0-9]/g, '');
+    const cleanDetectedDigits = String(detectedBrokerAccountId || '').trim().replace(/[^0-9]/g, '');
+
+    if (cleanRegisteredDigits && cleanDetectedDigits && cleanRegisteredDigits !== cleanDetectedDigits) {
+      console.warn(`[EXTENSION SYNC REJECTED] Quotex Account ID mismatch for user ${user.traderId}: registered=${cleanRegisteredDigits}, detected=${cleanDetectedDigits}`);
+      return res.status(403).json({
+        success: false,
+        accountMismatch: true,
+        registeredBrokerAccountId: cleanRegisteredDigits,
+        detectedBrokerAccountId: cleanDetectedDigits,
+        message: `Quotex Account ID মিলছে না! আপনার চ্যালেঞ্জের সাথে যুক্ত Quotex ID হলো [${cleanRegisteredDigits}], কিন্তু বর্তমানে ব্রাউজারে লগইন থাকা Quotex ID হলো [${cleanDetectedDigits}]। সঠিক Quotex অ্যাকাউন্টে লগইন না করা পর্যন্ত ট্রেড সিঙ্ক সম্পূর্ণ ব্লক থাকবে।`
       });
     }
 

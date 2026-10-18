@@ -313,3 +313,227 @@
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ========================================================
+   QUOTEX ACCOUNT ID MISMATCH MODAL & BADGES
+   ======================================================== */
+.bpf-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  background: rgba(8, 10, 15, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  animation: bpfModalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+@keyframes bpfModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bpf-modal-card {
+  position: relative !important;
+  max-width: 490px !important;
+  width: 100% !important;
+  background: linear-gradient(180deg, #181d28 0%, #0e121a 100%) !important;
+  border: 1px solid rgba(239, 68, 68, 0.45) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(239, 68, 68, 0.2) !important;
+  padding: 24px 22px !important;
+  color: #f1f5f9 !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+  animation: bpfModalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes bpfModalSlideUp {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.bpf-modal-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+  margin-bottom: 16px !important;
+}
+
+.bpf-modal-icon-wrap {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  color: #ef4444 !important;
+  font-size: 22px !important;
+}
+
+.bpf-modal-title {
+  margin: 0 !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.2px !important;
+}
+
+.bpf-modal-badge-blocked {
+  display: inline-block !important;
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
+  margin-top: 4px !important;
+}
+
+.bpf-modal-body {
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+  color: #94a3b8 !important;
+  margin-bottom: 18px !important;
+}
+
+.bpf-modal-id-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  margin: 14px 0 !important;
+}
+
+.bpf-modal-id-box {
+  background: rgba(15, 23, 42, 0.7) !important;
+  border-radius: 10px !important;
+  padding: 10px 12px !important;
+  box-sizing: border-box !important;
+}
+
+.bpf-modal-id-box.registered {
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+.bpf-modal-id-box.current {
+  border: 1px solid rgba(239, 68, 68, 0.5) !important;
+}
+
+.bpf-modal-id-label {
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  color: #94a3b8 !important;
+  margin-bottom: 4px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+}
+
+.bpf-modal-id-val {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  letter-spacing: 0.5px !important;
+}
+
+.bpf-modal-id-box.registered .bpf-modal-id-val {
+  color: #fbbf24 !important;
+}
+
+.bpf-modal-id-box.current .bpf-modal-id-val {
+  color: #f87171 !important;
+}
+
+.bpf-modal-notice {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-left: 3px solid #ef4444 !important;
+  border-radius: 0 8px 8px 0 !important;
+  padding: 9px 12px !important;
+  font-size: 12px !important;
+  color: #cbd5e1 !important;
+  line-height: 1.45 !important;
+  margin-bottom: 16px !important;
+}
+
+.bpf-modal-actions {
+  display: flex !important;
+  gap: 10px !important;
+  justify-content: flex-end !important;
+}
+
+.bpf-modal-btn {
+  padding: 8px 16px !important;
+  border-radius: 10px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  border: none !important;
+  transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.bpf-modal-btn-sec {
+  background: rgba(148, 163, 184, 0.12) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+}
+
+.bpf-modal-btn-sec:hover {
+  background: rgba(148, 163, 184, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.bpf-modal-btn-pri {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
+}
+
+.bpf-modal-btn-pri:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.55) !important;
+}
+
+/* ID Tag in Widget Pill */
+.bpf-id-tag {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  padding: 2px 7px !important;
+  border-radius: 10px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+.bpf-id-tag.verified {
+  background: rgba(0, 230, 118, 0.12) !important;
+  color: #00e676 !important;
+  border: 1px solid rgba(0, 230, 118, 0.3) !important;
+}
+
+.bpf-id-tag.mismatch {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+.bpf-id-tag.scanning {
+  background: rgba(148, 163, 184, 0.12) !important;
+  color: #94a3b8 !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+}
+

@@ -9,6 +9,49 @@ document.addEventListener('DOMContentLoaded', async () => {
   const openHistoryBtn = document.getElementById('openHistoryBtn');
   const openDashBtn = document.getElementById('openDashBtn');
 
+  let cachedRegBrokerId = '';
+  let cachedDetectedBrokerId = '';
+
+  function updateIdMatchUi(regId, activeId) {
+    if (regId !== undefined) cachedRegBrokerId = String(regId || '').trim();
+    if (activeId !== undefined) cachedDetectedBrokerId = String(activeId || '').trim();
+
+    const regEl = document.getElementById('popupRegId');
+    const actEl = document.getElementById('popupActiveId');
+    const tagEl = document.getElementById('popupIdStatusTag');
+    if (!regEl || !actEl || !tagEl) return;
+
+    const cleanReg = cachedRegBrokerId.replace(/[^0-9]/g, '');
+    const cleanAct = cachedDetectedBrokerId.replace(/[^0-9]/g, '');
+
+    regEl.innerText = cleanReg || (cachedRegBrokerId ? cachedRegBrokerId : '--');
+    actEl.innerText = cleanAct || (cachedDetectedBrokerId ? cachedDetectedBrokerId : '--');
+
+    if (cleanReg && cleanAct) {
+      if (cleanReg === cleanAct) {
+        tagEl.style.background = 'rgba(0, 230, 118, 0.15)';
+        tagEl.style.color = '#00e676';
+        tagEl.style.border = '1px solid rgba(0, 230, 118, 0.3)';
+        tagEl.innerText = '✅ Quotex Account ID Verified';
+      } else {
+        tagEl.style.background = 'rgba(239, 68, 68, 0.18)';
+        tagEl.style.color = '#ef4444';
+        tagEl.style.border = '1px solid rgba(239, 68, 68, 0.35)';
+        tagEl.innerText = '⚠️ Quotex ID Mismatch (Sync Blocked)';
+      }
+    } else if (cleanReg) {
+      tagEl.style.background = 'rgba(245, 158, 11, 0.12)';
+      tagEl.style.color = '#fbbf24';
+      tagEl.style.border = '1px solid rgba(245, 158, 11, 0.25)';
+      tagEl.innerText = 'ℹ️ লগইনকৃত Quotex ID স্ক্যান করা হচ্ছে...';
+    } else {
+      tagEl.style.background = 'rgba(148, 163, 184, 0.1)';
+      tagEl.style.color = '#94a3b8';
+      tagEl.style.border = '1px solid rgba(148, 163, 184, 0.2)';
+      tagEl.innerText = 'অ্যাকাউন্ট ভেরিফিকেশন চেক করা হচ্ছে';
+    }
+  }
+
   async function pingServerHeartbeat(tId, sUrl) {
     const tid = (tId || traderIdInput.value).trim();
     if (!tid) return;
@@ -26,6 +69,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
       });
       const data = await res.json();
+      if (data && data.registeredBrokerAccountId !== undefined) {
+        cachedRegBrokerId = String(data.registeredBrokerAccountId || '').trim();
+        chrome.storage.local.set({ quotex_registered_broker_id: cachedRegBrokerId });
+        updateIdMatchUi(cachedRegBrokerId, cachedDetectedBrokerId);
+      }
       if (data && data.active) {
         connBadge.className = 'badge badge-active';
         connBadge.innerText = '● Connected';
@@ -37,7 +85,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Load saved settings
-  chrome.storage.local.get(['traderId', 'serverUrl', 'autoSync', 'lastSynced', 'lastCount', 'quotex_broker_tz_str'], (res) => {
+  chrome.storage.local.get([
+    'traderId',
+    'serverUrl',
+    'autoSync',
+    'lastSynced',
+    'lastCount',
+    'quotex_broker_tz_str',
+    'quotex_registered_broker_id',
+    'quotex_detected_account_id'
+  ], (res) => {
     if (res.traderId) {
       traderIdInput.value = res.traderId;
       pingServerHeartbeat(res.traderId, res.serverUrl);
@@ -50,6 +107,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (tzText) tzText.innerText = `⏱️ ব্রোকার টাইম: ${res.quotex_broker_tz_str}`;
       if (tzTag) tzTag.innerText = res.quotex_broker_tz_str;
     }
+    updateIdMatchUi(res.quotex_registered_broker_id, res.quotex_detected_account_id);
+
     if (res.lastSynced) {
       const d = new Date(res.lastSynced);
       lastSyncedText.innerText = `Last: ${d.toLocaleTimeString()} (${res.lastCount || 0} trades)`;
@@ -57,6 +116,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       connBadge.innerText = '● Active';
     }
   });
+
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes) => {
+      if (changes.quotex_registered_broker_id || changes.quotex_detected_account_id) {
+        chrome.storage.local.get(['quotex_registered_broker_id', 'quotex_detected_account_id'], (res) => {
+          updateIdMatchUi(res.quotex_registered_broker_id, res.quotex_detected_account_id);
+        });
+      }
+    });
+  }
 
   // Save settings on input
   let saveTimer = null;
@@ -90,6 +159,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    // Check account ID match before triggering
+    const cleanReg = cachedRegBrokerId.replace(/[^0-9]/g, '');
+    const cleanAct = cachedDetectedBrokerId.replace(/[^0-9]/g, '');
+    if (cleanReg && cleanAct && cleanReg !== cleanAct) {
+      showStatus(`⚠️ Quotex ID মিলছে না! চ্যালেঞ্জের ID: ${cleanReg}, কিন্তু লগইনকৃত ID: ${cleanAct}। ট্রেড সিঙ্ক সম্পূর্ণ ব্লক রাখা হয়েছে।`, 'error');
+      return;
+    }
+
     saveSettings();
     syncNowBtn.disabled = true;
     syncNowBtn.innerText = '⏳ Scanning & Syncing...';
@@ -120,6 +197,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (chrome.runtime.lastError) {
           showStatus('পেজটি একবার রিলোড (F5) দিন এবং আবার সিঙ্ক বাটন চাপুন।', 'error');
+          return;
+        }
+
+        if (response && response.accountMismatch) {
+          showStatus(`⚠️ ${response.error || 'Quotex Account ID মিলছে না! ট্রেড সিঙ্ক ব্লক করা হয়েছে।'}`, 'error');
           return;
         }
 

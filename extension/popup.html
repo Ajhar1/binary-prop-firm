@@ -13,7 +13,7 @@
         <img src="icon48.png" style="width:34px; height:34px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.4);" alt="PB" />
         <div>
           <h1 class="title">Binary Prop Firm</h1>
-          <p class="subtitle">Quotex Live Trade Synchronizer v1.0.5</p>
+          <p class="subtitle">Quotex Live Trade Synchronizer v1.0.6</p>
         </div>
       </div>
       <div id="connBadge" class="badge badge-idle">● Idle</div>
@@ -39,6 +39,24 @@
           <span id="brokerTzTag" style="font-size:10px; background:rgba(255,184,0,0.15); padding:2px 6px; border-radius:4px; font-weight:700;">AUTO</span>
         </div>
         <small class="hint">কোটেক্সে যে দেশের টাইমজোনই থাকুক না কেন, তা স্বয়ংক্রিয়ভাবে নিখুঁত UTC তে কনভার্ট হবে।</small>
+      </div>
+
+      <div class="form-group">
+        <label>Quotex অ্যাকাউন্ট ভেরিফিকেশন (Account ID):</label>
+        <div id="quotexIdBox" style="background:#181b21; border:1px solid #2a303c; border-radius:6px; padding:8px 10px; font-size:11px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="color:#94a3b8;">রেজিস্ট্রার্ড ID:</span>
+            <strong id="popupRegId" style="color:#ffb800; font-family:monospace;">--</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="color:#94a3b8;">লগইনকৃত Quotex ID:</span>
+            <strong id="popupActiveId" style="color:#cbd5e1; font-family:monospace;">--</strong>
+          </div>
+          <div id="popupIdStatusTag" style="font-size:10.5px; font-weight:700; text-align:center; padding:3px 6px; border-radius:4px; margin-top:5px; background:rgba(255,255,255,0.05); color:#94a3b8;">
+            শনাক্ত করা হচ্ছে...
+          </div>
+        </div>
+        <small class="hint">রেজিস্ট্রার্ড Quotex ID ও বর্তমান ব্রাউজারে লগইন থাকা ID হুবহু এক হতে হবে।</small>
       </div>
 
       <div class="toggle-group">

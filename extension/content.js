@@ -14,6 +14,12 @@
   let heartbeatTimer = null;
   let tzScanTimer = null;
 
+  // Quotex Account Verification State
+  let detectedQuotexAccountId = null;
+  let currentRegisteredBrokerAccountId = '';
+  let isAccountIdMismatch = false;
+  let lastIdScanTime = 0;
+
   // 1. Load config from chrome.storage.local
   function loadConfig(cb) {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
@@ -23,7 +29,9 @@
         'autoSync',
         'syncedCache',
         'quotex_broker_tz_offset_min',
-        'quotex_broker_tz_str'
+        'quotex_broker_tz_str',
+        'quotex_registered_broker_id',
+        'quotex_detected_account_id'
       ], (res) => {
         if (res.traderId) config.traderId = res.traderId;
         if (res.serverUrl) config.serverUrl = res.serverUrl;
@@ -33,6 +41,12 @@
         }
         if (res.quotex_broker_tz_str) {
           config.brokerTzStr = res.quotex_broker_tz_str;
+        }
+        if (res.quotex_registered_broker_id) {
+          currentRegisteredBrokerAccountId = res.quotex_registered_broker_id;
+        }
+        if (res.quotex_detected_account_id) {
+          detectedQuotexAccountId = res.quotex_detected_account_id;
         }
         if (Array.isArray(res.syncedCache)) {
           res.syncedCache.forEach(id => syncedTicketsCache.add(id));
@@ -144,6 +158,196 @@
     }
 
     return null;
+  }
+
+  // 2.1 Quotex Account ID Auto-Detection & Verification Engine
+  async function scanQuotexAccountId(forceRefresh = false) {
+    const now = Date.now();
+    if (!forceRefresh && detectedQuotexAccountId && (now - lastIdScanTime < 60000)) {
+      return detectedQuotexAccountId;
+    }
+
+    // Method A: Check active DOM elements (Header, profile menu, user info, drawer)
+    try {
+      const candidates = document.querySelectorAll(
+        '[class*="profile"], [class*="user"], [class*="account"], header, .header, nav, [class*="drawer"], [class*="sidebar"], [class*="menu"], [class*="settings"]'
+      );
+      for (const el of candidates) {
+        const text = el.innerText || '';
+        const match = text.match(/\b(?:ID|Account\s*ID)\s*[:#]?\s*(\d{5,12})\b/i);
+        if (match && match[1]) {
+          detectedQuotexAccountId = match[1];
+          lastIdScanTime = now;
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ quotex_detected_account_id: detectedQuotexAccountId });
+          }
+          updateWidgetStatus();
+          return detectedQuotexAccountId;
+        }
+      }
+    } catch (e) {}
+
+    // Method B: Check Quotex LocalStorage / SessionStorage
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        const lowerKey = key.toLowerCase();
+        if (lowerKey.includes('user') || lowerKey.includes('profile') || lowerKey.includes('account') || lowerKey.includes('auth') || lowerKey.includes('state')) {
+          const val = localStorage.getItem(key);
+          if (val) {
+            const m = val.match(/"(?:accountId|account_id|userId|user_id|id)"\s*:\s*"?(\d{5,12})"?/i);
+            if (m && m[1]) {
+              detectedQuotexAccountId = m[1];
+              lastIdScanTime = now;
+              if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+                chrome.storage.local.set({ quotex_detected_account_id: detectedQuotexAccountId });
+              }
+              updateWidgetStatus();
+              return detectedQuotexAccountId;
+            }
+          }
+        }
+      }
+    } catch (e) {}
+
+    // Method C: Full body text search
+    try {
+      const fullText = (document.body && document.body.innerText) ? document.body.innerText.substring(0, 12000) : '';
+      const m = fullText.match(/\bID\s*[:#]?\s*(\d{5,12})\b/i);
+      if (m && m[1]) {
+        detectedQuotexAccountId = m[1];
+        lastIdScanTime = now;
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          chrome.storage.local.set({ quotex_detected_account_id: detectedQuotexAccountId });
+        }
+        updateWidgetStatus();
+        return detectedQuotexAccountId;
+      }
+    } catch (e) {}
+
+    // Method D: Fetch /en/settings with credentials: 'include' (same-origin background fetch)
+    try {
+      const origin = window.location.origin;
+      const settingsUrl = `${origin}/en/settings`;
+      const res = await fetch(settingsUrl, { credentials: 'include' });
+      if (res.ok) {
+        const html = await res.text();
+        const idMatch = html.match(/\bID\s*(?:&nbsp;)?\s*[:#]?\s*(\d{5,12})\b/i) ||
+                        html.match(/["'](?:user_id|accountId|account_id)["']\s*:\s*["']?(\d{5,12})["']?/i);
+        if (idMatch && idMatch[1]) {
+          detectedQuotexAccountId = idMatch[1];
+          lastIdScanTime = now;
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ quotex_detected_account_id: detectedQuotexAccountId });
+          }
+          updateWidgetStatus();
+          return detectedQuotexAccountId;
+        }
+      }
+    } catch (e) {}
+
+    // Method E: Cached value in chrome.storage.local
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      try {
+        const stored = await new Promise(res => chrome.storage.local.get(['quotex_detected_account_id'], res));
+        if (stored && stored.quotex_detected_account_id) {
+          detectedQuotexAccountId = stored.quotex_detected_account_id;
+          updateWidgetStatus();
+          return detectedQuotexAccountId;
+        }
+      } catch (e) {}
+    }
+
+    return detectedQuotexAccountId;
+  }
+
+  function verifyQuotexAccountIdMatch(detectedId, registeredId) {
+    const cleanReg = (registeredId || currentRegisteredBrokerAccountId || '').replace(/[^0-9]/g, '');
+    const cleanDet = (detectedId || detectedQuotexAccountId || '').replace(/[^0-9]/g, '');
+
+    if (cleanReg && cleanDet) {
+      if (cleanReg !== cleanDet) {
+        isAccountIdMismatch = true;
+        return { isMismatch: true, cleanReg, cleanDet };
+      } else {
+        isAccountIdMismatch = false;
+        return { isMismatch: false, verified: true, cleanReg, cleanDet };
+      }
+    }
+
+    return { isMismatch: false, verified: false, cleanReg, cleanDet };
+  }
+
+  function showAccountMismatchModal(registeredId, currentId) {
+    const existing = document.getElementById('bpf-mismatch-modal-overlay');
+    if (existing) existing.remove();
+
+    const cleanReg = String(registeredId || currentRegisteredBrokerAccountId || 'Not Set').replace(/[^0-9]/g, '') || registeredId || 'Not Set';
+    const cleanDet = String(currentId || detectedQuotexAccountId || 'Not Detected').replace(/[^0-9]/g, '') || currentId || 'Not Detected';
+
+    const overlay = document.createElement('div');
+    overlay.id = 'bpf-mismatch-modal-overlay';
+    overlay.className = 'bpf-modal-overlay';
+
+    overlay.innerHTML = `
+      <div class="bpf-modal-card" role="dialog" aria-modal="true">
+        <div class="bpf-modal-header">
+          <div class="bpf-modal-icon-wrap">⚠️</div>
+          <div>
+            <h3 class="bpf-modal-title">Quotex Account ID মিলছে না!</h3>
+            <span class="bpf-modal-badge-blocked">🚫 Trade Sync Blocked</span>
+          </div>
+        </div>
+        <div class="bpf-modal-body">
+          <p style="margin:0 0 10px 0;">
+            আপনার চ্যালেঞ্জটি নির্দিষ্ট করা Quotex অ্যাকাউন্টের সাথে যুক্ত। আপনি বর্তমানে যে Quotex অ্যাকাউন্টে লগইন করে আছেন, সেটির ID আপনার চ্যালেঞ্জের রেজিস্ট্রার্ড ID-র সাথে মিলছে না।
+          </p>
+          <div class="bpf-modal-id-grid">
+            <div class="bpf-modal-id-box registered">
+              <div class="bpf-modal-id-label">রেজিস্ট্রার্ড Quotex ID</div>
+              <div class="bpf-modal-id-val">${cleanReg}</div>
+            </div>
+            <div class="bpf-modal-id-box current">
+              <div class="bpf-modal-id-label">বর্তমান লগইনকৃত ID</div>
+              <div class="bpf-modal-id-val">${cleanDet}</div>
+            </div>
+          </div>
+          <div class="bpf-modal-notice">
+            ⚠️ <strong>নিরাপত্তা সতর্কতা:</strong> অন্য কোনো অ্যাকাউন্ট থেকে নেওয়া ট্রেড আপনার চ্যালেঞ্জে গ্রহণযোগ্য নয়। সঠিক Quotex অ্যাকাউন্টে লগইন করার পর পুনরায় সিঙ্ক করুন।
+          </div>
+        </div>
+        <div class="bpf-modal-actions">
+          <button class="bpf-modal-btn bpf-modal-btn-sec" id="bpfCloseMismatchModal">
+            বুঝেছি, বন্ধ করুন
+          </button>
+          <button class="bpf-modal-btn bpf-modal-btn-pri" id="bpfOpenSettingsBtn">
+            ⚙️ Quotex Settings চেক করুন
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const closeModal = () => {
+      if (overlay && overlay.parentNode) overlay.remove();
+    };
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    const closeBtn = document.getElementById('bpfCloseMismatchModal');
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+    const settingsBtn = document.getElementById('bpfOpenSettingsBtn');
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', () => {
+        closeModal();
+        window.location.href = `${window.location.origin}/en/settings`;
+      });
+    }
   }
 
   // 3. Robust Trade Timestamp Parser in Absolute UTC Epoch Milliseconds
@@ -392,6 +596,9 @@
         <span id="bpfTzTag" style="font-size:10px; font-weight:700; background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); padding:2px 6px; border-radius:10px;" title="শনাক্তকৃত ব্রোকার টাইমজোন">
           ${config.brokerTzStr || 'UTC'}
         </span>
+        <span id="bpfIdTag" class="bpf-id-tag scanning" title="Quotex Account ID">
+          ID: ...
+        </span>
         <div class="bpf-indicator-wrap" id="bpfIndicatorWrap" title="এক্সটেনশন কানেক্টেড রয়েছে">
           <span class="bpf-pulse-dot"></span>
           <span class="bpf-indicator-label">Connected</span>
@@ -411,7 +618,7 @@
     document.body.appendChild(root);
     makeWidgetDraggable(root);
 
-    document.getElementById('bpfSyncBtn').addEventListener('click', () => {
+    document.getElementById('bpfSyncBtn').addEventListener('click', async () => {
       if (isExtensionLocked) {
         showToast(lockReason || '⚠️ আপনার চ্যালেঞ্জটি বর্তমানে বন্ধ/নিষ্ক্রিয় রয়েছে। এক্সটেনশন কোনো ট্রেড সিঙ্ক করবে না।', 'error');
         return;
@@ -419,6 +626,28 @@
 
       if (!config.traderId) {
         showToast('ত্রুটি: আপনার Trader ID সেট করা নেই! এক্সটেনশন আইকনে ক্লিক করে Trader ID লিখুন।', 'error');
+        return;
+      }
+
+      // Step 1: Scan & Verify Quotex Account ID match with active challenge
+      const detectedId = await scanQuotexAccountId(true);
+      if (!currentRegisteredBrokerAccountId) {
+        try {
+          await fetchChallengeStatus();
+        } catch (e) {}
+      }
+
+      const matchCheck = verifyQuotexAccountIdMatch(detectedId, currentRegisteredBrokerAccountId);
+      if (matchCheck.isMismatch) {
+        showAccountMismatchModal(matchCheck.cleanReg, matchCheck.cleanDet);
+        showToast('⚠️ Quotex Account ID মিলছে না! ট্রেড সিঙ্ক সম্পূর্ণ ব্লক রাখা হয়েছে।', 'error');
+        const syncBtn = document.getElementById('bpfSyncBtn');
+        if (syncBtn) {
+          syncBtn.innerHTML = `<span>⚠️ ID Mismatch</span>`;
+          syncBtn.style.background = '#4a1515';
+          syncBtn.style.borderColor = '#ff5252';
+          syncBtn.style.color = '#ff8a80';
+        }
         return;
       }
 
@@ -461,6 +690,31 @@
     if (tzTag && config.brokerTzStr) {
       tzTag.innerText = config.brokerTzStr;
     }
+    const idTag = document.getElementById('bpfIdTag');
+    if (idTag) {
+      const cleanReg = (currentRegisteredBrokerAccountId || '').replace(/[^0-9]/g, '');
+      const cleanDet = (detectedQuotexAccountId || '').replace(/[^0-9]/g, '');
+
+      if (cleanReg && cleanDet) {
+        if (cleanReg === cleanDet) {
+          idTag.className = 'bpf-id-tag verified';
+          idTag.innerText = `ID: ${cleanDet}`;
+          idTag.title = `Quotex ID ভেরিফাইড (${cleanDet})`;
+        } else {
+          idTag.className = 'bpf-id-tag mismatch';
+          idTag.innerText = `⚠️ ID Mismatch`;
+          idTag.title = `Quotex ID মিলছে না! চ্যালেঞ্জ: ${cleanReg}, বর্তমান: ${cleanDet}`;
+        }
+      } else if (cleanDet) {
+        idTag.className = 'bpf-id-tag scanning';
+        idTag.innerText = `ID: ${cleanDet}`;
+        idTag.title = `লগইনকৃত Quotex ID: ${cleanDet}`;
+      } else {
+        idTag.className = 'bpf-id-tag scanning';
+        idTag.innerText = `ID: ...`;
+        idTag.title = `Quotex Account ID স্ক্যান করা হচ্ছে`;
+      }
+    }
   }
 
   // Server Challenge Lock / Active Status Handler
@@ -474,6 +728,28 @@
     const pill = document.getElementById('bpfPill');
     const indicatorWrap = document.getElementById('bpfIndicatorWrap');
     const syncBtn = document.getElementById('bpfSyncBtn');
+
+    if (data.registeredBrokerAccountId !== undefined) {
+      currentRegisteredBrokerAccountId = String(data.registeredBrokerAccountId || '').trim();
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ quotex_registered_broker_id: currentRegisteredBrokerAccountId });
+      }
+    }
+    updateWidgetStatus();
+
+    if (data.accountMismatch) {
+      isAccountIdMismatch = true;
+      showAccountMismatchModal(data.registeredBrokerAccountId, data.detectedBrokerAccountId);
+      if (syncBtn) {
+        syncBtn.disabled = true;
+        syncBtn.style.opacity = '0.7';
+        syncBtn.style.background = '#4a1515';
+        syncBtn.style.borderColor = '#ff5252';
+        syncBtn.style.color = '#ff8a80';
+        syncBtn.innerHTML = `<span>⚠️ ID Mismatch</span>`;
+      }
+      return;
+    }
 
     if (data.challengeStartTime) {
       currentChallengeStartTime = data.challengeStartTime;
@@ -540,6 +816,7 @@
     if (!config.traderId) return null;
     const targetUrl = (config.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '') + '/api/extension/heartbeat';
     const accountType = detectAccountType();
+    const detectedId = await scanQuotexAccountId();
 
     try {
       const res = await fetch(targetUrl, {
@@ -549,6 +826,7 @@
           traderId: config.traderId,
           status: 'online',
           accountType,
+          detectedBrokerAccountId: detectedId,
           url: window.location.href,
           brokerTzOffset: config.brokerTzOffsetMin,
           brokerTzStr: config.brokerTzStr,
@@ -853,6 +1131,7 @@
     }
 
     const targetUrl = (config.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '') + '/api/extension/sync-trades';
+    const detectedId = await scanQuotexAccountId();
 
     const res = await fetch(targetUrl, {
       method: 'POST',
@@ -861,6 +1140,7 @@
         traderId: config.traderId,
         accountType,
         source: 'quotex',
+        detectedBrokerAccountId: detectedId,
         brokerTzOffset: config.brokerTzOffsetMin,
         brokerTzStr: config.brokerTzStr,
         clientTzOffset: new Date().getTimezoneOffset(),
@@ -893,9 +1173,32 @@
       showToast(lockReason || '⚠️ আপনার চ্যালেঞ্জটি বর্তমানে বন্ধ/নিষ্ক্রিয় রয়েছে। এক্সটেনশন কোনো ট্রেড সিঙ্ক করবে না।', 'error');
       return;
     }
-    isSyncing = true;
 
     const btn = document.getElementById('bpfSyncBtn');
+
+    // Quotex Account ID Verification before parsing trades
+    const detectedId = await scanQuotexAccountId(true);
+    if (!currentRegisteredBrokerAccountId) {
+      try {
+        await fetchChallengeStatus();
+      } catch (e) {}
+    }
+
+    const matchCheck = verifyQuotexAccountIdMatch(detectedId, currentRegisteredBrokerAccountId);
+    if (matchCheck.isMismatch) {
+      showAccountMismatchModal(matchCheck.cleanReg, matchCheck.cleanDet);
+      showToast('⚠️ Quotex Account ID মিলছে না! ট্রেড সিঙ্ক বন্ধ রাখা হয়েছে।', 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>⚠️ ID Mismatch</span>`;
+        btn.style.background = '#4a1515';
+        btn.style.borderColor = '#ff5252';
+        btn.style.color = '#ff8a80';
+      }
+      return;
+    }
+
+    isSyncing = true;
     if (btn) {
       btn.disabled = true;
       btn.innerHTML = '<span>⏳ স্ক্যান ও সিঙ্ক হচ্ছে...</span>';
@@ -932,6 +1235,19 @@
           setTimeout(() => {
             if (btn) setSyncBtnText('⚡ Sync Trades');
           }, 3500);
+        }
+
+        if (result && result.accountMismatch) {
+          isAccountIdMismatch = true;
+          showAccountMismatchModal(result.registeredBrokerAccountId, result.detectedBrokerAccountId);
+          showToast('⚠️ Quotex Account ID মিলছে না! সিঙ্ক ব্লক করা হয়েছে।', 'error');
+          if (btn) {
+            btn.innerHTML = `<span>⚠️ ID Mismatch</span>`;
+            btn.style.background = '#4a1515';
+            btn.style.borderColor = '#ff5252';
+            btn.style.color = '#ff8a80';
+          }
+          return;
         }
 
         if (result && (result.isDisqualified || result.noActiveChallenge)) {
@@ -1006,34 +1322,52 @@
           sendResponse({ success: false, error: lockReason || 'আপনার চ্যালেঞ্জটি বন্ধ বা বাতিল রয়েছে।' });
           return true;
         }
-        if (!window.location.pathname.includes('/trades')) {
-          const acct = detectAccountType();
-          sessionStorage.setItem('bpf_auto_sync_target', 'true');
-          window.location.href = `${window.location.origin}/en/trades?page=1&account=${acct}`;
-          sendResponse({ success: true, message: 'Trades অপশনে নেওয়া হচ্ছে...' });
-          return true;
-        } else {
-          const acct = detectAccountType();
-          collectAllChallengeTrades(acct, currentChallengeStartTime).then(({ trades, pagesScanned }) => {
-            if (!trades || trades.length === 0) {
-              sendResponse({ success: false, error: 'চ্যালেঞ্জের কোনো ট্রেড পাওয়া যায়নি।' });
-              return;
-            }
-            postTradesToServer(trades, acct).then(res => {
-              if (res && res.success) {
-                trades.forEach(t => syncedTicketsCache.add(t.ticketId));
-                saveSyncedCache();
-                sendHeartbeat();
+
+        scanQuotexAccountId(true).then((detectedId) => {
+          const matchCheck = verifyQuotexAccountIdMatch(detectedId, currentRegisteredBrokerAccountId);
+          if (matchCheck.isMismatch) {
+            showAccountMismatchModal(matchCheck.cleanReg, matchCheck.cleanDet);
+            sendResponse({
+              success: false,
+              accountMismatch: true,
+              error: `Quotex Account ID মিলছে না! চ্যালেঞ্জ ID: ${matchCheck.cleanReg}, লগইনকৃত ID: ${matchCheck.cleanDet}`
+            });
+            return;
+          }
+
+          if (!window.location.pathname.includes('/trades')) {
+            const acct = detectAccountType();
+            sessionStorage.setItem('bpf_auto_sync_target', 'true');
+            window.location.href = `${window.location.origin}/en/trades?page=1&account=${acct}`;
+            sendResponse({ success: true, message: 'Trades অপশনে নেওয়া হচ্ছে...' });
+          } else {
+            const acct = detectAccountType();
+            collectAllChallengeTrades(acct, currentChallengeStartTime).then(({ trades, pagesScanned }) => {
+              if (!trades || trades.length === 0) {
+                sendResponse({ success: false, error: 'চ্যালেঞ্জের কোনো ট্রেড পাওয়া যায়নি।' });
+                return;
               }
-              sendResponse({ ...res, count: trades.length, pagesScanned });
+              postTradesToServer(trades, acct).then(res => {
+                if (res && res.accountMismatch) {
+                  showAccountMismatchModal(res.registeredBrokerAccountId, res.detectedBrokerAccountId);
+                  sendResponse({ success: false, accountMismatch: true, error: res.message });
+                  return;
+                }
+                if (res && res.success) {
+                  trades.forEach(t => syncedTicketsCache.add(t.ticketId));
+                  saveSyncedCache();
+                  sendHeartbeat();
+                }
+                sendResponse({ ...res, count: trades.length, pagesScanned });
+              }).catch(err => {
+                sendResponse({ success: false, error: err.message });
+              });
             }).catch(err => {
               sendResponse({ success: false, error: err.message });
             });
-          }).catch(err => {
-            sendResponse({ success: false, error: err.message });
-          });
-          return true;
-        }
+          }
+        });
+        return true;
       }
     });
   }
@@ -1042,6 +1376,7 @@
   function startExtension() {
     loadConfig(() => {
       scanQuotexBrokerTimezone();
+      scanQuotexAccountId();
       injectWidget();
       sendHeartbeat();
 
@@ -1050,6 +1385,8 @@
 
       if (tzScanTimer) clearInterval(tzScanTimer);
       tzScanTimer = setInterval(scanQuotexBrokerTimezone, 15000);
+
+      setInterval(() => scanQuotexAccountId(), 45000);
 
       if (window.location.pathname.includes('/trades')) {
         setTimeout(() => {
