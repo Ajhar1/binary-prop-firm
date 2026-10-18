@@ -3968,7 +3968,9 @@
                     <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
                         <thead>
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.76rem; text-transform:uppercase; letter-spacing:0.5px;">
-                                <th style="padding:10px 12px; width:50px; text-align:center;">#</th>
+                                <th style="padding:10px 12px; width:45px; text-align:center;">#</th>
+                                <th style="padding:10px 12px; min-width:145px;">সেশন ও ধাপ (Session)</th>
+                                <th style="padding:10px 12px; min-width:160px;">নিয়ম / ভুল চেক (Status)</th>
                                 <th style="padding:10px 12px;">Asset</th>
                                 <th style="padding:10px 12px;">Info (Ticket / Payout)</th>
                                 <th style="padding:10px 12px;">Opening Quote</th>
@@ -3980,7 +3982,7 @@
                         </thead>
                         <tbody id="syncedTradesTableBody">
                             <tr>
-                                <td colspan="8" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
+                                <td colspan="10" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
                                     <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
                                     ট্রেড হিস্টোরি লোড হচ্ছে...
                                 </td>
@@ -6010,6 +6012,11 @@
             renderMyChallengesTab();
             checkMoneyManagementEligibility();
             updateAuditCardInfo();
+            if (Array.isArray(userSyncedTradesData) && userSyncedTradesData.length > 0) {
+                try {
+                    renderSyncedTrades({ trades: userSyncedTradesData, stats: lastSyncedTradesStats });
+                } catch(e) {}
+            }
         }
 
         // ==================== MY CHALLENGES & HISTORY TAB RENDERING ====================
@@ -6956,11 +6963,276 @@
             `;
         }
 
+        // Helper to parse Quotex and broker timestamps
+        function parseTradeTime(str) {
+            if (!str) return 0;
+            if (typeof str === 'number') return str;
+            const clean = String(str).trim();
+            const m = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:,?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+            if (m) {
+                const day = parseInt(m[1], 10);
+                const month = parseInt(m[2], 10) - 1;
+                const year = parseInt(m[3], 10);
+                const hour = parseInt(m[4] || '0', 10);
+                const min = parseInt(m[5] || '0', 10);
+                const sec = parseInt(m[6] || '0', 10);
+                return new Date(year, month, day, hour, min, sec).getTime();
+            }
+            const parsed = new Date(clean).getTime();
+            return isNaN(parsed) ? 0 : parsed;
+        }
+
+        function getValidStakesForPlanned(planned) {
+            const p = Math.round(Number(planned) * 100) / 100;
+            if (isNaN(p) || p <= 0) return [1];
+            const rounded = (typeof roundCentStake === 'function') 
+                ? roundCentStake(p) 
+                : Math.max(1, ((Math.round((p - Math.floor(p)) * 100) > 50) ? Math.floor(p) + 1 : Math.floor(p)));
+            const valid = [rounded];
+            if (!valid.includes(p)) valid.push(p);
+            const floor = Math.floor(p);
+            const ceil = Math.ceil(p);
+            if (floor >= 1 && !valid.includes(floor)) valid.push(floor);
+            if (ceil >= 1 && !valid.includes(ceil)) valid.push(ceil);
+            return valid;
+        }
+
+        // Global Session & Audit Mapping Engine:
+        // Tags every synced trade with its exact challenge number, session number, step number, and error / compliance check!
+        function buildTradeSessionAuditMap() {
+            const structured = (typeof getUserStructuredChallenges === 'function') 
+                ? getUserStructuredChallenges() 
+                : { allGroups: [], runningGroups: [], activeGroup: null };
+            const tradeAuditMap = new Map();
+
+            // 1. Map all submitted / audited trades from past completed submissions
+            (structured.allGroups || []).forEach(chGroup => {
+                const chNum = chGroup.challengeNumber || 1;
+                let officialIndex = 0;
+                let practiceIndex = 0;
+
+                (chGroup.submissions || []).forEach((sub, subIdx) => {
+                    const isPractice = !!sub.isPractice;
+                    if (isPractice) practiceIndex++;
+                    else officialIndex++;
+
+                    const sessionNum = sub._sessionNum || (isPractice ? (sub.practiceSessionNumber || practiceIndex) : (sub.sessionNumber || officialIndex));
+                    const sessionLabel = isPractice ? `প্র্যাকটিস #${sessionNum}` : `সেশন #${sessionNum}`;
+                    const isSessionPassed = (sub.status === 'verified' || sub.status === 'auto_verified');
+
+                    if (Array.isArray(sub.auditReport) && sub.auditReport.length > 0) {
+                        sub.auditReport.forEach((a, aIdx) => {
+                            const ticket = String(a.ticketId || a.ticket || '').trim();
+                            const stepNum = a.tradeNum || a.stepIndex || (aIdx + 1);
+                            const isPassed = (a.isPassed !== undefined ? a.isPassed : (a.isCompliant !== undefined ? a.isCompliant : true));
+                            const isRefund = !!a.isRefund;
+                            
+                            let errorReason = '';
+                            if (!isPassed) {
+                                errorReason = a.reason || a.complianceStatus || 'নিয়ম বহির্ভূত ট্রেড';
+                            }
+
+                            if (ticket) {
+                                tradeAuditMap.set(ticket, {
+                                    isAudited: true,
+                                    isUnsubmitted: false,
+                                    challengeNum: chNum,
+                                    isPractice,
+                                    sessionNum,
+                                    sessionLabel,
+                                    stepNum,
+                                    plannedStake: a.plannedStake,
+                                    actualStake: a.actualStake,
+                                    isPassed,
+                                    isRefund,
+                                    errorReason,
+                                    payout: a.payout || (a.payoutPercent ? `${a.payoutPercent}%` : ''),
+                                    submissionId: sub.id,
+                                    submissionStatus: sub.status
+                                });
+                            }
+                        });
+                    } else if (Array.isArray(sub.auditedTicketIds)) {
+                        sub.auditedTicketIds.forEach((id, aIdx) => {
+                            const ticket = String(id).trim();
+                            if (ticket && !tradeAuditMap.has(ticket)) {
+                                tradeAuditMap.set(ticket, {
+                                    isAudited: true,
+                                    isUnsubmitted: false,
+                                    challengeNum: chNum,
+                                    isPractice,
+                                    sessionNum,
+                                    sessionLabel,
+                                    stepNum: aIdx + 1,
+                                    plannedStake: null,
+                                    actualStake: null,
+                                    isPassed: isSessionPassed,
+                                    isRefund: false,
+                                    errorReason: isSessionPassed ? '' : 'সেশন অসফল',
+                                    submissionId: sub.id
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            // 2. Identify and evaluate Unsubmitted / Active Trades
+            const activeGroup = (structured.runningGroups && structured.runningGroups.length > 0) 
+                ? structured.runningGroups[structured.runningGroups.length - 1] 
+                : structured.activeGroup;
+            const activeChallenge = activeGroup ? activeGroup.challenge : null;
+
+            const completedOfficial = (activeGroup ? activeGroup.submissions : []).filter(s => !s.isPractice).length;
+            const completedPractice = (activeGroup ? activeGroup.submissions : []).filter(s => s.isPractice).length;
+            const isPracticePhase = (activeChallenge && (activeChallenge.challengePhase === 'practice' || activeChallenge.isPractice));
+
+            const activeSessionNum = isPracticePhase ? (completedPractice + 1) : (completedOfficial + 1);
+            const activeSessionLabel = isPracticePhase ? `চলতি প্র্যাকটিস #${activeSessionNum}` : `চলতি সেশন #${activeSessionNum}`;
+            const activeChNum = activeGroup ? activeGroup.challengeNumber : 1;
+
+            // Filter unsubmitted trades
+            const unsubmitted = (Array.isArray(userSyncedTradesData) ? userSyncedTradesData : []).filter(t => {
+                const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                return tick && !tradeAuditMap.has(tick);
+            });
+
+            // Sort chronologically oldest first to simulate accurate progression (Trade #1, Trade #2...)
+            unsubmitted.sort((a, b) => {
+                const timeA = parseTradeTime(a.openTime) || parseTradeTime(a.closeTime) || new Date(a.syncedAt || 0).getTime();
+                const timeB = parseTradeTime(b.openTime) || parseTradeTime(b.closeTime) || new Date(b.syncedAt || 0).getTime();
+                return timeA - timeB;
+            });
+
+            // Active Starting Capital
+            let sessionCapital = Number(activeChallenge ? (activeChallenge.currentCapital || activeChallenge.fundedAmount || 100) : 100);
+            if (activeGroup && activeGroup.submissions.length > 0) {
+                const lastSub = activeGroup.submissions[activeGroup.submissions.length - 1];
+                if (lastSub && lastSub.endingCapital) sessionCapital = Number(lastSub.endingCapital);
+            }
+
+            const mat = (typeof buildMasanielloMatrix === 'function') 
+                ? buildMasanielloMatrix(16, 6, 1.85) 
+                : [];
+            let theoreticalCashier = sessionCapital;
+            let simWins = 0;
+            let simLosses = 0;
+            let stepCount = 0;
+
+            unsubmitted.forEach(t => {
+                const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                const actualStake = parseFloat(t.amount) || 0;
+                const isWin = (t.result === 'WIN' || (parseFloat(t.profit) > parseFloat(t.amount)));
+                
+                // Payout extraction
+                let resolvedPayout = (t.payout || '').trim();
+                let payoutNum = parseFloat(String(resolvedPayout).replace('%', '').trim()) || 0;
+                if (!payoutNum || payoutNum === 90) {
+                    const amt = parseFloat(t.amount) || 0;
+                    const prof = parseFloat(t.profit) || 0;
+                    if (amt > 0 && prof > 0) {
+                        const calcP = (prof > amt) ? Math.round(((prof - amt) / amt) * 100) : Math.round((prof / amt) * 100);
+                        if (calcP >= 40 && calcP <= 100) payoutNum = calcP;
+                    }
+                }
+                if (!payoutNum) payoutNum = 85;
+
+                const isRefund = (t.result === 'REFUND' || actualStake === 0 || (t.profit === t.amount && actualStake > 0));
+
+                if (isRefund) {
+                    tradeAuditMap.set(tick, {
+                        isAudited: false,
+                        isUnsubmitted: true,
+                        challengeNum: activeChNum,
+                        isPractice: isPracticePhase,
+                        sessionNum: activeSessionNum,
+                        sessionLabel: activeSessionLabel,
+                        stepNum: stepCount + 1,
+                        plannedStake: 0,
+                        actualStake,
+                        isPassed: true,
+                        isRefund: true,
+                        errorReason: 'মার্কেটের রিফান্ড ট্রেড (বাদ দেওয়া হয়েছে)',
+                        payout: `${payoutNum}%`
+                    });
+                    return;
+                }
+
+                stepCount++;
+                const currentStep = stepCount;
+                const m = simWins + simLosses;
+
+                // Calculate expected planned stake
+                let plannedStake = 0;
+                if (mat.length > 0 && m < 16) {
+                    let stake = 0;
+                    if (6 - simWins === 16 - m) {
+                        stake = theoreticalCashier;
+                    } else {
+                        const down = (mat[m + 1] && mat[m + 1][simWins] != null) ? mat[m + 1][simWins] : 0;
+                        const diag = (mat[m + 1] && mat[m + 1][simWins + 1] != null) ? mat[m + 1][simWins + 1] : 0;
+                        const denom = down + (1.85 - 1) * diag;
+                        if (denom <= 0) {
+                            stake = theoreticalCashier;
+                        } else {
+                            const factor = 1 - (1.85 * diag) / denom;
+                            stake = factor * theoreticalCashier;
+                        }
+                    }
+                    const rawStake = Math.max(0.01, Math.round(stake * 100) / 100);
+                    plannedStake = typeof roundCentStake === 'function' ? roundCentStake(rawStake) : Math.max(1, Math.round(rawStake));
+                }
+
+                const validStakes = getValidStakesForPlanned(plannedStake);
+                const isStakeOk = validStakes.some(v => Math.abs(actualStake - v) < 0.05);
+                const isPayoutOk = (payoutNum >= 85);
+
+                let tradePassed = true;
+                let tradeError = '';
+
+                if (!isStakeOk) {
+                    tradePassed = false;
+                    tradeError = `ভুল স্টেক: Plan ছিল $${plannedStake}, নেওয়া হয়েছে $${actualStake.toFixed(2)}`;
+                } else if (!isPayoutOk) {
+                    tradePassed = false;
+                    tradeError = `কম পেআউট: ${payoutNum}% (ন্যূনতম ৮৫% প্রয়োজন)`;
+                }
+
+                tradeAuditMap.set(tick, {
+                    isAudited: false,
+                    isUnsubmitted: true,
+                    challengeNum: activeChNum,
+                    isPractice: isPracticePhase,
+                    sessionNum: activeSessionNum,
+                    sessionLabel: activeSessionLabel,
+                    stepNum: currentStep,
+                    plannedStake,
+                    actualStake,
+                    isPassed: tradePassed,
+                    isRefund: false,
+                    errorReason: tradeError,
+                    payout: `${payoutNum}%`
+                });
+
+                // Advance theoretical simulation
+                if (isWin) {
+                    simWins++;
+                    theoreticalCashier += (plannedStake * 0.85);
+                } else {
+                    simLosses++;
+                    theoreticalCashier -= plannedStake;
+                }
+            });
+
+            return tradeAuditMap;
+        }
+
         function renderUserSerialSessions() {
             const structured = getUserStructuredChallenges();
             const tradeHistContainer = document.getElementById('tradeHistorySessionsList');
             const submissionContainer = document.getElementById('userSubmissionSessionsContainer');
             const activeSessionCard = document.getElementById('activeSessionCard');
+            const auditMap = buildTradeSessionAuditMap();
 
             // 1. Render Active / Unsubmitted Synced Trades Card
             const activeGroup = structured.runningGroups[structured.runningGroups.length - 1] || structured.activeGroup;
@@ -6970,11 +7242,17 @@
                 if (activeChallenge && Array.isArray(userSyncedTradesData) && userSyncedTradesData.length > 0) {
                     const auditedIds = activeGroup ? activeGroup.auditedTicketIds : new Set();
                     const unsubmittedTrades = userSyncedTradesData.filter(t => {
-                        const tick = String(t.ticketId || t.ticket || t.id || '');
+                        const tick = String(t.ticketId || t.ticket || t.id || '').trim();
                         return tick && !auditedIds.has(tick);
                     });
 
                     if (unsubmittedTrades.length > 0) {
+                        const completedOfficial = (activeGroup ? activeGroup.submissions : []).filter(s => !s.isPractice).length;
+                        const completedPractice = (activeGroup ? activeGroup.submissions : []).filter(s => s.isPractice).length;
+                        const isPracticePhase = (activeChallenge && (activeChallenge.challengePhase === 'practice' || activeChallenge.isPractice));
+                        const activeSessionNum = isPracticePhase ? (completedPractice + 1) : (completedOfficial + 1);
+                        const activeSessionName = isPracticePhase ? `চলতি প্র্যাকটিস #${activeSessionNum}` : `চলতি সেশন #${activeSessionNum}`;
+
                         const unsubmittedWins = unsubmittedTrades.filter(t => t.result === 'WIN').length;
                         const unsubmittedLosses = unsubmittedTrades.filter(t => t.result === 'LOSS').length;
                         const unsubmittedPnl = unsubmittedTrades.reduce((sum, t) => {
@@ -6987,13 +7265,19 @@
                         const pnlSign = unsubmittedPnl >= 0 ? '+' : '';
                         const pnlColor = unsubmittedPnl >= 0 ? 'var(--neon-green)' : 'var(--danger-red)';
 
+                        const mistakeCount = unsubmittedTrades.filter(t => {
+                            const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                            const a = auditMap.get(tick);
+                            return a && !a.isPassed;
+                        }).length;
+
                         activeSessionCard.style.display = 'block';
                         activeSessionCard.innerHTML = `
                             <div style="background:rgba(245,176,65,0.06); border:1.5px solid rgba(245,176,65,0.4); border-radius:12px; padding:12px 14px; box-shadow:0 0 16px rgba(245,176,65,0.12);">
                                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
                                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                                        <span style="background:linear-gradient(135deg, #00e676, #10b981); color:#000; font-weight:900; font-size:0.78rem; padding:3px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
-                                            <i class="fas fa-bolt"></i> চলতি ট্রেড সেশন (Active Synced Trades)
+                                        <span style="background:linear-gradient(135deg, #00e676, #10b981); color:#000; font-weight:900; font-size:0.78rem; padding:3px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:5px; box-shadow:0 0 10px rgba(0,230,118,0.25);">
+                                            <i class="fas fa-bolt"></i> ${escapeHtml(activeSessionName)} (চলতি ট্রেড সেশন)
                                         </span>
                                         <span style="font-size:0.82rem; color:#fff; font-weight:700;">
                                             <strong style="color:var(--yellow);">${unsubmittedTrades.length}</strong>টি সিঙ্কড ট্রেড
@@ -7008,40 +7292,91 @@
                                     </button>
                                 </div>
 
+                                ${mistakeCount > 0 ? `
+                                    <div style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.45); border-radius:8px; padding:8px 12px; margin-bottom:10px; color:#fca5a5; font-size:0.78rem; display:flex; align-items:center; gap:8px;">
+                                        <i class="fas fa-exclamation-triangle" style="color:#ef4444; font-size:1.1rem; flex-shrink:0;"></i>
+                                        <div>
+                                            <strong>সতর্কতা:</strong> ${mistakeCount}টি ট্রেডে নিয়ম লঙ্ঘন বা ভুল স্টেক সনাক্ত হয়েছে! নিচে লাল চিহ্নে ভুলগুলো লক্ষ্য করুন।
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.25); border-radius:8px; padding:6px 12px; margin-bottom:10px; color:#a7f3d0; font-size:0.76rem; display:flex; align-items:center; gap:8px;">
+                                        <i class="fas fa-check-circle" style="color:#00e676; font-size:0.95rem; flex-shrink:0;"></i>
+                                        <div>
+                                            সবগুলো ট্রেড মানি ম্যানেজমেন্ট নিয়ম মেনে সঠিকভাবে সম্পন্ন হচ্ছে।
+                                        </div>
+                                    </div>
+                                `}
+
                                 <div style="overflow-x:auto; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
                                     <table style="width:100%; font-size:0.76rem; text-align:left; border-collapse:collapse;">
                                         <thead>
                                             <tr style="border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
-                                                <th style="padding:6px 10px; text-align:center;">#</th>
-                                                <th style="padding:6px 10px;">অ্যাসেট</th>
-                                                <th style="padding:6px 10px;">টিকিট ID</th>
-                                                <th style="padding:6px 10px;">স্টেক</th>
-                                                <th style="padding:6px 10px;">পেআউট</th>
-                                                <th style="padding:6px 10px;">সময়</th>
-                                                <th style="padding:6px 10px;">ফলাফল</th>
-                                                <th style="padding:6px 10px;">P&L</th>
+                                                <th style="padding:7px 10px; text-align:center;">#</th>
+                                                <th style="padding:7px 10px; min-width:130px;">সেশন ও ধাপ</th>
+                                                <th style="padding:7px 10px; min-width:140px;">ভুল / নিয়ম চেক</th>
+                                                <th style="padding:7px 10px;">অ্যাসেট</th>
+                                                <th style="padding:7px 10px;">টিকিট ID</th>
+                                                <th style="padding:7px 10px;">স্টেক (Plan / Actual)</th>
+                                                <th style="padding:7px 10px;">পেআউট</th>
+                                                <th style="padding:7px 10px;">সময়</th>
+                                                <th style="padding:7px 10px;">ফলাফল</th>
+                                                <th style="padding:7px 10px;">P&L</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             ${unsubmittedTrades.map((t, idx) => {
+                                                const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                                                const audit = auditMap.get(tick);
                                                 const isWin = t.result === 'WIN';
                                                 const pColor = isWin ? 'var(--neon-green)' : 'var(--danger-red)';
                                                 const tradeProfit = isWin ? (t.profit > t.amount ? (t.profit - t.amount) : (t.profit || 0)) : -(t.amount || 0);
                                                 const tSign = tradeProfit >= 0 ? '+' : '';
+                                                const stepNum = audit ? audit.stepNum : (idx + 1);
+
+                                                let checkBadgeHtml = '';
+                                                if (audit && audit.isRefund) {
+                                                    checkBadgeHtml = '<span style="color:#fbbf24; font-weight:700;"><i class="fas fa-undo"></i> রিফান্ড</span>';
+                                                } else if (audit && audit.isPassed) {
+                                                    checkBadgeHtml = '<span style="color:#00e676; font-weight:700;"><i class="fas fa-check-circle"></i> ✓ নিয়ম মেনে ট্রেড</span>';
+                                                } else if (audit && !audit.isPassed) {
+                                                    checkBadgeHtml = `
+                                                        <span style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.45); padding:2px 7px; border-radius:5px; font-weight:800; font-size:0.7rem;" title="${escapeHtml(audit.errorReason)}">
+                                                            <i class="fas fa-times-circle"></i> ✕ ${escapeHtml(audit.errorReason)}
+                                                        </span>
+                                                    `;
+                                                } else {
+                                                    checkBadgeHtml = '<span style="color:#00e676; font-weight:700;">✓ ট্রেড রেকর্ড</span>';
+                                                }
+
+                                                const planStakeDisplay = (audit && audit.plannedStake != null && audit.plannedStake > 0)
+                                                    ? `<span style="color:var(--yellow); font-weight:700;">$${audit.plannedStake}</span> <span style="color:var(--text-secondary); font-size:0.7rem;">/</span> <span style="font-weight:700; color:#38bdf8;">$${Number(t.amount || 0).toFixed(2)}</span>`
+                                                    : `<span style="font-weight:700; color:#38bdf8;">$${Number(t.amount || 0).toFixed(2)}</span>`;
+
                                                 return `
                                                     <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
-                                                        <td style="padding:6px 10px; text-align:center; font-weight:800; color:var(--yellow);">#${idx + 1}</td>
-                                                        <td style="padding:6px 10px; font-weight:700; color:#fff;">${escapeHtml(t.asset || 'N/A')}</td>
-                                                        <td style="padding:6px 10px; font-family:monospace; color:#aaa;">${escapeHtml(String(t.ticketId || t.ticket || '').substring(0, 12))}...</td>
-                                                        <td style="padding:6px 10px; font-weight:700; color:#38bdf8;">$${Number(t.amount || 0).toFixed(2)}</td>
-                                                        <td style="padding:6px 10px; color:#cbd5e1;">${escapeHtml(t.payout || '85%')}</td>
-                                                        <td style="padding:6px 10px; color:var(--text-secondary); font-size:0.72rem;">${escapeHtml(t.openTime || t.closeTime || '')}</td>
-                                                        <td style="padding:6px 10px;">
+                                                        <td style="padding:7px 10px; text-align:center; font-weight:800; color:var(--yellow);">#${idx + 1}</td>
+                                                        <td style="padding:7px 10px;">
+                                                            <span style="background:linear-gradient(135deg, rgba(0,230,118,0.18), rgba(16,185,129,0.25)); color:#00e676; border:1px solid rgba(0,230,118,0.45); font-weight:800; font-size:0.72rem; padding:3px 8px; border-radius:6px; white-space:nowrap;">
+                                                                <i class="fas fa-bolt"></i> ${escapeHtml(activeSessionName)} • ট্রেড #${stepNum}
+                                                            </span>
+                                                        </td>
+                                                        <td style="padding:7px 10px;">
+                                                            ${checkBadgeHtml}
+                                                        </td>
+                                                        <td style="padding:7px 10px; font-weight:700; color:#fff;">${escapeHtml(t.asset || 'N/A')}</td>
+                                                        <td style="padding:7px 10px; font-family:monospace; color:#aaa;">${escapeHtml(String(t.ticketId || t.ticket || '').substring(0, 12))}...</td>
+                                                        <td style="padding:7px 10px;">
+                                                            ${planStakeDisplay}
+                                                        </td>
+                                                        <td style="padding:7px 10px; color:#cbd5e1;">${escapeHtml(t.payout || '85%')}</td>
+                                                        <td style="padding:7px 10px; color:var(--text-secondary); font-size:0.72rem;">${escapeHtml(t.openTime || t.closeTime || '')}</td>
+                                                        <td style="padding:7px 10px;">
                                                             <span style="background:${isWin ? 'rgba(0,230,118,0.18)' : 'rgba(239,68,68,0.18)'}; color:${isWin ? '#00e676' : '#f87171'}; border:1px solid ${isWin ? 'rgba(0,230,118,0.35)' : 'rgba(239,68,68,0.35)'}; padding:2px 7px; border-radius:5px; font-size:0.68rem; font-weight:800;">
                                                                 ${t.result || 'WIN'}
                                                             </span>
                                                         </td>
-                                                        <td style="padding:6px 10px; font-weight:700; color:${pColor};">
+                                                        <td style="padding:7px 10px; font-weight:700; color:${pColor};">
                                                             ${tSign}$${tradeProfit.toFixed(2)}
                                                         </td>
                                                     </tr>
@@ -11013,7 +11348,7 @@
                     if (tbody) {
                         tbody.innerHTML = `
                             <tr>
-                                <td colspan="8" style="text-align:center; padding:2.5rem 1rem; color:#f87171;">
+                                <td colspan="10" style="text-align:center; padding:2.5rem 1rem; color:#f87171;">
                                     <i class="fas fa-exclamation-circle" style="font-size:1.8rem; margin-bottom:8px; display:block;"></i>
                                     ${data.message || 'ট্রেড হিস্টোরি লোড করতে সমস্যা হয়েছে।'}
                                 </td>
@@ -11026,7 +11361,7 @@
                 if (tbody) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="8" style="text-align:center; padding:2.5rem 1rem; color:#f87171;">
+                            <td colspan="10" style="text-align:center; padding:2.5rem 1rem; color:#f87171;">
                                 <i class="fas fa-wifi" style="font-size:1.8rem; margin-bottom:8px; display:block;"></i>
                                 নেটওয়ার্ক ত্রুটি। পুনরায় চেষ্টা করুন।
                             </td>
@@ -11036,28 +11371,12 @@
             }
         }
 
-        // Helper to parse Quotex and broker timestamps for accurate descending sorting
-        function parseTradeTime(str) {
-            if (!str) return 0;
-            if (typeof str === 'number') return str;
-            const clean = String(str).trim();
-            const m = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})(?:,?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
-            if (m) {
-                const day = parseInt(m[1], 10);
-                const month = parseInt(m[2], 10) - 1;
-                const year = parseInt(m[3], 10);
-                const hour = parseInt(m[4] || '0', 10);
-                const min = parseInt(m[5] || '0', 10);
-                const sec = parseInt(m[6] || '0', 10);
-                return new Date(year, month, day, hour, min, sec).getTime();
-            }
-            const parsed = new Date(clean).getTime();
-            return isNaN(parsed) ? 0 : parsed;
-        }
+        let lastSyncedTradesStats = {};
 
         function renderSyncedTrades(data) {
             let trades = (data.trades || []).slice();
-            const stats = data.stats || {};
+            const stats = data.stats || lastSyncedTradesStats || {};
+            lastSyncedTradesStats = stats;
 
             // Strict sort: newest trades first (latest trade at top)
             trades.sort((a, b) => {
@@ -11098,7 +11417,7 @@
             if (trades.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8" style="text-align:center; padding:2.5rem 1rem; color:var(--text-secondary);">
+                        <td colspan="10" style="text-align:center; padding:2.5rem 1rem; color:var(--text-secondary);">
                             <div style="width:48px; height:48px; border-radius:50%; background:rgba(255,184,0,0.1); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem auto; font-size:1.3rem; color:var(--yellow);">
                                 <i class="fas fa-cloud-download-alt"></i>
                             </div>
@@ -11111,6 +11430,10 @@
                 `;
                 return;
             }
+
+            const auditMap = (typeof buildTradeSessionAuditMap === 'function') 
+                ? buildTradeSessionAuditMap() 
+                : new Map();
 
             tbody.innerHTML = trades.map((t, idx) => {
                 const serialNum = trades.length - idx;
@@ -11140,17 +11463,83 @@
                 if (!resolvedPayout) resolvedPayout = '85%';
 
                 const accountBadge = isLiveAcct
-                    ? `<span style="background:rgba(0,230,118,0.14); color:#00e676; padding:3px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; border:1px solid rgba(0,230,118,0.4); display:inline-flex; align-items:center; gap:4px;">
+                    ? `<span style="background:rgba(0,230,118,0.14); color:#00e676; padding:3px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; border:1px solid rgba(0,230,118,0.4); display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
                         <span style="width:6px; height:6px; border-radius:50%; background:#00e676;"></span> রিয়েল ব্যালেন্স (LIVE)
                        </span>`
-                    : `<span style="background:rgba(255,184,0,0.14); color:#ffb800; padding:3px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; border:1px solid rgba(255,184,0,0.4); display:inline-flex; align-items:center; gap:4px;">
+                    : `<span style="background:rgba(255,184,0,0.14); color:#ffb800; padding:3px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; border:1px solid rgba(255,184,0,0.4); display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
                         <span style="width:6px; height:6px; border-radius:50%; background:#ffb800;"></span> ডেমো ব্যালেন্স (DEMO)
                        </span>`;
+
+                // Audit and Session Mapping
+                const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                const audit = auditMap.get(tick);
+
+                let sessionBadgeHtml = '';
+                if (audit && audit.isUnsubmitted) {
+                    sessionBadgeHtml = `
+                        <span style="background:linear-gradient(135deg, rgba(0,230,118,0.18), rgba(16,185,129,0.25)); color:#00e676; border:1px solid rgba(0,230,118,0.45); font-weight:800; font-size:0.74rem; padding:4px 9px; border-radius:7px; display:inline-flex; align-items:center; gap:5px; box-shadow:0 0 10px rgba(0,230,118,0.15); white-space:nowrap;">
+                            <i class="fas fa-bolt"></i> ${escapeHtml(audit.sessionLabel)} • ধাপ #${audit.stepNum}
+                        </span>
+                    `;
+                } else if (audit && !audit.isUnsubmitted) {
+                    sessionBadgeHtml = `
+                        <span style="background:linear-gradient(135deg, rgba(255,184,0,0.18), rgba(212,136,23,0.25)); color:var(--yellow); border:1px solid rgba(255,184,0,0.45); font-weight:800; font-size:0.74rem; padding:4px 9px; border-radius:7px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;">
+                            <i class="fas fa-trophy"></i> ${escapeHtml(audit.sessionLabel)} • ধাপ #${audit.stepNum}
+                        </span>
+                    `;
+                } else {
+                    sessionBadgeHtml = `
+                        <span style="background:rgba(255,255,255,0.05); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); font-size:0.72rem; padding:3px 8px; border-radius:6px; white-space:nowrap;">
+                            স্ট্যান্ডবাই
+                        </span>
+                    `;
+                }
+
+                let complianceBadgeHtml = '';
+                if (audit && audit.isRefund) {
+                    complianceBadgeHtml = `
+                        <span style="background:rgba(245,176,65,0.15); color:#fbbf24; border:1px solid rgba(245,176,65,0.4); padding:3px 8px; border-radius:6px; font-weight:700; font-size:0.74rem; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
+                            <i class="fas fa-undo"></i> রিফান্ড ট্রেড
+                        </span>
+                    `;
+                } else if (audit && audit.isPassed) {
+                    const plannedText = (audit.plannedStake != null && audit.plannedStake > 0) ? `(Plan: $${audit.plannedStake})` : '';
+                    complianceBadgeHtml = `
+                        <div style="display:flex; flex-direction:column; gap:2px;">
+                            <span style="color:#00e676; font-weight:800; font-size:0.74rem; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
+                                <i class="fas fa-check-circle"></i> ✓ নিয়ম মেনে ট্রেড
+                            </span>
+                            ${plannedText ? `<span style="font-size:0.7rem; color:var(--text-secondary); font-family:monospace;">${plannedText}</span>` : ''}
+                        </div>
+                    `;
+                } else if (audit && !audit.isPassed) {
+                    const errReason = audit.errorReason || 'নিয়ম বহির্ভূত ট্রেড';
+                    complianceBadgeHtml = `
+                        <div style="display:flex; flex-direction:column; gap:2px; max-width:210px;">
+                            <span style="background:rgba(239,68,68,0.22); color:#f87171; border:1px solid rgba(239,68,68,0.5); padding:3px 8px; border-radius:6px; font-weight:800; font-size:0.72rem; display:inline-flex; align-items:center; gap:4px; box-shadow:0 0 10px rgba(239,68,68,0.2); white-space:nowrap;" title="${escapeHtml(errReason)}">
+                                <i class="fas fa-times-circle"></i> ✕ ভুল ট্রেড
+                            </span>
+                            <span style="font-size:0.7rem; color:#fca5a5; font-weight:700; line-height:1.25; word-break:break-word;">
+                                ${escapeHtml(errReason)}
+                            </span>
+                        </div>
+                    `;
+                } else {
+                    complianceBadgeHtml = `
+                        <span style="color:var(--text-secondary); font-size:0.74rem;">-</span>
+                    `;
+                }
 
                 return `
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                         <td style="padding:12px; text-align:center;">
                             <span style="background:rgba(255,184,0,0.12); color:var(--yellow); padding:3px 8px; border-radius:6px; font-weight:800; font-family:monospace; font-size:0.82rem; border:1px solid rgba(255,184,0,0.3);">#${serialNum}</span>
+                        </td>
+                        <td style="padding:12px;">
+                            ${sessionBadgeHtml}
+                        </td>
+                        <td style="padding:12px;">
+                            ${complianceBadgeHtml}
                         </td>
                         <td style="padding:12px; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px;">
                             <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${isWin ? '#00e676' : '#ff5252'};"></span>
