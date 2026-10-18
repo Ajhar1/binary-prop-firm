@@ -3043,29 +3043,32 @@
                     </form>
                 </div>
 
-                <!-- Past Submissions History Card -->
-                <div class="glass-card">
-                    <h2 style="font-size:1.15rem; font-weight:800; margin-bottom:0.85rem;">
-                        <i class="fas fa-history" style="color:var(--yellow);"></i> Submission Logs
-                    </h2>
-
-                    <div class="table-responsive">
-                        <table class="styled-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Broker</th>
-                                    <th>Trades</th>
-                                    <th>P&L</th>
-                                    <th>Proof</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="submissionTableBody">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
+                <!-- Past Submissions History Card (Admin-Style Sequential Sessions) -->
+                <div class="glass-card" style="padding:1.25rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.75rem;">
+                        <div>
+                            <h2 style="font-size:1.15rem; font-weight:800; margin:0; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-layer-group" style="color:var(--yellow);"></i> সেশন ট্রেডিং হিস্টোরি (Session Records)
+                            </h2>
+                            <p style="margin:3px 0 0 0; font-size:0.76rem; color:var(--text-secondary);">ক্রমানুসারে সকল সেশন ও প্রতিটি ট্রেডের বিস্তারিত হিসাব ও লাইভ অডিট</p>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn-outline" style="padding:5px 12px; font-size:0.76rem; border-radius:6px; cursor:pointer;" onclick="fetchSubmissions()">
+                                <i class="fas fa-sync-alt"></i> রিফ্রেশ
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- Container for Sequential Session Accordion Cards -->
+                    <div id="userSubmissionSessionsContainer" style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="text-align:center; padding:2rem 1rem; color:var(--text-secondary); font-size:0.84rem;">
+                            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--yellow); margin-bottom:8px; display:block;"></i>
+                            সেশন হিস্টোরি লোড হচ্ছে...
+                        </div>
+                    </div>
+
+                    <!-- Hidden fallback tbody for backwards compatibility -->
+                    <table style="display:none;"><tbody id="submissionTableBody"></tbody></table>
                 </div>
             </div>
         </section>
@@ -3916,23 +3919,52 @@
                 </div>
             </div>
 
-            <!-- Trade History Records Table -->
+            <!-- Trade History Records Table / Session View -->
             <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; box-shadow:0 8px 30px rgba(0,0,0,0.3);">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem;">
+                <!-- Header with View Switcher -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.75rem;">
                     <div>
-                        <h3 style="font-size:1.05rem; font-weight:800; color:#fff; margin:0;">
-                            <i class="fas fa-chart-line" style="color:var(--yellow); margin-right:6px;"></i> লাইভ ট্রেড রেকর্ড
+                        <h3 style="font-size:1.05rem; font-weight:800; color:#fff; margin:0; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-layer-group" style="color:var(--yellow);"></i> ট্রেডিং হিস্টোরি ও সেশন রেকর্ড
                         </h3>
+                        <p style="margin:2px 0 0 0; font-size:0.76rem; color:var(--text-secondary);">
+                            ক্রমানুসারে সকল সেশন ও প্রতিটি ট্রেডের বিস্তারিত হিসাব
+                        </p>
                     </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn-outline" style="padding:7px 14px; font-size:0.8rem; border-radius:8px; cursor:pointer;" onclick="fetchUserSyncedTrades()">
+                    
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <!-- View Toggle Tabs -->
+                        <div style="display:inline-flex; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:2px;">
+                            <button type="button" id="tradeHistViewBtnSessions" onclick="switchTradeHistoryView('sessions')" style="background:var(--yellow); color:#000; font-weight:800; border:none; padding:5px 12px; font-size:0.76rem; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s ease;">
+                                <i class="fas fa-layer-group"></i> সেশন অনুযায়ী
+                            </button>
+                            <button type="button" id="tradeHistViewBtnRaw" onclick="switchTradeHistoryView('raw')" style="background:transparent; color:var(--text-secondary); font-weight:700; border:none; padding:5px 12px; font-size:0.76rem; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s ease;">
+                                <i class="fas fa-list"></i> সকল র ট্রেডস
+                            </button>
+                        </div>
+
+                        <button class="btn-outline" style="padding:6px 14px; font-size:0.78rem; border-radius:8px; cursor:pointer;" onclick="fetchUserSyncedTrades()">
                             <i class="fas fa-sync-alt"></i> রিফ্রেশ
                         </button>
                     </div>
                 </div>
 
-                <!-- Table Container -->
-                <div style="overflow-x:auto;">
+                <!-- 1. Session-Wise View (Default) -->
+                <div id="tradeHistorySessionsView">
+                    <!-- Current Active / Unsubmitted Synced Trades Card -->
+                    <div id="activeSessionCard" style="display:none; margin-bottom:12px;"></div>
+
+                    <!-- Completed Sequential Session Cards -->
+                    <div id="tradeHistorySessionsList" style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="text-align:center; padding:2.5rem 1rem; color:var(--text-secondary);">
+                            <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
+                            সেশন হিস্টোরি লোড হচ্ছে...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Raw Stream Table View -->
+                <div id="tradeHistoryRawView" style="display:none; overflow-x:auto;">
                     <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
                         <thead>
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.76rem; text-transform:uppercase; letter-spacing:0.5px;">
@@ -6006,9 +6038,25 @@
             }
         }
 
-        function renderChallengeSubsTableHtml(subs) {
+        function renderChallengeSubsTableHtml(subs, challengeId) {
             if (!subs || subs.length === 0) {
                 return `<div style="text-align:center; padding:1.2rem; color:var(--text-secondary); font-size:0.82rem;">এই চ্যালেঞ্জে এখনো কোনো সেশন জমা দেওয়া হয়নি।</div>`;
+            }
+
+            if (typeof getUserStructuredChallenges === 'function' && typeof renderSingleUserSessionCardHtml === 'function') {
+                const structured = getUserStructuredChallenges();
+                const chGroup = (structured.allGroups || []).find(g => g.challengeId === challengeId);
+                if (chGroup && chGroup.submissions.length > 0) {
+                    let officialIndex = 0;
+                    return `
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            ${chGroup.submissions.map((s, idx) => {
+                                if (!s.isPractice) officialIndex++;
+                                return renderSingleUserSessionCardHtml(s, idx, officialIndex, chGroup.challenge, chGroup, `mych_${challengeId}_`);
+                            }).join('')}
+                        </div>
+                    `;
+                }
             }
 
             return `
@@ -6256,7 +6304,7 @@
 
                             <!-- Expandable Submissions Container -->
                             <div id="subs-container-${c.id}" style="display:none; margin-top:10px; background:rgba(0,0,0,0.4); border-radius:10px; border:1px solid rgba(255,255,255,0.06); padding:10px;">
-                                ${renderChallengeSubsTableHtml(chSubs)}
+                                ${renderChallengeSubsTableHtml(chSubs, c.id)}
                             </div>
                         </div>
 
@@ -6432,9 +6480,626 @@
             }
         }
 
-        // Render Submissions Table
+        // ==================== USER SEQUENTIAL SESSIONS & TRADE HISTORY CONTROLLER ====================
+        let openUserSessionCards = new Set();
+        let currentTradeHistoryView = 'sessions';
+
+        function switchTradeHistoryView(viewType) {
+            currentTradeHistoryView = viewType;
+            const sessView = document.getElementById('tradeHistorySessionsView');
+            const rawView = document.getElementById('tradeHistoryRawView');
+            const btnSess = document.getElementById('tradeHistViewBtnSessions');
+            const btnRaw = document.getElementById('tradeHistViewBtnRaw');
+
+            if (viewType === 'sessions') {
+                if (sessView) sessView.style.display = 'block';
+                if (rawView) rawView.style.display = 'none';
+                if (btnSess) {
+                    btnSess.style.background = 'var(--yellow)';
+                    btnSess.style.color = '#000';
+                    btnSess.style.fontWeight = '800';
+                }
+                if (btnRaw) {
+                    btnRaw.style.background = 'transparent';
+                    btnRaw.style.color = 'var(--text-secondary)';
+                    btnRaw.style.fontWeight = '700';
+                }
+                renderUserSerialSessions();
+            } else {
+                if (sessView) sessView.style.display = 'none';
+                if (rawView) rawView.style.display = 'block';
+                if (btnRaw) {
+                    btnRaw.style.background = 'var(--yellow)';
+                    btnRaw.style.color = '#000';
+                    btnRaw.style.fontWeight = '800';
+                }
+                if (btnSess) {
+                    btnSess.style.background = 'transparent';
+                    btnSess.style.color = 'var(--text-secondary)';
+                    btnSess.style.fontWeight = '700';
+                }
+            }
+        }
+
+        function toggleUserSessionCard(subId, prefix = '') {
+            const p = prefix || '';
+            const bodyEl = document.getElementById(`${p}SessionBody_${subId}`);
+            const chevEl = document.getElementById(`${p}Chevron_${subId}`);
+            if (!bodyEl) return;
+            const isCurrentlyOpen = bodyEl.style.display === 'block';
+            if (isCurrentlyOpen) {
+                bodyEl.style.display = 'none';
+                openUserSessionCards.delete(subId);
+                if (chevEl) chevEl.style.transform = 'rotate(0deg)';
+            } else {
+                bodyEl.style.display = 'block';
+                openUserSessionCards.add(subId);
+                if (chevEl) chevEl.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function getUserStructuredChallenges() {
+            const challengesList = [...(myChallenges || [])];
+            // Sort challenges chronologically
+            challengesList.sort((a, b) => {
+                const timeA = new Date(a.createdAt || a.approvedAt || 0).getTime();
+                const timeB = new Date(b.createdAt || b.approvedAt || 0).getTime();
+                if (timeA !== timeB) return timeA - timeB;
+                if (a.status !== 'in_progress' && b.status === 'in_progress') return -1;
+                if (a.status === 'in_progress' && b.status !== 'in_progress') return 1;
+                return 0;
+            });
+
+            const allSubs = Array.isArray(allMySubmissions) && allMySubmissions.length > 0
+                ? allMySubmissions
+                : (mySubmissions || []);
+
+            // If user has no challenge entries but has submissions, construct fallback challenge
+            if (challengesList.length === 0 && allSubs.length > 0) {
+                challengesList.push({
+                    id: allSubs[0].challengeId || 'ch_default',
+                    packageName: allSubs[0].packageName || 'Master',
+                    fundedAmount: 100,
+                    brokerName: allSubs[0].brokerName || 'Quotex',
+                    status: 'in_progress'
+                });
+            }
+
+            const structuredList = challengesList.map((c, idx) => {
+                const cNum = idx + 1;
+                const cSubs = allSubs.filter(s => {
+                    if (s.challengeId) return s.challengeId === c.id;
+                    return challengesList.length <= 1;
+                });
+
+                // Chronological sort: oldest submission first (Session #1, then Session #2, etc.)
+                cSubs.sort((a, b) => {
+                    const timeA = new Date(a.submittedAt || a.sessionDate || 0).getTime();
+                    const timeB = new Date(b.submittedAt || b.sessionDate || 0).getTime();
+                    return timeA - timeB;
+                });
+
+                const auditedTicketIds = new Set();
+                let officialIndex = 0;
+                let practiceIndex = 0;
+
+                cSubs.forEach(s => {
+                    if (s.isPractice) {
+                        practiceIndex++;
+                        s._sessionNum = s.practiceSessionNumber || practiceIndex;
+                    } else {
+                        officialIndex++;
+                        s._sessionNum = s.sessionNumber || officialIndex;
+                    }
+                    if (Array.isArray(s.auditedTicketIds)) {
+                        s.auditedTicketIds.forEach(id => auditedTicketIds.add(String(id)));
+                    }
+                    if (Array.isArray(s.auditReport)) {
+                        s.auditReport.forEach(t => {
+                            if (t.ticketId) auditedTicketIds.add(String(t.ticketId));
+                            if (t.ticket) auditedTicketIds.add(String(t.ticket));
+                        });
+                    }
+                });
+
+                const pendingReviews = cSubs.filter(s => s.status === 'under_review').length;
+                const verifiedSubs = cSubs.filter(s => (s.status === 'verified' || s.status === 'auto_verified') && !s.isPractice).length;
+                const totalPnl = cSubs.reduce((sum, s) => sum + (parseFloat(s.profitLoss) || 0), 0);
+                const winTrades = cSubs.reduce((sum, s) => sum + (parseInt(s.winTrades) || 0), 0);
+                const lossTrades = cSubs.reduce((sum, s) => sum + (parseInt(s.lossTrades) || 0), 0);
+                const totalTrades = cSubs.reduce((sum, s) => sum + (parseInt(s.tradesCount) || 0), 0);
+
+                return {
+                    challenge: c,
+                    challengeId: c.id,
+                    challengeNumber: cNum,
+                    isRunning: c.status === 'in_progress',
+                    isFailed: c.status === 'failed',
+                    isPassed: c.status === 'passed',
+                    submissions: cSubs,
+                    submissionsCount: cSubs.length,
+                    auditedTicketIds,
+                    pendingReviews,
+                    verifiedSubs,
+                    totalPnl,
+                    winTrades,
+                    lossTrades,
+                    totalTrades
+                };
+            });
+
+            const runningGroups = structuredList.filter(g => g.isRunning);
+            const failedGroups = structuredList.filter(g => g.isFailed);
+            const passedGroups = structuredList.filter(g => g.isPassed);
+            const activeGroup = runningGroups[runningGroups.length - 1] || structuredList[structuredList.length - 1] || null;
+
+            return {
+                activeGroup,
+                allGroups: structuredList,
+                runningGroups,
+                failedGroups,
+                passedGroups
+            };
+        }
+
+        function renderSingleUserSessionCardHtml(sub, idx, officialIndex, ch, chGroup, prefix = 'hist_') {
+            const sessionNum = sub._sessionNum || (sub.isPractice
+                ? (sub.practiceSessionNumber || (idx + 1))
+                : (sub.sessionNumber || officialIndex));
+
+            // Default latest session open if user hasn't explicitly opened/closed any
+            const isLatestInGroup = (idx === chGroup.submissions.length - 1);
+            const isOpen = openUserSessionCards.has(sub.id) || (openUserSessionCards.size === 0 && isLatestInGroup) || (sub.status === 'under_review');
+
+            const subPnl = parseFloat(sub.profitLoss) || 0;
+            const pnlSign = subPnl >= 0 ? '+' : '';
+            const pnlColor = subPnl >= 0 ? 'var(--neon-green)' : 'var(--danger-red)';
+
+            const isScreenshotVideo = /\.(mp4|webm|mov|mkv|avi)($|\?)/i.test(sub.screenshotUrl || '');
+            const isVideoUrlPlayable = /\.(mp4|webm|mov|mkv|avi)($|\?)/i.test(sub.videoUrl || '');
+
+            const videoSrc = isVideoUrlPlayable ? sub.videoUrl : (isScreenshotVideo ? sub.screenshotUrl : (sub.fileType === 'video' ? (sub.videoUrl || sub.screenshotUrl) : (sub.videoUrl && !sub.screenshotUrl ? sub.videoUrl : null)));
+            const imageSrc = (!isScreenshotVideo && sub.screenshotUrl) ? sub.screenshotUrl : null;
+            const externalVideoLink = (sub.videoUrl && sub.videoUrl !== videoSrc && sub.videoUrl !== imageSrc) ? sub.videoUrl : (!videoSrc && sub.videoUrl ? sub.videoUrl : null);
+
+            const chNum = chGroup ? chGroup.challengeNumber : 1;
+            const timeStr = sub.submittedAt ? new Date(sub.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+            // Clean status badge
+            let statusBadgeHtml = '';
+            if (sub.status === 'auto_verified' || sub.status === 'verified') {
+                statusBadgeHtml = `<span style="background:rgba(0,230,118,0.18); color:#00e676; border:1px solid rgba(0,230,118,0.4); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-check-circle"></i> AUTO VERIFIED</span>`;
+            } else if (sub.status === 'under_review') {
+                statusBadgeHtml = `<span style="background:rgba(245,176,65,0.18); color:var(--yellow); border:1px solid rgba(245,176,65,0.4); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-clock"></i> UNDER REVIEW</span>`;
+            } else if (sub.status === 'practice_failed') {
+                statusBadgeHtml = `<span style="background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-exclamation-triangle"></i> PRACTICE MISTAKE</span>`;
+            } else if (sub.status === 'needs_resubmission') {
+                statusBadgeHtml = `<span style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.5); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-redo-alt"></i> RE-UPLOAD NEEDED</span>`;
+            } else {
+                statusBadgeHtml = `<span style="background:rgba(239,68,68,0.18); color:#f87171; border:1px solid rgba(239,68,68,0.4); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-times-circle"></i> FAILED</span>`;
+            }
+
+            return `
+                <div class="serial-session-card" id="${prefix}SessionCard_${sub.id}" style="background:rgba(22,22,26,0.92); border:1px solid ${sub.status === 'under_review' ? 'rgba(245,176,65,0.45)' : 'rgba(255,255,255,0.08)'}; border-radius:10px; overflow:hidden; transition:all 0.2s ease;">
+                    
+                    <!-- Clean Single-Line Session Header (Admin Panel Exact 1:1) -->
+                    <div onclick="toggleUserSessionCard('${sub.id}', '${prefix}')" style="padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; cursor:pointer; background:rgba(255,255,255,0.015); border-bottom:${isOpen ? '1px solid rgba(255,255,255,0.07)' : 'none'}; user-select:none;">
+                        
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <span style="background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); font-weight:800; font-size:0.72rem; padding:3px 8px; border-radius:6px;">
+                                CH #${chNum}
+                            </span>
+                            ${sub.isPractice ? `
+                                <span style="background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.4); font-weight:800; font-size:0.78rem; padding:3px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
+                                    <i class="fas fa-graduation-cap"></i> Practice #${sessionNum}
+                                </span>
+                            ` : `
+                                <span style="background:linear-gradient(135deg, var(--yellow), #d48817); color:#000; font-weight:900; font-size:0.78rem; padding:3px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
+                                    Session #${sessionNum}
+                                </span>
+                            `}
+                            <span style="color:#fff; font-size:0.84rem; font-weight:700;">${sub.sessionDate || ''}</span>
+                            ${timeStr ? `<span style="color:var(--text-secondary); font-size:0.75rem;">${timeStr}</span>` : ''}
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">
+                                <strong style="color:#fff;">${sub.tradesCount || 0}</strong> Trades
+                                <span style="color:var(--yellow); margin-left:3px;">(${sub.winTrades || 0}W / ${sub.lossTrades || 0}L)</span>
+                            </div>
+
+                            <div style="font-size:0.88rem; font-weight:800; color:${pnlColor}; min-width:58px; text-align:right;">
+                                ${pnlSign}$${subPnl.toFixed(2)}
+                            </div>
+
+                            ${statusBadgeHtml}
+
+                            <div style="width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:var(--yellow); font-size:0.75rem;">
+                                <i class="fas fa-chevron-down" id="${prefix}Chevron_${sub.id}" style="transition:transform 0.25s ease; transform:${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Session Body Details (Expandable) -->
+                    <div id="${prefix}SessionBody_${sub.id}" style="display:${isOpen ? 'block' : 'none'}; padding:14px;">
+                        
+                        <!-- 4 Key Stat Blocks -->
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:12px;">
+                            <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
+                                <div style="font-size:0.7rem; color:var(--text-secondary);">Broker</div>
+                                <div style="font-weight:700; color:#fff; font-size:0.86rem; margin-top:2px;">${sub.brokerName || ch?.brokerName || 'Quotex'}</div>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
+                                <div style="font-size:0.7rem; color:var(--text-secondary);">Total Trades</div>
+                                <div style="font-weight:700; color:#fff; font-size:0.86rem; margin-top:2px;">${sub.tradesCount || 0}</div>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
+                                <div style="font-size:0.7rem; color:var(--text-secondary);">Win Rate</div>
+                                <div style="font-weight:700; color:var(--yellow); font-size:0.86rem; margin-top:2px;">${sub.winRate || '0%'} (${sub.winTrades || 0}W / ${sub.lossTrades || 0}L)</div>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
+                                <div style="font-size:0.7rem; color:var(--text-secondary);">Net P&L</div>
+                                <div style="font-weight:800; color:${pnlColor}; font-size:0.88rem; margin-top:2px;">${pnlSign}$${subPnl.toFixed(2)}</div>
+                            </div>
+                        </div>
+
+                        ${sub.notes ? `
+                            <div style="background:rgba(212,175,55,0.08); border-left:3px solid var(--yellow); padding:8px 12px; border-radius:8px; margin-bottom:12px;">
+                                <div style="color:var(--yellow); font-weight:700; font-size:0.74rem; margin-bottom:2px;">ট্রেডার নোট:</div>
+                                <div style="color:#eee; font-size:0.82rem; white-space:pre-wrap; font-family:monospace; line-height:1.4;">${escapeHtml(sub.notes)}</div>
+                            </div>
+                        ` : ''}
+
+                        ${sub.adminFeedback ? `
+                            <div style="background:rgba(245,158,11,0.12); border-left:3px solid #f59e0b; padding:8px 12px; border-radius:8px; margin-bottom:12px;">
+                                <div style="color:#fbbf24; font-weight:800; font-size:0.78rem; margin-bottom:2px;">সিস্টেম / এডমিন ফিডব্যাক:</div>
+                                <div style="color:#fff; font-size:0.82rem;">"${escapeHtml(sub.adminFeedback)}"</div>
+                            </div>
+                        ` : ''}
+
+                        <!-- Auto Audit Trades Table -->
+                        ${(sub.auditReport && sub.auditReport.length > 0) ? `
+                            <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px; margin-bottom:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                        <span style="background:rgba(0,230,118,0.15); color:#00e676; padding:2px 8px; border-radius:5px; font-weight:800; font-size:0.72rem; border:1px solid rgba(0,230,118,0.35);">
+                                            <i class="fas fa-robot"></i> Auto Audit (${sub.auditReport.length} Trades)
+                                        </span>
+                                        <span style="font-size:0.76rem; color:var(--text-secondary);">
+                                            Start: <strong style="color:#fff;">$${(sub.startingCapital || 0).toFixed(2)}</strong> • End: <strong style="color:#00e676;">$${(sub.endingCapital || (sub.startingCapital ? sub.startingCapital + subPnl : 0)).toFixed(2)}</strong>
+                                        </span>
+                                    </div>
+                                    <button type="button" class="btn-outline" style="padding:3px 8px; font-size:0.72rem; border-radius:6px; color:var(--yellow); border-color:rgba(245,176,65,0.4); cursor:pointer;" onclick="openUserAuditReportModal('${sub.id}')">
+                                        <i class="fas fa-expand-alt"></i> বড় ভিউ
+                                    </button>
+                                </div>
+
+                                <div style="overflow-x:auto; background:rgba(0,0,0,0.4); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                    <table style="width:100%; font-size:0.76rem; text-align:left; border-collapse:collapse;">
+                                        <thead>
+                                            <tr style="border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
+                                                <th style="padding:6px 10px;">Step</th>
+                                                <th style="padding:6px 10px;">Plan</th>
+                                                <th style="padding:6px 10px;">Actual</th>
+                                                <th style="padding:6px 10px;">Payout</th>
+                                                <th style="padding:6px 10px;">Asset / Ticket</th>
+                                                <th style="padding:6px 10px;">Result</th>
+                                                <th style="padding:6px 10px;">P&L</th>
+                                                <th style="padding:6px 10px;">Check</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${sub.auditReport.map((a, aIdx) => {
+                                                const stepNum = a.tradeNum || a.stepIndex || (aIdx + 1);
+                                                const planned = (a.plannedStake != null && a.plannedStake % 1 === 0) ? String(a.plannedStake) : Number(a.plannedStake || 0).toFixed(0);
+                                                const actual = Number(a.actualStake || 0).toFixed(2);
+                                                const ticket = a.ticketId || a.ticket || 'N/A';
+                                                const outcome = a.outcome || a.result || 'N/A';
+                                                const payout = a.payout || (a.payoutPercent ? a.payoutPercent + '%' : 'N/A');
+                                                const pNum = parseFloat(String(payout).replace('%', '').trim()) || 0;
+                                                const pGood = (pNum >= 85 || pNum === 0);
+                                                const isPassed = (a.isPassed !== undefined ? a.isPassed : (a.isCompliant !== undefined ? a.isCompliant : true));
+                                                const pnlNum = Number(a.pnl || 0);
+
+                                                return `
+                                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                                                        <td style="padding:6px 10px; font-weight:700; color:var(--yellow);">#${stepNum}</td>
+                                                        <td style="padding:6px 10px; color:var(--yellow); font-weight:700;">$${planned}</td>
+                                                        <td style="padding:6px 10px; font-weight:700; color:#38bdf8;">$${actual}</td>
+                                                        <td style="padding:6px 10px;">
+                                                            <span style="color:${pGood ? 'var(--neon-green)' : '#f87171'}; font-weight:700;">${payout}</span>
+                                                        </td>
+                                                        <td style="padding:6px 10px; font-size:0.72rem; color:var(--text-secondary);">
+                                                            <span style="color:#fff;">${escapeHtml(a.asset || 'N/A')}</span> <span style="font-family:monospace; color:#aaa;">(${escapeHtml(String(ticket).substring(0, 10))}...)</span>
+                                                        </td>
+                                                        <td style="padding:6px 10px;">
+                                                            <span style="background:${outcome === 'WIN' ? 'rgba(0,230,118,0.18)' : (outcome === 'REFUND' ? 'rgba(245,176,65,0.18)' : 'rgba(239,68,68,0.18)')}; color:${outcome === 'WIN' ? '#00e676' : (outcome === 'REFUND' ? '#fbbf24' : '#f87171')}; border:1px solid ${outcome === 'WIN' ? 'rgba(0,230,118,0.35)' : (outcome === 'REFUND' ? 'rgba(245,176,65,0.35)' : 'rgba(239,68,68,0.35)')}; padding:2px 7px; border-radius:5px; font-size:0.68rem; font-weight:800;">
+                                                                ${outcome}
+                                                            </span>
+                                                        </td>
+                                                        <td style="padding:6px 10px; font-weight:700; color:${pnlNum >= 0 ? 'var(--neon-green)' : 'var(--danger-red)'};">
+                                                            ${pnlNum >= 0 ? '+' : ''}$${pnlNum.toFixed(2)}
+                                                        </td>
+                                                        <td style="padding:6px 10px;">
+                                                            ${a.isRefund ? `
+                                                                <span style="color:#f59e0b; font-weight:700;">Refund</span>
+                                                            ` : isPassed ? `
+                                                                <span style="color:#00e676; font-weight:700;">✓ OK</span>
+                                                            ` : `
+                                                                <span style="color:#ef4444; font-weight:700;" title="${escapeHtml(a.complianceStatus || a.reason || 'Violation')}">✕ Error</span>
+                                                            `}
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <!-- Media Proofs (if video or screenshot exists) -->
+                        ${(videoSrc || imageSrc || externalVideoLink) ? `
+                            <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px; margin-bottom:12px;">
+                                <div style="display:flex; flex-direction:column; gap:10px;">
+                                    ${videoSrc ? `
+                                        <div>
+                                            <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:5px;"><i class="fas fa-video"></i> সেশন ভিডিও প্রুফ:</div>
+                                            <video controls playsinline preload="metadata" style="width:100%; max-width:600px; max-height:360px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); display:block; background:#000;">
+                                                <source src="${videoSrc}">
+                                            </video>
+                                        </div>
+                                    ` : ''}
+                                    ${imageSrc ? `
+                                        <div>
+                                            <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:5px;"><i class="fas fa-image"></i> ট্রেড হিস্টোরি স্ক্রিনশট:</div>
+                                            <img src="${imageSrc}" style="max-width:100%; max-height:360px; border-radius:8px; display:block; cursor:pointer; border:1px solid rgba(255,255,255,0.12);" onclick="window.open('${imageSrc}', '_blank')" />
+                                        </div>
+                                    ` : ''}
+                                    ${externalVideoLink ? `
+                                        <div>
+                                            <a href="${externalVideoLink}" target="_blank" class="btn-outline" style="border-color:var(--blue); color:var(--blue); font-size:0.76rem; padding:4px 10px; display:inline-flex; align-items:center; gap:6px; border-radius:6px;">
+                                                <i class="fas fa-video"></i> এক্সটার্নাল ভিডিও লিংক ওপেন করুন
+                                            </a>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <!-- Action Controls -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <button type="button" class="btn-outline" style="font-size:0.74rem; padding:4px 10px; border-radius:6px; color:var(--yellow); border-color:rgba(245,176,65,0.35); cursor:pointer;" onclick="openUserAuditReportModal('${sub.id}')">
+                                <i class="fas fa-file-invoice"></i> ফুল অডিট রিপোর্ট
+                            </button>
+                            ${sub.status === 'needs_resubmission' ? `
+                                <button type="button" class="btn-warning" style="background:#f59e0b; color:#000; border:none; padding:4px 10px; font-size:0.74rem; font-weight:800; border-radius:6px; cursor:pointer;" onclick="openUserResubmitModal('${sub.id}')">
+                                    <i class="fas fa-redo-alt"></i> পুনরায় আপলোড করুন
+                                </button>
+                            ` : ''}
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderUserChallengeGroupHtml(chGroup, prefix = 'hist_') {
+            const c = chGroup.challenge || {};
+            const isRunning = chGroup.isRunning;
+            const isPassed = chGroup.isPassed;
+            const borderColor = isRunning ? 'rgba(46,204,113,0.35)' : (isPassed ? 'rgba(245,176,65,0.4)' : 'rgba(239,68,68,0.35)');
+            const headerBg = isRunning
+                ? 'rgba(46,204,113,0.08)'
+                : (isPassed ? 'rgba(245,176,65,0.08)' : 'rgba(239,68,68,0.08)');
+            const badgeBg = isRunning ? 'rgba(46,204,113,0.18)' : (isPassed ? 'rgba(245,176,65,0.18)' : 'rgba(239,68,68,0.18)');
+            const badgeColor = isRunning ? '#2ecc71' : (isPassed ? 'var(--yellow)' : '#f87171');
+            const statusLabel = isRunning ? 'Running' : (isPassed ? 'Passed' : 'Disqualified');
+
+            const pnlColor = chGroup.totalPnl >= 0 ? 'var(--neon-green)' : 'var(--danger-red)';
+            const pnlSign = chGroup.totalPnl >= 0 ? '+' : '';
+            const failReasonText = c.violatedRule || c.failReason || c.failReasonText || '';
+
+            let officialIndex = 0;
+            const sessionsHtml = chGroup.submissions.length > 0
+                ? chGroup.submissions.map((sub, idx) => {
+                    if (!sub.isPractice) officialIndex++;
+                    return renderSingleUserSessionCardHtml(sub, idx, officialIndex, c, chGroup, prefix);
+                }).join('')
+                : `
+                    <div style="text-align:center; padding:1.6rem 1rem; background:rgba(0,0,0,0.2); border-radius:10px; border:1px dashed rgba(255,255,255,0.08); color:var(--text-secondary); font-size:0.84rem;">
+                        <i class="fas fa-clock" style="font-size:1.6rem; color:var(--yellow); opacity:0.6; margin-bottom:6px; display:block;"></i>
+                        Challenge #${chGroup.challengeNumber}-এ এখনো কোনো সেশন জমা দেওয়া হয়নি।
+                    </div>
+                `;
+
+            return `
+                <div style="border:1px solid ${borderColor}; border-radius:12px; background:rgba(15,15,20,0.6); overflow:hidden; margin-bottom:12px;">
+                    <!-- Challenge Header -->
+                    <div style="background:${headerBg}; padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <span style="background:linear-gradient(135deg, var(--yellow), #d48817); color:#000; font-weight:900; font-size:0.8rem; padding:3px 10px; border-radius:6px;">
+                                Challenge #${chGroup.challengeNumber}
+                            </span>
+                            <span style="background:${badgeBg}; color:${badgeColor}; border:1px solid ${borderColor}; font-weight:800; font-size:0.75rem; padding:3px 9px; border-radius:6px;">
+                                ${statusLabel}
+                            </span>
+                            <span style="color:#fff; font-size:0.8rem; font-weight:700;">
+                                ${c.packageName || 'Master'} ($${(c.fundedAmount || 100).toLocaleString()})
+                            </span>
+                            <span style="color:#60a5fa; font-size:0.78rem; font-weight:700;">
+                                • ${c.brokerName || 'Quotex'} (${c.brokerAccountId || 'N/A'})
+                            </span>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <span style="font-size:0.78rem; color:var(--text-secondary);">
+                                Sessions: <strong style="color:#fff;">${chGroup.submissionsCount}</strong>
+                                <span style="color:var(--yellow); margin-left:3px;">(${chGroup.winTrades}W / ${chGroup.lossTrades}L)</span>
+                            </span>
+                            <span style="font-size:0.82rem; font-weight:800; color:${pnlColor};">
+                                ${pnlSign}$${chGroup.totalPnl.toFixed(2)}
+                            </span>
+                        </div>
+                    </div>
+
+                    ${(!isRunning && failReasonText) ? `
+                        <div style="background:rgba(239,68,68,0.08); border-bottom:1px solid rgba(239,68,68,0.18); padding:6px 14px; font-size:0.76rem; color:#fca5a5;">
+                            <strong>Reason:</strong> ${escapeHtml(failReasonText)}
+                        </div>
+                    ` : ''}
+
+                    <div style="padding:10px; display:flex; flex-direction:column; gap:8px;">
+                        ${sessionsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderUserSerialSessions() {
+            const structured = getUserStructuredChallenges();
+            const tradeHistContainer = document.getElementById('tradeHistorySessionsList');
+            const submissionContainer = document.getElementById('userSubmissionSessionsContainer');
+            const activeSessionCard = document.getElementById('activeSessionCard');
+
+            // 1. Render Active / Unsubmitted Synced Trades Card
+            const activeGroup = structured.runningGroups[structured.runningGroups.length - 1] || structured.activeGroup;
+            const activeChallenge = activeGroup ? activeGroup.challenge : null;
+
+            if (activeSessionCard) {
+                if (activeChallenge && Array.isArray(userSyncedTradesData) && userSyncedTradesData.length > 0) {
+                    const auditedIds = activeGroup ? activeGroup.auditedTicketIds : new Set();
+                    const unsubmittedTrades = userSyncedTradesData.filter(t => {
+                        const tick = String(t.ticketId || t.ticket || t.id || '');
+                        return tick && !auditedIds.has(tick);
+                    });
+
+                    if (unsubmittedTrades.length > 0) {
+                        const unsubmittedWins = unsubmittedTrades.filter(t => t.result === 'WIN').length;
+                        const unsubmittedLosses = unsubmittedTrades.filter(t => t.result === 'LOSS').length;
+                        const unsubmittedPnl = unsubmittedTrades.reduce((sum, t) => {
+                            if (t.result === 'WIN') {
+                                return sum + (t.profit > t.amount ? (t.profit - t.amount) : (t.profit || 0));
+                            } else {
+                                return sum - (t.amount || 0);
+                            }
+                        }, 0);
+                        const pnlSign = unsubmittedPnl >= 0 ? '+' : '';
+                        const pnlColor = unsubmittedPnl >= 0 ? 'var(--neon-green)' : 'var(--danger-red)';
+
+                        activeSessionCard.style.display = 'block';
+                        activeSessionCard.innerHTML = `
+                            <div style="background:rgba(245,176,65,0.06); border:1.5px solid rgba(245,176,65,0.4); border-radius:12px; padding:12px 14px; box-shadow:0 0 16px rgba(245,176,65,0.12);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                        <span style="background:linear-gradient(135deg, #00e676, #10b981); color:#000; font-weight:900; font-size:0.78rem; padding:3px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:5px;">
+                                            <i class="fas fa-bolt"></i> চলতি ট্রেড সেশন (Active Synced Trades)
+                                        </span>
+                                        <span style="font-size:0.82rem; color:#fff; font-weight:700;">
+                                            <strong style="color:var(--yellow);">${unsubmittedTrades.length}</strong>টি সিঙ্কড ট্রেড
+                                            <span style="color:#00e676; margin-left:4px;">(${unsubmittedWins}W / ${unsubmittedLosses}L)</span>
+                                        </span>
+                                        <span style="font-size:0.86rem; font-weight:800; color:${pnlColor};">
+                                            ${pnlSign}$${unsubmittedPnl.toFixed(2)}
+                                        </span>
+                                    </div>
+                                    <button type="button" class="btn-gold" onclick="switchTab('submission')" style="padding:5px 14px; font-size:0.78rem; border-radius:6px; display:inline-flex; align-items:center; gap:6px; font-weight:800;">
+                                        <i class="fas fa-bolt"></i> সেশন অডিট ও সাবমিট করুন &rarr;
+                                    </button>
+                                </div>
+
+                                <div style="overflow-x:auto; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                    <table style="width:100%; font-size:0.76rem; text-align:left; border-collapse:collapse;">
+                                        <thead>
+                                            <tr style="border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
+                                                <th style="padding:6px 10px; text-align:center;">#</th>
+                                                <th style="padding:6px 10px;">অ্যাসেট</th>
+                                                <th style="padding:6px 10px;">টিকিট ID</th>
+                                                <th style="padding:6px 10px;">স্টেক</th>
+                                                <th style="padding:6px 10px;">পেআউট</th>
+                                                <th style="padding:6px 10px;">সময়</th>
+                                                <th style="padding:6px 10px;">ফলাফল</th>
+                                                <th style="padding:6px 10px;">P&L</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${unsubmittedTrades.map((t, idx) => {
+                                                const isWin = t.result === 'WIN';
+                                                const pColor = isWin ? 'var(--neon-green)' : 'var(--danger-red)';
+                                                const tradeProfit = isWin ? (t.profit > t.amount ? (t.profit - t.amount) : (t.profit || 0)) : -(t.amount || 0);
+                                                const tSign = tradeProfit >= 0 ? '+' : '';
+                                                return `
+                                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+                                                        <td style="padding:6px 10px; text-align:center; font-weight:800; color:var(--yellow);">#${idx + 1}</td>
+                                                        <td style="padding:6px 10px; font-weight:700; color:#fff;">${escapeHtml(t.asset || 'N/A')}</td>
+                                                        <td style="padding:6px 10px; font-family:monospace; color:#aaa;">${escapeHtml(String(t.ticketId || t.ticket || '').substring(0, 12))}...</td>
+                                                        <td style="padding:6px 10px; font-weight:700; color:#38bdf8;">$${Number(t.amount || 0).toFixed(2)}</td>
+                                                        <td style="padding:6px 10px; color:#cbd5e1;">${escapeHtml(t.payout || '85%')}</td>
+                                                        <td style="padding:6px 10px; color:var(--text-secondary); font-size:0.72rem;">${escapeHtml(t.openTime || t.closeTime || '')}</td>
+                                                        <td style="padding:6px 10px;">
+                                                            <span style="background:${isWin ? 'rgba(0,230,118,0.18)' : 'rgba(239,68,68,0.18)'}; color:${isWin ? '#00e676' : '#f87171'}; border:1px solid ${isWin ? 'rgba(0,230,118,0.35)' : 'rgba(239,68,68,0.35)'}; padding:2px 7px; border-radius:5px; font-size:0.68rem; font-weight:800;">
+                                                                ${t.result || 'WIN'}
+                                                            </span>
+                                                        </td>
+                                                        <td style="padding:6px 10px; font-weight:700; color:${pColor};">
+                                                            ${tSign}$${tradeProfit.toFixed(2)}
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        activeSessionCard.style.display = 'none';
+                    }
+                } else {
+                    activeSessionCard.style.display = 'none';
+                }
+            }
+
+            // 2. Render Completed Sessions in Trade History tab
+            if (tradeHistContainer) {
+                if (structured.allGroups.length === 0) {
+                    tradeHistContainer.innerHTML = `
+                        <div style="text-align:center; padding:3rem 1.5rem; background:rgba(255,255,255,0.02); border-radius:14px; border:1px dashed rgba(255,255,255,0.1);">
+                            <i class="fas fa-layer-group" style="font-size:2.6rem; color:var(--text-secondary); opacity:0.4; margin-bottom:10px; display:block;"></i>
+                            <h4 style="font-size:1.05rem; color:#fff; font-weight:700; margin:0;">কোনো সেশন রেকর্ড পাওয়া যায়নি</h4>
+                            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">কোটেক্সে ট্রেড সম্পন্ন করে সেশন প্রুফ সাবমিট করুন।</p>
+                        </div>
+                    `;
+                } else {
+                    const groupsToRender = [...structured.allGroups].reverse();
+                    tradeHistContainer.innerHTML = groupsToRender.map(g => renderUserChallengeGroupHtml(g, 'hist_')).join('');
+                }
+            }
+
+            // 3. Render Completed Sessions in Daily Trade Proof tab
+            if (submissionContainer) {
+                const targetGroup = activeGroup || structured.allGroups[structured.allGroups.length - 1];
+                if (targetGroup) {
+                    submissionContainer.innerHTML = renderUserChallengeGroupHtml(targetGroup, 'sub_');
+                } else if (structured.allGroups.length > 0) {
+                    submissionContainer.innerHTML = structured.allGroups.map(g => renderUserChallengeGroupHtml(g, 'sub_')).join('');
+                } else {
+                    submissionContainer.innerHTML = `
+                        <div style="text-align:center; padding:2rem 1rem; color:var(--text-secondary); font-size:0.84rem;">
+                            <i class="fas fa-inbox" style="font-size:2rem; opacity:0.5; margin-bottom:8px; display:block;"></i>
+                            এখনো কোনো সেশন প্রুফ আপলোড করা হয়নি। আপনার প্রথম সেশন ট্রেড সম্পন্ন করে সাবমিট করুন!
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Render Submissions Table (kept for full compatibility and triggers serial sessions)
         function renderSubmissionsTable(submissions) {
+            renderUserSerialSessions();
+
             const tbody = document.getElementById('submissionTableBody');
+            if (!tbody) return;
             if (!submissions || submissions.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-secondary);">No trade proofs uploaded yet. Submit your first daily session proof!</td></tr>`;
                 return;
@@ -10310,6 +10975,9 @@
                 });
                 const data = await res.json();
                 if (data.success) {
+                    if (!allMySubmissions || allMySubmissions.length === 0) {
+                        try { fetchSubmissions(); } catch(e) {}
+                    }
                     userSyncedTradesData = data.trades || [];
                     renderSyncedTrades(data);
 
@@ -10518,6 +11186,13 @@
                     </tr>
                 `;
             }).join('');
+
+            // Trigger serial sessions render for session-wise view
+            try {
+                renderUserSerialSessions();
+            } catch (e) {
+                console.error('Error rendering serial sessions from renderSyncedTrades:', e);
+            }
         }
 
         // ==========================================
