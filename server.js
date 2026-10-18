@@ -5272,6 +5272,36 @@ app.post('/api/submissions/:id/resubmit', authenticateToken, upload.fields([
 // In-Memory Heartbeat Cache for Trader Extensions
 const traderHeartbeats = new Map();
 
+// Real-Time SSE clients listening for live extension status updates: Map<userId, Set<Response>>
+const extensionStatusSseClients = new Map();
+
+function broadcastExtensionStatus(userId, statusData) {
+  if (!userId) return;
+  const uid = String(userId).toLowerCase();
+  const clients = extensionStatusSseClients.get(uid);
+  if (clients && clients.size > 0) {
+    const payload = `data: ${JSON.stringify(statusData)}\n\n`;
+    for (const client of Array.from(clients)) {
+      try {
+        client.write(payload);
+      } catch (e) {
+        clients.delete(client);
+      }
+    }
+  }
+}
+
+// Periodic cleanup of stale heartbeats (marking disconnected after 25s silence)
+setInterval(() => {
+  const now = Date.now();
+  const LIVE_TIMEOUT_MS = 25000;
+  for (const [key, hb] of traderHeartbeats.entries()) {
+    if (hb && hb.status === 'online' && (now - hb.lastPing) > LIVE_TIMEOUT_MS) {
+      hb.status = 'disconnected';
+    }
+  }
+}, 15000);
+
 // Helper to parse Quotex and broker timestamps (DD/MM/YYYY, HH:MM:SS or ISO)
 function parseQuotexDate(str, clientTzOffset, brokerTzOffset) {
   if (!str) return 0;
@@ -5415,6 +5445,9 @@ app.post('/api/extension/heartbeat', (req, res) => {
       if (matchedUser.email) traderHeartbeats.set(matchedUser.email.toLowerCase(), entry);
       if (matchedUser.traderId) traderHeartbeats.set(matchedUser.traderId.toLowerCase(), entry);
 
+      const statusPayload = getLiveExtensionStatus(matchedUser);
+      broadcastExtensionStatus(matchedUser.id, statusPayload);
+
       return res.json({
         success: false,
         active: false,
@@ -5446,7 +5479,7 @@ app.post('/api/extension/heartbeat', (req, res) => {
 
     const entry = {
       lastPing: Date.now(),
-      status,
+      status: 'online',
       accountType: (accountType || 'demo').toLowerCase(),
       url,
       isActiveChallenge: true,
@@ -5456,6 +5489,10 @@ app.post('/api/extension/heartbeat', (req, res) => {
     if (matchedUser.id) traderHeartbeats.set(matchedUser.id.toLowerCase(), entry);
     if (matchedUser.email) traderHeartbeats.set(matchedUser.email.toLowerCase(), entry);
     if (matchedUser.traderId) traderHeartbeats.set(matchedUser.traderId.toLowerCase(), entry);
+
+    // Instant SSE broadcast to trader dashboard (0ms update)
+    const liveStatus = getLiveExtensionStatus(matchedUser);
+    broadcastExtensionStatus(matchedUser.id, liveStatus);
 
     res.json({
       success: true,
@@ -5473,76 +5510,158 @@ app.post('/api/extension/heartbeat', (req, res) => {
   }
 });
 
-// 0.1 Check Extension Connection Status for Authenticated Trader
+// Helper: Calculate Strict Live Real-Time Extension Status for Trader
+function getLiveExtensionStatus(user) {
+  if (!user) return { success: false, connected: false };
+  const cleanTraderId = (user.traderId || '').trim().toLowerCase();
+  const cleanEmail = (user.email || '').trim().toLowerCase();
+  const cleanId = (user.id || '').trim().toLowerCase();
+
+  const challenges = readJson(CHALLENGES_FILE, []);
+  const activeChallenge = challenges.find(c => 
+    c.status === 'in_progress' && 
+    c.isActive !== false &&
+    (c.userId === user.id || 
+     (c.userEmail && c.userEmail.toLowerCase() === (user.email || '').toLowerCase()) || 
+     (c.userTraderId && c.userTraderId.toLowerCase() === (user.traderId || '').toLowerCase()))
+  );
+
+  const userChallenges = challenges.filter(c => 
+    c.userId === user.id || 
+    (c.userEmail && c.userEmail.toLowerCase() === (user.email || '').toLowerCase()) || 
+    (c.userTraderId && c.userTraderId.toLowerCase() === (user.traderId || '').toLowerCase())
+  );
+  const isDisqualified = !activeChallenge && userChallenges.some(c => c.status === 'failed' || c.status === 'disqualified');
+
+  const hb = (cleanTraderId && traderHeartbeats.get(cleanTraderId)) ||
+             (cleanEmail && traderHeartbeats.get(cleanEmail)) ||
+             (cleanId && traderHeartbeats.get(cleanId));
+
+  const now = Date.now();
+  // STRICT LIVE DETECTION: Must have pinged within the last 25 seconds while tab is active!
+  // NO fake 24-hour or 48-hour fallback! If Quotex tab is closed, it is DISCONNECTED.
+  const LIVE_TIMEOUT_MS = 25000;
+  const isLiveActive = !!(
+    activeChallenge &&
+    hb &&
+    hb.status === 'online' &&
+    hb.isActiveChallenge &&
+    (now - hb.lastPing) < LIVE_TIMEOUT_MS
+  );
+
+  return {
+    success: true,
+    connected: isLiveActive,
+    isLiveActive,
+    statusType: isLiveActive ? 'live' : 'disconnected',
+    hasActiveChallenge: !!activeChallenge,
+    isDisqualified,
+    challengeStatus: activeChallenge ? activeChallenge.status : (isDisqualified ? 'failed' : 'none'),
+    lastPing: (hb && hb.lastPing) ? hb.lastPing : null,
+    accountType: (hb && isLiveActive) ? hb.accountType : null,
+    url: (hb && isLiveActive) ? hb.url : null,
+    secondsAgo: (hb && hb.lastPing) ? Math.max(0, Math.round((now - hb.lastPing) / 1000)) : null
+  };
+}
+
+// 0.1 Check Extension Connection Status for Authenticated Trader (Strict Real-Time)
 app.get('/api/user/extension-status', authenticateToken, (req, res) => {
   try {
-    const user = req.user;
-    const cleanTraderId = (user.traderId || '').trim().toLowerCase();
-    const cleanEmail = (user.email || '').trim().toLowerCase();
-    const cleanId = (user.id || '').trim().toLowerCase();
-
-    const challenges = readJson(CHALLENGES_FILE, []);
-    const activeChallenge = challenges.find(c => 
-      c.status === 'in_progress' && 
-      c.isActive !== false &&
-      (c.userId === user.id || 
-       (c.userEmail && c.userEmail.toLowerCase() === (user.email || '').toLowerCase()) || 
-       (c.userTraderId && c.userTraderId.toLowerCase() === (user.traderId || '').toLowerCase()))
-    );
-
-    const userChallenges = challenges.filter(c => 
-      c.userId === user.id || 
-      (c.userEmail && c.userEmail.toLowerCase() === (user.email || '').toLowerCase()) || 
-      (c.userTraderId && c.userTraderId.toLowerCase() === (user.traderId || '').toLowerCase())
-    );
-    const isDisqualified = !activeChallenge && userChallenges.some(c => c.status === 'failed' || c.status === 'disqualified');
-
-    const hb = (cleanTraderId && traderHeartbeats.get(cleanTraderId)) ||
-               (cleanEmail && traderHeartbeats.get(cleanEmail)) ||
-               (cleanId && traderHeartbeats.get(cleanId));
-
-    const now = Date.now();
-    // Live Active: ping within last 120s (active tab on Quotex)
-    const isLiveActive = !!(activeChallenge && hb && hb.isActiveChallenge && (now - hb.lastPing) < 120000);
-    // Paired: ping within last 24h (extension is set up and working, even if backgrounded on mobile)
-    let isPaired = !!(activeChallenge && hb && hb.isActiveChallenge && (now - hb.lastPing) < (24 * 60 * 60 * 1000));
-
-    // Resilience check: if in-memory heartbeat was reset (e.g. server restart) or tab backgrounded, check recent trade syncs
-    if (!isPaired && activeChallenge) {
-      try {
-        const syncedTrades = readJson(SYNCED_TRADES_FILE, []);
-        const recentSync = syncedTrades.find(t => 
-          (t.userId === user.id || (cleanTraderId && (t.traderId || '').toLowerCase() === cleanTraderId)) &&
-          t.challengeId === activeChallenge.id
-        );
-        if (recentSync && recentSync.syncedAt) {
-          const syncMs = new Date(recentSync.syncedAt).getTime();
-          if (!isNaN(syncMs) && (now - syncMs) < (48 * 60 * 60 * 1000)) {
-            isPaired = true;
-          }
-        }
-      } catch (e) {}
-    }
-
-    const isConnected = isLiveActive || isPaired;
-    const statusType = isLiveActive ? 'live' : (isPaired ? 'paired' : 'disconnected');
-
-    res.json({
-      success: true,
-      connected: isConnected,
-      isLiveActive,
-      isPaired,
-      statusType,
-      hasActiveChallenge: !!activeChallenge,
-      isDisqualified,
-      challengeStatus: activeChallenge ? activeChallenge.status : (isDisqualified ? 'failed' : 'none'),
-      lastPing: hb ? hb.lastPing : null,
-      accountType: hb ? hb.accountType : null,
-      url: hb ? hb.url : null,
-      secondsAgo: hb ? Math.round((now - hb.lastPing) / 1000) : null
-    });
+    const status = getLiveExtensionStatus(req.user);
+    res.json(status);
   } catch (err) {
     res.status(500).json({ success: false, connected: false });
+  }
+});
+
+// 0.2 Real-Time SSE Stream for Extension Status (0ms instant updates)
+app.get('/api/user/extension-stream', (req, res) => {
+  try {
+    const token = req.query.token || req.headers['authorization']?.replace(/^Bearer\s+/i, '');
+    if (!token) return res.status(401).end();
+
+    let decoded = null;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (e) {
+      return res.status(401).end();
+    }
+
+    const users = readJson(USERS_FILE, []);
+    const user = users.find(u => u.id === decoded.id || u.email === decoded.email);
+    if (!user) return res.status(404).end();
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    const uid = String(user.id).toLowerCase();
+    if (!extensionStatusSseClients.has(uid)) {
+      extensionStatusSseClients.set(uid, new Set());
+    }
+    extensionStatusSseClients.get(uid).add(res);
+
+    // Immediately stream initial current state (0ms)
+    const initialStatus = getLiveExtensionStatus(user);
+    res.write(`data: ${JSON.stringify(initialStatus)}\n\n`);
+
+    const keepAliveTimer = setInterval(() => {
+      try {
+        res.write(': keepalive\n\n');
+      } catch (e) {
+        clearInterval(keepAliveTimer);
+      }
+    }, 15000);
+
+    req.on('close', () => {
+      clearInterval(keepAliveTimer);
+      const clients = extensionStatusSseClients.get(uid);
+      if (clients) {
+        clients.delete(res);
+        if (clients.size === 0) extensionStatusSseClients.delete(uid);
+      }
+    });
+  } catch (err) {
+    res.status(500).end();
+  }
+});
+
+// 0.3 Instant Disconnect Endpoint (Beacon on tab close / unload)
+app.post('/api/extension/disconnect', (req, res) => {
+  try {
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch(e){}
+    }
+    const traderId = (body?.traderId || req.query.traderId || '').trim().toLowerCase();
+    if (traderId) {
+      const hb = traderHeartbeats.get(traderId);
+      if (hb) {
+        hb.status = 'disconnected';
+        hb.lastPing = 0;
+      }
+      traderHeartbeats.delete(traderId);
+
+      const users = readJson(USERS_FILE, []);
+      const matchedUser = users.find(u => 
+        (u.traderId && u.traderId.toLowerCase() === traderId) ||
+        (u.id && u.id.toLowerCase() === traderId) ||
+        (u.email && u.email.toLowerCase() === traderId)
+      );
+
+      if (matchedUser) {
+        traderHeartbeats.delete(matchedUser.id?.toLowerCase());
+        traderHeartbeats.delete(matchedUser.email?.toLowerCase());
+        traderHeartbeats.delete(matchedUser.traderId?.toLowerCase());
+
+        const statusPayload = getLiveExtensionStatus(matchedUser);
+        broadcastExtensionStatus(matchedUser.id, statusPayload);
+      }
+    }
+    res.json({ success: true, message: 'Disconnected' });
+  } catch (err) {
+    res.status(500).json({ success: false });
   }
 });
 
@@ -5638,6 +5757,9 @@ app.post('/api/extension/sync-trades', (req, res) => {
     if (user.id) traderHeartbeats.set(user.id.toLowerCase(), hbEntry);
     if (user.email) traderHeartbeats.set(user.email.toLowerCase(), hbEntry);
     if (user.traderId) traderHeartbeats.set(user.traderId.toLowerCase(), hbEntry);
+
+    const liveStatus = getLiveExtensionStatus(user);
+    broadcastExtensionStatus(user.id, liveStatus);
 
     // Determine the exact activation timestamp:
     // If reactivated: use reactivatedAt

@@ -957,6 +957,33 @@
     fetchChallengeStatus();
   }
 
+  // Instant Disconnect Beacon when tab closes or navigates away
+  function sendDisconnectSignal() {
+    if (!config.traderId) return;
+    const targetUrl = (config.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '') + '/api/extension/disconnect';
+    const payload = JSON.stringify({
+      traderId: config.traderId,
+      timestamp: Date.now()
+    });
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: 'application/json' });
+      navigator.sendBeacon(targetUrl, blob);
+    } else {
+      try {
+        fetch(targetUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true
+        });
+      } catch (e) {}
+    }
+  }
+
+  window.addEventListener('beforeunload', sendDisconnectSignal);
+  window.addEventListener('pagehide', sendDisconnectSignal);
+
   // 9. Parse Quotex Trade History Table from Document with Turbo/Timeframe Support
   function parseQuotexTradesFromDoc(doc, forcedAccountType) {
     const trades = [];
@@ -1494,7 +1521,7 @@
       sendHeartbeat();
 
       if (heartbeatTimer) clearInterval(heartbeatTimer);
-      heartbeatTimer = setInterval(sendHeartbeat, 30000);
+      heartbeatTimer = setInterval(sendHeartbeat, 8000);
 
       if (tzScanTimer) clearInterval(tzScanTimer);
       tzScanTimer = setInterval(scanQuotexBrokerTimezone, 15000);

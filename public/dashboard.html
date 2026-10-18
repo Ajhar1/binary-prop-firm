@@ -10148,11 +10148,11 @@
 
         let extensionPollInterval = null;
 
-        // Module 3: Check Live Extension Connection Status
-        async function checkExtensionLiveStatus() {
-            const authToken = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token') || (typeof token !== 'undefined' ? token : null);
-            if (!authToken) return;
+        let extEventSource = null;
 
+        // Module 3: Render Real-Time Extension Connection Status
+        function renderExtensionStatusUi(data) {
+            if (!data) return;
             const banner = document.getElementById('extStatusBanner');
             const dot = document.getElementById('extStatusDot');
             const title = document.getElementById('extStatusTitle');
@@ -10162,96 +10162,121 @@
 
             if (!banner) return;
 
+            const prevConn = window.isExtensionLiveConnected;
+
+            if (data.isDisqualified) {
+                window.isExtensionLiveConnected = false;
+                banner.style.borderColor = 'rgba(255, 82, 82, 0.55)';
+                banner.style.background = 'linear-gradient(135deg, rgba(255,82,82,0.1), #12151d)';
+                dot.style.background = '#ff5252';
+                dot.style.boxShadow = '0 0 12px #ff5252';
+                title.style.color = '#ff5252';
+                title.innerHTML = '🚫 চ্যালেঞ্জ নিষ্ক্রিয়';
+                if (badge) {
+                    badge.style.display = 'inline-block';
+                    badge.style.background = 'rgba(255,82,82,0.2)';
+                    badge.style.color = '#ff5252';
+                    badge.style.border = '1px solid rgba(255,82,82,0.4)';
+                    badge.innerText = 'চ্যালেঞ্জ বাতিল';
+                }
+                sub.innerText = 'সক্রিয় চ্যালেঞ্জ না থাকায় ট্রেড সিঙ্ক বন্ধ রয়েছে।';
+                if (btnWrap) {
+                    btnWrap.innerHTML = `
+                        <a href="#pane-buy-challenge" onclick="switchTab('pane-buy-challenge')" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                            <i class="fas fa-shopping-cart"></i> চ্যালেঞ্জ কিনুন
+                        </a>
+                    `;
+                }
+            } else if (data.success && data.connected && data.isLiveActive) {
+                window.isExtensionLiveConnected = true;
+                banner.style.borderColor = 'rgba(0, 230, 118, 0.45)';
+                banner.style.background = 'linear-gradient(135deg, rgba(0,230,118,0.08), #12151d)';
+                dot.style.background = '#00e676';
+                dot.style.boxShadow = '0 0 14px #00e676';
+                title.style.color = '#00e676';
+                title.innerHTML = '🟢 এক্সটেনশন কানেক্টেড (লাইভ)';
+
+                if (badge) {
+                    badge.style.display = 'inline-block';
+                    const isLiveAcct = (data.accountType === 'live');
+                    badge.style.background = isLiveAcct ? 'rgba(0,230,118,0.2)' : 'rgba(255,184,0,0.2)';
+                    badge.style.color = isLiveAcct ? '#00e676' : '#ffb800';
+                    badge.style.border = isLiveAcct ? '1px solid rgba(0,230,118,0.4)' : '1px solid rgba(255,184,0,0.4)';
+                    badge.innerText = isLiveAcct ? 'LIVE Account' : 'DEMO Account';
+                }
+
+                const ago = (data.secondsAgo !== null && data.secondsAgo !== undefined) ? `${data.secondsAgo}s আগে` : '০s আগে';
+                sub.innerHTML = `কোটেক্সে ট্রেড করলেই রিয়েল-টাইমে সিঙ্ক হবে (লাস্ট হার্টবিট: ${ago})`;
+
+                if (btnWrap) {
+                    btnWrap.innerHTML = `
+                        <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                            <i class="fas fa-external-link-alt"></i> Quotex চার্ট
+                        </a>
+                    `;
+                }
+            } else {
+                window.isExtensionLiveConnected = false;
+                banner.style.borderColor = 'rgba(245, 176, 65, 0.4)';
+                banner.style.background = '#12151d';
+                dot.style.background = '#f59e0b';
+                dot.style.boxShadow = '0 0 10px #f59e0b';
+                title.style.color = '#f59e0b';
+                title.innerText = '⚠️ এক্সটেনশন ডিসকানেক্টেড';
+                if (badge) badge.style.display = 'none';
+                sub.innerText = 'ট্রেড সিঙ্ক করতে ব্রাউজারে Quotex এবং এক্সটেনশন চালু করুন।';
+
+                if (btnWrap) {
+                    btnWrap.innerHTML = `
+                        <a href="/api/extension/download" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                            <i class="fas fa-download"></i> এক্সটেনশন (ZIP)
+                        </a>
+                    `;
+                }
+            }
+
+            if (prevConn !== window.isExtensionLiveConnected) {
+                calculateAndRenderMasaniello();
+                if (typeof updateAuditCardInfo === 'function') updateAuditCardInfo();
+            }
+        }
+
+        async function checkExtensionLiveStatus() {
+            const authToken = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token') || (typeof token !== 'undefined' ? token : null);
+            if (!authToken) return;
+
             try {
                 const res = await fetch('/api/user/extension-status', {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 const data = await res.json();
+                renderExtensionStatusUi(data);
+            } catch (err) {}
+        }
 
-                const prevConn = window.isExtensionLiveConnected;
-                if (data.isDisqualified) {
-                    window.isExtensionLiveConnected = false;
-                    banner.style.borderColor = 'rgba(255, 82, 82, 0.55)';
-                    banner.style.background = 'linear-gradient(135deg, rgba(255,82,82,0.1), #12151d)';
-                    dot.style.background = '#ff5252';
-                    dot.style.boxShadow = '0 0 12px #ff5252';
-                    title.style.color = '#ff5252';
-                    title.innerHTML = '🚫 চ্যালেঞ্জ নিষ্ক্রিয়';
-                    if (badge) {
-                        badge.style.display = 'inline-block';
-                        badge.style.background = 'rgba(255,82,82,0.2)';
-                        badge.style.color = '#ff5252';
-                        badge.style.border = '1px solid rgba(255,82,82,0.4)';
-                        badge.innerText = 'চ্যালেঞ্জ বাতিল';
-                    }
-                    sub.innerText = 'সক্রিয় চ্যালেঞ্জ না থাকায় ট্রেড সিঙ্ক বন্ধ রয়েছে।';
-                    if (btnWrap) {
-                        btnWrap.innerHTML = `
-                            <a href="#pane-buy-challenge" onclick="switchTab('pane-buy-challenge')" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                                <i class="fas fa-shopping-cart"></i> চ্যালেঞ্জ কিনুন
-                            </a>
-                        `;
-                    }
-                } else if (data.success && data.connected) {
-                    window.isExtensionLiveConnected = true;
-                    const isLive = (data.statusType === 'live') || (data.secondsAgo !== null && data.secondsAgo < 120);
+        function initExtensionLiveStream() {
+            const authToken = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token') || (typeof token !== 'undefined' ? token : null);
+            if (!authToken) return;
 
-                    banner.style.borderColor = 'rgba(0, 230, 118, 0.45)';
-                    banner.style.background = 'linear-gradient(135deg, rgba(0,230,118,0.06), #12151d)';
-                    dot.style.background = '#00e676';
-                    dot.style.boxShadow = '0 0 12px #00e676';
-                    title.style.color = '#00e676';
-                    title.innerHTML = isLive
-                        ? '🟢 এক্সটেনশন অ্যাক্টিভ'
-                        : '🟢 এক্সটেনশন কানেক্টেড';
+            if (extEventSource) {
+                try { extEventSource.close(); } catch(e){}
+                extEventSource = null;
+            }
 
-                    if (badge) {
-                        badge.style.display = 'inline-block';
-                        const isLiveAcct = (data.accountType === 'live');
-                        badge.style.background = isLiveAcct ? 'rgba(0,230,118,0.2)' : 'rgba(255,184,0,0.2)';
-                        badge.style.color = isLiveAcct ? '#00e676' : '#ffb800';
-                        badge.style.border = isLiveAcct ? '1px solid rgba(0,230,118,0.4)' : '1px solid rgba(255,184,0,0.4)';
-                        badge.innerText = isLiveAcct ? 'LIVE Account' : 'DEMO Account';
-                    }
-
-                    const ago = (data.secondsAgo !== null && data.secondsAgo !== undefined) ? `${data.secondsAgo}s আগে` : 'সক্রিয়';
-                    sub.innerHTML = isLive
-                        ? `লাইভ চার্ট থেকে স্বয়ংক্রিয় সিঙ্ক চলছে (লাস্ট হার্টবিট: ${ago})`
-                        : `কোটেক্সে ট্রেড করলেই রিয়েল-টাইমে সিঙ্ক হবে।`;
-
-                    if (btnWrap) {
-                        btnWrap.innerHTML = `
-                            <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                                <i class="fas fa-external-link-alt"></i> Quotex চার্ট
-                            </a>
-                        `;
-                    }
-                } else {
-                    window.isExtensionLiveConnected = false;
-                    banner.style.borderColor = 'rgba(245, 176, 65, 0.4)';
-                    banner.style.background = '#12151d';
-                    dot.style.background = '#f59e0b';
-                    dot.style.boxShadow = '0 0 10px #f59e0b';
-                    title.style.color = '#f59e0b';
-                    title.innerText = '⚠️ এক্সটেনশন ডিসকানেক্টেড';
-                    if (badge) badge.style.display = 'none';
-                    sub.innerText = 'ট্রেড সিঙ্ক করতে ব্রাউজারে এক্সটেনশন চালু করুন।';
-
-                    if (btnWrap) {
-                        btnWrap.innerHTML = `
-                            <a href="/api/extension/download" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                                <i class="fas fa-download"></i> এক্সটেনশন (ZIP)
-                            </a>
-                        `;
-                    }
-                }
-
-                if (prevConn !== window.isExtensionLiveConnected) {
-                    calculateAndRenderMasaniello();
-                    if (typeof updateAuditCardInfo === 'function') updateAuditCardInfo();
-                }
-            } catch (err) {
-                // Keep current state on network hiccup
+            try {
+                extEventSource = new EventSource(`/api/user/extension-stream?token=${encodeURIComponent(authToken)}`);
+                extEventSource.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        renderExtensionStatusUi(data);
+                    } catch (e) {}
+                };
+                extEventSource.onerror = () => {
+                    // Fallback to polling if stream connection drops
+                    checkExtensionLiveStatus();
+                };
+            } catch (e) {
+                checkExtensionLiveStatus();
             }
         }
 
@@ -10789,10 +10814,11 @@
             fetchUserSupportTickets();
             fetchUserSyncedTrades();
             checkExtensionLiveStatus();
+            initExtensionLiveStream();
             initMasaniello();
 
             // Periodic live checkers
-            setInterval(checkExtensionLiveStatus, 10000);
+            setInterval(checkExtensionLiveStatus, 5000);
             setInterval(fetchUserSyncedTrades, 15000);
         });
     </script>
