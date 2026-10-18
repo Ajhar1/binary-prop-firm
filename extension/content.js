@@ -233,10 +233,23 @@
       const res = await fetch(settingsUrl, { credentials: 'include' });
       if (res.ok) {
         const html = await res.text();
-        const idMatch = html.match(/\bID\s*(?:&nbsp;)?\s*[:#]?\s*(\d{5,12})\b/i) ||
-                        html.match(/["'](?:user_id|accountId|account_id)["']\s*:\s*["']?(\d{5,12})["']?/i);
-        if (idMatch && idMatch[1]) {
-          detectedQuotexAccountId = idMatch[1];
+        const parsedDoc = new DOMParser().parseFromString(html, 'text/html');
+        const parsedText = (parsedDoc.body ? parsedDoc.body.innerText : '').replace(/\u00a0/g, ' ');
+        const textMatch = parsedText.match(/\bID\s*[:#]?\s*(\d{5,12})\b/i);
+        if (textMatch && textMatch[1]) {
+          detectedQuotexAccountId = textMatch[1];
+          lastIdScanTime = now;
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ quotex_detected_account_id: detectedQuotexAccountId });
+          }
+          updateWidgetStatus();
+          return detectedQuotexAccountId;
+        }
+
+        const rawMatch = html.match(/\bID\s*[:#]?\s*(?:<[^>]+>)*\s*(\d{5,12})\b/i) ||
+                         html.match(/["'](?:user_id|accountId|account_id|trader_id)["']\s*:\s*["']?(\d{5,12})["']?/i);
+        if (rawMatch && rawMatch[1]) {
+          detectedQuotexAccountId = rawMatch[1];
           lastIdScanTime = now;
           if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
             chrome.storage.local.set({ quotex_detected_account_id: detectedQuotexAccountId });
@@ -266,14 +279,18 @@
     const cleanReg = (registeredId || currentRegisteredBrokerAccountId || '').replace(/[^0-9]/g, '');
     const cleanDet = (detectedId || detectedQuotexAccountId || '').replace(/[^0-9]/g, '');
 
-    if (cleanReg && cleanDet) {
+    // If challenge has a registered Quotex Account ID:
+    if (cleanReg) {
+      if (!cleanDet) {
+        isAccountIdMismatch = true;
+        return { isMismatch: true, missingDetected: true, cleanReg, cleanDet: '' };
+      }
       if (cleanReg !== cleanDet) {
         isAccountIdMismatch = true;
         return { isMismatch: true, cleanReg, cleanDet };
-      } else {
-        isAccountIdMismatch = false;
-        return { isMismatch: false, verified: true, cleanReg, cleanDet };
       }
+      isAccountIdMismatch = false;
+      return { isMismatch: false, verified: true, cleanReg, cleanDet };
     }
 
     return { isMismatch: false, verified: false, cleanReg, cleanDet };

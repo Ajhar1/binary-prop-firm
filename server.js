@@ -5595,20 +5595,34 @@ app.post('/api/extension/sync-trades', (req, res) => {
       });
     }
 
-    // Module 1.1: Quotex Account ID Verification
+    // Module 1.1: Strict Quotex Account ID Verification
     const registeredBrokerAccountId = (activeChallenge.brokerAccountId || user.brokerAccountId || '').trim();
     const cleanRegisteredDigits = registeredBrokerAccountId.replace(/[^0-9]/g, '');
     const cleanDetectedDigits = String(detectedBrokerAccountId || '').trim().replace(/[^0-9]/g, '');
 
-    if (cleanRegisteredDigits && cleanDetectedDigits && cleanRegisteredDigits !== cleanDetectedDigits) {
-      console.warn(`[EXTENSION SYNC REJECTED] Quotex Account ID mismatch for user ${user.traderId}: registered=${cleanRegisteredDigits}, detected=${cleanDetectedDigits}`);
-      return res.status(403).json({
-        success: false,
-        accountMismatch: true,
-        registeredBrokerAccountId: cleanRegisteredDigits,
-        detectedBrokerAccountId: cleanDetectedDigits,
-        message: `Quotex Account ID মিলছে না! আপনার চ্যালেঞ্জের সাথে যুক্ত Quotex ID হলো [${cleanRegisteredDigits}], কিন্তু বর্তমানে ব্রাউজারে লগইন থাকা Quotex ID হলো [${cleanDetectedDigits}]। সঠিক Quotex অ্যাকাউন্টে লগইন না করা পর্যন্ত ট্রেড সিঙ্ক সম্পূর্ণ ব্লক থাকবে।`
-      });
+    // If this challenge was purchased with a Quotex Account ID (e.g. 63896760):
+    if (cleanRegisteredDigits) {
+      if (!cleanDetectedDigits) {
+        console.warn(`[EXTENSION SYNC REJECTED] Missing Quotex Account ID for user ${user.traderId}. Registered challenge ID: ${cleanRegisteredDigits}`);
+        return res.status(403).json({
+          success: false,
+          accountMismatch: true,
+          registeredBrokerAccountId: cleanRegisteredDigits,
+          detectedBrokerAccountId: null,
+          message: `Quotex Account ID পাওয়া যায়নি! আপনার সক্রিয় চ্যালেঞ্জটি Quotex ID: [${cleanRegisteredDigits}] এর সাথে লিংক করা। ট্রেড সিঙ্ক করার পূর্বে এক্সটেনশনটি রিলোড দিন এবং সঠিক Quotex অ্যাকাউন্টে লগইন করুন।`
+        });
+      }
+
+      if (cleanRegisteredDigits !== cleanDetectedDigits) {
+        console.warn(`[EXTENSION SYNC REJECTED] Quotex Account ID mismatch for user ${user.traderId}: registered=${cleanRegisteredDigits}, detected=${cleanDetectedDigits}`);
+        return res.status(403).json({
+          success: false,
+          accountMismatch: true,
+          registeredBrokerAccountId: cleanRegisteredDigits,
+          detectedBrokerAccountId: cleanDetectedDigits,
+          message: `Quotex Account ID মিলছে না! আপনার চ্যালেঞ্জের সাথে যুক্ত Quotex ID হলো [${cleanRegisteredDigits}], কিন্তু বর্তমানে ব্রাউজারে লগইন থাকা Quotex ID হলো [${cleanDetectedDigits}]। সঠিক Quotex অ্যাকাউন্টে লগইন না করা পর্যন্ত ট্রেড সিঙ্ক সম্পূর্ণ ব্লক থাকবে।`
+        });
+      }
     }
 
     // Instantly register/refresh active extension heartbeat on every trade sync
