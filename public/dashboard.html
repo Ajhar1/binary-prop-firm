@@ -2322,6 +2322,7 @@
 
         .modal-overlay.active,
         #masAuditProgressModal.active,
+        #tradeSyncMismatchModal.active,
         #masSessionCompleteModal.active {
             opacity: 1 !important;
             visibility: visible !important;
@@ -2330,6 +2331,7 @@
         }
 
         #masAuditProgressModal.active .modal-box,
+        #tradeSyncMismatchModal.active .modal-box,
         #masSessionCompleteModal.active .modal-box {
             transform: translateY(0) !important;
         }
@@ -3030,6 +3032,10 @@
                                     <span style="color:var(--text-secondary); font-size:0.7rem; display:block;">এক্সটেনশন</span>
                                     <strong id="auditCardExtensionStatus" style="color:var(--neon-green); font-size:0.85rem;">কানেক্টেড</strong>
                                 </div>
+                            </div>
+
+                            <!-- Live Trade Sync Match Status Banner -->
+                            <div id="auditCardSyncStatusBox" style="margin-bottom:12px; padding:9px 12px; border-radius:10px; font-size:0.82rem; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); display:none;">
                             </div>
 
                             <div class="form-group" style="margin-bottom:12px;">
@@ -4272,14 +4278,63 @@
                 <span class="badge" id="masModalStatPnl" style="background:rgba(245,176,65,0.15); font-size:0.82rem; padding:6px 12px; color:var(--yellow); font-weight:800;">P&L: $0.00</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <button type="button" class="btn-gold" onclick="closeMasCompleteModal(); switchTab('submission'); syncMasanielloToProofForm(true); runAutomatedSessionAudit();" style="padding:12px 24px; font-weight:800; font-size:0.95rem; justify-content:center; border-radius:10px; box-shadow:0 0 15px rgba(245,176,65,0.4);">
-                    <i class="fas fa-bolt"></i> ⚡ স্বয়ংক্রিয় অডিট ও সেশন সাবমিট করুন
+                <button type="button" class="btn-gold" onclick="closeMasCompleteModal(); switchTab('trade-history'); fetchUserSyncedTrades();" style="padding:12px 24px; font-weight:800; font-size:0.95rem; justify-content:center; border-radius:10px; box-shadow:0 0 15px rgba(245,176,65,0.4);">
+                    <i class="fas fa-chart-line"></i> ট্রেডিং হিস্টোরি চেক করুন
                 </button>
-                <button type="button" class="btn-outline" onclick="closeMasCompleteModal(); proceedToProofUploadFromSheet();" style="padding:10px 18px; font-size:0.88rem; justify-content:center; border-color:rgba(255,255,255,0.2); color:#cbd5e1; border-radius:10px;">
-                    <i class="fas fa-eye"></i> প্রুফ পেজে বিস্তারিত দেখুন
+                <button type="button" class="btn-outline" onclick="closeMasCompleteModal(); switchTab('money-management');" style="padding:10px 18px; font-size:0.88rem; justify-content:center; border-color:rgba(255,255,255,0.2); color:#cbd5e1; border-radius:10px;">
+                    <i class="fas fa-table"></i> পরে আপলোড করব (শীট দেখুন)
                 </button>
-                <button type="button" class="btn-outline" onclick="closeMasCompleteModal()" style="padding:8px 18px; font-size:0.82rem; justify-content:center; border-color:transparent; color:var(--text-secondary); border-radius:10px;">
-                    পরে আপলোড করব (শীট দেখুন)
+            </div>
+        </div>
+    </div>
+
+    <!-- Trade Sync Count Mismatch Warning Modal -->
+    <div id="tradeSyncMismatchModal" class="modal-overlay" style="z-index:999999;">
+        <div class="modal-box" style="max-width:540px; width:95%; text-align:center; padding:1.8rem 1.4rem; border:1.5px solid rgba(239,68,68,0.5); border-radius:20px; box-shadow:0 12px 50px rgba(0,0,0,0.95); background:#121622;">
+            <div style="width:70px; height:70px; border-radius:50%; background:rgba(239,68,68,0.12); border:2px solid var(--danger-red); color:var(--danger-red); display:flex; align-items:center; justify-content:center; font-size:2.2rem; margin:0 auto 1.1rem; box-shadow:0 0 25px rgba(239,68,68,0.25);">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+
+            <h3 style="font-size:1.3rem; font-weight:800; color:#fff; margin-bottom:0.4rem;">
+                ট্রেড সিঙ্ক অসম্পূর্ণ রয়েছে! ⚠️
+            </h3>
+            <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:1.3rem; line-height:1.5;">
+                মানি ম্যানেজমেন্ট শীট অনুযায়ী যতগুলো ট্রেড নেওয়া হয়েছে, ট্রেডিং হিস্টোরিতে ততগুলো ট্রেড সেভ না হওয়া পর্যন্ত সেশন অডিট সম্পন্ন করা যাবে না।
+            </p>
+
+            <!-- Stat Cards Comparison Grid -->
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:1.3rem;">
+                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); padding:12px 8px; border-radius:12px;">
+                    <span style="font-size:0.72rem; color:var(--text-secondary); display:block; margin-bottom:4px;">শীটে মোট ট্রেড</span>
+                    <strong id="mismatchSheetTrades" style="font-size:1.25rem; color:#fff; font-weight:800;">০টি</strong>
+                </div>
+                <div style="background:rgba(46,204,113,0.08); border:1px solid rgba(46,204,113,0.25); padding:12px 8px; border-radius:12px;">
+                    <span style="font-size:0.72rem; color:var(--text-secondary); display:block; margin-bottom:4px;">হিস্টোরিতে সেভ</span>
+                    <strong id="mismatchSyncedTrades" style="font-size:1.25rem; color:var(--neon-green); font-weight:800;">০টি</strong>
+                </div>
+                <div style="background:rgba(239,68,68,0.1); border:1.5px solid rgba(239,68,68,0.35); padding:12px 8px; border-radius:12px;">
+                    <span style="font-size:0.72rem; color:#fca5a5; display:block; margin-bottom:4px;">সেভ বাকি আছে</span>
+                    <strong id="mismatchRemainingTrades" style="font-size:1.25rem; color:var(--danger-red); font-weight:800;">০টি</strong>
+                </div>
+            </div>
+
+            <!-- Detailed Explanation & Instruction Box -->
+            <div style="background:rgba(245,176,65,0.06); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px 14px; text-align:left; font-size:0.84rem; line-height:1.6; margin-bottom:1.4rem;">
+                <div style="color:#f8fafc; margin-bottom:8px;">
+                    📌 আপনি মানি ম্যানেজমেন্ট শীটে মোট <strong id="mismatchMsgSheetCount" style="color:var(--yellow);">০টি</strong> ট্রেড রেকর্ড করেছেন, কিন্তু কোটেক্স থেকে আপনার ট্রেডিং হিস্টোরিতে মাত্র <strong id="mismatchMsgSyncedCount" style="color:var(--neon-green);">০টি</strong> ট্রেড সেভ হয়েছে। এখনো <strong id="mismatchMsgRemainingCount" style="color:var(--danger-red);">০টি</strong> ট্রেড সেভ হওয়া বাকি রয়েছে।
+                </div>
+                <div style="color:#cbd5e1; font-size:0.8rem; border-top:1px dashed rgba(255,255,255,0.1); padding-top:8px;">
+                    💡 <strong>করণীয়:</strong> Quotex ব্রাউজার ওপেন করে আপনার এক্সটেনশনটি ব্যবহার করে বাকি ট্রেডগুলো সঠিকভাবে সেভ করুন। এরপর <strong>ট্রেডিং হিস্টোরি</strong> পেজে গিয়ে <strong>"Sync Trades"</strong> বাটনে চাপ দিন। সকল ট্রেড সেভ হলে তারপরই অডিট সাবমিট করতে পারবেন।
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button type="button" class="btn-gold" onclick="closeModal('tradeSyncMismatchModal'); switchTab('trade-history'); fetchUserSyncedTrades();" style="padding:12px; font-weight:800; font-size:0.92rem; justify-content:center; border-radius:10px; box-shadow:0 0 15px rgba(245,176,65,0.3);">
+                    <i class="fas fa-sync-alt"></i> ট্রেডিং হিস্টোরি ও Sync Trades চেক করুন
+                </button>
+                <button type="button" class="btn-outline" onclick="closeModal('tradeSyncMismatchModal'); switchTab('money-management');" style="padding:10px; font-size:0.86rem; justify-content:center; border-radius:10px; border-color:rgba(255,255,255,0.2); color:#cbd5e1;">
+                    <i class="fas fa-table"></i> মানি ম্যানেজমেন্ট শীট দেখুন
                 </button>
             </div>
         </div>
@@ -8102,20 +8157,135 @@
         }
 
         // ============================================================================
-        // AUTOMATED SESSION AUDIT CONTROLLER (7-8 Second Realistic Compliance Audit)
         // ============================================================================
+        // AUTOMATED SESSION AUDIT CONTROLLER & TRADE SYNC GUARD
+        // ============================================================================
+
+        function getTradeSyncComparison() {
+            // 1. Get sheet trades count
+            let sheetTradesCount = 0;
+            try {
+                if (typeof getMasanielloSessionData === 'function') {
+                    const sheetData = getMasanielloSessionData();
+                    if (sheetData && sheetData.totalCount !== undefined) {
+                        sheetTradesCount = Number(sheetData.totalCount) || 0;
+                    }
+                }
+                if (sheetTradesCount === 0 && typeof masState !== 'undefined' && Array.isArray(masState.history)) {
+                    sheetTradesCount = masState.history.length;
+                }
+            } catch(e) {
+                console.warn('Error reading sheet trades count:', e);
+            }
+
+            // 2. Map previously audited ticket IDs from all submissions
+            const auditedTicketIds = new Set();
+            try {
+                const structured = (typeof getUserStructuredChallenges === 'function')
+                    ? getUserStructuredChallenges()
+                    : { allGroups: [] };
+                (structured.allGroups || []).forEach(chGroup => {
+                    (chGroup.submissions || []).forEach(sub => {
+                        if (Array.isArray(sub.auditReport)) {
+                            sub.auditReport.forEach(a => {
+                                const tId = String(a.ticketId || a.ticket || '').trim();
+                                if (tId) auditedTicketIds.add(tId);
+                            });
+                        } else if (Array.isArray(sub.auditedTicketIds)) {
+                            sub.auditedTicketIds.forEach(id => {
+                                const tId = String(id).trim();
+                                if (tId) auditedTicketIds.add(tId);
+                            });
+                        }
+                    });
+                });
+            } catch(e) {
+                console.warn('Error reading audited ticket IDs:', e);
+            }
+
+            // 3. Filter unsubmitted synced trades
+            const activeChallenge = (myChallenges || []).find(c => c.status === 'in_progress');
+            const activeChId = activeChallenge ? activeChallenge.id : null;
+
+            const unsubmitted = (Array.isArray(userSyncedTradesData) ? userSyncedTradesData : []).filter(t => {
+                if (t.challengeId && activeChId && t.challengeId !== activeChId) return false;
+                const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                return tick && !auditedTicketIds.has(tick);
+            });
+
+            // Effective trades (excluding refund trades)
+            const effectiveTrades = unsubmitted.filter(t => {
+                const actualStake = parseFloat(t.amount) || 0;
+                const isRefund = (t.result === 'REFUND' || (parseFloat(t.profit) === actualStake && actualStake > 0));
+                return !isRefund;
+            });
+
+            const syncedTradesCount = effectiveTrades.length;
+            const missingCount = Math.max(0, sheetTradesCount - syncedTradesCount);
+            const isMatched = (sheetTradesCount > 0) && (syncedTradesCount >= sheetTradesCount);
+
+            return {
+                sheetTradesCount,
+                syncedTradesCount,
+                missingCount,
+                isMatched,
+                unsubmitted,
+                effectiveTrades
+            };
+        }
+
+        function showTradeSyncMismatchModal(syncComp) {
+            const modal = document.getElementById('tradeSyncMismatchModal');
+            if (!modal) return;
+
+            const sheetCount = syncComp ? (syncComp.sheetTradesCount || 0) : 0;
+            const syncedCount = syncComp ? (syncComp.syncedTradesCount || 0) : 0;
+            const remainingCount = syncComp ? (syncComp.missingCount !== undefined ? syncComp.missingCount : Math.max(0, sheetCount - syncedCount)) : 0;
+
+            const sheetEl = document.getElementById('mismatchSheetTrades');
+            const syncedEl = document.getElementById('mismatchSyncedTrades');
+            const remainingEl = document.getElementById('mismatchRemainingTrades');
+            const msgSheet = document.getElementById('mismatchMsgSheetCount');
+            const msgSynced = document.getElementById('mismatchMsgSyncedCount');
+            const msgRemaining = document.getElementById('mismatchMsgRemainingCount');
+
+            if (sheetEl) sheetEl.innerText = `${sheetCount}টি`;
+            if (syncedEl) syncedEl.innerText = `${syncedCount}টি`;
+            if (remainingEl) remainingEl.innerText = `${remainingCount}টি ট্রেড`;
+            if (msgSheet) msgSheet.innerText = `${sheetCount}টি`;
+            if (msgSynced) msgSynced.innerText = `${syncedCount}টি`;
+            if (msgRemaining) msgRemaining.innerText = `${remainingCount}টি`;
+
+            modal.style.display = 'flex';
+            modal.classList.add('active');
+            openModal('tradeSyncMismatchModal');
+        }
+
+        function closeTradeSyncMismatchModal() {
+            const modal = document.getElementById('tradeSyncMismatchModal');
+            if (modal) {
+                modal.classList.remove('active');
+                closeModal('tradeSyncMismatchModal');
+                modal.style.display = 'none';
+            }
+        }
 
         function updateAuditCardInfo() {
             const activeChallenge = (myChallenges || []).find(c => c.status === 'in_progress');
             const sessionNumEl = document.getElementById('auditCardSessionNum');
             const startingCapEl = document.getElementById('auditCardStartingCap');
             const extStatusEl = document.getElementById('auditCardExtensionStatus');
+            const syncBox = document.getElementById('auditCardSyncStatusBox');
+            const submitBtn = document.getElementById('submitProofBtn');
+
+            let isPractice = false;
+            let practiceCompleted = 0;
 
             if (sessionNumEl && activeChallenge) {
-                const practiceCompleted = activeChallenge.practiceSessionsCompleted !== undefined 
+                practiceCompleted = activeChallenge.practiceSessionsCompleted !== undefined 
                     ? activeChallenge.practiceSessionsCompleted 
                     : (mySubmissions ? mySubmissions.filter(s => s.isPractice).length : 0);
-                const isPractice = (activeChallenge.challengePhase === 'practice' && practiceCompleted < 3);
+                isPractice = (activeChallenge.challengePhase === 'practice' && practiceCompleted < 3);
                 if (isPractice) {
                     sessionNumEl.innerText = `প্র্যাকটিস #${practiceCompleted + 1}`;
                 } else {
@@ -8136,12 +8306,97 @@
                     extStatusEl.style.color = 'var(--yellow)';
                 }
             }
+
+            // Update Live Trade Sync Status Banner & Submit Button Guard
+            const syncComp = getTradeSyncComparison();
+            if (syncBox && syncComp) {
+                syncBox.style.display = 'block';
+                if (syncComp.sheetTradesCount > 0 && syncComp.syncedTradesCount < syncComp.sheetTradesCount) {
+                    syncBox.style.borderColor = 'rgba(239,68,68,0.45)';
+                    syncBox.style.background = 'rgba(239,68,68,0.1)';
+                    syncBox.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-exclamation-triangle" style="color:var(--yellow); font-size:1.05rem;"></i>
+                                <div>
+                                    <div style="color:#fecaca; font-weight:700;">ট্রেড সিঙ্ক অসম্পূর্ণ (${syncComp.syncedTradesCount}/${syncComp.sheetTradesCount}টি সেভ হয়েছে)</div>
+                                    <div style="color:#cbd5e1; font-size:0.75rem;">এখনো <strong style="color:var(--danger-red);">${syncComp.missingCount}টি ট্রেড</strong> কোটেক্স থেকে সেভ হওয়া বাকি।</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-outline" onclick="switchTab('trade-history'); fetchUserSyncedTrades();" style="padding:4px 10px; font-size:0.75rem; border-color:var(--yellow); color:var(--yellow); border-radius:6px; cursor:pointer;">
+                                <i class="fas fa-sync-alt"></i> Sync Trades
+                            </button>
+                        </div>
+                    `;
+                } else if (syncComp.sheetTradesCount > 0 && syncComp.isMatched) {
+                    syncBox.style.borderColor = 'rgba(46,204,113,0.4)';
+                    syncBox.style.background = 'rgba(46,204,113,0.1)';
+                    syncBox.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-check-circle" style="color:var(--neon-green); font-size:1.05rem;"></i>
+                                <span style="color:#86efac; font-weight:700;">
+                                    ট্রেড সংখ্যা মিল রয়েছে: মোট ${syncComp.sheetTradesCount}টি ট্রেড সঠিকভাবে সেভ হয়েছে
+                                </span>
+                            </div>
+                            <span class="badge" style="background:rgba(46,204,113,0.25); color:var(--neon-green); font-size:0.74rem; padding:3px 8px;">
+                                ✓ অডিটের জন্য প্রস্তুত
+                            </span>
+                        </div>
+                    `;
+                } else {
+                    syncBox.style.borderColor = 'rgba(255,255,255,0.08)';
+                    syncBox.style.background = 'rgba(0,0,0,0.25)';
+                    syncBox.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px; color:var(--text-secondary); font-size:0.8rem;">
+                            <i class="fas fa-info-circle"></i>
+                            <span>মানি ম্যানেজমেন্ট শীট অনুযায়ী সেশন সমাপ্ত হলে এখানে অডিট স্ট্যাটাস প্রদর্শিত হবে।</span>
+                        </div>
+                    `;
+                }
+            }
+
+            if (submitBtn && activeChallenge) {
+                const sNum = isPractice ? (practiceCompleted + 1) : ((activeChallenge.sessionsCompleted || 0) + 1);
+                const prefix = isPractice ? '🎓 প্র্যাকটিস সেশন #' : '🚀 সেশন #';
+                if (syncComp && syncComp.sheetTradesCount > 0 && syncComp.syncedTradesCount < syncComp.sheetTradesCount) {
+                    submitBtn.style.background = 'linear-gradient(135deg, rgba(239,68,68,0.9), rgba(217,119,6,0.95))';
+                    submitBtn.style.borderColor = 'rgba(239,68,68,0.6)';
+                    submitBtn.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ⚠️ ${prefix}${sNum} অডিট লক (${syncComp.missingCount}টি সেভ বাকি)`;
+                } else {
+                    submitBtn.style.background = '';
+                    submitBtn.style.borderColor = '';
+                    submitBtn.innerHTML = isPractice 
+                        ? `<i class="fas fa-graduation-cap"></i> 🎓 প্র্যাকটিস সেশন #${sNum} আপলোড ও অডিট করুন`
+                        : `<i class="fas fa-bolt"></i> 🚀 সেশন #${sNum} আপলোড ও অডিট করুন`;
+                }
+            }
         }
 
         async function runAutomatedSessionAudit() {
             const activeChallenge = (myChallenges || []).find(c => c.status === 'in_progress');
             if (!activeChallenge) {
                 showToast('আপনার কোনো সক্রিয় (Active) চ্যালেঞ্জ নেই।', 'error');
+                return;
+            }
+
+            // Ensure submissions and synced trades are available for comparison
+            if (!allMySubmissions || allMySubmissions.length === 0) {
+                try { await fetchSubmissions(); } catch(e){}
+            }
+            if (!userSyncedTradesData || userSyncedTradesData.length === 0) {
+                try { await fetchUserSyncedTrades(); } catch(e){}
+            }
+
+            const syncComp = getTradeSyncComparison();
+            if (syncComp.sheetTradesCount <= 0) {
+                showToast('মানি ম্যানেজমেন্ট শীটে আপনার বর্তমান সেশনের কোনো ট্রেড পাওয়া যায়নি। অনুগ্রহ করে শীটে ট্রেড এন্ট্রি সম্পন্ন করুন।', 'warning');
+                return;
+            }
+
+            // ENFORCE GUARD: As long as syncedTradesCount < sheetTradesCount, do NOT proceed!
+            if (syncComp.syncedTradesCount < syncComp.sheetTradesCount) {
+                showTradeSyncMismatchModal(syncComp);
                 return;
             }
 
@@ -8185,6 +8440,19 @@
                 });
 
                 const data = await res.json();
+
+                if (data.tradeCountMismatch) {
+                    scanningView.style.display = 'none';
+                    closeModal('masAuditProgressModal');
+                    modal.style.display = 'none';
+                    modal.classList.remove('active');
+                    showTradeSyncMismatchModal({
+                        sheetTradesCount: data.sheetTradesCount,
+                        syncedTradesCount: data.syncedTradesCount,
+                        missingCount: data.missingCount
+                    });
+                    return;
+                }
 
                 // If no trade report exists (e.g. no trades synced or incomplete)
                 if (!data.auditReport || !Array.isArray(data.auditReport) || data.auditReport.length === 0) {
@@ -11315,6 +11583,7 @@
                     }
                     userSyncedTradesData = data.trades || [];
                     renderSyncedTrades(data);
+                    if (typeof updateAuditCardInfo === 'function') updateAuditCardInfo();
 
                     // Update Time-Lock Filter UI
                     const filterStatusEl = document.getElementById('extChallengeTimeLockStatus');

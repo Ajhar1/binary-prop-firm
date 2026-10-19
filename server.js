@@ -4731,11 +4731,41 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     // Sort chronologically oldest first
     candidateTrades.sort((a, b) => getTradeExecutionTime(a) - getTradeExecutionTime(b));
 
+    // Extract client session trade logs if provided by dashboard
+    const clientTradeLogs = (req.body.clientSessionData && Array.isArray(req.body.clientSessionData.tradeLogs))
+      ? req.body.clientSessionData.tradeLogs
+      : [];
+    const clientTradeCount = (req.body.clientSessionData && typeof req.body.clientSessionData.totalCount === 'number')
+      ? req.body.clientSessionData.totalCount
+      : clientTradeLogs.length;
+
     if (candidateTrades.length === 0) {
       return res.json({
         success: false,
         passed: false,
-        message: 'কোটেক্স এক্সটেনশন থেকে সিঙ্ক হওয়া কোনো নতুন ট্রেড পাওয়া যায়নি। অনুগ্রহ করে কোটেক্সে ট্রেড সম্পন্ন করে এক্সটেনশনের Sync বাটনে চাপ দিন বা পেজটি রিফ্রেশ করুন।'
+        tradeCountMismatch: (clientTradeCount > 0),
+        sheetTradesCount: clientTradeCount,
+        syncedTradesCount: 0,
+        missingCount: clientTradeCount,
+        message: clientTradeCount > 0
+          ? `মানি ম্যানেজমেন্ট শীটে মোট ${clientTradeCount}টি ট্রেড নেওয়া হয়েছে, কিন্তু কোটেক্স থেকে কোনো ট্রেড সেভ হয়নি। অনুগ্রহ করে কোটেক্স থেকে ট্রেড সেভ করে Sync Trades বাটনে চাপ দিন।`
+          : 'কোটেক্স এক্সটেনশন থেকে সিঙ্ক হওয়া কোনো নতুন ট্রেড পাওয়া যায়নি। অনুগ্রহ করে কোটেক্সে ট্রেড সম্পন্ন করে এক্সটেনশনের Sync বাটনে চাপ দিন বা পেজটি রিফ্রেশ করুন।'
+      });
+    }
+
+    // Effective candidate trades (excluding refund trades)
+    const effectiveCandidateTrades = candidateTrades.filter(t => !isTradeRefundServer(t));
+
+    if (clientTradeCount > 0 && effectiveCandidateTrades.length < clientTradeCount) {
+      const missingCount = clientTradeCount - effectiveCandidateTrades.length;
+      return res.json({
+        success: false,
+        passed: false,
+        tradeCountMismatch: true,
+        sheetTradesCount: clientTradeCount,
+        syncedTradesCount: effectiveCandidateTrades.length,
+        missingCount: missingCount,
+        message: `মানি ম্যানেজমেন্ট শীট অনুযায়ী মোট ${clientTradeCount}টি ট্রেড নেওয়া হয়েছে, কিন্তু ট্রেডিং হিস্টোরিতে মাত্র ${effectiveCandidateTrades.length}টি ট্রেড সেভ হয়েছে। এখনো ${missingCount}টি ট্রেড সেভ হওয়া বাকি রয়েছে। অনুগ্রহ করে কোটেক্স থেকে বাকি ট্রেডগুলো সঠিকভাবে সেভ করে Sync Trades বাটনে চাপ দিন।`
       });
     }
 
@@ -4753,11 +4783,6 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     const violations = [];
     let sessionComplete = false;
     let completionReason = '';
-
-    // Extract client session trade logs if provided by dashboard
-    const clientTradeLogs = (req.body.clientSessionData && Array.isArray(req.body.clientSessionData.tradeLogs))
-      ? req.body.clientSessionData.tradeLogs
-      : [];
 
     for (let idx = 0; idx < candidateTrades.length; idx++) {
       const t = candidateTrades[idx];
