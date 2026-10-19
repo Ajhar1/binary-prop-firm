@@ -2957,12 +2957,18 @@
                     <form id="submissionForm" onsubmit="event.preventDefault(); runAutomatedSessionAudit();">
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; margin-bottom:0.85rem;">
                             <div class="form-group" style="margin-bottom:0;">
-                                <label>Session Date</label>
-                                <input type="date" class="form-control" id="subDate" required />
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span>Session Date</span>
+                                    <span style="font-size:0.7rem; color:var(--text-secondary);"><i class="fas fa-lock"></i> অটো-লক</span>
+                                </label>
+                                <input type="date" class="form-control" id="subDate" readonly required tabindex="-1" style="background:rgba(255,255,255,0.06); cursor:not-allowed; pointer-events:none; color:#fff;" />
                             </div>
                             <div class="form-group" style="margin-bottom:0;">
-                                <label>Broker</label>
-                                <select class="form-control" id="subBroker">
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span>Broker</span>
+                                    <span style="font-size:0.7rem; color:var(--text-secondary);"><i class="fas fa-lock"></i> চ্যালেন্জ ফিক্সড</span>
+                                </label>
+                                <select class="form-control" id="subBroker" tabindex="-1" style="background:rgba(255,255,255,0.06); cursor:not-allowed; pointer-events:none; color:#fff;">
                                     <option value="Quotex">Quotex</option>
                                     <option value="Pocket Option">Pocket Option</option>
                                     <option value="Olymp Trade">Olymp Trade</option>
@@ -2975,35 +2981,39 @@
                         <!-- Win Trades & Loss Trades Inputs -->
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; margin-bottom:0.85rem;">
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="color:#2ecc71; font-weight:700;">
-                                    <i class="fas fa-arrow-trend-up"></i> উইন (Wins)
+                                <label style="color:#2ecc71; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                                    <span><i class="fas fa-arrow-trend-up"></i> উইন (Wins)</span>
+                                    <span style="font-size:0.7rem; color:rgba(46,204,113,0.8);"><i class="fas fa-lock"></i> শিট লক</span>
                                 </label>
-                                <input type="number" class="form-control" id="subWinTrades" min="0" placeholder="e.g. 6" oninput="calculateTradeCounts()" required style="border-color:rgba(46,204,113,0.35); font-weight:700;" />
+                                <input type="number" class="form-control" id="subWinTrades" min="0" placeholder="শীট থেকে অটো" readonly required tabindex="-1" style="background:rgba(255,255,255,0.06); border-color:rgba(46,204,113,0.35); font-weight:700; cursor:not-allowed; color:#2ecc71;" />
                             </div>
                             <div class="form-group" style="margin-bottom:0;">
-                                <label style="color:#e74c3c; font-weight:700;">
-                                    <i class="fas fa-arrow-trend-down"></i> লস (Losses)
+                                <label style="color:#e74c3c; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                                    <span><i class="fas fa-arrow-trend-down"></i> লস (Losses)</span>
+                                    <span style="font-size:0.7rem; color:rgba(231,76,60,0.8);"><i class="fas fa-lock"></i> শিট লক</span>
                                 </label>
-                                <input type="number" class="form-control" id="subLossTrades" min="0" placeholder="e.g. 2" oninput="calculateTradeCounts()" required style="border-color:rgba(231,76,60,0.35); font-weight:700;" />
+                                <input type="number" class="form-control" id="subLossTrades" min="0" placeholder="শীট থেকে অটো" readonly required tabindex="-1" style="background:rgba(255,255,255,0.06); border-color:rgba(231,76,60,0.35); font-weight:700; cursor:not-allowed; color:#e74c3c;" />
                             </div>
                         </div>
 
                         <!-- Auto-calculated Total Trades & Net P&L -->
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; margin-bottom:0.85rem;">
                             <div class="form-group" style="margin-bottom:0;">
-                                <label>
-                                    <i class="fas fa-calculator" style="color:var(--yellow);"></i> মোট ট্রেড
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span><i class="fas fa-calculator" style="color:var(--yellow);"></i> মোট ট্রেড</span>
+                                    <span style="font-size:0.7rem; color:rgba(245,176,65,0.8);"><i class="fas fa-lock"></i> অটোমেটিক</span>
                                 </label>
-                                <input type="number" class="form-control" id="subTradesCount" min="1" placeholder="অটোমেটিক" readonly required style="background:rgba(255,255,255,0.06); font-weight:800; color:var(--yellow); cursor:not-allowed;" />
+                                <input type="number" class="form-control" id="subTradesCount" min="0" placeholder="অটোমেটিক" readonly required tabindex="-1" style="background:rgba(255,255,255,0.06); font-weight:800; color:var(--yellow); cursor:not-allowed;" />
                                 <small id="subWinRateDisplay" style="color:var(--neon-green); font-size:0.74rem; margin-top:3px; display:block; font-weight:600;">
                                     Win Rate: 0%
                                 </small>
                             </div>
                             <div class="form-group" style="margin-bottom:0;">
-                                <label>
-                                    <i class="fas fa-dollar-sign" style="color:var(--yellow);"></i> নিট P&L ($)
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span><i class="fas fa-dollar-sign" style="color:var(--yellow);"></i> নিট P&L ($)</span>
+                                    <span style="font-size:0.7rem; color:rgba(245,176,65,0.8);"><i class="fas fa-lock"></i> শিট হিসাব</span>
                                 </label>
-                                <input type="number" step="0.01" class="form-control" id="subProfitLoss" placeholder="+14.50 বা -5.00" required />
+                                <input type="number" step="0.01" class="form-control" id="subProfitLoss" placeholder="শীট থেকে লোড হবে" readonly required tabindex="-1" style="background:rgba(255,255,255,0.06); font-weight:700; color:#fff; cursor:not-allowed;" />
                             </div>
                         </div>
 
@@ -3039,7 +3049,11 @@
                             </div>
 
                             <div class="form-group" style="margin-bottom:12px;">
-                                <input type="text" class="form-control" id="subNotes" placeholder="ট্রেডার নোট (ঐচ্ছিক)..." style="height:38px; font-size:0.84rem;" />
+                                <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                    <span style="font-size:0.8rem; color:var(--text-secondary);"><i class="fas fa-file-lines"></i> ট্রেডার নোট ও সেশন ট্রেড লগ</span>
+                                    <span style="font-size:0.7rem; color:var(--text-secondary);"><i class="fas fa-lock"></i> অটো-লক</span>
+                                </label>
+                                <input type="text" class="form-control" id="subNotes" placeholder="ট্রেডার নোট (শীট থেকে স্বয়ংক্রিয়ভাবে তৈরি হবে)..." readonly tabindex="-1" style="height:38px; font-size:0.84rem; background:rgba(255,255,255,0.06); cursor:not-allowed; color:#fff;" />
                             </div>
 
                             <button type="button" class="btn-gold" style="width:100%; justify-content:center; padding:11px; font-size:0.9rem; font-weight:800; border-radius:10px; box-shadow:0 4px 15px rgba(245,176,65,0.25);" id="submitProofBtn" onclick="runAutomatedSessionAudit()">
@@ -9920,15 +9934,6 @@
         }
 
         function syncMasanielloToProofForm(silent = false) {
-            if (!masState || !Array.isArray(masState.history) || masState.history.length === 0) {
-                const syncNotice = document.getElementById('subSheetSyncNotice');
-                if (syncNotice) syncNotice.style.display = 'none';
-                return false;
-            }
-
-            const sessionData = getMasanielloSessionData();
-            if (!sessionData || sessionData.totalCount === 0) return false;
-
             // 1. Session Date
             const dateInput = document.getElementById('subDate');
             if (dateInput && !dateInput.value) {
@@ -9945,21 +9950,41 @@
                 }
             }
 
-            // 3. Winning and Losing trades
             const winInput = document.getElementById('subWinTrades');
             const lossInput = document.getElementById('subLossTrades');
+            const pnlInput = document.getElementById('subProfitLoss');
+            const notesInput = document.getElementById('subNotes');
+
+            if (!masState || !Array.isArray(masState.history) || masState.history.length === 0) {
+                const syncNotice = document.getElementById('subSheetSyncNotice');
+                if (syncNotice) syncNotice.style.display = 'none';
+                if (winInput && !winInput.value) winInput.value = 0;
+                if (lossInput && !lossInput.value) lossInput.value = 0;
+                if (pnlInput && !pnlInput.value) pnlInput.value = '0.00';
+                calculateTradeCounts();
+                return false;
+            }
+
+            const sessionData = getMasanielloSessionData();
+            if (!sessionData || sessionData.totalCount === 0) {
+                if (winInput) winInput.value = 0;
+                if (lossInput) lossInput.value = 0;
+                if (pnlInput) pnlInput.value = '0.00';
+                calculateTradeCounts();
+                return false;
+            }
+
+            // 3. Winning and Losing trades
             if (winInput) winInput.value = sessionData.wins;
             if (lossInput) lossInput.value = sessionData.losses;
             calculateTradeCounts();
 
             // 4. Session Net P&L
-            const pnlInput = document.getElementById('subProfitLoss');
             if (pnlInput) {
                 pnlInput.value = sessionData.netPnl.toFixed(2);
             }
 
             // 5. Trader Notes: full breakdown of every trade number, dollar stake, and outcome
-            const notesInput = document.getElementById('subNotes');
             if (notesInput) {
                 notesInput.value = formatTradeLogsForNotes(sessionData);
             }
