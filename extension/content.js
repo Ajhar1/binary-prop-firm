@@ -923,30 +923,87 @@
     }
   }
 
+  // Universal Background Bridge: routes API requests through background service worker
+  // to completely bypass any webpage Content-Security-Policy (CSP) or connect-src restrictions
+  async function callApiViaBackground(endpoint, body, method = 'POST') {
+    const payload = {
+      action: 'API_FETCH',
+      endpoint,
+      method,
+      serverUrl: config.serverUrl || 'https://binarypropfirm.com',
+      body
+    };
+
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+      try {
+        const bgResult = await new Promise((resolve) => {
+          let hasTimedOut = false;
+          const timer = setTimeout(() => {
+            hasTimedOut = true;
+            resolve({ isTimeout: true, error: 'Background service worker response timed out' });
+          }, 12000);
+
+          chrome.runtime.sendMessage(payload, (resp) => {
+            clearTimeout(timer);
+            if (hasTimedOut) return;
+            if (chrome.runtime.lastError) {
+              resolve({ isBridgeError: true, error: chrome.runtime.lastError.message });
+            } else {
+              resolve(resp || { isBridgeError: true, error: 'Empty response from background' });
+            }
+          });
+        });
+
+        if (bgResult && !bgResult.isBridgeError && !bgResult.isTimeout) {
+          if (bgResult.data !== undefined) {
+            return bgResult.data;
+          }
+          if (bgResult.error) {
+            throw new Error(bgResult.error);
+          }
+        }
+        console.warn('[BPF Bridge] Background bridge reported issue, attempting direct fetch fallback...', bgResult);
+      } catch (e) {
+        console.warn('[BPF Bridge] Background bridge exception:', e);
+      }
+    }
+
+    // Direct fetch fallback
+    const serverUrl = (config.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '');
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+    const targetUrl = serverUrl + cleanEndpoint;
+
+    const res = await fetch(targetUrl, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+
+    const data = await res.json().catch(() => ({}));
+    return data;
+  }
+
   // 8. Heartbeat Engine (Sends ping every 30s to keep dashboard connected)
   async function fetchChallengeStatus() {
     if (!config.traderId) return null;
-    const targetUrl = (config.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '') + '/api/extension/heartbeat';
     const accountType = detectAccountType();
     const detectedId = await scanQuotexAccountId();
 
     try {
-      const res = await fetch(targetUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          traderId: config.traderId,
-          status: 'online',
-          accountType,
-          detectedBrokerAccountId: detectedId,
-          url: window.location.href,
-          brokerTzOffset: config.brokerTzOffsetMin,
-          brokerTzStr: config.brokerTzStr,
-          timestamp: Date.now()
-        })
-      });
-      const data = await res.json();
-      handleServerStatusResponse(data);
+      const data = await callApiViaBackground('/api/extension/heartbeat', {
+        traderId: config.traderId,
+        status: 'online',
+        accountType,
+        detectedBrokerAccountId: detectedId,
+        url: window.location.href,
+        brokerTzOffset: config.brokerTzOffsetMin,
+        brokerTzStr: config.brokerTzStr,
+        timestamp: Date.now()
+      }, 'POST');
+
+      if (data) {
+        handleServerStatusResponse(data);
+      }
       return data;
     } catch (e) {
       return null;
@@ -960,25 +1017,20 @@
   // Instant Disconnect Beacon when tab closes or navigates away
   function sendDisconnectSignal() {
     if (!config.traderId) return;
-    const targetUrl = (config.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '') + '/api/extension/disconnect';
-    const payload = JSON.stringify({
-      traderId: config.traderId,
-      timestamp: Date.now()
-    });
-
-    if (navigator.sendBeacon) {
-      const blob = new Blob([payload], { type: 'application/json' });
-      navigator.sendBeacon(targetUrl, blob);
-    } else {
-      try {
-        fetch(targetUrl, {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage({
+          action: 'API_FETCH',
+          endpoint: '/api/extension/disconnect',
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payload,
-          keepalive: true
+          serverUrl: config.serverUrl || 'https://binarypropfirm.com',
+          body: {
+            traderId: config.traderId,
+            timestamp: Date.now()
+          }
         });
-      } catch (e) {}
-    }
+      }
+    } catch (e) {}
   }
 
   window.addEventListener('beforeunload', sendDisconnectSignal);
@@ -1262,33 +1314,28 @@
     return { trades: allCollectedTrades, pagesScanned };
   }
 
-  // 11. Send Trades to Prop Firm Server
+  // 11. Send Trades to Prop Firm Server (via Background Bridge to bypass page CSP)
   async function postTradesToServer(trades, accountType) {
     if (!config.traderId) {
       showToast('ত্রুটি: Trader ID সেট করা নেই! এক্সটেনশনে Trader ID লিখুন।', 'error');
       return { success: false, message: 'Trader ID not set' };
     }
 
-    const targetUrl = (config.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '') + '/api/extension/sync-trades';
     const detectedId = await scanQuotexAccountId();
 
-    const res = await fetch(targetUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        traderId: config.traderId,
-        accountType,
-        source: 'quotex',
-        detectedBrokerAccountId: detectedId,
-        brokerTzOffset: config.brokerTzOffsetMin,
-        brokerTzStr: config.brokerTzStr,
-        clientTzOffset: new Date().getTimezoneOffset(),
-        clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Dhaka',
-        trades
-      })
-    });
+    const payload = {
+      traderId: config.traderId,
+      accountType,
+      source: 'quotex',
+      detectedBrokerAccountId: detectedId,
+      brokerTzOffset: config.brokerTzOffsetMin,
+      brokerTzStr: config.brokerTzStr,
+      clientTzOffset: new Date().getTimezoneOffset(),
+      clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Dhaka',
+      trades
+    };
 
-    return await res.json();
+    return await callApiViaBackground('/api/extension/sync-trades', payload, 'POST');
   }
 
   function waitForTradesTable(callback, maxAttempts = 30) {

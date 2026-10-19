@@ -2601,6 +2601,7 @@ async function uploadToFreeCloudCdn(fileBuffer, originalFilename, mimeType) {
 
 // Middleware
 app.use(cors());
+app.options('*', cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -5420,6 +5421,8 @@ function getTradeExecutionTime(t, clientTzOffset, brokerTzOffset) {
 
 // 0. Extension Heartbeat Ping (Called every 30s by active extension)
 app.post('/api/extension/heartbeat', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   try {
     const { traderId, status = 'online', accountType = 'demo', url = '' } = req.body;
     if (!traderId) {
@@ -5692,6 +5695,8 @@ app.post('/api/extension/disconnect', (req, res) => {
 
 // 1. Sync Trades from Quotex Extension (With Challenge Time-Lock Filter)
 app.post('/api/extension/sync-trades', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   try {
     const { traderId, accountType = 'demo', source = 'quotex', brokerTzOffset, detectedBrokerAccountId, trades = [] } = req.body;
     if (!traderId) {
