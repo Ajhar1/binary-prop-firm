@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -2651,6 +2651,11 @@
                     <span>ট্রেডিং হিস্টোরি</span>
                     <span style="background:rgba(0,230,118,0.15); color:#00e676; font-size:0.68rem; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:auto; border:1px solid rgba(0,230,118,0.3);">Extension</span>
                 </li>
+                <li class="sidebar-item" onclick="switchTab('payout', this)" id="nav-payout">
+                    <i class="fas fa-hand-holding-usd" style="color:var(--neon-green);"></i>
+                    <span>পে-আউট (Payout)</span>
+                    <span id="payoutNavBadge" style="display:none; background:rgba(0,230,118,0.15); color:#00e676; font-size:0.68rem; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:auto; border:1px solid rgba(0,230,118,0.3);">Passed</span>
+                </li>
             </ul>
         </div>
 
@@ -4012,6 +4017,217 @@
                 </div>
             </div>
         </section>
+        <!-- ==============================================
+             TAB 9: PAYOUT & LIVE FUNDING (POST-CHALLENGE)
+        ============================================== -->
+        <section class="tab-pane" id="pane-payout">
+            <!-- Header Banner -->
+            <div style="background:linear-gradient(135deg, rgba(0, 230, 118, 0.08) 0%, rgba(22, 27, 34, 0.95) 100%); border:1px solid rgba(0, 230, 118, 0.25); border-radius:14px; padding:1.2rem 1.4rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:1.4rem;">💸</span>
+                        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:#fff;">পে-আউট সেন্টার (Payout & Live Funding)</h3>
+                        <span id="payoutHeaderBadge" style="background:rgba(0,230,118,0.15); color:#00e676; font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:12px; border:1px solid rgba(0,230,118,0.3);">Verification Center</span>
+                    </div>
+                    <p style="margin:4px 0 0 0; font-size:0.82rem; color:var(--text-secondary);">
+                        চ্যালেঞ্জ সফলভাবে পাস করার পর Quotex-এর Binance Pay Deposit QR কোড আপলোড করে লাইভ ফান্ডিং নিন এবং Binance একাউন্টে প্রফিট উইথড্রয়াল করুন।
+                    </p>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button type="button" class="btn-outline" style="padding:7px 14px; font-size:0.8rem; border-radius:8px; cursor:pointer;" onclick="fetchUserPayouts()">
+                        <i class="fas fa-sync-alt"></i> রিফ্রেশ
+                    </button>
+                </div>
+            </div>
+
+            <!-- STATE A: LOCKED STATE (When user has no passed challenges) -->
+            <div id="payoutLockedState" style="display:none; background:rgba(22, 27, 34, 0.85); border:1px solid rgba(255, 184, 0, 0.3); border-radius:16px; padding:2.5rem 1.5rem; text-align:center; max-width:760px; margin:0 auto 2rem auto; box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+                <div style="width:70px; height:70px; border-radius:50%; background:rgba(255, 184, 0, 0.12); border:1px solid rgba(255, 184, 0, 0.35); display:flex; align-items:center; justify-content:center; margin:0 auto 1.2rem auto; font-size:2rem; color:#ffb800;">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3 style="font-size:1.35rem; font-weight:800; color:#fff; margin-bottom:8px;">পে-আউট ফিচার বর্তমানে লক রয়েছে</h3>
+                <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6; max-width:580px; margin:0 auto 1.5rem auto;">
+                    পে-আউট ও লাইভ ফান্ডিং রিকোয়েস্ট করতে হলে প্রথমে আপনার সক্রিয় ইভ্যালুয়েশন চ্যালেঞ্জটি সম্পূর্ণভাবে পাস করতে হবে। সব সেশন নিয়ম মেনে শেষ হওয়ার পর এডমিন রিভিউ করে চ্যালেঞ্জটি <strong>'Passed'</strong> হিসেবে অনুমোদন করলে এই সেকশনটি স্বয়ংক্রিয়ভাবে আনলক হবে।
+                </p>
+                <div id="payoutActiveChallengePreview" style="background:#0f1218; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; max-width:480px; margin:0 auto 1.5rem auto; text-align:left;">
+                    <!-- Dynamic active challenge preview -->
+                </div>
+                <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+                    <button type="button" class="btn-gold" style="padding:10px 22px; font-size:0.88rem;" onclick="switchTab('trade-history')">
+                        <i class="fas fa-chart-line"></i> ট্রেডিং হিস্টোরি ও সিঙ্ক দেখুন
+                    </button>
+                    <button type="button" class="btn-outline" style="padding:10px 20px; font-size:0.88rem;" onclick="switchTab('my-challenges')">
+                        <i class="fas fa-trophy"></i> আমার চ্যালেঞ্জ স্ট্যাটাস
+                    </button>
+                </div>
+            </div>
+
+            <!-- STATE B: UNLOCKED STATE (When user has at least one passed challenge) -->
+            <div id="payoutUnlockedState" style="display:none;">
+                <!-- Congratulatory Alert -->
+                <div style="background:rgba(0, 230, 118, 0.12); border:1px solid rgba(0, 230, 118, 0.35); border-radius:12px; padding:12px 18px; margin-bottom:1.5rem; display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:1.6rem;">🏆</span>
+                    <div>
+                        <strong style="color:#00e676; font-size:0.95rem; display:block;">অভিনন্দন! আপনি সফলভাবে চ্যালেঞ্জ পাস করেছেন।</strong>
+                        <span style="color:#cbd5e1; font-size:0.82rem;">আপনার Quotex অ্যাকাউন্টে ফান্ড ডিপোজিট নিতে অথবা উপার্জিত প্রফিটের ডলার পেতে নিচের ফর্মটি পূরণ করুন।</span>
+                    </div>
+                </div>
+
+                <!-- Main Payout Submission Form -->
+                <div class="glass" style="border:1px solid rgba(255, 255, 255, 0.08); border-radius:16px; padding:1.5rem; margin-bottom:2rem; background:#161b22;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.75rem;">
+                        <h4 style="margin:0; font-size:1.05rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-file-invoice-dollar" style="color:var(--neon-green);"></i> নতুন পে-আউট রিকোয়েস্ট সাবমিট করুন
+                        </h4>
+                        <span style="font-size:0.78rem; color:#94a3b8;">* চিহ্নিত ফিল্ডগুলো আবশ্যক</span>
+                    </div>
+
+                    <form id="payoutRequestForm" onsubmit="handlePayoutFormSubmit(event)">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:1.2rem;">
+                            <!-- 1. Select Passed Challenge -->
+                            <div class="form-group" style="margin:0;">
+                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                    ১. পাস করা চ্যালেঞ্জ নির্বাচন করুন *
+                                </label>
+                                <select id="payoutChallengeSelect" class="input-control" required onchange="handlePayoutChallengeChange()" style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.88rem;">
+                                    <!-- Populated dynamically -->
+                                </select>
+                                <small id="payoutChallengeInfo" style="display:block; font-size:0.75rem; color:#ffb800; margin-top:4px;"></small>
+                            </div>
+
+                            <!-- 2. Payout Purpose / Type -->
+                            <div class="form-group" style="margin:0;">
+                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                    ২. পে-আউটের ধরন / উদ্দেশ্য *
+                                </label>
+                                <select id="payoutTypeSelect" class="input-control" required style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.88rem;">
+                                    <option value="quotex_deposit">💎 Quotex লাইভ ফান্ড ডিপোজিট (Binance Pay QR)</option>
+                                    <option value="profit_withdrawal">💰 প্রফিট উইথড্রয়াল (Binance Account)</option>
+                                    <option value="both">🎁 Quotex ডিপোজিট + প্রফিট উইথড্রয়াল</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 3. Upload Quotex QR Code (Binance Pay QR) -->
+                        <div style="background:#0f1218; border:1px dashed rgba(0, 230, 118, 0.4); border-radius:12px; padding:1.2rem; margin-bottom:1.2rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                                <div>
+                                    <label style="font-size:0.88rem; font-weight:800; color:#00e676; display:flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-qrcode"></i> Quotex-এর Binance Pay Deposit QR Code (স্ক্রিনশট আপলোড) *
+                                    </label>
+                                    <p style="margin:3px 0 0 0; font-size:0.78rem; color:#94a3b8;">
+                                        Quotex-এ <strong>Deposit</strong> ➔ <strong>Binance Pay</strong> সিলেক্ট করার পর যে ডিপোজিট QR কোডটি আসে, সেটির স্পষ্ট স্ক্রিনশট এখানে আপলোড করুন। অ্যাডমিন এটি স্ক্যান করে সরাসরি আপনার Quotex অ্যাকাউন্টে ডলার দিয়ে দেবে।
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+                                <div style="flex:1; min-width:240px;">
+                                    <input type="file" id="payoutQrInput" accept="image/*" onchange="handlePayoutQrSelect(event)" style="display:none;" />
+                                    <button type="button" class="btn-outline" onclick="document.getElementById('payoutQrInput').click()" style="width:100%; padding:12px; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:0.86rem; border-color:rgba(0,230,118,0.4); color:#00e676;">
+                                        <i class="fas fa-camera"></i> QR কোড স্ক্রিনশট সিলেক্ট করুন (PNG, JPG)
+                                    </button>
+                                    <div id="payoutQrFileName" style="font-size:0.75rem; color:#94a3b8; margin-top:5px; text-align:center;">কোনো ফাইল সিলেক্ট করা হয়নি</div>
+                                </div>
+
+                                <!-- Preview Box -->
+                                <div id="payoutQrPreviewBox" style="display:none; position:relative; width:110px; height:110px; border-radius:8px; border:2px solid #00e676; overflow:hidden; background:#000;">
+                                    <img id="payoutQrPreviewImg" src="" alt="QR Preview" style="width:100%; height:100%; object-fit:contain;" />
+                                    <button type="button" onclick="removePayoutQrImage()" style="position:absolute; top:2px; right:2px; background:rgba(239,68,68,0.9); color:#fff; border:none; width:20px; height:20px; border-radius:50%; font-size:10px; cursor:pointer; line-height:20px; text-align:center;">&times;</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:1.2rem;">
+                            <!-- 4. Binance Pay ID / UID -->
+                            <div class="form-group" style="margin:0;">
+                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                    ৪. আপনার Binance Pay ID অথবা UID *
+                                </label>
+                                <input type="text" id="payoutBinanceUid" class="input-control" placeholder="যেমন: 83749201" style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.88rem;" />
+                                <small style="font-size:0.75rem; color:#94a3b8;">প্রফিটের ডলার এই Binance অ্যাকাউন্টে পাঠানো হবে।</small>
+                            </div>
+
+                            <!-- 5. Quotex Account ID -->
+                            <div class="form-group" style="margin:0;">
+                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                    ৫. আপনার Quotex Account ID *
+                                </label>
+                                <input type="text" id="payoutQuotexId" class="input-control" placeholder="যেমন: 63896760" required style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.88rem;" />
+                                <small style="font-size:0.75rem; color:#94a3b8;">যে Quotex অ্যাকাউন্টে ডলার ডিপোজিট হবে।</small>
+                            </div>
+
+                            <!-- 6. Requested Amount ($) -->
+                            <div class="form-group" style="margin:0;">
+                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                    ৬. ডলারের পরিমাণ (Amount in USD) *
+                                </label>
+                                <input type="number" id="payoutAmount" step="1" min="10" class="input-control" placeholder="100" required style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#ffb800; font-weight:800; padding:10px 12px; border-radius:8px; font-size:0.95rem;" />
+                                <small style="font-size:0.75rem; color:#94a3b8;">আপনার পাস করা প্যাকেজের ফান্ডেড অ্যামাউন্ট বা প্রফিট।</small>
+                            </div>
+
+                            <!-- 7. Binance USDT Address (Optional) -->
+                            <div class="form-group" style="margin:0;">
+                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                    ৭. Binance USDT Address (ঐচ্ছিক / TRC20 বা BEP20)
+                                </label>
+                                <input type="text" id="payoutBinanceAddress" class="input-control" placeholder="যেমন: T... অথবা 0x..." style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.88rem;" />
+                            </div>
+                        </div>
+
+                        <!-- 8. Trader Notes -->
+                        <div class="form-group" style="margin-bottom:1.5rem;">
+                            <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                ৮. বিশেষ নির্দেশনা / মন্তব্য (ঐচ্ছিক)
+                            </label>
+                            <textarea id="payoutNotes" rows="2" class="input-control" placeholder="আপনার কোনো বিশেষ নির্দেশনা থাকলে এখানে লিখুন..." style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.86rem;"></textarea>
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end;">
+                            <button type="submit" id="payoutSubmitBtn" class="btn-gold" style="padding:12px 28px; font-size:0.92rem; font-weight:800; border-radius:10px; display:inline-flex; align-items:center; gap:8px;">
+                                <i class="fas fa-paper-plane"></i> পে-আউট রিকোয়েস্ট সাবমিট করুন
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 4. Payout History Card -->
+            <div class="glass" style="border:1px solid rgba(255, 255, 255, 0.08); border-radius:16px; padding:1.5rem; background:#161b22;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.75rem;">
+                    <h4 style="margin:0; font-size:1.05rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-history" style="color:var(--yellow);"></i> আমার পে-আউট রিকোয়েস্টসমূহ (Payout History)
+                    </h4>
+                    <span id="payoutHistoryCount" style="font-size:0.8rem; color:#94a3b8;">০ টি রিকোয়েস্ট</span>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="data-table" style="width:100%; border-collapse:collapse; min-width:850px;">
+                        <thead>
+                            <tr>
+                                <th style="padding:10px 12px; font-size:0.78rem;"># ID & তারিখ</th>
+                                <th style="padding:10px 12px; font-size:0.78rem;">চ্যালেঞ্জ</th>
+                                <th style="padding:10px 12px; font-size:0.78rem;">ধরন</th>
+                                <th style="padding:10px 12px; font-size:0.78rem;">পরিমাণ</th>
+                                <th style="padding:10px 12px; font-size:0.78rem;">Quotex ID</th>
+                                <th style="padding:10px 12px; font-size:0.78rem;">Binance Pay ID</th>
+                                <th style="padding:10px 12px; font-size:0.78rem; text-align:center;">QR কোড</th>
+                                <th style="padding:10px 12px; font-size:0.78rem; text-align:center;">স্ট্যাটাস</th>
+                                <th style="padding:10px 12px; font-size:0.78rem;">এডমিন নোট / Trx ID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userPayoutHistoryBody">
+                            <tr>
+                                <td colspan="9" style="text-align:center; padding:2rem; color:#94a3b8;">
+                                    <i class="fas fa-spinner fa-spin" style="color:var(--yellow); font-size:1.4rem; display:block; margin-bottom:8px;"></i>
+                                    পে-আউট হিস্টোরি লোড হচ্ছে...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Setup Video Modal (Computer, Android, iPhone) -->
@@ -4639,7 +4855,8 @@
                 'buy-challenge': ['🛒 চ্যালেঞ্জ প্যাকেজ', 'পছন্দের ফান্ডেড প্যাকেজ বাছাই করুন।'],
                 'profile': ['👤 প্রোফাইল সেটিংস', 'ব্যক্তিগত তথ্য ও পেআউট ওয়ালেট।'],
                 'support': ['🎧 সাপোর্ট হেল্পডেস্ক', 'এডমিন সহায়তা ও মেসেজ ইনবক্স।'],
-                'trade-history': ['📊 ট্রেডিং হিস্টোরি', 'Quotex লাইভ সিঙ্কড ট্রেড রেকর্ড।']
+                'trade-history': ['📊 ট্রেডিং হিস্টোরি', 'Quotex লাইভ সিঙ্কড ট্রেড রেকর্ড।'],
+                'payout': ['💸 পে-আউট রিকোয়েস্ট', 'চ্যালেঞ্জ পাস করার পর ডলার ডিপোজিট ও প্রফিট উইথড্রয়াল।']
             };
 
             if (headings[tabId]) {
@@ -4666,6 +4883,8 @@
                 fetchUserSupportTickets();
             } else if (tabId === 'trade-history') {
                 fetchUserSyncedTrades();
+            } else if (tabId === 'payout') {
+                fetchUserPayouts();
             }
 
             // Close mobile sidebar on switch
@@ -12163,7 +12382,351 @@
             const subDateEl = document.getElementById('subDate');
             if (subDateEl) subDateEl.value = new Date().toISOString().split('T')[0];
 
+        // ==============================================
+        // PAYOUT SYSTEM JAVASCRIPT LOGIC (User Dashboard)
+        // ==============================================
+        let userPayoutsData = {
+            hasPassedChallenge: false,
+            passedChallenges: [],
+            activeChallenges: [],
+            payouts: [],
+            userProfile: {}
+        };
+        let selectedPayoutQrFile = null;
+
+        async function fetchUserPayouts() {
+            const authToken = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token') || (typeof token !== 'undefined' ? token : null);
+            if (!authToken) return;
+
+            try {
+                const res = await fetch('/api/user/payouts', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                if (!data.success) return;
+
+                userPayoutsData = data;
+                renderUserPayoutUi(data);
+            } catch (err) {
+                console.error('[Payout Fetch Error]', err);
+            }
+        }
+
+        function renderUserPayoutUi(data) {
+            const lockedState = document.getElementById('payoutLockedState');
+            const unlockedState = document.getElementById('payoutUnlockedState');
+            const navBadge = document.getElementById('payoutNavBadge');
+            const headerBadge = document.getElementById('payoutHeaderBadge');
+
+            const hasPassed = data.hasPassedChallenge && data.passedChallenges && data.passedChallenges.length > 0;
+
+            if (navBadge) {
+                if (hasPassed) {
+                    navBadge.style.display = 'inline-block';
+                    navBadge.style.background = 'rgba(0,230,118,0.15)';
+                    navBadge.style.color = '#00e676';
+                    navBadge.style.borderColor = 'rgba(0,230,118,0.3)';
+                    navBadge.innerText = `${data.passedChallenges.length} Passed`;
+                } else {
+                    navBadge.style.display = 'none';
+                }
+            }
+
+            if (!hasPassed) {
+                // Show Locked State
+                if (lockedState) lockedState.style.display = 'block';
+                if (unlockedState) unlockedState.style.display = 'none';
+                if (headerBadge) {
+                    headerBadge.style.background = 'rgba(255,184,0,0.15)';
+                    headerBadge.style.color = '#ffb800';
+                    headerBadge.style.borderColor = 'rgba(255,184,0,0.3)';
+                    headerBadge.innerText = '🔒 Challenge Pass Required';
+                }
+
+                // Render preview of active in-progress challenge if any
+                const previewBox = document.getElementById('payoutActiveChallengePreview');
+                if (previewBox) {
+                    const activeCh = data.activeChallenges && data.activeChallenges.length > 0 ? data.activeChallenges[0] : null;
+                    if (activeCh) {
+                        const sessionsDone = activeCh.sessionsCompleted || 0;
+                        const sessionsReq = activeCh.sessionsRequired || 15;
+                        const pct = Math.min(100, Math.round((sessionsDone / sessionsReq) * 100));
+                        previewBox.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <strong style="color:#fff; font-size:0.86rem;">
+                                    <i class="fas fa-running" style="color:var(--yellow);"></i> ${activeCh.packageName || 'Active Challenge'}
+                                </strong>
+                                <span style="background:rgba(255,184,0,0.15); color:#ffb800; font-size:0.72rem; padding:2px 8px; border-radius:10px; font-weight:700;">
+                                    ${sessionsDone} / ${sessionsReq} সেশন সম্পন্ন
+                                </span>
+                            </div>
+                            <div style="width:100%; height:6px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden; margin-bottom:6px;">
+                                <div style="width:${pct}%; height:100%; background:linear-gradient(90deg, #ffb800, #00e676); border-radius:10px;"></div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#94a3b8;">
+                                <span>সেশন প্রোগ্রেস: ${pct}%</span>
+                                <span>আরও ${Math.max(0, sessionsReq - sessionsDone)} টি সেশন বাকি</span>
+                            </div>
+                        `;
+                    } else {
+                        previewBox.innerHTML = `
+                            <div style="text-align:center; color:#94a3b8; font-size:0.82rem;">
+                                আপনার বর্তমানে কোনো অ্যাক্টিভ চ্যালেঞ্জ নেই। নতুন চ্যালেঞ্জ নিয়ে শুরু করুন।
+                            </div>
+                        `;
+                    }
+                }
+            } else {
+                // Show Unlocked State
+                if (lockedState) lockedState.style.display = 'none';
+                if (unlockedState) unlockedState.style.display = 'block';
+                if (headerBadge) {
+                    headerBadge.style.background = 'rgba(0,230,118,0.15)';
+                    headerBadge.style.color = '#00e676';
+                    headerBadge.style.borderColor = 'rgba(0,230,118,0.3)';
+                    headerBadge.innerText = '✅ Payout Unlocked (Eligible)';
+                }
+
+                // Populate Passed Challenges Dropdown
+                const sel = document.getElementById('payoutChallengeSelect');
+                if (sel) {
+                    sel.innerHTML = data.passedChallenges.map((c, i) => {
+                        const pkgName = c.packageName || c.packageTitle || `Funded Account ($${c.fundedAmount || 100})`;
+                        const cleanId = c.payoutId || c.id || `CH-${i+1}`;
+                        const dt = c.passedAt ? new Date(c.passedAt).toLocaleDateString() : 'Verified';
+                        return `<option value="${c.id || c.challengeId}" data-broker-id="${c.brokerAccountId || ''}" data-amount="${c.fundedAmount || 100}" data-split="${c.profitSplit || '75%'}">
+                            🏆 ${pkgName} (ID: ${cleanId.substring(0, 12)}...) | Passed: ${dt}
+                        </option>`;
+                    }).join('');
+
+                    handlePayoutChallengeChange();
+                }
+
+                // Autofill Binance & Quotex from user profile if inputs are empty
+                const bUidInput = document.getElementById('payoutBinanceUid');
+                if (bUidInput && !bUidInput.value && data.userProfile) {
+                    bUidInput.value = data.userProfile.payoutWallet || '';
+                }
+                const qIdInput = document.getElementById('payoutQuotexId');
+                if (qIdInput && !qIdInput.value && data.userProfile) {
+                    qIdInput.value = data.userProfile.brokerAccountId || '';
+                }
+            }
+
+            // Render History Table
+            renderUserPayoutHistory(data.payouts || []);
+        }
+
+        function handlePayoutChallengeChange() {
+            const sel = document.getElementById('payoutChallengeSelect');
+            if (!sel || !sel.options[sel.selectedIndex]) return;
+            const opt = sel.options[sel.selectedIndex];
+            const amount = opt.getAttribute('data-amount') || '100';
+            const split = opt.getAttribute('data-split') || '75%';
+            const brokerId = opt.getAttribute('data-broker-id') || '';
+
+            const infoEl = document.getElementById('payoutChallengeInfo');
+            if (infoEl) {
+                infoEl.innerHTML = `ফান্ডেড অ্যামাউন্ট: <strong>$${amount}</strong> | প্রফিট স্প্লিট: <strong>${split}</strong>`;
+            }
+
+            const amtInput = document.getElementById('payoutAmount');
+            if (amtInput) amtInput.value = amount;
+
+            const qIdInput = document.getElementById('payoutQuotexId');
+            if (qIdInput && brokerId && !qIdInput.value) qIdInput.value = brokerId;
+        }
+
+        function handlePayoutQrSelect(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            selectedPayoutQrFile = file;
+            const nameEl = document.getElementById('payoutQrFileName');
+            if (nameEl) nameEl.innerText = `✅ নির্বাচিত ফাইল: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+
+            const previewBox = document.getElementById('payoutQrPreviewBox');
+            const previewImg = document.getElementById('payoutQrPreviewImg');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (previewImg) previewImg.src = e.target.result;
+                if (previewBox) previewBox.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePayoutQrImage() {
+            selectedPayoutQrFile = null;
+            const inp = document.getElementById('payoutQrInput');
+            if (inp) inp.value = '';
+            const previewBox = document.getElementById('payoutQrPreviewBox');
+            if (previewBox) previewBox.style.display = 'none';
+            const nameEl = document.getElementById('payoutQrFileName');
+            if (nameEl) nameEl.innerText = 'কোনো ফাইল সিলেক্ট করা হয়নি';
+        }
+
+        async function handlePayoutFormSubmit(event) {
+            event.preventDefault();
+            const authToken = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token') || (typeof token !== 'undefined' ? token : null);
+            if (!authToken) {
+                showToast('লগইন সেশন পাওয়া যায়নি। পুনরায় লগইন করুন।', 'error');
+                return;
+            }
+
+            const pType = document.getElementById('payoutTypeSelect').value;
+            const qId = (document.getElementById('payoutQuotexId').value || '').trim();
+            const bUid = (document.getElementById('payoutBinanceUid').value || '').trim();
+            const bAddr = (document.getElementById('payoutBinanceAddress').value || '').trim();
+            const amt = document.getElementById('payoutAmount').value;
+            const chId = document.getElementById('payoutChallengeSelect').value;
+            const notes = document.getElementById('payoutNotes').value;
+
+            // Validation based on type
+            if (!qId && (pType === 'quotex_deposit' || pType === 'both')) {
+                showToast('অনুগ্রহ করে আপনার Quotex Account ID দিন।', 'error');
+                document.getElementById('payoutQuotexId').focus();
+                return;
+            }
+
+            if (!bUid && !bAddr && (pType === 'profit_withdrawal' || pType === 'both')) {
+                showToast('প্রফিট উইথড্রয়ালের জন্য অনুগ্রহ করে আপনার Binance Pay ID / UID দিন।', 'error');
+                document.getElementById('payoutBinanceUid').focus();
+                return;
+            }
+
+            if (!selectedPayoutQrFile && (pType === 'quotex_deposit' || pType === 'both')) {
+                showToast('⚠️ Quotex-এর Binance Pay Deposit QR কোডের স্ক্রিনশট আপলোড করা আবশ্যক!', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('payoutSubmitBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> সাবমিট হচ্ছে...`;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('challengeId', chId);
+                formData.append('payoutType', pType);
+                formData.append('quotexAccountId', qId);
+                formData.append('binancePayId', bUid);
+                formData.append('binanceUid', bUid);
+                formData.append('binanceAddress', bAddr);
+                formData.append('amount', amt);
+                formData.append('traderNotes', notes);
+                if (selectedPayoutQrFile) {
+                    formData.append('qrCodeImage', selectedPayoutQrFile);
+                }
+
+                const res = await fetch('/api/user/payouts', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-paper-plane"></i> পে-আউট রিকোয়েস্ট সাবমিট করুন`;
+                }
+
+                if (data.success) {
+                    showToast(data.message || 'পে-আউট রিকোয়েস্ট সফলভাবে গৃহীত হয়েছে!', 'success');
+                    removePayoutQrImage();
+                    document.getElementById('payoutNotes').value = '';
+                    fetchUserPayouts();
+                } else {
+                    showToast(data.message || 'রিকোয়েস্ট সাবমিট ব্যর্থ হয়েছে।', 'error');
+                }
+            } catch (err) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-paper-plane"></i> পে-আউট রিকোয়েস্ট সাবমিট করুন`;
+                }
+                showToast('সার্ভার কানেকশন এরর: ' + err.message, 'error');
+            }
+        }
+
+        function renderUserPayoutHistory(payouts) {
+            const tbody = document.getElementById('userPayoutHistoryBody');
+            const countEl = document.getElementById('payoutHistoryCount');
+            if (!tbody) return;
+
+            if (countEl) countEl.innerText = `${payouts.length} টি রিকোয়েস্ট`;
+
+            if (!payouts || payouts.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align:center; padding:2.5rem 1rem; color:#94a3b8;">
+                            <i class="fas fa-folder-open" style="font-size:1.8rem; color:var(--yellow); display:block; margin-bottom:8px; opacity:0.6;"></i>
+                            এখনও কোনো পে-আউট রিকোয়েস্ট করা হয়নি।
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = payouts.map(p => {
+                const dt = p.createdAt ? new Date(p.createdAt).toLocaleDateString() : '--';
+                const time = p.createdAt ? new Date(p.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+                let stBadge = '';
+                if (p.status === 'paid') {
+                    stBadge = `<span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:3px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">✅ Paid / সম্পন্ন</span>`;
+                } else if (p.status === 'rejected') {
+                    stBadge = `<span style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:3px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">❌ Rejected / বাতিল</span>`;
+                } else {
+                    stBadge = `<span style="background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); padding:3px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">⏳ Under Review / অপেক্ষমাণ</span>`;
+                }
+
+                const qrPreview = p.qrCodeUrl
+                    ? `<a href="${p.qrCodeUrl}" target="_blank" title="ক্লিক করে বড় করে দেখুন" style="display:inline-block; border-radius:6px; overflow:hidden; border:1px solid rgba(0,230,118,0.4); width:36px; height:36px; vertical-align:middle;">
+                        <img src="${p.qrCodeUrl}" alt="QR" style="width:100%; height:100%; object-fit:cover;" />
+                       </a>`
+                    : '<span style="color:#64748b; font-size:0.75rem;">None</span>';
+
+                return `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <td style="padding:10px 12px; font-size:0.8rem;">
+                            <strong style="color:var(--yellow); font-family:monospace;">${p.payoutId || p.id.substring(0,8)}</strong>
+                            <div style="font-size:0.72rem; color:#94a3b8;">${dt} ${time}</div>
+                        </td>
+                        <td style="padding:10px 12px; font-size:0.8rem; color:#cbd5e1;">
+                            ${p.challengePackageName || 'Funded Plan'}
+                        </td>
+                        <td style="padding:10px 12px; font-size:0.78rem;">
+                            <span style="background:rgba(255,255,255,0.05); color:#cbd5e1; padding:2px 6px; border-radius:4px;">
+                                ${p.payoutTypeLabel || p.payoutType}
+                            </span>
+                        </td>
+                        <td style="padding:10px 12px; font-size:0.86rem; font-weight:800; color:#00e676;">
+                            $${p.amount || 0}
+                        </td>
+                        <td style="padding:10px 12px; font-size:0.8rem; font-family:monospace; color:#fff;">
+                            ${p.quotexAccountId || '--'}
+                        </td>
+                        <td style="padding:10px 12px; font-size:0.8rem; font-family:monospace; color:#ffb800;">
+                            ${p.binancePayId || p.binanceUid || '--'}
+                        </td>
+                        <td style="padding:10px 12px; text-align:center;">
+                            ${qrPreview}
+                        </td>
+                        <td style="padding:10px 12px; text-align:center;">
+                            ${stBadge}
+                        </td>
+                        <td style="padding:10px 12px; font-size:0.78rem; color:#94a3b8; max-width:200px;">
+                            ${p.adminNotes ? `<span style="color:#e2e8f0; display:block;">${p.adminNotes}</span>` : ''}
+                            ${p.transactionId ? `<code style="color:#00e676; font-size:0.72rem; display:block;">Trx: ${p.transactionId}</code>` : (!p.adminNotes ? '--' : '')}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
             fetchUserProfile();
+            fetchUserPayouts();
             fetchChallenges();
             fetchSubmissions();
             fetchPackages();

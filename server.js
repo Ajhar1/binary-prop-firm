@@ -35,6 +35,7 @@ const PROMO_CODES_FILE = path.join(DATA_DIR, 'promo_codes.json');
 const SUPPORT_FILE = path.join(DATA_DIR, 'support_tickets.json');
 const TRADER_STATES_FILE = path.join(DATA_DIR, 'trader_states.json');
 const SYNCED_TRADES_FILE = path.join(DATA_DIR, 'synced_trades.json');
+const PAYOUTS_FILE = path.join(DATA_DIR, 'payouts.json');
 const DOWNLOADS_DIR = path.join(__dirname, 'public', 'downloads');
 const TRADERS_VAULT_DIR = path.join(DATA_DIR, 'lifelong_traders_vault');
 const TRADERS_VAULT_FILE = path.join(TRADERS_VAULT_DIR, 'master_registered_traders_vault.json');
@@ -2554,6 +2555,28 @@ const uploadAvatar = multer({
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) cb(null, true);
     else cb(new Error('Only image files (JPG, PNG, WebP, GIF) are allowed.'));
+  }
+});
+
+// Multer storage for Payout Quotex Binance QR Code screenshots
+const payoutQrStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase() || '.png';
+    const cleanId = (req.user && req.user.traderId ? req.user.traderId : 'payout').replace(/[^a-zA-Z0-9]/g, '_');
+    cb(null, `payout_qr_${cleanId}_${Date.now()}${ext}`);
+  }
+});
+const uploadPayoutQr = multer({
+  storage: payoutQrStorage,
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (file.mimetype.startsWith('image/') || ['.png', '.jpg', '.jpeg', '.webp'].includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files (.png, .jpg, .jpeg, .webp) are allowed for QR code screenshot.'));
+    }
   }
 });
 
@@ -6431,6 +6454,7 @@ app.get('/api/admin/stats', authenticateAdminToken, (req, res) => {
   const submissions = readJson(SUBMISSIONS_FILE);
   const mmLinks = readJson(MM_LINKS_FILE);
   const courses = readJson(COURSES_FILE);
+  const payouts = readJson(PAYOUTS_FILE, []);
 
   const totalUsers = users.length;
   const pendingChallenges = challenges.filter(c => c.status === 'pending_approval').length;
@@ -6438,6 +6462,8 @@ app.get('/api/admin/stats', authenticateAdminToken, (req, res) => {
   const passedChallenges = challenges.filter(c => c.status === 'passed').length;
   const failedChallenges = challenges.filter(c => c.status === 'failed').length;
   const pendingSubmissions = submissions.filter(s => s.status === 'under_review').length;
+  const pendingPayouts = payouts.filter(p => p.status === 'pending').length;
+  const totalPayoutsPaid = payouts.filter(p => p.status === 'paid').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
   const isApprovedChallenge = (c) => Boolean(
     c &&
     c.status !== 'pending_approval' &&
@@ -6481,6 +6507,8 @@ app.get('/api/admin/stats', authenticateAdminToken, (req, res) => {
       failedChallenges,
       pendingSubmissions,
       totalRevenue,
+      pendingPayouts,
+      totalPayoutsPaid,
       totalMmLinks: mmLinks.length,
       totalCourses: courses.length
     },
@@ -8533,6 +8561,277 @@ app.post('/api/admin/support/resolve-challenge', authenticateAdminToken, (req, r
 
   saveChallenges(challenges);
   res.json({ success: true, message: 'চ্যালেঞ্জের সমস্যা সফলভাবে সমাধান করা হয়েছে!', challenge: challenges[idx] });
+});
+
+// ==============================================
+// PAYOUT MANAGEMENT MODULE (User & Admin)
+// Quotex Deposit via Binance Pay QR & Profit Withdrawal
+// ==============================================
+
+// 1. User: Get Payout Overview & Eligibility
+app.get('/api/user/payouts', authenticateToken, (req, res) => {
+  try {
+    const user = req.user;
+    const allCh = syncChallengesWithSubmissions();
+    const userCh = allCh.filter(c => 
+      c.userId === user.id || 
+      (c.userEmail && user.email && c.userEmail.toLowerCase() === user.email.toLowerCase()) ||
+      (c.userTraderId && user.traderId && c.userTraderId.toLowerCase() === user.traderId.toLowerCase())
+    );
+    const passedChallenges = userCh.filter(c => 
+      c.status === 'passed' || 
+      c.isCompleted === true || 
+      c.challengePhase === 'funded'
+    );
+    const activeChallenges = userCh.filter(c => c.status === 'in_progress');
+
+    const allPayouts = readJson(PAYOUTS_FILE, []);
+    const userPayouts = allPayouts.filter(p => 
+      p.userId === user.id || 
+      (p.userEmail && user.email && p.userEmail.toLowerCase() === user.email.toLowerCase()) ||
+      (p.userTraderId && user.traderId && p.userTraderId.toLowerCase() === user.traderId.toLowerCase())
+    ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const users = readJson(USERS_FILE, []);
+    const fullUser = users.find(u => u.id === user.id) || user;
+
+    res.json({
+      success: true,
+      hasPassedChallenge: passedChallenges.length > 0,
+      passedChallenges,
+      activeChallenges,
+      payouts: userPayouts,
+      userProfile: {
+        id: fullUser.id,
+        traderId: fullUser.traderId || '',
+        name: fullUser.name || '',
+        email: fullUser.email || '',
+        telegram: fullUser.telegram || '',
+        brokerAccountId: fullUser.brokerAccountId || '',
+        payoutWallet: fullUser.payoutWallet || '',
+        preferredBroker: fullUser.preferredBroker || ''
+      }
+    });
+  } catch (err) {
+    console.error('[User Payouts GET Error]', err);
+    res.status(500).json({ success: false, message: 'পে-আউট তথ্য লোড করতে ব্যর্থ হয়েছে।' });
+  }
+});
+
+// 2. User: Submit New Payout Request
+app.post('/api/user/payouts', authenticateToken, uploadPayoutQr.single('qrCodeImage'), async (req, res) => {
+  try {
+    const user = req.user;
+    const allCh = syncChallengesWithSubmissions();
+    const userCh = allCh.filter(c => 
+      c.userId === user.id || 
+      (c.userEmail && user.email && c.userEmail.toLowerCase() === user.email.toLowerCase()) ||
+      (c.userTraderId && user.traderId && c.userTraderId.toLowerCase() === user.traderId.toLowerCase())
+    );
+    const passedChallenges = userCh.filter(c => 
+      c.status === 'passed' || 
+      c.isCompleted === true || 
+      c.challengePhase === 'funded'
+    );
+
+    // Guard: Must have at least one passed challenge
+    if (passedChallenges.length === 0) {
+      if (req.file && fs.existsSync(req.file.path)) {
+        try { fs.unlinkSync(req.file.path); } catch (e) {}
+      }
+      return res.status(403).json({
+        success: false,
+        message: 'পে-আউট রিকোয়েস্ট করতে হলে প্রথমে একটি চ্যালেঞ্জ সম্পূর্ণভাবে পাস করতে হবে।'
+      });
+    }
+
+    const {
+      challengeId,
+      payoutType = 'quotex_deposit',
+      quotexAccountId,
+      binancePayId,
+      binanceUid,
+      binanceAddress,
+      amount,
+      traderNotes
+    } = req.body;
+
+    const selectedChallenge = passedChallenges.find(c => c.id === challengeId || c.challengeId === challengeId) || passedChallenges[0];
+
+    let qrCodeUrl = '';
+    if (req.file) {
+      try {
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const cloudUpload = await uploadToFreeCloudCdn(fileBuffer, req.file.originalname, req.file.mimetype);
+        if (cloudUpload.success) {
+          qrCodeUrl = cloudUpload.url;
+          try { fs.unlinkSync(req.file.path); } catch (e) {}
+        } else {
+          qrCodeUrl = `/uploads/${req.file.filename}`;
+        }
+      } catch (e) {
+        qrCodeUrl = `/uploads/${req.file.filename}`;
+      }
+    }
+
+    let payoutTypeLabel = 'Quotex ডিপোজিট (Binance Pay QR)';
+    if (payoutType === 'profit_withdrawal') {
+      payoutTypeLabel = 'প্রফিট উইথড্রয়াল (Binance)';
+    } else if (payoutType === 'both') {
+      payoutTypeLabel = 'Quotex ডিপোজিট + প্রফিট';
+    }
+
+    const allPayouts = readJson(PAYOUTS_FILE, []);
+    const newSeq = allPayouts.length + 1001;
+    const payoutId = `PAY-${newSeq}`;
+
+    const users = readJson(USERS_FILE, []);
+    const fullUser = users.find(u => u.id === user.id) || user;
+
+    const newPayout = {
+      id: 'pay_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+      payoutId,
+      userId: user.id,
+      userTraderId: user.traderId || fullUser.traderId || 'Trader',
+      userName: user.name || fullUser.name || 'Trader',
+      userEmail: user.email || fullUser.email || '',
+      userTelegram: user.telegram || fullUser.telegram || '',
+      challengeId: selectedChallenge.id || selectedChallenge.challengeId || '',
+      challengePackageName: selectedChallenge.packageName || selectedChallenge.packageTitle || 'Funded Challenge',
+      challengeFundedAmount: selectedChallenge.fundedAmount || selectedChallenge.packageSize || 0,
+      challengeProfitSplit: selectedChallenge.profitSplit || '75%',
+      payoutType,
+      payoutTypeLabel,
+      quotexAccountId: (quotexAccountId || selectedChallenge.brokerAccountId || fullUser.brokerAccountId || '').trim(),
+      binancePayId: (binancePayId || binanceUid || '').trim(),
+      binanceUid: (binanceUid || binancePayId || '').trim(),
+      binanceAddress: (binanceAddress || '').trim(),
+      amount: parseFloat(amount) || selectedChallenge.fundedAmount || 100,
+      qrCodeUrl: qrCodeUrl || '',
+      traderNotes: (traderNotes || '').trim(),
+      status: 'pending',
+      adminNotes: '',
+      transactionId: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      paidAt: null
+    };
+
+    allPayouts.unshift(newPayout);
+    writeJson(PAYOUTS_FILE, allPayouts);
+
+    if (binancePayId || binanceUid || binanceAddress) {
+      try {
+        const uIdx = users.findIndex(u => u.id === user.id);
+        if (uIdx !== -1) {
+          users[uIdx].payoutWallet = binancePayId || binanceUid || binanceAddress || users[uIdx].payoutWallet;
+          writeJson(USERS_FILE, users);
+        }
+      } catch(e) {}
+    }
+
+    res.json({
+      success: true,
+      message: `পে-আউট রিকোয়েস্ট [${payoutId}] সফলভাবে সাবমিট হয়েছে! অ্যাডমিন প্যানেল থেকে ভেরিফাই করে ডলার পাঠানো হবে।`,
+      payout: newPayout
+    });
+  } catch (err) {
+    console.error('[User Payouts POST Error]', err);
+    res.status(500).json({ success: false, message: 'পে-আউট রিকোয়েস্ট সাবমিট করতে সমস্যা হয়েছে: ' + err.message });
+  }
+});
+
+// 3. Admin: Get All Payout Requests
+app.get('/api/admin/payouts', authenticateAdminToken, (req, res) => {
+  try {
+    const allPayouts = readJson(PAYOUTS_FILE, []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const allUsers = syncUsersWithAllData();
+
+    const enriched = allPayouts.map(p => {
+      const u = allUsers.find(user => user.id === p.userId || (user.email && p.userEmail && user.email.toLowerCase() === p.userEmail.toLowerCase()));
+      return {
+        ...p,
+        userAvatar: u ? (u.profilePicture || null) : null,
+        userTelegram: u ? (u.telegram || p.userTelegram) : p.userTelegram,
+        userName: u ? (u.name || p.userName) : p.userName,
+        userTraderId: u ? (u.traderId || p.userTraderId) : p.userTraderId
+      };
+    });
+
+    const pendingCount = enriched.filter(p => p.status === 'pending').length;
+    const paidCount = enriched.filter(p => p.status === 'paid').length;
+    const rejectedCount = enriched.filter(p => p.status === 'rejected').length;
+    const totalPaidAmount = enriched.filter(p => p.status === 'paid').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+    const uniqueTraders = new Set(enriched.map(p => p.userTraderId || p.userEmail)).size;
+
+    res.json({
+      success: true,
+      payouts: enriched,
+      stats: {
+        totalCount: enriched.length,
+        pendingCount,
+        paidCount,
+        rejectedCount,
+        totalPaidAmount,
+        totalTradersCount: uniqueTraders
+      }
+    });
+  } catch (err) {
+    console.error('[Admin Payouts GET Error]', err);
+    res.status(500).json({ success: false, message: 'পে-আউট ডেটা লোড করতে ব্যর্থ হয়েছে।' });
+  }
+});
+
+// 4. Admin: Update Payout Status (Approve/Paid or Reject)
+app.post('/api/admin/payouts/:id/status', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNotes, transactionId } = req.body;
+    const validStatuses = ['pending', 'paid', 'rejected'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status provided.' });
+    }
+
+    const allPayouts = readJson(PAYOUTS_FILE, []);
+    const idx = allPayouts.findIndex(p => p.id === id || p.payoutId === id);
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'পে-আউট রিকোয়েস্ট খুঁজে পাওয়া যায়নি।' });
+    }
+
+    allPayouts[idx].status = status;
+    if (adminNotes !== undefined) allPayouts[idx].adminNotes = String(adminNotes).trim();
+    if (transactionId !== undefined) allPayouts[idx].transactionId = String(transactionId).trim();
+    allPayouts[idx].updatedAt = new Date().toISOString();
+    if (status === 'paid') {
+      allPayouts[idx].paidAt = new Date().toISOString();
+    } else if (status === 'pending') {
+      allPayouts[idx].paidAt = null;
+    }
+
+    writeJson(PAYOUTS_FILE, allPayouts);
+
+    res.json({
+      success: true,
+      message: `পে-আউট স্ট্যাটাস সফলভাবে '${status === 'paid' ? 'পরিশোধিত (Paid)' : status === 'rejected' ? 'বাতিল (Rejected)' : 'অপেক্ষমাণ (Pending)'}' করা হয়েছে!`,
+      payout: allPayouts[idx]
+    });
+  } catch (err) {
+    console.error('[Admin Payout Status Error]', err);
+    res.status(500).json({ success: false, message: 'স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে।' });
+  }
+});
+
+// 5. Admin: Delete Payout Request
+app.delete('/api/admin/payouts/:id', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    let allPayouts = readJson(PAYOUTS_FILE, []);
+    allPayouts = allPayouts.filter(p => p.id !== id && p.payoutId !== id);
+    writeJson(PAYOUTS_FILE, allPayouts);
+    res.json({ success: true, message: 'পে-আউট রেকর্ডটি সফলভাবে ডিলিট করা হয়েছে।' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'ডিলিট করতে সমস্যা হয়েছে।' });
+  }
 });
 
 // Serve Single Page Apps / Fallback
