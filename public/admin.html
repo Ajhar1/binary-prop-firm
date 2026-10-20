@@ -1386,13 +1386,11 @@
                 <div style="display:flex; align-items:center; gap:12px;">
                     <i class="fas fa-hand-holding-usd" style="color:var(--neon-green); font-size:1.4rem;"></i>
                     <div>
-                        <div style="font-weight:800; font-size:0.98rem; color:#fff;">à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦°à¦¦à§‡à¦° à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦“ à¦¡à¦²à¦¾à¦° à¦¡à¦¿à¦ªà§‹à¦œà¦¿à¦Ÿ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ à¦…à¦ªà§‡à¦•à§à¦·à¦®à¦¾à¦£</div>
-                        <div style="color:var(--text-secondary); font-size:0.82rem;" id="quickPayoutAlertText">à¦šà§à¦¯à¦¾à¦²à§‡à¦žà§à¦œ à¦ªà¦¾à¦¸ à¦•à¦°à¦¾ à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦°à¦¦à§‡à¦° Quotex QR à¦•à§‹à¦¡ à¦¸à§à¦•à§à¦¯à¦¾à¦¨ à¦•à¦°à§‡ à¦¡à¦²à¦¾à¦° à¦¡à¦¿à¦ªà§‹à¦œà¦¿à¦Ÿ à¦•à¦°à§à¦¨à¥¤</div>
+                        <div style="font-weight:800; font-size:0.98rem; color:#fff;">Pending Payout & Live Funding Requests Awaiting Review</div>
+                        <div style="color:var(--text-secondary); font-size:0.82rem;" id="quickPayoutAlertText">Traders who passed challenges are waiting for Quotex live deposit & profit withdrawal.</div>
                     </div>
                 </div>
-                <button class="btn-gold" onclick="switchAdminTab('payouts')" style="padding:7px 16px; font-size:0.82rem; background:linear-gradient(135deg, #00e676, #00b0ff); border-color:#00e676; color:#000; font-weight:800;">
-                    à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦¦à¦¿à¦¨ â†’
-                </button>
+                <button class="btn-gold" onclick="switchAdminTab('payouts')" style="padding:7px 16px; font-size:0.82rem; background:linear-gradient(135deg, #00e676, #00b0ff); border-color:#00e676; color:#000; font-weight:800;">Process Payouts →</button>
             </div>
 
             <!-- Quick Action Alert if pending orders exist -->
@@ -2183,40 +2181,40 @@
         <div class="tab-content" id="pane-payouts">
             <!-- Top Stat Cards (4 Cards) -->
             <div class="stats-grid" style="margin-bottom:1.5rem;">
-                <div class="stat-card glass clickable" onclick="filterAdminPayouts('pending')" title="à¦«à¦¿à¦²à§à¦Ÿà¦¾à¦°: à¦…à¦ªà§‡à¦•à§à¦·à¦®à¦¾à¦£ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ">
+                <div class="stat-card glass clickable" onclick="filterAdminPayouts('pending')" title="ফিল্টার: অপেক্ষমাণ রিকোয়েস্ট">
                     <div class="stat-icon" style="background:rgba(255,184,0,0.15); color:var(--yellow);">
                         <i class="fas fa-hourglass-half"></i>
                     </div>
                     <div>
                         <div class="stat-val" id="payoutStatPending" style="color:#ffb800;">0</div>
-                        <div class="stat-label">à¦…à¦ªà§‡à¦•à§à¦·à¦®à¦¾à¦£ à¦ªà§‡-à¦†à¦‰à¦Ÿ (Pending)</div>
+                        <div class="stat-label">অপেক্ষমাণ পে-আউট (Pending)</div>
                     </div>
                 </div>
-                <div class="stat-card glass clickable" onclick="filterAdminPayouts('paid')" title="à¦«à¦¿à¦²à§à¦Ÿà¦¾à¦°: à¦¸à¦«à¦² à¦ªà§‡-à¦†à¦‰à¦Ÿ">
+                <div class="stat-card glass clickable" onclick="filterAdminPayouts('paid')" title="ফিল্টার: সফল পে-আউট">
                     <div class="stat-icon" style="background:rgba(0,230,118,0.15); color:var(--neon-green);">
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div>
                         <div class="stat-val" id="payoutStatPaid" style="color:#00e676;">0</div>
-                        <div class="stat-label">à¦¸à¦«à¦² à¦ªà§‡-à¦†à¦‰à¦Ÿ (Paid)</div>
+                        <div class="stat-label">সফল পে-আউট (Paid)</div>
                     </div>
                 </div>
-                <div class="stat-card glass" title="à¦®à§‹à¦Ÿ à¦ªà§‡à¦‡à¦¡ à¦«à¦¾à¦¨à§à¦¡ à¦“ à¦ªà§à¦°à¦«à¦¿à¦Ÿ">
+                <div class="stat-card glass" title="মোট পেইড ফান্ড ও প্রফিট">
                     <div class="stat-icon" style="background:rgba(168,85,247,0.15); color:#a855f7;">
                         <i class="fas fa-dollar-sign"></i>
                     </div>
                     <div>
-                        <div class="stat-val" id="payoutStatTotalPaid" style="color:#c084fc;"></div>
-                        <div class="stat-label">à¦®à§‹à¦Ÿ à¦ªà§‡à¦‡à¦¡ à¦¡à¦²à¦¾à¦° (Total Paid)</div>
+                        <div class="stat-val" id="payoutStatTotalPaid" style="color:#c084fc;">$0</div>
+                        <div class="stat-label">মোট পেইড ডলার (Total Paid)</div>
                     </div>
                 </div>
-                <div class="stat-card glass" title="à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦ªà§à¦°à¦¾à¦ªà§à¦¤ à¦®à§‹à¦Ÿ à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦°">
+                <div class="stat-card glass" title="পে-আউট প্রাপ্ত মোট ট্রেডার">
                     <div class="stat-icon" style="background:rgba(59,130,246,0.15); color:#60a5fa;">
                         <i class="fas fa-users"></i>
                     </div>
                     <div>
                         <div class="stat-val" id="payoutStatTraders" style="color:#60a5fa;">0</div>
-                        <div class="stat-label">à¦®à§‹à¦Ÿ à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦° (Total Traders)</div>
+                        <div class="stat-label">মোট ট্রেডার (Total Traders)</div>
                     </div>
                 </div>
             </div>
@@ -2228,11 +2226,11 @@
                     <div>
                         <div class="table-title" style="font-size:1.15rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:10px;">
                             <i class="fas fa-hand-holding-usd" style="color:var(--neon-green);"></i>
-                            <span>à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦° à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦“ à¦¡à¦²à¦¾à¦° à¦¡à¦¿à¦ªà§‹à¦œà¦¿à¦Ÿ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ</span>
-                            <span class="nav-badge" id="adminPayoutListCount" style="background:rgba(0,230,118,0.2); color:#00e676; border:1px solid rgba(0,230,118,0.3); font-size:0.75rem;">0 à¦Ÿà¦¿ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ</span>
+                            <span>ট্রেডার পে-আউট ও ডলার ডিপোজিট রিকোয়েস্ট</span>
+                            <span class="nav-badge" id="adminPayoutListCount" style="background:rgba(0,230,118,0.2); color:#00e676; border:1px solid rgba(0,230,118,0.3); font-size:0.75rem;">0 টি রিকোয়েস্ট</span>
                         </div>
                         <p style="margin:4px 0 0 0; font-size:0.8rem; color:var(--text-secondary);">
-                            à¦šà§à¦¯à¦¾à¦²à§‡à¦žà§à¦œ à¦ªà¦¾à¦¸ à¦•à¦°à¦¾à¦° à¦ªà¦° à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦°à¦¦à§‡à¦° Quotex Binance Pay QR à¦•à§‹à¦¡ à¦¸à§à¦•à§à¦¯à¦¾à¦¨ à¦•à¦°à§‡ à¦²à¦¾à¦‡à¦­ à¦«à¦¾à¦¨à§à¦¡à¦¿à¦‚ à¦¦à¦¿à¦¨ à¦à¦¬à¦‚ à¦ªà§à¦°à¦«à¦¿à¦Ÿ à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦•à¦°à§à¦¨à¥¤
+                            চ্যালেঞ্জ পাস করার পর ট্রেডারদের Quotex Binance Pay QR কোড স্ক্যান করে লাইভ ফান্ডিং দিন এবং প্রফিট প্রদান করুন।
                         </p>
                     </div>
 
@@ -2240,36 +2238,36 @@
                     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                         <div style="position:relative; min-width:230px; flex:1;">
                             <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-secondary); font-size:0.85rem;"></i>
-                            <input type="text" class="form-control" id="payoutSearchInput" placeholder="à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦° ID, à¦¨à¦¾à¦®, Quotex à¦¬à¦¾ Binance ID..." style="padding-left:34px; width:100%; border-radius:10px; height:38px; font-size:0.84rem;" oninput="renderAdminPayoutsTable()" />
+                            <input type="text" class="form-control" id="payoutSearchInput" placeholder="ট্রেডার ID, নাম, Quotex বা Binance ID..." style="padding-left:34px; width:100%; border-radius:10px; height:38px; font-size:0.84rem;" oninput="renderAdminPayoutsTable()" />
                         </div>
                         <div style="min-width:180px;">
                             <select class="form-control" id="payoutTypeFilter" style="width:100%; border-radius:10px; font-weight:600; height:38px; font-size:0.84rem;" onchange="renderAdminPayoutsTable()">
-                                <option value="all">à¦¸à¦•à¦² à¦§à¦°à¦¨ (All Types)</option>
+                                <option value="all">সকল ধরন (All Types)</option>
                                 <option value="quotex_deposit">Quotex Live Deposit</option>
                                 <option value="profit_withdrawal">Profit Withdrawal</option>
-                                <option value="both">Both (à¦«à¦¾à¦¨à§à¦¡ à¦“ à¦ªà§à¦°à¦«à¦¿à¦Ÿ)</option>
+                                <option value="both">Both (ফান্ড ও প্রফিট)</option>
                             </select>
                         </div>
                         <button type="button" class="btn-outline" id="adminPayoutRefreshBtn" style="padding:7px 14px; font-size:0.82rem; border-radius:8px; cursor:pointer;" onclick="fetchAdminPayouts()">
-                            <i class="fas fa-sync-alt"></i> à¦°à¦¿à¦«à§à¦°à§‡à¦¶
+                            <i class="fas fa-sync-alt"></i> রিফ্রেশ
                         </button>
                     </div>
                 </div>
 
                 <!-- Status Filter Pills -->
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:1rem; padding:8px 10px; background:rgba(0,0,0,0.3); border-radius:12px; border:1px solid rgba(255,255,255,0.06); align-items:center;">
-                    <span style="font-size:0.78rem; color:var(--text-secondary); font-weight:700; margin-right:4px;">à¦¸à§à¦Ÿà§à¦¯à¦¾à¦Ÿà¦¾à¦¸:</span>
+                    <span style="font-size:0.78rem; color:var(--text-secondary); font-weight:700; margin-right:4px;">স্ট্যাটাস:</span>
                     <button type="button" class="btn-sm payout-filter-btn active" data-status="all" onclick="filterAdminPayouts('all')" style="padding:4px 12px; font-size:0.75rem; border-radius:8px; border:1px solid var(--neon-green); background:rgba(0,230,118,0.2); color:#fff; cursor:pointer;">
-                        à¦¸à¦¬à¦—à§à¦²à§‹
+                        সবগুলো
                     </button>
                     <button type="button" class="btn-sm payout-filter-btn" data-status="pending" onclick="filterAdminPayouts('pending')" style="padding:4px 12px; font-size:0.75rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:var(--text-secondary); cursor:pointer;">
-                        â³ à¦…à¦ªà§‡à¦•à§à¦·à¦®à¦¾à¦£ (Pending)
+                        ⏳ অপেক্ষমাণ (Pending)
                     </button>
                     <button type="button" class="btn-sm payout-filter-btn" data-status="paid" onclick="filterAdminPayouts('paid')" style="padding:4px 12px; font-size:0.75rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:var(--text-secondary); cursor:pointer;">
-                        âœ… à¦ªà§‡à¦‡à¦¡ à¦¸à¦®à§à¦ªà¦¨à§à¦¨ (Paid)
+                        ✅ পেইড সম্পন্ন (Paid)
                     </button>
                     <button type="button" class="btn-sm payout-filter-btn" data-status="rejected" onclick="filterAdminPayouts('rejected')" style="padding:4px 12px; font-size:0.75rem; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:var(--text-secondary); cursor:pointer;">
-                        âŒ à¦¬à¦¾à¦¤à¦¿à¦² (Rejected)
+                        ❌ বাতিল (Rejected)
                     </button>
                 </div>
 
@@ -2278,16 +2276,16 @@
                     <table class="data-table" style="width:100%; border-collapse:collapse;">
                         <thead>
                             <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); font-size:0.78rem; text-transform:uppercase; color:var(--text-secondary); letter-spacing:0.5px;">
-                                <th style="padding:12px; text-align:left;"># ID & à¦¤à¦¾à¦°à¦¿à¦–</th>
-                                <th style="padding:12px; text-align:left;">à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦° à¦¤à¦¥à§à¦¯</th>
-                                <th style="padding:12px; text-align:left;">à¦ªà¦¾à¦¸ à¦•à¦°à¦¾ à¦šà§à¦¯à¦¾à¦²à§‡à¦žà§à¦œ</th>
-                                <th style="padding:12px; text-align:left;">à¦Ÿà¦¾à¦‡à¦ª</th>
-                                <th style="padding:12px; text-align:left;">à¦…à§à¦¯à¦¾à¦®à¦¾à¦‰à¦¨à§à¦Ÿ ($)</th>
+                                <th style="padding:12px; text-align:left;"># ID & তারিখ</th>
+                                <th style="padding:12px; text-align:left;">ট্রেডার তথ্য</th>
+                                <th style="padding:12px; text-align:left;">পাস করা চ্যালেঞ্জ</th>
+                                <th style="padding:12px; text-align:left;">টাইপ</th>
+                                <th style="padding:12px; text-align:left;">অ্যামাউন্ট ($)</th>
                                 <th style="padding:12px; text-align:left;">Quotex ID</th>
                                 <th style="padding:12px; text-align:left;">Binance ID</th>
-                                <th style="padding:12px; text-align:center;">Quotex QR à¦•à§‹à¦¡</th>
-                                <th style="padding:12px; text-align:center;">à¦¸à§à¦Ÿà§à¦¯à¦¾à¦Ÿà¦¾à¦¸</th>
-                                <th style="padding:12px; text-align:center;">à¦…à§à¦¯à¦¾à¦•à¦¶à¦¨</th>
+                                <th style="padding:12px; text-align:center;">Quotex QR কোড</th>
+                                <th style="padding:12px; text-align:center;">স্ট্যাটাস</th>
+                                <th style="padding:12px; text-align:center;">অ্যাকশন</th>
                             </tr>
                         </thead>
                         <tbody id="adminPayoutTableBody">
@@ -2297,6 +2295,7 @@
                 </div>
             </div>
         </div>
+
 
     </main>
 
@@ -3380,9 +3379,9 @@
                         <i class="fas fa-hand-holding-usd"></i>
                     </div>
                     <div>
-                        <h3 style="margin:0; font-size:1.2rem; font-weight:800; color:#fff;">à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦°à¦•à§‡ à¦¡à¦²à¦¾à¦° à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦“ à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦­à§‡à¦°à¦¿à¦«à¦¿à¦•à§‡à¦¶à¦¨</h3>
+                        <h3 style="margin:0; font-size:1.2rem; font-weight:800; color:#fff;">ট্রেডারকে ডলার প্রদান ও পে-আউট ভেরিফিকেশন</h3>
                         <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">
-                            à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ ID: <strong id="modalPayoutIdHeading" style="color:var(--yellow); font-family:monospace;">PAY-XXXX</strong>
+                            রিকোয়েস্ট ID: <strong id="modalPayoutIdHeading" style="color:var(--yellow); font-family:monospace;">PAY-XXXX</strong>
                         </div>
                     </div>
                 </div>
@@ -3396,7 +3395,7 @@
                 <!-- Column 1: QR Code & Scanner Box -->
                 <div style="background:#0b0f17; border:1px solid rgba(0,230,118,0.25); border-radius:16px; padding:1.2rem; text-align:center;">
                     <div style="font-size:0.88rem; font-weight:800; color:#fff; margin-bottom:10px; display:flex; align-items:center; justify-content:center; gap:6px;">
-                        <i class="fas fa-qrcode" style="color:#00e676;"></i> Quotex Binance Pay Deposit QR à¦•à§‹à¦¡
+                        <i class="fas fa-qrcode" style="color:#00e676;"></i> Quotex Binance Pay Deposit QR কোড
                     </div>
 
                     <!-- QR Image Box -->
@@ -3406,7 +3405,7 @@
                         </div>
                         <div style="margin-top:10px;">
                             <a id="modalPayoutQrFullLink" href="#" target="_blank" class="btn-outline" style="padding:5px 12px; font-size:0.75rem; border-radius:6px; display:inline-block; text-decoration:none;">
-                                <i class="fas fa-external-link-alt"></i> à¦¬à§œ à¦†à¦•à¦¾à¦°à§‡ à¦«à§à¦² à¦›à¦¬à¦¿ à¦¦à§‡à¦–à§à¦¨
+                                <i class="fas fa-external-link-alt"></i> বড় আকারে ফুল ছবি দেখুন
                             </a>
                         </div>
                     </div>
@@ -3414,17 +3413,17 @@
                     <!-- No QR Box (e.g. for pure profit withdrawal) -->
                     <div id="modalPayoutNoQrBox" style="display:none; padding:2rem 1rem; color:#94a3b8;">
                         <i class="fas fa-wallet" style="font-size:2.5rem; color:#ffb800; margin-bottom:10px; display:block; opacity:0.8;"></i>
-                        <div style="font-weight:700; color:#fff; margin-bottom:6px;">à¦ªà§à¦°à¦«à¦¿à¦Ÿ à¦‰à¦‡à¦¥à¦¡à§à¦°à§Ÿà¦¾à¦² à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ</div>
-                        <p style="font-size:0.8rem; margin:0; line-height:1.5;">à¦à¦‡ à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦° à¦¶à§à¦§à§à¦®à¦¾à¦¤à§à¦° à¦ªà§à¦°à¦«à¦¿à¦Ÿ à¦‰à¦‡à¦¥à¦¡à§à¦°à§Ÿà¦¾à¦²à§‡à¦° à¦†à¦¬à§‡à¦¦à¦¨ à¦•à¦°à§‡à¦›à§‡à¦¨à¥¤ à¦¨à¦¿à¦šà§‡à¦° Binance Pay ID / UID-à¦¤à§‡ à¦¸à¦°à¦¾à¦¸à¦°à¦¿ à¦¡à¦²à¦¾à¦° à¦ªà¦¾à¦ à¦¿à§Ÿà§‡ à¦¦à¦¿à¦¨à¥¤</p>
+                        <div style="font-weight:700; color:#fff; margin-bottom:6px;">প্রফিট উইথড্রয়াল রিকোয়েস্ট</div>
+                        <p style="font-size:0.8rem; margin:0; line-height:1.5;">এই ট্রেডার শুধুমাত্র প্রফিট উইথড্রয়ালের আবেদন করেছেন। নিচের Binance Pay ID / UID-তে সরাসরি ডলার পাঠিয়ে দিন।</p>
                     </div>
 
                     <!-- Instruction Card -->
                     <div style="background:rgba(0,230,118,0.06); border:1px solid rgba(0,230,118,0.2); border-radius:10px; padding:10px; text-align:left; font-size:0.76rem; color:#cbd5e1; line-height:1.5;">
-                        <strong style="color:#00e676; display:block; margin-bottom:4px;">ðŸ“² à¦¯à§‡à¦­à¦¾à¦¬à§‡ à¦¡à¦²à¦¾à¦° à¦ªà¦¾à¦ à¦¾à¦¬à§‡à¦¨:</strong>
-                        1. à¦†à¦ªà¦¨à¦¾à¦° à¦®à§‹à¦¬à¦¾à¦‡à¦²à§‡à¦° <strong>Binance App</strong> à¦“à¦ªà§‡à¦¨ à¦•à¦°à§à¦¨à¥¤<br/>
-                        2. à¦‰à¦ªà¦°à§‡ à¦¡à¦¾à¦¨à¦¦à¦¿à¦•à§‡à¦° <strong>Scan</strong> à¦…à¦ªà¦¶à¦¨ à¦šà¦¾à¦ªà§à¦¨à¥¤<br/>
-                        3. à¦à¦‡ à¦¸à§à¦•à§à¦°à¦¿à¦¨à§‡ à¦¥à¦¾à¦•à¦¾ QR à¦•à§‹à¦¡à¦Ÿà¦¿ à¦¸à§à¦•à§à¦¯à¦¾à¦¨ à¦•à¦°à§‡ à¦ à¦¿à¦• <strong id="modalPayoutAmountScanNotice" style="color:#ffb800;"></strong> à¦¡à¦²à¦¾à¦° à¦ªà¦¾à¦ à¦¿à§Ÿà§‡ à¦¦à¦¿à¦¨à¥¤<br/>
-                        4. à¦¸à§‡à¦¨à§à¦¡ à¦¸à¦«à¦² à¦¹à¦²à§‡ à¦¨à¦¿à¦šà§‡à¦° à¦¬à¦¾à¦Ÿà¦¨à§‡ à¦•à§à¦²à¦¿à¦• à¦•à¦°à§‡ <strong>'à¦ªà§‡à¦‡à¦¡ à¦¸à¦®à§à¦ªà¦¨à§à¦¨'</strong> à¦®à¦¾à¦°à§à¦• à¦•à¦°à§à¦¨à¥¤
+                        <strong style="color:#00e676; display:block; margin-bottom:4px;">📲 যেভাবে ডলার পাঠাবেন:</strong>
+                        1. আপনার মোবাইলের <strong>Binance App</strong> ওপেন করুন।<br/>
+                        2. উপরে ডানদিকের <strong>Scan</strong> অপশন চাপুন।<br/>
+                        3. এই স্ক্রিনে থাকা QR কোডটি স্ক্যান করে ঠিক <strong id="modalPayoutAmountScanNotice" style="color:#ffb800;">$100</strong> ডলার পাঠিয়ে দিন।<br/>
+                        4. সেন্ড সফল হলে নিচের বাটনে ক্লিক করে <strong>'পেইড সম্পন্ন'</strong> মার্ক করুন।
                     </div>
                 </div>
 
@@ -3433,56 +3432,56 @@
                     <!-- Trader & Challenge Summary -->
                     <div style="background:#0b0f17; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1rem; margin-bottom:1rem;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:6px;">
-                            <span style="font-size:0.76rem; color:var(--text-secondary); text-transform:uppercase;">à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦° à¦ªà¦°à¦¿à¦šà¦¿à¦¤à¦¿</span>
+                            <span style="font-size:0.76rem; color:var(--text-secondary); text-transform:uppercase;">ট্রেডার পরিচিতি</span>
                             <span id="modalPayoutTraderId" style="font-size:0.74rem; background:rgba(255,184,0,0.15); color:#ffb800; padding:2px 6px; border-radius:6px; font-weight:800; font-family:monospace;">ID: --</span>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.84rem;">
-                            <span style="color:#94a3b8;">à¦¨à¦¾à¦®:</span>
+                            <span style="color:#94a3b8;">নাম:</span>
                             <strong id="modalPayoutTraderName" style="color:#fff;">--</strong>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.84rem;">
-                            <span style="color:#94a3b8;">à¦‡à¦®à§‡à¦‡à¦²:</span>
+                            <span style="color:#94a3b8;">ইমেইল:</span>
                             <span id="modalPayoutTraderEmail" style="color:#cbd5e1; font-family:monospace;">--</span>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.84rem;">
-                            <span style="color:#94a3b8;">à¦ªà¦¾à¦¸ à¦•à¦°à¦¾ à¦ªà§à¦¯à¦¾à¦•à§‡à¦œ:</span>
+                            <span style="color:#94a3b8;">পাস করা প্যাকেজ:</span>
                             <span id="modalPayoutPackage" style="color:var(--yellow); font-weight:700;">--</span>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.84rem;">
-                            <span style="color:#94a3b8;">à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿà§‡à¦° à¦‰à¦¦à§à¦¦à§‡à¦¶à§à¦¯:</span>
+                            <span style="color:#94a3b8;">রিকোয়েস্টের উদ্দেশ্য:</span>
                             <span id="modalPayoutType" style="color:#60a5fa; font-weight:700;">--</span>
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06);">
-                            <span style="color:#94a3b8; font-size:0.85rem;">à¦ªà§à¦°à¦¦à§‡à¦¯à¦¼ à¦…à§à¦¯à¦¾à¦®à¦¾à¦‰à¦¨à§à¦Ÿ:</span>
-                            <span id="modalPayoutAmount" style="font-size:1.35rem; font-weight:900; color:#00e676;"></span>
+                            <span style="color:#94a3b8; font-size:0.85rem;">প্রদেয় অ্যামাউন্ট:</span>
+                            <span id="modalPayoutAmount" style="font-size:1.35rem; font-weight:900; color:#00e676;">$0</span>
                         </div>
                     </div>
 
                     <!-- Quotex Account ID Box with 1-click Copy -->
                     <div style="background:#0b0f17; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
-                        <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">Quotex Account ID (à¦¡à¦²à¦¾à¦° à¦¯à§‡ à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿà§‡ à¦¯à¦¾à¦¬à§‡):</div>
+                        <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">Quotex Account ID (ডলার যে একাউন্টে যাবে):</div>
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <code id="modalPayoutQuotexId" style="font-size:0.95rem; font-weight:800; color:#fff; font-family:monospace;">--</code>
                             <button type="button" class="btn-sm" style="padding:4px 10px; font-size:0.75rem; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); border-radius:6px; cursor:pointer;" onclick="copyToClipboard(document.getElementById('modalPayoutQuotexId').innerText)">
-                                <i class="fas fa-copy"></i> à¦•à¦ªà¦¿ à¦†à¦‡à¦¡à¦¿
+                                <i class="fas fa-copy"></i> কপি আইডি
                             </button>
                         </div>
                     </div>
 
                     <!-- Binance Pay ID / UID Box with 1-click Copy -->
                     <div style="background:#0b0f17; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
-                        <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦°à§‡à¦° Binance Pay ID / UID (à¦ªà§à¦°à¦«à¦¿à¦Ÿ à¦ªà¦¾à¦ à¦¾à¦¨à§‹à¦° à¦œà¦¨à§à¦¯):</div>
+                        <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">ট্রেডারের Binance Pay ID / UID (প্রফিট পাঠানোর জন্য):</div>
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <code id="modalPayoutBinanceId" style="font-size:0.95rem; font-weight:800; color:#ffb800; font-family:monospace;">--</code>
                             <button type="button" class="btn-sm" style="padding:4px 10px; font-size:0.75rem; background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); border-radius:6px; cursor:pointer;" onclick="copyToClipboard(document.getElementById('modalPayoutBinanceId').innerText)">
-                                <i class="fas fa-copy"></i> à¦•à¦ªà¦¿ Binance ID
+                                <i class="fas fa-copy"></i> কপি Binance ID
                             </button>
                         </div>
                     </div>
 
                     <!-- Trader Note Box -->
                     <div style="background:rgba(255,255,255,0.02); border-left:3px solid var(--gold); border-radius:6px; padding:8px 12px; margin-bottom:12px;">
-                        <div style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:2px;">à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦°à§‡à¦° à¦¨à§‹à¦Ÿ / à¦¬à¦¾à¦°à§à¦¤à¦¾:</div>
+                        <div style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:2px;">ট্রেডারের নোট / বার্তা:</div>
                         <div id="modalPayoutTraderNotes" style="font-size:0.8rem; color:#e2e8f0; font-style:italic;">--</div>
                     </div>
 
@@ -3490,30 +3489,30 @@
                     <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:1.2rem;">
                         <div>
                             <label style="font-size:0.76rem; color:var(--text-secondary); font-weight:700; margin-bottom:3px; display:block;">
-                                Binance Transaction ID / Order ID (à¦à¦šà§à¦›à¦¿à¦•):
+                                Binance Transaction ID / Order ID (ঐচ্ছিক):
                             </label>
-                            <input type="text" class="form-control" id="adminPayoutTrxInput" placeholder="e.g. 214983021948 à¦¬à¦¾ TrxID" style="height:36px; font-size:0.82rem; border-radius:8px;" />
+                            <input type="text" class="form-control" id="adminPayoutTrxInput" placeholder="e.g. 214983021948 বা TrxID" style="height:36px; font-size:0.82rem; border-radius:8px;" />
                         </div>
                         <div>
                             <label style="font-size:0.76rem; color:var(--text-secondary); font-weight:700; margin-bottom:3px; display:block;">
-                                à¦à¦¡à¦®à¦¿à¦¨ à¦°à¦¿à¦®à¦¾à¦°à§à¦•à¦¸ / à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦°à¦•à§‡ à¦®à§‡à¦¸à§‡à¦œ:
+                                এডমিন রিমার্কস / ট্রেডারকে মেসেজ:
                             </label>
-                            <input type="text" class="form-control" id="adminPayoutNotesInput" placeholder="e.g. à¦†à¦ªà¦¨à¦¾à¦° Quotex à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿà§‡ à¦²à¦¾à¦‡à¦­ à¦«à¦¾à¦¨à§à¦¡à¦¿à¦‚ à¦¡à¦¿à¦ªà§‹à¦œà¦¿à¦Ÿ à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡à¥¤" style="height:36px; font-size:0.82rem; border-radius:8px;" />
+                            <input type="text" class="form-control" id="adminPayoutNotesInput" placeholder="e.g. আপনার Quotex একাউন্টে লাইভ ফান্ডিং ডিপোজিট করা হয়েছে।" style="height:36px; font-size:0.82rem; border-radius:8px;" />
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
                     <div style="display:flex; flex-direction:column; gap:8px;">
                         <button type="button" class="btn-gold" style="width:100%; padding:10px; font-size:0.92rem; font-weight:800; background:linear-gradient(135deg, #00e676 0%, #00b0ff 100%); border-color:#00e676; color:#000; border-radius:10px; cursor:pointer;" onclick="handleUpdatePayoutStatus('paid')">
-                            <i class="fas fa-check-circle"></i> âœ… à¦¡à¦²à¦¾à¦° à¦¦à§‡à¦“à§Ÿà¦¾ à¦¹à§Ÿà§‡à¦›à§‡ (Mark as Paid)
+                            <i class="fas fa-check-circle"></i> ✅ ডলার দেওয়া হয়েছে (Mark as Paid)
                         </button>
                         
                         <div style="display:flex; gap:8px;">
                             <button type="button" class="btn-outline" style="flex:1; padding:8px; font-size:0.8rem; border-radius:8px; color:#ef4444; border-color:rgba(239,68,68,0.4); cursor:pointer;" onclick="handleUpdatePayoutStatus('rejected')">
-                                <i class="fas fa-times-circle"></i> à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ à¦¬à¦¾à¦¤à¦¿à¦² (Reject)
+                                <i class="fas fa-times-circle"></i> রিকোয়েস্ট বাতিল (Reject)
                             </button>
                             <button type="button" class="btn-outline" style="flex:1; padding:8px; font-size:0.8rem; border-radius:8px; color:#ffb800; border-color:rgba(255,184,0,0.4); cursor:pointer;" onclick="handleUpdatePayoutStatus('pending')">
-                                <i class="fas fa-clock"></i> à¦ªà§‡à¦¨à§à¦¡à¦¿à¦‚ à¦°à¦¾à¦–à§à¦¨ (Reset)
+                                <i class="fas fa-clock"></i> পেন্ডিং রাখুন (Reset)
                             </button>
                         </div>
                     </div>
@@ -3521,6 +3520,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Toast Notifications -->
     <div id="toastContainer"></div>
@@ -3621,7 +3621,7 @@
                 'email-settings': ['Email & SMTP', ''],
                 'backups': ['Database & Backups', ''],
                 'support': ['Support Desk', ''],
-                'payouts': ['Payout Requests (à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦“ à¦²à¦¾à¦‡à¦­ à¦«à¦¾à¦¨à§à¦¡à¦¿à¦‚)', 'à¦šà§à¦¯à¦¾à¦²à§‡à¦žà§à¦œ à¦ªà¦¾à¦¸ à¦•à¦°à¦¾ à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦°à¦¦à§‡à¦° Quotex QR à¦¸à§à¦•à§à¦¯à¦¾à¦¨ à¦•à¦°à§‡ à¦¡à¦²à¦¾à¦° à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦“ à¦ªà§à¦°à¦«à¦¿à¦Ÿ à¦‰à¦‡à¦¥à¦¡à§à¦°à§Ÿà¦¾à¦²']
+                'payouts': ['Payout Requests', 'Trader Quotex Binance QR Scan & Profit Payout Management']
             };
 
             if (titles[tabKey]) {
@@ -4094,7 +4094,7 @@
                 if (s.pendingPayouts > 0) {
                     payoutAlertBox.style.display = 'flex';
                     const alertTxt = document.getElementById('quickPayoutAlertText');
-                    if (alertTxt) alertTxt.innerText = ${s.pendingPayouts} à¦Ÿà¦¿ à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ à¦ªà§‡à¦¨à§à¦¡à¦¿à¦‚ à¦°à§Ÿà§‡à¦›à§‡à¥¤ Quotex QR à¦¸à§à¦•à§à¦¯à¦¾à¦¨ à¦•à¦°à§‡ à¦¡à¦²à¦¾à¦° à¦¦à¦¿à¦¨à¥¤;
+                    if (alertTxt) alertTxt.innerText = (s.pendingPayouts || 0) + ' pending payout request(s) awaiting review.';
                 } else {
                     payoutAlertBox.style.display = 'none';
                 }
@@ -9319,7 +9319,7 @@
             if (!text || text === '--') return;
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(() => {
-                    showToast(ðŸ“‹ à¦•à¦ªà¦¿ à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡: ${text}, 'success');
+                    showToast(`📋 কপি করা হয়েছে: ${text}`, 'success');
                 }).catch(() => fallbackCopy(text));
             } else {
                 fallbackCopy(text);
@@ -9336,9 +9336,9 @@
             ta.select();
             try {
                 document.execCommand('copy');
-                showToast(ðŸ“‹ à¦•à¦ªà¦¿ à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡: ${text}, 'success');
+                showToast(`📋 কপি করা হয়েছে: ${text}`, 'success');
             } catch (e) {
-                showToast('à¦•à¦ªà¦¿ à¦¬à§à¦¯à¦°à§à¦¥ à¦¹à§Ÿà§‡à¦›à§‡', 'error');
+                showToast('কপি ব্যর্থ হয়েছে', 'error');
             }
             document.body.removeChild(ta);
         }
@@ -9346,17 +9346,17 @@
         async function fetchAdminPayouts() {
             if (!adminToken) return;
             const refreshBtn = document.getElementById('adminPayoutRefreshBtn');
-            if (refreshBtn) refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> à¦°à¦¿à¦«à§à¦°à§‡à¦¶';
+            if (refreshBtn) refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> রিফ্রেশ';
 
             try {
                 const res = await fetch('/api/admin/payouts', {
-                    headers: { 'Authorization': Bearer ${adminToken}` }
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
                 });
                 const data = await res.json();
-                if (refreshBtn) refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> à¦°à¦¿à¦«à§à¦°à§‡à¦¶';
+                if (refreshBtn) refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> রিফ্রেশ';
 
                 if (!data.success) {
-                    showToast(data.message || 'à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦¡à¦¾à¦Ÿà¦¾ à¦²à§‹à¦¡ à¦¬à§à¦¯à¦°à§à¦¥ à¦¹à¦¯à¦¼à§‡à¦›à§‡', 'error');
+                    showToast(data.message || 'পে-আউট ডাটা লোড ব্যর্থ হয়েছে', 'error');
                     return;
                 }
 
@@ -9365,7 +9365,7 @@
                 renderAdminPayoutStats();
                 renderAdminPayoutsTable();
             } catch (err) {
-                if (refreshBtn) refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> à¦°à¦¿à¦«à§à¦°à§‡à¦¶';
+                if (refreshBtn) refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> রিফ্রেশ';
                 console.error('[Admin Payout Fetch Error]', err);
             }
         }
@@ -9379,7 +9379,7 @@
 
             if (pPending) pPending.innerText = s.pendingCount ?? 0;
             if (pPaid) pPaid.innerText = s.paidCount ?? 0;
-            if (pTotal) pTotal.innerText = $${(s.totalPaidAmount || 0).toLocaleString()}`;
+            if (pTotal) pTotal.innerText = `$${(s.totalPaidAmount || 0).toLocaleString()}`;
             if (pTraders) pTraders.innerText = s.totalTradersCount ?? 0;
 
             const pBadge = document.getElementById('pendingPayoutsBadge');
@@ -9400,7 +9400,7 @@
                 if (s.pendingCount > 0) {
                     payoutAlertBox.style.display = 'flex';
                     const alertTxt = document.getElementById('quickPayoutAlertText');
-                    if (alertTxt) alertTxt.innerText = ${s.pendingCount} à¦Ÿà¦¿ à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ à¦ªà§‡à¦¨à§à¦¡à¦¿à¦‚ à¦°à§Ÿà§‡à¦›à§‡à¥¤ Quotex QR à¦¸à§à¦•à§à¦¯à¦¾à¦¨ à¦•à¦°à§‡ à¦¡à¦²à¦¾à¦° à¦¦à¦¿à¦¨à¥¤;
+                    if (alertTxt) alertTxt.innerText = (s.pendingPayouts || 0) + ' pending payout request(s) awaiting review.';
                 } else {
                     payoutAlertBox.style.display = 'none';
                 }
@@ -9449,17 +9449,17 @@
             });
 
             const countBadge = document.getElementById('adminPayoutListCount');
-            if (countBadge) countBadge.innerText = ${list.length} à¦Ÿà¦¿ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ;
+            if (countBadge) countBadge.innerText = `${list.length} টি রিকোয়েস্ট`;
 
             if (list.length === 0) {
-                tbody.innerHTML = 
+                tbody.innerHTML = `
                     <tr>
                         <td colspan="10" style="text-align:center; padding:3rem 1rem; color:#94a3b8;">
                             <i class="fas fa-hand-holding-usd" style="font-size:2.4rem; color:var(--yellow); opacity:0.6; display:block; margin-bottom:10px;"></i>
-                            à¦•à§‹à¦¨à§‹ à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ à¦ªà¦¾à¦“à¦¯à¦¼à¦¾ à¦¯à¦¾à¦¯à¦¼à¦¨à¦¿à¥¤
+                            কোনো পে-আউট রিকোয়েস্ট পাওয়া যায়নি।
                         </td>
                     </tr>
-                ;
+                `;
                 return;
             }
 
@@ -9469,127 +9469,127 @@
                 
                 let stBadge = '';
                 if (p.status === 'paid') {
-                    stBadge = '<span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:3px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">âœ… Paid</span>';
+                    stBadge = '<span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:3px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">✅ Paid</span>';
                 } else if (p.status === 'rejected') {
-                    stBadge = '<span style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:3px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">âŒ Rejected</span>';
+                    stBadge = '<span style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:3px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">❌ Rejected</span>';
                 } else {
-                    stBadge = '<span style="background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); padding:3px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">â³ Pending</span>';
+                    stBadge = '<span style="background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); padding:3px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">⏳ Pending</span>';
                 }
 
                 let typeLabel = '';
                 if (p.payoutType === 'quotex_deposit') {
-                    typeLabel = '<span style="background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); padding:2px 6px; border-radius:6px; font-size:0.72rem;">ðŸ“² Quotex Deposit</span>';
+                    typeLabel = '<span style="background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); padding:2px 6px; border-radius:6px; font-size:0.72rem;">📲 Quotex Deposit</span>';
                 } else if (p.payoutType === 'profit_withdrawal') {
-                    typeLabel = '<span style="background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); padding:2px 6px; border-radius:6px; font-size:0.72rem;">ðŸ’° Profit Withdrawal</span>';
+                    typeLabel = '<span style="background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); padding:2px 6px; border-radius:6px; font-size:0.72rem;">💰 Profit Withdrawal</span>';
                 } else {
-                    typeLabel = '<span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:2px 6px; border-radius:6px; font-size:0.72rem;">ðŸ”„ Both (à¦«à¦¾à¦¨à§à¦¡ à¦“ à¦ªà§à¦°à¦«à¦¿à¦Ÿ)</span>';
+                    typeLabel = '<span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:2px 6px; border-radius:6px; font-size:0.72rem;">🔄 Both (ফান্ড ও প্রফিট)</span>';
                 }
 
                 const qrPreview = p.qrCodeUrl
-                    ? <div style="display:inline-flex; align-items:center; gap:6px;">
-                        <img src="" alt="QR" style="width:38px; height:38px; border-radius:6px; object-fit:cover; border:1px solid rgba(0,230,118,0.5); cursor:pointer;" onclick="openAdminPayoutModal('')" title="à¦•à§à¦²à¦¿à¦• à¦•à¦°à§‡ à¦¬à§œ à¦•à¦°à§‡ à¦¦à§‡à¦–à§à¦¨ à¦“ à¦¸à§à¦•à§à¦¯à¦¾à¦¨ à¦•à¦°à§à¦¨" />
-                        <button type="button" class="btn-sm" style="padding:2px 6px; font-size:0.7rem; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); border-radius:4px; cursor:pointer;" onclick="openAdminPayoutModal('')"><i class="fas fa-qrcode"></i> à¦¸à§à¦•à§à¦¯à¦¾à¦¨</button>
-                      </div>
+                    ? `<div style="display:inline-flex; align-items:center; gap:6px;">
+                        <img src="${p.qrCodeUrl}" alt="QR" style="width:38px; height:38px; border-radius:6px; object-fit:cover; border:1px solid rgba(0,230,118,0.5); cursor:pointer;" onclick="openAdminPayoutModal('${p.id}')" title="ক্লিক করে বড় করে দেখুন ও স্ক্যান করুন" />
+                        <button type="button" class="btn-sm" style="padding:2px 6px; font-size:0.7rem; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); border-radius:4px; cursor:pointer;" onclick="openAdminPayoutModal('${p.id}')"><i class="fas fa-qrcode"></i> স্ক্যান</button>
+                      </div>`
                     : '<span style="color:#64748b; font-size:0.75rem;">None</span>';
 
                 const avatar = p.userAvatar 
-                    ? <img src="" style="width:30px; height:30px; border-radius:50%; object-fit:cover;" />
-                    : <div style="width:30px; height:30px; border-radius:50%; background:var(--gold); color:#000; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:0.75rem;"></div>;
+                    ? `<img src="${p.userAvatar}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;" />`
+                    : `<div style="width:30px; height:30px; border-radius:50%; background:var(--gold); color:#000; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:0.75rem;">${(p.userName || 'T')[0].toUpperCase()}</div>`;
 
                 const quotexBox = p.quotexAccountId
-                    ? <div style="display:flex; align-items:center; gap:4px;">
-                        <code style="color:#fff; font-weight:700;"></code>
-                        <button type="button" class="btn-sm" style="padding:2px 5px; font-size:0.68rem; cursor:pointer;" onclick="copyToClipboard('')" title="à¦•à¦ªà¦¿ à¦•à¦°à§à¦¨"><i class="fas fa-copy"></i></button>
-                       </div>
+                    ? `<div style="display:flex; align-items:center; gap:4px;">
+                        <code style="color:#fff; font-weight:700;">${p.quotexAccountId}</code>
+                        <button type="button" class="btn-sm" style="padding:2px 5px; font-size:0.68rem; cursor:pointer;" onclick="copyToClipboard('${p.quotexAccountId}')" title="কপি করুন"><i class="fas fa-copy"></i></button>
+                       </div>`
                     : '<span style="color:#64748b;">--</span>';
 
                 const binanceBox = (p.binancePayId || p.binanceUid)
-                    ? <div style="display:flex; align-items:center; gap:4px;">
-                        <code style="color:#ffb800; font-weight:700;"></code>
-                        <button type="button" class="btn-sm" style="padding:2px 5px; font-size:0.68rem; cursor:pointer;" onclick="copyToClipboard('')" title="à¦•à¦ªà¦¿ à¦•à¦°à§à¦¨"><i class="fas fa-copy"></i></button>
-                       </div>
+                    ? `<div style="display:flex; align-items:center; gap:4px;">
+                        <code style="color:#ffb800; font-weight:700;">${p.binancePayId || p.binanceUid}</code>
+                        <button type="button" class="btn-sm" style="padding:2px 5px; font-size:0.68rem; cursor:pointer;" onclick="copyToClipboard('${p.binancePayId || p.binanceUid}')" title="কপি করুন"><i class="fas fa-copy"></i></button>
+                       </div>`
                     : '<span style="color:#64748b;">--</span>';
 
-                return 
+                return `
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                         <td style="padding:10px 12px; font-size:0.8rem;">
-                            <strong style="color:var(--yellow); font-family:monospace;"></strong>
-                            <div style="font-size:0.72rem; color:#94a3b8;"> </div>
+                            <strong style="color:var(--yellow); font-family:monospace;">${p.payoutId || p.id.substring(0,8)}</strong>
+                            <div style="font-size:0.72rem; color:#94a3b8;">${dt} ${time}</div>
                         </td>
                         <td style="padding:10px 12px;">
                             <div style="display:flex; align-items:center; gap:8px;">
-                                
+                                ${avatar}
                                 <div>
-                                    <div style="font-weight:700; color:#fff; font-size:0.82rem;"></div>
-                                    <div style="font-size:0.72rem; color:#94a3b8;"></div>
-                                    <span style="font-size:0.68rem; color:var(--yellow); font-family:monospace;">ID: </span>
+                                    <div style="font-weight:700; color:#fff; font-size:0.82rem;">${p.userName || 'Trader'}</div>
+                                    <div style="font-size:0.72rem; color:#94a3b8;">${p.userEmail || ''}</div>
+                                    <span style="font-size:0.68rem; color:var(--yellow); font-family:monospace;">ID: ${p.userTraderId || '--'}</span>
                                 </div>
                             </div>
                         </td>
                         <td style="padding:10px 12px; font-size:0.8rem;">
-                            <strong style="color:#e2e8f0; display:block;"></strong>
-                            <span style="font-size:0.72rem; color:#10b981; font-weight:700;">Account: {p.fundedAmount || p.amount || 100}</span>
+                            <strong style="color:#e2e8f0; display:block;">${p.challengePackageName || 'Funded Account'}</strong>
+                            <span style="font-size:0.72rem; color:#10b981; font-weight:700;">Account: $${p.fundedAmount || p.amount || 100}</span>
                         </td>
                         <td style="padding:10px 12px;">
-                            
+                            ${typeLabel}
                         </td>
                         <td style="padding:10px 12px; font-size:0.95rem; font-weight:800; color:#00e676;">
-                            {p.amount || 0}
+                            $${p.amount || 0}
                         </td>
                         <td style="padding:10px 12px; font-size:0.8rem;">
-                            
+                            ${quotexBox}
                         </td>
                         <td style="padding:10px 12px; font-size:0.8rem;">
-                            
+                            ${binanceBox}
                         </td>
                         <td style="padding:10px 12px; text-align:center;">
-                            
+                            ${qrPreview}
                         </td>
                         <td style="padding:10px 12px; text-align:center;">
-                            
+                            ${stBadge}
                         </td>
                         <td style="padding:10px 12px; text-align:center;">
                             <div style="display:flex; gap:6px; justify-content:center;">
-                                <button type="button" class="btn-gold" style="padding:5px 10px; font-size:0.75rem; border-radius:6px; white-space:nowrap; cursor:pointer;" onclick="openAdminPayoutModal('')">
-                                    <i class="fas fa-eye"></i> à¦¬à¦¿à¦¸à§à¦¤à¦¾à¦°à¦¿à¦¤ à¦“ à¦¸à§à¦•à§à¦¯à¦¾à¦¨
+                                <button type="button" class="btn-gold" style="padding:5px 10px; font-size:0.75rem; border-radius:6px; white-space:nowrap; cursor:pointer;" onclick="openAdminPayoutModal('${p.id}')">
+                                    <i class="fas fa-eye"></i> বিস্তারিত ও স্ক্যান
                                 </button>
-                                <button type="button" class="btn-outline" style="padding:5px 8px; font-size:0.75rem; border-radius:6px; color:#ef4444; border-color:rgba(239,68,68,0.3); cursor:pointer;" onclick="handleDeletePayout('')" title="à¦®à§à¦›à§‡ à¦«à§‡à¦²à§à¦¨">
+                                <button type="button" class="btn-outline" style="padding:5px 8px; font-size:0.75rem; border-radius:6px; color:#ef4444; border-color:rgba(239,68,68,0.3); cursor:pointer;" onclick="handleDeletePayout('${p.id}')" title="মুছে ফেলুন">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
-                ;
+                `;
             }).join('');
         }
 
         function openAdminPayoutModal(payoutId) {
             const p = adminPayouts.find(item => item.id === payoutId || item.payoutId === payoutId);
             if (!p) {
-                showToast('à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿ à¦ªà¦¾à¦“à¦¯à¦¼à¦¾ à¦¯à¦¾à¦¯à¦¼à¦¨à¦¿à¥¤', 'error');
+                showToast('পে-আউট রিকোয়েস্ট পাওয়া যায়নি।', 'error');
                 return;
             }
             currentViewingPayout = p;
 
             document.getElementById('modalPayoutIdHeading').innerText = p.payoutId || p.id;
-            document.getElementById('modalPayoutAmount').innerText = $;
+            document.getElementById('modalPayoutAmount').innerText = `$${p.amount || 0}`;
             const scanAmtNotice = document.getElementById('modalPayoutAmountScanNotice');
-            if (scanAmtNotice) scanAmtNotice.innerText = $;
+            if (scanAmtNotice) scanAmtNotice.innerText = `$${p.amount || 0}`;
 
             document.getElementById('modalPayoutTraderName').innerText = p.userName || 'Trader';
             document.getElementById('modalPayoutTraderEmail').innerText = p.userEmail || '--';
-            document.getElementById('modalPayoutTraderId').innerText = ID: ;
+            document.getElementById('modalPayoutTraderId').innerText = `ID: ${p.userTraderId || '--'}`;
             document.getElementById('modalPayoutPackage').innerText = p.challengePackageName || 'Funded Plan';
             document.getElementById('modalPayoutType').innerText = p.payoutTypeLabel || p.payoutType;
 
             const qEl = document.getElementById('modalPayoutQuotexId');
-            if (qEl) qEl.innerText = p.quotexAccountId || 'à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦•à¦°à¦¾ à¦¹à§Ÿà¦¨à¦¿';
+            if (qEl) qEl.innerText = p.quotexAccountId || 'প্রদান করা হয়নি';
             const bEl = document.getElementById('modalPayoutBinanceId');
-            if (bEl) bEl.innerText = p.binancePayId || p.binanceUid || 'à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦•à¦°à¦¾ à¦¹à§Ÿà¦¨à¦¿';
+            if (bEl) bEl.innerText = p.binancePayId || p.binanceUid || 'প্রদান করা হয়নি';
 
             const notesEl = document.getElementById('modalPayoutTraderNotes');
             if (notesEl) {
-                notesEl.innerText = p.traderNotes ? "" : 'à¦•à§‹à¦¨à§‹ à¦¬à¦¿à¦¶à§‡à¦· à¦¨à§‹à¦Ÿ à¦¦à§‡à¦“à§Ÿà¦¾ à¦¹à§Ÿà¦¨à¦¿à¥¤';
+                notesEl.innerText = p.traderNotes ? `"${p.traderNotes}"` : 'কোনো বিশেষ নোট দেওয়া হয়নি।';
             }
 
             const qrImg = document.getElementById('modalPayoutQrImg');
@@ -9613,11 +9613,11 @@
             const stEl = document.getElementById('modalPayoutStatusBadge');
             if (stEl) {
                 if (p.status === 'paid') {
-                    stEl.innerHTML = <span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:700;">âœ… à¦ªà§‡à¦‡à¦¡ à¦¸à¦®à§à¦ªà¦¨à§à¦¨ ()</span>;
+                    stEl.innerHTML = `<span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:700;">✅ পেইড সম্পন্ন (${p.paidAt ? new Date(p.paidAt).toLocaleDateString() : ''})</span>`;
                 } else if (p.status === 'rejected') {
-                    stEl.innerHTML = <span style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:700;">âŒ à¦¬à¦¾à¦¤à¦¿à¦² à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡</span>;
+                    stEl.innerHTML = `<span style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:700;">❌ বাতিল করা হয়েছে</span>`;
                 } else {
-                    stEl.innerHTML = <span style="background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:700;">â³ à¦…à¦ªà§‡à¦•à§à¦·à¦®à¦¾à¦£ / Reviewing</span>;
+                    stEl.innerHTML = `<span style="background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:700;">⏳ অপেক্ষমাণ / Reviewing</span>`;
                 }
             }
 
@@ -9632,20 +9632,20 @@
             const trxId = document.getElementById('adminPayoutTrxInput').value.trim();
             const notes = document.getElementById('adminPayoutNotesInput').value.trim();
 
-            if (newStatus === 'rejected' && !confirm('à¦†à¦ªà¦¨à¦¿ à¦•à¦¿ à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤ à¦¯à§‡ à¦à¦‡ à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿà¦Ÿà¦¿ à¦¬à¦¾à¦¤à¦¿à¦² à¦•à¦°à¦¤à§‡ à¦šà¦¾à¦¨?')) {
+            if (newStatus === 'rejected' && !confirm('আপনি কি নিশ্চিত যে এই পে-আউট রিকোয়েস্টটি বাতিল করতে চান?')) {
                 return;
             }
 
-            if (newStatus === 'paid' && !confirm(à¦†à¦ªà¦¨à¦¿ à¦•à¦¿ à¦Ÿà§à¦°à§‡à¦¡à¦¾à¦° -à¦•à§‡ {currentViewingPayout.amount || 0} à¦¡à¦²à¦¾à¦° à¦ªà¦¾à¦ à¦¿à§Ÿà§‡à¦›à§‡à¦¨ à¦à¦¬à¦‚ à¦à¦Ÿà¦¿ à¦ªà§‡à¦‡à¦¡ à¦¹à¦¿à¦¸à§‡à¦¬à§‡ à¦®à¦¾à¦°à§à¦• à¦•à¦°à¦¤à§‡ à¦šà¦¾à¦¨?)) {
+            if (newStatus === 'paid' && !confirm(`আপনি কি ট্রেডার ${currentViewingPayout.userName || ''}-কে $${currentViewingPayout.amount || 0} ডলার পাঠিয়েছেন এবং এটি পেইড হিসেবে মার্ক করতে চান?`)) {
                 return;
             }
 
             try {
-                const res = await fetch(/api/admin/payouts/11260/status, {
+                const res = await fetch(`/api/admin/payouts/${pId}/status`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': Bearer 
+                        'Authorization': `Bearer ${adminToken}`
                     },
                     body: JSON.stringify({
                         status: newStatus,
@@ -9655,41 +9655,42 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message || 'à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦¸à§à¦Ÿà§à¦¯à¦¾à¦Ÿà¦¾à¦¸ à¦¸à¦«à¦²à¦­à¦¾à¦¬à§‡ à¦†à¦ªà¦¡à§‡à¦Ÿ à¦•à¦°à¦¾ à¦¹à§Ÿà§‡à¦›à§‡!', 'success');
+                    showToast(data.message || 'পে-আউট স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে!', 'success');
                     closeModal('adminPayoutModal');
                     fetchAdminPayouts();
                     if (typeof loadAllAdminData === 'function') {
                         loadAllAdminData();
                     }
                 } else {
-                    showToast(data.message || 'à¦¸à§à¦Ÿà§à¦¯à¦¾à¦Ÿà¦¾à¦¸ à¦†à¦ªà¦¡à§‡à¦Ÿ à¦¬à§à¦¯à¦°à§à¦¥ à¦¹à¦¯à¦¼à§‡à¦›à§‡', 'error');
+                    showToast(data.message || 'স্ট্যাটাস আপডেট ব্যর্থ হয়েছে', 'error');
                 }
             } catch (err) {
-                showToast('à¦¸à¦¾à¦°à§à¦­à¦¾à¦° à¦à¦°à¦°: ' + err.message, 'error');
+                showToast('সার্ভার এরর: ' + err.message, 'error');
             }
         }
 
         async function handleDeletePayout(pId) {
-            if (!confirm('à¦†à¦ªà¦¨à¦¿ à¦•à¦¿ à¦¨à¦¿à¦¶à§à¦šà¦¿à¦¤ à¦¯à§‡ à¦à¦‡ à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦°à¦¿à¦•à§‹à¦¯à¦¼à§‡à¦¸à§à¦Ÿà¦Ÿà¦¿ à¦®à§à¦›à§‡ à¦«à§‡à¦²à¦¤à§‡ à¦šà¦¾à¦¨? à¦à¦Ÿà¦¿ à¦ªà¦¾à¦°à§à¦®à¦¾à¦¨à§‡à¦¨à§à¦Ÿà¦²à¦¿ à¦¡à¦¿à¦²à¦¿à¦Ÿ à¦¹à¦¬à§‡à¥¤')) return;
+            if (!confirm('আপনি কি নিশ্চিত যে এই পে-আউট রিকোয়েস্টটি মুছে ফেলতে চান? এটি পার্মানেন্টলি ডিলিট হবে।')) return;
             if (!adminToken) return;
 
             try {
-                const res = await fetch(/api/admin/payouts/11260, {
+                const res = await fetch(`/api/admin/payouts/${pId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': Bearer  }
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('à¦ªà§‡-à¦†à¦‰à¦Ÿ à¦°à§‡à¦•à¦°à§à¦¡ à¦®à§à¦›à§‡ à¦«à§‡à¦²à¦¾ à¦¹à§Ÿà§‡à¦›à§‡à¥¤', 'success');
+                    showToast('পে-আউট রেকর্ড মুছে ফেলা হয়েছে।', 'success');
                     closeModal('adminPayoutModal');
                     fetchAdminPayouts();
                 } else {
-                    showToast(data.message || 'à¦®à§à¦›à§‡ à¦«à§‡à¦²à¦¾ à¦¬à§à¦¯à¦°à§à¦¥ à¦¹à§Ÿà§‡à¦›à§‡', 'error');
+                    showToast(data.message || 'মুছে ফেলা ব্যর্থ হয়েছে', 'error');
                 }
             } catch (err) {
-                showToast('à¦¸à¦¾à¦°à§à¦­à¦¾à¦° à¦à¦°à¦°: ' + err.message, 'error');
+                showToast('সার্ভার এরর: ' + err.message, 'error');
             }
         }
+
     </script>
 </body>
 </html>
