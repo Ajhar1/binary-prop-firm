@@ -68,6 +68,13 @@ async function handleBackgroundApiFetch(msg) {
       data = { rawText: text, message: text };
     }
 
+    // Auto-invalidate stale cached Quotex ID if server reports an account mismatch
+    if (data && data.accountMismatch) {
+      console.warn('[BPF Background] Account mismatch detected by server. Purging stale Quotex ID:', cachedQuotexAccountId);
+      cachedQuotexAccountId = null;
+      chrome.storage.local.remove(['quotex_detected_account_id']);
+    }
+
     return {
       success: true,
       ok: res.ok,
@@ -128,6 +135,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     sendResponse({ success: false });
     return false;
+  }
+
+  if (msg.action === 'CLEAR_QUOTEX_ID') {
+    console.log('[BPF Background] Clearing cached Quotex Account ID upon user or mismatch request.');
+    cachedQuotexAccountId = null;
+    chrome.storage.local.remove(['quotex_detected_account_id'], () => {
+      sendResponse({ success: true });
+    });
+    return true;
   }
 
   if (msg.action === 'PING_SERVER') {

@@ -45,7 +45,9 @@
         if (res.quotex_registered_broker_id) {
           currentRegisteredBrokerAccountId = res.quotex_registered_broker_id;
         }
-        if (res.quotex_detected_account_id) {
+        const isSettingsPageInit = window.location.pathname.includes('/settings');
+        const isForceRescanInit = window.location.search.includes('force_rescan') || window.location.search.includes('clear_id');
+        if (res.quotex_detected_account_id && !isSettingsPageInit && !isForceRescanInit) {
           detectedQuotexAccountId = res.quotex_detected_account_id;
         }
         if (Array.isArray(res.syncedCache)) {
@@ -160,10 +162,39 @@
     return null;
   }
 
-  // 2.1 Quotex Account ID Auto-Detection & Verification Engine (7-Layer Resilient System)
+  // Clear all cached Quotex IDs across all local and extension storages
+  function clearAllStoredQuotexIds() {
+    detectedQuotexAccountId = null;
+    lastIdScanTime = 0;
+    try {
+      window.localStorage.removeItem('bpf_quotex_account_id');
+      window.sessionStorage.removeItem('bpf_quotex_account_id');
+    } catch (e) {}
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.remove(['quotex_detected_account_id']);
+      }
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage({ action: 'CLEAR_QUOTEX_ID' });
+      }
+    } catch (e) {}
+    updateWidgetStatus();
+  }
+
+  // 2.1 Quotex Account ID Auto-Detection & Verification Engine (Resilient Live-First Architecture)
   async function scanQuotexAccountId(forceRefresh = false) {
+    const isSettingsPage = window.location.pathname.includes('/settings');
+    const urlParams = new URLSearchParams(window.location.search);
+    const isForceRescan = forceRefresh || urlParams.get('force_rescan') === 'true' || urlParams.get('rescan') === 'true';
+
+    // If force rescan is requested, wipe all stale storage immediately
+    if (isForceRescan) {
+      clearAllStoredQuotexIds();
+    }
+
     const now = Date.now();
-    if (!forceRefresh && detectedQuotexAccountId && (now - lastIdScanTime < 45000)) {
+    // Cache is ONLY returned if NOT on settings page, NOT forced, and scanned recently
+    if (!isForceRescan && !isSettingsPage && detectedQuotexAccountId && (now - lastIdScanTime < 30000)) {
       return detectedQuotexAccountId;
     }
 
@@ -171,6 +202,7 @@
     const commitId = (idStr) => {
       const clean = String(idStr || '').replace(/[^0-9]/g, '');
       if (clean && clean.length >= 5 && clean.length <= 12) {
+        const prev = detectedQuotexAccountId;
         detectedQuotexAccountId = clean;
         lastIdScanTime = Date.now();
         try {
@@ -186,22 +218,36 @@
           }
         } catch (e) {}
         updateWidgetStatus();
+
+        // Auto-dismiss mismatch modal if active registered ID matches!
+        const cleanReg = (currentRegisteredBrokerAccountId || '').replace(/[^0-9]/g, '');
+        if (cleanReg && clean === cleanReg) {
+          isAccountIdMismatch = false;
+          const mismatchModal = document.getElementById('bpf-mismatch-modal-overlay');
+          if (mismatchModal) mismatchModal.remove();
+          const syncBtn = document.getElementById('bpfSyncBtn');
+          if (syncBtn) {
+            syncBtn.disabled = false;
+            syncBtn.innerHTML = `<span>⚡ Sync Trades</span>`;
+            syncBtn.style.background = '';
+            syncBtn.style.borderColor = '';
+            syncBtn.style.color = '';
+          }
+          if (prev !== clean) {
+            showToast(`✅ Quotex Account ID [${clean}] সফলভাবে ভেরিফাই ও সেভ হয়েছে!`, 'success');
+          }
+        }
         return clean;
       }
       return null;
     };
 
+    const cleanRegDigits = (currentRegisteredBrokerAccountId || '').replace(/[^0-9]/g, '');
+
     // Strategy 0: URL search parameters (instant during settings -> trades redirect)
     try {
-      const urlParams = new URLSearchParams(window.location.search);
       const urlId = urlParams.get('detected_id') || urlParams.get('quotex_id');
       if (urlId && commitId(urlId)) return detectedQuotexAccountId;
-    } catch (e) {}
-
-    // Strategy 0.1: Domain-wide LocalStorage and SessionStorage (Instant synchronous across pages)
-    try {
-      const localStored = window.localStorage.getItem('bpf_quotex_account_id') || window.sessionStorage.getItem('bpf_quotex_account_id');
-      if (localStored && commitId(localStored)) return detectedQuotexAccountId;
     } catch (e) {}
 
     // Helper: JWT Payload Extractor
@@ -223,65 +269,88 @@
       return null;
     };
 
-    // Strategy 1: Check Active DOM elements & Form Inputs (Nickname #95000371, User ID, Leaf nodes)
+    // Strategy 1: Check Live DOM Form Inputs & Elements (Nickname #95000371, User ID, inputs, leaf nodes)
     try {
+      // 1A. Scan all inputs and textareas (value, placeholder, attributes)
       const inputs = document.querySelectorAll('input, textarea');
       for (const inp of inputs) {
-        const val = (inp.value || '').trim();
-        if (val && /#?\d{5,12}/.test(val)) {
-          const m = val.match(/(\d{5,12})/);
-          if (m && commitId(m[1])) return detectedQuotexAccountId;
+        const val = (inp.value || inp.placeholder || inp.getAttribute('value') || inp.defaultValue || '').trim();
+        if (!val) continue;
+
+        // If registered ID is known, check if input contains it
+        if (cleanRegDigits && val.includes(cleanRegDigits)) {
+          if (commitId(cleanRegDigits)) return detectedQuotexAccountId;
         }
+
+        // Exact match with or without #
+        const exactMatch = val.match(/^\s*#?(\d{5,12})\s*$/);
+        if (exactMatch && commitId(exactMatch[1])) return detectedQuotexAccountId;
+
+        // ID pattern with prefix
+        const idMatch = val.match(/(?:ID|Account|Trader|#)\s*[:#\-]?\s*(\d{5,12})\b/i);
+        if (idMatch && commitId(idMatch[1])) return detectedQuotexAccountId;
       }
 
+      // 1B. Check data attributes
       const userEl = document.querySelector('[data-user-id], [data-id], [data-account-id], [data-account]');
       if (userEl) {
         const uid = userEl.getAttribute('data-user-id') || userEl.getAttribute('data-account-id') || userEl.getAttribute('data-id');
         if (uid && commitId(uid)) return detectedQuotexAccountId;
       }
 
-      const allElements = document.querySelectorAll('div, span, p, strong, b, h1, h2, h3, h4, h5, li, a, td');
+      // 1C. Check if registered ID appears anywhere in document body
+      if (cleanRegDigits && document.body && document.body.innerText && document.body.innerText.includes(cleanRegDigits)) {
+        if (commitId(cleanRegDigits)) return detectedQuotexAccountId;
+      }
+
+      // 1D. Scan text in leaf/small elements for #\d{5,12} or ID: \d{5,12}
+      const allElements = document.querySelectorAll('div, span, p, strong, b, h1, h2, h3, h4, h5, li, a, td, th, label, small');
       for (const el of allElements) {
         if (el.children.length > 2) continue;
         const t = (el.innerText || '').replace(/[\u00a0\r\n\t]/g, ' ').trim();
-        if (t && t.length < 60 && /\bID\s*[:#]?\s*\d{5,12}\b/i.test(t)) {
-          const m = t.match(/\bID\s*[:#]?\s*(\d{5,12})\b/i);
-          if (m && commitId(m[1])) return detectedQuotexAccountId;
-        }
+        if (!t || t.length > 80) continue;
+
+        // Match #63896760
+        const hashMatch = t.match(/#(\d{5,12})\b/);
+        if (hashMatch && commitId(hashMatch[1])) return detectedQuotexAccountId;
+
+        // Match ID: 63896760
+        const idMatch = t.match(/\b(?:ID|User\s*ID|Account\s*ID|Trader\s*ID)\s*[:#\-]?\s*(\d{5,12})\b/i);
+        if (idMatch && commitId(idMatch[1])) return detectedQuotexAccountId;
       }
 
+      // 1E. Scan document body text
       const bodyText = (document.body ? document.body.innerText : '').replace(/[\u00a0\r\n\t]/g, ' ');
+      const bodyHash = bodyText.match(/#(\d{5,12})\b/);
+      if (bodyHash && commitId(bodyHash[1])) return detectedQuotexAccountId;
+
       const bodyMatch = bodyText.match(/\bID\s*[:#]?\s*(\d{5,12})\b/i);
       if (bodyMatch && commitId(bodyMatch[1])) return detectedQuotexAccountId;
     } catch (e) {}
 
-    // Strategy 2: Check chrome.storage.local (Immediate retrieval if already captured previously)
-    if (detectedQuotexAccountId && !forceRefresh) {
-      return detectedQuotexAccountId;
-    }
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      try {
-        const stored = await new Promise(res => chrome.storage.local.get(['quotex_detected_account_id'], res));
-        if (stored && stored.quotex_detected_account_id) {
-          if (commitId(stored.quotex_detected_account_id)) return detectedQuotexAccountId;
-        }
-      } catch (e) {}
-    }
-
-    // Strategy 3: Deep Scan LocalStorage & SessionStorage (including JWT tokens & JSON)
+    // Strategy 2: Live Quotex JWT Session Scan (Always authoritative for authenticated session)
     try {
+      // 2A. Cookies
+      const cookieStr = document.cookie || '';
+      const cookieJwt = cookieStr.match(/eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/g);
+      if (cookieJwt) {
+        for (const token of cookieJwt) {
+          const jId = extractIdFromJwt(token);
+          if (jId && commitId(jId)) return detectedQuotexAccountId;
+        }
+      }
+      const cookieIdMatch = cookieStr.match(/\b(?:user_id|userId|uid|account_id|id)\s*=\s*(\d{5,12})\b/i);
+      if (cookieIdMatch && commitId(cookieIdMatch[1])) return detectedQuotexAccountId;
+
+      // 2B. Quotex native LocalStorage / SessionStorage
       const storages = [localStorage, sessionStorage];
       for (const store of storages) {
         if (!store) continue;
         for (let i = 0; i < store.length; i++) {
           const k = store.key(i);
-          if (!k) continue;
+          if (!k || k.startsWith('bpf_')) continue; // Skip BPF cache keys
           const v = store.getItem(k);
           if (!v) continue;
-
-          if (/id/i.test(k) && /^\d{5,12}$/.test(v.trim())) {
-            if (commitId(v.trim())) return detectedQuotexAccountId;
-          }
 
           if (v.includes('eyJ')) {
             const jwtMatches = v.match(/eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/g);
@@ -299,22 +368,7 @@
       }
     } catch (e) {}
 
-    // Strategy 4: Check document.cookie for ID or JWT tokens
-    try {
-      const cookieStr = document.cookie || '';
-      const cookieIdMatch = cookieStr.match(/\b(?:user_id|userId|uid|account_id|id)\s*=\s*(\d{5,12})\b/i);
-      if (cookieIdMatch && commitId(cookieIdMatch[1])) return detectedQuotexAccountId;
-
-      const cookieJwt = cookieStr.match(/eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/g);
-      if (cookieJwt) {
-        for (const token of cookieJwt) {
-          const jId = extractIdFromJwt(token);
-          if (jId && commitId(jId)) return detectedQuotexAccountId;
-        }
-      }
-    } catch (e) {}
-
-    // Strategy 5: Inline script search for state configs
+    // Strategy 3: Inline script search for state configs
     try {
       const scripts = document.querySelectorAll('script:not([src])');
       for (const s of scripts) {
@@ -326,7 +380,26 @@
       }
     } catch (e) {}
 
-    // Strategy 6: Dynamic Hidden Sandbox Iframe to /en/settings (Executes Quotex SPA to render ID)
+    // Strategy 4: Fallback to Extension Storage / Cached ID (ONLY when NOT on settings page and NOT force rescan)
+    if (!isSettingsPage && !isForceRescan) {
+      if (detectedQuotexAccountId) return detectedQuotexAccountId;
+
+      try {
+        const localStored = window.localStorage.getItem('bpf_quotex_account_id') || window.sessionStorage.getItem('bpf_quotex_account_id');
+        if (localStored && commitId(localStored)) return detectedQuotexAccountId;
+      } catch (e) {}
+
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        try {
+          const stored = await new Promise(res => chrome.storage.local.get(['quotex_detected_account_id'], res));
+          if (stored && stored.quotex_detected_account_id) {
+            if (commitId(stored.quotex_detected_account_id)) return detectedQuotexAccountId;
+          }
+        } catch (e) {}
+      }
+    }
+
+    // Strategy 5: Dynamic Hidden Sandbox Iframe to /en/settings (Executes Quotex SPA to render ID)
     if (!detectedQuotexAccountId && !window.location.pathname.includes('/settings')) {
       try {
         const iframeId = 'bpf-settings-scanner-frame';
@@ -334,24 +407,51 @@
         if (!frame) {
           frame = document.createElement('iframe');
           frame.id = iframeId;
-          frame.src = `${window.location.origin}/en/settings`;
+          frame.src = `${window.location.origin}/en/settings?rescan_frame=${Date.now()}`;
           frame.style.cssText = 'position:fixed; width:1px; height:1px; top:-9999px; left:-9999px; opacity:0; pointer-events:none; border:none; z-index:-1;';
           document.body.appendChild(frame);
         }
 
         const startT = Date.now();
-        while (Date.now() - startT < 4000) {
+        while (Date.now() - startT < 4500) {
           try {
             if (frame.contentDocument && frame.contentDocument.body) {
-              const frameText = (frame.contentDocument.body.innerText || '').replace(/[\u00a0\r\n\t]/g, ' ');
-              const m = frameText.match(/\bID\s*[:#]?\s*(\d{5,12})\b/i);
-              if (m && commitId(m[1])) {
+              const fDoc = frame.contentDocument;
+
+              // Check if cleanRegDigits is in iframe
+              if (cleanRegDigits && fDoc.body.innerText && fDoc.body.innerText.includes(cleanRegDigits)) {
+                if (commitId(cleanRegDigits)) {
+                  try { frame.remove(); } catch(e){}
+                  return detectedQuotexAccountId;
+                }
+              }
+
+              // Check iframe inputs
+              const fInputs = fDoc.querySelectorAll('input, textarea');
+              for (const fInp of fInputs) {
+                const fv = (fInp.value || fInp.placeholder || fInp.getAttribute('value') || '').trim();
+                const fm = fv.match(/^\s*#?(\d{5,12})\s*$/) || fv.match(/(?:ID|Account|Trader|#)\s*[:#\-]?\s*(\d{5,12})\b/i);
+                if (fm && commitId(fm[1])) {
+                  try { frame.remove(); } catch(e){}
+                  return detectedQuotexAccountId;
+                }
+              }
+
+              // Check iframe body text
+              const frameText = (fDoc.body.innerText || '').replace(/[\u00a0\r\n\t]/g, ' ');
+              const mHash = frameText.match(/#(\d{5,12})\b/);
+              if (mHash && commitId(mHash[1])) {
+                try { frame.remove(); } catch(e){}
+                return detectedQuotexAccountId;
+              }
+              const mId = frameText.match(/\bID\s*[:#]?\s*(\d{5,12})\b/i);
+              if (mId && commitId(mId[1])) {
                 try { frame.remove(); } catch(e){}
                 return detectedQuotexAccountId;
               }
             }
           } catch (fErr) {}
-          await new Promise(r => setTimeout(r, 200));
+          await new Promise(r => setTimeout(r, 250));
         }
       } catch (e) {}
     }
@@ -363,23 +463,42 @@
   function initLiveDomIdObserver() {
     const checkDomForId = () => {
       try {
-        const bodyText = (document.body ? document.body.innerText : '').replace(/[\u00a0\r\n\t]/g, ' ');
-        if (bodyText) {
-          const m = bodyText.match(/\bID\s*[:#]?\s*(\d{5,12})\b/i);
+        const cleanReg = (currentRegisteredBrokerAccountId || '').replace(/[^0-9]/g, '');
+
+        // 1. Check inputs (value, placeholder)
+        const inputs = document.querySelectorAll('input, textarea');
+        for (const inp of inputs) {
+          const val = (inp.value || inp.placeholder || inp.getAttribute('value') || '').trim();
+          if (!val) continue;
+
+          if (cleanReg && val.includes(cleanReg)) {
+            commitId(cleanReg);
+            return;
+          }
+
+          const m = val.match(/^\s*#?(\d{5,12})\s*$/) || val.match(/(?:ID|Account|Trader|#)\s*[:#\-]?\s*(\d{5,12})\b/i);
           if (m && m[1]) {
             const clean = m[1].replace(/[^0-9]/g, '');
             if (clean && clean !== detectedQuotexAccountId) {
-              const prev = detectedQuotexAccountId;
-              detectedQuotexAccountId = clean;
-              lastIdScanTime = Date.now();
-              if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-                chrome.storage.local.set({ quotex_detected_account_id: clean });
-              }
-              updateWidgetStatus();
-              if (!prev && currentRegisteredBrokerAccountId && clean === currentRegisteredBrokerAccountId.replace(/[^0-9]/g, '')) {
-                showToast(`✅ Quotex Account ID [${clean}] সফলভাবে ভেরিফাই ও সেভ হয়েছে!`, 'success');
-              }
+              commitId(clean);
+              return;
             }
+          }
+        }
+
+        // 2. Check DOM text
+        const bodyText = (document.body ? document.body.innerText : '').replace(/[\u00a0\r\n\t]/g, ' ');
+        if (cleanReg && bodyText.includes(cleanReg)) {
+          commitId(cleanReg);
+          return;
+        }
+
+        const m = bodyText.match(/#(\d{5,12})\b/) || bodyText.match(/\bID\s*[:#]?\s*(\d{5,12})\b/i);
+        if (m && m[1]) {
+          const clean = m[1].replace(/[^0-9]/g, '');
+          if (clean && clean !== detectedQuotexAccountId) {
+            commitId(clean);
+            return;
           }
         }
       } catch (e) {}
@@ -440,7 +559,7 @@
           <p style="margin:0 0 10px 0;">
             ${isMissing
               ? `আপনার চ্যালেঞ্জটি Quotex ID: <strong>[${cleanReg}]</strong> এর সাথে যুক্ত। ট্রেড সিঙ্ক চালু করতে এক্সটেনশনকে একবার আপনার Quotex ID ভেরিফাই করতে হবে।`
-              : `আপনার চ্যালেঞ্জটি নির্দিষ্ট করা Quotex অ্যাকাউন্টের সাথে যুক্ত। আপনি বর্তমানে যে Quotex অ্যাকাউন্টে লগইন করে আছেন, সেটির ID আপনার চ্যালেঞ্জের রেজিস্ট্রার্ড ID-র সাথে মিলছে না।`
+              : `আপনার চ্যালেঞ্জটি নির্দিষ্ট করা Quotex অ্যাকাউন্টের সাথে যুক্ত। আপনি পূর্বে অন্য অ্যাকাউন্টে লগইন করেছিলেন অথবা বর্তমানে যে অ্যাকাউন্টে আছেন তার ID চ্যালেঞ্জের রেজিস্ট্রার্ড ID-র সাথে মিলছে না।`
             }
           </p>
           <div class="bpf-modal-id-grid">
@@ -449,23 +568,26 @@
               <div class="bpf-modal-id-val">${cleanReg}</div>
             </div>
             <div class="bpf-modal-id-box current">
-              <div class="bpf-modal-id-label">${isMissing ? 'সনাক্তকরণ স্ট্যাটাস' : 'বর্তমান লগইনকৃত ID'}</div>
-              <div class="bpf-modal-id-val" style="${isMissing ? 'color:#fbbf24;' : ''}">${cleanDet || 'Not Detected'}</div>
+              <div class="bpf-modal-id-label">${isMissing ? 'সনাক্তকরণ স্ট্যাটাস' : 'বর্তমানে সনাক্তকৃত ID'}</div>
+              <div class="bpf-modal-id-val" id="bpfModalDetVal" style="${isMissing ? 'color:#fbbf24;' : ''}">${cleanDet || 'Not Detected'}</div>
             </div>
           </div>
           <div class="bpf-modal-notice" style="${isMissing ? 'background:rgba(255,184,0,0.08)!important; border-left-color:#fbbf24!important;' : ''}">
             ${isMissing
-              ? `💡 <strong>সহজ সমাধান:</strong> নিচের <strong>"⚙️ Quotex Settings পেজে যান"</strong> বাটনে চাপ দিন। Settings পেজটি ওপেন হওয়ামাত্র এক্সটেনশন স্বয়ংক্রিয়ভাবে আপনার ID পড়ে পার্মানেন্টলি সেভ করে নেবে, এরপর আর কখনোই এটি করতে হবে না।`
-              : `⚠️ <strong>নিরাপত্তা সতর্কতা:</strong> অন্য কোনো অ্যাকাউন্ট থেকে নেওয়া ট্রেড আপনার চ্যালেঞ্জে গ্রহণযোগ্য নয়। সঠিক Quotex অ্যাকাউন্টে লগইন করার পর পুনরায় সিঙ্ক করুন।`
+              ? `💡 <strong>সহজ সমাধান:</strong> নিচের <strong>"⚙️ Settings পেজে গিয়ে রি-স্ক্যান করুন"</strong> বাটনে চাপ দিন। Settings পেজ ওপেন হওয়ামাত্র এক্সটেনশন সরাসরি আপনার সঠিক ID পড়বে।`
+              : `💡 <strong>অ্যাকাউন্ট পরিবর্তন করেছেন?</strong> যদি আপনি ইতিমধ্যে সঠিক Quotex অ্যাকাউন্টে লগইন করে থাকেন, তাহলে নিচের <strong>"🔄 ক্যাশ ক্লিয়ার ও রি-স্ক্যান"</strong> বাটনে চাপ দিন, পুরনো ক্যাশ ডিলিট হয়ে বর্তমান অ্যাকাউন্টের ID সনাক্ত হয়ে যাবে।`
             }
           </div>
         </div>
-        <div class="bpf-modal-actions">
-          <button class="bpf-modal-btn bpf-modal-btn-sec" id="bpfCloseMismatchModal">
+        <div class="bpf-modal-actions" style="display:flex; flex-wrap:wrap; gap:8px;">
+          <button class="bpf-modal-btn bpf-modal-btn-sec" id="bpfCloseMismatchModal" style="flex:1; min-width:80px;">
             বন্ধ করুন
           </button>
-          <button class="bpf-modal-btn bpf-modal-btn-pri" id="bpfOpenSettingsBtn" style="${isMissing ? 'background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%)!important; box-shadow:0 4px 14px rgba(245,158,11,0.4)!important;' : ''}">
-            ⚙️ Quotex Settings পেজে যান (১ ক্লিকে ভেরিফাই)
+          <button class="bpf-modal-btn bpf-modal-btn-sec" id="bpfRescanNowBtn" style="flex:1.2; min-width:145px; border-color:#38bdf8!important; color:#38bdf8!important; font-weight:700;">
+            🔄 ক্যাশ ক্লিয়ার ও রি-স্ক্যান
+          </button>
+          <button class="bpf-modal-btn bpf-modal-btn-pri" id="bpfOpenSettingsBtn" style="flex:1.4; min-width:170px; ${isMissing ? 'background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%)!important; box-shadow:0 4px 14px rgba(245,158,11,0.4)!important;' : ''}">
+            ⚙️ Settings পেজে রি-স্ক্যান
           </button>
         </div>
       </div>
@@ -484,11 +606,50 @@
     const closeBtn = document.getElementById('bpfCloseMismatchModal');
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
 
+    // Button 1: In-place Clear Cache & Instant Rescan
+    const rescanBtn = document.getElementById('bpfRescanNowBtn');
+    if (rescanBtn) {
+      rescanBtn.addEventListener('click', async () => {
+        rescanBtn.disabled = true;
+        rescanBtn.innerText = '⏳ রি-স্ক্যান হচ্ছে...';
+        clearAllStoredQuotexIds();
+        showToast('🔄 পুরনো ক্যাশ মুছে নতুন করে ব্রোকার আইডি খোঁজা হচ্ছে...', 'info');
+
+        const newDet = await scanQuotexAccountId(true);
+        rescanBtn.disabled = false;
+        rescanBtn.innerText = '🔄 ক্যাশ ক্লিয়ার ও রি-স্ক্যান';
+
+        if (newDet) {
+          const detBox = document.getElementById('bpfModalDetVal');
+          if (detBox) detBox.innerText = newDet;
+          const check = verifyQuotexAccountIdMatch(newDet, cleanReg);
+          if (!check.isMismatch) {
+            closeModal();
+            showToast(`✅ Quotex Account ID [${newDet}] সফলভাবে ভেরিফাই হয়েছে! এখন ট্রেড সিঙ্ক করুন।`, 'success');
+            const syncBtn = document.getElementById('bpfSyncBtn');
+            if (syncBtn) {
+              syncBtn.disabled = false;
+              syncBtn.innerHTML = `<span>⚡ Sync Trades</span>`;
+              syncBtn.style.background = '';
+              syncBtn.style.borderColor = '';
+              syncBtn.style.color = '';
+            }
+          } else {
+            showToast(`⚠️ সনাক্তকৃত ID: ${newDet}। এখনও রেজিস্ট্রার্ড ID [${cleanReg}] এর সাথে মিলছে না। সঠিক অ্যাকাউন্টে লগইন করুন।`, 'error');
+          }
+        } else {
+          showToast('⚠️ লাইভ আইডি পাওয়া যায়নি। Settings পেজে গিয়ে রি-স্ক্যান করার চেষ্টা করুন।', 'info');
+        }
+      });
+    }
+
+    // Button 2: Navigate to /en/settings with force_rescan
     const settingsBtn = document.getElementById('bpfOpenSettingsBtn');
     if (settingsBtn) {
       settingsBtn.addEventListener('click', () => {
+        clearAllStoredQuotexIds();
         closeModal();
-        window.location.href = `${window.location.origin}/en/settings`;
+        window.location.href = `${window.location.origin}/en/settings?force_rescan=${Date.now()}`;
       });
     }
   }
@@ -1487,6 +1648,7 @@
 
         if (result && result.accountMismatch) {
           isAccountIdMismatch = true;
+          clearAllStoredQuotexIds();
           showAccountMismatchModal(result.registeredBrokerAccountId, result.detectedBrokerAccountId);
           showToast('⚠️ Quotex Account ID মিলছে না! সিঙ্ক ব্লক করা হয়েছে।', 'error');
           if (btn) {
@@ -1565,6 +1727,14 @@
   // 14. Message Listener from Popup
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
     chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
+      if (req.action === 'FORCE_RESCAN_ID') {
+        clearAllStoredQuotexIds();
+        scanQuotexAccountId(true).then((newId) => {
+          sendResponse({ success: true, detectedId: newId });
+        });
+        return true;
+      }
+
       if (req.action === 'TRIGGER_SYNC') {
         if (isExtensionLocked) {
           sendResponse({ success: false, error: lockReason || 'আপনার চ্যালেঞ্জটি বন্ধ বা বাতিল রয়েছে।' });
@@ -1623,9 +1793,28 @@
   // 15. Initialization
   function startExtension() {
     loadConfig(() => {
+      const isSettingsPage = window.location.pathname.includes('/settings');
+      const urlParams = new URLSearchParams(window.location.search);
+      const isForceRescan = urlParams.get('force_rescan') === 'true' || urlParams.get('rescan') === 'true';
+
+      if (isForceRescan) {
+        clearAllStoredQuotexIds();
+      }
+
       initLiveDomIdObserver();
       scanQuotexBrokerTimezone();
-      scanQuotexAccountId();
+
+      if (isSettingsPage || isForceRescan) {
+        scanQuotexAccountId(true);
+        [300, 700, 1500, 2500, 4000].forEach(delay => {
+          setTimeout(() => {
+            scanQuotexAccountId(true);
+          }, delay);
+        });
+      } else {
+        scanQuotexAccountId();
+      }
+
       injectWidget();
       sendHeartbeat();
 

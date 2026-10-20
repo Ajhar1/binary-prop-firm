@@ -144,6 +144,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   serverUrlInput.addEventListener('input', saveSettings);
   autoSyncCheckbox.addEventListener('change', saveSettings);
 
+  // Manual Reset / Re-scan Button in Popup
+  const rescanIdBtn = document.getElementById('popupRescanIdBtn');
+  if (rescanIdBtn) {
+    rescanIdBtn.addEventListener('click', async () => {
+      rescanIdBtn.disabled = true;
+      rescanIdBtn.innerText = '⏳ Scanning...';
+      chrome.storage.local.remove(['quotex_detected_account_id']);
+      chrome.runtime.sendMessage({ action: 'CLEAR_QUOTEX_ID' });
+      cachedDetectedBrokerId = '';
+      updateIdMatchUi(cachedRegBrokerId, '');
+      showStatus('🔄 পুরনো আইডি মুছে লাইভ স্ক্যান করা হচ্ছে...', 'info');
+
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab && tab.id) {
+          chrome.tabs.sendMessage(tab.id, { action: 'FORCE_RESCAN_ID' }, (resp) => {
+            rescanIdBtn.disabled = false;
+            rescanIdBtn.innerText = '🔄 Reset/Re-scan';
+            if (resp && resp.detectedId) {
+              updateIdMatchUi(cachedRegBrokerId, resp.detectedId);
+              showStatus(`✅ নতুন Quotex ID [${resp.detectedId}] সনাক্ত হয়েছে!`, 'success');
+            } else {
+              showStatus('ℹ️ আইডি সনাক্ত করা যায়নি। Quotex Settings পেজে গিয়ে রি-স্ক্যান করুন।', 'info');
+            }
+          });
+          return;
+        }
+      } catch (e) {}
+
+      rescanIdBtn.disabled = false;
+      rescanIdBtn.innerText = '🔄 Reset/Re-scan';
+    });
+  }
+
   function showStatus(msg, type = 'success') {
     statusBox.style.display = 'block';
     statusBox.className = `status-box status-${type}`;
