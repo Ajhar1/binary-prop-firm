@@ -3,6 +3,14 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log('[BPF Background] Service worker installed.');
 });
 
+// In-memory fallback cache for verified Quotex Account IDs
+let cachedQuotexAccountId = null;
+chrome.storage.local.get(['quotex_detected_account_id'], (res) => {
+  if (res && res.quotex_detected_account_id) {
+    cachedQuotexAccountId = String(res.quotex_detected_account_id).replace(/[^0-9]/g, '');
+  }
+});
+
 // Universal Background API Proxy - Bypasses all webpage CSP restrictions
 async function handleBackgroundApiFetch(msg) {
   const serverUrl = (msg.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '');
@@ -22,7 +30,32 @@ async function handleBackgroundApiFetch(msg) {
   };
 
   if (method !== 'GET' && method !== 'HEAD' && msg.body !== undefined) {
-    fetchOptions.body = typeof msg.body === 'string' ? msg.body : JSON.stringify(msg.body);
+    let bodyObj = typeof msg.body === 'string' ? null : msg.body;
+    if (typeof msg.body === 'string') {
+      try { bodyObj = JSON.parse(msg.body); } catch(e) {}
+    }
+
+    // Auto-inject verified Quotex Account ID if missing in sync payload
+    if (cleanEndpoint.includes('/api/extension/sync-trades') && bodyObj) {
+      if (!bodyObj.detectedBrokerAccountId) {
+        if (!cachedQuotexAccountId) {
+          try {
+            const stored = await new Promise(r => chrome.storage.local.get(['quotex_detected_account_id'], r));
+            if (stored && stored.quotex_detected_account_id) {
+              cachedQuotexAccountId = String(stored.quotex_detected_account_id).replace(/[^0-9]/g, '');
+            }
+          } catch(e) {}
+        }
+        if (cachedQuotexAccountId) {
+          bodyObj.detectedBrokerAccountId = cachedQuotexAccountId;
+          console.log('[BPF Background] Injected cached Quotex Account ID into sync payload:', cachedQuotexAccountId);
+        }
+      } else {
+        cachedQuotexAccountId = String(bodyObj.detectedBrokerAccountId).replace(/[^0-9]/g, '');
+      }
+    }
+
+    fetchOptions.body = bodyObj ? JSON.stringify(bodyObj) : (typeof msg.body === 'string' ? msg.body : JSON.stringify(msg.body));
   }
 
   try {
@@ -54,9 +87,10 @@ async function handleBackgroundApiFetch(msg) {
 
 // Periodic keepalive / heartbeat engine
 async function sendBackgroundHeartbeat() {
-  chrome.storage.local.get(['traderId', 'serverUrl'], async (res) => {
+  chrome.storage.local.get(['traderId', 'serverUrl', 'quotex_detected_account_id'], async (res) => {
     if (!res.traderId) return;
     const url = (res.serverUrl || 'https://binarypropfirm.com').replace(/\/+$/, '') + '/api/extension/heartbeat';
+    const detectedId = res.quotex_detected_account_id ? String(res.quotex_detected_account_id).replace(/[^0-9]/g, '') : cachedQuotexAccountId;
     try {
       await fetch(url, {
         method: 'POST',
@@ -65,6 +99,7 @@ async function sendBackgroundHeartbeat() {
           traderId: res.traderId,
           status: 'online',
           accountType: 'demo',
+          detectedBrokerAccountId: detectedId || null,
           url: 'background',
           timestamp: Date.now()
         })
@@ -80,6 +115,19 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       sendResponse(result);
     });
     return true; // Keep asynchronous message port open
+  }
+
+  if (msg.action === 'SAVE_QUOTEX_ID') {
+    const cleanId = String(msg.id || '').replace(/[^0-9]/g, '');
+    if (cleanId) {
+      cachedQuotexAccountId = cleanId;
+      chrome.storage.local.set({ quotex_detected_account_id: cleanId }, () => {
+        sendResponse({ success: true, id: cleanId });
+      });
+      return true;
+    }
+    sendResponse({ success: false });
+    return false;
   }
 
   if (msg.action === 'PING_SERVER') {

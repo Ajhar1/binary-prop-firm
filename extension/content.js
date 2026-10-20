@@ -167,20 +167,42 @@
       return detectedQuotexAccountId;
     }
 
-    // Helper: Validate and persist detected ID
+    // Helper: Validate and persist detected ID across all storage layers
     const commitId = (idStr) => {
       const clean = String(idStr || '').replace(/[^0-9]/g, '');
       if (clean && clean.length >= 5 && clean.length <= 12) {
         detectedQuotexAccountId = clean;
         lastIdScanTime = Date.now();
+        try {
+          window.localStorage.setItem('bpf_quotex_account_id', clean);
+          window.sessionStorage.setItem('bpf_quotex_account_id', clean);
+        } catch (e) {}
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
           chrome.storage.local.set({ quotex_detected_account_id: clean });
         }
+        try {
+          if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+            chrome.runtime.sendMessage({ action: 'SAVE_QUOTEX_ID', id: clean });
+          }
+        } catch (e) {}
         updateWidgetStatus();
         return clean;
       }
       return null;
     };
+
+    // Strategy 0: URL search parameters (instant during settings -> trades redirect)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlId = urlParams.get('detected_id') || urlParams.get('quotex_id');
+      if (urlId && commitId(urlId)) return detectedQuotexAccountId;
+    } catch (e) {}
+
+    // Strategy 0.1: Domain-wide LocalStorage and SessionStorage (Instant synchronous across pages)
+    try {
+      const localStored = window.localStorage.getItem('bpf_quotex_account_id') || window.sessionStorage.getItem('bpf_quotex_account_id');
+      if (localStored && commitId(localStored)) return detectedQuotexAccountId;
+    } catch (e) {}
 
     // Helper: JWT Payload Extractor
     const extractIdFromJwt = (token) => {
@@ -201,8 +223,17 @@
       return null;
     };
 
-    // Strategy 1: Check Active DOM elements (Leaf nodes, short texts, data-attributes, and body)
+    // Strategy 1: Check Active DOM elements & Form Inputs (Nickname #95000371, User ID, Leaf nodes)
     try {
+      const inputs = document.querySelectorAll('input, textarea');
+      for (const inp of inputs) {
+        const val = (inp.value || '').trim();
+        if (val && /#?\d{5,12}/.test(val)) {
+          const m = val.match(/(\d{5,12})/);
+          if (m && commitId(m[1])) return detectedQuotexAccountId;
+        }
+      }
+
       const userEl = document.querySelector('[data-user-id], [data-id], [data-account-id], [data-account]');
       if (userEl) {
         const uid = userEl.getAttribute('data-user-id') || userEl.getAttribute('data-account-id') || userEl.getAttribute('data-id');
@@ -769,6 +800,12 @@
         const acct = detectAccountType();
         sessionStorage.setItem('bpf_auto_sync_target', 'true');
         sessionStorage.setItem('bpf_account_type', acct);
+        if (detectedId) {
+          try {
+            window.sessionStorage.setItem('bpf_quotex_account_id', detectedId);
+            window.localStorage.setItem('bpf_quotex_account_id', detectedId);
+          } catch (e) {}
+        }
 
         const btn = document.getElementById('bpfSyncBtn');
         if (btn) {
@@ -777,7 +814,10 @@
         }
 
         showToast('🚀 Trades হিস্টোরি পেজে নিয়ে যাওয়া হচ্ছে, সেখানে স্বয়ংক্রিয়ভাবে সিঙ্ক হবে...', 'info');
-        window.location.href = `${window.location.origin}/en/trades?page=1&account=${acct}`;
+        const targetUrl = `${window.location.origin}/en/trades?page=1&account=${acct}${detectedId ? `&detected_id=${detectedId}` : ''}`;
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 150);
       }
     });
 
@@ -1321,13 +1361,35 @@
       return { success: false, message: 'Trader ID not set' };
     }
 
-    const detectedId = await scanQuotexAccountId();
+    let detectedId = detectedQuotexAccountId;
+    if (!detectedId) {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        detectedId = urlParams.get('detected_id') || urlParams.get('quotex_id');
+      } catch (e) {}
+    }
+    if (!detectedId) {
+      try {
+        detectedId = window.localStorage.getItem('bpf_quotex_account_id') || window.sessionStorage.getItem('bpf_quotex_account_id');
+      } catch (e) {}
+    }
+    if (!detectedId) {
+      detectedId = await scanQuotexAccountId();
+    }
+    if (!detectedId && typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      try {
+        const stored = await new Promise(r => chrome.storage.local.get(['quotex_detected_account_id'], r));
+        if (stored && stored.quotex_detected_account_id) {
+          detectedId = stored.quotex_detected_account_id;
+        }
+      } catch (e) {}
+    }
 
     const payload = {
       traderId: config.traderId,
       accountType,
       source: 'quotex',
-      detectedBrokerAccountId: detectedId,
+      detectedBrokerAccountId: detectedId ? String(detectedId).replace(/[^0-9]/g, '') : null,
       brokerTzOffset: config.brokerTzOffsetMin,
       brokerTzStr: config.brokerTzStr,
       clientTzOffset: new Date().getTimezoneOffset(),
@@ -1568,7 +1630,7 @@
       sendHeartbeat();
 
       if (heartbeatTimer) clearInterval(heartbeatTimer);
-      heartbeatTimer = setInterval(sendHeartbeat, 8000);
+      heartbeatTimer = setInterval(sendHeartbeat, 30000);
 
       if (tzScanTimer) clearInterval(tzScanTimer);
       tzScanTimer = setInterval(scanQuotexBrokerTimezone, 15000);

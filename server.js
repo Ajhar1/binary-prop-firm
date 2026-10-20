@@ -47,15 +47,28 @@ const MASTER_SECURITY_PASSWORD = 'AJHAR1';
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
-// JSON DB Helper functions
+// High-Speed In-Memory Cache for High Concurrency (20k-50k users)
+const memoryJsonCache = new Map();
+
+// JSON DB Helper functions (Optimized O(1) in-memory cache with stat verification)
 function readJson(file, defaultValue = []) {
   try {
     if (!fs.existsSync(file)) {
       fs.writeFileSync(file, JSON.stringify(defaultValue, null, 2), 'utf8');
+      memoryJsonCache.set(file, { data: defaultValue, mtime: fs.statSync(file).mtimeMs });
       return defaultValue;
     }
+
+    const currentMtime = fs.statSync(file).mtimeMs;
+    const cached = memoryJsonCache.get(file);
+    if (cached && cached.mtime === currentMtime) {
+      return cached.data;
+    }
+
     const data = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
-    return JSON.parse(data || '[]');
+    const parsed = JSON.parse(data || '[]');
+    memoryJsonCache.set(file, { data: parsed, mtime: currentMtime });
+    return parsed;
   } catch (err) {
     console.error(`Error reading ${file}:`, err);
     return defaultValue;
@@ -63,7 +76,7 @@ function readJson(file, defaultValue = []) {
 }
 
 // Atomic crash-proof JSON writer to prevent data loss or corruption
-function writeJson(file, data) {
+function writeJson(file, data, singleItemToMirror = null) {
   try {
     const jsonStr = JSON.stringify(data, null, 2);
     if (!jsonStr || jsonStr === 'undefined') return;
@@ -76,41 +89,53 @@ function writeJson(file, data) {
       try { fs.unlinkSync(tempFile); } catch (e) {}
     }
 
-    // Double Safety Mirroring to MySQL
-    mirrorToMySql(file, data);
+    // Update in-memory cache instantly
+    try {
+      const mtime = fs.statSync(file).mtimeMs;
+      memoryJsonCache.set(file, { data, mtime });
+    } catch (e) {
+      memoryJsonCache.set(file, { data, mtime: Date.now() });
+    }
+
+    // Double Safety Mirroring to MySQL (Efficient, non-blocking)
+    mirrorToMySql(file, data, singleItemToMirror);
   } catch (err) {
     console.error(`Error writing ${file}:`, err);
   }
 }
 
 // Asynchronously mirror local writes to MySQL when active
-function mirrorToMySql(file, data) {
+function mirrorToMySql(file, data, singleItemToMirror = null) {
   if (!db || !db.isMySqlActive() || !data) return;
   try {
-    if (file === USERS_FILE || file === USERS_PERMANENT_STORE_FILE) {
-      if (Array.isArray(data)) {
-        data.forEach(u => {
-          if (u && u.id) {
-            db.saveUser(u).catch(e => console.error('[MYSQL USER MIRROR ERROR]:', e.message));
+    // If a specific modified item was provided, only mirror that single entity!
+    if (singleItemToMirror && singleItemToMirror.id) {
+      if (file === USERS_FILE || file === USERS_PERMANENT_STORE_FILE) {
+        db.saveUser(singleItemToMirror).catch(e => console.error('[MYSQL USER MIRROR ERROR]:', e.message));
+      } else if (file === CHALLENGES_FILE || file === CHALLENGES_PERMANENT_STORE_FILE) {
+        db.saveChallenge(singleItemToMirror).catch(e => console.error('[MYSQL CHALLENGE MIRROR ERROR]:', e.message));
+      } else if (file === SUBMISSIONS_FILE) {
+        db.saveSubmission(singleItemToMirror).catch(e => console.error('[MYSQL SUBMISSION MIRROR ERROR]:', e.message));
+      }
+      return;
+    }
+
+    // If an array was passed without single item:
+    // Only mirror if small dataset (<= 50 items) to prevent choking connection pool with 50,000 queries
+    if (Array.isArray(data)) {
+      if (data.length <= 50) {
+        data.forEach(item => {
+          if (item && item.id) {
+            if (file === USERS_FILE || file === USERS_PERMANENT_STORE_FILE) db.saveUser(item).catch(e => {});
+            else if (file === CHALLENGES_FILE || file === CHALLENGES_PERMANENT_STORE_FILE) db.saveChallenge(item).catch(e => {});
+            else if (file === SUBMISSIONS_FILE) db.saveSubmission(item).catch(e => {});
           }
         });
       }
-    } else if (file === CHALLENGES_FILE || file === CHALLENGES_PERMANENT_STORE_FILE) {
-      if (Array.isArray(data)) {
-        data.forEach(c => {
-          if (c && c.id) {
-            db.saveChallenge(c).catch(e => console.error('[MYSQL CHALLENGE MIRROR ERROR]:', e.message));
-          }
-        });
-      }
-    } else if (file === SUBMISSIONS_FILE) {
-      if (Array.isArray(data)) {
-        data.forEach(s => {
-          if (s && s.id) {
-            db.saveSubmission(s).catch(e => console.error('[MYSQL SUBMISSION MIRROR ERROR]:', e.message));
-          }
-        });
-      }
+    } else if (data && data.id) {
+      if (file === USERS_FILE || file === USERS_PERMANENT_STORE_FILE) db.saveUser(data).catch(e => {});
+      else if (file === CHALLENGES_FILE || file === CHALLENGES_PERMANENT_STORE_FILE) db.saveChallenge(data).catch(e => {});
+      else if (file === SUBMISSIONS_FILE) db.saveSubmission(data).catch(e => {});
     }
   } catch (err) {
     console.error('[MYSQL MIRROR ERROR]:', err.message);
@@ -5424,7 +5449,7 @@ app.post('/api/extension/heartbeat', (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   try {
-    const { traderId, status = 'online', accountType = 'demo', url = '' } = req.body;
+    const { traderId, status = 'online', accountType = 'demo', detectedBrokerAccountId, url = '' } = req.body;
     if (!traderId) {
       return res.status(400).json({ success: false, message: 'Trader ID প্রয়োজন।' });
     }
@@ -5504,6 +5529,12 @@ app.post('/api/extension/heartbeat', (req, res) => {
     }
 
     const registeredBrokerAccountId = (activeChallenge.brokerAccountId || matchedUser.brokerAccountId || '').trim();
+    const cleanRegisteredDigits = registeredBrokerAccountId.replace(/[^0-9]/g, '');
+    const cleanDetectedDigits = String(detectedBrokerAccountId || '').trim().replace(/[^0-9]/g, '');
+    if (cleanDetectedDigits && cleanRegisteredDigits && cleanDetectedDigits === cleanRegisteredDigits) {
+      activeChallenge.lastVerifiedBrokerAccountId = cleanDetectedDigits;
+      activeChallenge.brokerAccountIdVerified = true;
+    }
 
     const entry = {
       lastPing: Date.now(),
@@ -5751,26 +5782,36 @@ app.post('/api/extension/sync-trades', (req, res) => {
 
     // If this challenge was purchased with a Quotex Account ID (e.g. 63896760):
     if (cleanRegisteredDigits) {
-      if (!cleanDetectedDigits) {
-        console.warn(`[EXTENSION SYNC REJECTED] Missing Quotex Account ID for user ${user.traderId}. Registered challenge ID: ${cleanRegisteredDigits}`);
-        return res.status(403).json({
-          success: false,
-          accountMismatch: true,
-          registeredBrokerAccountId: cleanRegisteredDigits,
-          detectedBrokerAccountId: null,
-          message: `Quotex Account ID পাওয়া যায়নি! আপনার সক্রিয় চ্যালেঞ্জটি Quotex ID: [${cleanRegisteredDigits}] এর সাথে লিংক করা। ট্রেড সিঙ্ক করার পূর্বে এক্সটেনশনটি রিলোড দিন এবং সঠিক Quotex অ্যাকাউন্টে লগইন করুন।`
-        });
-      }
-
-      if (cleanRegisteredDigits !== cleanDetectedDigits) {
-        console.warn(`[EXTENSION SYNC REJECTED] Quotex Account ID mismatch for user ${user.traderId}: registered=${cleanRegisteredDigits}, detected=${cleanDetectedDigits}`);
-        return res.status(403).json({
-          success: false,
-          accountMismatch: true,
-          registeredBrokerAccountId: cleanRegisteredDigits,
-          detectedBrokerAccountId: cleanDetectedDigits,
-          message: `Quotex Account ID মিলছে না! আপনার চ্যালেঞ্জের সাথে যুক্ত Quotex ID হলো [${cleanRegisteredDigits}], কিন্তু বর্তমানে ব্রাউজারে লগইন থাকা Quotex ID হলো [${cleanDetectedDigits}]। সঠিক Quotex অ্যাকাউন্টে লগইন না করা পর্যন্ত ট্রেড সিঙ্ক সম্পূর্ণ ব্লক থাকবে।`
-        });
+      if (cleanDetectedDigits) {
+        // Strict ID mismatch check: If detected ID differs from registered ID -> 100% BLOCK
+        if (cleanRegisteredDigits !== cleanDetectedDigits) {
+          console.warn(`[EXTENSION SYNC REJECTED] Quotex Account ID mismatch for user ${user.traderId}: registered=${cleanRegisteredDigits}, detected=${cleanDetectedDigits}`);
+          return res.status(403).json({
+            success: false,
+            accountMismatch: true,
+            registeredBrokerAccountId: cleanRegisteredDigits,
+            detectedBrokerAccountId: cleanDetectedDigits,
+            message: `Quotex Account ID মিলছে না! আপনার চ্যালেঞ্জের সাথে যুক্ত Quotex ID হলো [${cleanRegisteredDigits}], কিন্তু বর্তমানে ব্রাউজারে লগইন থাকা Quotex ID হলো [${cleanDetectedDigits}]। সঠিক Quotex অ্যাকাউন্টে লগইন না করা পর্যন্ত ট্রেড সিঙ্ক সম্পূর্ণ ব্লক থাকবে।`
+          });
+        }
+        // Matched! Remember verified pairing on active challenge
+        activeChallenge.lastVerifiedBrokerAccountId = cleanDetectedDigits;
+        activeChallenge.brokerAccountIdVerified = true;
+      } else {
+        // cleanDetectedDigits is empty / not supplied in this packet:
+        // Check if this challenge was already verified previously for this cleanRegisteredDigits
+        const isPreviouslyVerified = activeChallenge.lastVerifiedBrokerAccountId === cleanRegisteredDigits ||
+                                     activeChallenge.brokerAccountIdVerified === true;
+        if (!isPreviouslyVerified) {
+          console.warn(`[EXTENSION SYNC REJECTED] Missing Quotex Account ID for user ${user.traderId}. Registered challenge ID: ${cleanRegisteredDigits}`);
+          return res.status(403).json({
+            success: false,
+            accountMismatch: true,
+            registeredBrokerAccountId: cleanRegisteredDigits,
+            detectedBrokerAccountId: null,
+            message: `Quotex Account ID পাওয়া যায়নি! আপনার সক্রিয় চ্যালেঞ্জটি Quotex ID: [${cleanRegisteredDigits}] এর সাথে লিংক করা। ট্রেড সিঙ্ক করার পূর্বে এক্সটেনশনটি রিলোড দিন এবং সঠিক Quotex অ্যাকাউন্টে লগইন করুন।`
+          });
+        }
       }
     }
 
