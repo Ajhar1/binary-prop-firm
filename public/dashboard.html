@@ -13023,14 +13023,6 @@
                 showToast('সার্ভার কানেকশন এরর: ' + err.message, 'error');
             }
         }
-            } catch (err) {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = `<i class="fas fa-paper-plane"></i> পে-আউট রিকোয়েস্ট সাবমিট করুন`;
-                }
-                showToast('সার্ভার কানেকশন এরর: ' + err.message, 'error');
-            }
-        }
 
         function renderUserPayoutHistory(payouts) {
             const tbody = document.getElementById('userPayoutHistoryBody');
