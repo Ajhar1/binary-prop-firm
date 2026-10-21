@@ -4016,6 +4016,26 @@
                             <span style="color:#94a3b8; font-size:0.85rem;">প্রদেয় অ্যামাউন্ট:</span>
                             <span id="modalPayoutAmount" style="font-size:1.35rem; font-weight:900; color:#00e676;">$0</span>
                         </div>
+
+                        <!-- Profit Split Breakdown Box -->
+                        <div id="modalPayoutProfitSplitBreakdown" style="display:none; background:rgba(255,184,0,0.08); border:1px solid rgba(255,184,0,0.25); border-radius:10px; padding:10px 12px; margin-top:10px;">
+                            <div style="font-size:0.75rem; color:#ffb800; font-weight:800; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                                <span><i class="fas fa-calculator"></i> প্রফিট স্প্লিট হিসাব:</span>
+                                <span id="modalSplitPctBadge" style="background:rgba(255,184,0,0.15); padding:2px 8px; border-radius:6px; font-size:0.72rem;">75% Trader / 25% Firm</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:3px; color:#cbd5e1;">
+                                <span>Quotex থেকে মোট উইথড্র:</span>
+                                <strong id="modalQuotexGrossAmt" style="color:#fff;">$0.00</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:3px; color:#ffb800;">
+                                <span>ফার্মের শেয়ার / কমিশন:</span>
+                                <strong id="modalFirmCutAmt">-$0.00</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.88rem; padding-top:4px; border-top:1px dashed rgba(255,255,255,0.1); color:#00e676; font-weight:900;">
+                                <span>ট্রেডারের নিট পাওনা (Binance-এ প্রদেয়):</span>
+                                <strong id="modalTraderNetAmt" style="font-size:1.15rem;">+$0.00</strong>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Quotex Account ID Box with 1-click Copy -->
@@ -10246,7 +10266,10 @@
                             ${typeLabel}
                         </td>
                         <td style="padding:10px 12px; font-size:0.95rem; font-weight:800; color:#00e676;">
-                            $${p.amount || 0}
+                            ${!isQuotex && p.traderPayableAmount ? `
+                                <div>$${parseFloat(p.traderPayableAmount).toFixed(2)}</div>
+                                <span style="font-size:0.7rem; color:#94a3b8; font-weight:normal; display:block;">(Quotex: $${parseFloat(p.quotexWithdrawAmount || p.amount).toFixed(2)})</span>
+                            ` : `$${p.amount || 0}`}
                         </td>
                         <td style="padding:10px 12px; font-size:0.8rem;">
                             ${quotexBox}
@@ -10285,10 +10308,42 @@
 
             const isProfit = (p.payoutType === 'profit_withdrawal');
 
+            // Profit Split Calculation
+            const quotexAmt = parseFloat(p.quotexWithdrawAmount || p.amount || 0);
+            const traderPct = parseFloat(p.traderProfitPercent || (String(p.challengeProfitSplit || '75').replace(/[^0-9.]/g, '')) || 75);
+            const firmPct = parseFloat(p.firmProfitPercent || (100 - traderPct));
+            const firmCut = (p.firmCutAmount !== undefined && p.firmCutAmount !== null) ? parseFloat(p.firmCutAmount) : Math.round((quotexAmt * (firmPct / 100)) * 100) / 100;
+            const traderNet = (p.traderPayableAmount !== undefined && p.traderPayableAmount !== null) ? parseFloat(p.traderPayableAmount) : Math.round((quotexAmt - firmCut) * 100) / 100;
+
             document.getElementById('modalPayoutIdHeading').innerText = p.payoutId || p.id;
-            document.getElementById('modalPayoutAmount').innerText = `$${p.amount || 0}`;
-            const scanAmtNotice = document.getElementById('modalPayoutAmountScanNotice');
-            if (scanAmtNotice) scanAmtNotice.innerText = `$${p.amount || 0}`;
+            
+            if (isProfit) {
+                document.getElementById('modalPayoutAmount').innerText = `$${traderNet.toFixed(2)}`;
+                const scanAmtNotice = document.getElementById('modalPayoutAmountScanNotice');
+                if (scanAmtNotice) scanAmtNotice.innerText = `$${traderNet.toFixed(2)}`;
+            } else {
+                document.getElementById('modalPayoutAmount').innerText = `$${p.amount || 0}`;
+                const scanAmtNotice = document.getElementById('modalPayoutAmountScanNotice');
+                if (scanAmtNotice) scanAmtNotice.innerText = `$${p.amount || 0}`;
+            }
+
+            // Profit Split Breakdown Box
+            const splitBox = document.getElementById('modalPayoutProfitSplitBreakdown');
+            if (splitBox) {
+                if (isProfit) {
+                    splitBox.style.display = 'block';
+                    const badge = document.getElementById('modalSplitPctBadge');
+                    if (badge) badge.innerText = `${traderPct}% Trader / ${firmPct}% Firm`;
+                    const grossEl = document.getElementById('modalQuotexGrossAmt');
+                    if (grossEl) grossEl.innerText = `$${quotexAmt.toFixed(2)}`;
+                    const cutEl = document.getElementById('modalFirmCutAmt');
+                    if (cutEl) cutEl.innerText = `-$${firmCut.toFixed(2)} (${firmPct}%)`;
+                    const netEl = document.getElementById('modalTraderNetAmt');
+                    if (netEl) netEl.innerText = `+$${traderNet.toFixed(2)} (${traderPct}%)`;
+                } else {
+                    splitBox.style.display = 'none';
+                }
+            }
 
             document.getElementById('modalPayoutTraderName').innerText = p.userName || 'Trader';
             document.getElementById('modalPayoutTraderEmail').innerText = p.userEmail || '--';
@@ -10305,10 +10360,10 @@
             if (instrText) {
                 if (isProfit) {
                     instrText.innerHTML = `
-                        <strong style="color:#ffb800; display:block; margin-bottom:4px;">🔍 প্রফিট উইথড্রয়াল ভেরিফিকেশন নির্দেশিকা:</strong>
-                        1. ট্রেডারের দেওয়া স্ক্রিনশট অনুযায়ী আপনার Binance অ্যাকাউন্টে ঠিক <strong style="color:#00e676;">$${p.amount || 0}</strong> ডলার জমা হয়েছে কিনা Binance অ্যাপে চেক করুন।<br/>
-                        2. ডলার জমা কনফার্ম হলে ট্রেডারের Binance ID (<code style="color:#ffb800; font-weight:800;">${p.binancePayId || p.binanceUid}</code>)-তে প্রফিট স্প্লিট পাঠিয়ে দিন।<br/>
-                        3. ট্রানজেকশন আইডি লিখে নিচের <strong>'✅ প্রফিট কনফার্ম ও পেইড'</strong> বাটনে ক্লিক করুন।
+                        <strong style="color:#ffb800; display:block; margin-bottom:4px;">🔍 প্রফিট উইথড্রয়াল ভেরিফিকেশন ও পে-আউট নির্দেশিকা:</strong>
+                        1. ট্রেডারের দেওয়া স্ক্রিনশট মিলিয়ে আপনার Binance অ্যাকাউন্টে কটেক্স থেকে মোট <strong style="color:#fff;">$${quotexAmt.toFixed(2)}</strong> ডলার জমা হয়েছে কিনা Binance অ্যাপে নিশ্চিত করুন।<br/>
+                        2. জমা নিশ্চিত হলে ফার্মের শেয়ার <strong style="color:#ffb800;">$${firmCut.toFixed(2)} (${firmPct}%)</strong> কেটে রেখে ট্রেডারের প্রাপ্য নিট প্রফিট <strong style="color:#00e676; font-size:0.95rem;">$${traderNet.toFixed(2)} (${traderPct}%)</strong> ট্রেডারের Binance ID (<code style="color:#00e676; font-weight:800; background:rgba(0,0,0,0.6); padding:2px 6px; border-radius:4px;">${p.binancePayId || p.binanceUid}</code>)-তে পাঠিয়ে দিন।<br/>
+                        3. Binance Transaction ID লিখে নিচের <strong>'✅ প্রফিট কনফার্ম ও ডলার দেওয়া হয়েছে'</strong> বাটনে ক্লিক করুন।
                     `;
                 } else {
                     instrText.innerHTML = `
@@ -10342,7 +10397,7 @@
 
             const payBtnText = document.getElementById('modalPayoutPayBtnText');
             if (payBtnText) {
-                payBtnText.innerText = isProfit ? '✅ প্রফিট কনফার্ম ও ডলার দেওয়া হয়েছে (Confirm & Paid)' : '✅ ডলার দেওয়া হয়েছে (Mark as Paid)';
+                payBtnText.innerText = isProfit ? `✅ প্রফিট কনফার্ম ও ট্রেডারকে $${traderNet.toFixed(2)} দেওয়া হয়েছে` : '✅ ডলার দেওয়া হয়েছে (Mark as Paid)';
             }
 
             const notesEl = document.getElementById('modalPayoutTraderNotes');
@@ -10394,7 +10449,12 @@
                 return;
             }
 
-            if (newStatus === 'paid' && !confirm(`আপনি কি ট্রেডার ${currentViewingPayout.userName || ''}-কে $${currentViewingPayout.amount || 0} ডলার পাঠিয়েছেন এবং এটি পেইড হিসেবে মার্ক করতে চান?`)) {
+            const isProfit = (currentViewingPayout.payoutType === 'profit_withdrawal');
+            const payableAmt = isProfit 
+                ? (currentViewingPayout.traderPayableAmount !== undefined ? currentViewingPayout.traderPayableAmount : currentViewingPayout.amount) 
+                : currentViewingPayout.amount;
+
+            if (newStatus === 'paid' && !confirm(`আপনি কি ট্রেডার ${currentViewingPayout.userName || ''}-কে তাঁর প্রাপ্য $${payableAmt} ডলার পাঠিয়েছেন এবং এটি কনফার্ম করতে চান?`)) {
                 return;
             }
 

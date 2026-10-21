@@ -8812,6 +8812,16 @@ app.post('/api/user/payouts', authenticateToken, uploadPayoutQr.single('qrCodeIm
 
     const currentPayoutSettings = readJson(PAYOUT_SETTINGS_FILE, DEFAULT_PAYOUT_SETTINGS);
 
+    // Calculate Profit Split
+    const rawSplit = selectedChallenge.profitSplit || '75%';
+    let traderSplitPct = parseFloat(String(rawSplit).replace(/[^0-9.]/g, '')) || 75;
+    if (traderSplitPct <= 0 || traderSplitPct > 100) traderSplitPct = 75;
+    const firmSplitPct = Math.round((100 - traderSplitPct) * 100) / 100;
+
+    const quotexWithdrawAmount = isQuotex ? 0 : finalAmount;
+    const firmShareAmount = isQuotex ? 0 : Math.round((quotexWithdrawAmount * (firmSplitPct / 100)) * 100) / 100;
+    const traderPayableAmount = isQuotex ? finalAmount : Math.round((quotexWithdrawAmount - firmShareAmount) * 100) / 100;
+
     const payoutTypeLabel = isQuotex
       ? 'Quotex Live Fund Deposit (Binance Pay QR)'
       : 'Profit Withdraw (Binance Account)';
@@ -8831,16 +8841,23 @@ app.post('/api/user/payouts', authenticateToken, uploadPayoutQr.single('qrCodeIm
       challengeId: selectedChallenge.id || selectedChallenge.challengeId || '',
       challengePackageName: selectedChallenge.packageName || selectedChallenge.packageTitle || 'Funded Challenge',
       challengeFundedAmount: parseFloat(selectedChallenge.fundedAmount || selectedChallenge.packageSize || 100),
-      challengeProfitSplit: selectedChallenge.profitSplit || '75%',
+      challengeProfitSplit: `${traderSplitPct}%`,
       payoutType: isQuotex ? 'quotex_deposit' : 'profit_withdrawal',
       payoutTypeLabel,
       quotexAccountId: isQuotex ? (quotexAccountId || selectedChallenge.brokerAccountId || fullUser.brokerAccountId || '').trim() : '',
       binancePayId: (binancePayId || binanceUid || '').trim(),
       binanceUid: (binanceUid || binancePayId || '').trim(),
       binanceAddress: (binanceAddress || '').trim(),
-      firmBinancePayId: currentPayoutSettings.adminBinancePayId || '',
-      firmBinanceName: currentPayoutSettings.adminBinanceName || '',
+      firmBinancePayId: currentPayoutSettings.adminBinancePayId || '838241680',
+      firmBinanceName: currentPayoutSettings.adminBinanceName || 'Binary Prop Firm Official',
+      firmUsdtAddress: currentPayoutSettings.adminUsdtAddress || 'TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx',
+      firmUsdtNetwork: currentPayoutSettings.adminUsdtNetwork || 'TRC20',
       amount: finalAmount,
+      quotexWithdrawAmount,
+      firmProfitPercent: firmSplitPct,
+      firmCutAmount: firmShareAmount,
+      traderProfitPercent: traderSplitPct,
+      traderPayableAmount,
       qrCodeUrl: qrCodeUrl || '',
       proofScreenshotUrl: qrCodeUrl || '',
       traderNotes: (traderNotes || '').trim(),

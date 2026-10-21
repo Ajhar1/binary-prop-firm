@@ -4113,15 +4113,58 @@
                             </div>
                         </div>
 
-                        <!-- ২. পে-আউটের ধরন / উদ্দেশ্য (শুধুমাত্র ২টি অপশন: Quotex Deposit এবং Profit Withdraw) -->
-                        <div class="form-group" style="margin-bottom:1.4rem;">
-                            <label style="display:block; font-size:0.86rem; font-weight:700; color:#cbd5e1; margin-bottom:8px;">
-                                ২. পে-আউটের ধরন / উদ্দেশ্য নির্বাচন করুন *
+                        <!-- ২. পে-আউটের ধরন / উদ্দেশ্য (উভয় অপশন স্পষ্ট ও দৃশ্যমান) -->
+                        <div class="form-group" style="margin-bottom:1.5rem;">
+                            <label style="display:block; font-size:0.88rem; font-weight:800; color:#cbd5e1; margin-bottom:10px;">
+                                ২. পে-আউটের ধরন নির্বাচন করুন *
                             </label>
-                            <select id="payoutTypeSelect" class="input-control" required onchange="handlePayoutTypeChange()" style="width:100%; background:#0f1218; border:1px solid rgba(0, 230, 118, 0.35); color:#fff; padding:12px 14px; border-radius:10px; font-size:0.92rem; font-weight:700;">
-                                <option value="quotex_deposit">💎 Quotex Live Fund Deposit (Binance Pay QR)</option>
-                                <option value="profit_withdrawal">💰 Profit Withdraw (Binance Account)</option>
-                            </select>
+                            
+                            <!-- Hidden Select for form compatibility -->
+                            <input type="hidden" id="payoutTypeSelect" value="quotex_deposit" />
+
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
+                                <!-- Option 1: Quotex Live Fund Deposit -->
+                                <div id="payoutTabDeposit" onclick="selectPayoutType('quotex_deposit')" style="cursor:pointer; border:2px solid #00e676; background:rgba(0, 230, 118, 0.08); border-radius:14px; padding:16px; transition:all 0.25s ease; position:relative;">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <div style="width:38px; height:38px; border-radius:10px; background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.3); display:flex; align-items:center; justify-content:center; color:#00e676; font-size:1.15rem;">
+                                                <i class="fas fa-gem"></i>
+                                            </div>
+                                            <div>
+                                                <h5 style="margin:0; font-size:0.96rem; font-weight:800; color:#00e676;">১. Quotex Live Fund Deposit</h5>
+                                                <span style="font-size:0.72rem; color:#94a3b8;">লাইভ ফান্ড ডিপোজিট</span>
+                                            </div>
+                                        </div>
+                                        <span id="tabDepositBadge" style="background:#00e676; color:#000; font-size:0.7rem; font-weight:900; padding:3px 8px; border-radius:12px;">
+                                            <i class="fas fa-check"></i> সিলেক্টেড
+                                        </span>
+                                    </div>
+                                    <p style="margin:0; font-size:0.78rem; color:#cbd5e1; line-height:1.45;">
+                                        চ্যালেঞ্জ পাস করার পর আপনার Quotex অ্যাকাউন্টে নতুন লাইভ ডলার ডিপোজিট নেওয়ার জন্য Binance Pay QR কোড দিন।
+                                    </p>
+                                </div>
+
+                                <!-- Option 2: Profit Withdraw -->
+                                <div id="payoutTabProfit" onclick="selectPayoutType('profit_withdrawal')" style="cursor:pointer; border:1px solid rgba(255, 184, 0, 0.3); background:rgba(255, 184, 0, 0.03); border-radius:14px; padding:16px; transition:all 0.25s ease; position:relative;">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <div style="width:38px; height:38px; border-radius:10px; background:rgba(255,184,0,0.15); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; color:#ffb800; font-size:1.15rem;">
+                                                <i class="fas fa-coins"></i>
+                                            </div>
+                                            <div>
+                                                <h5 style="margin:0; font-size:0.96rem; font-weight:800; color:#ffb800;">২. Profit Withdraw (Binance)</h5>
+                                                <span style="font-size:0.72rem; color:#94a3b8;">কটেক্স থেকে প্রফিট উইথড্র</span>
+                                            </div>
+                                        </div>
+                                        <span id="tabProfitBadge" style="display:none; background:#ffb800; color:#000; font-size:0.7rem; font-weight:900; padding:3px 8px; border-radius:12px;">
+                                            <i class="fas fa-check"></i> সিলেক্টেড
+                                        </span>
+                                    </div>
+                                    <p style="margin:0; font-size:0.78rem; color:#cbd5e1; line-height:1.45;">
+                                        Quotex থেকে আমাদের অফিশিয়াল Binance অ্যাকাউন্টে উইথড্র দিয়ে আপনার প্রফিট শেয়ার ($) নিজস্ব একাউন্টে বুঝে নিন।
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- গ্রুপ ১: Quotex Live Fund Deposit ফিল্ডসমূহ -->
@@ -4136,7 +4179,7 @@
                                     <small style="font-size:0.75rem; color:#94a3b8;">যে Quotex অ্যাকাউন্টে পাস করা ফান্ড ডিপোজিট করা হবে।</small>
                                 </div>
 
-                                <!-- Auto-determined Amount info (৬. ডলারের পরিমাণ অপশনটি থাকবে না, স্বয়ংক্রিয়ভাবে নির্ধারিত) -->
+                                <!-- Auto-determined Amount info (স্বয়ংক্রিয় নির্ধারিত) -->
                                 <div class="form-group" style="margin:0;">
                                     <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
                                         ডিপোজিট অ্যামাউন্ট (স্বয়ংক্রিয় নির্ধারিত)
@@ -4197,72 +4240,110 @@
                             </div>
                         </div>
 
-                        <!-- গ্রুপ ২: Profit Withdraw ফিল্ডসমূহ (Profit Withdraw সিলেক্ট করলে আসবে) -->
+                        <!-- গ্রুপ ২: Profit Withdraw ফিল্ডসমূহ (Profit Withdraw সিলেক্ট করলে দৃশ্যমান) -->
                         <div id="profitWithdrawFieldsGroup" style="display:none;">
                             <!-- ফার্মের অফিশিয়াল Binance অ্যাকাউন্ট কার্ড (যেখানে কটেক্স থেকে উইথড্র দিতে হবে) -->
-                            <div style="background:linear-gradient(135deg, rgba(255, 184, 0, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%); border:1px solid rgba(255, 184, 0, 0.35); border-radius:12px; padding:1.25rem; margin-bottom:1.4rem;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; border-bottom:1px solid rgba(255,184,0,0.15); padding-bottom:8px;">
-                                    <div style="font-weight:800; color:#ffb800; font-size:0.95rem; display:flex; align-items:center; gap:8px;">
-                                        <i class="fab fa-bitcoin"></i> আমাদের অফিশিয়াল Binance অ্যাকাউন্ট (কটেক্স থেকে এখানে উইথড্র দিন)
+                            <div style="background:linear-gradient(135deg, rgba(255, 184, 0, 0.12) 0%, rgba(15, 23, 42, 0.98) 100%); border:2px solid rgba(255, 184, 0, 0.45); border-radius:14px; padding:1.4rem; margin-bottom:1.4rem; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid rgba(255,184,0,0.2); padding-bottom:10px;">
+                                    <div style="font-weight:900; color:#ffb800; font-size:1.02rem; display:flex; align-items:center; gap:10px;">
+                                        <div style="width:36px; height:36px; border-radius:10px; background:rgba(255,184,0,0.18); display:flex; align-items:center; justify-content:center; color:#ffb800; font-size:1.2rem; border:1px solid rgba(255,184,0,0.35);">
+                                            <i class="fab fa-bitcoin"></i>
+                                        </div>
+                                        <span>আমাদের অফিশিয়াল Binance একাউন্ট (কটেক্স থেকে এখানে উইথড্র দিন)</span>
                                     </div>
-                                    <span style="font-size:0.75rem; color:#00e676; background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.25); padding:3px 8px; border-radius:6px;">
-                                        <i class="fas fa-check-circle"></i> ভেরিফাইড রিসিভিং অ্যাকাউন্ট
+                                    <span style="font-size:0.75rem; font-weight:800; color:#00e676; background:rgba(0,230,118,0.12); border:1px solid rgba(0,230,118,0.35); padding:4px 10px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-check-circle"></i> ভেরিফাইড ফার্ম রিসিভিং একাউন্ট
                                     </span>
                                 </div>
 
+                                <!-- Binance Pay ID & Account Name with glowing copy button -->
                                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; margin-bottom:12px;">
-                                    <div style="background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
+                                    <div style="background:rgba(0,0,0,0.55); border:1px solid rgba(0, 230, 118, 0.35); border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
                                         <div>
-                                            <span style="font-size:0.72rem; color:#94a3b8; display:block;">আমাদের Binance Pay ID / UID:</span>
-                                            <span id="displayFirmBinanceId" style="font-size:1.2rem; font-weight:900; color:#00e676; font-family:monospace; letter-spacing:0.5px;">838241680</span>
+                                            <span style="font-size:0.72rem; color:#94a3b8; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; display:block;">আমাদের Binance Pay ID / UID:</span>
+                                            <span id="displayFirmBinanceId" style="font-size:1.35rem; font-weight:900; color:#00e676; font-family:monospace; letter-spacing:1px;">838241680</span>
                                         </div>
-                                        <button type="button" class="btn-sm btn-outline" onclick="copyFirmBinanceId()" style="padding:5px 12px; font-size:0.78rem; border-color:#00e676; color:#00e676; border-radius:6px; cursor:pointer;">
+                                        <button type="button" class="btn-sm btn-outline" onclick="copyFirmBinanceId()" style="padding:6px 14px; font-size:0.8rem; font-weight:800; border-color:#00e676; color:#00e676; background:rgba(0,230,118,0.08); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
                                             <i class="fas fa-copy"></i> কপি Pay ID
                                         </button>
                                     </div>
 
-                                    <div style="background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
+                                    <div style="background:rgba(0,0,0,0.55); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
                                         <div>
-                                            <span style="font-size:0.72rem; color:#94a3b8; display:block;">অ্যাকাউন্ট নাম:</span>
-                                            <span id="displayFirmBinanceName" style="font-size:0.95rem; font-weight:800; color:#fff;">Binary Prop Firm Official</span>
+                                            <span style="font-size:0.72rem; color:#94a3b8; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; display:block;">অ্যাকাউন্ট নাম (Binance Name):</span>
+                                            <span id="displayFirmBinanceName" style="font-size:1rem; font-weight:800; color:#fff;">Binary Prop Firm Official</span>
                                         </div>
-                                        <span style="font-size:0.72rem; color:#ffb800; border:1px solid rgba(255,184,0,0.3); padding:3px 8px; border-radius:6px;">Official Pay</span>
+                                        <span style="font-size:0.72rem; font-weight:800; color:#ffb800; background:rgba(255,184,0,0.1); border:1px solid rgba(255,184,0,0.3); padding:4px 10px; border-radius:8px;">Official Pay</span>
                                     </div>
                                 </div>
 
-                                <div id="firmUsdtRow" style="background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                                    <div style="overflow:hidden;">
-                                        <span style="font-size:0.72rem; color:#94a3b8; display:block;">USDT Deposit Address (<span id="displayFirmUsdtNet">TRC20</span>):</span>
-                                        <span id="displayFirmUsdtAddress" style="font-size:0.85rem; font-weight:700; color:#60a5fa; font-family:monospace; word-break:break-all;">TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx</span>
+                                <!-- USDT TRC20 Address with copy button -->
+                                <div id="firmUsdtRow" style="background:rgba(0,0,0,0.55); border:1px solid rgba(96, 165, 250, 0.35); border-radius:10px; padding:12px 16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                                    <div style="overflow:hidden; max-width:calc(100% - 120px);">
+                                        <span style="font-size:0.72rem; color:#94a3b8; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; display:block;">
+                                            USDT Deposit Address (<span id="displayFirmUsdtNet" style="color:#60a5fa; font-weight:800;">TRC20</span>):
+                                        </span>
+                                        <span id="displayFirmUsdtAddress" style="font-size:0.92rem; font-weight:800; color:#60a5fa; font-family:monospace; word-break:break-all;">TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx</span>
                                     </div>
-                                    <button type="button" class="btn-sm btn-outline" onclick="copyFirmUsdtAddress()" style="padding:4px 10px; font-size:0.75rem; border-color:#60a5fa; color:#60a5fa; border-radius:6px; cursor:pointer; margin-left:10px; white-space:nowrap;">
-                                        <i class="fas fa-copy"></i> কপি
+                                    <button type="button" class="btn-sm btn-outline" onclick="copyFirmUsdtAddress()" style="padding:6px 14px; font-size:0.8rem; font-weight:800; border-color:#60a5fa; color:#60a5fa; background:rgba(96,165,250,0.08); border-radius:8px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-copy"></i> কপি USDT
                                     </button>
                                 </div>
 
-                                <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.5; background:rgba(255, 184, 0, 0.05); border-left:3px solid #ffb800; padding:8px 12px; border-radius:0 8px 8px 0;">
-                                    <i class="fas fa-info-circle" style="color:#ffb800; margin-right:4px;"></i>
-                                    <span id="displayFirmInstructions">Quotex-এ আপনার প্রফিট থেকে উইথড্র দেওয়ার সময় প্রাপক (Recipient) হিসেবে উপরের Binance Pay ID দিন। উইথড্র প্রক্রিয়া সফল হলে প্রাপ্ত স্ক্রিনশটটি নিচের ফর্মে আপলোড করুন।</span>
+                                <!-- Instruction Banner -->
+                                <div style="font-size:0.82rem; color:#cbd5e1; line-height:1.6; background:rgba(255, 184, 0, 0.08); border-left:4px solid #ffb800; padding:10px 14px; border-radius:0 10px 10px 0;">
+                                    <i class="fas fa-info-circle" style="color:#ffb800; margin-right:6px; font-size:0.95rem;"></i>
+                                    <span id="displayFirmInstructions">
+                                        Quotex-এ আপনার প্রফিট থেকে উইথড্র দেওয়ার সময় প্রাপক (Recipient) হিসেবে উপরের <strong>Binance Pay ID (838241680)</strong> অথবা <strong>USDT TRC20 Address</strong> টি দিন। উইথড্র সম্পন্ন হলে প্রাপ্ত স্ক্রিনশট এবং প্রয়োজনীয় তথ্য নিচে আপলোড করুন।
+                                    </span>
                                 </div>
                             </div>
 
-                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:1.2rem;">
-                                <!-- Dollar Amount for profit withdrawal -->
-                                <div class="form-group" style="margin:0;">
-                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
-                                        উইথড্র করার ডলারের পরিমাণ (Amount in USD) *
-                                    </label>
-                                    <input type="number" id="payoutProfitAmount" step="any" min="10" class="input-control" placeholder="যেমন: 50" style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#00e676; font-weight:800; padding:11px 14px; border-radius:8px; font-size:0.95rem;" />
-                                    <small style="font-size:0.75rem; color:#94a3b8;">কটেক্স থেকে আমাদের অ্যাকাউন্টে যত ডলার উইথড্র দিয়েছেন (নূন্যতম $১০)।</small>
+                            <!-- লাইভ প্রফিট স্প্লিট ও ক্যালকুলেটর সেকশন -->
+                            <div style="background:#0f1218; border:1px solid rgba(255, 184, 0, 0.35); border-radius:12px; padding:1.25rem; margin-bottom:1.4rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                                    <span style="font-size:0.9rem; font-weight:800; color:#ffb800; display:flex; align-items:center; gap:8px;">
+                                        <i class="fas fa-calculator"></i> লাইভ প্রফিট স্প্লিট ক্যালকুলেটর (Profit Split Breakdown)
+                                    </span>
+                                    <span style="font-size:0.75rem; color:#94a3b8; background:rgba(255,255,255,0.06); padding:4px 10px; border-radius:6px;">
+                                        আপনার লভ্যাংশ: <strong id="traderSplitDisplayPct" style="color:#00e676;">75%</strong> | ফার্ম কমিশন: <strong id="firmSplitDisplayPct" style="color:#ffb800;">25%</strong>
+                                    </span>
                                 </div>
 
-                                <!-- Trader's OWN Binance ID (Where profit share will be sent) -->
-                                <div class="form-group" style="margin:0;">
-                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
-                                        আপনার নিজস্ব Binance Pay ID / UID *
-                                    </label>
-                                    <input type="text" id="payoutBinanceUid" class="input-control" placeholder="যেমন: 83749201" style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:11px 14px; border-radius:8px; font-size:0.9rem;" />
-                                    <small style="font-size:0.75rem; color:#ffb800;">আমাদের অ্যাকাউন্টে ডলার আসার পর আপনার লভ্যাংশ এই Binance অ্যাকাউন্টে পাঠানো হবে।</small>
+                                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:1.2rem;">
+                                    <!-- Dollar Amount for profit withdrawal -->
+                                    <div class="form-group" style="margin:0;">
+                                        <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                            কটেক্স থেকে উইথড্র করা অ্যামাউন্ট ($ USD) *
+                                        </label>
+                                        <input type="number" id="payoutProfitAmount" step="any" min="10" class="input-control" placeholder="যেমন: 100" oninput="calculateProfitSplit()" style="width:100%; background:#161b22; border:1px solid rgba(255, 184, 0, 0.4); color:#00e676; font-weight:900; padding:11px 14px; border-radius:8px; font-size:1.05rem;" />
+                                        <small style="font-size:0.75rem; color:#94a3b8;">কটেক্স থেকে আমাদের অ্যাকাউন্টে যত ডলার উইথড্র দিয়েছেন (নূন্যতম $১০)।</small>
+                                    </div>
+
+                                    <!-- Trader's OWN Binance ID (Where profit share will be sent) -->
+                                    <div class="form-group" style="margin:0;">
+                                        <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                            আপনার নিজস্ব Binance Pay ID / UID *
+                                        </label>
+                                        <input type="text" id="payoutBinanceUid" class="input-control" placeholder="যেমন: 83749201" style="width:100%; background:#161b22; border:1px solid rgba(255,255,255,0.15); color:#fff; font-weight:700; padding:11px 14px; border-radius:8px; font-size:0.95rem;" />
+                                        <small style="font-size:0.75rem; color:#ffb800;">আমাদের অ্যাকাউন্টে ডলার আসার পর আপনার প্রাপ্য নিট লভ্যাংশ এই Binance অ্যাকাউন্টে পাঠানো হবে।</small>
+                                    </div>
+                                </div>
+
+                                <!-- Live Calculation Display Cards -->
+                                <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
+                                    <div style="border-right:1px solid rgba(255,255,255,0.08); padding-right:10px;">
+                                        <span style="font-size:0.72rem; color:#94a3b8; display:block;">মোট কটেক্স উইথড্রয়াল:</span>
+                                        <span id="calcTotalWithdraw" style="font-size:1.15rem; font-weight:800; color:#fff;">$0.00</span>
+                                    </div>
+                                    <div style="border-right:1px solid rgba(255,255,255,0.08); padding-right:10px;">
+                                        <span style="font-size:0.72rem; color:#ffb800; display:block;">ফার্মের শেয়ার (<span id="calcFirmPct">25%</span>):</span>
+                                        <span id="calcFirmCut" style="font-size:1.15rem; font-weight:800; color:#ffb800;">-$0.00</span>
+                                    </div>
+                                    <div>
+                                        <span style="font-size:0.72rem; color:#00e676; font-weight:700; display:block;">আপনার প্রাপ্য নিট লভ্যাংশ (<span id="calcTraderPct">75%</span>):</span>
+                                        <span id="calcTraderShare" style="font-size:1.35rem; font-weight:900; color:#00e676;">+$0.00</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -4314,7 +4395,7 @@
                             </div>
                         </div>
 
-                        <!-- ৮. বিশেষ নির্দেশনা / মন্তব্য -->
+                        <!-- বিশেষ নির্দেশনা / মন্তব্য -->
                         <div class="form-group" style="margin-bottom:1.5rem;">
                             <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
                                 বিশেষ নির্দেশনা / মন্তব্য (ঐচ্ছিক)
@@ -4324,7 +4405,7 @@
 
                         <div style="display:flex; justify-content:flex-end;">
                             <button type="submit" id="payoutSubmitBtn" class="btn-gold" style="padding:12px 28px; font-size:0.92rem; font-weight:800; border-radius:10px; display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
-                                <i class="fas fa-paper-plane"></i> পে-আউট রিকোয়েস্ট সাবমিট করুন
+                                <i class="fas fa-paper-plane"></i> Quotex ফান্ড ডিপোজিট রিকোয়েস্ট সাবমিট করুন
                             </button>
                         </div>
                     </form>
@@ -12505,22 +12586,6 @@
             document.body.appendChild(script);
         }
 
-        // Init on load
-        window.addEventListener('DOMContentLoaded', () => {
-            // Apply Theme & Language on load
-            const savedTheme = localStorage.getItem('dash_theme_template') || 'full-night';
-            applyThemeTemplate(savedTheme, false);
-
-            const savedLang = localStorage.getItem('dash_selected_lang') || 'default';
-            changeLanguage(savedLang, false);
-            if (savedLang !== 'default') {
-                initGoogleTranslateScript();
-            }
-
-            // Set today's date in form
-            const subDateEl = document.getElementById('subDate');
-            if (subDateEl) subDateEl.value = new Date().toISOString().split('T')[0];
-
         // ==============================================
         // PAYOUT SYSTEM JAVASCRIPT LOGIC (User Dashboard)
         // ==============================================
@@ -12529,11 +12594,198 @@
             passedChallenges: [],
             activeChallenges: [],
             payouts: [],
+            payoutSettings: null,
             userProfile: {}
         };
         let selectedPayoutQrFile = null;
+        let selectedPayoutProofFile = null;
+
+        function copyToClipboard(text) {
+            if (!text) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).catch(() => legacyCopyText(text));
+            } else {
+                legacyCopyText(text);
+            }
+        }
+
+        function legacyCopyText(text) {
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                ta.style.top = '0';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            } catch (e) {
+                console.warn('Copy fallback error', e);
+            }
+        }
+
+        function copyFirmBinanceId() {
+            const text = document.getElementById('displayFirmBinanceId')?.innerText?.trim() || '838241680';
+            if (text && text !== '--') {
+                copyToClipboard(text);
+                showToast('📋 আমাদের Binance Pay ID কপি করা হয়েছে: ' + text, 'success');
+            }
+        }
+
+        function copyFirmUsdtAddress() {
+            const text = document.getElementById('displayFirmUsdtAddress')?.innerText?.trim() || 'TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx';
+            if (text && text !== '--') {
+                copyToClipboard(text);
+                showToast('📋 USDT Address (TRC20) কপি করা হয়েছে: ' + text, 'success');
+            }
+        }
+
+        function selectPayoutType(type) {
+            const hiddenSelect = document.getElementById('payoutTypeSelect');
+            if (hiddenSelect) hiddenSelect.value = type;
+
+            const tabDeposit = document.getElementById('payoutTabDeposit');
+            const tabProfit = document.getElementById('payoutTabProfit');
+            const badgeDeposit = document.getElementById('tabDepositBadge');
+            const badgeProfit = document.getElementById('tabProfitBadge');
+
+            const quotexGroup = document.getElementById('quotexDepositFieldsGroup');
+            const profitGroup = document.getElementById('profitWithdrawFieldsGroup');
+            const qIdInput = document.getElementById('payoutQuotexId');
+            const bUidInput = document.getElementById('payoutBinanceUid');
+            const submitBtn = document.getElementById('payoutSubmitBtn');
+
+            if (type === 'profit_withdrawal') {
+                if (tabDeposit) {
+                    tabDeposit.style.border = '1px solid rgba(255,255,255,0.12)';
+                    tabDeposit.style.background = 'rgba(255,255,255,0.02)';
+                }
+                if (tabProfit) {
+                    tabProfit.style.border = '2px solid #ffb800';
+                    tabProfit.style.background = 'rgba(255, 184, 0, 0.12)';
+                }
+                if (badgeDeposit) badgeDeposit.style.display = 'none';
+                if (badgeProfit) badgeProfit.style.display = 'inline-block';
+
+                if (quotexGroup) quotexGroup.style.display = 'none';
+                if (profitGroup) profitGroup.style.display = 'block';
+
+                if (qIdInput) qIdInput.required = false;
+                if (bUidInput) bUidInput.required = true;
+
+                calculateProfitSplit();
+            } else {
+                if (tabDeposit) {
+                    tabDeposit.style.border = '2px solid #00e676';
+                    tabDeposit.style.background = 'rgba(0, 230, 118, 0.08)';
+                }
+                if (tabProfit) {
+                    tabProfit.style.border = '1px solid rgba(255, 184, 0, 0.3)';
+                    tabProfit.style.background = 'rgba(255, 184, 0, 0.03)';
+                }
+                if (badgeDeposit) badgeDeposit.style.display = 'inline-block';
+                if (badgeProfit) badgeProfit.style.display = 'none';
+
+                if (quotexGroup) quotexGroup.style.display = 'block';
+                if (profitGroup) profitGroup.style.display = 'none';
+
+                if (qIdInput) qIdInput.required = true;
+                if (bUidInput) bUidInput.required = false;
+
+                if (submitBtn) {
+                    submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Quotex ফান্ড ডিপোজিট রিকোয়েস্ট সাবমিট করুন`;
+                }
+            }
+        }
+
+        function handlePayoutTypeChange() {
+            const val = document.getElementById('payoutTypeSelect')?.value || 'quotex_deposit';
+            selectPayoutType(val);
+        }
+
+        function calculateProfitSplit() {
+            const rawSplit = document.getElementById('payoutAutoProfitSplit')?.innerText || '75%';
+            let traderPct = parseFloat(String(rawSplit).replace(/[^0-9.]/g, '')) || 75;
+            if (traderPct <= 0 || traderPct > 100) traderPct = 75;
+            const firmPct = Math.round((100 - traderPct) * 100) / 100;
+
+            const traderSplitDisplayPct = document.getElementById('traderSplitDisplayPct');
+            if (traderSplitDisplayPct) traderSplitDisplayPct.innerText = `${traderPct}%`;
+
+            const firmSplitDisplayPct = document.getElementById('firmSplitDisplayPct');
+            if (firmSplitDisplayPct) firmSplitDisplayPct.innerText = `${firmPct}%`;
+
+            const calcTraderPct = document.getElementById('calcTraderPct');
+            if (calcTraderPct) calcTraderPct.innerText = `${traderPct}%`;
+
+            const calcFirmPct = document.getElementById('calcFirmPct');
+            if (calcFirmPct) calcFirmPct.innerText = `${firmPct}%`;
+
+            const amtInput = document.getElementById('payoutProfitAmount');
+            const withdrawAmt = parseFloat(amtInput?.value) || 0;
+
+            const firmCut = Math.round((withdrawAmt * (firmPct / 100)) * 100) / 100;
+            const traderNet = Math.max(0, Math.round((withdrawAmt - firmCut) * 100) / 100);
+
+            const calcTotalWithdraw = document.getElementById('calcTotalWithdraw');
+            if (calcTotalWithdraw) calcTotalWithdraw.innerText = `$${withdrawAmt.toFixed(2)}`;
+
+            const calcFirmCut = document.getElementById('calcFirmCut');
+            if (calcFirmCut) calcFirmCut.innerText = `-$${firmCut.toFixed(2)}`;
+
+            const calcTraderShare = document.getElementById('calcTraderShare');
+            if (calcTraderShare) calcTraderShare.innerText = `+$${traderNet.toFixed(2)}`;
+
+            const submitBtn = document.getElementById('payoutSubmitBtn');
+            const pType = document.getElementById('payoutTypeSelect')?.value || 'quotex_deposit';
+            if (submitBtn && pType === 'profit_withdrawal') {
+                if (withdrawAmt > 0) {
+                    submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> প্রফিট পে-আউট রিকোয়েস্ট পাঠান (আপনার প্রাপ্য: $${traderNet.toFixed(2)})`;
+                } else {
+                    submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> প্রফিট উইথড্র রিকোয়েস্ট সাবমিট করুন`;
+                }
+            }
+        }
+
+        function populateFirmBinanceDetails(settings) {
+            if (!settings) return;
+            const firmIdEl = document.getElementById('displayFirmBinanceId');
+            if (firmIdEl) firmIdEl.innerText = settings.adminBinancePayId || '838241680';
+
+            const firmNameEl = document.getElementById('displayFirmBinanceName');
+            if (firmNameEl) firmNameEl.innerText = settings.adminBinanceName || 'Binary Prop Firm Official';
+
+            const firmUsdtEl = document.getElementById('displayFirmUsdtAddress');
+            const firmUsdtRow = document.getElementById('firmUsdtRow');
+            const firmUsdtNet = document.getElementById('displayFirmUsdtNet');
+            if (firmUsdtEl && settings.adminUsdtAddress) {
+                firmUsdtEl.innerText = settings.adminUsdtAddress;
+                if (firmUsdtNet) firmUsdtNet.innerText = settings.adminUsdtNetwork || 'TRC20';
+                if (firmUsdtRow) firmUsdtRow.style.display = 'flex';
+            } else if (firmUsdtRow && !settings.adminUsdtAddress) {
+                firmUsdtRow.style.display = 'none';
+            }
+
+            const firmInstrEl = document.getElementById('displayFirmInstructions');
+            if (firmInstrEl && settings.instructions) {
+                firmInstrEl.innerText = settings.instructions;
+            }
+        }
 
         async function fetchUserPayouts() {
+            // First fetch public payout settings so firm Binance Pay ID & USDT address are always guaranteed visible
+            try {
+                fetch('/api/public/payout-settings')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.success && data.settings) {
+                            populateFirmBinanceDetails(data.settings);
+                        }
+                    }).catch(e => console.warn('[Public Payout Settings Fetch]', e));
+            } catch(e) {}
+
             const authToken = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token') || (typeof token !== 'undefined' ? token : null);
             if (!authToken) return;
 
@@ -12545,6 +12797,9 @@
                 if (!data.success) return;
 
                 userPayoutsData = data;
+                if (data.payoutSettings) {
+                    populateFirmBinanceDetails(data.payoutSettings);
+                }
                 renderUserPayoutUi(data);
             } catch (err) {
                 console.error('[Payout Fetch Error]', err);
@@ -12657,27 +12912,7 @@
 
                 // Populate Firm Binance Account Details for Profit Withdrawals
                 if (data.payoutSettings) {
-                    const firmIdEl = document.getElementById('displayFirmBinanceId');
-                    if (firmIdEl) firmIdEl.innerText = data.payoutSettings.adminBinancePayId || '838241680';
-
-                    const firmNameEl = document.getElementById('displayFirmBinanceName');
-                    if (firmNameEl) firmNameEl.innerText = data.payoutSettings.adminBinanceName || 'Binary Prop Firm Official';
-
-                    const firmUsdtEl = document.getElementById('displayFirmUsdtAddress');
-                    const firmUsdtRow = document.getElementById('firmUsdtRow');
-                    const firmUsdtNet = document.getElementById('displayFirmUsdtNet');
-                    if (firmUsdtEl && data.payoutSettings.adminUsdtAddress) {
-                        firmUsdtEl.innerText = data.payoutSettings.adminUsdtAddress;
-                        if (firmUsdtNet) firmUsdtNet.innerText = data.payoutSettings.adminUsdtNetwork || 'TRC20';
-                        if (firmUsdtRow) firmUsdtRow.style.display = 'flex';
-                    } else if (firmUsdtRow) {
-                        firmUsdtRow.style.display = 'none';
-                    }
-
-                    const firmInstrEl = document.getElementById('displayFirmInstructions');
-                    if (firmInstrEl && data.payoutSettings.instructions) {
-                        firmInstrEl.innerText = data.payoutSettings.instructions;
-                    }
+                    populateFirmBinanceDetails(data.payoutSettings);
                 }
 
                 // Autofill Binance & Quotex from user profile if inputs are empty
@@ -12690,52 +12925,12 @@
                     qIdInput.value = data.userProfile.brokerAccountId || '';
                 }
 
-                handlePayoutTypeChange();
+                selectPayoutType('quotex_deposit');
+                calculateProfitSplit();
             }
 
             // Render History Table
             renderUserPayoutHistory(data.payouts || []);
-        }
-
-        let selectedPayoutProofFile = null;
-
-        function copyFirmBinanceId() {
-            const text = document.getElementById('displayFirmBinanceId')?.innerText || '';
-            if (text && text !== '--') {
-                copyToClipboard(text);
-                showToast('📋 আমাদের Binance Pay ID কপি করা হয়েছে: ' + text, 'success');
-            }
-        }
-
-        function copyFirmUsdtAddress() {
-            const text = document.getElementById('displayFirmUsdtAddress')?.innerText || '';
-            if (text && text !== '--') {
-                copyToClipboard(text);
-                showToast('📋 USDT Address কপি করা হয়েছে: ' + text, 'success');
-            }
-        }
-
-        function handlePayoutTypeChange() {
-            const pType = document.getElementById('payoutTypeSelect')?.value || 'quotex_deposit';
-            const quotexGroup = document.getElementById('quotexDepositFieldsGroup');
-            const profitGroup = document.getElementById('profitWithdrawFieldsGroup');
-            const qIdInput = document.getElementById('payoutQuotexId');
-            const bUidInput = document.getElementById('payoutBinanceUid');
-            const submitBtn = document.getElementById('payoutSubmitBtn');
-
-            if (pType === 'quotex_deposit') {
-                if (quotexGroup) quotexGroup.style.display = 'block';
-                if (profitGroup) profitGroup.style.display = 'none';
-                if (qIdInput) qIdInput.required = true;
-                if (bUidInput) bUidInput.required = false;
-                if (submitBtn) submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Quotex ডিপোজিট রিকোয়েস্ট সাবমিট করুন`;
-            } else {
-                if (quotexGroup) quotexGroup.style.display = 'none';
-                if (profitGroup) profitGroup.style.display = 'block';
-                if (qIdInput) qIdInput.required = false;
-                if (bUidInput) bUidInput.required = true;
-                if (submitBtn) submitBtn.innerHTML = `<i class="fas fa-paper-plane"></i> প্রফিট উইথড্র রিকোয়েস্ট সাবমিট করুন`;
-            }
         }
 
         function setPayoutQrFile(file) {
@@ -12999,7 +13194,7 @@
                 if (btn) {
                     btn.disabled = false;
                     btn.innerHTML = pType === 'quotex_deposit'
-                        ? `<i class="fas fa-paper-plane"></i> Quotex ডিপোজিট রিকোয়েস্ট সাবমিট করুন`
+                        ? `<i class="fas fa-paper-plane"></i> Quotex ফান্ড ডিপোজিট রিকোয়েস্ট সাবমিট করুন`
                         : `<i class="fas fa-paper-plane"></i> প্রফিট উইথড্র রিকোয়েস্ট সাবমিট করুন`;
                 }
 
@@ -13056,9 +13251,15 @@
                     stBadge = `<span style="background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); padding:3px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">⏳ Under Review / অপেক্ষমাণ</span>`;
                 }
 
+                const isProf = (p.payoutType === 'profit_withdrawal');
+                const amountDisplay = (isProf && p.traderPayableAmount)
+                    ? `<div style="font-weight:900; color:#00e676;">$${parseFloat(p.traderPayableAmount).toFixed(2)}</div>
+                       <span style="font-size:0.7rem; color:#94a3b8; font-weight:normal; display:block;">(উইথড্র: $${parseFloat(p.quotexWithdrawAmount || p.amount).toFixed(2)})</span>`
+                    : `<span style="font-weight:900; color:#00e676;">$${p.amount || 0}</span>`;
+
                 const qrPreview = p.qrCodeUrl
                     ? `<a href="${p.qrCodeUrl}" target="_blank" title="ক্লিক করে বড় করে দেখুন" style="display:inline-block; border-radius:6px; overflow:hidden; border:1px solid rgba(0,230,118,0.4); width:36px; height:36px; vertical-align:middle;">
-                        <img src="${p.qrCodeUrl}" alt="QR" style="width:100%; height:100%; object-fit:cover;" />
+                        <img src="${p.qrCodeUrl}" alt="Proof" style="width:100%; height:100%; object-fit:cover;" />
                        </a>`
                     : '<span style="color:#64748b; font-size:0.75rem;">None</span>';
 
@@ -13072,12 +13273,12 @@
                             ${p.challengePackageName || 'Funded Plan'}
                         </td>
                         <td style="padding:10px 12px; font-size:0.78rem;">
-                            <span style="background:rgba(255,255,255,0.05); color:#cbd5e1; padding:2px 6px; border-radius:4px;">
-                                ${p.payoutTypeLabel || p.payoutType}
+                            <span style="background:${isProf ? 'rgba(255,184,0,0.1)' : 'rgba(0,230,118,0.1)'}; color:${isProf ? '#ffb800' : '#00e676'}; border:1px solid ${isProf ? 'rgba(255,184,0,0.25)' : 'rgba(0,230,118,0.25)'}; padding:2px 8px; border-radius:4px; font-weight:700;">
+                                ${isProf ? '💰 Profit Withdraw' : '💎 Quotex Deposit'}
                             </span>
                         </td>
-                        <td style="padding:10px 12px; font-size:0.86rem; font-weight:800; color:#00e676;">
-                            $${p.amount || 0}
+                        <td style="padding:10px 12px; font-size:0.86rem;">
+                            ${amountDisplay}
                         </td>
                         <td style="padding:10px 12px; font-size:0.8rem; font-family:monospace; color:#fff;">
                             ${p.quotexAccountId || '--'}
@@ -13099,6 +13300,44 @@
                 `;
             }).join('');
         }
+
+        // Global bindings
+        window.fetchUserPayouts = fetchUserPayouts;
+        window.selectPayoutType = selectPayoutType;
+        window.handlePayoutTypeChange = handlePayoutTypeChange;
+        window.calculateProfitSplit = calculateProfitSplit;
+        window.copyToClipboard = copyToClipboard;
+        window.copyFirmBinanceId = copyFirmBinanceId;
+        window.copyFirmUsdtAddress = copyFirmUsdtAddress;
+        window.setPayoutQrFile = setPayoutQrFile;
+        window.handlePayoutQrSelect = handlePayoutQrSelect;
+        window.handlePayoutQrDragOver = handlePayoutQrDragOver;
+        window.handlePayoutQrDragLeave = handlePayoutQrDragLeave;
+        window.handlePayoutQrDrop = handlePayoutQrDrop;
+        window.removePayoutQrImage = removePayoutQrImage;
+        window.setPayoutProofFile = setPayoutProofFile;
+        window.handlePayoutProofSelect = handlePayoutProofSelect;
+        window.handlePayoutProofDragOver = handlePayoutProofDragOver;
+        window.handlePayoutProofDragLeave = handlePayoutProofDragLeave;
+        window.handlePayoutProofDrop = handlePayoutProofDrop;
+        window.removePayoutProofImage = removePayoutProofImage;
+        window.handlePayoutFormSubmit = handlePayoutFormSubmit;
+
+        // Init on load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Apply Theme & Language on load
+            const savedTheme = localStorage.getItem('dash_theme_template') || 'full-night';
+            applyThemeTemplate(savedTheme, false);
+
+            const savedLang = localStorage.getItem('dash_selected_lang') || 'default';
+            changeLanguage(savedLang, false);
+            if (savedLang !== 'default') {
+                initGoogleTranslateScript();
+            }
+
+            // Set today's date in form
+            const subDateEl = document.getElementById('subDate');
+            if (subDateEl) subDateEl.value = new Date().toISOString().split('T')[0];
 
             fetchUserProfile();
             fetchUserPayouts();
