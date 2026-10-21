@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -2245,7 +2245,6 @@
                                 <option value="all">সকল ধরন (All Types)</option>
                                 <option value="quotex_deposit">Quotex Live Deposit</option>
                                 <option value="profit_withdrawal">Profit Withdrawal</option>
-                                <option value="both">Both (ফান্ড ও প্রফিট)</option>
                             </select>
                         </div>
                         <button type="button" class="btn-outline" id="adminPayoutRefreshBtn" style="padding:7px 14px; font-size:0.82rem; border-radius:8px; cursor:pointer;" onclick="fetchAdminPayouts()">
@@ -9478,11 +9477,9 @@
 
                 let typeLabel = '';
                 if (p.payoutType === 'quotex_deposit') {
-                    typeLabel = '<span style="background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); padding:2px 6px; border-radius:6px; font-size:0.72rem;">📲 Quotex Deposit</span>';
-                } else if (p.payoutType === 'profit_withdrawal') {
-                    typeLabel = '<span style="background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); padding:2px 6px; border-radius:6px; font-size:0.72rem;">💰 Profit Withdrawal</span>';
+                    typeLabel = '<span style="background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">💎 Quotex Deposit</span>';
                 } else {
-                    typeLabel = '<span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:2px 6px; border-radius:6px; font-size:0.72rem;">🔄 Both (ফান্ড ও প্রফিট)</span>';
+                    typeLabel = '<span style="background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">💰 Profit Withdrawal</span>';
                 }
 
                 const qrPreview = p.qrCodeUrl

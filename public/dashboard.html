@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -4083,108 +4083,162 @@
                     </div>
 
                     <form id="payoutRequestForm" onsubmit="handlePayoutFormSubmit(event)">
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:1.2rem;">
-                            <!-- 1. Select Passed Challenge -->
-                            <div class="form-group" style="margin:0;">
-                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
-                                    ১. পাস করা চ্যালেঞ্জ নির্বাচন করুন *
-                                </label>
-                                <select id="payoutChallengeSelect" class="input-control" required onchange="handlePayoutChallengeChange()" style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.88rem;">
-                                    <!-- Populated dynamically -->
-                                </select>
-                                <small id="payoutChallengeInfo" style="display:block; font-size:0.75rem; color:#ffb800; margin-top:4px;"></small>
-                            </div>
-
-                            <!-- 2. Payout Purpose / Type -->
-                            <div class="form-group" style="margin:0;">
-                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
-                                    ২. পে-আউটের ধরন / উদ্দেশ্য *
-                                </label>
-                                <select id="payoutTypeSelect" class="input-control" required style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.88rem;">
-                                    <option value="quotex_deposit">💎 Quotex লাইভ ফান্ড ডিপোজিট (Binance Pay QR)</option>
-                                    <option value="profit_withdrawal">💰 প্রফিট উইথড্রয়াল (Binance Account)</option>
-                                    <option value="both">🎁 Quotex ডিপোজিট + প্রফিট উইথড্রয়াল</option>
-                                </select>
+                        <!-- অটো-সিলেক্টেড পাস করা চ্যালেঞ্জ কার্ড (১. পাস করা চ্যালেঞ্জ নির্বাচন ড্রপডাউন অপসারিত ও অটোমেটেড) -->
+                        <input type="hidden" id="payoutChallengeId" value="" />
+                        <input type="hidden" id="payoutChallengeAmount" value="100" />
+                        
+                        <div id="payoutPassedChallengeCard" style="background:linear-gradient(135deg, rgba(0, 230, 118, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%); border:1px solid rgba(0, 230, 118, 0.3); border-radius:12px; padding:1.2rem; margin-bottom:1.4rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="width:46px; height:46px; border-radius:12px; background:rgba(0, 230, 118, 0.15); display:flex; align-items:center; justify-content:center; color:#00e676; font-size:1.5rem; border:1px solid rgba(0,230,118,0.3);">
+                                        <i class="fas fa-award"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.74rem; text-transform:uppercase; letter-spacing:0.6px; color:#10b981; font-weight:800; display:flex; align-items:center; gap:6px;">
+                                            <i class="fas fa-check-circle"></i> ভেরিফাইড পাস করা চ্যালেঞ্জ (অটোমেটিক সিলেক্টেড)
+                                        </div>
+                                        <h4 id="payoutAutoPackageName" style="margin:2px 0 0 0; font-size:1.05rem; font-weight:800; color:#fff;">Funded Account</h4>
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:12px; align-items:center;">
+                                    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:6px 14px; text-align:right;">
+                                        <span style="font-size:0.7rem; color:#94a3b8; display:block;">ফান্ডেড অ্যাকাউন্ট সাইজ</span>
+                                        <span id="payoutAutoFundedAmount" style="font-size:1.1rem; font-weight:900; color:#00e676;">$100</span>
+                                    </div>
+                                    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:6px 14px; text-align:right;">
+                                        <span style="font-size:0.7rem; color:#94a3b8; display:block;">প্রফিট স্প্লিট</span>
+                                        <span id="payoutAutoProfitSplit" style="font-size:1.1rem; font-weight:900; color:#ffb800;">75%</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- 3. Upload Quotex QR Code (Binance Pay QR) -->
-                        <div style="background:#0f1218; border:1px dashed rgba(0, 230, 118, 0.4); border-radius:12px; padding:1.2rem; margin-bottom:1.2rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
-                                <div>
-                                    <label style="font-size:0.88rem; font-weight:800; color:#00e676; display:flex; align-items:center; gap:6px;">
-                                        <i class="fas fa-qrcode"></i> Quotex-এর Binance Pay Deposit QR Code (স্ক্রিনশট আপলোড) *
+                        <!-- ২. পে-আউটের ধরন / উদ্দেশ্য (শুধুমাত্র ২টি অপশন: Quotex Deposit এবং Profit Withdraw) -->
+                        <div class="form-group" style="margin-bottom:1.4rem;">
+                            <label style="display:block; font-size:0.86rem; font-weight:700; color:#cbd5e1; margin-bottom:8px;">
+                                ২. পে-আউটের ধরন / উদ্দেশ্য নির্বাচন করুন *
+                            </label>
+                            <select id="payoutTypeSelect" class="input-control" required onchange="handlePayoutTypeChange()" style="width:100%; background:#0f1218; border:1px solid rgba(0, 230, 118, 0.35); color:#fff; padding:12px 14px; border-radius:10px; font-size:0.92rem; font-weight:700;">
+                                <option value="quotex_deposit">💎 Quotex Live Fund Deposit (Binance Pay QR)</option>
+                                <option value="profit_withdrawal">💰 Profit Withdraw (Binance Account)</option>
+                            </select>
+                        </div>
+
+                        <!-- গ্রুপ ১: Quotex Live Fund Deposit ফিল্ডসমূহ -->
+                        <div id="quotexDepositFieldsGroup">
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:1.2rem;">
+                                <!-- Quotex Account ID -->
+                                <div class="form-group" style="margin:0;">
+                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                        আপনার Quotex Account ID *
                                     </label>
-                                    <p style="margin:3px 0 0 0; font-size:0.78rem; color:#94a3b8;">
-                                        Quotex-এ <strong>Deposit</strong> ➔ <strong>Binance Pay</strong> সিলেক্ট করার পর যে ডিপোজিট QR কোডটি আসে, সেটির স্পষ্ট স্ক্রিনশট এখানে আপলোড করুন। অ্যাডমিন এটি স্ক্যান করে সরাসরি আপনার Quotex অ্যাকাউন্টে ডলার দিয়ে দেবে।
+                                    <input type="text" id="payoutQuotexId" class="input-control" placeholder="যেমন: 63896760" style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:11px 14px; border-radius:8px; font-size:0.9rem;" />
+                                    <small style="font-size:0.75rem; color:#94a3b8;">যে Quotex অ্যাকাউন্টে পাস করা ফান্ড ডিপোজিট করা হবে।</small>
+                                </div>
+
+                                <!-- Auto-determined Amount info (৬. ডলারের পরিমাণ অপশনটি থাকবে না, স্বয়ংক্রিয়ভাবে নির্ধারিত) -->
+                                <div class="form-group" style="margin:0;">
+                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                        ডিপোজিট অ্যামাউন্ট (স্বয়ংক্রিয় নির্ধারিত)
+                                    </label>
+                                    <div style="background:#0f1218; border:1px solid rgba(0, 230, 118, 0.3); border-radius:8px; padding:11px 14px; display:flex; align-items:center; justify-content:space-between;">
+                                        <span style="font-size:0.82rem; color:#94a3b8;">পাস করা প্যাকেজ অনুযায়ী ফান্ডেড ডলার:</span>
+                                        <span id="quotexAutoDepositDisplay" style="font-size:1.15rem; font-weight:900; color:#00e676;">$100.00</span>
+                                    </div>
+                                    <small style="font-size:0.75rem; color:#10b981;">আপনি কত ডলারের চ্যালেঞ্জ পাস করেছেন তা স্বয়ংক্রিয় নির্ধারিত হয়েছে।</small>
+                                </div>
+                            </div>
+
+                            <!-- Quotex Binance Pay QR Code Upload Dropzone -->
+                            <div style="background:#0f1218; border:1px dashed rgba(0, 230, 118, 0.45); border-radius:12px; padding:1.25rem; margin-bottom:1.4rem;">
+                                <div style="margin-bottom:12px;">
+                                    <label style="font-size:0.9rem; font-weight:800; color:#00e676; display:flex; align-items:center; gap:8px;">
+                                        <i class="fas fa-qrcode"></i> Quotex Binance Pay Deposit QR Code (স্ক্রিনশট আপলোড) *
+                                    </label>
+                                    <p style="margin:4px 0 0 0; font-size:0.78rem; color:#94a3b8; line-height:1.5;">
+                                        Quotex-এ <strong>Deposit</strong> ➔ <strong>Binance Pay</strong> সিলেক্ট করার পর যে ডিপোজিট QR কোডটি স্ক্রিনে আসে, সেটির স্পষ্ট স্ক্রিনশট এখানে আপলোড বা পেস্ট করুন। অ্যাডমিন এটি স্ক্যান করে সরাসরি আপনার Quotex অ্যাকাউন্টে ডলার ডিপোজিট দিয়ে দেবে।
                                     </p>
                                 </div>
-                            </div>
 
-                            <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
-                                <div style="flex:1; min-width:240px;">
-                                    <input type="file" id="payoutQrInput" accept="image/*" onchange="handlePayoutQrSelect(event)" style="display:none;" />
-                                    <button type="button" class="btn-outline" onclick="document.getElementById('payoutQrInput').click()" style="width:100%; padding:12px; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:0.86rem; border-color:rgba(0,230,118,0.4); color:#00e676;">
-                                        <i class="fas fa-camera"></i> QR কোড স্ক্রিনশট সিলেক্ট করুন (PNG, JPG)
-                                    </button>
-                                    <div id="payoutQrFileName" style="font-size:0.75rem; color:#94a3b8; margin-top:5px; text-align:center;">কোনো ফাইল সিলেক্ট করা হয়নি</div>
-                                </div>
+                                <input type="file" id="payoutQrInput" accept="image/*" onchange="handlePayoutQrSelect(event)" style="display:none;" />
+                                
+                                <div id="payoutQrDropzone" 
+                                     onclick="document.getElementById('payoutQrInput').click()" 
+                                     ondragover="handlePayoutQrDragOver(event)" 
+                                     ondragleave="handlePayoutQrDragLeave(event)" 
+                                     ondrop="handlePayoutQrDrop(event)"
+                                     style="cursor:pointer; border:2px dashed rgba(0, 230, 118, 0.35); background:rgba(0, 230, 118, 0.02); border-radius:10px; padding:22px 14px; text-align:center; transition:all 0.2s ease;">
+                                    
+                                    <div id="payoutQrEmptyState">
+                                        <i class="fas fa-cloud-upload-alt" style="font-size:2.2rem; color:#00e676; margin-bottom:8px; display:block;"></i>
+                                        <strong style="color:#fff; font-size:0.9rem; display:block; margin-bottom:4px;">QR কোডের স্ক্রিনশট সিলেক্ট বা এখানে ড্রপ করুন</strong>
+                                        <span style="color:#94a3b8; font-size:0.76rem; display:block;">অথবা স্ক্রিনশট কপি করে সরাসরি <kbd style="background:rgba(255,255,255,0.12); padding:2px 6px; border-radius:4px; font-size:0.72rem; color:#fff;">Ctrl + V</kbd> প্রেস করুন (PNG, JPG, WebP)</span>
+                                    </div>
 
-                                <!-- Preview Box -->
-                                <div id="payoutQrPreviewBox" style="display:none; position:relative; width:110px; height:110px; border-radius:8px; border:2px solid #00e676; overflow:hidden; background:#000;">
-                                    <img id="payoutQrPreviewImg" src="" alt="QR Preview" style="width:100%; height:100%; object-fit:contain;" />
-                                    <button type="button" onclick="removePayoutQrImage()" style="position:absolute; top:2px; right:2px; background:rgba(239,68,68,0.9); color:#fff; border:none; width:20px; height:20px; border-radius:50%; font-size:10px; cursor:pointer; line-height:20px; text-align:center;">&times;</button>
+                                    <div id="payoutQrPreviewState" style="display:none; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap;">
+                                        <div style="position:relative; width:120px; height:120px; border-radius:10px; border:2px solid #00e676; overflow:hidden; background:#000; box-shadow:0 0 15px rgba(0,230,118,0.25);">
+                                            <img id="payoutQrPreviewImg" src="" alt="QR Preview" style="width:100%; height:100%; object-fit:contain;" />
+                                            <button type="button" onclick="event.stopPropagation(); removePayoutQrImage();" style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,0.95); color:#fff; border:none; width:22px; height:22px; border-radius:50%; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:bold;">&times;</button>
+                                        </div>
+                                        <div style="text-align:left;">
+                                            <div id="payoutQrFileName" style="font-size:0.85rem; font-weight:700; color:#00e676; word-break:break-all;">--</div>
+                                            <div id="payoutQrFileSize" style="font-size:0.75rem; color:#94a3b8; margin-top:3px;">--</div>
+                                            <div style="margin-top:8px; display:flex; gap:8px;">
+                                                <button type="button" onclick="event.stopPropagation(); document.getElementById('payoutQrInput').click();" class="btn-outline" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; color:#00e676; border-color:rgba(0,230,118,0.4); cursor:pointer;">
+                                                    <i class="fas fa-sync-alt"></i> পরিবর্তন করুন
+                                                </button>
+                                                <button type="button" onclick="event.stopPropagation(); removePayoutQrImage();" class="btn-outline" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; color:#ef4444; border-color:rgba(239,68,68,0.4); cursor:pointer;">
+                                                    <i class="fas fa-trash"></i> মুছে দিন
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:1.2rem;">
-                            <!-- 4. Binance Pay ID / UID -->
-                            <div class="form-group" style="margin:0;">
-                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
-                                    ৪. আপনার Binance Pay ID অথবা UID *
-                                </label>
-                                <input type="text" id="payoutBinanceUid" class="input-control" placeholder="যেমন: 83749201" style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.88rem;" />
-                                <small style="font-size:0.75rem; color:#94a3b8;">প্রফিটের ডলার এই Binance অ্যাকাউন্টে পাঠানো হবে।</small>
-                            </div>
+                        <!-- গ্রুপ ২: Profit Withdraw ফিল্ডসমূহ (Profit Withdraw সিলেক্ট করলে আসবে) -->
+                        <div id="profitWithdrawFieldsGroup" style="display:none;">
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:1.2rem;">
+                                <!-- Binance Account ID / UID (সাত নাম্বার অপশন: "আমাদের Binance account ID number") -->
+                                <div class="form-group" style="margin:0;">
+                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                        আমাদের Binance account ID number (Binance Pay ID / UID) *
+                                    </label>
+                                    <input type="text" id="payoutBinanceUid" class="input-control" placeholder="যেমন: 83749201" style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:11px 14px; border-radius:8px; font-size:0.9rem;" />
+                                    <small style="font-size:0.75rem; color:#94a3b8;">যে Binance অ্যাকাউন্টে আপনার প্রফিটের ডলার গ্রহণ করবেন।</small>
+                                </div>
 
-                            <!-- 5. Quotex Account ID -->
-                            <div class="form-group" style="margin:0;">
-                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
-                                    ৫. আপনার Quotex Account ID *
-                                </label>
-                                <input type="text" id="payoutQuotexId" class="input-control" placeholder="যেমন: 63896760" required style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.88rem;" />
-                                <small style="font-size:0.75rem; color:#94a3b8;">যে Quotex অ্যাকাউন্টে ডলার ডিপোজিট হবে।</small>
-                            </div>
+                                <!-- Dollar Amount for profit withdrawal -->
+                                <div class="form-group" style="margin:0;">
+                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                        উইথড্র করার ডলারের পরিমাণ (Amount in USD) *
+                                    </label>
+                                    <input type="number" id="payoutProfitAmount" step="any" min="10" class="input-control" placeholder="যেমন: 50" style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#00e676; font-weight:800; padding:11px 14px; border-radius:8px; font-size:0.95rem;" />
+                                    <small style="font-size:0.75rem; color:#94a3b8;">উপার্জিত প্রফিট থেকে যত ডলার উত্তোলন করতে চান (নূন্যতম $১০)।</small>
+                                </div>
 
-                            <!-- 6. Requested Amount ($) -->
-                            <div class="form-group" style="margin:0;">
-                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
-                                    ৬. ডলারের পরিমাণ (Amount in USD) *
-                                </label>
-                                <input type="number" id="payoutAmount" step="1" min="10" class="input-control" placeholder="100" required style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#ffb800; font-weight:800; padding:10px 12px; border-radius:8px; font-size:0.95rem;" />
-                                <small style="font-size:0.75rem; color:#94a3b8;">আপনার পাস করা প্যাকেজের ফান্ডেড অ্যামাউন্ট বা প্রফিট।</small>
-                            </div>
-
-                            <!-- 7. Binance USDT Address (Optional) -->
-                            <div class="form-group" style="margin:0;">
-                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
-                                    ৭. Binance USDT Address (ঐচ্ছিক / TRC20 বা BEP20)
-                                </label>
-                                <input type="text" id="payoutBinanceAddress" class="input-control" placeholder="যেমন: T... অথবা 0x..." style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.88rem;" />
+                                <!-- Binance USDT Address (Optional) -->
+                                <div class="form-group" style="margin:0;">
+                                    <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                        Binance USDT Address (ঐচ্ছিক / TRC20 বা BEP20)
+                                    </label>
+                                    <input type="text" id="payoutBinanceAddress" class="input-control" placeholder="যেমন: T... অথবা 0x..." style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:11px 14px; border-radius:8px; font-size:0.9rem;" />
+                                    <small style="font-size:0.75rem; color:#94a3b8;">Binance Pay ID ছাড়াও USDT অ্যাড্রেসে ডলার নিতে চাইলে দিতে পারেন।</small>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- 8. Trader Notes -->
+                        <!-- ৮. বিশেষ নির্দেশনা / মন্তব্য -->
                         <div class="form-group" style="margin-bottom:1.5rem;">
                             <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
-                                ৮. বিশেষ নির্দেশনা / মন্তব্য (ঐচ্ছিক)
+                                বিশেষ নির্দেশনা / মন্তব্য (ঐচ্ছিক)
                             </label>
                             <textarea id="payoutNotes" rows="2" class="input-control" placeholder="আপনার কোনো বিশেষ নির্দেশনা থাকলে এখানে লিখুন..." style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px; border-radius:8px; font-size:0.86rem;"></textarea>
                         </div>
 
                         <div style="display:flex; justify-content:flex-end;">
-                            <button type="submit" id="payoutSubmitBtn" class="btn-gold" style="padding:12px 28px; font-size:0.92rem; font-weight:800; border-radius:10px; display:inline-flex; align-items:center; gap:8px;">
+                            <button type="submit" id="payoutSubmitBtn" class="btn-gold" style="padding:12px 28px; font-size:0.92rem; font-weight:800; border-radius:10px; display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
                                 <i class="fas fa-paper-plane"></i> পে-আউট রিকোয়েস্ট সাবমিট করুন
                             </button>
                         </div>
@@ -12487,19 +12541,33 @@
                     headerBadge.innerText = '✅ Payout Unlocked (Eligible)';
                 }
 
-                // Populate Passed Challenges Dropdown
-                const sel = document.getElementById('payoutChallengeSelect');
-                if (sel) {
-                    sel.innerHTML = data.passedChallenges.map((c, i) => {
-                        const pkgName = c.packageName || c.packageTitle || `Funded Account ($${c.fundedAmount || 100})`;
-                        const cleanId = c.payoutId || c.id || `CH-${i+1}`;
-                        const dt = c.passedAt ? new Date(c.passedAt).toLocaleDateString() : 'Verified';
-                        return `<option value="${c.id || c.challengeId}" data-broker-id="${c.brokerAccountId || ''}" data-amount="${c.fundedAmount || 100}" data-split="${c.profitSplit || '75%'}">
-                            🏆 ${pkgName} (ID: ${cleanId.substring(0, 12)}...) | Passed: ${dt}
-                        </option>`;
-                    }).join('');
+                // Automatically Select and display Passed Challenge Info
+                const topPassed = (data.passedChallenges && data.passedChallenges.length > 0) ? data.passedChallenges[0] : null;
+                if (topPassed) {
+                    const chIdInput = document.getElementById('payoutChallengeId');
+                    if (chIdInput) chIdInput.value = topPassed.id || topPassed.challengeId || '';
 
-                    handlePayoutChallengeChange();
+                    const fundedVal = parseFloat(topPassed.fundedAmount || topPassed.packageSize || 100);
+                    const chAmtInput = document.getElementById('payoutChallengeAmount');
+                    if (chAmtInput) chAmtInput.value = fundedVal;
+
+                    const pkgNameEl = document.getElementById('payoutAutoPackageName');
+                    if (pkgNameEl) pkgNameEl.innerText = topPassed.packageName || topPassed.packageTitle || 'Funded Account';
+
+                    const fundedDisplayEl = document.getElementById('payoutAutoFundedAmount');
+                    if (fundedDisplayEl) fundedDisplayEl.innerText = `$${fundedVal}`;
+
+                    const quotexAmtDisplay = document.getElementById('quotexAutoDepositDisplay');
+                    if (quotexAmtDisplay) quotexAmtDisplay.innerText = `$${fundedVal}.00`;
+
+                    const splitEl = document.getElementById('payoutAutoProfitSplit');
+                    if (splitEl) splitEl.innerText = topPassed.profitSplit || '75%';
+
+                    // Autofill Quotex ID from challenge if available
+                    const qIdInput = document.getElementById('payoutQuotexId');
+                    if (qIdInput && topPassed.brokerAccountId && !qIdInput.value) {
+                        qIdInput.value = topPassed.brokerAccountId;
+                    }
                 }
 
                 // Autofill Binance & Quotex from user profile if inputs are empty
@@ -12511,60 +12579,130 @@
                 if (qIdInput && !qIdInput.value && data.userProfile) {
                     qIdInput.value = data.userProfile.brokerAccountId || '';
                 }
+
+                handlePayoutTypeChange();
             }
 
             // Render History Table
             renderUserPayoutHistory(data.payouts || []);
         }
 
-        function handlePayoutChallengeChange() {
-            const sel = document.getElementById('payoutChallengeSelect');
-            if (!sel || !sel.options[sel.selectedIndex]) return;
-            const opt = sel.options[sel.selectedIndex];
-            const amount = opt.getAttribute('data-amount') || '100';
-            const split = opt.getAttribute('data-split') || '75%';
-            const brokerId = opt.getAttribute('data-broker-id') || '';
-
-            const infoEl = document.getElementById('payoutChallengeInfo');
-            if (infoEl) {
-                infoEl.innerHTML = `ফান্ডেড অ্যামাউন্ট: <strong>$${amount}</strong> | প্রফিট স্প্লিট: <strong>${split}</strong>`;
-            }
-
-            const amtInput = document.getElementById('payoutAmount');
-            if (amtInput) amtInput.value = amount;
-
+        function handlePayoutTypeChange() {
+            const pType = document.getElementById('payoutTypeSelect')?.value || 'quotex_deposit';
+            const quotexGroup = document.getElementById('quotexDepositFieldsGroup');
+            const profitGroup = document.getElementById('profitWithdrawFieldsGroup');
             const qIdInput = document.getElementById('payoutQuotexId');
-            if (qIdInput && brokerId && !qIdInput.value) qIdInput.value = brokerId;
+            const bUidInput = document.getElementById('payoutBinanceUid');
+
+            if (pType === 'quotex_deposit') {
+                if (quotexGroup) quotexGroup.style.display = 'block';
+                if (profitGroup) profitGroup.style.display = 'none';
+                if (qIdInput) qIdInput.required = true;
+                if (bUidInput) bUidInput.required = false;
+            } else {
+                if (quotexGroup) quotexGroup.style.display = 'none';
+                if (profitGroup) profitGroup.style.display = 'block';
+                if (qIdInput) qIdInput.required = false;
+                if (bUidInput) bUidInput.required = true;
+            }
         }
 
-        function handlePayoutQrSelect(event) {
-            const file = event.target.files && event.target.files[0];
+        function setPayoutQrFile(file) {
             if (!file) return;
-
+            if (!file.type.startsWith('image/')) {
+                showToast('অনুগ্রহ করে শুধুমাত্র ইমেজ ফাইল (PNG, JPG, WebP) সিলেক্ট করুন।', 'error');
+                return;
+            }
             selectedPayoutQrFile = file;
-            const nameEl = document.getElementById('payoutQrFileName');
-            if (nameEl) nameEl.innerText = `✅ নির্বাচিত ফাইল: ${file.name} (${Math.round(file.size / 1024)} KB)`;
 
-            const previewBox = document.getElementById('payoutQrPreviewBox');
+            const emptyState = document.getElementById('payoutQrEmptyState');
+            const previewState = document.getElementById('payoutQrPreviewState');
             const previewImg = document.getElementById('payoutQrPreviewImg');
+            const fileName = document.getElementById('payoutQrFileName');
+            const fileSize = document.getElementById('payoutQrFileSize');
+
+            if (fileName) fileName.innerText = file.name || 'Pasted_QR_Screenshot.png';
+            if (fileSize) fileSize.innerText = `${(file.size / 1024).toFixed(1)} KB`;
 
             const reader = new FileReader();
             reader.onload = (e) => {
                 if (previewImg) previewImg.src = e.target.result;
-                if (previewBox) previewBox.style.display = 'block';
+                if (emptyState) emptyState.style.display = 'none';
+                if (previewState) previewState.style.display = 'flex';
             };
             reader.readAsDataURL(file);
+        }
+
+        function handlePayoutQrSelect(event) {
+            const file = event.target.files && event.target.files[0];
+            if (file) setPayoutQrFile(file);
+        }
+
+        function handlePayoutQrDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropzone = document.getElementById('payoutQrDropzone');
+            if (dropzone) {
+                dropzone.style.borderColor = '#00e676';
+                dropzone.style.background = 'rgba(0, 230, 118, 0.08)';
+            }
+        }
+
+        function handlePayoutQrDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropzone = document.getElementById('payoutQrDropzone');
+            if (dropzone) {
+                dropzone.style.borderColor = 'rgba(0, 230, 118, 0.35)';
+                dropzone.style.background = 'rgba(0, 230, 118, 0.02)';
+            }
+        }
+
+        function handlePayoutQrDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropzone = document.getElementById('payoutQrDropzone');
+            if (dropzone) {
+                dropzone.style.borderColor = 'rgba(0, 230, 118, 0.35)';
+                dropzone.style.background = 'rgba(0, 230, 118, 0.02)';
+            }
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+                setPayoutQrFile(e.dataTransfer.files[0]);
+            }
         }
 
         function removePayoutQrImage() {
             selectedPayoutQrFile = null;
             const inp = document.getElementById('payoutQrInput');
             if (inp) inp.value = '';
-            const previewBox = document.getElementById('payoutQrPreviewBox');
-            if (previewBox) previewBox.style.display = 'none';
-            const nameEl = document.getElementById('payoutQrFileName');
-            if (nameEl) nameEl.innerText = 'কোনো ফাইল সিলেক্ট করা হয়নি';
+            const emptyState = document.getElementById('payoutQrEmptyState');
+            const previewState = document.getElementById('payoutQrPreviewState');
+            const previewImg = document.getElementById('payoutQrPreviewImg');
+            if (previewImg) previewImg.src = '';
+            if (previewState) previewState.style.display = 'none';
+            if (emptyState) emptyState.style.display = 'block';
         }
+
+        // Global Paste Listener for QR screenshot
+        window.addEventListener('paste', (e) => {
+            const pane = document.getElementById('pane-payout');
+            if (!pane || pane.classList.contains('hidden') || pane.style.display === 'none') return;
+            const pType = document.getElementById('payoutTypeSelect')?.value;
+            if (pType !== 'quotex_deposit') return;
+
+            const items = e.clipboardData && e.clipboardData.items;
+            if (!items) return;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        setPayoutQrFile(file);
+                        showToast('📋 QR কোড স্ক্রিনশট সফলভাবে পেস্ট করা হয়েছে!', 'success');
+                        break;
+                    }
+                }
+            }
+        });
 
         async function handlePayoutFormSubmit(event) {
             event.preventDefault();
@@ -12574,30 +12712,42 @@
                 return;
             }
 
-            const pType = document.getElementById('payoutTypeSelect').value;
-            const qId = (document.getElementById('payoutQuotexId').value || '').trim();
-            const bUid = (document.getElementById('payoutBinanceUid').value || '').trim();
-            const bAddr = (document.getElementById('payoutBinanceAddress').value || '').trim();
-            const amt = document.getElementById('payoutAmount').value;
-            const chId = document.getElementById('payoutChallengeSelect').value;
-            const notes = document.getElementById('payoutNotes').value;
+            const pType = document.getElementById('payoutTypeSelect')?.value || 'quotex_deposit';
+            const chId = document.getElementById('payoutChallengeId')?.value || '';
+            const notes = (document.getElementById('payoutNotes')?.value || '').trim();
 
-            // Validation based on type
-            if (!qId && (pType === 'quotex_deposit' || pType === 'both')) {
-                showToast('অনুগ্রহ করে আপনার Quotex Account ID দিন।', 'error');
-                document.getElementById('payoutQuotexId').focus();
-                return;
-            }
+            let amount = 0;
+            let qId = '';
+            let bUid = '';
+            let bAddr = '';
 
-            if (!bUid && !bAddr && (pType === 'profit_withdrawal' || pType === 'both')) {
-                showToast('প্রফিট উইথড্রয়ালের জন্য অনুগ্রহ করে আপনার Binance Pay ID / UID দিন।', 'error');
-                document.getElementById('payoutBinanceUid').focus();
-                return;
-            }
-
-            if (!selectedPayoutQrFile && (pType === 'quotex_deposit' || pType === 'both')) {
-                showToast('⚠️ Quotex-এর Binance Pay Deposit QR কোডের স্ক্রিনশট আপলোড করা আবশ্যক!', 'error');
-                return;
+            if (pType === 'quotex_deposit') {
+                qId = (document.getElementById('payoutQuotexId')?.value || '').trim();
+                if (!qId) {
+                    showToast('অনুগ্রহ করে আপনার Quotex Account ID প্রদান করুন।', 'error');
+                    document.getElementById('payoutQuotexId')?.focus();
+                    return;
+                }
+                if (!selectedPayoutQrFile) {
+                    showToast('⚠️ Quotex-এর Binance Pay Deposit QR কোডের স্ক্রিনশট আপলোড করা আবশ্যক!', 'error');
+                    return;
+                }
+                amount = document.getElementById('payoutChallengeAmount')?.value || 100;
+            } else {
+                bUid = (document.getElementById('payoutBinanceUid')?.value || '').trim();
+                if (!bUid) {
+                    showToast('প্রফিট উইথড্রয়ালের জন্য আপনার Binance account ID number (Pay ID / UID) দিন।', 'error');
+                    document.getElementById('payoutBinanceUid')?.focus();
+                    return;
+                }
+                const profitAmt = parseFloat(document.getElementById('payoutProfitAmount')?.value);
+                if (!profitAmt || isNaN(profitAmt) || profitAmt <= 0) {
+                    showToast('অনুগ্রহ করে উইথড্র করার সঠিক ডলারের পরিমাণ (Amount in USD) লিখুন।', 'error');
+                    document.getElementById('payoutProfitAmount')?.focus();
+                    return;
+                }
+                amount = profitAmt;
+                bAddr = (document.getElementById('payoutBinanceAddress')?.value || '').trim();
             }
 
             const btn = document.getElementById('payoutSubmitBtn');
@@ -12614,9 +12764,9 @@
                 formData.append('binancePayId', bUid);
                 formData.append('binanceUid', bUid);
                 formData.append('binanceAddress', bAddr);
-                formData.append('amount', amt);
+                formData.append('amount', amount);
                 formData.append('traderNotes', notes);
-                if (selectedPayoutQrFile) {
+                if (selectedPayoutQrFile && pType === 'quotex_deposit') {
                     formData.append('qrCodeImage', selectedPayoutQrFile);
                 }
 
@@ -12635,7 +12785,10 @@
                 if (data.success) {
                     showToast(data.message || 'পে-আউট রিকোয়েস্ট সফলভাবে গৃহীত হয়েছে!', 'success');
                     removePayoutQrImage();
-                    document.getElementById('payoutNotes').value = '';
+                    const notesEl = document.getElementById('payoutNotes');
+                    if (notesEl) notesEl.value = '';
+                    const profitAmtInput = document.getElementById('payoutProfitAmount');
+                    if (profitAmtInput) profitAmtInput.value = '';
                     fetchUserPayouts();
                 } else {
                     showToast(data.message || 'রিকোয়েস্ট সাবমিট ব্যর্থ হয়েছে।', 'error');

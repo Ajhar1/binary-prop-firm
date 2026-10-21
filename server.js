@@ -2560,7 +2560,12 @@ const uploadAvatar = multer({
 
 // Multer storage for Payout Quotex Binance QR Code screenshots
 const payoutQrStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+  destination: (req, file, cb) => {
+    if (!fs.existsSync(UPLOADS_DIR)) {
+      try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch (e) {}
+    }
+    cb(null, UPLOADS_DIR);
+  },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase() || '.png';
     const cleanId = (req.user && req.user.traderId ? req.user.traderId : 'payout').replace(/[^a-zA-Z0-9]/g, '_');
@@ -2572,7 +2577,8 @@ const uploadPayoutQr = multer({
   limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    if (file.mimetype.startsWith('image/') || ['.png', '.jpg', '.jpeg', '.webp'].includes(ext)) {
+    const validExts = ['.png', '.jpg', '.jpeg', '.webp', '.jfif', '.pjpeg', '.pjp', '.svg', '.gif'];
+    if (file.mimetype.startsWith('image/') || validExts.includes(ext)) {
       cb(null, true);
     } else {
       cb(new Error('Only image files (.png, .jpg, .jpeg, .webp) are allowed for QR code screenshot.'));
@@ -8658,35 +8664,77 @@ app.post('/api/user/payouts', authenticateToken, uploadPayoutQr.single('qrCodeIm
 
     const selectedChallenge = passedChallenges.find(c => c.id === challengeId || c.challengeId === challengeId) || passedChallenges[0];
 
+    const users = readJson(USERS_FILE, []);
+    const fullUser = users.find(u => u.id === user.id) || user;
+
+    let finalAmount = 0;
     let qrCodeUrl = '';
-    if (req.file) {
-      try {
-        const fileBuffer = fs.readFileSync(req.file.path);
-        const cloudUpload = await uploadToFreeCloudCdn(fileBuffer, req.file.originalname, req.file.mimetype);
-        if (cloudUpload.success) {
-          qrCodeUrl = cloudUpload.url;
+    const isQuotex = (payoutType === 'quotex_deposit');
+
+    if (isQuotex) {
+      // 1. Quotex Live Fund Deposit:
+      // Amount is automatically determined by the passed challenge package size
+      finalAmount = parseFloat(selectedChallenge.fundedAmount || selectedChallenge.packageSize || selectedChallenge.balance || 100);
+
+      // Validate Quotex Account ID
+      const finalQuotexId = (quotexAccountId || selectedChallenge.brokerAccountId || fullUser.brokerAccountId || '').trim();
+      if (!finalQuotexId) {
+        if (req.file && fs.existsSync(req.file.path)) {
           try { fs.unlinkSync(req.file.path); } catch (e) {}
-        } else {
-          qrCodeUrl = `/uploads/${req.file.filename}`;
         }
-      } catch (e) {
+        return res.status(400).json({
+          success: false,
+          message: 'Quotex লাইভ ফান্ড ডিপোজিটের জন্য অনুগ্রহ করে আপনার Quotex Account ID প্রদান করুন।'
+        });
+      }
+
+      // Validate QR Code image upload
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'Quotex লাইভ ফান্ড ডিপোজিটের জন্য Binance Pay Deposit QR কোডের স্পষ্ট স্ক্রিনশট আপলোড করা আবশ্যক।'
+        });
+      }
+
+      // Store reliable local static URL directly so admin and trader can access immediately
+      qrCodeUrl = `/uploads/${req.file.filename}`;
+    } else {
+      // 2. Profit Withdrawal:
+      const withdrawAmount = parseFloat(amount);
+      if (!withdrawAmount || isNaN(withdrawAmount) || withdrawAmount <= 0) {
+        if (req.file && fs.existsSync(req.file.path)) {
+          try { fs.unlinkSync(req.file.path); } catch (e) {}
+        }
+        return res.status(400).json({
+          success: false,
+          message: 'প্রফিট উইথড্র করার জন্য অনুগ্রহ করে সঠিক ডলারের পরিমাণ (USD) লিখুন।'
+        });
+      }
+      finalAmount = withdrawAmount;
+
+      const finalBinanceId = (binancePayId || binanceUid || '').trim();
+      if (!finalBinanceId) {
+        if (req.file && fs.existsSync(req.file.path)) {
+          try { fs.unlinkSync(req.file.path); } catch (e) {}
+        }
+        return res.status(400).json({
+          success: false,
+          message: 'প্রফিট উইথড্রয়ালের জন্য আপনার Binance account ID number (Pay ID / UID) প্রদান করা আবশ্যক।'
+        });
+      }
+
+      if (req.file) {
         qrCodeUrl = `/uploads/${req.file.filename}`;
       }
     }
 
-    let payoutTypeLabel = 'Quotex ডিপোজিট (Binance Pay QR)';
-    if (payoutType === 'profit_withdrawal') {
-      payoutTypeLabel = 'প্রফিট উইথড্রয়াল (Binance)';
-    } else if (payoutType === 'both') {
-      payoutTypeLabel = 'Quotex ডিপোজিট + প্রফিট';
-    }
+    const payoutTypeLabel = isQuotex
+      ? 'Quotex Live Fund Deposit (Binance Pay QR)'
+      : 'Profit Withdraw (Binance Account)';
 
     const allPayouts = readJson(PAYOUTS_FILE, []);
     const newSeq = allPayouts.length + 1001;
     const payoutId = `PAY-${newSeq}`;
-
-    const users = readJson(USERS_FILE, []);
-    const fullUser = users.find(u => u.id === user.id) || user;
 
     const newPayout = {
       id: 'pay_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
@@ -8698,15 +8746,15 @@ app.post('/api/user/payouts', authenticateToken, uploadPayoutQr.single('qrCodeIm
       userTelegram: user.telegram || fullUser.telegram || '',
       challengeId: selectedChallenge.id || selectedChallenge.challengeId || '',
       challengePackageName: selectedChallenge.packageName || selectedChallenge.packageTitle || 'Funded Challenge',
-      challengeFundedAmount: selectedChallenge.fundedAmount || selectedChallenge.packageSize || 0,
+      challengeFundedAmount: parseFloat(selectedChallenge.fundedAmount || selectedChallenge.packageSize || 100),
       challengeProfitSplit: selectedChallenge.profitSplit || '75%',
-      payoutType,
+      payoutType: isQuotex ? 'quotex_deposit' : 'profit_withdrawal',
       payoutTypeLabel,
       quotexAccountId: (quotexAccountId || selectedChallenge.brokerAccountId || fullUser.brokerAccountId || '').trim(),
       binancePayId: (binancePayId || binanceUid || '').trim(),
       binanceUid: (binanceUid || binancePayId || '').trim(),
       binanceAddress: (binanceAddress || '').trim(),
-      amount: parseFloat(amount) || selectedChallenge.fundedAmount || 100,
+      amount: finalAmount,
       qrCodeUrl: qrCodeUrl || '',
       traderNotes: (traderNotes || '').trim(),
       status: 'pending',
