@@ -36,6 +36,15 @@ const SUPPORT_FILE = path.join(DATA_DIR, 'support_tickets.json');
 const TRADER_STATES_FILE = path.join(DATA_DIR, 'trader_states.json');
 const SYNCED_TRADES_FILE = path.join(DATA_DIR, 'synced_trades.json');
 const PAYOUTS_FILE = path.join(DATA_DIR, 'payouts.json');
+const PAYOUT_SETTINGS_FILE = path.join(DATA_DIR, 'payout_settings.json');
+const DEFAULT_PAYOUT_SETTINGS = {
+  adminBinancePayId: '838241680',
+  adminBinanceName: 'Binary Prop Firm Official',
+  adminUsdtAddress: 'TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx',
+  adminUsdtNetwork: 'TRC20',
+  instructions: 'Quotex থেকে প্রফিট উইথড্র দেওয়ার সময় প্রাপক (Recipient) হিসেবে আমাদের এই Binance Pay ID দিন। উইথড্র সম্পন্ন হলে প্রাপ্ত স্ক্রিনশটটি নিচে আপলোড করুন।',
+  updatedAt: new Date().toISOString()
+};
 const DOWNLOADS_DIR = path.join(__dirname, 'public', 'downloads');
 const TRADERS_VAULT_DIR = path.join(DATA_DIR, 'lifelong_traders_vault');
 const TRADERS_VAULT_FILE = path.join(TRADERS_VAULT_DIR, 'master_registered_traders_vault.json');
@@ -8600,6 +8609,7 @@ app.get('/api/user/payouts', authenticateToken, (req, res) => {
 
     const users = readJson(USERS_FILE, []);
     const fullUser = users.find(u => u.id === user.id) || user;
+    const payoutSettings = readJson(PAYOUT_SETTINGS_FILE, DEFAULT_PAYOUT_SETTINGS);
 
     res.json({
       success: true,
@@ -8607,6 +8617,7 @@ app.get('/api/user/payouts', authenticateToken, (req, res) => {
       passedChallenges,
       activeChallenges,
       payouts: userPayouts,
+      payoutSettings,
       userProfile: {
         id: fullUser.id,
         traderId: fullUser.traderId || '',
@@ -8719,14 +8730,22 @@ app.post('/api/user/payouts', authenticateToken, uploadPayoutQr.single('qrCodeIm
         }
         return res.status(400).json({
           success: false,
-          message: 'প্রফিট উইথড্রয়ালের জন্য আপনার Binance account ID number (Pay ID / UID) প্রদান করা আবশ্যক।'
+          message: 'আপনার লভ্যাংশ গ্রহণের জন্য আপনার নিজস্ব Binance Pay ID / UID প্রদান করা আবশ্যক।'
         });
       }
 
-      if (req.file) {
-        qrCodeUrl = `/uploads/${req.file.filename}`;
+      // Validate Quotex Withdrawal Proof screenshot
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'Quotex থেকে আমাদের Binance অ্যাকাউন্টে উইথড্র দেওয়ার স্ক্রিনশট / প্রমাণপত্র আপলোড করা আবশ্যক।'
+        });
       }
+
+      qrCodeUrl = `/uploads/${req.file.filename}`;
     }
+
+    const currentPayoutSettings = readJson(PAYOUT_SETTINGS_FILE, DEFAULT_PAYOUT_SETTINGS);
 
     const payoutTypeLabel = isQuotex
       ? 'Quotex Live Fund Deposit (Binance Pay QR)'
@@ -8750,12 +8769,15 @@ app.post('/api/user/payouts', authenticateToken, uploadPayoutQr.single('qrCodeIm
       challengeProfitSplit: selectedChallenge.profitSplit || '75%',
       payoutType: isQuotex ? 'quotex_deposit' : 'profit_withdrawal',
       payoutTypeLabel,
-      quotexAccountId: (quotexAccountId || selectedChallenge.brokerAccountId || fullUser.brokerAccountId || '').trim(),
+      quotexAccountId: isQuotex ? (quotexAccountId || selectedChallenge.brokerAccountId || fullUser.brokerAccountId || '').trim() : '',
       binancePayId: (binancePayId || binanceUid || '').trim(),
       binanceUid: (binanceUid || binancePayId || '').trim(),
       binanceAddress: (binanceAddress || '').trim(),
+      firmBinancePayId: currentPayoutSettings.adminBinancePayId || '',
+      firmBinanceName: currentPayoutSettings.adminBinanceName || '',
       amount: finalAmount,
       qrCodeUrl: qrCodeUrl || '',
+      proofScreenshotUrl: qrCodeUrl || '',
       traderNotes: (traderNotes || '').trim(),
       status: 'pending',
       adminNotes: '',
@@ -8879,6 +8901,49 @@ app.delete('/api/admin/payouts/:id', authenticateAdminToken, (req, res) => {
     res.json({ success: true, message: 'পে-আউট রেকর্ডটি সফলভাবে ডিলিট করা হয়েছে।' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'ডিলিট করতে সমস্যা হয়েছে।' });
+  }
+});
+
+// 6. Admin & Public: Payout Settings (Official Firm Binance Account for Profit Withdrawals)
+app.get('/api/public/payout-settings', (req, res) => {
+  try {
+    const settings = readJson(PAYOUT_SETTINGS_FILE, DEFAULT_PAYOUT_SETTINGS);
+    res.json({ success: true, settings });
+  } catch (e) {
+    res.json({ success: true, settings: DEFAULT_PAYOUT_SETTINGS });
+  }
+});
+
+app.get('/api/admin/payout-settings', authenticateAdminToken, (req, res) => {
+  try {
+    const settings = readJson(PAYOUT_SETTINGS_FILE, DEFAULT_PAYOUT_SETTINGS);
+    res.json({ success: true, settings });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/admin/payout-settings', authenticateAdminToken, (req, res) => {
+  try {
+    const { adminBinancePayId, adminBinanceName, adminUsdtAddress, adminUsdtNetwork, instructions } = req.body;
+    if (!adminBinancePayId || !adminBinancePayId.trim()) {
+      return res.status(400).json({ success: false, message: 'আমাদের Binance Pay ID / UID প্রদান করা আবশ্যক।' });
+    }
+    const current = readJson(PAYOUT_SETTINGS_FILE, DEFAULT_PAYOUT_SETTINGS);
+    const updated = {
+      ...current,
+      adminBinancePayId: adminBinancePayId.trim(),
+      adminBinanceName: (adminBinanceName || '').trim(),
+      adminUsdtAddress: (adminUsdtAddress || '').trim(),
+      adminUsdtNetwork: (adminUsdtNetwork || 'TRC20').trim(),
+      instructions: (instructions || current.instructions || '').trim(),
+      updatedAt: new Date().toISOString()
+    };
+    writeJson(PAYOUT_SETTINGS_FILE, updated);
+    res.json({ success: true, message: 'অফিশিয়াল প্রফিট উইথড্রয়াল Binance অ্যাকাউন্ট সফলভাবে সেভ ও আপডেট হয়েছে!', settings: updated });
+  } catch (err) {
+    console.error('[Admin Payout Settings Error]', err);
+    res.status(500).json({ success: false, message: 'সেটিংস সেভ করতে সমস্যা হয়েছে: ' + err.message });
   }
 });
 

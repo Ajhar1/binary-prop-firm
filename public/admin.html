@@ -2219,6 +2219,58 @@
                 </div>
             </div>
 
+            <!-- Official Binance Payout Settings Card -->
+            <div class="glass" style="border:1px solid rgba(255, 184, 0, 0.35); border-radius:18px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; background:linear-gradient(135deg, rgba(255, 184, 0, 0.06) 0%, rgba(22, 27, 34, 0.95) 100%);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.75rem;">
+                    <div>
+                        <h4 style="margin:0; font-size:1.05rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <i class="fab fa-bitcoin" style="color:#ffb800;"></i> অফিশিয়াল প্রফিট উইথড্রয়াল Binance অ্যাকাউন্ট (যেখানে ট্রেডাররা কটেক্স থেকে উইথড্র দিবে)
+                        </h4>
+                        <p style="margin:3px 0 0 0; font-size:0.78rem; color:#94a3b8;">
+                            এখানে আপনি যে Binance Pay ID দিবেন, ট্রেডাররা তাদের ড্যাশবোর্ডে <strong>Profit Withdraw</strong> সিলেক্ট করলে এটি দেখতে পাবে এবং কটেক্স থেকে এই অ্যাকাউন্টে প্রফিট পাঠাবে।
+                        </p>
+                    </div>
+                    <span style="font-size:0.74rem; color:#00e676; background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.25); padding:4px 10px; border-radius:8px;">
+                        <i class="fas fa-edit"></i> যেকোনো সময় পরিবর্তনযোগ্য
+                    </span>
+                </div>
+
+                <form id="adminPayoutSettingsForm" onsubmit="handleSavePayoutSettings(event)">
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1rem; margin-bottom:1rem;">
+                        <div class="form-group" style="margin:0;">
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:5px;">
+                                আমাদের Binance Pay ID / UID *
+                            </label>
+                            <input type="text" id="settingAdminBinanceId" class="form-control" placeholder="যেমন: 838241680" required style="width:100%; font-weight:800; color:#00e676; font-size:0.92rem;" />
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:5px;">
+                                Binance অ্যাকাউন্টের নাম / লেবেল
+                            </label>
+                            <input type="text" id="settingAdminBinanceName" class="form-control" placeholder="যেমন: Binary Prop Firm Official" style="width:100%; color:#fff; font-size:0.88rem;" />
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:5px;">
+                                USDT Deposit Address (ঐচ্ছিক / TRC20 বা BEP20)
+                            </label>
+                            <input type="text" id="settingAdminUsdtAddress" class="form-control" placeholder="যেমন: TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx" style="width:100%; color:#60a5fa; font-size:0.85rem;" />
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr auto; gap:1rem; align-items:flex-end;">
+                        <div class="form-group" style="margin:0;">
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:5px;">
+                                ট্রেডারদের জন্য বিশেষ নির্দেশনামূলক মেসেজ
+                            </label>
+                            <input type="text" id="settingAdminInstructions" class="form-control" placeholder="Quotex থেকে প্রফিট উইথড্র দেওয়ার সময় প্রাপক হিসেবে আমাদের এই Binance Pay ID দিন..." style="width:100%; color:#fff; font-size:0.85rem;" />
+                        </div>
+                        <button type="submit" id="savePayoutSettingsBtn" class="btn-gold" style="padding:9px 24px; font-size:0.88rem; font-weight:800; border-radius:8px; display:inline-flex; align-items:center; gap:8px; white-space:nowrap; cursor:pointer;">
+                            <i class="fas fa-save"></i> সংরক্ষণ করুন
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             <!-- Table Card -->
             <div class="table-card glass" style="border:1px solid rgba(0, 230, 118, 0.2); border-radius:18px; box-shadow:0 15px 35px rgba(0,0,0,0.4); padding:1.3rem;">
                 <!-- Header with Title and Search/Filters -->
@@ -2282,7 +2334,7 @@
                                 <th style="padding:12px; text-align:left;">অ্যামাউন্ট ($)</th>
                                 <th style="padding:12px; text-align:left;">Quotex ID</th>
                                 <th style="padding:12px; text-align:left;">Binance ID</th>
-                                <th style="padding:12px; text-align:center;">Quotex QR কোড</th>
+                                <th style="padding:12px; text-align:center;">QR কোড / উইথড্র প্রুফ</th>
                                 <th style="padding:12px; text-align:center;">স্ট্যাটাস</th>
                                 <th style="padding:12px; text-align:center;">অ্যাকশন</th>
                             </tr>
@@ -3394,13 +3446,13 @@
                 <!-- Column 1: QR Code & Scanner Box -->
                 <div style="background:#0b0f17; border:1px solid rgba(0,230,118,0.25); border-radius:16px; padding:1.2rem; text-align:center;">
                     <div style="font-size:0.88rem; font-weight:800; color:#fff; margin-bottom:10px; display:flex; align-items:center; justify-content:center; gap:6px;">
-                        <i class="fas fa-qrcode" style="color:#00e676;"></i> Quotex Binance Pay Deposit QR কোড
+                        <i id="modalPayoutProofIcon" class="fas fa-qrcode" style="color:#00e676;"></i> <span id="modalPayoutProofTitle">Quotex Binance Pay Deposit QR কোড</span>
                     </div>
 
-                    <!-- QR Image Box -->
+                    <!-- QR / Proof Image Box -->
                     <div id="modalPayoutQrBox" style="margin-bottom:12px;">
                         <div style="background:#000; padding:10px; border-radius:14px; border:2px dashed rgba(0,230,118,0.5); display:inline-block; max-width:100%; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
-                            <img id="modalPayoutQrImg" src="" alt="Quotex Binance Pay QR Code" style="max-width:280px; width:100%; max-height:280px; object-fit:contain; border-radius:8px; display:block;" />
+                            <img id="modalPayoutQrImg" src="" alt="Proof Screenshot / QR" style="max-width:280px; width:100%; max-height:280px; object-fit:contain; border-radius:8px; display:block;" />
                         </div>
                         <div style="margin-top:10px;">
                             <a id="modalPayoutQrFullLink" href="#" target="_blank" class="btn-outline" style="padding:5px 12px; font-size:0.75rem; border-radius:6px; display:inline-block; text-decoration:none;">
@@ -3409,20 +3461,22 @@
                         </div>
                     </div>
 
-                    <!-- No QR Box (e.g. for pure profit withdrawal) -->
+                    <!-- No QR Box (if missing image) -->
                     <div id="modalPayoutNoQrBox" style="display:none; padding:2rem 1rem; color:#94a3b8;">
-                        <i class="fas fa-wallet" style="font-size:2.5rem; color:#ffb800; margin-bottom:10px; display:block; opacity:0.8;"></i>
-                        <div style="font-weight:700; color:#fff; margin-bottom:6px;">প্রফিট উইথড্রয়াল রিকোয়েস্ট</div>
-                        <p style="font-size:0.8rem; margin:0; line-height:1.5;">এই ট্রেডার শুধুমাত্র প্রফিট উইথড্রয়ালের আবেদন করেছেন। নিচের Binance Pay ID / UID-তে সরাসরি ডলার পাঠিয়ে দিন।</p>
+                        <i class="fas fa-image" style="font-size:2.5rem; color:#ffb800; margin-bottom:10px; display:block; opacity:0.8;"></i>
+                        <div style="font-weight:700; color:#fff; margin-bottom:6px;">কোনো ছবি আপলোড করা হয়নি</div>
+                        <p style="font-size:0.8rem; margin:0; line-height:1.5;">ট্রেডার কোনো QR কোড বা স্ক্রিনশট আপলোড করেননি।</p>
                     </div>
 
                     <!-- Instruction Card -->
-                    <div style="background:rgba(0,230,118,0.06); border:1px solid rgba(0,230,118,0.2); border-radius:10px; padding:10px; text-align:left; font-size:0.76rem; color:#cbd5e1; line-height:1.5;">
-                        <strong style="color:#00e676; display:block; margin-bottom:4px;">📲 যেভাবে ডলার পাঠাবেন:</strong>
-                        1. আপনার মোবাইলের <strong>Binance App</strong> ওপেন করুন।<br/>
-                        2. উপরে ডানদিকের <strong>Scan</strong> অপশন চাপুন।<br/>
-                        3. এই স্ক্রিনে থাকা QR কোডটি স্ক্যান করে ঠিক <strong id="modalPayoutAmountScanNotice" style="color:#ffb800;">$100</strong> ডলার পাঠিয়ে দিন।<br/>
-                        4. সেন্ড সফল হলে নিচের বাটনে ক্লিক করে <strong>'পেইড সম্পন্ন'</strong> মার্ক করুন।
+                    <div id="modalPayoutInstructionBox" style="background:rgba(0,230,118,0.06); border:1px solid rgba(0,230,118,0.2); border-radius:10px; padding:10px; text-align:left; font-size:0.76rem; color:#cbd5e1; line-height:1.5;">
+                        <span id="modalPayoutInstructionText">
+                            <strong style="color:#00e676; display:block; margin-bottom:4px;">📲 যেভাবে ডলার পাঠাবেন:</strong>
+                            1. আপনার মোবাইলের <strong>Binance App</strong> ওপেন করুন।<br/>
+                            2. উপরে ডানদিকের <strong>Scan</strong> অপশন চাপুন।<br/>
+                            3. এই স্ক্রিনে থাকা QR কোডটি স্ক্যান করে ঠিক <strong id="modalPayoutAmountScanNotice" style="color:#ffb800;">$100</strong> ডলার পাঠিয়ে দিন।<br/>
+                            4. সেন্ড সফল হলে নিচের বাটনে ক্লিক করে <strong>'পেইড সম্পন্ন'</strong> মার্ক করুন।
+                        </span>
                     </div>
                 </div>
 
@@ -3457,7 +3511,7 @@
                     </div>
 
                     <!-- Quotex Account ID Box with 1-click Copy -->
-                    <div style="background:#0b0f17; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
+                    <div id="modalPayoutQuotexBox" style="background:#0b0f17; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
                         <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">Quotex Account ID (ডলার যে একাউন্টে যাবে):</div>
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <code id="modalPayoutQuotexId" style="font-size:0.95rem; font-weight:800; color:#fff; font-family:monospace;">--</code>
@@ -3467,9 +3521,15 @@
                         </div>
                     </div>
 
+                    <!-- Firm Binance Account Box (Shown for profit withdrawal) -->
+                    <div id="modalPayoutFirmBinanceBox" style="display:none; background:#0b0f17; border:1px solid rgba(255,184,0,0.3); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
+                        <div style="font-size:0.75rem; color:#ffb800; margin-bottom:2px;">আমাদের ফার্মের Binance ID (যেখানে ট্রেডার ডলার উইথড্র দিয়েছে):</div>
+                        <code id="modalPayoutFirmBinanceId" style="font-size:0.95rem; font-weight:800; color:#00e676; font-family:monospace;">--</code>
+                    </div>
+
                     <!-- Binance Pay ID / UID Box with 1-click Copy -->
-                    <div style="background:#0b0f17; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
-                        <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">ট্রেডারের Binance Pay ID / UID (প্রফিট পাঠানোর জন্য):</div>
+                    <div id="modalPayoutTraderBinanceBox" style="background:#0b0f17; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
+                        <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">ট্রেডারের Binance Pay ID / UID (প্রফিটের লভ্যাংশ পাঠানোর জন্য):</div>
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                             <code id="modalPayoutBinanceId" style="font-size:0.95rem; font-weight:800; color:#ffb800; font-family:monospace;">--</code>
                             <button type="button" class="btn-sm" style="padding:4px 10px; font-size:0.75rem; background:rgba(255,184,0,0.15); color:#ffb800; border:1px solid rgba(255,184,0,0.3); border-radius:6px; cursor:pointer;" onclick="copyToClipboard(document.getElementById('modalPayoutBinanceId').innerText)">
@@ -3496,14 +3556,14 @@
                             <label style="font-size:0.76rem; color:var(--text-secondary); font-weight:700; margin-bottom:3px; display:block;">
                                 এডমিন রিমার্কস / ট্রেডারকে মেসেজ:
                             </label>
-                            <input type="text" class="form-control" id="adminPayoutNotesInput" placeholder="e.g. আপনার Quotex একাউন্টে লাইভ ফান্ডিং ডিপোজিট করা হয়েছে।" style="height:36px; font-size:0.82rem; border-radius:8px;" />
+                            <input type="text" class="form-control" id="adminPayoutNotesInput" placeholder="e.g. আপনার পে-আউট রিকোয়েস্ট সফলভাবে প্রসেস করা হয়েছে।" style="height:36px; font-size:0.82rem; border-radius:8px;" />
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
                     <div style="display:flex; flex-direction:column; gap:8px;">
-                        <button type="button" class="btn-gold" style="width:100%; padding:10px; font-size:0.92rem; font-weight:800; background:linear-gradient(135deg, #00e676 0%, #00b0ff 100%); border-color:#00e676; color:#000; border-radius:10px; cursor:pointer;" onclick="handleUpdatePayoutStatus('paid')">
-                            <i class="fas fa-check-circle"></i> ✅ ডলার দেওয়া হয়েছে (Mark as Paid)
+                        <button type="button" class="btn-gold" id="modalPayoutPayBtn" style="width:100%; padding:10px; font-size:0.92rem; font-weight:800; background:linear-gradient(135deg, #00e676 0%, #00b0ff 100%); border-color:#00e676; color:#000; border-radius:10px; cursor:pointer;" onclick="handleUpdatePayoutStatus('paid')">
+                            <i class="fas fa-check-circle"></i> <span id="modalPayoutPayBtnText">✅ ডলার দেওয়া হয়েছে (Mark as Paid)</span>
                         </button>
                         
                         <div style="display:flex; gap:8px;">
@@ -9342,12 +9402,90 @@
             document.body.removeChild(ta);
         }
 
+        let adminPayoutSettings = null;
+
+        async function fetchAdminPayoutSettings() {
+            if (!adminToken) return;
+            try {
+                const res = await fetch('/api/admin/payout-settings', {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await res.json();
+                if (data.success && data.settings) {
+                    adminPayoutSettings = data.settings;
+                    const idInp = document.getElementById('settingAdminBinanceId');
+                    const nameInp = document.getElementById('settingAdminBinanceName');
+                    const usdtInp = document.getElementById('settingAdminUsdtAddress');
+                    const instrInp = document.getElementById('settingAdminInstructions');
+                    if (idInp && (!idInp.value || document.activeElement !== idInp)) idInp.value = data.settings.adminBinancePayId || '';
+                    if (nameInp && (!nameInp.value || document.activeElement !== nameInp)) nameInp.value = data.settings.adminBinanceName || '';
+                    if (usdtInp && (!usdtInp.value || document.activeElement !== usdtInp)) usdtInp.value = data.settings.adminUsdtAddress || '';
+                    if (instrInp && (!instrInp.value || document.activeElement !== instrInp)) instrInp.value = data.settings.instructions || '';
+                }
+            } catch (err) {
+                console.error('[Fetch Payout Settings Error]', err);
+            }
+        }
+
+        async function handleSavePayoutSettings(event) {
+            event.preventDefault();
+            if (!adminToken) {
+                showToast('এডমিন লগইন প্রয়োজন।', 'error');
+                return;
+            }
+            const adminBinancePayId = (document.getElementById('settingAdminBinanceId')?.value || '').trim();
+            const adminBinanceName = (document.getElementById('settingAdminBinanceName')?.value || '').trim();
+            const adminUsdtAddress = (document.getElementById('settingAdminUsdtAddress')?.value || '').trim();
+            const instructions = (document.getElementById('settingAdminInstructions')?.value || '').trim();
+
+            if (!adminBinancePayId) {
+                showToast('অনুগ্রহ করে আমাদের Binance Pay ID / UID প্রদান করুন।', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('savePayoutSettingsBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...`;
+            }
+
+            try {
+                const res = await fetch('/api/admin/payout-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify({ adminBinancePayId, adminBinanceName, adminUsdtAddress, instructions })
+                });
+                const data = await res.json();
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-save"></i> সংরক্ষণ করুন`;
+                }
+
+                if (data.success) {
+                    showToast(data.message || 'Binance সেটিংস সফলভাবে সেভ হয়েছে!', 'success');
+                    adminPayoutSettings = data.settings;
+                } else {
+                    showToast(data.message || 'সেটিংস সেভ ব্যর্থ হয়েছে।', 'error');
+                }
+            } catch (err) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-save"></i> সংরক্ষণ করুন`;
+                }
+                showToast('সার্ভার কানেকশন এরর: ' + err.message, 'error');
+            }
+        }
+
         async function fetchAdminPayouts() {
             if (!adminToken) return;
             const refreshBtn = document.getElementById('adminPayoutRefreshBtn');
             if (refreshBtn) refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> রিফ্রেশ';
 
             try {
+                fetchAdminPayoutSettings();
                 const res = await fetch('/api/admin/payouts', {
                     headers: { 'Authorization': `Bearer ${adminToken}` }
                 });
@@ -9482,10 +9620,13 @@
                     typeLabel = '<span style="background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">💰 Profit Withdrawal</span>';
                 }
 
+                const isQuotex = (p.payoutType === 'quotex_deposit');
                 const qrPreview = p.qrCodeUrl
                     ? `<div style="display:inline-flex; align-items:center; gap:6px;">
-                        <img src="${p.qrCodeUrl}" alt="QR" style="width:38px; height:38px; border-radius:6px; object-fit:cover; border:1px solid rgba(0,230,118,0.5); cursor:pointer;" onclick="openAdminPayoutModal('${p.id}')" title="ক্লিক করে বড় করে দেখুন ও স্ক্যান করুন" />
-                        <button type="button" class="btn-sm" style="padding:2px 6px; font-size:0.7rem; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); border-radius:4px; cursor:pointer;" onclick="openAdminPayoutModal('${p.id}')"><i class="fas fa-qrcode"></i> স্ক্যান</button>
+                        <img src="${p.qrCodeUrl}" alt="Proof" style="width:38px; height:38px; border-radius:6px; object-fit:cover; border:1px solid ${isQuotex ? 'rgba(0,230,118,0.5)' : 'rgba(255,184,0,0.5)'}; cursor:pointer;" onclick="openAdminPayoutModal('${p.id}')" title="ক্লিক করে বড় করে দেখুন" />
+                        <button type="button" class="btn-sm" style="padding:2px 6px; font-size:0.7rem; background:${isQuotex ? 'rgba(0,230,118,0.15)' : 'rgba(255,184,0,0.15)'}; color:${isQuotex ? '#00e676' : '#ffb800'}; border:1px solid ${isQuotex ? 'rgba(0,230,118,0.3)' : 'rgba(255,184,0,0.3)'}; border-radius:4px; cursor:pointer;" onclick="openAdminPayoutModal('${p.id}')">
+                            <i class="${isQuotex ? 'fas fa-qrcode' : 'fas fa-file-invoice'}"></i> ${isQuotex ? 'স্ক্যান' : 'প্রুফ'}
+                        </button>
                       </div>`
                     : '<span style="color:#64748b; font-size:0.75rem;">None</span>';
 
@@ -9548,7 +9689,7 @@
                         <td style="padding:10px 12px; text-align:center;">
                             <div style="display:flex; gap:6px; justify-content:center;">
                                 <button type="button" class="btn-gold" style="padding:5px 10px; font-size:0.75rem; border-radius:6px; white-space:nowrap; cursor:pointer;" onclick="openAdminPayoutModal('${p.id}')">
-                                    <i class="fas fa-eye"></i> বিস্তারিত ও স্ক্যান
+                                    <i class="fas fa-eye"></i> ${isQuotex ? 'বিস্তারিত ও স্ক্যান' : 'বিস্তারিত ও কনফার্ম'}
                                 </button>
                                 <button type="button" class="btn-outline" style="padding:5px 8px; font-size:0.75rem; border-radius:6px; color:#ef4444; border-color:rgba(239,68,68,0.3); cursor:pointer;" onclick="handleDeletePayout('${p.id}')" title="মুছে ফেলুন">
                                     <i class="fas fa-trash"></i>
@@ -9568,6 +9709,8 @@
             }
             currentViewingPayout = p;
 
+            const isProfit = (p.payoutType === 'profit_withdrawal');
+
             document.getElementById('modalPayoutIdHeading').innerText = p.payoutId || p.id;
             document.getElementById('modalPayoutAmount').innerText = `$${p.amount || 0}`;
             const scanAmtNotice = document.getElementById('modalPayoutAmountScanNotice');
@@ -9579,10 +9722,54 @@
             document.getElementById('modalPayoutPackage').innerText = p.challengePackageName || 'Funded Plan';
             document.getElementById('modalPayoutType').innerText = p.payoutTypeLabel || p.payoutType;
 
+            const proofTitle = document.getElementById('modalPayoutProofTitle');
+            const proofIcon = document.getElementById('modalPayoutProofIcon');
+            if (proofTitle) proofTitle.innerText = isProfit ? 'Quotex উইথড্রয়াল স্ক্রিনশট / প্রমাণপত্র' : 'Quotex Binance Pay Deposit QR কোড';
+            if (proofIcon) proofIcon.className = isProfit ? 'fas fa-file-invoice' : 'fas fa-qrcode';
+
+            const instrText = document.getElementById('modalPayoutInstructionText');
+            if (instrText) {
+                if (isProfit) {
+                    instrText.innerHTML = `
+                        <strong style="color:#ffb800; display:block; margin-bottom:4px;">🔍 প্রফিট উইথড্রয়াল ভেরিফিকেশন নির্দেশিকা:</strong>
+                        1. ট্রেডারের দেওয়া স্ক্রিনশট অনুযায়ী আপনার Binance অ্যাকাউন্টে ঠিক <strong style="color:#00e676;">$${p.amount || 0}</strong> ডলার জমা হয়েছে কিনা Binance অ্যাপে চেক করুন।<br/>
+                        2. ডলার জমা কনফার্ম হলে ট্রেডারের Binance ID (<code style="color:#ffb800; font-weight:800;">${p.binancePayId || p.binanceUid}</code>)-তে প্রফিট স্প্লিট পাঠিয়ে দিন।<br/>
+                        3. ট্রানজেকশন আইডি লিখে নিচের <strong>'✅ প্রফিট কনফার্ম ও পেইড'</strong> বাটনে ক্লিক করুন।
+                    `;
+                } else {
+                    instrText.innerHTML = `
+                        <strong style="color:#00e676; display:block; margin-bottom:4px;">📲 যেভাবে ডলার পাঠাবেন:</strong>
+                        1. আপনার মোবাইলের <strong>Binance App</strong> ওপেন করুন।<br/>
+                        2. উপরে ডানদিকের <strong>Scan</strong> অপশন চাপুন।<br/>
+                        3. এই স্ক্রিনে থাকা QR কোডটি স্ক্যান করে ঠিক <strong style="color:#ffb800;">$${p.amount || 0}</strong> ডলার পাঠিয়ে দিন।<br/>
+                        4. সেন্ড সফল হলে নিচের বাটনে ক্লিক করে <strong>'পেইড সম্পন্ন'</strong> মার্ক করুন।
+                    `;
+                }
+            }
+
             const qEl = document.getElementById('modalPayoutQuotexId');
             if (qEl) qEl.innerText = p.quotexAccountId || 'প্রদান করা হয়নি';
             const bEl = document.getElementById('modalPayoutBinanceId');
             if (bEl) bEl.innerText = p.binancePayId || p.binanceUid || 'প্রদান করা হয়নি';
+
+            const quotexBox = document.getElementById('modalPayoutQuotexBox');
+            if (quotexBox) quotexBox.style.display = isProfit ? 'none' : 'block';
+
+            const firmBinanceBox = document.getElementById('modalPayoutFirmBinanceBox');
+            const firmBinanceIdEl = document.getElementById('modalPayoutFirmBinanceId');
+            if (firmBinanceBox) {
+                if (isProfit) {
+                    firmBinanceBox.style.display = 'block';
+                    if (firmBinanceIdEl) firmBinanceIdEl.innerText = p.firmBinancePayId || adminPayoutSettings?.adminBinancePayId || '838241680';
+                } else {
+                    firmBinanceBox.style.display = 'none';
+                }
+            }
+
+            const payBtnText = document.getElementById('modalPayoutPayBtnText');
+            if (payBtnText) {
+                payBtnText.innerText = isProfit ? '✅ প্রফিট কনফার্ম ও ডলার দেওয়া হয়েছে (Confirm & Paid)' : '✅ ডলার দেওয়া হয়েছে (Mark as Paid)';
+            }
 
             const notesEl = document.getElementById('modalPayoutTraderNotes');
             if (notesEl) {
