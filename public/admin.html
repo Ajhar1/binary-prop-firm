@@ -196,6 +196,90 @@
             border-radius: 20px;
         }
 
+        /* User Controller Accordion & Submenu Styling */
+        .nav-group-header {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 14px;
+            border-radius: 12px;
+            color: #e2e8f0;
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            user-select: none;
+        }
+        .nav-group-header:hover {
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            border-color: rgba(245, 176, 65, 0.3);
+        }
+        .nav-group-header.parent-active {
+            background: linear-gradient(135deg, rgba(245, 176, 65, 0.15) 0%, rgba(22, 27, 34, 0.95) 100%);
+            border-color: rgba(245, 176, 65, 0.45);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(245, 176, 65, 0.1);
+        }
+        .nav-group-header .nav-accordion-arrow {
+            transition: transform 0.25s ease;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+        }
+        .nav-group-header.expanded .nav-accordion-arrow {
+            transform: rotate(180deg);
+            color: var(--gold);
+        }
+        .sidebar-submenu {
+            list-style: none;
+            padding-left: 0.65rem;
+            margin: 4px 0 10px 10px;
+            border-left: 2px solid rgba(245, 176, 65, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .sidebar-submenu.collapsed {
+            display: none;
+        }
+        .sidebar-submenu .nav-sub-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.18s ease;
+            position: relative;
+        }
+        .sidebar-submenu .nav-sub-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.92rem;
+        }
+        .sidebar-submenu .nav-sub-item:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(3px);
+        }
+        .sidebar-submenu .nav-sub-item.active {
+            color: #000 !important;
+            background: var(--gold) !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 14px var(--gold-glow);
+            transform: translateX(4px);
+        }
+        .sidebar-submenu .nav-sub-item.active i {
+            color: #000 !important;
+        }
+
         .sidebar-footer {
             padding: 1.2rem;
             border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -1235,46 +1319,71 @@
         </div>
 
         <ul class="sidebar-nav">
-            <li class="nav-item active" onclick="switchAdminTab('overview', this)">
-                <i class="fas fa-chart-pie"></i> Overview
+            <!-- 1. USER CONTROLLER (Accordion / Collapsible Submenu) -->
+            <li class="nav-group-wrapper" id="adminNavGroup-user" style="list-style:none;">
+                <div class="nav-group-header parent-active expanded" id="adminNav-userController" onclick="toggleUserControllerMenu(event)">
+                    <i class="fas fa-users-cog" style="color:var(--gold); font-size:1.05rem;"></i>
+                    <span>1. User Controller</span>
+                    <span class="nav-badge" id="userControllerTotalBadge" style="display:none; background:var(--neon-red); margin-left:auto; margin-right:8px;">0</span>
+                    <i class="fas fa-chevron-down nav-accordion-arrow" id="userControllerArrow" style="margin-left:auto;"></i>
+                </div>
+
+                <ul class="sidebar-submenu" id="userControllerSubmenu">
+                    <li class="nav-sub-item active" id="subnav-overview" onclick="switchAdminTab('overview', this)">
+                        <i class="fas fa-chart-pie" style="color:var(--gold);"></i> 1. Overview
+                    </li>
+                    <li class="nav-sub-item" id="subnav-challenges" onclick="switchAdminTab('challenges', this)">
+                        <i class="fas fa-trophy" style="color:#60a5fa;"></i> 2. Challenge Orders
+                        <span class="nav-badge" id="pendingChallengesBadge" style="display:none;">0</span>
+                    </li>
+                    <li class="nav-sub-item" id="subnav-package-manage" onclick="switchAdminTab('package-manage', this)">
+                        <i class="fas fa-cubes" style="color:var(--gold);"></i> 3. Challenge Manage
+                        <span class="nav-badge" id="packagesCountBadge" style="display:inline-block; background:var(--gold); color:#000;">9</span>
+                    </li>
+                    <li class="nav-sub-item" id="subnav-users" onclick="switchAdminTab('users', this)">
+                        <i class="fas fa-users" style="color:#38bdf8;"></i> 4. Users & History
+                    </li>
+                    <li class="nav-sub-item" id="subnav-submissions" onclick="switchAdminTab('submissions', this)">
+                        <i class="fas fa-camera" style="color:#f472b6;"></i> 5. Daily Trade Proofs
+                        <span class="nav-badge" id="pendingSubmissionsBadge" style="display:none;">0</span>
+                    </li>
+                    <li class="nav-sub-item" id="subnav-payouts" onclick="switchAdminTab('payouts', this)">
+                        <i class="fas fa-hand-holding-usd" style="color:var(--neon-green);"></i> 6. Payout Requests
+                        <span class="nav-badge" id="pendingPayoutsBadge" style="display:none; background:var(--neon-green); color:#000; font-weight:800;">0</span>
+                    </li>
+                    <li class="nav-sub-item" id="subnav-support" onclick="switchAdminTab('support', this)">
+                        <i class="fas fa-headset" style="color:#fbbf24;"></i> 7. Support Desk
+                        <span class="nav-badge" id="adminSupportBadge" style="display:none; background:var(--gold); color:#000; font-weight:800;">0</span>
+                    </li>
+                    <li class="nav-sub-item" id="subnav-payment-methods" onclick="switchAdminTab('payment-methods', this)">
+                        <i class="fas fa-credit-card" style="color:#34d399;"></i> 8. Payment Methods
+                    </li>
+                    <li class="nav-sub-item" id="subnav-mm-links" onclick="switchAdminTab('mm-links', this)" style="opacity:0.85; font-size:0.82rem;">
+                        <i class="fas fa-file-excel"></i> MM Sheet Pool
+                    </li>
+                    <li class="nav-sub-item" id="subnav-courses" onclick="switchAdminTab('courses', this)" style="opacity:0.85; font-size:0.82rem;">
+                        <i class="fas fa-graduation-cap"></i> Trading Courses
+                    </li>
+                </ul>
             </li>
-            <li class="nav-item" onclick="switchAdminTab('challenges', this)">
-                <i class="fas fa-trophy"></i> Challenge Orders
-                <span class="nav-badge" id="pendingChallengesBadge" style="display:none;">0</span>
+
+            <!-- 2. PARTNER CONTROLLER -->
+            <li class="nav-item" id="adminNav-partners" onclick="switchAdminTab('partner-controller', this)" style="margin-top:6px;">
+                <i class="fas fa-handshake" style="color:#00e676;"></i>
+                <span>2. Partner Controller</span>
+                <span class="nav-badge" id="partnerPendingBadge" style="display:none; background:#00e676; color:#000; font-weight:800;">0</span>
             </li>
-            <li class="nav-item" onclick="switchAdminTab('package-manage', this)">
-                <i class="fas fa-cubes" style="color:var(--gold);"></i> Challenge Manage
-                <span class="nav-badge" id="packagesCountBadge" style="display:inline-block; background:var(--gold); color:#000;">9</span>
+
+            <!-- 3. EMAIL & SMTP -->
+            <li class="nav-item" id="adminNav-email" onclick="switchAdminTab('email-settings', this)">
+                <i class="fas fa-envelope-open-text" style="color:#60a5fa;"></i>
+                <span>3. Email & SMTP</span>
             </li>
-            <li class="nav-item" onclick="switchAdminTab('users', this)">
-                <i class="fas fa-users"></i> Users & History
-            </li>
-            <li class="nav-item" onclick="switchAdminTab('submissions', this)">
-                <i class="fas fa-camera"></i> Daily Trade Proofs
-                <span class="nav-badge" id="pendingSubmissionsBadge" style="display:none;">0</span>
-            </li>
-            <li class="nav-item" onclick="switchAdminTab('payouts', this)" id="adminNav-payouts">
-                <i class="fas fa-hand-holding-usd" style="color:var(--neon-green);"></i> Payout Requests
-                <span class="nav-badge" id="pendingPayoutsBadge" style="display:none; background:var(--neon-green); color:#000; font-weight:800;">0</span>
-            </li>
-            <li class="nav-item" onclick="switchAdminTab('support', this)">
-                <i class="fas fa-headset" style="color:var(--gold);"></i> Support Desk
-                <span class="nav-badge" id="adminSupportBadge" style="display:none; background:var(--gold); color:#000; font-weight:800;">0</span>
-            </li>
-            <li class="nav-item" onclick="switchAdminTab('mm-links', this)">
-                <i class="fas fa-file-excel"></i> MM Sheet Pool
-            </li>
-            <li class="nav-item" onclick="switchAdminTab('courses', this)">
-                <i class="fas fa-graduation-cap"></i> Trading Courses
-            </li>
-            <li class="nav-item" onclick="switchAdminTab('payment-methods', this)">
-                <i class="fas fa-credit-card"></i> Payment Methods
-            </li>
-            <li class="nav-item" onclick="switchAdminTab('email-settings', this)">
-                <i class="fas fa-envelope-open-text"></i> Email & SMTP
-            </li>
-            <li class="nav-item" onclick="switchAdminTab('backups', this)">
-                <i class="fas fa-database"></i> Database & Backups
+
+            <!-- 4. DATABASE & BACKUPS -->
+            <li class="nav-item" id="adminNav-backups" onclick="switchAdminTab('backups', this)">
+                <i class="fas fa-database" style="color:#f59e0b;"></i>
+                <span>4. Database & Backups</span>
             </li>
         </ul>
 
@@ -2347,6 +2456,262 @@
             </div>
         </div>
 
+        <!-- ==============================================
+        2. PARTNER CONTROLLER (Affiliate Partners Hub)
+        ============================================== -->
+        <div class="tab-content" id="pane-partner-controller">
+            <!-- Top Stat Cards (6 Cards) -->
+            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+                <div class="stat-card glass clickable" onclick="switchPartnerSubtab('partners-list')" title="মোট পার্টনার">
+                    <div class="stat-icon" style="background:rgba(0,230,118,0.15); color:#00e676;">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="statPartnerCount" style="color:#00e676;">0</div>
+                        <div class="stat-label">মোট পার্টনার (Total)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card glass clickable" onclick="switchPartnerSubtab('referral-logs')" title="রেফার করা মোট ট্রেডার">
+                    <div class="stat-icon" style="background:rgba(59,130,246,0.15); color:#60a5fa;">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="statPartnerReferredTraders" style="color:#60a5fa;">0</div>
+                        <div class="stat-label">রেফার্ড ট্রেডার (Referred)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card glass clickable" onclick="switchPartnerSubtab('referral-logs')" title="রেফারেল থেকে মোট সেলস">
+                    <div class="stat-icon" style="background:rgba(245,176,65,0.15); color:var(--gold);">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="statPartnerTotalSales" style="color:var(--gold);">$0</div>
+                        <div class="stat-label">রেফারেল সেলস (Volume)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card glass" title="পার্টনারদের মোট অর্জিত কমিশন">
+                    <div class="stat-icon" style="background:rgba(168,85,247,0.15); color:#c084fc;">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="statPartnerEarnedCommission" style="color:#c084fc;">$0</div>
+                        <div class="stat-label">মোট অর্জিত কমিশন</div>
+                    </div>
+                </div>
+
+                <div class="stat-card glass clickable" onclick="switchPartnerSubtab('payout-history')" title="পরিশোধিত মোট কমিশন">
+                    <div class="stat-icon" style="background:rgba(16,185,129,0.15); color:#10b981;">
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="statPartnerPaidCommission" style="color:#10b981;">$0</div>
+                        <div class="stat-label">পরিশোধিত কমিশন (Paid)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card glass clickable" onclick="switchPartnerSubtab('partners-list')" title="বকেয়া কমিশন">
+                    <div class="stat-icon" style="background:rgba(239,68,68,0.15); color:#f87171;">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="statPartnerPendingCommission" style="color:#f87171;">$0</div>
+                        <div class="stat-label">বকেয়া কমিশন (Pending)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subtab Navigation Bar -->
+            <div class="glass" style="padding:10px 14px; border-radius:14px; margin-bottom:1.4rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn-outline partner-tab-btn active" id="btnPartnerTab-list" onclick="switchPartnerSubtab('partners-list')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
+                        <i class="fas fa-users"></i> ১. পার্টনার তালিকা (Partners)
+                    </button>
+                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-logs" onclick="switchPartnerSubtab('referral-logs')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
+                        <i class="fas fa-list-alt"></i> ২. রেফারেল অর্ডার লগ (Sales Log)
+                    </button>
+                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-payouts" onclick="switchPartnerSubtab('payout-history')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
+                        <i class="fas fa-money-check-alt"></i> ৩. কমিশন পে-আউট হিস্ট্রি
+                    </button>
+                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-settings" onclick="switchPartnerSubtab('partner-settings')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
+                        <i class="fas fa-sliders-h"></i> ৪. পলিসি ও সেটিংস
+                    </button>
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button type="button" class="btn-gold" onclick="openAddPartnerModal()" style="padding:8px 18px; font-size:0.88rem; border-radius:10px; font-weight:800;">
+                        <i class="fas fa-user-plus"></i> + নতুন পার্টনার যুক্ত করুন
+                    </button>
+                    <button type="button" class="btn-outline" onclick="fetchAdminPartners()" title="রিফ্রেশ" style="padding:8px 12px; border-radius:10px;">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW 1: Partners List -->
+            <div id="partnerSubview-list" class="partner-subview">
+                <div class="glass" style="border-radius:18px; padding:1.25rem 1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.2rem;">
+                        <div>
+                            <h3 style="margin:0; font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-handshake" style="color:#00e676;"></i> অ্যাফিলিয়েট পার্টনার তালিকা
+                            </h3>
+                            <p style="margin:3px 0 0 0; font-size:0.8rem; color:var(--text-secondary);">
+                                পার্টনারদের প্রোমো কোড, রেফারেল লিঙ্ক, কমিশন হার ও অর্জিত ডলার ম্যানেজ করুন।
+                            </p>
+                        </div>
+                        <div style="position:relative; min-width:260px;">
+                            <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-secondary); font-size:0.85rem;"></i>
+                            <input type="text" id="partnerSearchInput" class="form-control" placeholder="নাম, ইমেইল, প্রোমো কোড..." style="padding-left:36px; width:100%; border-radius:10px; height:38px; font-size:0.85rem;" oninput="renderAdminPartnersTable()" />
+                        </div>
+                    </div>
+
+                    <div style="overflow-x:auto; border-radius:14px; border:1px solid rgba(255,255,255,0.07); background:rgba(10, 16, 28, 0.7);">
+                        <table class="data-table" style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); font-size:0.78rem; text-transform:uppercase; color:var(--text-secondary); letter-spacing:0.5px;">
+                                    <th style="padding:12px; text-align:left;">পার্টনার তথ্য</th>
+                                    <th style="padding:12px; text-align:left;">রেফারেল কোড / লিংক</th>
+                                    <th style="padding:12px; text-align:center;">কমিশন হার</th>
+                                    <th style="padding:12px; text-align:center;">রেফার্ড ট্রেডার</th>
+                                    <th style="padding:12px; text-align:left;">মোট সেলস ($)</th>
+                                    <th style="padding:12px; text-align:left;">অর্জিত কমিশন ($)</th>
+                                    <th style="padding:12px; text-align:left;">বকেয়া কমিশন ($)</th>
+                                    <th style="padding:12px; text-align:center;">স্ট্যাটাস</th>
+                                    <th style="padding:12px; text-align:center;">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPartnersTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: Referral Sales Log -->
+            <div id="partnerSubview-logs" class="partner-subview" style="display:none;">
+                <div class="glass" style="border-radius:18px; padding:1.25rem 1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.2rem;">
+                        <div>
+                            <h3 style="margin:0; font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-list-alt" style="color:#60a5fa;"></i> রেফারেল অর্ডার ও কমিশন লগ
+                            </h3>
+                            <p style="margin:3px 0 0 0; font-size:0.8rem; color:var(--text-secondary);">
+                                পার্টনারদের রেফারেল লিঙ্ক বা প্রোমো কোড ব্যবহার করে কেনা সকল চ্যালেঞ্জ অর্ডারের লাইভ তালিকা।
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x:auto; border-radius:14px; border:1px solid rgba(255,255,255,0.07); background:rgba(10, 16, 28, 0.7);">
+                        <table class="data-table" style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); font-size:0.78rem; text-transform:uppercase; color:var(--text-secondary); letter-spacing:0.5px;">
+                                    <th style="padding:12px; text-align:left;">অর্ডার তারিখ ও আইডি</th>
+                                    <th style="padding:12px; text-align:left;">ট্রেডার তথ্য</th>
+                                    <th style="padding:12px; text-align:left;">প্যাকেজ</th>
+                                    <th style="padding:12px; text-align:left;">সেলস প্রাইস ($)</th>
+                                    <th style="padding:12px; text-align:left;">পার্টনার ও কোড</th>
+                                    <th style="padding:12px; text-align:left;">কমিশন ($)</th>
+                                    <th style="padding:12px; text-align:center;">অর্ডার স্ট্যাটাস</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPartnerLogsTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: Partner Payout History -->
+            <div id="partnerSubview-payouts" class="partner-subview" style="display:none;">
+                <div class="glass" style="border-radius:18px; padding:1.25rem 1.5rem;">
+                    <div style="margin-bottom:1.2rem;">
+                        <h3 style="margin:0; font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-money-check-alt" style="color:#10b981;"></i> পার্টনার কমিশন পে-আউট হিস্ট্রি
+                        </h3>
+                        <p style="margin:3px 0 0 0; font-size:0.8rem; color:var(--text-secondary);">
+                            পার্টনারদেরকে পাঠানো সকল কমিশন পেমেন্টের ট্রানজেকশন রেকর্ড।
+                        </p>
+                    </div>
+
+                    <div style="overflow-x:auto; border-radius:14px; border:1px solid rgba(255,255,255,0.07); background:rgba(10, 16, 28, 0.7);">
+                        <table class="data-table" style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); font-size:0.78rem; text-transform:uppercase; color:var(--text-secondary); letter-spacing:0.5px;">
+                                    <th style="padding:12px; text-align:left;">পেমেন্ট তারিখ</th>
+                                    <th style="padding:12px; text-align:left;">পার্টনার তথ্য</th>
+                                    <th style="padding:12px; text-align:left;">পেইড অ্যামাউন্ট ($)</th>
+                                    <th style="padding:12px; text-align:left;">পেমেন্ট মেথড ও আইডি</th>
+                                    <th style="padding:12px; text-align:left;">ট্রানজেকশন ID</th>
+                                    <th style="padding:12px; text-align:left;">নোট</th>
+                                    <th style="padding:12px; text-align:center;">স্ট্যাটাস</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPartnerPayoutsTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: Program Settings -->
+            <div id="partnerSubview-settings" class="partner-subview" style="display:none;">
+                <div class="glass" style="border-radius:18px; padding:1.5rem; max-width:800px;">
+                    <h3 style="margin:0 0 6px 0; font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-sliders-h" style="color:var(--gold);"></i> অ্যাফিলিয়েট প্রোগ্রাম পলিসি ও গ্লোবাল সেটিংস
+                    </h3>
+                    <p style="margin:0 0 1.5rem 0; font-size:0.82rem; color:var(--text-secondary);">
+                        ডিফল্ট রেফারেল কমিশন, ট্রেডারদের ডিসকাউন্ট এবং মিনিমাম পে-আউট থ্রেশহোল্ড কনফিগার করুন।
+                    </p>
+
+                    <form id="partnerSettingsForm" onsubmit="handleSavePartnerSettings(event)">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1.2rem; margin-bottom:1.5rem;">
+                            <div class="form-group" style="margin:0;">
+                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                    ডিফল্ট কমিশন রেট (% শতাংশ) *
+                                </label>
+                                <input type="number" id="settingDefaultCommissionRate" class="form-control" min="1" max="50" step="0.5" required style="width:100%; font-size:0.95rem; font-weight:800; color:#00e676;" />
+                                <small style="font-size:0.74rem; color:#94a3b8;">যেমন: ১০% (ট্রেডার $100 দিলে পার্টনার $10 পাবে)</small>
+                            </div>
+
+                            <div class="form-group" style="margin:0;">
+                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                    ট্রেডারদের ডিসকাউন্ট (% শতাংশ) *
+                                </label>
+                                <input type="number" id="settingTraderDiscountRate" class="form-control" min="0" max="30" step="0.5" required style="width:100%; font-size:0.95rem; font-weight:800; color:#60a5fa;" />
+                                <small style="font-size:0.74rem; color:#94a3b8;">পার্টনারের কোড ব্যবহার করলে ট্রেডার কত % ছাড় পাবে</small>
+                            </div>
+
+                            <div class="form-group" style="margin:0;">
+                                <label style="display:block; font-size:0.82rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                                    মিনিমাম পে-আউট সীমা ($ USD) *
+                                </label>
+                                <input type="number" id="settingMinPayoutAmount" class="form-control" min="5" max="500" required style="width:100%; font-size:0.95rem; font-weight:800; color:var(--gold);" />
+                                <small style="font-size:0.74rem; color:#94a3b8;">সর্বনিম্ন কত ডলার হলে পার্টনার উইথড্র করতে পারবে</small>
+                            </div>
+                        </div>
+
+                        <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:1rem; border:1px solid rgba(255,255,255,0.08); margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-weight:700; font-size:0.9rem; color:#fff;">পার্টনার প্রোগ্রাম সক্রিয় স্ট্যাটাস</div>
+                                <div style="font-size:0.76rem; color:var(--text-secondary);">অ্যাফিলিয়েট রেজিস্ট্রেশন ও কমিশন ট্র্যাকিং সক্রিয় রাখতে অন রাখুন।</div>
+                            </div>
+                            <input type="checkbox" id="settingPartnerProgramEnabled" checked style="width:20px; height:20px; accent-color:#00e676; cursor:pointer;" />
+                        </div>
+
+                        <button type="submit" class="btn-gold" style="padding:10px 24px; font-size:0.9rem; font-weight:800; cursor:pointer;">
+                            <i class="fas fa-save"></i> সেটিংস সেভ করুন
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
 
     </main>
 
@@ -2383,6 +2748,149 @@
     </nav>
 
     <!-- ==================== MODALS ==================== -->
+
+    <!-- PARTNER MODAL: ADD / EDIT PARTNER -->
+    <div class="modal-overlay" id="adminPartnerModal">
+        <div class="modal-box" style="max-width:560px;">
+            <button class="modal-close" onclick="closeModal('adminPartnerModal')">&times;</button>
+            <h2 id="partnerModalTitle" style="font-size:1.2rem; font-weight:800; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-handshake" style="color:#00e676;"></i> নতুন পার্টনার যুক্ত করুন
+            </h2>
+            <form id="partnerForm" onsubmit="handleSavePartner(event)">
+                <input type="hidden" id="partnerModalId" value="" />
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">পার্টনারের নাম *</label>
+                        <input type="text" id="partnerFormName" class="form-control" placeholder="যেমন: Arif Rahman" required style="width:100%; font-size:0.88rem;" />
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">ইমেইল অ্যাড্রেস *</label>
+                        <input type="email" id="partnerFormEmail" class="form-control" placeholder="partner@gmail.com" required style="width:100%; font-size:0.88rem;" />
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">ফোন / WhatsApp</label>
+                        <input type="text" id="partnerFormPhone" class="form-control" placeholder="+8801700000000" style="width:100%; font-size:0.88rem;" />
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">রেফারেল / প্রোমো কোড *</label>
+                        <input type="text" id="partnerFormCode" class="form-control" placeholder="যেমন: ARIF10" required style="width:100%; font-size:0.9rem; font-weight:800; color:#ffb800; text-transform:uppercase;" />
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">কমিশন হার (%) *</label>
+                        <input type="number" id="partnerFormCommRate" class="form-control" placeholder="10" min="1" max="50" step="0.5" required style="width:100%; font-size:0.9rem; font-weight:800; color:#00e676;" />
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">ট্রেডার ডিসকাউন্ট (%)</label>
+                        <input type="number" id="partnerFormDiscount" class="form-control" placeholder="5" min="0" max="30" step="0.5" style="width:100%; font-size:0.9rem; font-weight:800; color:#60a5fa;" />
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">পে-আউট গ্রহণের মেথড</label>
+                        <select id="partnerFormPayoutMethod" class="form-control" style="width:100%; font-size:0.88rem;">
+                            <option value="binance_pay">Binance Pay (Pay ID / UID)</option>
+                            <option value="usdt_trc20">USDT (TRC20 Address)</option>
+                            <option value="bkash">bKash Personal</option>
+                            <option value="nagad">Nagad Personal</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">পে-আউট আইডি / নাম্বার</label>
+                        <input type="text" id="partnerFormPayoutDetails" class="form-control" placeholder="যেমন: 838241680" style="width:100%; font-size:0.88rem;" />
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">স্ট্যাটাস</label>
+                        <select id="partnerFormStatus" class="form-control" style="width:100%; font-size:0.88rem;">
+                            <option value="active">সক্রিয় (Active)</option>
+                            <option value="inactive">নিষ্ক্রিয় (Inactive)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">নোট (ঐচ্ছিক)</label>
+                        <input type="text" id="partnerFormNotes" class="form-control" placeholder="পার্টনার সংক্রান্ত নোট..." style="width:100%; font-size:0.88rem;" />
+                    </div>
+                </div>
+
+                <div class="modal-actions" style="margin-top:1.2rem; display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn-outline" onclick="closeModal('adminPartnerModal')">বাতিল</button>
+                    <button type="submit" class="btn-gold" id="btnSavePartner">
+                        <i class="fas fa-save"></i> সেভ করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PARTNER PAYOUT MODAL -->
+    <div class="modal-overlay" id="adminPayPartnerModal">
+        <div class="modal-box" style="max-width:500px;">
+            <button class="modal-close" onclick="closeModal('adminPayPartnerModal')">&times;</button>
+            <h2 style="font-size:1.2rem; font-weight:800; color:#10b981; margin-bottom:0.8rem; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-coins"></i> পার্টনার কমিশন প্রদান (Pay Commission)
+            </h2>
+            <form id="payPartnerForm" onsubmit="handleConfirmPartnerPayout(event)">
+                <input type="hidden" id="payPartnerId" value="" />
+
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px 14px; margin-bottom:14px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="font-size:0.8rem; color:#94a3b8;">পার্টনার:</span>
+                        <strong id="payPartnerName" style="color:#fff; font-size:0.9rem;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="font-size:0.8rem; color:#94a3b8;">প্রোমো কোড:</span>
+                        <code id="payPartnerCode" style="color:#ffb800; font-weight:800;">--</code>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="font-size:0.8rem; color:#94a3b8;">বর্তমান বকেয়া কমিশন:</span>
+                        <strong id="payPartnerPending" style="color:#f87171; font-size:1.05rem;">$0</strong>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:0.82rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">পেইড অ্যামাউন্ট ($ USD) *</label>
+                    <input type="number" id="payPartnerAmount" class="form-control" step="0.01" min="1" required style="width:100%; font-size:1.1rem; font-weight:900; color:#00e676;" />
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">পেমেন্ট মেথড *</label>
+                        <input type="text" id="payPartnerMethod" class="form-control" required style="width:100%; font-size:0.88rem;" />
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">রিসিভিং অ্যাড্রেস / ID *</label>
+                        <input type="text" id="payPartnerAddress" class="form-control" required style="width:100%; font-size:0.88rem;" />
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">ট্রানজেকশন ID / রেফারেন্স *</label>
+                    <input type="text" id="payPartnerTxId" class="form-control" placeholder="যেমন: BP_TX_987654" required style="width:100%; font-size:0.88rem;" />
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="font-size:0.8rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">নোট / বিবরণ</label>
+                    <input type="text" id="payPartnerNotes" class="form-control" placeholder="কমিশন পেমেন্ট সংক্রান্ত নোট..." style="width:100%; font-size:0.88rem;" />
+                </div>
+
+                <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn-outline" onclick="closeModal('adminPayPartnerModal')">বাতিল</button>
+                    <button type="submit" class="btn-gold" style="background:#10b981; border-color:#10b981; color:#000; font-weight:800;">
+                        <i class="fas fa-check-circle"></i> কমিশন পেইড কনফার্ম করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- 1. APPROVE CHALLENGE MODAL (with MM Serial Selection) -->
     <div class="modal-overlay" id="approveChallengeModal">
@@ -3637,13 +4145,69 @@
             if (bd) bd.classList.toggle('active');
         }
 
+        function toggleUserControllerMenu(e) {
+            if (e) e.stopPropagation();
+            const userControllerHeader = document.getElementById('adminNav-userController');
+            const userControllerSubmenu = document.getElementById('userControllerSubmenu');
+            if (!userControllerSubmenu) return;
+
+            const isCollapsed = userControllerSubmenu.classList.contains('collapsed');
+            if (isCollapsed) {
+                userControllerSubmenu.classList.remove('collapsed');
+                userControllerHeader?.classList.add('expanded');
+            } else {
+                userControllerSubmenu.classList.add('collapsed');
+                userControllerHeader?.classList.remove('expanded');
+            }
+        }
+
+        function updateUserControllerBadge() {
+            const ch = parseInt(document.getElementById('pendingChallengesBadge')?.innerText || '0', 10) || 0;
+            const sub = parseInt(document.getElementById('pendingSubmissionsBadge')?.innerText || '0', 10) || 0;
+            const pay = parseInt(document.getElementById('pendingPayoutsBadge')?.innerText || '0', 10) || 0;
+            const sup = parseInt(document.getElementById('adminSupportBadge')?.innerText || '0', 10) || 0;
+            const total = ch + sub + pay + sup;
+            const badgeEl = document.getElementById('userControllerTotalBadge');
+            if (badgeEl) {
+                badgeEl.innerText = total;
+                badgeEl.style.display = total > 0 ? 'inline-block' : 'none';
+            }
+        }
+
         function switchAdminTab(tabKey, element) {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item, .nav-sub-item').forEach(el => el.classList.remove('active'));
             if (element) {
                 element.classList.add('active');
             } else {
-                const el = Array.from(document.querySelectorAll('.nav-item')).find(item => item.innerText.toLowerCase().includes(tabKey));
-                if (el) el.classList.add('active');
+                const subEl = document.getElementById(`subnav-${tabKey}`);
+                if (subEl) {
+                    subEl.classList.add('active');
+                } else {
+                    const el = Array.from(document.querySelectorAll('.nav-item')).find(item => item.innerText.toLowerCase().includes(tabKey));
+                    if (el) el.classList.add('active');
+                }
+            }
+
+            // Sync User Controller Submenu & Parent Active State
+            const userTabs = ['overview', 'challenges', 'package-manage', 'users', 'submissions', 'payouts', 'support', 'payment-methods', 'mm-links', 'courses'];
+            const isUserTab = userTabs.includes(tabKey);
+            const userControllerHeader = document.getElementById('adminNav-userController');
+            const userControllerSubmenu = document.getElementById('userControllerSubmenu');
+
+            if (isUserTab) {
+                if (userControllerHeader) {
+                    userControllerHeader.classList.add('parent-active');
+                    userControllerHeader.classList.add('expanded');
+                }
+                if (userControllerSubmenu) {
+                    userControllerSubmenu.classList.remove('collapsed');
+                }
+                const currentSub = document.getElementById(`subnav-${tabKey}`);
+                if (currentSub) currentSub.classList.add('active');
+            } else {
+                if (userControllerHeader) {
+                    userControllerHeader.classList.remove('parent-active');
+                }
             }
 
             // Sync Mobile Bottom Nav Items
@@ -3669,17 +4233,18 @@
             if (targetPane) targetPane.classList.add('active');
 
             const titles = {
-                'overview': ['Overview', ''],
-                'challenges': ['Challenge Orders', ''],
-                'package-manage': ['Challenge Manage', ''],
-                'users': ['Users & History', ''],
-                'submissions': ['Daily Trade Proofs', ''],
-                'mm-links': ['MM Sheet Pool', ''],
-                'courses': ['Trading Courses', ''],
-                'payment-methods': ['Payment Methods', ''],
-                'email-settings': ['Email & SMTP', ''],
-                'backups': ['Database & Backups', ''],
-                'support': ['Support Desk', ''],
+                'overview': ['Overview', 'User Management & Metrics'],
+                'challenges': ['Challenge Orders', 'Traders Challenge Purchases & Orders'],
+                'package-manage': ['Challenge Manage', 'Plan Packages, Pricing & Rules'],
+                'users': ['Users & History', 'Trader Database & Full Profile History'],
+                'submissions': ['Daily Trade Proofs', 'Verification of Daily Trader Session Proofs'],
+                'mm-links': ['MM Sheet Pool', 'Money Management Google Spreadsheets'],
+                'courses': ['Trading Courses', 'Trader Academy Video & Lesson Pool'],
+                'payment-methods': ['Payment Methods', 'Deposit Accounts & Gateways'],
+                'partner-controller': ['Partner Controller', 'Affiliate Partners, Referral Tracking, Commissions & Payouts'],
+                'email-settings': ['Email & SMTP', 'System Automated Email & SMTP Server Config'],
+                'backups': ['Database & Backups', 'Live Vault, Database Snapshots & Safety Mirrors'],
+                'support': ['Support Desk', 'User Help Tickets & Live Customer Assistance'],
                 'payouts': ['Payout Requests', 'Trader Quotex Binance QR Scan & Profit Payout Management']
             };
 
@@ -3690,6 +4255,9 @@
 
             if (tabKey === 'package-manage') {
                 fetchAdminPackages();
+            }
+            if (tabKey === 'partner-controller') {
+                fetchAdminPartners();
             }
             if (tabKey === 'backups') {
                 loadBackupsData();
@@ -4096,6 +4664,11 @@
                 // 11. Payout Requests
                 fetchAdminPayouts();
 
+                // 12. Partner Controller
+                fetchAdminPartners();
+
+                updateUserControllerBadge();
+
             } catch (err) {
                 console.error('Error loading admin data:', err);
                 showToast('Failed to sync admin records.', 'error');
@@ -4146,6 +4719,7 @@
                 if (pPayBadge) pPayBadge.style.display = 'none';
                 if (mobPayBadge) mobPayBadge.style.display = 'none';
             }
+            updateUserControllerBadge();
 
             // Quick Payout Alert box
             const payoutAlertBox = document.getElementById('quickPayoutAlertBox');
@@ -9872,6 +10446,550 @@
                 }
             } catch (err) {
                 showToast('সার্ভার এরর: ' + err.message, 'error');
+            }
+        }
+
+        // ==============================================
+        // PARTNER & AFFILIATE CONTROLLER JAVASCRIPT
+        // ==============================================
+        let adminPartnersList = [];
+        let adminPartnerReferralLogs = [];
+        let adminPartnerPayoutsList = [];
+        let adminPartnerSettingsData = {};
+        let currentPartnerActiveSubtab = 'partners-list';
+
+        async function fetchAdminPartners() {
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            if (!token) return;
+
+            try {
+                const [resPartners, resLogs, resPayouts] = await Promise.all([
+                    fetch('/api/admin/partners', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/admin/partner-referral-logs', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/admin/partner-payouts', { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+
+                const dataPartners = await resPartners.json();
+                const dataLogs = await resLogs.json();
+                const dataPayouts = await resPayouts.json();
+
+                if (dataPartners.success) {
+                    adminPartnersList = dataPartners.partners || [];
+                    adminPartnerSettingsData = dataPartners.settings || {};
+                    populatePartnerSettingsFields(adminPartnerSettingsData);
+                }
+
+                if (dataLogs.success) {
+                    adminPartnerReferralLogs = dataLogs.logs || [];
+                }
+
+                if (dataPayouts.success) {
+                    adminPartnerPayoutsList = dataPayouts.payouts || [];
+                }
+
+                renderAdminPartnerStats();
+                renderAdminPartnersTable();
+                renderAdminPartnerLogsTable();
+                renderAdminPartnerPayoutsTable();
+            } catch (err) {
+                console.error('[Admin Partners Error]:', err);
+            }
+        }
+
+        function renderAdminPartnerStats() {
+            const totalPartners = adminPartnersList.length;
+            const totalReferredTraders = adminPartnersList.reduce((sum, p) => sum + (p.totalReferred || 0), 0);
+            const totalSales = adminPartnersList.reduce((sum, p) => sum + (p.totalSales || 0), 0);
+            const totalEarned = adminPartnersList.reduce((sum, p) => sum + (p.totalCommissionEarned || 0), 0);
+            const totalPaid = adminPartnersList.reduce((sum, p) => sum + (p.totalCommissionPaid || 0), 0);
+            const pendingCommission = adminPartnersList.reduce((sum, p) => sum + (p.pendingCommission || 0), 0);
+
+            const elCount = document.getElementById('statPartnerCount');
+            if (elCount) elCount.innerText = totalPartners;
+
+            const elTraders = document.getElementById('statPartnerReferredTraders');
+            if (elTraders) elTraders.innerText = totalReferredTraders;
+
+            const elSales = document.getElementById('statPartnerTotalSales');
+            if (elSales) elSales.innerText = `$${Math.round(totalSales).toLocaleString()}`;
+
+            const elEarned = document.getElementById('statPartnerEarnedCommission');
+            if (elEarned) elEarned.innerText = `$${Math.round(totalEarned).toLocaleString()}`;
+
+            const elPaid = document.getElementById('statPartnerPaidCommission');
+            if (elPaid) elPaid.innerText = `$${Math.round(totalPaid).toLocaleString()}`;
+
+            const elPending = document.getElementById('statPartnerPendingCommission');
+            if (elPending) elPending.innerText = `$${Math.round(pendingCommission).toLocaleString()}`;
+
+            const badgeEl = document.getElementById('partnerPendingBadge');
+            if (badgeEl) {
+                if (pendingCommission > 0) {
+                    badgeEl.innerText = `$${Math.round(pendingCommission)}`;
+                    badgeEl.style.display = 'inline-block';
+                } else {
+                    badgeEl.style.display = 'none';
+                }
+            }
+        }
+
+        function switchPartnerSubtab(subtab) {
+            currentPartnerActiveSubtab = subtab;
+            const views = {
+                'partners-list': 'partnerSubview-list',
+                'referral-logs': 'partnerSubview-logs',
+                'payout-history': 'partnerSubview-payouts',
+                'partner-settings': 'partnerSubview-settings'
+            };
+
+            const btns = {
+                'partners-list': 'btnPartnerTab-list',
+                'referral-logs': 'btnPartnerTab-logs',
+                'payout-history': 'btnPartnerTab-payouts',
+                'partner-settings': 'btnPartnerTab-settings'
+            };
+
+            Object.keys(views).forEach(k => {
+                const viewEl = document.getElementById(views[k]);
+                if (viewEl) viewEl.style.display = (k === subtab) ? 'block' : 'none';
+                const btnEl = document.getElementById(btns[k]);
+                if (btnEl) {
+                    if (k === subtab) {
+                        btnEl.classList.add('active');
+                        btnEl.style.background = 'var(--gold)';
+                        btnEl.style.color = '#000';
+                        btnEl.style.borderColor = 'var(--gold)';
+                    } else {
+                        btnEl.classList.remove('active');
+                        btnEl.style.background = 'transparent';
+                        btnEl.style.color = '#fff';
+                        btnEl.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                    }
+                }
+            });
+        }
+
+        function renderAdminPartnersTable() {
+            const tbody = document.getElementById('adminPartnersTableBody');
+            if (!tbody) return;
+
+            const q = (document.getElementById('partnerSearchInput')?.value || '').trim().toLowerCase();
+            const filtered = adminPartnersList.filter(p => {
+                if (!q) return true;
+                return (p.name || '').toLowerCase().includes(q) ||
+                       (p.email || '').toLowerCase().includes(q) ||
+                       (p.promoCode || '').toLowerCase().includes(q) ||
+                       (p.phone || '').toLowerCase().includes(q);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align:center; padding:2.5rem; color:var(--text-secondary);">
+                            <i class="fas fa-handshake" style="font-size:2rem; color:var(--gold); display:block; margin-bottom:8px; opacity:0.6;"></i>
+                            ${q ? 'অনুসন্ধানের সাথে মিল পাওয়া যায়নি।' : 'এখনও কোনো পার্টনার যুক্ত করা হয়নি। "+ নতুন পার্টনার যুক্ত করুন" বাটনে ক্লিক করে প্রথম পার্টনার যুক্ত করুন।'}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(p => {
+                const isActive = (p.status === 'active');
+                return `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition:background 0.2s;">
+                        <td style="padding:12px;">
+                            <div style="font-weight:800; color:#fff; font-size:0.9rem;">${escapeHtml(p.name)}</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">${escapeHtml(p.email)}</div>
+                            ${p.phone ? `<div style="font-size:0.72rem; color:#60a5fa;"><i class="fab fa-whatsapp"></i> ${escapeHtml(p.phone)}</div>` : ''}
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="font-family:monospace; font-weight:900; color:#ffb800; background:rgba(255,184,0,0.12); padding:3px 8px; border-radius:6px; border:1px solid rgba(255,184,0,0.3); font-size:0.85rem;">
+                                    ${escapeHtml(p.promoCode)}
+                                </span>
+                                <button type="button" class="btn-sm btn-outline" onclick="copyPartnerLink('${escapeHtml(p.promoCode)}')" style="padding:3px 7px; font-size:0.7rem; border-radius:5px; cursor:pointer;" title="কপি রেফারেল লিংক">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div style="font-size:0.72rem; color:#94a3b8; margin-top:3px;">
+                                ট্রেডার ছাড়: <strong style="color:#60a5fa;">${p.traderDiscount || 5}%</strong>
+                            </div>
+                        </td>
+                        <td style="padding:12px; text-align:center;">
+                            <span style="font-weight:900; color:#00e676; font-size:0.95rem; background:rgba(0,230,118,0.1); padding:3px 8px; border-radius:6px; border:1px solid rgba(0,230,118,0.25);">
+                                ${p.commissionRate || 10}%
+                            </span>
+                        </td>
+                        <td style="padding:12px; text-align:center;">
+                            <span style="font-weight:800; color:#fff; font-size:0.9rem;">${p.totalReferred || 0}</span>
+                        </td>
+                        <td style="padding:12px; font-weight:800; color:var(--gold);">
+                            $${(p.totalSales || 0).toLocaleString()}
+                        </td>
+                        <td style="padding:12px; font-weight:800; color:#c084fc;">
+                            $${(p.totalCommissionEarned || 0).toLocaleString()}
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="font-weight:900; color:${(p.pendingCommission || 0) > 0 ? '#f87171' : '#10b981'}; font-size:0.95rem;">
+                                $${(p.pendingCommission || 0).toLocaleString()}
+                            </div>
+                            ${(p.totalCommissionPaid || 0) > 0 ? `<div style="font-size:0.7rem; color:#94a3b8;">পেইড: $${p.totalCommissionPaid}</div>` : ''}
+                        </td>
+                        <td style="padding:12px; text-align:center;">
+                            <span style="font-size:0.72rem; padding:3px 8px; border-radius:6px; font-weight:700; ${isActive ? 'background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3);' : 'background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3);'}">
+                                ${isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
+                            </span>
+                        </td>
+                        <td style="padding:12px; text-align:center;">
+                            <div style="display:inline-flex; gap:6px; align-items:center;">
+                                <button type="button" class="btn-sm btn-gold" onclick="openPayPartnerModal('${p.id}')" style="padding:4px 9px; font-size:0.74rem; border-radius:6px; cursor:pointer;" title="কমিশন পেমেন্ট দিন">
+                                    <i class="fas fa-coins"></i> পে
+                                </button>
+                                <button type="button" class="btn-sm btn-outline" onclick="openEditPartnerModal('${p.id}')" style="padding:4px 8px; font-size:0.74rem; border-radius:6px; cursor:pointer;" title="এডিট">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn-sm btn-outline" onclick="handleDeletePartner('${p.id}')" style="padding:4px 8px; font-size:0.74rem; border-radius:6px; color:#f87171; border-color:rgba(239,68,68,0.3); cursor:pointer;" title="মুছে ফেলুন">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderAdminPartnerLogsTable() {
+            const tbody = document.getElementById('adminPartnerLogsTableBody');
+            if (!tbody) return;
+
+            if (adminPartnerReferralLogs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2.5rem; color:var(--text-secondary);">
+                            <i class="fas fa-shopping-cart" style="font-size:2rem; color:#60a5fa; display:block; margin-bottom:8px; opacity:0.6;"></i>
+                            এখনও কোনো পার্টনার রেফারেল সেলস রেকর্ড পাওয়া যায়নি।
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = adminPartnerReferralLogs.map(log => {
+                const dt = log.createdAt ? new Date(log.createdAt).toLocaleDateString() : '--';
+                return `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <td style="padding:12px;">
+                            <div style="font-weight:700; color:#fff; font-size:0.85rem;">${escapeHtml(log.id)}</div>
+                            <div style="font-size:0.72rem; color:var(--text-secondary);">${dt}</div>
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="font-weight:700; color:#fff; font-size:0.86rem;">${escapeHtml(log.userName)}</div>
+                            <div style="font-size:0.72rem; color:var(--text-secondary);">${escapeHtml(log.userEmail)}</div>
+                        </td>
+                        <td style="padding:12px; font-size:0.84rem; color:#cbd5e1;">
+                            ${escapeHtml(log.packageName)}
+                        </td>
+                        <td style="padding:12px; font-weight:800; color:var(--gold);">
+                            $${log.fee || 0}
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="font-weight:700; color:#00e676; font-size:0.86rem;">${escapeHtml(log.partnerName)}</div>
+                            <code style="color:#ffb800; font-size:0.75rem;">${escapeHtml(log.promoCode)}</code>
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="font-weight:900; color:#c084fc; font-size:0.92rem;">+$${log.commissionAmount || 0}</div>
+                            <span style="font-size:0.7rem; color:#94a3b8;">(${log.commissionRate || 10}%)</span>
+                        </td>
+                        <td style="padding:12px; text-align:center;">
+                            <span style="font-size:0.72rem; padding:3px 8px; border-radius:6px; font-weight:700; ${log.status === 'in_progress' || log.status === 'passed' ? 'background:rgba(0,230,118,0.15); color:#00e676;' : 'background:rgba(255,184,0,0.15); color:#ffb800;'}">
+                                ${log.status || 'Active'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderAdminPartnerPayoutsTable() {
+            const tbody = document.getElementById('adminPartnerPayoutsTableBody');
+            if (!tbody) return;
+
+            if (adminPartnerPayoutsList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2.5rem; color:var(--text-secondary);">
+                            <i class="fas fa-money-check-alt" style="font-size:2rem; color:#10b981; display:block; margin-bottom:8px; opacity:0.6;"></i>
+                            এখনও কোনো কমিশন পে-আউট দেওয়া হয়নি।
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = adminPartnerPayoutsList.map(p => {
+                const dt = p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '--';
+                return `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <td style="padding:12px; font-size:0.82rem; color:var(--text-secondary);">
+                            ${dt}
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="font-weight:700; color:#fff; font-size:0.86rem;">${escapeHtml(p.partnerName)}</div>
+                            <div style="font-size:0.72rem; color:var(--text-secondary);">${escapeHtml(p.partnerEmail || '')}</div>
+                        </td>
+                        <td style="padding:12px; font-weight:900; color:#10b981; font-size:0.95rem;">
+                            $${p.amount || 0}
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="font-weight:700; color:#fff; font-size:0.82rem;">${escapeHtml(p.paymentMethod || 'Binance Pay')}</div>
+                            <code style="font-size:0.74rem; color:#ffb800;">${escapeHtml(p.payoutAddress || '')}</code>
+                        </td>
+                        <td style="padding:12px; font-family:monospace; font-size:0.78rem; color:#60a5fa;">
+                            ${escapeHtml(p.txId || '--')}
+                        </td>
+                        <td style="padding:12px; font-size:0.8rem; color:#94a3b8;">
+                            ${escapeHtml(p.notes || '--')}
+                        </td>
+                        <td style="padding:12px; text-align:center;">
+                            <span style="font-size:0.72rem; padding:3px 8px; border-radius:6px; font-weight:700; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3);">
+                                <i class="fas fa-check-circle"></i> সম্পন্ন (Paid)
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function populatePartnerSettingsFields(settings) {
+            if (!settings) return;
+            const comm = document.getElementById('settingDefaultCommissionRate');
+            if (comm) comm.value = settings.defaultCommissionRate || 10;
+            const disc = document.getElementById('settingTraderDiscountRate');
+            if (disc) disc.value = settings.traderDiscountRate || 5;
+            const minP = document.getElementById('settingMinPayoutAmount');
+            if (minP) minP.value = settings.minPayoutAmount || 20;
+            const en = document.getElementById('settingPartnerProgramEnabled');
+            if (en) en.checked = (settings.programEnabled !== false);
+        }
+
+        function openAddPartnerModal() {
+            document.getElementById('partnerModalId').value = '';
+            document.getElementById('partnerModalTitle').innerHTML = `<i class="fas fa-handshake" style="color:#00e676;"></i> নতুন পার্টনার যুক্ত করুন`;
+            document.getElementById('partnerFormName').value = '';
+            document.getElementById('partnerFormEmail').value = '';
+            document.getElementById('partnerFormPhone').value = '';
+            document.getElementById('partnerFormCode').value = '';
+            document.getElementById('partnerFormCommRate').value = adminPartnerSettingsData.defaultCommissionRate || 10;
+            document.getElementById('partnerFormDiscount').value = adminPartnerSettingsData.traderDiscountRate || 5;
+            document.getElementById('partnerFormPayoutMethod').value = 'binance_pay';
+            document.getElementById('partnerFormPayoutDetails').value = '';
+            document.getElementById('partnerFormStatus').value = 'active';
+            document.getElementById('partnerFormNotes').value = '';
+            openModal('adminPartnerModal');
+        }
+
+        function openEditPartnerModal(id) {
+            const p = adminPartnersList.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('partnerModalId').value = p.id;
+            document.getElementById('partnerModalTitle').innerHTML = `<i class="fas fa-edit" style="color:var(--gold);"></i> পার্টনার এডিট: ${escapeHtml(p.name)}`;
+            document.getElementById('partnerFormName').value = p.name || '';
+            document.getElementById('partnerFormEmail').value = p.email || '';
+            document.getElementById('partnerFormPhone').value = p.phone || '';
+            document.getElementById('partnerFormCode').value = p.promoCode || '';
+            document.getElementById('partnerFormCommRate').value = p.commissionRate || 10;
+            document.getElementById('partnerFormDiscount').value = p.traderDiscount || 5;
+            document.getElementById('partnerFormPayoutMethod').value = p.payoutMethod || 'binance_pay';
+            document.getElementById('partnerFormPayoutDetails').value = p.payoutDetails || '';
+            document.getElementById('partnerFormStatus').value = p.status || 'active';
+            document.getElementById('partnerFormNotes').value = p.notes || '';
+            openModal('adminPartnerModal');
+        }
+
+        async function handleSavePartner(e) {
+            e.preventDefault();
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            if (!token) return;
+
+            const id = document.getElementById('partnerModalId').value;
+            const body = {
+                name: document.getElementById('partnerFormName').value.trim(),
+                email: document.getElementById('partnerFormEmail').value.trim(),
+                phone: document.getElementById('partnerFormPhone').value.trim(),
+                promoCode: document.getElementById('partnerFormCode').value.trim(),
+                commissionRate: parseFloat(document.getElementById('partnerFormCommRate').value),
+                traderDiscount: parseFloat(document.getElementById('partnerFormDiscount').value),
+                payoutMethod: document.getElementById('partnerFormPayoutMethod').value,
+                payoutDetails: document.getElementById('partnerFormPayoutDetails').value.trim(),
+                status: document.getElementById('partnerFormStatus').value,
+                notes: document.getElementById('partnerFormNotes').value.trim()
+            };
+
+            const btn = document.getElementById('btnSavePartner');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...`;
+            }
+
+            try {
+                const url = id ? `/api/admin/partners/${id}` : '/api/admin/partners';
+                const method = id ? 'PUT' : 'POST';
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await res.json();
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-save"></i> সেভ করুন`;
+                }
+
+                if (data.success) {
+                    showToast(data.message || 'পার্টনার সফলভাবে সেভ হয়েছে!', 'success');
+                    closeModal('adminPartnerModal');
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'সেভ করতে সমস্যা হয়েছে।', 'error');
+                }
+            } catch (err) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-save"></i> সেভ করুন`;
+                }
+                showToast('সার্ভার এরর: ' + err.message, 'error');
+            }
+        }
+
+        async function handleDeletePartner(id) {
+            const p = adminPartnersList.find(item => item.id === id);
+            if (!p) return;
+            if (!confirm(`আপনি কি নিশ্চিত যে পার্টনার "${p.name}" (${p.promoCode}) মুছে ফেলতে চান?`)) return;
+
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            if (!token) return;
+
+            try {
+                const res = await fetch(`/api/admin/partners/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'পার্টনার মুছে ফেলা হয়েছে।', 'success');
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে।', 'error');
+                }
+            } catch (err) {
+                showToast('সার্ভার এরর: ' + err.message, 'error');
+            }
+        }
+
+        function openPayPartnerModal(id) {
+            const p = adminPartnersList.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('payPartnerId').value = p.id;
+            document.getElementById('payPartnerName').innerText = p.name;
+            document.getElementById('payPartnerCode').innerText = p.promoCode;
+            document.getElementById('payPartnerPending').innerText = `$${(p.pendingCommission || 0).toLocaleString()}`;
+            document.getElementById('payPartnerAmount').value = (p.pendingCommission || 0) > 0 ? p.pendingCommission : '';
+            document.getElementById('payPartnerMethod').value = p.payoutMethod || 'Binance Pay';
+            document.getElementById('payPartnerAddress').value = p.payoutDetails || '';
+            document.getElementById('payPartnerTxId').value = `BP_PART_${Date.now()}`;
+            document.getElementById('payPartnerNotes').value = '';
+
+            openModal('adminPayPartnerModal');
+        }
+
+        async function handleConfirmPartnerPayout(e) {
+            e.preventDefault();
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            if (!token) return;
+
+            const id = document.getElementById('payPartnerId').value;
+            const body = {
+                amount: parseFloat(document.getElementById('payPartnerAmount').value),
+                paymentMethod: document.getElementById('payPartnerMethod').value.trim(),
+                payoutAddress: document.getElementById('payPartnerAddress').value.trim(),
+                txId: document.getElementById('payPartnerTxId').value.trim(),
+                notes: document.getElementById('payPartnerNotes').value.trim()
+            };
+
+            try {
+                const res = await fetch(`/api/admin/partners/${id}/payout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'কমিশন পে-আউট সফলভাবে রেকর্ড করা হয়েছে!', 'success');
+                    closeModal('adminPayPartnerModal');
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'পে-আউট রেকর্ড ব্যর্থ হয়েছে।', 'error');
+                }
+            } catch (err) {
+                showToast('সার্ভার এরর: ' + err.message, 'error');
+            }
+        }
+
+        async function handleSavePartnerSettings(e) {
+            e.preventDefault();
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            if (!token) return;
+
+            const body = {
+                defaultCommissionRate: parseFloat(document.getElementById('settingDefaultCommissionRate').value),
+                traderDiscountRate: parseFloat(document.getElementById('settingTraderDiscountRate').value),
+                minPayoutAmount: parseFloat(document.getElementById('settingMinPayoutAmount').value),
+                programEnabled: document.getElementById('settingPartnerProgramEnabled').checked
+            };
+
+            try {
+                const res = await fetch('/api/admin/partner-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'সেটিংস সফলভাবে সেভ হয়েছে!', 'success');
+                    adminPartnerSettingsData = data.settings || {};
+                } else {
+                    showToast(data.message || 'সেটিংস সেভ ব্যর্থ হয়েছে।', 'error');
+                }
+            } catch (err) {
+                showToast('সার্ভার এরর: ' + err.message, 'error');
+            }
+        }
+
+        function copyPartnerLink(code) {
+            if (!code) return;
+            const url = `https://binarypropfirm.com/?ref=${encodeURIComponent(code)}`;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast(`📋 পার্টনার রেফারেল লিংক কপি করা হয়েছে: ${url}`, 'success');
+                }).catch(() => {
+                    prompt('রেফারেল লিংক কপি করুন:', url);
+                });
+            } else {
+                prompt('রেফারেল লিংক কপি করুন:', url);
             }
         }
 

@@ -45,6 +45,44 @@ const DEFAULT_PAYOUT_SETTINGS = {
   instructions: 'Quotex থেকে প্রফিট উইথড্র দেওয়ার সময় প্রাপক (Recipient) হিসেবে আমাদের এই Binance Pay ID দিন। উইথড্র সম্পন্ন হলে প্রাপ্ত স্ক্রিনশটটি নিচে আপলোড করুন।',
   updatedAt: new Date().toISOString()
 };
+
+// Partner / Affiliate Program Stores
+const PARTNERS_FILE = path.join(DATA_DIR, 'partners.json');
+const PARTNER_PAYOUTS_FILE = path.join(DATA_DIR, 'partner_payouts.json');
+const PARTNER_SETTINGS_FILE = path.join(DATA_DIR, 'partner_settings.json');
+const DEFAULT_PARTNER_SETTINGS = {
+  defaultCommissionRate: 10,
+  traderDiscountRate: 5,
+  minPayoutAmount: 20,
+  cookieDurationDays: 30,
+  programEnabled: true,
+  updatedAt: new Date().toISOString()
+};
+
+function getPartners() {
+  return readJson(PARTNERS_FILE, []);
+}
+
+function savePartners(partners) {
+  writeJson(PARTNERS_FILE, partners);
+}
+
+function getPartnerPayouts() {
+  return readJson(PARTNER_PAYOUTS_FILE, []);
+}
+
+function savePartnerPayouts(payouts) {
+  writeJson(PARTNER_PAYOUTS_FILE, payouts);
+}
+
+function getPartnerSettings() {
+  return readJson(PARTNER_SETTINGS_FILE, DEFAULT_PARTNER_SETTINGS);
+}
+
+function savePartnerSettings(settings) {
+  writeJson(PARTNER_SETTINGS_FILE, settings);
+}
+
 const DOWNLOADS_DIR = path.join(__dirname, 'public', 'downloads');
 const TRADERS_VAULT_DIR = path.join(DATA_DIR, 'lifelong_traders_vault');
 const TRADERS_VAULT_FILE = path.join(TRADERS_VAULT_DIR, 'master_registered_traders_vault.json');
@@ -3205,6 +3243,7 @@ app.post('/api/auth/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const verificationCode = generateVerificationCode();
+    const refCode = (req.body.referralCode || req.body.ref || req.body.promoCode || '').trim().toUpperCase();
 
     const newUser = {
       id: `usr_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
@@ -3218,6 +3257,7 @@ app.post('/api/auth/register', async (req, res) => {
       payoutWallet: '',
       brokerAccountId: '',
       profilePicture: null,
+      referredBy: refCode || null,
       isEmailVerified: false,
       emailVerificationCode: verificationCode,
       emailVerificationExpires: Date.now() + 15 * 60 * 1000,
@@ -4167,6 +4207,20 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
   const numExchangeRate = (exchangeRate && !isNaN(parseFloat(exchangeRate)) && parseFloat(exchangeRate) > 0) ? parseFloat(exchangeRate) : 1;
   const numLocalAmount = (localAmount && !isNaN(parseFloat(localAmount)) && parseFloat(localAmount) > 0) ? parseFloat(localAmount) : (finalFee * numExchangeRate);
 
+  // Partner / Affiliate Attribution
+  let matchedPartner = null;
+  try {
+    const partners = getPartners();
+    const targetCode = appliedPromo ? appliedPromo.code : (promoCode && typeof promoCode === 'string' && promoCode.trim() ? promoCode.trim().toUpperCase() : (currentUser.referredBy || ''));
+    if (targetCode) {
+      matchedPartner = partners.find(p => p.promoCode && p.promoCode.toUpperCase() === targetCode.toUpperCase() && p.status === 'active');
+    }
+  } catch (partErr) {
+    console.warn('[Partner Attribution Error]:', partErr.message);
+  }
+  const partnerCommRate = matchedPartner ? (parseFloat(matchedPartner.commissionRate) || 10) : 0;
+  const partnerCommAmount = matchedPartner ? Math.round((finalFee * (partnerCommRate / 100)) * 100) / 100 : 0;
+
   const newChallenge = {
     id: `ch_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
     userId: req.user.id,
@@ -4198,6 +4252,12 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
     paymentMethod: paymentMethod || 'USDT TRC20',
     paymentTxId: paymentTxId || `TX_${Date.now()}`,
     senderNumber: senderNumber ? senderNumber.trim() : '',
+    partnerId: matchedPartner ? matchedPartner.id : null,
+    partnerName: matchedPartner ? matchedPartner.name : null,
+    partnerPromoCode: matchedPartner ? matchedPartner.promoCode : null,
+    partnerCommissionRate: partnerCommRate,
+    partnerCommission: partnerCommAmount,
+    partnerCommissionStatus: matchedPartner ? 'pending' : null,
     currency: currency ? currency.trim().toUpperCase() : 'USD',
     currencySymbol: currencySymbol ? currencySymbol.trim() : '$',
     exchangeRate: numExchangeRate,
@@ -6975,6 +7035,11 @@ app.post('/api/admin/challenges/:id/approve', authenticateAdminToken, (req, res)
   challenges[idx].assignedMmUrl = assignedLink.url;
   challenges[idx].assignedMmNote = assignedLink.note;
 
+  // Partner Commission Confirmation
+  if (challenges[idx].partnerId && challenges[idx].partnerCommission > 0) {
+    challenges[idx].partnerCommissionStatus = 'approved';
+  }
+
   saveChallenges(challenges);
   logUserArchive('CHALLENGE_APPROVED', { id: challenges[idx].userId }, {
     challengeId: challenges[idx].id,
@@ -8944,6 +9009,377 @@ app.post('/api/admin/payout-settings', authenticateAdminToken, (req, res) => {
   } catch (err) {
     console.error('[Admin Payout Settings Error]', err);
     res.status(500).json({ success: false, message: 'সেটিংস সেভ করতে সমস্যা হয়েছে: ' + err.message });
+  }
+});
+
+// ==========================================
+// PARTNER & AFFILIATE CONTROLLER API
+// ==========================================
+
+// 1. Admin: Get all partners with calculated live stats
+app.get('/api/admin/partners', authenticateAdminToken, (req, res) => {
+  try {
+    const partners = getPartners();
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const payouts = getPartnerPayouts();
+    const settings = getPartnerSettings();
+
+    const enrichedPartners = partners.map(partner => {
+      const code = (partner.promoCode || '').toUpperCase();
+      const referredChallenges = challenges.filter(c =>
+        (c.partnerId && c.partnerId === partner.id) ||
+        (c.promoCode && c.promoCode.toUpperCase() === code) ||
+        (c.partnerPromoCode && c.partnerPromoCode.toUpperCase() === code)
+      );
+
+      const approvedReferredChallenges = referredChallenges.filter(c =>
+        c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled'
+      );
+
+      const totalSales = approvedReferredChallenges.reduce((sum, c) => sum + (c.fee || 0), 0);
+      const totalCommissionEarned = approvedReferredChallenges.reduce((sum, c) => {
+        if (c.partnerCommission) return sum + c.partnerCommission;
+        const rate = partner.commissionRate || 10;
+        return sum + Math.round(((c.fee || 0) * (rate / 100)) * 100) / 100;
+      }, 0);
+
+      const partnerPayoutsList = payouts.filter(p => p.partnerId === partner.id && p.status === 'completed');
+      const totalCommissionPaid = partnerPayoutsList.reduce((sum, p) => sum + (p.amount || 0), 0);
+      const pendingCommission = Math.max(0, Math.round((totalCommissionEarned - totalCommissionPaid) * 100) / 100);
+
+      return {
+        ...partner,
+        totalReferred: approvedReferredChallenges.length,
+        totalSales: Math.round(totalSales * 100) / 100,
+        totalCommissionEarned: Math.round(totalCommissionEarned * 100) / 100,
+        totalCommissionPaid: Math.round(totalCommissionPaid * 100) / 100,
+        pendingCommission
+      };
+    });
+
+    res.json({
+      success: true,
+      partners: enrichedPartners,
+      settings
+    });
+  } catch (err) {
+    console.error('[Admin Partners GET Error]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 2. Admin: Create a new partner
+app.post('/api/admin/partners', authenticateAdminToken, (req, res) => {
+  try {
+    const { name, email, phone, promoCode, commissionRate, traderDiscount, payoutMethod, payoutDetails, status, notes } = req.body;
+    if (!name || !name.trim() || !email || !email.trim()) {
+      return res.status(400).json({ success: false, message: 'পার্টনারের নাম এবং ইমেইল দেওয়া আবশ্যক।' });
+    }
+
+    const cleanPromo = (promoCode || '').trim().toUpperCase();
+    if (!cleanPromo) {
+      return res.status(400).json({ success: false, message: 'পার্টনারের জন্য একটি ইউনিক রেফারেল / প্রোমো কোড দিন।' });
+    }
+
+    const partners = getPartners();
+    if (partners.some(p => p.promoCode && p.promoCode.toUpperCase() === cleanPromo)) {
+      return res.status(400).json({ success: false, message: `"${cleanPromo}" কোডটি ইতিমধ্যে অন্য পার্টনার ব্যবহার করছেন।` });
+    }
+
+    const newPartner = {
+      id: `part_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      phone: (phone || '').trim(),
+      promoCode: cleanPromo,
+      commissionRate: parseFloat(commissionRate) || 10,
+      traderDiscount: parseFloat(traderDiscount) || 5,
+      payoutMethod: payoutMethod || 'binance_pay',
+      payoutDetails: (payoutDetails || '').trim(),
+      status: status || 'active',
+      notes: (notes || '').trim(),
+      totalReferred: 0,
+      totalSales: 0,
+      totalCommissionEarned: 0,
+      totalCommissionPaid: 0,
+      pendingCommission: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    partners.unshift(newPartner);
+    savePartners(partners);
+
+    // Sync to promo_codes.json so traders immediately get discount when applying this code
+    try {
+      const promoCodes = getPromoCodes();
+      if (!promoCodes.some(c => c.code && c.code.toUpperCase() === cleanPromo)) {
+        promoCodes.unshift({
+          id: `promo_part_${newPartner.id}`,
+          code: cleanPromo,
+          discountType: 'percentage',
+          discountValue: newPartner.traderDiscount || 5,
+          packageId: 'all',
+          maxUses: 999999,
+          usedCount: 0,
+          expiresAt: null,
+          status: newPartner.status === 'active' ? 'active' : 'inactive',
+          notes: `Affiliate Partner Promo: ${newPartner.name} (${newPartner.email})`,
+          isPartnerCode: true,
+          partnerId: newPartner.id,
+          createdAt: new Date().toISOString()
+        });
+        savePromoCodes(promoCodes);
+      }
+    } catch (promoErr) {
+      console.warn('[Sync Partner Promo Warning]', promoErr.message);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `নতুন পার্টনার "${newPartner.name}" সফলভাবে যুক্ত করা হয়েছে!`,
+      partner: newPartner
+    });
+  } catch (err) {
+    console.error('[Admin Partner Create Error]', err);
+    res.status(500).json({ success: false, message: 'পার্টনার তৈরি করতে সমস্যা হয়েছে: ' + err.message });
+  }
+});
+
+// 3. Admin: Update a partner
+app.put('/api/admin/partners/:id', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone, promoCode, commissionRate, traderDiscount, payoutMethod, payoutDetails, status, notes } = req.body;
+
+    const partners = getPartners();
+    const idx = partners.findIndex(p => p.id === id);
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'পার্টনার খুঁজে পাওয়া যায়নি।' });
+    }
+
+    const cleanPromo = (promoCode || partners[idx].promoCode || '').trim().toUpperCase();
+    if (cleanPromo !== partners[idx].promoCode && partners.some(p => p.id !== id && p.promoCode && p.promoCode.toUpperCase() === cleanPromo)) {
+      return res.status(400).json({ success: false, message: `"${cleanPromo}" কোডটি ইতিমধ্যে অন্য পার্টনার ব্যবহার করছেন।` });
+    }
+
+    partners[idx] = {
+      ...partners[idx],
+      name: name ? name.trim() : partners[idx].name,
+      email: email ? email.trim().toLowerCase() : partners[idx].email,
+      phone: phone !== undefined ? phone.trim() : partners[idx].phone,
+      promoCode: cleanPromo,
+      commissionRate: commissionRate !== undefined ? parseFloat(commissionRate) : partners[idx].commissionRate,
+      traderDiscount: traderDiscount !== undefined ? parseFloat(traderDiscount) : partners[idx].traderDiscount,
+      payoutMethod: payoutMethod || partners[idx].payoutMethod,
+      payoutDetails: payoutDetails !== undefined ? payoutDetails.trim() : partners[idx].payoutDetails,
+      status: status || partners[idx].status,
+      notes: notes !== undefined ? notes.trim() : partners[idx].notes,
+      updatedAt: new Date().toISOString()
+    };
+
+    savePartners(partners);
+
+    // Sync in promo_codes.json
+    try {
+      const promoCodes = getPromoCodes();
+      const pIdx = promoCodes.findIndex(c => c.partnerId === id || (c.code && c.code.toUpperCase() === cleanPromo));
+      if (pIdx !== -1) {
+        promoCodes[pIdx].code = cleanPromo;
+        promoCodes[pIdx].discountValue = partners[idx].traderDiscount || 5;
+        promoCodes[pIdx].status = partners[idx].status === 'active' ? 'active' : 'inactive';
+        savePromoCodes(promoCodes);
+      }
+    } catch (e) {
+      console.warn('[Sync Promo on Partner Update Warning]', e.message);
+    }
+
+    res.json({
+      success: true,
+      message: 'পার্টনার তথ্য সফলভাবে আপডেট হয়েছে!',
+      partner: partners[idx]
+    });
+  } catch (err) {
+    console.error('[Admin Partner Update Error]', err);
+    res.status(500).json({ success: false, message: 'আপডেট করতে সমস্যা হয়েছে: ' + err.message });
+  }
+});
+
+// 4. Admin: Delete a partner
+app.delete('/api/admin/partners/:id', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    let partners = getPartners();
+    const found = partners.find(p => p.id === id);
+    if (!found) {
+      return res.status(404).json({ success: false, message: 'পার্টনার খুঁজে পাওয়া যায়নি।' });
+    }
+
+    partners = partners.filter(p => p.id !== id);
+    savePartners(partners);
+
+    try {
+      const promoCodes = getPromoCodes();
+      const updatedCodes = promoCodes.filter(c => c.partnerId !== id && c.code.toUpperCase() !== (found.promoCode || '').toUpperCase());
+      savePromoCodes(updatedCodes);
+    } catch (e) {}
+
+    res.json({ success: true, message: `পার্টনার "${found.name}" সফলভাবে মুছে ফেলা হয়েছে।` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 5. Admin: Record a commission payout to a partner
+app.post('/api/admin/partners/:id/payout', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount, paymentMethod, payoutAddress, txId, notes } = req.body;
+    const numAmount = parseFloat(amount);
+    if (!numAmount || isNaN(numAmount) || numAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'অনুগ্রহ করে সঠিক পেইড অ্যামাউন্ট দিন।' });
+    }
+
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === id);
+    if (!partner) {
+      return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+    }
+
+    const payouts = getPartnerPayouts();
+    const newPayout = {
+      id: `payout_part_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      partnerId: partner.id,
+      partnerName: partner.name,
+      partnerEmail: partner.email,
+      partnerPromoCode: partner.promoCode,
+      amount: numAmount,
+      paymentMethod: paymentMethod || partner.payoutMethod || 'Binance Pay',
+      payoutAddress: payoutAddress || partner.payoutDetails || 'N/A',
+      txId: (txId || `TX_${Date.now()}`).trim(),
+      status: 'completed',
+      notes: (notes || '').trim(),
+      paidAt: new Date().toISOString()
+    };
+
+    payouts.unshift(newPayout);
+    savePartnerPayouts(payouts);
+
+    partner.totalCommissionPaid = Math.round(((partner.totalCommissionPaid || 0) + numAmount) * 100) / 100;
+    savePartners(partners);
+
+    res.json({
+      success: true,
+      message: `$${numAmount} কমিশন পে-আউট সফলভাবে রেকর্ড করা হয়েছে!`,
+      payout: newPayout
+    });
+  } catch (err) {
+    console.error('[Admin Partner Payout Error]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 6. Admin: Get all referral sales logs
+app.get('/api/admin/partner-referral-logs', authenticateAdminToken, (req, res) => {
+  try {
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const partners = getPartners();
+
+    const referralChallenges = challenges.filter(c => {
+      if (c.partnerId || c.partnerPromoCode) return true;
+      if (c.promoCode) {
+        return partners.some(p => p.promoCode && p.promoCode.toUpperCase() === c.promoCode.toUpperCase());
+      }
+      return false;
+    });
+
+    const logs = referralChallenges.map(c => {
+      const code = (c.partnerPromoCode || c.promoCode || '').toUpperCase();
+      const matchedPartner = partners.find(p => p.id === c.partnerId || (p.promoCode && p.promoCode.toUpperCase() === code));
+      const rate = c.partnerCommissionRate || (matchedPartner ? matchedPartner.commissionRate : 10);
+      const commission = c.partnerCommission || Math.round(((c.fee || 0) * (rate / 100)) * 100) / 100;
+
+      return {
+        id: c.id,
+        createdAt: c.createdAt,
+        userId: c.userId,
+        userName: c.userName || 'Trader',
+        userEmail: c.userEmail || '',
+        packageName: c.packageName || 'Challenge',
+        fee: c.fee || 0,
+        status: c.status,
+        promoCode: code,
+        partnerId: matchedPartner ? matchedPartner.id : null,
+        partnerName: matchedPartner ? matchedPartner.name : (c.partnerName || 'Unknown Partner'),
+        partnerEmail: matchedPartner ? matchedPartner.email : '',
+        commissionRate: rate,
+        commissionAmount: commission,
+        commissionStatus: (c.status === 'pending_approval' || c.status === 'rejected' || c.status === 'cancelled') ? 'pending_approval' : 'approved'
+      };
+    }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.json({ success: true, logs });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 7. Admin: Get partner payouts history
+app.get('/api/admin/partner-payouts', authenticateAdminToken, (req, res) => {
+  try {
+    const payouts = getPartnerPayouts();
+    res.json({ success: true, payouts });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 8. Admin: Get & Update partner settings
+app.get('/api/admin/partner-settings', authenticateAdminToken, (req, res) => {
+  res.json({ success: true, settings: getPartnerSettings() });
+});
+
+app.post('/api/admin/partner-settings', authenticateAdminToken, (req, res) => {
+  try {
+    const { defaultCommissionRate, traderDiscountRate, minPayoutAmount, cookieDurationDays, programEnabled } = req.body;
+    const current = getPartnerSettings();
+    const updated = {
+      ...current,
+      defaultCommissionRate: defaultCommissionRate !== undefined ? parseFloat(defaultCommissionRate) : current.defaultCommissionRate,
+      traderDiscountRate: traderDiscountRate !== undefined ? parseFloat(traderDiscountRate) : current.traderDiscountRate,
+      minPayoutAmount: minPayoutAmount !== undefined ? parseFloat(minPayoutAmount) : current.minPayoutAmount,
+      cookieDurationDays: cookieDurationDays !== undefined ? parseInt(cookieDurationDays, 10) : current.cookieDurationDays,
+      programEnabled: programEnabled !== undefined ? Boolean(programEnabled) : current.programEnabled,
+      updatedAt: new Date().toISOString()
+    };
+    savePartnerSettings(updated);
+    res.json({ success: true, message: 'পার্টনার প্রোগ্রাম সেটিংস সফলভাবে সেভ করা হয়েছে!', settings: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 9. Public: Verify referral partner code
+app.get('/api/public/partners/verify-ref/:code', (req, res) => {
+  try {
+    const { code } = req.params;
+    if (!code) return res.status(400).json({ success: false, valid: false });
+    const clean = code.trim().toUpperCase();
+    const partners = getPartners();
+    const found = partners.find(p => p.promoCode && p.promoCode.toUpperCase() === clean && p.status === 'active');
+    if (!found) return res.status(404).json({ success: false, valid: false, message: 'Invalid referral code' });
+    res.json({
+      success: true,
+      valid: true,
+      partner: {
+        id: found.id,
+        name: found.name,
+        promoCode: found.promoCode,
+        traderDiscount: found.traderDiscount || 5
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ success: false, valid: false });
   }
 });
 
