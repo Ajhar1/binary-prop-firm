@@ -4053,11 +4053,298 @@
                     <!-- Dynamic active challenge preview -->
                 </div>
                 <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-                    <button type="button" class="btn-gold" style="padding:10px 22px; font-size:0.88rem;" onclick="switchTab('trade-history')">
-                        <i class="fas fa-chart-line"></i> ট্রেডিং হিস্টোরি ও সিঙ্ক দেখুন
+                    <button type="button" class="btn-gold" style="padding:10px 22px; font-size:0.88rem; display:inline-flex; align-items:center; gap:8px;" onclick="showPayoutOverview()">
+                        <i class="fas fa-eye"></i> পে-আউট ওভারভিউ
                     </button>
                     <button type="button" class="btn-outline" style="padding:10px 20px; font-size:0.88rem;" onclick="switchTab('my-challenges')">
                         <i class="fas fa-trophy"></i> আমার চ্যালেঞ্জ স্ট্যাটাস
+                    </button>
+                </div>
+            </div>
+
+            <!-- STATE C: PAYOUT OVERVIEW (Walkthrough & Complete Process Guide for traders) -->
+            <div id="payoutOverviewState" style="display:none; margin-bottom:2.5rem;">
+                <!-- Overview Header with Return Button -->
+                <div style="background:linear-gradient(135deg, rgba(0, 230, 118, 0.1) 0%, rgba(15, 23, 42, 0.95) 100%); border:1px solid rgba(0, 230, 118, 0.35); border-radius:16px; padding:1.4rem 1.6rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+                            <span style="font-size:1.5rem;">📖</span>
+                            <h3 style="margin:0; font-size:1.2rem; font-weight:800; color:#fff;">পে-আউট ওভারভিউ ও সম্পূর্ণ প্রসেস গাইড</h3>
+                            <span style="background:rgba(255,184,0,0.18); color:#ffb800; font-size:0.75rem; font-weight:800; padding:3px 10px; border-radius:12px; border:1px solid rgba(255,184,0,0.35);">
+                                <i class="fas fa-info-circle"></i> গাইড ও প্রিভিউ মোড
+                            </span>
+                        </div>
+                        <p style="margin:0; font-size:0.84rem; color:var(--text-secondary); max-width:680px; line-height:1.5;">
+                            মূল্যায়ণ চ্যালেঞ্জ সফলভাবে পাস করার পর পে-আউট এবং লাইভ ফান্ডিং কিভাবে কাজ করে তা এখানে বিস্তারিত তুলে ধরা হয়েছে যাতে আপনি অগ্রিম সম্পূর্ণ ধারণা পেতে পারেন।
+                        </p>
+                    </div>
+                    <button type="button" class="btn-outline" style="padding:8px 18px; font-size:0.84rem; border-radius:8px; display:inline-flex; align-items:center; gap:8px;" onclick="hidePayoutOverview()">
+                        <i class="fas fa-arrow-left"></i> লক স্ক্রিনে ফিরুন
+                    </button>
+                </div>
+
+                <!-- 4-Step Visual Workflow Grid -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin-bottom:1.5rem;">
+                    <!-- Step 1 -->
+                    <div style="background:#161b22; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:8px; right:12px; font-size:2rem; font-weight:900; color:rgba(255,255,255,0.04);">০১</div>
+                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(255,184,0,0.15); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; color:#ffb800; font-size:1.2rem; margin-bottom:10px;">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <h4 style="margin:0 0 6px 0; font-size:0.95rem; font-weight:800; color:#fff;">১. মূল্যায়ণ পাস করুন</h4>
+                        <p style="margin:0; font-size:0.8rem; color:#94a3b8; line-height:1.5;">
+                            ১৫টি ভেরিফাইড সেশন ২৫% ড্রডাউন লিমিটের মধ্যে সম্পন্ন করুন। সব সেশন শেষে এডমিন রিভিউ করে স্ট্যাটাস <strong>'Passed'</strong> করবেন।
+                        </p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div style="background:#161b22; border:1px solid rgba(0,230,118,0.25); border-radius:14px; padding:1.2rem; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:8px; right:12px; font-size:2rem; font-weight:900; color:rgba(0,230,118,0.06);">০২</div>
+                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.3); display:flex; align-items:center; justify-content:center; color:#00e676; font-size:1.2rem; margin-bottom:10px;">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <h4 style="margin:0 0 6px 0; font-size:0.95rem; font-weight:800; color:#00e676;">২. Quotex লাইভ ফান্ড ডিপোজিট</h4>
+                        <p style="margin:0; font-size:0.8rem; color:#94a3b8; line-height:1.5;">
+                            Quotex-এ Binance Pay সিলেক্ট করে প্রাপ্ত ডিপোজিট QR কোডের স্ক্রিনশট আপলোড করবেন। এডমিন সরাসরি ডলার ডিপোজিট করে দেবে।
+                        </p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div style="background:#161b22; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:8px; right:12px; font-size:2rem; font-weight:900; color:rgba(255,255,255,0.04);">০৩</div>
+                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); display:flex; align-items:center; justify-content:center; color:#60a5fa; font-size:1.2rem; margin-bottom:10px;">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4 style="margin:0 0 6px 0; font-size:0.95rem; font-weight:800; color:#60a5fa;">৩. ফান্ডেড অ্যাকাউন্টে লাভ</h4>
+                        <p style="margin:0; font-size:0.8rem; color:#94a3b8; line-height:1.5;">
+                            ফার্মের প্রদত্ত আসল ফান্ডেড ডলার ($100 - $1,000) দিয়ে কটেক্সে লাইভ ট্রেডিং চালিয়ে নিজের দক্ষতায় মুনাফা অর্জন করবেন।
+                        </p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div style="background:#161b22; border:1px solid rgba(255,184,0,0.25); border-radius:14px; padding:1.2rem; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:8px; right:12px; font-size:2rem; font-weight:900; color:rgba(255,184,0,0.06);">০৪</div>
+                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(255,184,0,0.15); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; color:#ffb800; font-size:1.2rem; margin-bottom:10px;">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <h4 style="margin:0 0 6px 0; font-size:0.95rem; font-weight:800; color:#ffb800;">৪. প্রফিট উইথড্র ও শেয়ার গ্রহণ</h4>
+                        <p style="margin:0; font-size:0.8rem; color:#94a3b8; line-height:1.5;">
+                            Quotex থেকে ফার্মের Binance-এ উইথড্র দিয়ে প্রমাণ সাবমিট করবেন। আপনার প্রাপ্য ৭৫%-৮৫% ডলার আপনার নিজস্ব Binance-এ পাঠিয়ে দেওয়া হবে।
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive Profit Split Live Calculator & Official Binance Details -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; margin-bottom:1.5rem;">
+                    <!-- Calculator Card -->
+                    <div style="background:#161b22; border:1px solid rgba(0,230,118,0.25); border-radius:14px; padding:1.4rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <h4 style="margin:0; font-size:0.98rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-calculator" style="color:var(--neon-green);"></i> লাইভ প্রফিট স্প্লিট ক্যালকুলেটর
+                            </h4>
+                            <span style="font-size:0.75rem; background:rgba(0,230,118,0.15); color:#00e676; padding:2px 8px; border-radius:10px; font-weight:800;">৭৫% ট্রেডার শেয়ার</span>
+                        </div>
+                        <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:12px;">
+                            আপনি কত লাভ করেছেন তা লিখুন এবং সাথে সাথে আপনার নিজস্ব প্রাপ্যতা ও ফার্মের ফি পরীক্ষা করুন:
+                        </p>
+                        <div style="margin-bottom:14px;">
+                            <label style="display:block; font-size:0.8rem; font-weight:700; color:#cbd5e1; margin-bottom:4px;">উপার্জিত প্রফিটের পরিমাণ (USD):</label>
+                            <div style="position:relative;">
+                                <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#00e676; font-weight:800; font-size:1rem;">$</span>
+                                <input type="number" id="demoProfitCalcInput" value="200" min="1" step="any" oninput="calculateDemoProfitSplit(this.value)" style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:10px 12px 10px 30px; border-radius:8px; font-size:0.95rem; font-weight:700;" placeholder="যেমন: 200" />
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.3); border-radius:10px; padding:10px; text-align:center;">
+                                <div style="font-size:0.72rem; color:#94a3b8;">আপনার প্রাপ্যতা (৭৫%)</div>
+                                <div id="demoTraderProfitDisplay" style="font-size:1.25rem; font-weight:900; color:#00e676;">$150.00</div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px; text-align:center;">
+                                <div style="font-size:0.72rem; color:#94a3b8;">প্ল্যাটফর্ম ফি (২৫%)</div>
+                                <div id="demoFirmFeeDisplay" style="font-size:1.25rem; font-weight:900; color:#cbd5e1;">$50.00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Firm Binance Accounts Card -->
+                    <div style="background:#161b22; border:1px solid rgba(255,184,0,0.3); border-radius:14px; padding:1.4rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <h4 style="margin:0; font-size:0.98rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                                <i class="fab fa-bitcoin" style="color:var(--yellow);"></i> ফার্মের অফিশিয়াল উইথড্রল অ্যাকাউন্ট
+                            </h4>
+                            <span style="font-size:0.72rem; background:rgba(255,184,0,0.15); color:#ffb800; padding:2px 8px; border-radius:10px; font-weight:800;">অফিশিয়াল ডেস্টিনেশন</span>
+                        </div>
+                        <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:12px;">
+                            Quotex থেকে প্রফিট উইথড্র দেওয়ার জন্য আমাদের নিচের অফিশিয়াল Binance অ্যাকাউন্টে রিকোয়েস্ট পাঠাতে হবে:
+                        </p>
+                        <div style="background:#0f1218; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <span style="font-size:0.72rem; color:#94a3b8; display:block;">Official Binance Pay ID:</span>
+                                <strong style="color:#00e676; font-size:0.95rem; letter-spacing:0.5px;">838241680</strong>
+                                <span style="font-size:0.7rem; color:#60a5fa; margin-left:6px;">(Binary Prop Firm Official)</span>
+                            </div>
+                            <button type="button" class="btn-outline" style="padding:4px 10px; font-size:0.75rem; border-radius:6px;" onclick="copyToClipboard('838241680', 'Binance Pay ID কপি করা হয়েছে!')">
+                                <i class="far fa-copy"></i> কপি
+                            </button>
+                        </div>
+                        <div style="background:#0f1218; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                            <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:8px;">
+                                <span style="font-size:0.72rem; color:#94a3b8; display:block;">Official USDT (TRC20) Address:</span>
+                                <code style="color:#ffb800; font-size:0.82rem; font-family:monospace;">TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx</code>
+                            </div>
+                            <button type="button" class="btn-outline" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; flex-shrink:0;" onclick="copyToClipboard('TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx', 'USDT TRC20 অ্যাড্রেস কপি করা হয়েছে!')">
+                                <i class="far fa-copy"></i> কপি
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DEMO UI PREVIEW (Exact Visual of how the real form works) -->
+                <div style="background:#161b22; border:1px solid rgba(255, 255, 255, 0.1); border-radius:16px; padding:1.5rem; margin-bottom:1.5rem; position:relative;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.75rem; flex-wrap:wrap; gap:10px;">
+                        <h4 style="margin:0; font-size:1.05rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-laptop-code" style="color:var(--neon-green);"></i> পে-আউট রিকোয়েস্ট ইন্টারফেসের ফুল ডেমো প্রিভিউ
+                        </h4>
+                        <span style="background:rgba(255,184,0,0.18); color:#ffb800; border:1px solid rgba(255,184,0,0.35); font-size:0.74rem; font-weight:800; padding:3px 10px; border-radius:8px;">
+                            <i class="fas fa-lock"></i> প্রিভিউ মোড (শুধুমাত্র প্রদর্শনীর জন্য)
+                        </span>
+                    </div>
+
+                    <!-- Demo Challenge Selected Card -->
+                    <div style="background:linear-gradient(135deg, rgba(0, 230, 118, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%); border:1px solid rgba(0, 230, 118, 0.3); border-radius:12px; padding:1.2rem; margin-bottom:1.4rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="width:46px; height:46px; border-radius:12px; background:rgba(0, 230, 118, 0.15); display:flex; align-items:center; justify-content:center; color:#00e676; font-size:1.5rem; border:1px solid rgba(0,230,118,0.3);">
+                                    <i class="fas fa-award"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.74rem; text-transform:uppercase; letter-spacing:0.6px; color:#10b981; font-weight:800; display:flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-check-circle"></i> ভেরিফাইড পাস করা চ্যালেঞ্জ (অটোমেটিক সিলেক্টেড ডেমো)
+                                    </div>
+                                    <h4 style="margin:2px 0 0 0; font-size:1.05rem; font-weight:800; color:#fff;">Bronze Evaluation ($100)</h4>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:12px; align-items:center;">
+                                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:6px 14px; text-align:right;">
+                                    <span style="font-size:0.7rem; color:#94a3b8; display:block;">ফান্ডেড অ্যাকাউন্ট সাইজ</span>
+                                    <span style="font-size:1.1rem; font-weight:900; color:#00e676;">$100.00</span>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:6px 14px; text-align:right;">
+                                    <span style="font-size:0.7rem; color:#94a3b8; display:block;">প্রফিট স্প্লিট</span>
+                                    <span style="font-size:1.1rem; font-weight:900; color:#ffb800;">75%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Demo Tab Selector -->
+                    <div style="margin-bottom:1.5rem;">
+                        <label style="display:block; font-size:0.88rem; font-weight:800; color:#cbd5e1; margin-bottom:10px;">
+                            পে-আউটের ধরন নির্বাচন (ক্লিক করে ডেমো পরীক্ষা করুন)
+                        </label>
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
+                            <div id="demoTabDeposit" onclick="toggleDemoTab('deposit')" style="cursor:pointer; border:2px solid #00e676; background:rgba(0, 230, 118, 0.08); border-radius:14px; padding:16px; transition:all 0.25s ease;">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <div style="width:38px; height:38px; border-radius:10px; background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.3); display:flex; align-items:center; justify-content:center; color:#00e676; font-size:1.15rem;">
+                                            <i class="fas fa-gem"></i>
+                                        </div>
+                                        <div>
+                                            <h5 style="margin:0; font-size:0.96rem; font-weight:800; color:#00e676;">১. Quotex Live Fund Deposit</h5>
+                                            <span style="font-size:0.72rem; color:#94a3b8;">লাইভ ফান্ড ডিপোজিট</span>
+                                        </div>
+                                    </div>
+                                    <span id="demoTabDepositBadge" style="background:#00e676; color:#000; font-size:0.7rem; font-weight:900; padding:3px 8px; border-radius:12px;">
+                                        <i class="fas fa-check"></i> সিলেক্টেড
+                                    </span>
+                                </div>
+                                <p style="margin:0; font-size:0.78rem; color:#cbd5e1; line-height:1.45;">
+                                    চ্যালেঞ্জ পাস করার পর আপনার Quotex অ্যাকাউন্টে পাস করা ফান্ড ($100) ডিপোজিট নেওয়ার জন্য Binance Pay QR কোড দিন।
+                                </p>
+                            </div>
+
+                            <div id="demoTabProfit" onclick="toggleDemoTab('profit')" style="cursor:pointer; border:1px solid rgba(255, 184, 0, 0.3); background:rgba(255, 184, 0, 0.03); border-radius:14px; padding:16px; transition:all 0.25s ease;">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <div style="width:38px; height:38px; border-radius:10px; background:rgba(255,184,0,0.15); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; color:#ffb800; font-size:1.15rem;">
+                                            <i class="fas fa-coins"></i>
+                                        </div>
+                                        <div>
+                                            <h5 style="margin:0; font-size:0.96rem; font-weight:800; color:#ffb800;">২. Profit Withdraw (Binance)</h5>
+                                            <span style="font-size:0.72rem; color:#94a3b8;">কটেক্স থেকে প্রফিট উইথড্র</span>
+                                        </div>
+                                    </div>
+                                    <span id="demoTabProfitBadge" style="display:none; background:#ffb800; color:#000; font-size:0.7rem; font-weight:900; padding:3px 8px; border-radius:12px;">
+                                        <i class="fas fa-check"></i> সিলেক্টেড
+                                    </span>
+                                </div>
+                                <p style="margin:0; font-size:0.78rem; color:#cbd5e1; line-height:1.45;">
+                                    Quotex থেকে আমাদের Binance-এ উইথড্র দিয়ে আপনার প্রফিট শেয়ার ($) আপনার নিজস্ব Binance Pay ID-তে বুঝে নিন।
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Demo Option 1 Content -->
+                    <div id="demoDepositView" style="display:block;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:1.2rem;">
+                            <div>
+                                <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">আপনার Quotex Account ID *</label>
+                                <input type="text" class="input-control" value="63896760" readonly style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#94a3b8; padding:11px 14px; border-radius:8px; font-size:0.9rem;" />
+                                <small style="font-size:0.75rem; color:#94a3b8;">পাস করার পর স্বয়ংক্রিয়ভাবে অ্যাকাউন্ট আইডি বসে যাবে।</small>
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">ডিপোজিট অ্যামাউন্ট (স্বয়ংক্রিয় নির্ধারিত)</label>
+                                <div style="background:#0f1218; border:1px solid rgba(0, 230, 118, 0.3); border-radius:8px; padding:11px 14px; display:flex; align-items:center; justify-content:space-between;">
+                                    <span style="font-size:0.82rem; color:#94a3b8;">পাস করা প্যাকেজ অনুযায়ী ফান্ড:</span>
+                                    <span style="font-size:1.15rem; font-weight:900; color:#00e676;">$100.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background:#0f1218; border:1px dashed rgba(0, 230, 118, 0.45); border-radius:12px; padding:1.25rem; margin-bottom:1.2rem; text-align:center;">
+                            <i class="fas fa-qrcode" style="font-size:2rem; color:#00e676; margin-bottom:6px; display:block;"></i>
+                            <strong style="color:#fff; font-size:0.88rem; display:block;">Quotex Binance Pay Deposit QR কোড আপলোড ড্রপজোন</strong>
+                            <span style="color:#94a3b8; font-size:0.75rem;">পাস করার পর এখানে কিউআর কোডের স্পষ্ট স্ক্রিনশট আপলোড করতে পারবেন।</span>
+                        </div>
+                    </div>
+
+                    <!-- Demo Option 2 Content -->
+                    <div id="demoProfitView" style="display:none;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:1.2rem;">
+                            <div>
+                                <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">আপনার নিজস্ব Binance Pay ID / UID *</label>
+                                <input type="text" class="input-control" placeholder="আপনার Binance Pay ID (যেমন: 12345678)" readonly style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#94a3b8; padding:11px 14px; border-radius:8px; font-size:0.9rem;" />
+                                <small style="font-size:0.75rem; color:#94a3b8;">যে আইডিতে ফার্ম আপনাকে ৭৫% ডলার পাঠিয়ে দেবে।</small>
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.84rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">উইথড্র করার ডলারের পরিমাণ ($)</label>
+                                <input type="text" class="input-control" value="200.00" readonly style="width:100%; background:#0f1218; border:1px solid rgba(255,255,255,0.15); color:#94a3b8; padding:11px 14px; border-radius:8px; font-size:0.9rem;" />
+                                <small style="font-size:0.75rem; color:#94a3b8;">Quotex থেকে ফার্মের অ্যাকাউন্টে উইথড্র দেওয়া অ্যামাউন্ট।</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notice Submit Disabled Button -->
+                    <div style="margin-top:1.2rem; text-align:center;">
+                        <button type="button" class="btn-gold" style="width:100%; padding:14px; font-size:0.95rem; font-weight:800; opacity:0.65; cursor:not-allowed; background:linear-gradient(135deg, rgba(255,184,0,0.4), rgba(0,230,118,0.4)); border:1px dashed #ffb800;" onclick="showToast('⚠️ এটি শুধুমাত্র প্রিভিউ মোড। পে-আউট রিকোয়েস্ট করতে হলে প্রথমে আপনার সক্রিয় মূল্যায়ণ চ্যালেঞ্জটি সম্পূর্ণ পাস করতে হবে।', 'error')">
+                            <i class="fas fa-lock"></i> পে-আউট রিকোয়েস্ট সাবমিট করুন (চ্যালেঞ্জ পাস করার পর আনলক হবে)
+                        </button>
+                        <small style="display:block; margin-top:8px; color:#94a3b8; font-size:0.76rem;">
+                            <i class="fas fa-info-circle"></i> আপনি মূল্যায়ণের ১৫টি ভেরিফাইড সেশন সম্পন্ন করে পাস করার পর এই ফর্মটি স্বয়ংক্রিয়ভাবে কার্যকর হবে।
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Footer Back Buttons -->
+                <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:1rem;">
+                    <button type="button" class="btn-gold" style="padding:10px 22px; font-size:0.88rem; display:inline-flex; align-items:center; gap:8px;" onclick="hidePayoutOverview()">
+                        <i class="fas fa-arrow-left"></i> মূল পে-আউট স্ট্যাটাসে ফিরুন
+                    </button>
+                    <button type="button" class="btn-outline" style="padding:10px 20px; font-size:0.88rem; display:inline-flex; align-items:center; gap:8px;" onclick="switchTab('my-challenges')">
+                        <i class="fas fa-trophy"></i> আমার চ্যালেঞ্জ স্ট্যাটাস
+                    </button>
+                    <button type="button" class="btn-outline" style="padding:10px 20px; font-size:0.88rem; display:inline-flex; align-items:center; gap:8px;" onclick="switchTab('trade-history')">
+                        <i class="fas fa-chart-line"></i> ট্রেডিং হিস্টোরি ও সিঙ্ক
                     </button>
                 </div>
             </div>
@@ -12828,8 +13115,14 @@
             }
 
             if (!hasPassed) {
-                // Show Locked State
-                if (lockedState) lockedState.style.display = 'block';
+                // Show Locked State (or retain Overview State if trader is viewing it)
+                const overviewState = document.getElementById('payoutOverviewState');
+                if (overviewState && overviewState.style.display === 'block') {
+                    if (lockedState) lockedState.style.display = 'none';
+                } else {
+                    if (lockedState) lockedState.style.display = 'block';
+                    if (overviewState) overviewState.style.display = 'none';
+                }
                 if (unlockedState) unlockedState.style.display = 'none';
                 if (headerBadge) {
                     headerBadge.style.background = 'rgba(255,184,0,0.15)';
@@ -12876,6 +13169,8 @@
             } else {
                 // Show Unlocked State
                 if (lockedState) lockedState.style.display = 'none';
+                const overviewState = document.getElementById('payoutOverviewState');
+                if (overviewState) overviewState.style.display = 'none';
                 if (unlockedState) unlockedState.style.display = 'block';
                 if (headerBadge) {
                     headerBadge.style.background = 'rgba(0,230,118,0.15)';
@@ -13309,7 +13604,78 @@
             }).join('');
         }
 
+        function showPayoutOverview() {
+            const lockedState = document.getElementById('payoutLockedState');
+            const overviewState = document.getElementById('payoutOverviewState');
+            if (lockedState) lockedState.style.display = 'none';
+            if (overviewState) {
+                overviewState.style.display = 'block';
+                overviewState.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function hidePayoutOverview() {
+            const lockedState = document.getElementById('payoutLockedState');
+            const overviewState = document.getElementById('payoutOverviewState');
+            if (overviewState) overviewState.style.display = 'none';
+            if (lockedState) {
+                lockedState.style.display = 'block';
+                lockedState.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function calculateDemoProfitSplit(val) {
+            const num = parseFloat(val) || 0;
+            const traderShare = Math.round(num * 0.75 * 100) / 100;
+            const firmFee = Math.round((num - traderShare) * 100) / 100;
+            const traderEl = document.getElementById('demoTraderProfitDisplay');
+            const firmEl = document.getElementById('demoFirmFeeDisplay');
+            if (traderEl) traderEl.innerText = '$' + traderShare.toFixed(2);
+            if (firmEl) firmEl.innerText = '$' + firmFee.toFixed(2);
+        }
+
+        function toggleDemoTab(type) {
+            const tabDep = document.getElementById('demoTabDeposit');
+            const tabProf = document.getElementById('demoTabProfit');
+            const badgeDep = document.getElementById('demoTabDepositBadge');
+            const badgeProf = document.getElementById('demoTabProfitBadge');
+            const viewDep = document.getElementById('demoDepositView');
+            const viewProf = document.getElementById('demoProfitView');
+
+            if (type === 'deposit') {
+                if (tabDep) {
+                    tabDep.style.border = '2px solid #00e676';
+                    tabDep.style.background = 'rgba(0, 230, 118, 0.08)';
+                }
+                if (tabProf) {
+                    tabProf.style.border = '1px solid rgba(255, 184, 0, 0.3)';
+                    tabProf.style.background = 'rgba(255, 184, 0, 0.03)';
+                }
+                if (badgeDep) badgeDep.style.display = 'inline-block';
+                if (badgeProf) badgeProf.style.display = 'none';
+                if (viewDep) viewDep.style.display = 'block';
+                if (viewProf) viewProf.style.display = 'none';
+            } else {
+                if (tabProf) {
+                    tabProf.style.border = '2px solid #ffb800';
+                    tabProf.style.background = 'rgba(255, 184, 0, 0.08)';
+                }
+                if (tabDep) {
+                    tabDep.style.border = '1px solid rgba(0, 230, 118, 0.3)';
+                    tabDep.style.background = 'rgba(0, 230, 118, 0.02)';
+                }
+                if (badgeProf) badgeProf.style.display = 'inline-block';
+                if (badgeDep) badgeDep.style.display = 'none';
+                if (viewProf) viewProf.style.display = 'block';
+                if (viewDep) viewDep.style.display = 'none';
+            }
+        }
+
         // Global bindings
+        window.showPayoutOverview = showPayoutOverview;
+        window.hidePayoutOverview = hidePayoutOverview;
+        window.calculateDemoProfitSplit = calculateDemoProfitSplit;
+        window.toggleDemoTab = toggleDemoTab;
         window.fetchUserPayouts = fetchUserPayouts;
         window.selectPayoutType = selectPayoutType;
         window.handlePayoutTypeChange = handlePayoutTypeChange;
