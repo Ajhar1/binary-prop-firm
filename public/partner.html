@@ -662,6 +662,982 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
+        /* ================= LANDING PAGE STYLES ================= */
+        html {
+            scroll-behavior: smooth;
+        }
+        .landing-nav {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 999;
+            background: rgba(7, 10, 18, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.75rem 1.25rem;
+            transition: all 0.25s ease;
+        }
+        .landing-nav-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+        .brand-logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .brand-logo-wrap img {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            box-shadow: 0 0 16px rgba(0, 230, 118, 0.35);
+        }
+        .brand-title-text {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.2;
+            letter-spacing: -0.3px;
+        }
+        .brand-sub-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--emerald);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+        .landing-menu {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .nav-item-link {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .nav-item-link:hover {
+            color: var(--emerald);
+        }
+        .landing-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .landing-mobile-toggle {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 1.15rem;
+            cursor: pointer;
+        }
+        .mobile-nav-ctas {
+            display: none;
+            width: 100%;
+            padding-top: 1rem;
+            margin-top: 0.5rem;
+            border-top: 1px solid var(--border-subtle);
+            gap: 10px;
+        }
+
+        /* Hero Section */
+        .landing-hero {
+            position: relative;
+            padding: 4.5rem 1.25rem 3.5rem 1.25rem;
+            text-align: center;
+            overflow: hidden;
+        }
+        .hero-glow-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.18;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .blob-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--emerald);
+            top: -100px;
+            left: 20%;
+        }
+        .blob-2 {
+            width: 450px;
+            height: 450px;
+            background: var(--cyan);
+            top: 15%;
+            right: 15%;
+        }
+        .landing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            color: var(--emerald);
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.15);
+            margin-bottom: 1.25rem;
+        }
+        .hero-headline {
+            font-size: 3.1rem;
+            font-weight: 900;
+            line-height: 1.22;
+            letter-spacing: -0.8px;
+            color: #ffffff;
+            margin-bottom: 1.25rem;
+        }
+        .hero-gradient-text {
+            background: linear-gradient(135deg, #00e676 0%, #00f0ff 50%, #f5b041 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-subtext {
+            font-size: 1.12rem;
+            line-height: 1.7;
+            color: #94a3b8;
+            max-width: 780px;
+            margin: 0 auto 2.25rem auto;
+        }
+        .hero-cta-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 3.5rem;
+        }
+        .hero-btn-lg {
+            padding: 14px 28px;
+            font-size: 1rem;
+            border-radius: 12px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Hero Stats Strip */
+        .hero-stats-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3.5rem;
+        }
+        .hero-stat-box {
+            background: rgba(18, 24, 38, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        .hero-stat-box:hover {
+            border-color: rgba(0, 230, 118, 0.3);
+            transform: translateY(-2px);
+        }
+        .hero-stat-num {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 4px;
+        }
+        .hero-stat-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .text-emerald { color: var(--emerald) !important; }
+        .text-cyan { color: var(--cyan) !important; }
+        .text-gold { color: var(--gold) !important; }
+        .text-purple { color: var(--purple) !important; }
+
+        /* Hero Preview Partner Pass Card */
+        .hero-preview-wrapper {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+        .hero-partner-card {
+            padding: 1.75rem;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            background: linear-gradient(135deg, rgba(16, 24, 40, 0.9) 0%, rgba(13, 27, 42, 0.95) 100%);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 230, 118, 0.1);
+            text-align: left;
+        }
+        .card-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .card-partner-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .avatar-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 230, 118, 0.2), rgba(0, 240, 255, 0.2));
+            border: 1px solid var(--emerald);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--emerald);
+            font-size: 1.15rem;
+        }
+        .partner-card-name {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+        }
+        .partner-card-status {
+            font-size: 0.75rem;
+            color: var(--emerald);
+            font-weight: 600;
+        }
+        .card-mid-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .mid-cell .lbl {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .mid-cell .val {
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+        .card-bottom-bar {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .ref-link-chip {
+            font-family: monospace;
+            font-size: 0.82rem;
+            color: var(--emerald);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-discount-notice {
+            font-size: 0.76rem;
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+
+        /* Generic Section Styling */
+        .landing-section {
+            padding: 5rem 1.25rem;
+            position: relative;
+        }
+        .section-header {
+            text-align: center;
+            max-width: 760px;
+            margin: 0 auto 3.5rem auto;
+        }
+        .section-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            background: rgba(0, 230, 118, 0.1);
+            color: var(--emerald);
+            border: 1px solid rgba(0, 230, 118, 0.25);
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: 2.35rem;
+            font-weight: 900;
+            line-height: 1.25;
+            margin-bottom: 12px;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+        .section-desc {
+            font-size: 0.98rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+        }
+
+        /* 6-Tier Cards Grid */
+        .tiers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+        .tier-card {
+            border-radius: 18px;
+            padding: 1.75rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .tier-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 230, 118, 0.35);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+        .tier-card-badge {
+            align-self: flex-start;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            margin-bottom: 14px;
+        }
+        .tier-card-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+        .tier-card-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .tier-card-rate {
+            font-size: 2.2rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .tier-card-rate .rate-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .tier-card-range {
+            font-size: 0.82rem;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .tier-perks {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: auto;
+            font-size: 0.82rem;
+            color: #cbd5e1;
+        }
+        .tier-perks li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tier-guarantee-box {
+            padding: 1.25rem 1.5rem;
+            border-radius: 14px;
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            background: rgba(0, 230, 118, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        /* Calculator Styles */
+        .calc-card {
+            border-radius: 20px;
+            padding: 2.25rem;
+            border: 1px solid rgba(0, 230, 118, 0.25);
+        }
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.9fr;
+            gap: 2rem;
+            align-items: center;
+        }
+        .calc-input-group {
+            margin-bottom: 1.25rem;
+        }
+        .calc-input-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .calc-input-header label {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .calc-badge-val {
+            font-size: 0.95rem;
+            font-weight: 900;
+            color: var(--emerald);
+            background: rgba(0, 230, 118, 0.12);
+            padding: 4px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+        .calc-slider {
+            width: 100%;
+            height: 10px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            border: 1px solid var(--border-subtle);
+        }
+        .calc-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--emerald) 0%, #00b0ff 100%);
+            cursor: pointer;
+            box-shadow: 0 0 14px rgba(0, 230, 118, 0.6);
+            border: 2px solid #fff;
+            transition: transform 0.15s;
+        }
+        .calc-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        .calc-slider-ticks {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        .calc-package-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .pkg-chip {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-subtle);
+            color: #cbd5e1;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pkg-chip:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+        .pkg-chip.active {
+            background: rgba(0, 230, 118, 0.15);
+            border-color: var(--emerald);
+            color: var(--emerald);
+            font-weight: 800;
+            box-shadow: 0 0 12px rgba(0, 230, 118, 0.2);
+        }
+        .calc-tier-progress-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-top: 1.25rem;
+        }
+        .calc-results-col {
+            padding: 2rem;
+            border-radius: 18px;
+            border: 1px solid rgba(0, 230, 118, 0.35);
+            background: linear-gradient(135deg, rgba(16, 24, 40, 0.95) 0%, rgba(13, 27, 42, 0.95) 100%);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .calc-result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .calc-rate-display {
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: var(--emerald);
+        }
+        .calc-result-main {
+            text-align: center;
+            padding: 1rem 0;
+            margin-bottom: 1.25rem;
+            background: rgba(0, 230, 118, 0.05);
+            border-radius: 14px;
+            border: 1px solid rgba(0, 230, 118, 0.2);
+        }
+        .calc-result-main .res-label {
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .calc-result-main .res-amount-usd {
+            font-size: 2.6rem;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+        .calc-result-main .res-amount-bdt {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .calc-result-sub-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .sub-cell {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+        .sub-cell .sub-lbl {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+        .sub-cell .sub-val {
+            font-size: 1.15rem;
+            font-weight: 900;
+        }
+        .sub-cell .sub-bdt {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        /* Broker Cards Grid */
+        .broker-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .broker-card {
+            border-radius: 18px;
+            padding: 1.75rem;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.25s ease;
+        }
+        .broker-card:hover {
+            border-color: rgba(0, 230, 118, 0.3);
+            transform: translateY(-3px);
+        }
+        .broker-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 1rem;
+        }
+        .broker-logo-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .broker-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .broker-desc {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+        .broker-perks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        /* Traders Love Strip */
+        .traders-love-strip {
+            border-radius: 18px;
+            padding: 1.75rem 2rem;
+            border: 1px solid rgba(245, 176, 65, 0.3);
+            background: linear-gradient(135deg, rgba(245, 176, 65, 0.05) 0%, rgba(18, 24, 38, 0.9) 100%);
+        }
+        .strip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.25rem;
+        }
+        .strip-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .strip-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .strip-item strong {
+            display: block;
+            font-size: 0.92rem;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+        .strip-item p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        /* Benefits Grid */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .benefit-card {
+            padding: 1.75rem;
+            border-radius: 18px;
+            transition: all 0.25s ease;
+        }
+        .benefit-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 230, 118, 0.35);
+        }
+        .benefit-icon {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+        .benefit-card h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .benefit-card p {
+            font-size: 0.86rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Steps Grid */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .step-card {
+            padding: 2rem 1.75rem;
+            border-radius: 18px;
+            position: relative;
+            transition: transform 0.25s;
+        }
+        .step-card:hover {
+            transform: translateY(-4px);
+        }
+        .step-num {
+            position: absolute;
+            top: 1rem;
+            right: 1.25rem;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.05);
+            line-height: 1;
+        }
+        .step-icon {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+        .step-card h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .step-card p {
+            font-size: 0.86rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* FAQ Accordion */
+        .faq-accordion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .faq-card {
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .faq-card:hover {
+            border-color: rgba(0, 230, 118, 0.3);
+        }
+        .faq-question {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #fff;
+        }
+        .faq-chevron {
+            color: var(--emerald);
+            transition: transform 0.25s ease;
+            font-size: 0.85rem;
+        }
+        .faq-card.open .faq-chevron {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            display: none;
+            padding: 0 1.5rem 1.25rem 1.5rem;
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            line-height: 1.65;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 10px;
+        }
+        .faq-card.open .faq-answer {
+            display: block;
+        }
+
+        /* Bottom Conversion CTA Banner */
+        .bottom-cta-banner {
+            border-radius: 24px;
+            padding: 3.5rem 2rem;
+            text-align: center;
+            border: 1px solid rgba(0, 230, 118, 0.35);
+            background: linear-gradient(135deg, rgba(16, 24, 40, 0.95) 0%, rgba(13, 27, 42, 0.98) 100%);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 230, 118, 0.12);
+        }
+        .cta-banner-content {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .cta-banner-title {
+            font-size: 2.3rem;
+            font-weight: 900;
+            color: #fff;
+            margin: 1.25rem 0 0.75rem 0;
+            line-height: 1.25;
+        }
+        .cta-banner-sub {
+            font-size: 1.05rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .cta-banner-btns {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Landing Footer */
+        .landing-footer {
+            background: #05080f;
+            border-top: 1px solid var(--border-subtle);
+            padding: 3.5rem 1.25rem 2rem 1.25rem;
+        }
+        .footer-top-row {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+        .footer-links-col h4 {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .footer-links-col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .footer-links-col a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.82rem;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .footer-links-col a:hover {
+            color: var(--emerald);
+        }
+        .footer-divider {
+            height: 1px;
+            background: var(--border-subtle);
+            margin-bottom: 1.5rem;
+        }
+        .footer-bottom-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Responsive Mobile Styles */
+        @media (max-width: 992px) {
+            .landing-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #090e18;
+                border-bottom: 1px solid var(--border-subtle);
+                padding: 1.25rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+            }
+            .landing-menu.mobile-active {
+                display: flex;
+            }
+            .landing-mobile-toggle {
+                display: inline-flex;
+            }
+            .mobile-nav-ctas {
+                display: flex;
+            }
+            .footer-top-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-headline {
+                font-size: 2.4rem;
+            }
+            .section-title {
+                font-size: 1.85rem;
+            }
+        }
+        @media (max-width: 640px) {
+            .hero-headline {
+                font-size: 1.85rem;
+            }
+            .hero-subtext {
+                font-size: 0.95rem;
+            }
+            .hero-btn-lg {
+                width: 100%;
+            }
+            .footer-top-row {
+                grid-template-columns: 1fr;
+            }
+            .footer-bottom-row {
+                flex-direction: column;
+                text-align: center;
+            }
+            .footer-bottom-row div {
+                text-align: center !important;
+            }
+            .calc-card {
+                padding: 1.25rem;
+            }
+            .calc-result-sub-grid {
+                grid-template-columns: 1fr;
+            }
+            .cta-banner-title {
+                font-size: 1.7rem;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 992px) {
             .sidebar {
@@ -691,10 +1667,569 @@
     <!-- Toast Notifications Container -->
     <div id="toastContainer"></div>
 
-    <!-- ========================================== -->
-    <!-- 1. AUTH SCREEN (LOGIN & REGISTRATION)     -->
-    <!-- ========================================== -->
-    <div id="authContainer">
+    <!-- Sticky Return to Dashboard Bar (Visible only when partner is viewing public landing while logged in) -->
+    <div id="previewReturnBar" style="display:none; background:linear-gradient(90deg, #00e676, #00f0ff); color:#070a12; padding:9px 16px; font-weight:800; font-size:0.86rem; text-align:center; position:sticky; top:0; z-index:10000; box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+        <span><i class="fas fa-info-circle"></i> আপনি অফিসিয়াল পার্টনার হিসেবে লগইন আছেন।</span>
+        <button type="button" onclick="returnToDashboard()" style="background:#070a12; color:#fff; border:none; padding:5px 14px; border-radius:8px; font-weight:700; margin-left:12px; cursor:pointer;">
+            <i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে ফিরে যান
+        </button>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 1. PUBLIC MARKETING & AFFILIATE LANDING PAGE VIEW        -->
+    <!-- ======================================================== -->
+    <div id="landingView">
+        
+        <!-- STICKY NAVIGATION BAR -->
+        <header class="landing-nav">
+            <div class="landing-nav-inner">
+                <a href="/" class="brand-logo-wrap">
+                    <img src="/assets/logo.png" alt="Binary Prop Firm">
+                    <div>
+                        <div class="brand-title-text">Binary Prop Firm</div>
+                        <div class="brand-sub-badge">PARTNER &amp; AFFILIATE</div>
+                    </div>
+                </a>
+
+                <!-- Desktop Nav Menu -->
+                <nav class="landing-menu" id="landingNavMenu">
+                    <a href="#tiers" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-layer-group"></i> কমিশন টিয়ার</a>
+                    <a href="#calculator" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-calculator"></i> ইনকাম ক্যালকুলেটর</a>
+                    <a href="#brokers" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-handshake"></i> ব্রোকার সাপোর্ট</a>
+                    <a href="#benefits" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-gem"></i> সুবিধাসমূহ</a>
+                    <a href="#howItWorks" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-stream"></i> যেভাবে কাজ করে</a>
+                    <a href="#faq" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-question-circle"></i> FAQ</a>
+
+                    <div class="mobile-nav-ctas">
+                        <button type="button" class="btn-outline" onclick="scrollToAuth('login'); closeLandingMobileMenu();" style="flex:1; justify-content:center; padding:9px;">
+                            <i class="fas fa-sign-in-alt"></i> লগইন
+                        </button>
+                        <button type="button" class="btn-emerald" onclick="scrollToAuth('register'); closeLandingMobileMenu();" style="flex:1; justify-content:center; padding:9px;">
+                            <i class="fas fa-rocket"></i> পার্টনার হন
+                        </button>
+                    </div>
+                </nav>
+
+                <!-- Right Action Buttons -->
+                <div class="landing-nav-actions">
+                    <button type="button" class="btn-outline btn-sm" onclick="scrollToAuth('login')">
+                        <i class="fas fa-sign-in-alt"></i> লগইন
+                    </button>
+                    <button type="button" class="btn-emerald btn-sm" onclick="scrollToAuth('register')">
+                        <i class="fas fa-rocket"></i> পার্টনার জয়েন করুন
+                    </button>
+                    <button type="button" class="landing-mobile-toggle" onclick="toggleLandingMobileMenu()" aria-label="মেনু খুলুন">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- HERO SECTION -->
+        <section class="landing-hero">
+            <div class="hero-glow-blob blob-1"></div>
+            <div class="hero-glow-blob blob-2"></div>
+            <div class="landing-container">
+                <div class="hero-badge">
+                    <i class="fas fa-crown"></i> দ্য ওয়ার্ল্ডস #১ বাইনারি অপশনস পার্টনার নেটওয়ার্ক
+                </div>
+                <h1 class="hero-headline">
+                    ট্রেডার রেফার করুন এবং জিতে নিন <br>
+                    <span class="hero-gradient-text">আজীবন ৫০% পর্যন্ত</span> রিয়েল ক্যাশ কমিশন!
+                </h1>
+                <p class="hero-subtext">
+                    Quotex, Pocket Option ও Deriv ব্রোকার ব্যবহারকারী ট্রেডারদের আমাদের ফান্ডেড চ্যালেঞ্জে রেফার করুন। 
+                    কোনো ডিপোজিট বা ট্রেডিং ঝুঁকি ছাড়াই পান আজীবন প্যাসিভ ইনকাম ও তাৎক্ষণিক পে-আউট (Binance Pay / USDT / বিকাশ / নগদ)।
+                </p>
+
+                <div class="hero-cta-group">
+                    <button type="button" class="btn-emerald hero-btn-lg" onclick="scrollToAuth('register')">
+                        <i class="fas fa-user-plus"></i> আজই ফ্রি পার্টনার একাউন্ট খুলুন
+                    </button>
+                    <button type="button" class="btn-gold hero-btn-lg" onclick="scrollToSection('calculator')">
+                        <i class="fas fa-calculator"></i> ইনকাম হিসাব করুন
+                    </button>
+                    <button type="button" class="btn-outline hero-btn-lg" onclick="scrollToAuth('login')">
+                        <i class="fas fa-sign-in-alt"></i> পার্টনার লগইন
+                    </button>
+                </div>
+
+                <!-- Hero Trust Stats Strip -->
+                <div class="hero-stats-strip">
+                    <div class="hero-stat-box">
+                        <div class="hero-stat-num text-emerald">৫০%</div>
+                        <div class="hero-stat-label">সর্বোচ্চ কমিশন টিয়ার</div>
+                    </div>
+                    <div class="hero-stat-box">
+                        <div class="hero-stat-num text-cyan">৩টি</div>
+                        <div class="hero-stat-label">টপ গ্লোবাল ব্রোকার সাপোর্ট</div>
+                    </div>
+                    <div class="hero-stat-box">
+                        <div class="hero-stat-num text-gold">০ টাকা</div>
+                        <div class="hero-stat-label">ফ্রি পার্টনারশিপ রেজিস্ট্রেশন</div>
+                    </div>
+                    <div class="hero-stat-box">
+                        <div class="hero-stat-num text-emerald">ইনস্ট্যান্ট</div>
+                        <div class="hero-stat-label">Binance Pay / বিকাশ উইথড্র</div>
+                    </div>
+                </div>
+
+                <!-- Hero Visual Pass Card -->
+                <div class="hero-preview-wrapper">
+                    <div class="hero-partner-card glass glass-glow">
+                        <div class="card-top-row">
+                            <div class="card-partner-info">
+                                <div class="avatar-circle"><i class="fas fa-shield-alt"></i></div>
+                                <div>
+                                    <div class="partner-card-name">VIP AFFILIATE PASS</div>
+                                    <div class="partner-card-status"><i class="fas fa-check-circle"></i> অফিসিয়ালি ভেরিফাইড পার্টনার</div>
+                                </div>
+                            </div>
+                            <span class="badge badge-master"><i class="fas fa-medal"></i> MASTER TIER (50%)</span>
+                        </div>
+
+                        <div class="card-mid-grid">
+                            <div class="mid-cell">
+                                <div class="lbl">বর্তমান লাইফটাইম কমিশন</div>
+                                <div class="val text-emerald">৫০% ফিক্সড</div>
+                            </div>
+                            <div class="mid-cell">
+                                <div class="lbl">সাপোর্টেড ব্রোকার</div>
+                                <div class="val text-cyan">Quotex / Pocket / Deriv</div>
+                            </div>
+                            <div class="mid-cell">
+                                <div class="lbl">পে-আউট মাধ্যম</div>
+                                <div class="val text-gold">Binance Pay / USDT / bKash</div>
+                            </div>
+                        </div>
+
+                        <div class="card-bottom-bar">
+                            <div class="ref-link-chip">
+                                <span>https://binarypropfirm.com/?ref=VIPPRO</span>
+                                <span class="chip-copy"><i class="fas fa-check text-emerald"></i> অ্যাক্টিভ</span>
+                            </div>
+                            <div class="card-discount-notice">
+                                <i class="fas fa-tag text-gold"></i> ট্রেডারদের জন্য বিশেষ ৫% - ১৫% ছাড় অন্তর্ভুক্ত
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6-TIER COMMISSION LADDER SECTION -->
+        <section class="landing-section" id="tiers">
+            <div class="landing-container">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-layer-group"></i> ৬-টিয়ার ডায়নামিক কমিশন মডেল</span>
+                    <h2 class="section-title">যত বেশি সেলস, <span class="hero-gradient-text">তত বেশি কমিশন রেট</span></h2>
+                    <p class="section-desc">
+                        আমাদের রয়েছে ইন্ডাস্ট্রি-লিডিং লেভেল সিস্টেম। প্রথম সেল থেকেই ১০% আয় শুরু এবং মাত্র ৫১টি সেলস সম্পন্ন করলেই আজীবনের জন্য সর্বোচ্চ ৫০% কমিশন স্থায়ীভাবে আনলক হয়ে যাবে!
+                    </p>
+                </div>
+
+                <div class="tiers-grid">
+                    <!-- Tier 1 -->
+                    <div class="tier-card glass" style="border-color:rgba(205,127,50,0.3);">
+                        <div class="tier-card-badge">লেভেল ১</div>
+                        <div class="tier-card-icon" style="color:#cd7f32;"><i class="fas fa-medal"></i></div>
+                        <h3 class="tier-card-title" style="color:#cd7f32;">Bronze Partner</h3>
+                        <div class="tier-card-rate text-emerald">১০% <span class="rate-sub">কমিশন</span></div>
+                        <div class="tier-card-range">১ থেকে ১০টি চ্যালেঞ্জ সেলস</div>
+                        <ul class="tier-perks">
+                            <li><i class="fas fa-check text-emerald"></i> স্বয়ংক্রিয় রেফারেল লিংক ও ট্র্যাকিং</li>
+                            <li><i class="fas fa-check text-emerald"></i> ৫% ট্রেডার ডিসকাউন্ট কোড</li>
+                            <li><i class="fas fa-check text-emerald"></i> ন্যূনতম $২০ হলেই উইথড্র</li>
+                        </ul>
+                    </div>
+
+                    <!-- Tier 2 -->
+                    <div class="tier-card glass" style="border-color:rgba(192,192,192,0.3);">
+                        <div class="tier-card-badge">লেভেল ২</div>
+                        <div class="tier-card-icon" style="color:#e2e8f0;"><i class="fas fa-award"></i></div>
+                        <h3 class="tier-card-title" style="color:#e2e8f0;">Silver Partner</h3>
+                        <div class="tier-card-rate text-emerald">২০% <span class="rate-sub">কমিশন</span></div>
+                        <div class="tier-card-range">১১ থেকে ২০টি চ্যালেঞ্জ সেলস</div>
+                        <ul class="tier-perks">
+                            <li><i class="fas fa-check text-emerald"></i> দ্বিগুণ কমিশন রেট (২০%)</li>
+                            <li><i class="fas fa-check text-emerald"></i> কাস্টম প্রোমো কোড রিকোয়েস্ট</li>
+                            <li><i class="fas fa-check text-emerald"></i> লাইভ সেলস ও কমিশন নোটিফিকেশন</li>
+                        </ul>
+                    </div>
+
+                    <!-- Tier 3 -->
+                    <div class="tier-card glass" style="border-color:rgba(245,176,65,0.35);">
+                        <div class="tier-card-badge">লেভেল ৩</div>
+                        <div class="tier-card-icon" style="color:#f5b041;"><i class="fas fa-trophy"></i></div>
+                        <h3 class="tier-card-title" style="color:#f5b041;">Gold Partner</h3>
+                        <div class="tier-card-rate text-emerald">৩০% <span class="rate-sub">কমিশন</span></div>
+                        <div class="tier-card-range">২১ থেকে ৩০টি চ্যালেঞ্জ সেলস</div>
+                        <ul class="tier-perks">
+                            <li><i class="fas fa-check text-emerald"></i> ৩০% আকর্ষণীয় কমিশন</li>
+                            <li><i class="fas fa-check text-emerald"></i> উচ্চ প্রায়োরিটি পে-আউট অনুমোদন</li>
+                            <li><i class="fas fa-check text-emerald"></i> ১০% পর্যন্ত কাস্টম ডিসকাউন্ট কোড</li>
+                        </ul>
+                    </div>
+
+                    <!-- Tier 4 -->
+                    <div class="tier-card glass" style="border-color:rgba(0,210,211,0.35);">
+                        <div class="tier-card-badge">লেভেল ৪</div>
+                        <div class="tier-card-icon" style="color:#00d2d3;"><i class="fas fa-gem"></i></div>
+                        <h3 class="tier-card-title" style="color:#00d2d3;">Platinum Partner</h3>
+                        <div class="tier-card-rate text-emerald">৪০% <span class="rate-sub">কমিশন</span></div>
+                        <div class="tier-card-range">৩১ থেকে ৪০টি চ্যালেঞ্জ সেলস</div>
+                        <ul class="tier-perks">
+                            <li><i class="fas fa-check text-emerald"></i> ৪০% মেগা কমিশন লেভেল</li>
+                            <li><i class="fas fa-check text-emerald"></i> একই দিনে এক্সপ্রেস ক্যাশ প্রসেসিং</li>
+                            <li><i class="fas fa-check text-emerald"></i> সোশ্যাল মিডিয়া ব্যানার কিট</li>
+                        </ul>
+                    </div>
+
+                    <!-- Tier 5 -->
+                    <div class="tier-card glass" style="border-color:rgba(192,132,252,0.35);">
+                        <div class="tier-card-badge">লেভেল ৫</div>
+                        <div class="tier-card-icon" style="color:#c084fc;"><i class="fas fa-chess-queen"></i></div>
+                        <h3 class="tier-card-title" style="color:#c084fc;">Diamond Partner</h3>
+                        <div class="tier-card-rate text-emerald">৫০% <span class="rate-sub">কমিশন</span></div>
+                        <div class="tier-card-range">৪১ থেকে ৫০টি চ্যালেঞ্জ সেলস</div>
+                        <ul class="tier-perks">
+                            <li><i class="fas fa-check text-emerald"></i> সর্বোচ্চ ৫০% কমিশন শেয়ারিং</li>
+                            <li><i class="fas fa-check text-emerald"></i> ডেডিকেটেড ভিআইপি সাপোর্ট ম্যানেজার</li>
+                            <li><i class="fas fa-check text-emerald"></i> ১৫% স্পেশাল ট্রেডার ভাউচার কোড</li>
+                        </ul>
+                    </div>
+
+                    <!-- Tier 6 -->
+                    <div class="tier-card glass glass-glow" style="border-color:rgba(255,215,0,0.55); background:radial-gradient(circle at 50% 0%, rgba(255,215,0,0.14) 0%, rgba(18,24,38,0.95) 75%);">
+                        <div class="tier-card-badge" style="background:#ffd700; color:#070a12; font-weight:900;">আজীবন সর্বোচ্চ</div>
+                        <div class="tier-card-icon" style="color:#ffd700;"><i class="fas fa-crown"></i></div>
+                        <h3 class="tier-card-title" style="color:#ffd700;">Master Partner</h3>
+                        <div class="tier-card-rate" style="color:#ffd700;">৫০% <span class="rate-sub">পার্মানেন্ট</span></div>
+                        <div class="tier-card-range" style="color:#ffd700; font-weight:800;">৫১+ আজীবন স্থায়ী লেভেল</div>
+                        <ul class="tier-perks">
+                            <li><i class="fas fa-check text-gold"></i> আজীবন স্থায়ী ৫০% ক্যাশ কমিশন</li>
+                            <li><i class="fas fa-check text-gold"></i> কোনো সেলস কোটা বা ডিমোশন নেই</li>
+                            <li><i class="fas fa-check text-gold"></i> প্রতিটি রিপিট ও রিনিউ ক্রয়েও কমিশন</li>
+                            <li><i class="fas fa-check text-gold"></i> ১ ঘণ্টার মধ্যে এক্সপ্রেস ক্যাশ উইথড্র</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="tier-guarantee-box glass">
+                    <i class="fas fa-shield-alt text-emerald" style="font-size:1.6rem; flex-shrink:0;"></i>
+                    <div>
+                        <strong style="color:#fff;">লেভেল সুরক্ষা নিশ্চয়তা (Never Downgraded):</strong> 
+                        একবার আপনি কোনো লেভেলে পৌঁছালে আপনার অর্জিত কমিশন রেট আজীবনের জন্য সুরক্ষিত থাকবে। কোনো মাসে সেলস কম হলেও আপনার লেভেল কখনো নিচে নামবে না!
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERACTIVE LIVE EARNINGS CALCULATOR -->
+        <section class="landing-section" id="calculator" style="background:rgba(0,0,0,0.25);">
+            <div class="landing-container">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-calculator"></i> লাইভ ইনকাম সিমুলেটর</span>
+                    <h2 class="section-title">আপনার সম্ভাব্য মাসিক আয় <span class="hero-gradient-text">হিসাব করুন</span></h2>
+                    <p class="section-desc">
+                        নিচের স্লাইডার দিয়ে আপনার আনুমানিক মাসিক রেফারেল সংখ্যা ও গড় প্যাকেজ সিলেক্ট করে দেখুন আপনি প্রতি মাসে ও বছরে কত টাকা আয় করতে পারেন।
+                    </p>
+                </div>
+
+                <div class="calc-card glass glass-glow">
+                    <div class="calc-grid">
+                        <!-- Left: Inputs -->
+                        <div class="calc-inputs-col">
+                            <div class="calc-input-group">
+                                <div class="calc-input-header">
+                                    <label><i class="fas fa-users text-cyan"></i> প্রতি মাসে আনুমানিক রেফারেল সংখ্যা:</label>
+                                    <span class="calc-badge-val" id="calcReferralCountBadge">২৫ জন ট্রেডার</span>
+                                </div>
+                                <input type="range" class="calc-slider" id="calcReferralSlider" min="1" max="100" value="25" oninput="updateCalculator()">
+                                <div class="calc-slider-ticks">
+                                    <span>১ (১০%)</span>
+                                    <span>২০ (২০%)</span>
+                                    <span>৩০ (৩০%)</span>
+                                    <span>৪০ (৪০%)</span>
+                                    <span>৫০+ (৫০% Master)</span>
+                                </div>
+                            </div>
+
+                            <div class="calc-input-group" style="margin-top:1.5rem;">
+                                <label style="display:block; margin-bottom:8px; font-weight:700; font-size:0.88rem; color:#cbd5e1;">
+                                    <i class="fas fa-box text-gold"></i> গড় চ্যালেঞ্জ প্যাকেজ নির্বাচন করুন:
+                                </label>
+                                <div class="calc-package-chips">
+                                    <button type="button" class="pkg-chip" data-fee="15" onclick="selectCalcPackage(this, 15)">$100 Starter ($15 Fee)</button>
+                                    <button type="button" class="pkg-chip" data-fee="25" onclick="selectCalcPackage(this, 25)">$200 Pro ($25 Fee)</button>
+                                    <button type="button" class="pkg-chip active" data-fee="50" onclick="selectCalcPackage(this, 50)">$500 Elite ($50 Fee)</button>
+                                    <button type="button" class="pkg-chip" data-fee="90" onclick="selectCalcPackage(this, 90)">$1,000 Master ($90 Fee)</button>
+                                    <button type="button" class="pkg-chip" data-fee="105" onclick="selectCalcPackage(this, 105)">$1,200 Grand ($105 Fee)</button>
+                                </div>
+                            </div>
+
+                            <!-- Progress toward Master Tier -->
+                            <div class="calc-tier-progress-box">
+                                <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:6px;">
+                                    <span style="color:#cbd5e1;">মাস্টার পার্টনার (৫০% লাইফটাইম) অগ্রগতি:</span>
+                                    <strong id="calcMasterTierPctText" style="color:var(--emerald);">৪৯%</strong>
+                                </div>
+                                <div class="progress-bar-wrap" style="height:8px; margin:0;">
+                                    <div class="progress-bar-fill" id="calcMasterTierBar" style="width:49%;"></div>
+                                </div>
+                                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;" id="calcNextTierHint">
+                                    আর ২৬টি সেল হলে আপনি আজীবন ৫০% ফিক্সড কমিশন পাবেন!
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Computed Results -->
+                        <div class="calc-results-col glass">
+                            <div class="calc-result-header">
+                                <span class="badge badge-gold" id="calcLevelBadge">LEVEL 3: GOLD</span>
+                                <div class="calc-rate-display" id="calcRateDisplay">৩০% কমিশন রেট</div>
+                            </div>
+
+                            <div class="calc-result-main">
+                                <div class="res-label">আনুমানিক মাসিক ইনকাম (Monthly Earnings)</div>
+                                <div class="res-amount-usd text-emerald" id="calcMonthlyUsd">$375.00</div>
+                                <div class="res-amount-bdt" id="calcMonthlyBdt">≈ ৳৪৫,৭৫০ টাকা / মাস</div>
+                            </div>
+
+                            <div class="calc-result-sub-grid">
+                                <div class="sub-cell">
+                                    <div class="sub-lbl">আনুমানিক বার্ষিক ইনকাম</div>
+                                    <div class="sub-val text-gold" id="calcAnnualUsd">$4,500.00</div>
+                                    <div class="sub-bdt" id="calcAnnualBdt">≈ ৳৫,৪৯,০০০ টাকা/বছর</div>
+                                </div>
+                                <div class="sub-cell">
+                                    <div class="sub-lbl">মাসিক সেলস ভলিউম</div>
+                                    <div class="sub-val text-cyan" id="calcVolumeUsd">$1,250.00</div>
+                                    <div class="sub-bdt" id="calcVolumeBdt">২৫টি চ্যালেঞ্জ বিক্রয়</div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn-emerald" onclick="scrollToAuth('register')" style="width:100%; padding:14px; margin-top:1.25rem; font-size:0.96rem;">
+                                <i class="fas fa-arrow-right"></i> এই ইনকাম পেতে ফ্রি একাউন্ট খুলুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BROKER ECOSYSTEM & TRADER ADVANTAGES -->
+        <section class="landing-section" id="brokers">
+            <div class="landing-container">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-handshake"></i> গ্লোবাল ব্রোকার সাপোর্ট</span>
+                    <h2 class="section-title">টপ বাইনারি ব্রোকারদের সাথে <span class="hero-gradient-text">১০০% সামঞ্জস্যপূর্ণ</span></h2>
+                    <p class="section-desc">
+                        আপনার দর্শকরা তাদের পছন্দের যেকোনো বাইনারি ব্রোকারে ট্রেড করতে পারবে। কোনো জটিল সফটওয়্যার ইনস্টল ছাড়াই বিশ্বসেরা ব্রোকারগুলোর সাথে ফুল অটোমেশন।
+                    </p>
+                </div>
+
+                <div class="broker-cards-grid">
+                    <!-- Quotex -->
+                    <div class="broker-card glass">
+                        <div class="broker-top">
+                            <div class="broker-logo-box" style="background:rgba(0,230,118,0.15); color:var(--emerald);">
+                                <i class="fas fa-chart-line" style="font-size:1.8rem;"></i>
+                            </div>
+                            <div>
+                                <h3 class="broker-name">Quotex Broker</h3>
+                                <span class="badge badge-success">১০০% ভেরিফাইড সাপোর্ট</span>
+                            </div>
+                        </div>
+                        <p class="broker-desc">
+                            ট্রেডাররা তাদের নিজস্ব Quotex ডেমো বা লাইভ একাউন্টে ট্রেড করে Binary Prop Firm চ্যালেঞ্জ সম্পন্ন করতে পারে। আমাদের স্বয়ংক্রিয় সিঙ্ক সিস্টেম সেকেন্ডে পারফরম্যান্স ভেরিফাই করে।
+                        </p>
+                        <div class="broker-perks-list">
+                            <span><i class="fas fa-check text-emerald"></i> কোনো ব্রোকার পাসওয়ার্ড শেয়ারের প্রয়োজন নেই</span>
+                            <span><i class="fas fa-check text-emerald"></i> মোবাইল অ্যাপ ও ওয়েব উভয় প্ল্যাটফর্মে প্রযোজ্য</span>
+                            <span><i class="fas fa-check text-emerald"></i> ৮৫%-৯৫% হাই পে-আউট পেয়ার্স সাপোর্ট</span>
+                        </div>
+                    </div>
+
+                    <!-- Pocket Option -->
+                    <div class="broker-card glass">
+                        <div class="broker-top">
+                            <div class="broker-logo-box" style="background:rgba(0,240,255,0.15); color:var(--cyan);">
+                                <i class="fas fa-wallet" style="font-size:1.8rem;"></i>
+                            </div>
+                            <div>
+                                <h3 class="broker-name">Pocket Option</h3>
+                                <span class="badge badge-platinum">ফুল অটোমেশন রেডি</span>
+                            </div>
+                        </div>
+                        <p class="broker-desc">
+                            পকেট অপশন ট্রেডারদের কাছে বাইনারি প্রপ ফার্মের গ্রহণযোগ্যতা সর্বাধিক। ১৫ সেশন মানি ম্যানেজমেন্ট শিট রুলসে ট্রেডাররা সহজেই কোয়ালিফাই হয়ে ফান্ডেড মূলধন পায়।
+                        </p>
+                        <div class="broker-perks-list">
+                            <span><i class="fas fa-check text-cyan"></i> ওটিসি (OTC) ও রেগুলার মার্কেট কম্প্যাটিবল</span>
+                            <span><i class="fas fa-check text-cyan"></i> দ্রুত ট্রেড হিস্টোরি অডিট ও অ্যাপ্রুভাল</span>
+                            <span><i class="fas fa-check text-cyan"></i> মিলিয়ন ট্রেডারদের শীর্ষ জনপ্রিয় ব্রোকার</span>
+                        </div>
+                    </div>
+
+                    <!-- Deriv -->
+                    <div class="broker-card glass">
+                        <div class="broker-top">
+                            <div class="broker-logo-box" style="background:rgba(239,68,68,0.15); color:#f87171;">
+                                <i class="fas fa-globe" style="font-size:1.8rem;"></i>
+                            </div>
+                            <div>
+                                <h3 class="broker-name">Deriv (Binary.com)</h3>
+                                <span class="badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3);">গ্লোবাল লিডার</span>
+                            </div>
+                        </div>
+                        <p class="broker-desc">
+                            ২৫ বছরের অভিজ্ঞ গ্লোবাল ব্রোকার Deriv-এর সিন্থেটিক ইনডেক্স ও অপশনস ট্রেডাররা আমাদের প্ল্যাটফর্মে ফান্ডেড একাউন্ট নিয়ে ট্রেড পরিচালনা করতে পারে।
+                        </p>
+                        <div class="broker-perks-list">
+                            <span><i class="fas fa-check text-emerald"></i> ২৪/৭ সিন্থেটিক ইনডেক্স ট্রেডিং সুবিধা</span>
+                            <span><i class="fas fa-check text-emerald"></i> আন্তর্জাতিক ট্রেডার গ্রহণযোগ্যতা</span>
+                            <span><i class="fas fa-check text-emerald"></i> ৮০% প্রফিট স্প্লিট নিশ্চয়তা</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Why Traders Buy Strip -->
+                <div class="traders-love-strip glass">
+                    <div class="strip-header">
+                        <h3 style="font-size:1.15rem; font-weight:800; color:#fff;">
+                            <i class="fas fa-fire text-gold"></i> কেন আপনার দর্শকরা সাথে সাথে চ্যালেঞ্জ কিনবে?
+                        </h3>
+                        <p style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">
+                            আমাদের ৩টি স্বর্ণালী নিয়ম ও সর্বোচ্চ প্রফিট শেয়ারিং ট্রেডারদের কনভার্সন রেট ৮৫%+ পর্যন্ত পৌঁছে দেয়:
+                        </p>
+                    </div>
+                    <div class="strip-grid">
+                        <div class="strip-item">
+                            <div class="strip-icon"><i class="fas fa-clipboard-check text-emerald"></i></div>
+                            <div>
+                                <strong>১৫ সেশন ও ২৫% ড্র-ডাউন নিয়ম</strong>
+                                <p>জটিল কোনো স্টপলস নেই, মানি ম্যানেজমেন্ট শিট ফলো করলেই চ্যালেঞ্জ পাস।</p>
+                            </div>
+                        </div>
+                        <div class="strip-item">
+                            <div class="strip-icon"><i class="fas fa-hand-holding-usd text-gold"></i></div>
+                            <div>
+                                <strong>৮০% সরাসরি প্রফিট স্প্লিট</strong>
+                                <p>পাস করার পর অর্জিত মুনাফার সিংহভাগ সরাসরি ট্রেডারের নিজস্ব ওয়ালেটে চলে যায়।</p>
+                            </div>
+                        </div>
+                        <div class="strip-item">
+                            <div class="strip-icon"><i class="fas fa-bolt text-cyan"></i></div>
+                            <div>
+                                <strong>ইনস্ট্যান্ট লাইসেন্স অ্যাক্টিভেশন</strong>
+                                <p>পেমেন্ট সম্পন্ন হওয়ার সাথে সাথেই ট্রেডার পোর্টাল অ্যাক্সেস এবং গাইডলাইন পেয়ে যায়।</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WHY PARTNER WITH US SECTION -->
+        <section class="landing-section" id="benefits" style="background:rgba(0,0,0,0.2);">
+            <div class="landing-container">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-gem"></i> সেরা সুযোগ ও সুবিধা</span>
+                    <h2 class="section-title">কেন বাইনারি প্রপ ফার্মের <span class="hero-gradient-text">পার্টনার হবেন?</span></h2>
+                    <p class="section-desc">
+                        আমরা শুধু কমিশন দেই না, আপনার সোশ্যাল মিডিয়া ব্র্যান্ডকে গ্রো করতে দিই পূর্ণাঙ্গ টেকনোলজি, ট্র্যাকিং ও ডেডিকেটেড মার্কেটিং সাপোর্ট।
+                    </p>
+                </div>
+
+                <div class="benefits-grid">
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-emerald"><i class="fas fa-percentage"></i></div>
+                        <h3>৫০% পর্যন্ত রেকর্ড কমিশন</h3>
+                        <p>অন্যান্য প্ল্যাটফর্ম যেখানে মাত্র ১০-১৫% দেয়, সেখানে আমাদের প্ল্যাটফর্মে আপনি পাবেন ধাপে ধাপে আজীবন সর্বোচ্চ ৫০% পর্যন্ত রিয়েল ক্যাশ কমিশন।</p>
+                    </div>
+
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-gold"><i class="fas fa-money-bill-wave"></i></div>
+                        <h3>ইনস্ট্যান্ট ও সাপ্তাহিক পে-আউট</h3>
+                        <p>কমিশন উইথড্র করার জন্য দীর্ঘ অপেক্ষার প্রয়োজন নেই। মাত্র $২০ ব্যালেন্স হলেই Binance Pay, USDT, বিকাশ বা নগদ-এ তাৎক্ষণিক ক্যাশ উইথড্র দিন।</p>
+                    </div>
+
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-cyan"><i class="fas fa-tags"></i></div>
+                        <h3>কাস্টম ডিসকাউন্ট প্রোমো কোড</h3>
+                        <p>আপনার ইউটিউব বা টেলিগ্রাম চ্যানেলের নামে নিজস্ব প্রোমো কোড (যেমন: SUMON10) তৈরি করতে পারবেন। ট্রেডাররা ৫%-১৫% ছাড় পাবে এবং আপনি পুরো কমিশন পাবেন।</p>
+                    </div>
+
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-purple"><i class="fas fa-qrcode"></i></div>
+                        <h3>অটোমেটিক QR কোড ও সোশ্যাল কিট</h3>
+                        <p>এক ক্লিকে আপনার পার্টনার QR কোড ডাউনলোড করুন এবং আমাদের তৈরি করা উচ্চ-কনভার্সন রেডি-মেড বাংলা ও ইংলিশ প্রমোশনাল টেক্সট পোস্ট করুন।</p>
+                    </div>
+
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-emerald"><i class="fas fa-chart-pie"></i></div>
+                        <h3>লাইভ ড্যাশবোর্ড ও সেলস ট্র্যাকিং</h3>
+                        <p>কোন ট্রেডার কোন প্যাকেজ কিনলো, কত কমিশন জমা হলো — সবকিছু আপনার ব্যক্তিগত পার্টনার পোর্টালে সেকেন্ডের মধ্যে স্বচ্ছভাবে দেখতে পারবেন।</p>
+                    </div>
+
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-gold"><i class="fas fa-headset"></i></div>
+                        <h3>ডেডিকেটেড পার্টনার সাপোর্ট</h3>
+                        <p>যেকোনো টেকনিক্যাল প্রশ্ন, স্পেশাল ক্যাম্পেইন বা কাস্টম পার্টনারশিপের জন্য আমাদের অফিশিয়াল টেলিগ্রাম সাপোর্ট টিম সার্বক্ষণিক পাশে থাকে।</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS (3 SIMPLE STEPS) -->
+        <section class="landing-section" id="howItWorks">
+            <div class="landing-container">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-stream"></i> সহজ ৩টি ধাপ</span>
+                    <h2 class="section-title">যেভাবে শুরু করবেন <span class="hero-gradient-text">পার্টনারশিপ যাত্রা</span></h2>
+                    <p class="section-desc">
+                        কোনো অনুমোদন ফি বা জটিল কাগজপত্র ছাড়াই ১ মিনিটের মধ্যে সম্পূর্ণ ফ্রিতে পার্টনার একাউন্ট চালু করুন:
+                    </p>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card glass">
+                        <div class="step-num">০১</div>
+                        <div class="step-icon text-emerald"><i class="fas fa-user-check"></i></div>
+                        <h3>ফ্রি একাউন্ট খুলুন</h3>
+                        <p>নাম, ইমেইল ও আপনার পছন্দের ইউনিক রেফারেল কোড দিয়ে ৩০ সেকেন্ডে পার্টনার একাউন্ট নিবন্ধন সম্পন্ন করুন।</p>
+                    </div>
+
+                    <div class="step-card glass">
+                        <div class="step-num">০২</div>
+                        <div class="step-icon text-cyan"><i class="fas fa-share-alt"></i></div>
+                        <h3>লিংক ও কোড শেয়ার করুন</h3>
+                        <p>আপনার ইউটিউব ভিডিও, ফেসবুক গ্রুপ, টেলিগ্রাম বা বন্ধুদের সাথে আপনার ইউনিক লিংক বা প্রোমো কোড ছড়িয়ে দিন।</p>
+                    </div>
+
+                    <div class="step-card glass">
+                        <div class="step-num">০৩</div>
+                        <div class="step-icon text-gold"><i class="fas fa-wallet"></i></div>
+                        <h3>কমিশন পেয়ে পেমেন্ট নিন</h3>
+                        <p>ট্রেডাররা চ্যালেঞ্জ কিনলেই ১০% থেকে ৫০% কমিশন আপনার একাউন্টে জমা হবে। Binance Pay বা বিকাশে ক্যাশ উইথড্র নিন।</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AUTH SECTION (EMBEDDED LOGIN & REGISTER) -->
+        <section class="landing-section" id="authSection" style="background:radial-gradient(circle at 50% 50%, rgba(0,230,118,0.06) 0%, transparent 70%);">
+            <div class="landing-container">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-user-lock"></i> পার্টনার পোর্টাল এক্সেস</span>
+                    <h2 class="section-title">আজই শুরু করুন <span class="hero-gradient-text">আপনার প্যাসিভ ইনকাম</span></h2>
+                    <p class="section-desc">
+                        নতুন পার্টনার হতে নিচে রেজিস্ট্রেশন করুন, অথবা ইতিমধ্যে পার্টনার হয়ে থাকলে লগইন করে ড্যাশবোর্ডে প্রবেশ করুন।
+                    </p>
+                </div>
+
+                <div id="authContainer">
         <div class="auth-box glass glass-glow">
             <div class="auth-brand">
                 <img src="/assets/logo.png" alt="Binary Prop Firm">
@@ -826,6 +2361,163 @@
             </div>
         </div>
     </div>
+            </div>
+        </section>
+
+        <!-- FAQ ACCORDION -->
+        <section class="landing-section" id="faq">
+            <div class="landing-container" style="max-width:850px;">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-question-circle"></i> সচরাচর জিজ্ঞাসা</span>
+                    <h2 class="section-title">সাধারণ কিছু <span class="hero-gradient-text">প্রশ্নের উত্তর</span></h2>
+                    <p class="section-desc">
+                        পার্টনার ও অ্যাফিলিয়েট প্রোগ্রাম সম্পর্কে সর্বাধিক জিজ্ঞাসিত প্রশ্নের সুস্পষ্ট উত্তর নিচে দেওয়া হলো:
+                    </p>
+                </div>
+
+                <div class="faq-accordion-list">
+                    <!-- FAQ 1 -->
+                    <div class="faq-card glass" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>১. পার্টনার প্রোগ্রামে যোগ দিতে কি কোনো রেজিস্ট্রেশন ফি বা ইনভেস্টমেন্ট প্রয়োজন?</span>
+                            <i class="fas fa-chevron-down faq-chevron"></i>
+                        </div>
+                        <div class="faq-answer">
+                            না, এটি ১০০% বিনামূল্যে। যে কেউ সাথে সাথে একাউন্ট খুলে নিজের ইউনিক রেফারেল লিংক ও প্রোমো কোড তৈরি করে কমিশন উপার্জন শুরু করতে পারবেন। কোনো হিডেন চার্জ বা আপফ্রন্ট ফি নেই।
+                        </div>
+                    </div>
+
+                    <!-- FAQ 2 -->
+                    <div class="faq-card glass" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>২. ন্যূনতম পে-আউট কত এবং টাকা পেতে কতক্ষণ সময় লাগে?</span>
+                            <i class="fas fa-chevron-down faq-chevron"></i>
+                        </div>
+                        <div class="faq-answer">
+                            সর্বনিম্ন উত্তোলন সীমা মাত্র ২০ ডলার ($২০)। আপনি যেকোনো দিন যেকোনো সময় Binance Pay, USDT (TRC-20), বিকাশ বা নগদ-এর মাধ্যমে উইথড্র রিকোয়েস্ট করতে পারেন। রিকোয়েস্টের পর দ্রুততম সময়ে অ্যাডমিন পেমেন্ট সম্পন্ন করে ট্রানজেকশন আইডি প্রদান করে।
+                        </div>
+                    </div>
+
+                    <!-- FAQ 3 -->
+                    <div class="faq-card glass" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>৩. রেফারেল ট্র্যাকিং ও কুকি কীভাবে কাজ করে?</span>
+                            <i class="fas fa-chevron-down faq-chevron"></i>
+                        </div>
+                        <div class="faq-answer">
+                            কোনো ভিজিটর আপনার রেফারেল লিংকে ক্লিক করলে তার ব্রাউজারে ৯০ দিনের জন্য ট্র্যাকিং কুকি সেট হয়ে যায়। উক্ত ৯০ দিনের মধ্যে সে যে কোনো সময় একাউন্ট খুলে চ্যালেঞ্জ কিনলেই আপনি কমিশন পাবেন। তাছাড়া সে যদি আপনার প্রোমো কোড সরাসরি চেকআউটে ব্যবহার করে, তবে লাইফটাইম রেফারেল হিসেবে আপনার আন্ডারে চলে আসবে।
+                        </div>
+                    </div>
+
+                    <!-- FAQ 4 -->
+                    <div class="faq-card glass" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>৪. ট্রেডাররা কি ডিসকাউন্ট পাবে?</span>
+                            <i class="fas fa-chevron-down faq-chevron"></i>
+                        </div>
+                        <div class="faq-answer">
+                            হ্যাঁ! আপনার ডিফল্ট প্রোমো কোড ব্যবহার করলেই ট্রেডাররা চ্যালেঞ্জ ক্রয়ে ৫% তাৎক্ষণিক ডিসকাউন্ট পাবে। এছাড়া আপনার সেলস বাড়ার সাথে সাথে আপনি ১০% থেকে ১৫% পর্যন্ত স্পেশাল কাস্টম প্রোমো কোডের আবেদন করতে পারবেন।
+                        </div>
+                    </div>
+
+                    <!-- FAQ 5 -->
+                    <div class="faq-card glass" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>৫. ব্রোকারের সাথে ট্রেডারদের কোনো সমস্যা হবে কি?</span>
+                            <i class="fas fa-chevron-down faq-chevron"></i>
+                        </div>
+                        <div class="faq-answer">
+                            একদমই না। ট্রেডাররা Quotex, Pocket Option বা Deriv-এ তাদের নিজস্ব প্ল্যাটফর্ম অ্যাকাউন্টে ট্রেড করে। Binary Prop Firm কোনো ব্রোকারের অ্যাকাউন্টে লগইন বা হস্তক্ষেপ করে না; এটি একটি পিওর ট্রেডার ইভ্যালুয়েশন ও ফান্ডিং প্ল্যাটফর্ম।
+                        </div>
+                    </div>
+
+                    <!-- FAQ 6 -->
+                    <div class="faq-card glass" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>৬. আমার অর্জিত কমিশন রেট কি কখনো কমে যাবে?</span>
+                            <i class="fas fa-chevron-down faq-chevron"></i>
+                        </div>
+                        <div class="faq-answer">
+                            না! একবার আপনি পরবর্তী লেভেলে উঠলে (যেমন Gold ৩০% বা Master ৫০%), আপনার কমিশন রেট স্থায়ীভাবে লক হয়ে যায়। কোনো নির্দিষ্ট মাসে সেলস কম হলেও আপনার লেভেল কখনোই ডাউনগ্রেড হবে না।
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HIGH CONVERTING BOTTOM CTA BANNER -->
+        <section class="landing-section" style="padding-bottom:3.5rem;">
+            <div class="landing-container">
+                <div class="bottom-cta-banner glass glass-glow">
+                    <div class="cta-banner-content">
+                        <span class="badge badge-master"><i class="fas fa-rocket"></i> লাইফটাইম আর্নিং শুরু করুন</span>
+                        <h2 class="cta-banner-title">বাইনারি অপশনস কমিউনিটির সাথে <br>আজই গড়ুন আপনার প্যাসিভ আয়ের উৎস</h2>
+                        <p class="cta-banner-sub">
+                            হাজার হাজার সফল পার্টনারের সাথে যুক্ত হয়ে উপভোগ করুন সর্বোচ্চ ৫০% রিয়েল ক্যাশ কমিশন।
+                        </p>
+                        <div class="cta-banner-btns">
+                            <button type="button" class="btn-emerald hero-btn-lg" onclick="scrollToAuth('register')">
+                                <i class="fas fa-user-plus"></i> এখনই ফ্রি পার্টনার একাউন্ট খুলুন
+                            </button>
+                            <a href="https://t.me/BinaryPropFirmSupport" target="_blank" class="btn-outline hero-btn-lg" style="text-decoration:none;">
+                                <i class="fab fa-telegram-plane"></i> পার্টনার সাপোর্ট টেলিগ্রাম
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LANDING FOOTER -->
+        <footer class="landing-footer">
+            <div class="landing-container">
+                <div class="footer-top-row">
+                    <div class="footer-brand">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                            <img src="/assets/logo.png" alt="Binary Prop Firm" style="width:36px; height:36px; border-radius:8px;">
+                            <span style="font-weight:900; font-size:1.1rem; color:#fff;">Binary Prop Firm</span>
+                        </div>
+                        <p style="font-size:0.82rem; color:var(--text-muted); max-width:320px; line-height:1.5;">
+                            বিশ্বের অন্যতম শীর্ষস্থানীয় বাইনারি অপশনস ফান্ডিং প্ল্যাটফর্ম। নির্ভরযোগ্য ব্রোকার ইন্টিগ্রেশন ও সর্বোচ্চ প্রফিট স্প্লিট।
+                        </p>
+                    </div>
+
+                    <div class="footer-links-col">
+                        <h4>দ্রুত লিংক</h4>
+                        <a href="/"><i class="fas fa-home"></i> হোমপেজ</a>
+                        <a href="/dashboard"><i class="fas fa-chart-pie"></i> ট্রেডার ড্যাশবোর্ড</a>
+                        <a href="#tiers"><i class="fas fa-layer-group"></i> কমিশন টিয়ার</a>
+                        <a href="#calculator"><i class="fas fa-calculator"></i> ইনকাম সিমুলেটর</a>
+                    </div>
+
+                    <div class="footer-links-col">
+                        <h4>পেমেন্ট মেথড</h4>
+                        <span style="color:#cbd5e1; font-size:0.85rem;"><i class="fas fa-check text-emerald"></i> Binance Pay (UID)</span>
+                        <span style="color:#cbd5e1; font-size:0.85rem;"><i class="fas fa-check text-emerald"></i> USDT (TRC-20)</span>
+                        <span style="color:#cbd5e1; font-size:0.85rem;"><i class="fas fa-check text-emerald"></i> bKash Personal</span>
+                        <span style="color:#cbd5e1; font-size:0.85rem;"><i class="fas fa-check text-emerald"></i> Nagad Personal</span>
+                    </div>
+
+                    <div class="footer-links-col">
+                        <h4>অফিসিয়াল সহায়তা</h4>
+                        <a href="https://t.me/BinaryPropFirmSupport" target="_blank"><i class="fab fa-telegram-plane"></i> টেলিগ্রাম সাপোর্ট</a>
+                        <span style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;">সাপোর্ট সময়: ২৪/৭ একটিভ</span>
+                    </div>
+                </div>
+
+                <div class="footer-divider"></div>
+
+                <div class="footer-bottom-row">
+                    <div style="font-size:0.78rem; color:var(--text-muted);">
+                        &copy; 2026 Binary Prop Firm. সর্বস্বত্ব সংরক্ষিত।
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-muted); max-width:550px; text-align:right;">
+                        ঝুঁকি সতর্কতা: অপশনস ও ডেরিভেটিভস ট্রেডিং আর্থিক ঝুঁকির বিষয়। আমরা ট্রেডারদের ইভ্যালুয়েশন ও ক্যাপিটাল ফান্ডিং প্রদান করি।
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
 
 
     <!-- ========================================== -->
@@ -869,7 +2561,11 @@
                     <span>প্রোফাইল সেটিংস</span>
                 </div>
 
-                <div style="margin-top:auto; padding-top:1rem; border-top:1px solid var(--border-subtle);">
+                <div style="margin-top:auto; padding-top:1rem; border-top:1px solid var(--border-subtle); display:flex; flex-direction:column; gap:4px;">
+                    <div class="nav-link" onclick="previewLandingPage(event)" style="color:var(--cyan); cursor:pointer;">
+                        <i class="fas fa-globe"></i>
+                        <span>ল্যান্ডিং পেজ প্রিভিউ</span>
+                    </div>
                     <a href="/dashboard" target="_blank" class="nav-link" style="color:#60a5fa;">
                         <i class="fas fa-external-link-alt"></i>
                         <span>ট্রেডার ড্যাশবোর্ড</span>
@@ -1690,17 +3386,184 @@ Start your funded trading journey today! 📈
         }
 
         function showAuthView() {
-            document.getElementById('authContainer').style.display = 'flex';
-            document.getElementById('dashContainer').style.display = 'none';
+            const landing = document.getElementById('landingView');
+            if (landing) landing.style.display = 'block';
+            const authBox = document.getElementById('authContainer');
+            if (authBox) authBox.style.display = 'flex';
+            const dash = document.getElementById('dashContainer');
+            if (dash) dash.style.display = 'none';
+            showPreviewReturnBar(false);
+            updateCalculator();
+            window.scrollTo({ top: 0, behavior: 'auto' });
         }
 
         function showDashboardView() {
-            document.getElementById('authContainer').style.display = 'none';
-            document.getElementById('dashContainer').style.display = 'block';
+            const landing = document.getElementById('landingView');
+            if (landing) landing.style.display = 'none';
+            const dash = document.getElementById('dashContainer');
+            if (dash) dash.style.display = 'block';
+            showPreviewReturnBar(false);
             renderDashboardData();
             fetchPartnerSalesLog();
             fetchPartnerPromoCodes();
             fetchPartnerPayoutsHistory();
+        }
+
+        function previewLandingPage(e) {
+            if (e) e.preventDefault();
+            const landing = document.getElementById('landingView');
+            const dash = document.getElementById('dashContainer');
+            if (landing && dash) {
+                landing.style.display = 'block';
+                dash.style.display = 'none';
+                showPreviewReturnBar(true);
+                updateCalculator();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function showPreviewReturnBar(show) {
+            const bar = document.getElementById('previewReturnBar');
+            if (bar) bar.style.display = show ? 'block' : 'none';
+        }
+
+        function returnToDashboard() {
+            showDashboardView();
+        }
+
+        // ================= LANDING PAGE HELPERS =================
+        let currentCalcPackageFee = 50;
+
+        function updateCalculator() {
+            const slider = document.getElementById('calcReferralSlider');
+            if (!slider) return;
+            const count = parseInt(slider.value, 10) || 1;
+            const badge = document.getElementById('calcReferralCountBadge');
+            if (badge) badge.innerText = `${count} জন ট্রেডার`;
+
+            // Tier calculation matching server.js
+            let rate = 10;
+            let levelBadge = 'LEVEL 1: BRONZE';
+            let badgeClass = 'badge-bronze';
+
+            if (count <= 10) {
+                rate = 10;
+                levelBadge = 'LEVEL 1: BRONZE';
+                badgeClass = 'badge-bronze';
+            } else if (count <= 20) {
+                rate = 20;
+                levelBadge = 'LEVEL 2: SILVER';
+                badgeClass = 'badge-silver';
+            } else if (count <= 30) {
+                rate = 30;
+                levelBadge = 'LEVEL 3: GOLD';
+                badgeClass = 'badge-gold';
+            } else if (count <= 40) {
+                rate = 40;
+                levelBadge = 'LEVEL 4: PLATINUM';
+                badgeClass = 'badge-platinum';
+            } else if (count <= 50) {
+                rate = 50;
+                levelBadge = 'LEVEL 5: DIAMOND';
+                badgeClass = 'badge-diamond';
+            } else {
+                rate = 50;
+                levelBadge = 'LEVEL 6: MASTER (LIFETIME)';
+                badgeClass = 'badge-master';
+            }
+
+            const monthlySalesVolume = count * currentCalcPackageFee;
+            const monthlyCommission = monthlySalesVolume * (rate / 100);
+            const annualCommission = monthlyCommission * 12;
+            const bdtRate = 122; // approx USD to BDT
+
+            const lvlEl = document.getElementById('calcLevelBadge');
+            if (lvlEl) {
+                lvlEl.className = `badge ${badgeClass}`;
+                lvlEl.innerText = levelBadge;
+            }
+
+            const rateEl = document.getElementById('calcRateDisplay');
+            if (rateEl) rateEl.innerText = `${rate}% কমিশন রেট`;
+
+            const monthlyUsdEl = document.getElementById('calcMonthlyUsd');
+            if (monthlyUsdEl) monthlyUsdEl.innerText = `$${monthlyCommission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+            const monthlyBdtEl = document.getElementById('calcMonthlyBdt');
+            if (monthlyBdtEl) monthlyBdtEl.innerText = `≈ ৳${Math.round(monthlyCommission * bdtRate).toLocaleString('bn-BD')} টাকা / মাস`;
+
+            const annualUsdEl = document.getElementById('calcAnnualUsd');
+            if (annualUsdEl) annualUsdEl.innerText = `$${annualCommission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+            const annualBdtEl = document.getElementById('calcAnnualBdt');
+            if (annualBdtEl) annualBdtEl.innerText = `≈ ৳${Math.round(annualCommission * bdtRate).toLocaleString('bn-BD')} টাকা/বছর`;
+
+            const volUsdEl = document.getElementById('calcVolumeUsd');
+            if (volUsdEl) volUsdEl.innerText = `$${monthlySalesVolume.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+            const volBdtEl = document.getElementById('calcVolumeBdt');
+            if (volBdtEl) volBdtEl.innerText = `${count}টি প্যাকেজ বিক্রয়`;
+
+            // Master Tier Progress Bar (Target: 51 sales)
+            const masterPct = Math.min(100, Math.round((count / 51) * 100));
+            const bar = document.getElementById('calcMasterTierBar');
+            if (bar) bar.style.width = `${masterPct}%`;
+
+            const pctText = document.getElementById('calcMasterTierPctText');
+            if (pctText) pctText.innerText = `${masterPct}%`;
+
+            const hint = document.getElementById('calcNextTierHint');
+            if (hint) {
+                if (count >= 51) {
+                    hint.innerHTML = `<span style="color:var(--emerald); font-weight:800;"><i class="fas fa-check-circle"></i> অভিনন্দন! আপনি সর্বোচ্চ Master Partner (৫০% আজীবন) আনলক করেছেন!</span>`;
+                } else {
+                    const remaining = 51 - count;
+                    hint.innerText = `আর মাত্র ${remaining}টি সেল সম্পন্ন করলেই আজীবন স্থায়ী ৫০% কমিশন পাবেন!`;
+                }
+            }
+        }
+
+        function selectCalcPackage(btn, fee) {
+            document.querySelectorAll('.calc-package-chips .pkg-chip').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            currentCalcPackageFee = fee;
+            updateCalculator();
+        }
+
+        function toggleFaq(card) {
+            if (!card) return;
+            const isOpen = card.classList.contains('open');
+            document.querySelectorAll('.faq-card').forEach(c => c.classList.remove('open'));
+            if (!isOpen) {
+                card.classList.add('open');
+            }
+        }
+
+        function scrollToSection(sectionId) {
+            const el = document.getElementById(sectionId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function scrollToAuth(tab) {
+            const el = document.getElementById('authSection');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            if (tab) {
+                switchAuthTab(tab);
+            }
+        }
+
+        function toggleLandingMobileMenu() {
+            const menu = document.getElementById('landingNavMenu');
+            if (menu) menu.classList.toggle('mobile-active');
+        }
+
+        function closeLandingMobileMenu() {
+            const menu = document.getElementById('landingNavMenu');
+            if (menu) menu.classList.remove('mobile-active');
         }
 
         // ================= AUTH FUNCTIONS =================
