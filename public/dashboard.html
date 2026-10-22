@@ -505,17 +505,6 @@
             color: #0a0a0a;
         }
 
-        .sidebar-item-logout:hover {
-            color: #ffffff !important;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-            border-color: rgba(239, 68, 68, 0.6) !important;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35) !important;
-        }
-
-        .sidebar-item-logout:hover i, .sidebar-item-logout:hover span {
-            color: #ffffff !important;
-        }
-
         .sidebar-footer {
             padding: 1.2rem;
             border-top: 1px solid var(--card-border);
@@ -525,10 +514,19 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 12px;
+            padding: 9px 12px;
             background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px;
             margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .user-preview:hover, .user-preview.active {
+            background: rgba(245, 176, 65, 0.12);
+            border-color: rgba(245, 176, 65, 0.45);
+            box-shadow: 0 4px 15px rgba(245, 176, 65, 0.15);
         }
 
         .user-avatar {
@@ -2648,10 +2646,6 @@
                     <i class="fas fa-shopping-cart"></i>
                     <span>Buy Challenge</span>
                 </li>
-                <li class="sidebar-item" onclick="switchTab('profile', this)">
-                    <i class="fas fa-user-cog"></i>
-                    <span>Profile & Broker</span>
-                </li>
                 <li class="sidebar-item" onclick="switchTab('support', this)">
                     <i class="fas fa-headset" style="color:var(--yellow);"></i>
                     <span>Support & Helpdesk</span>
@@ -2672,20 +2666,17 @@
                     <span style="color:var(--yellow); font-weight:700;">Partner Program</span>
                     <span style="background:var(--yellow); color:#000; font-size:0.65rem; font-weight:800; padding:1px 6px; border-radius:10px; margin-left:auto;">50%</span>
                 </li>
-                <li class="sidebar-item sidebar-item-logout" onclick="handleLogout()" style="border:1px solid rgba(239,68,68,0.25); background:rgba(239,68,68,0.06); margin-top:6px; cursor:pointer;">
-                    <i class="fas fa-sign-out-alt" style="color:#ff4d4d;"></i>
-                    <span style="color:#ff4d4d; font-weight:700;">লগআউট (Logout)</span>
-                </li>
             </ul>
         </div>
 
         <div class="sidebar-footer">
-            <div class="user-preview">
+            <div class="user-preview" onclick="switchTab('profile')" style="cursor:pointer;" title="প্রোফাইল ও ব্রোকার সেটিংস">
                 <div class="user-avatar" id="avatarInitial">U</div>
-                <div class="user-info-text">
-                    <div class="user-name" id="sideUserName">Trader</div>
-                    <div class="user-email" id="sideUserEmail">trader@example.com</div>
+                <div class="user-info-text" style="flex:1; overflow:hidden;">
+                    <div class="user-name" id="sideUserName" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Trader</div>
+                    <div class="user-email" id="sideUserEmail" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">trader@example.com</div>
                 </div>
+                <i class="fas fa-user-cog" style="font-size:0.85rem; color:var(--text-secondary); opacity:0.7;" title="প্রোফাইল সেটিংস"></i>
             </div>
             <button class="btn-logout" onclick="handleLogout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -5242,6 +5233,7 @@
             document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
             document.querySelectorAll('.mobile-nav-item').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.user-preview').forEach(u => u.classList.remove('active'));
 
             const targetPane = document.getElementById(`pane-${tabId}`);
             if (targetPane) targetPane.classList.add('active');
@@ -5257,6 +5249,9 @@
 
             const mobItem = document.getElementById(`mobNav-${tabId}`);
             if (mobItem) mobItem.classList.add('active');
+            if (tabId === 'profile') {
+                document.querySelectorAll('.user-preview').forEach(u => u.classList.add('active'));
+            }
 
             // Headings - Clean & Concise Layout
             const headings = {
