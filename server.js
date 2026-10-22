@@ -8648,6 +8648,41 @@ app.post('/api/admin/support/resolve-challenge', authenticateAdminToken, (req, r
 // Quotex Deposit via Binance Pay QR & Profit Withdrawal
 // ==============================================
 
+// Helper: Strictly determine if a challenge is genuinely passed and eligible for payout / live funding
+function isChallengeEligibleForPayout(c) {
+  if (!c || typeof c !== 'object') return false;
+  
+  // Status must strictly be 'passed' or 'funded'
+  const isPassedStatus = (c.status === 'passed' || c.status === 'funded');
+  if (!isPassedStatus) return false;
+
+  // Under NO circumstances can it be in_progress, failed, rejected, pending, or cancelled
+  if (
+    c.status === 'in_progress' ||
+    c.status === 'failed' ||
+    c.status === 'rejected' ||
+    c.status === 'disqualified' ||
+    c.status === 'pending_approval' ||
+    c.status === 'pending' ||
+    c.status === 'closed' ||
+    c.status === 'cancelled'
+  ) {
+    return false;
+  }
+
+  // Under NO circumstances can it have failure or breach records
+  if (c.failReason || c.failedAt || c.violatedRule) {
+    return false;
+  }
+
+  // Under NO circumstances can it be in practice mode
+  if (c.challengePhase === 'practice') {
+    return false;
+  }
+
+  return true;
+}
+
 // 1. User: Get Payout Overview & Eligibility
 app.get('/api/user/payouts', authenticateToken, (req, res) => {
   try {
@@ -8658,12 +8693,8 @@ app.get('/api/user/payouts', authenticateToken, (req, res) => {
       (c.userEmail && user.email && c.userEmail.toLowerCase() === user.email.toLowerCase()) ||
       (c.userTraderId && user.traderId && c.userTraderId.toLowerCase() === user.traderId.toLowerCase())
     );
-    const passedChallenges = userCh.filter(c => 
-      c.status === 'passed' || 
-      c.isCompleted === true || 
-      c.challengePhase === 'funded'
-    );
-    const activeChallenges = userCh.filter(c => c.status === 'in_progress');
+    const passedChallenges = userCh.filter(isChallengeEligibleForPayout);
+    const activeChallenges = userCh.filter(c => c.status === 'in_progress' || (c.isActive === true && !isChallengeEligibleForPayout(c) && c.status !== 'failed' && c.status !== 'rejected'));
 
     const allPayouts = readJson(PAYOUTS_FILE, []);
     const userPayouts = allPayouts.filter(p => 
@@ -8710,11 +8741,7 @@ app.post('/api/user/payouts', authenticateToken, uploadPayoutQr.single('qrCodeIm
       (c.userEmail && user.email && c.userEmail.toLowerCase() === user.email.toLowerCase()) ||
       (c.userTraderId && user.traderId && c.userTraderId.toLowerCase() === user.traderId.toLowerCase())
     );
-    const passedChallenges = userCh.filter(c => 
-      c.status === 'passed' || 
-      c.isCompleted === true || 
-      c.challengePhase === 'funded'
-    );
+    const passedChallenges = userCh.filter(isChallengeEligibleForPayout);
 
     // Guard: Must have at least one passed challenge
     if (passedChallenges.length === 0) {
@@ -8723,7 +8750,7 @@ app.post('/api/user/payouts', authenticateToken, uploadPayoutQr.single('qrCodeIm
       }
       return res.status(403).json({
         success: false,
-        message: 'পে-আউট রিকোয়েস্ট করতে হলে প্রথমে একটি চ্যালেঞ্জ সম্পূর্ণভাবে পাস করতে হবে।'
+        message: 'পে-আউট ও লাইভ ফান্ড ডিপোজিট রিকোয়েস্ট করতে হলে প্রথমে মূল্যায়ণ চ্যালেঞ্জটি সফলভাবে পাস করতে হবে।'
       });
     }
 
@@ -8738,7 +8765,16 @@ app.post('/api/user/payouts', authenticateToken, uploadPayoutQr.single('qrCodeIm
       traderNotes
     } = req.body;
 
-    const selectedChallenge = passedChallenges.find(c => c.id === challengeId || c.challengeId === challengeId) || passedChallenges[0];
+    const selectedChallenge = (challengeId && passedChallenges.find(c => c.id === challengeId || c.challengeId === challengeId)) || passedChallenges[0];
+    if (!selectedChallenge) {
+      if (req.file && fs.existsSync(req.file.path)) {
+        try { fs.unlinkSync(req.file.path); } catch (e) {}
+      }
+      return res.status(403).json({
+        success: false,
+        message: 'নির্বাচিত চ্যালেঞ্জটি পাস করা হয়নি অথবা পে-আউটের জন্য উপযুক্ত নয়।'
+      });
+    }
 
     const users = readJson(USERS_FILE, []);
     const fullUser = users.find(u => u.id === user.id) || user;

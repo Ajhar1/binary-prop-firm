@@ -12812,7 +12812,7 @@
             const navBadge = document.getElementById('payoutNavBadge');
             const headerBadge = document.getElementById('payoutHeaderBadge');
 
-            const hasPassed = data.hasPassedChallenge && data.passedChallenges && data.passedChallenges.length > 0;
+            const hasPassed = (data.hasPassedChallenge === true) && (data.passedChallenges && data.passedChallenges.length > 0);
 
             if (navBadge) {
                 if (hasPassed) {
@@ -12823,6 +12823,7 @@
                     navBadge.innerText = `${data.passedChallenges.length} Passed`;
                 } else {
                     navBadge.style.display = 'none';
+                    navBadge.innerText = '';
                 }
             }
 
@@ -12842,13 +12843,15 @@
                 if (previewBox) {
                     const activeCh = data.activeChallenges && data.activeChallenges.length > 0 ? data.activeChallenges[0] : null;
                     if (activeCh) {
+                        const isPractice = (activeCh.challengePhase === 'practice');
                         const sessionsDone = activeCh.sessionsCompleted || 0;
                         const sessionsReq = activeCh.sessionsRequired || 15;
                         const pct = Math.min(100, Math.round((sessionsDone / sessionsReq) * 100));
                         previewBox.innerHTML = `
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <strong style="color:#fff; font-size:0.86rem;">
+                                <strong style="color:#fff; font-size:0.86rem; display:flex; align-items:center; gap:6px;">
                                     <i class="fas fa-running" style="color:var(--yellow);"></i> ${activeCh.packageName || 'Active Challenge'}
+                                    ${isPractice ? '<span style="background:rgba(59,130,246,0.18); color:#60a5fa; font-size:0.68rem; padding:2px 6px; border-radius:6px; border:1px solid rgba(59,130,246,0.3);">প্র্যাকটিস পর্ব</span>' : '<span style="background:rgba(255,184,0,0.15); color:#ffb800; font-size:0.68rem; padding:2px 6px; border-radius:6px; border:1px solid rgba(255,184,0,0.3);">ইভ্যালুয়েশন পর্ব</span>'}
                                 </strong>
                                 <span style="background:rgba(255,184,0,0.15); color:#ffb800; font-size:0.72rem; padding:2px 8px; border-radius:10px; font-weight:700;">
                                     ${sessionsDone} / ${sessionsReq} সেশন সম্পন্ন
@@ -12864,8 +12867,8 @@
                         `;
                     } else {
                         previewBox.innerHTML = `
-                            <div style="text-align:center; color:#94a3b8; font-size:0.82rem;">
-                                আপনার বর্তমানে কোনো অ্যাক্টিভ চ্যালেঞ্জ নেই। নতুন চ্যালেঞ্জ নিয়ে শুরু করুন।
+                            <div style="text-align:center; color:#94a3b8; font-size:0.82rem; padding:6px 0;">
+                                আপনার কোনো চ্যালেঞ্জ পাস করা হয়নি। পে-আউট পেতে প্রথমে একটি মূল্যায়ণ চ্যালেঞ্জ সফলভাবে পাস করুন।
                             </div>
                         `;
                     }
@@ -13116,6 +13119,11 @@
             const authToken = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token') || (typeof token !== 'undefined' ? token : null);
             if (!authToken) {
                 showToast('লগইন সেশন পাওয়া যায়নি। পুনরায় লগইন করুন।', 'error');
+                return;
+            }
+
+            if (!userPayoutsData || !userPayoutsData.hasPassedChallenge || !userPayoutsData.passedChallenges || userPayoutsData.passedChallenges.length === 0) {
+                showToast('⚠️ পে-আউট ও লাইভ ফান্ড ডিপোজিট রিকোয়েস্ট করতে হলে প্রথমে মূল্যায়ণ চ্যালেঞ্জটি সফলভাবে পাস করতে হবে।', 'error');
                 return;
             }
 
