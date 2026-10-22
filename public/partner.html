@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Partner & Affiliate Portal | Binary Prop Firm</title>
+    
+    <link rel="icon" type="image/png" href="/assets/logo.png">
+    <link rel="apple-touch-icon" href="/assets/logo.png">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            --bg-body: #070a12;
+            --bg-card: rgba(18, 24, 38, 0.85);
+            --bg-card-hover: rgba(26, 35, 54, 0.95);
+            --bg-input: rgba(10, 15, 26, 0.7);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(0, 230, 118, 0.35);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --emerald: #00e676;
+            --emerald-glow: rgba(0, 230, 118, 0.2);
+            --gold: #f5b041;
+            --gold-glow: rgba(245, 176, 65, 0.25);
+            --cyan: #00f0ff;
+            --purple: #a855f7;
+            --danger: #ef4444;
+            --sidebar-w: 260px;
+            --header-h: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 230, 118, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(245, 176, 65, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.02) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--emerald); }
+
+        /* Utilities */
+        .glass {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+        }
+        .glass-glow {
+            border: 1px solid rgba(0, 230, 118, 0.25);
+            box-shadow: 0 0 25px rgba(0, 230, 118, 0.08);
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #f5b041 0%, #e67e22 100%);
+            color: #070a12;
+            font-weight: 700;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(245, 176, 65, 0.25);
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 176, 65, 0.35);
+        }
+        .btn-emerald {
+            background: linear-gradient(135deg, #00e676 0%, #00b0ff 100%);
+            color: #070a12;
+            font-weight: 800;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(0, 230, 118, 0.25);
+        }
+        .btn-emerald:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 22px rgba(0, 230, 118, 0.4);
+        }
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            border: 1px solid var(--border-subtle);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.09);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.92rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus {
+            border-color: var(--emerald);
+            box-shadow: 0 0 12px rgba(0, 230, 118, 0.2);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .badge-bronze { background: rgba(205, 127, 50, 0.15); color: #cd7f32; border: 1px solid rgba(205, 127, 50, 0.35); }
+        .badge-silver { background: rgba(192, 192, 192, 0.15); color: #e2e8f0; border: 1px solid rgba(192, 192, 192, 0.35); }
+        .badge-gold { background: rgba(245, 176, 65, 0.15); color: #f5b041; border: 1px solid rgba(245, 176, 65, 0.35); }
+        .badge-platinum { background: rgba(0, 210, 211, 0.15); color: #00d2d3; border: 1px solid rgba(0, 210, 211, 0.35); }
+        .badge-diamond { background: rgba(155, 89, 182, 0.15); color: #c084fc; border: 1px solid rgba(155, 89, 182, 0.35); }
+        .badge-master { background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(245, 176, 65, 0.25)); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.5); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+        .badge-success { background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); }
+        .badge-pending { background: rgba(245, 176, 65, 0.15); color: #f5b041; border: 1px solid rgba(245, 176, 65, 0.3); }
+        .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* ================= AUTH VIEW ================= */
+        #authContainer {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        .auth-box {
+            width: 100%;
+            max-width: 520px;
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+        }
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .auth-brand img {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
+        }
+        .auth-brand h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 40%, var(--emerald) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .auth-tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 1.75rem;
+            border: 1px solid var(--border-subtle);
+        }
+        .auth-tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.88rem;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .auth-tab-btn.active {
+            background: linear-gradient(135deg, var(--emerald) 0%, #00b0ff 100%);
+            color: #070a12;
+            font-weight: 800;
+            box-shadow: 0 2px 10px rgba(0, 230, 118, 0.3);
+        }
+        .auth-form-group {
+            margin-bottom: 1.15rem;
+        }
+        .auth-form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+
+        /* Tier Preview Strip */
+        .tier-preview-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .tier-mini-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 8px 10px;
+            text-align: center;
+        }
+        .tier-mini-card strong {
+            display: block;
+            font-size: 0.78rem;
+            color: #fff;
+        }
+        .tier-mini-card span {
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: var(--emerald);
+        }
+
+        /* ================= DASHBOARD LAYOUT ================= */
+        #dashContainer {
+            display: none;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: var(--sidebar-w);
+            background: #090e18;
+            border-right: 1px solid var(--border-subtle);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-header {
+            height: var(--header-h);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 1.25rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .sidebar-header img {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0, 230, 118, 0.3);
+        }
+        .sidebar-header .brand-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+        }
+        .sidebar-header .brand-sub {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--emerald);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.25rem 0.75rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .nav-link.active {
+            color: #070a12;
+            background: linear-gradient(135deg, var(--emerald) 0%, #00b0ff 100%);
+            font-weight: 800;
+            box-shadow: 0 4px 14px rgba(0, 230, 118, 0.3);
+        }
+        .nav-link i {
+            font-size: 1.05rem;
+            width: 20px;
+            text-align: center;
+        }
+        .sidebar-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border-subtle);
+            background: rgba(0,0,0,0.25);
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            margin-left: var(--sidebar-w);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - var(--sidebar-w));
+        }
+        .topbar {
+            height: var(--header-h);
+            background: rgba(9, 14, 24, 0.85);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .menu-toggle-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .partner-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 230, 118, 0.08);
+            border: 1px solid rgba(0, 230, 118, 0.25);
+            padding: 6px 14px;
+            border-radius: 30px;
+        }
+        .content-body {
+            padding: 1.5rem;
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Subtabs / Panels */
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Level Hero Banner */
+        .level-banner {
+            background: linear-gradient(135deg, rgba(16, 24, 40, 0.9) 0%, rgba(13, 27, 42, 0.95) 100%);
+            border: 1px solid rgba(0, 230, 118, 0.25);
+            border-radius: 18px;
+            padding: 1.5rem 1.75rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+        .level-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0, 230, 118, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .progress-bar-wrap {
+            height: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 12px 0 8px 0;
+            border: 1px solid var(--border-subtle);
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--emerald) 0%, #00b0ff 100%);
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 12px rgba(0, 230, 118, 0.5);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            padding: 1.25rem;
+            border-radius: 14px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .stat-title {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+        }
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.2;
+        }
+        .stat-sub {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Interactive Tier Roadmap Ladder */
+        .tier-roadmap {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin: 1.25rem 0;
+        }
+        .tier-step {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .tier-step.active {
+            border-color: var(--emerald);
+            background: rgba(0, 230, 118, 0.08);
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.15);
+        }
+        .tier-step.completed {
+            border-color: rgba(0, 230, 118, 0.35);
+        }
+        .tier-step .tier-num {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .tier-step .tier-name {
+            font-size: 0.9rem;
+            font-weight: 800;
+            margin: 3px 0;
+            color: #fff;
+        }
+        .tier-step .tier-rate {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--emerald);
+        }
+        .tier-step .tier-range {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Table */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            text-align: left;
+        }
+        thead th {
+            padding: 12px 14px;
+            background: rgba(0, 0, 0, 0.35);
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-subtle);
+            white-space: nowrap;
+        }
+        tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            transition: background 0.15s;
+        }
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        tbody td {
+            padding: 14px;
+            color: #e2e8f0;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-box {
+            width: 100%;
+            max-width: 520px;
+            background: #0f1626;
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 1.75rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            animation: modalIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Toast */
+        #toastContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast-item {
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            animation: toastSlide 0.3s ease;
+        }
+        .toast-success { background: #065f46; border: 1px solid #059669; }
+        .toast-error { background: #7f1d1d; border: 1px solid #b91c1c; }
+        .toast-info { background: #1e3a8a; border: 1px solid #3b82f6; }
+        @keyframes toastSlide {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+            .menu-toggle-btn {
+                display: inline-flex;
+            }
+        }
+        @media (max-width: 640px) {
+            .content-body { padding: 1rem 0.75rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .topbar { padding: 0 1rem; }
+            .auth-box { padding: 1.75rem 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer"></div>
+
+    <!-- ========================================== -->
+    <!-- 1. AUTH SCREEN (LOGIN & REGISTRATION)     -->
+    <!-- ========================================== -->
+    <div id="authContainer">
+        <div class="auth-box glass glass-glow">
+            <div class="auth-brand">
+                <img src="/assets/logo.png" alt="Binary Prop Firm">
+                <div>
+                    <h1>Binary Prop Firm</h1>
+                    <div style="font-size:0.75rem; font-weight:700; color:var(--emerald); letter-spacing:0.8px;">OFFICIAL PARTNER PROGRAM</div>
+                </div>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab-btn active" id="tabBtnLogin" onclick="switchAuthTab('login')">
+                    <i class="fas fa-sign-in-alt"></i> লগইন (Login)
+                </button>
+                <button type="button" class="auth-tab-btn" id="tabBtnRegister" onclick="switchAuthTab('register')">
+                    <i class="fas fa-user-plus"></i> পার্টনার রেজিস্ট্রেশন
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="partnerLoginForm" onsubmit="handlePartnerLogin(event)">
+                <div class="auth-form-group">
+                    <label><i class="fas fa-envelope"></i> পার্টনার ইমেইল (Partner Email)</label>
+                    <input type="email" class="form-control" id="loginEmail" placeholder="yourname@gmail.com" required autocomplete="email">
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fas fa-lock"></i> পাসওয়ার্ড (Password)</label>
+                    <div style="position:relative;">
+                        <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" style="padding-right:40px;">
+                        <button type="button" onclick="togglePasswordVis('loginPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; font-size:0.82rem;">
+                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--text-muted);">
+                        <input type="checkbox" id="rememberMe" checked style="accent-color:var(--emerald);"> আমাকে মনে রাখুন
+                    </label>
+                    <a href="https://t.me/BinaryPropFirmSupport" target="_blank" style="color:var(--emerald); text-decoration:none; font-weight:600;">পাসওয়ার্ড সহায়তা?</a>
+                </div>
+
+                <button type="submit" class="btn-emerald" id="btnLoginSubmit" style="width:100%; padding:13px; font-size:0.95rem;">
+                    <i class="fas fa-arrow-right"></i> পার্টনার ড্যাশবোর্ডে প্রবেশ করুন
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="partnerRegisterForm" onsubmit="handlePartnerRegister(event)" style="display:none;">
+                <div class="auth-form-group">
+                    <label><i class="fas fa-user"></i> আপনার পূর্ণ নাম (Full Name)</label>
+                    <input type="text" class="form-control" id="regName" placeholder="Md. Rakib Hasan" required autocomplete="name">
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fas fa-envelope"></i> ইমেইল এড্রেস (Email Address)</label>
+                    <input type="email" class="form-control" id="regEmail" placeholder="name@gmail.com" required autocomplete="email">
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fab fa-whatsapp"></i> ফোন / হোয়াটসঅ্যাপ নাম্বার (WhatsApp/Phone)</label>
+                    <input type="tel" class="form-control" id="regPhone" placeholder="+8801700000000" autocomplete="tel">
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fas fa-tag"></i> ইউনিক রেফারেল কোড নির্বাচন করুন (Custom Promo Code)</label>
+                    <input type="text" class="form-control" id="regPromoCode" placeholder="e.g. RAKIB, FOREXPRO, AJ10" required oninput="previewReferralCode(this.value)" style="text-transform:uppercase; font-weight:800; letter-spacing:1px;">
+                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">
+                        আপনার লিংক হবে: <span id="regLinkPreview" style="color:var(--emerald); font-weight:700;">binarypropfirm.com/?ref=YOURCODE</span>
+                    </div>
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fas fa-wallet"></i> কমিশন উত্তোলনের মাধ্যম (Payout Method)</label>
+                    <select class="form-control" id="regPayoutMethod" onchange="updatePayoutPlaceholder()">
+                        <option value="Binance Pay">Binance Pay (Pay ID / UID) - তাৎক্ষণিক</option>
+                        <option value="USDT TRC20">USDT (TRC-20 Address)</option>
+                        <option value="bKash">bKash (বিকাশ পার্সোনাল)</option>
+                        <option value="Nagad">Nagad (নগদ পার্সোনাল)</option>
+                    </select>
+                </div>
+                <div class="auth-form-group">
+                    <label id="regPayoutDetailsLabel"><i class="fas fa-id-card"></i> Binance Pay ID / UID</label>
+                    <input type="text" class="form-control" id="regPayoutDetails" placeholder="e.g. 123456789" required>
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fas fa-lock"></i> পাসওয়ার্ড (Password - কমপক্ষে ৬ অক্ষর)</label>
+                    <div style="position:relative;">
+                        <input type="password" class="form-control" id="regPassword" placeholder="••••••••" required autocomplete="new-password" minlength="6" style="padding-right:40px;">
+                        <button type="button" onclick="togglePasswordVis('regPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-emerald" id="btnRegSubmit" style="width:100%; padding:13px; font-size:0.95rem; margin-top:6px;">
+                    <i class="fas fa-user-check"></i> পার্টনার অ্যাকাউন্ট তৈরি করুন
+                </button>
+            </form>
+
+            <!-- Commission Scale Quick Highlights Strip -->
+            <div class="tier-preview-strip">
+                <div class="tier-mini-card">
+                    <strong>১-১০ সেলস</strong>
+                    <span>১০% কমিশন</span>
+                </div>
+                <div class="tier-mini-card">
+                    <strong>১১-২০ সেলস</strong>
+                    <span>২০% কমিশন</span>
+                </div>
+                <div class="tier-mini-card">
+                    <strong>২১-৩০ সেলস</strong>
+                    <span>৩০% কমিশন</span>
+                </div>
+                <div class="tier-mini-card">
+                    <strong>৩১-৪০ সেলস</strong>
+                    <span>৪০% কমিশন</span>
+                </div>
+                <div class="tier-mini-card">
+                    <strong>৪১-৫০ সেলস</strong>
+                    <span>৫০% কমিশন</span>
+                </div>
+                <div class="tier-mini-card" style="border-color:rgba(255,215,0,0.4); background:rgba(255,215,0,0.06);">
+                    <strong style="color:#ffd700;">৫১+ আজীবন</strong>
+                    <span style="color:#ffd700;">৫০% পার্মানেন্ট</span>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:1.25rem;">
+                <a href="/" style="font-size:0.8rem; color:var(--text-muted); text-decoration:none;">
+                    <i class="fas fa-arrow-left"></i> মূল ওয়েবসাইটে ফিরে যান (Back to Home)
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- 2. LOGGED-IN PARTNER DASHBOARD CONTAINER   -->
+    <!-- ========================================== -->
+    <div id="dashContainer">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="partnerSidebar">
+            <div class="sidebar-header">
+                <img src="/assets/logo.png" alt="Binary Prop Firm">
+                <div>
+                    <div class="brand-title">Binary Prop Firm</div>
+                    <div class="brand-sub">PARTNER HUB</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-link active" onclick="switchPartnerTab('overview', this)">
+                    <i class="fas fa-tachometer-alt" style="color:var(--emerald);"></i>
+                    <span>ওভারভিউ (Overview)</span>
+                </div>
+                <div class="nav-link" onclick="switchPartnerTab('referral-tools', this)">
+                    <i class="fas fa-qrcode" style="color:var(--cyan);"></i>
+                    <span>রেফারেল লিংক ও QR</span>
+                </div>
+                <div class="nav-link" onclick="switchPartnerTab('sales-log', this)">
+                    <i class="fas fa-shopping-cart" style="color:var(--gold);"></i>
+                    <span>সেলস ও কমিশন হিস্টোরি</span>
+                </div>
+                <div class="nav-link" onclick="switchPartnerTab('promo-codes', this)">
+                    <i class="fas fa-tags" style="color:var(--purple);"></i>
+                    <span>কাস্টম প্রোমো কোড</span>
+                </div>
+                <div class="nav-link" onclick="switchPartnerTab('payouts', this)">
+                    <i class="fas fa-hand-holding-usd" style="color:#10b981;"></i>
+                    <span>কমিশন উইথড্রয়াল</span>
+                </div>
+                <div class="nav-link" onclick="switchPartnerTab('settings', this)">
+                    <i class="fas fa-user-cog" style="color:#94a3b8;"></i>
+                    <span>প্রোফাইল সেটিংস</span>
+                </div>
+
+                <div style="margin-top:auto; padding-top:1rem; border-top:1px solid var(--border-subtle);">
+                    <a href="/dashboard" target="_blank" class="nav-link" style="color:#60a5fa;">
+                        <i class="fas fa-external-link-alt"></i>
+                        <span>ট্রেডার ড্যাশবোর্ড</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button type="button" class="btn-outline" onclick="handlePartnerLogout()" style="width:100%; justify-content:center; padding:9px; font-size:0.84rem; border-color:rgba(239,68,68,0.3); color:#f87171;">
+                    <i class="fas fa-sign-out-alt"></i> লগআউট (Logout)
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN WRAPPER -->
+        <div class="main-wrapper">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button type="button" class="menu-toggle-btn" onclick="toggleMobileSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div>
+                        <div style="font-size:1.05rem; font-weight:800; color:#fff;" id="topPartnerWelcome">স্বাগতম, পার্টনার!</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">Binary Prop Firm অফিসিয়াল পার্টনার ড্যাশবোর্ড</div>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <!-- Current Level Badge -->
+                    <span class="badge badge-bronze" id="topPartnerLevelBadge">
+                        <i class="fas fa-medal"></i> BRONZE
+                    </span>
+
+                    <!-- Withdrawable commission pill -->
+                    <div class="partner-pill clickable" onclick="openPayoutModal()" title="উইথড্র করতে ক্লিক করুন">
+                        <i class="fas fa-wallet" style="color:var(--emerald);"></i>
+                        <div>
+                            <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">উত্তোলনযোগ্য ব্যালেন্স</div>
+                            <div style="font-size:0.92rem; font-weight:900; color:#fff;" id="topWithdrawableAmount">$0.00</div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-gold" onclick="openPayoutModal()" style="padding:8px 16px; font-size:0.84rem;">
+                        <i class="fas fa-arrow-down"></i> উইথড্র দিন
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT BODY -->
+            <main class="content-body">
+                
+                <!-- ================= TAB 1: OVERVIEW ================= -->
+                <div class="tab-panel active" id="pane-overview">
+                    
+                    <!-- Partner Level Progression Hero Banner -->
+                    <div class="level-banner">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; position:relative; z-index:2;">
+                            <div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span class="badge" id="heroLevelBadge" style="background:rgba(205,127,50,0.2); color:#cd7f32; border:1px solid #cd7f32;">
+                                        LEVEL 1: BRONZE
+                                    </span>
+                                    <span style="font-size:0.85rem; font-weight:800; color:#fff;" id="heroCommissionRateBadge">
+                                        ১০% প্রতি চ্যালেঞ্জ সেল
+                                    </span>
+                                </div>
+                                <h2 style="font-size:1.45rem; font-weight:900; margin:8px 0 4px 0; color:#fff;" id="heroPartnerNameGreeting">
+                                    হ্যালো, পার্টনার!
+                                </h2>
+                                <p style="font-size:0.85rem; color:var(--text-muted); max-width:620px;" id="heroProgressionStatusText">
+                                    আপনি প্রতিটি রেফারেল চ্যালেঞ্জ বিক্রয় থেকে লাইভ কমিশন পাচ্ছেন। পরবর্তী লেভেলে পৌঁছাতে আরও সেলস সম্পন্ন করুন!
+                                </p>
+                            </div>
+
+                            <div style="text-align:right;">
+                                <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">পরবর্তী লেভেল কমিশন রেট</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:var(--emerald);" id="heroNextRateText">২০%</div>
+                                <div style="font-size:0.75rem; color:#60a5fa;" id="heroSalesNeededText">আরও ১০টি সেল প্রয়োজন</div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Progress Bar -->
+                        <div class="progress-bar-wrap">
+                            <div class="progress-bar-fill" id="heroProgressBar" style="width: 0%;"></div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted);">
+                            <span id="heroProgressLabelLeft">০ / ১০ সেলস সম্পন্ন</span>
+                            <span id="heroProgressLabelRight">০% অগ্রগতি</span>
+                        </div>
+                    </div>
+
+                    <!-- 6 Top Stat Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card glass">
+                            <div class="stat-header">
+                                <span class="stat-title">উত্তোলনযোগ্য ব্যালেন্স</span>
+                                <div class="stat-icon" style="background:rgba(0, 230, 118, 0.15); color:var(--emerald);">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="statWithdrawable" style="color:var(--emerald);">$0.00</div>
+                            <div class="stat-sub">সরাসরি উইথড্র করার জন্য প্রস্তুত</div>
+                        </div>
+
+                        <div class="stat-card glass">
+                            <div class="stat-header">
+                                <span class="stat-title">মোট কমিশন আয়</span>
+                                <div class="stat-icon" style="background:rgba(168, 85, 247, 0.15); color:var(--purple);">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="statTotalEarned" style="color:#c084fc;">$0.00</div>
+                            <div class="stat-sub">আজ পর্যন্ত অর্জিত সর্বমোট কমিশন</div>
+                        </div>
+
+                        <div class="stat-card glass">
+                            <div class="stat-header">
+                                <span class="stat-title">মোট পেইড আউট</span>
+                                <div class="stat-icon" style="background:rgba(16, 185, 129, 0.15); color:#10b981;">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="statTotalPaid" style="color:#10b981;">$0.00</div>
+                            <div class="stat-sub">আপনার ওয়ালেটে পাঠানো সম্পন্ন</div>
+                        </div>
+
+                        <div class="stat-card glass">
+                            <div class="stat-header">
+                                <span class="stat-title">রেফারেল চ্যালেঞ্জ সেলস</span>
+                                <div class="stat-icon" style="background:rgba(245, 176, 65, 0.15); color:var(--gold);">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="statSalesCount" style="color:var(--gold);">0</div>
+                            <div class="stat-sub">সফলভাবে বিক্রি হওয়া চ্যালেঞ্জ সংখ্যা</div>
+                        </div>
+
+                        <div class="stat-card glass">
+                            <div class="stat-header">
+                                <span class="stat-title">রেফারেল সেলস ভলিউম</span>
+                                <div class="stat-icon" style="background:rgba(0, 240, 255, 0.15); color:var(--cyan);">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="statSalesVolume" style="color:var(--cyan);">$0.00</div>
+                            <div class="stat-sub">ট্রেডারদের মোট পেইড ভলিউম</div>
+                        </div>
+
+                        <div class="stat-card glass">
+                            <div class="stat-header">
+                                <span class="stat-title">রেফারেল প্রোমো কোড</span>
+                                <div class="stat-icon" style="background:rgba(59, 130, 246, 0.15); color:#60a5fa;">
+                                    <i class="fas fa-ticket-alt"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="statPromoCode" style="color:#fff; font-size:1.35rem; font-family:monospace;">CODE</div>
+                            <div class="stat-sub">ট্রেডার ছাড়: <strong id="statTraderDiscount">৫%</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Referral Link Share Box -->
+                    <div class="glass" style="padding:1.5rem; border-radius:16px; margin-bottom:1.5rem;">
+                        <h3 style="font-size:1.05rem; font-weight:800; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-share-alt" style="color:var(--emerald);"></i> আপনার ইউনিক রেফারেল লিংক ও প্রচার টুল
+                        </h3>
+
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
+                            <div style="flex:1; min-width:260px; position:relative;">
+                                <input type="text" class="form-control" id="overviewRefLinkInput" readonly style="font-family:monospace; font-size:0.9rem; padding-right:85px; background:rgba(0,0,0,0.4);">
+                                <button type="button" class="btn-emerald" onclick="copyRefLink()" style="position:absolute; right:4px; top:4px; bottom:4px; padding:0 16px; font-size:0.82rem; border-radius:7px;">
+                                    <i class="fas fa-copy"></i> কপি
+                                </button>
+                            </div>
+                            <button type="button" class="btn-outline" onclick="copyPromoCodeText()">
+                                <i class="fas fa-ticket-alt" style="color:var(--gold);"></i> কোড কপি করুন
+                            </button>
+                        </div>
+
+                        <!-- Instant Social Share Buttons -->
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                            <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">তাৎক্ষণিক শেয়ার করুন:</span>
+                            <button type="button" class="btn-outline" onclick="shareOnWhatsApp()" style="padding:6px 12px; font-size:0.8rem; border-color:rgba(37,211,102,0.3); color:#25D366;">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button type="button" class="btn-outline" onclick="shareOnTelegram()" style="padding:6px 12px; font-size:0.8rem; border-color:rgba(0,136,204,0.3); color:#0088cc;">
+                                <i class="fab fa-telegram-plane"></i> Telegram
+                            </button>
+                            <button type="button" class="btn-outline" onclick="shareOnFacebook()" style="padding:6px 12px; font-size:0.8rem; border-color:rgba(24,119,242,0.3); color:#1877f2;">
+                                <i class="fab fa-facebook"></i> Facebook
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 6-Stage Commission Ladder (Visual Roadmap) -->
+                    <div class="glass" style="padding:1.5rem; border-radius:16px; margin-bottom:1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                            <div>
+                                <h3 style="font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-layer-group" style="color:var(--gold);"></i> পার্টনার লেভেল ও ডায়নামিক কমিশন সিঁড়ি
+                                </h3>
+                                <p style="font-size:0.8rem; color:var(--text-muted);">
+                                    চ্যালেঞ্জ সেল বৃদ্ধির সাথে সাথে আপনার একাউন্টের লেভেল ও কমিশন পার্সেন্টেজ স্বয়ংক্রিয়ভাবে বৃদ্ধি পাবে।
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tier-roadmap">
+                            <div class="tier-step" id="tierCard-1">
+                                <div class="tier-num">লেভেল ১</div>
+                                <div class="tier-name" style="color:#cd7f32;">Bronze</div>
+                                <div class="tier-rate">১০%</div>
+                                <div class="tier-range">১ - ১০ সেলস</div>
+                            </div>
+                            <div class="tier-step" id="tierCard-2">
+                                <div class="tier-num">লেভেল ২</div>
+                                <div class="tier-name" style="color:#e2e8f0;">Silver</div>
+                                <div class="tier-rate">২০%</div>
+                                <div class="tier-range">১১ - ২০ সেলস</div>
+                            </div>
+                            <div class="tier-step" id="tierCard-3">
+                                <div class="tier-num">লেভেল ৩</div>
+                                <div class="tier-name" style="color:#f5b041;">Gold</div>
+                                <div class="tier-rate">৩০%</div>
+                                <div class="tier-range">২১ - ৩০ সেলস</div>
+                            </div>
+                            <div class="tier-step" id="tierCard-4">
+                                <div class="tier-num">লেভেল ৪</div>
+                                <div class="tier-name" style="color:#00d2d3;">Platinum</div>
+                                <div class="tier-rate">৪০%</div>
+                                <div class="tier-range">৩১ - ৪০ সেলস</div>
+                            </div>
+                            <div class="tier-step" id="tierCard-5">
+                                <div class="tier-num">লেভেল ৫</div>
+                                <div class="tier-name" style="color:#c084fc;">Diamond</div>
+                                <div class="tier-rate">৫০%</div>
+                                <div class="tier-range">৪১ - ৫০ সেলস</div>
+                            </div>
+                            <div class="tier-step" id="tierCard-6" style="border-color:rgba(255,215,0,0.3);">
+                                <div class="tier-num" style="color:#ffd700;">মাস্টার লেভেল</div>
+                                <div class="tier-name" style="color:#ffd700;">Master</div>
+                                <div class="tier-rate" style="color:#ffd700;">৫০%</div>
+                                <div class="tier-range">৫১+ পার্মানেন্ট</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Sales Table Preview -->
+                    <div class="glass" style="padding:1.5rem; border-radius:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                            <h3 style="font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-history" style="color:var(--emerald);"></i> সাম্প্রতিক রেফারেল বিক্রয় ও কমিশন
+                            </h3>
+                            <button type="button" class="btn-outline" onclick="switchPartnerTab('sales-log')" style="padding:6px 14px; font-size:0.8rem;">
+                                সম্পূর্ণ লগ দেখুন &rarr;
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>তারিখ</th>
+                                        <th>ট্রেডার</th>
+                                        <th>প্যাকেজ</th>
+                                        <th>পেইড ফি</th>
+                                        <th>কমিশন রেট</th>
+                                        <th>আপনার কমিশন</th>
+                                        <th>স্ট্যাটাস</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overviewRecentSalesTbody">
+                                    <tr>
+                                        <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                                            লোড হচ্ছে...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- ================= TAB 2: REFERRAL TOOLS & QR ================= -->
+                <div class="tab-panel" id="pane-referral-tools">
+                    <div class="glass" style="padding:1.5rem; border-radius:18px; margin-bottom:1.5rem;">
+                        <h2 style="font-size:1.25rem; font-weight:900; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-qrcode" style="color:var(--cyan);"></i> রেফারেল লিংক ও ডাউনলোডযোগ্য QR কোড
+                        </h2>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">
+                            এই লিঙ্ক বা QR কোড ব্যবহার করে যেকোনো ট্রেডার Binary Prop Firm-এ একাউন্ট খুলে চ্যালেঞ্জ কিনলে আপনি স্বয়ংক্রিয়ভাবে কমিশন পাবেন।
+                        </p>
+
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+                            <!-- QR Card -->
+                            <div class="glass" style="padding:1.5rem; border-radius:14px; text-align:center; background:rgba(0,0,0,0.3);">
+                                <div style="font-weight:800; font-size:0.95rem; margin-bottom:12px; color:#fff;">
+                                    অফিশিয়াল পার্টনার QR কোড
+                                </div>
+                                <div id="qrcodeBox" style="background:#fff; padding:12px; border-radius:12px; display:inline-block; margin-bottom:14px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
+                                    <!-- QR Code injected here -->
+                                </div>
+                                <div>
+                                    <button type="button" class="btn-emerald" onclick="downloadQRCode()" style="padding:8px 18px; font-size:0.84rem;">
+                                        <i class="fas fa-download"></i> QR কোড ডাউনলোড করুন (PNG)
+                                    </button>
+                                </div>
+                                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
+                                    পোস্টার, ব্যানার, ফেসবুক ও ইউটিউব থাম্বনেইলে ব্যবহারের জন্য উপযোগী।
+                                </p>
+                            </div>
+
+                            <!-- Link Details Card -->
+                            <div style="display:flex; flex-direction:column; gap:12px;">
+                                <div class="glass" style="padding:1.25rem; border-radius:12px;">
+                                    <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">আপনার প্রাইমারি রেফারেল লিংক</label>
+                                    <div style="display:flex; gap:8px; margin-top:6px;">
+                                        <input type="text" class="form-control" id="toolsRefLink" readonly style="font-family:monospace; font-size:0.85rem; background:rgba(0,0,0,0.35);">
+                                        <button type="button" class="btn-emerald" onclick="copyToolsLink()" style="padding:0 14px; font-size:0.84rem; flex-shrink:0;">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="glass" style="padding:1.25rem; border-radius:12px;">
+                                    <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">প্রোমো কোড (Promo Code)</label>
+                                    <div style="display:flex; gap:8px; margin-top:6px;">
+                                        <input type="text" class="form-control" id="toolsPromoCode" readonly style="font-family:monospace; font-weight:800; font-size:1.1rem; color:var(--gold); background:rgba(0,0,0,0.35);">
+                                        <button type="button" class="btn-gold" onclick="copyToolsCode()" style="padding:0 14px; font-size:0.84rem; flex-shrink:0;">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
+                                        ট্রেডাররা চ্যালেঞ্জ কেনার সময় এই কোডটি দিলে তাৎক্ষণিক <strong style="color:#60a5fa;" id="toolsDiscountText">৫%</strong> ডিসকাউন্ট পাবে।
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Marketing Copy / Promotional Blurbs -->
+                    <div class="glass" style="padding:1.5rem; border-radius:18px;">
+                        <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-bullhorn" style="color:var(--gold);"></i> তৈরি প্রমোশনাল টেক্সট (Ready-to-use Marketing Copy)
+                        </h3>
+                        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">
+                            সোশ্যাল মিডিয়া, ফেসবুক গ্রুপ বা টেলিগ্রাম চ্যানেলে এক ক্লিকে পোস্ট করার জন্য নিচের তৈরি পোস্টগুলো কপি করে শেয়ার করুন:
+                        </p>
+
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1rem;">
+                            <!-- Bangla Template -->
+                            <div class="glass" style="padding:1.25rem; border-radius:12px; background:rgba(0,0,0,0.25);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <strong style="color:var(--emerald); font-size:0.85rem;"><i class="fas fa-comment-dots"></i> বাংলা প্রমো পোস্ট</strong>
+                                    <button type="button" class="btn-outline" onclick="copyPromoTemplate('bn')" style="padding:4px 10px; font-size:0.75rem;">
+                                        <i class="fas fa-copy"></i> কপি করুন
+                                    </button>
+                                </div>
+                                <div id="promoTemplateBn" style="font-size:0.82rem; line-height:1.6; color:#cbd5e1; white-space:pre-wrap; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; border:1px solid var(--border-subtle);">
+🔥 Quotex বা পছন্দের ব্রোকারে ট্রেড করে ফান্ডেড একাউন্ট পেতে চান? 
+Binary Prop Firm-এ পাস করলেই পাবেন ৭৫% থেকে ৮০% প্রফিট স্প্লিট এবং ইন্সট্যান্ট পে-আউট!
+
+আমার রেফারেল লিংক থেকে জয়েন করে ডিসকাউন্ট উপভোগ করুন:
+🔗 {LINK}
+অথবা চ্যালেঞ্জ কেনার সময় প্রোমো কোড দিন: {CODE}
+
+আজই শুরু করুন এবং প্রফেশনাল ফান্ডেড ট্রেডার হোন! 🚀
+                                </div>
+                            </div>
+
+                            <!-- English Template -->
+                            <div class="glass" style="padding:1.25rem; border-radius:12px; background:rgba(0,0,0,0.25);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <strong style="color:#60a5fa; font-size:0.85rem;"><i class="fas fa-globe"></i> English Promo Copy</strong>
+                                    <button type="button" class="btn-outline" onclick="copyPromoTemplate('en')" style="padding:4px 10px; font-size:0.75rem;">
+                                        <i class="fas fa-copy"></i> Copy Text
+                                    </button>
+                                </div>
+                                <div id="promoTemplateEn" style="font-size:0.82rem; line-height:1.6; color:#cbd5e1; white-space:pre-wrap; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; border:1px solid var(--border-subtle);">
+🚀 Trade on Quotex Demo & Get Funded with Binary Prop Firm!
+Pass the evaluation and keep up to 80% profit with bi-weekly automated payouts.
+
+Sign up using my exclusive partner link:
+🔗 {LINK}
+Use Promo Code for special discount: {CODE}
+
+Start your funded trading journey today! 📈
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- ================= TAB 3: SALES & COMMISSIONS LOG ================= -->
+                <div class="tab-panel" id="pane-sales-log">
+                    <div class="glass" style="padding:1.5rem; border-radius:18px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.25rem;">
+                            <div>
+                                <h2 style="font-size:1.25rem; font-weight:900; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-shopping-cart" style="color:var(--gold);"></i> রেফারেল সেলস ও কমিশন হিস্টোরি
+                                </h2>
+                                <p style="font-size:0.85rem; color:var(--text-muted);">
+                                    আপনার রেফারেল লিংকের মাধ্যমে কেনা প্রতিটি চ্যালেঞ্জের বিস্তারিত ও অর্জিত কমিশন লগ।
+                                </p>
+                            </div>
+
+                            <!-- Filter & Search -->
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <select class="form-control" id="salesFilterStatus" onchange="filterSalesLog()" style="width:auto; padding:8px 12px; font-size:0.85rem;">
+                                    <option value="all">সকল স্ট্যাটাস (All)</option>
+                                    <option value="approved">অনুমোদিত (Approved)</option>
+                                    <option value="pending">পেন্ডিং পেমেন্ট (Pending)</option>
+                                </select>
+                                <button type="button" class="btn-outline" onclick="fetchPartnerSalesLog()" title="রিফ্রেশ" style="padding:8px 12px;">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>তারিখ ও সময়</th>
+                                        <th>ট্রেডার নাম / ইমেইল</th>
+                                        <th>প্যাকেজ</th>
+                                        <th>ফান্ডিং সাইজ</th>
+                                        <th>পেইড ফি</th>
+                                        <th>লেভেল রেট</th>
+                                        <th>আপনার কমিশন</th>
+                                        <th>কমিশন স্ট্যাটাস</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salesLogTbody">
+                                    <tr>
+                                        <td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
+                                            লোড হচ্ছে...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- ================= TAB 4: CUSTOM PROMO CODES ================= -->
+                <div class="tab-panel" id="pane-promo-codes">
+                    <div class="glass" style="padding:1.5rem; border-radius:18px; margin-bottom:1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.25rem;">
+                            <div>
+                                <h2 style="font-size:1.25rem; font-weight:900; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-tags" style="color:var(--purple);"></i> কাস্টম প্রোমো কোড ও ক্যাম্পেইন
+                                </h2>
+                                <p style="font-size:0.85rem; color:var(--text-muted);">
+                                    আপনার নামে কাস্টম প্রোমো কোড তৈরি করুন। অ্যাডমিন অনুমোদনের পর ট্রেডাররা এই কোড দিয়ে চ্যালেঞ্জে ডিসকাউন্ট পাবে।
+                                </p>
+                            </div>
+                            <button type="button" class="btn-gold" onclick="openCustomPromoModal()">
+                                <i class="fas fa-plus-circle"></i> নতুন প্রোমো কোডের আবেদন করুন
+                            </button>
+                        </div>
+
+                        <!-- Primary Referral Promo Code Display -->
+                        <div class="glass" style="padding:1.25rem; border-radius:14px; margin-bottom:1.5rem; background:rgba(0,0,0,0.3); border-color:rgba(0,230,118,0.3);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                                <div>
+                                    <span class="badge badge-success">ডিফল্ট প্রাইমারি কোড</span>
+                                    <div style="font-size:1.4rem; font-weight:900; color:var(--emerald); margin-top:4px; font-family:monospace;" id="promoPrimaryCodeDisplay">CODE</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">ট্রেডারদের ডিসকাউন্ট: <strong style="color:#60a5fa;" id="promoPrimaryDiscountDisplay">৫%</strong></div>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn-outline" onclick="copyPromoCodeText()">
+                                        <i class="fas fa-copy"></i> কোড কপি
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Promo Codes & Requests List -->
+                        <h3 style="font-size:1rem; font-weight:800; margin-bottom:10px; color:#fff;">
+                            কাস্টম প্রোমো কোড তালিকা ও আবেদন হিস্ট্রি
+                        </h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>প্রোমো কোড</th>
+                                        <th>ট্রেডার ছাড় (%)</th>
+                                        <th>আবেদনের তারিখ</th>
+                                        <th>অ্যাডমিন নোট / স্ট্যাটাস</th>
+                                        <th>অ্যাকশন</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="promoCodesTbody">
+                                    <tr>
+                                        <td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                                            লোড হচ্ছে...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- ================= TAB 5: PAYOUTS & WITHDRAWALS ================= -->
+                <div class="tab-panel" id="pane-payouts">
+                    <!-- Balance Summary Cards -->
+                    <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
+                        <div class="stat-card glass" style="border-color:rgba(0, 230, 118, 0.4); background:linear-gradient(135deg, rgba(0, 230, 118, 0.08) 0%, rgba(18, 24, 38, 0.9) 100%);">
+                            <div class="stat-header">
+                                <span class="stat-title" style="color:var(--emerald);">উত্তোলনযোগ্য ব্যালেন্স</span>
+                                <div class="stat-icon" style="background:rgba(0, 230, 118, 0.2); color:var(--emerald);">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="payoutWithdrawableVal" style="color:var(--emerald);">$0.00</div>
+                            <div style="margin-top:12px;">
+                                <button type="button" class="btn-emerald" onclick="openPayoutModal()" style="width:100%; padding:10px; font-size:0.88rem;">
+                                    <i class="fas fa-paper-plane"></i> উইথড্র রিকোয়েস্ট পাঠান
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="stat-card glass">
+                            <div class="stat-header">
+                                <span class="stat-title">বিবেচনাধীন উইথড্র রিকোয়েস্ট</span>
+                                <div class="stat-icon" style="background:rgba(245, 176, 65, 0.15); color:var(--gold);">
+                                    <i class="fas fa-hourglass-half"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="payoutPendingRequestsVal" style="color:var(--gold);">$0.00</div>
+                            <div class="stat-sub">অ্যাডমিন প্রসেসিংয়ে রয়েছে</div>
+                        </div>
+
+                        <div class="stat-card glass">
+                            <div class="stat-header">
+                                <span class="stat-title">সর্বমোট পেইড কমিশন</span>
+                                <div class="stat-icon" style="background:rgba(16, 185, 129, 0.15); color:#10b981;">
+                                    <i class="fas fa-check-double"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="payoutTotalPaidVal" style="color:#10b981;">$0.00</div>
+                            <div class="stat-sub">সফলভাবে ট্রান্সফার করা হয়েছে</div>
+                        </div>
+
+                        <div class="stat-card glass">
+                            <div class="stat-header">
+                                <span class="stat-title">ন্যূনতম পে-আউট লিমিট</span>
+                                <div class="stat-icon" style="background:rgba(59, 130, 246, 0.15); color:#60a5fa;">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="payoutMinLimitVal" style="color:#60a5fa;">$20.00</div>
+                            <div class="stat-sub">সর্বনিম্ন উইথড্রয়াল সীমা</div>
+                        </div>
+                    </div>
+
+                    <!-- Payouts History Table -->
+                    <div class="glass" style="padding:1.5rem; border-radius:18px; margin-top:1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                            <div>
+                                <h3 style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-list-ul" style="color:var(--emerald);"></i> পে-আউট রিকোয়েস্ট ও পেমেন্ট হিস্টোরি
+                                </h3>
+                                <p style="font-size:0.82rem; color:var(--text-muted);">
+                                    আপনার সকল উত্তোলন আবেদন এবং সম্পন্ন হওয়া পেমেন্টের ট্রানজেকশন আইডি ও হিস্টোরি।
+                                </p>
+                            </div>
+                            <button type="button" class="btn-outline" onclick="fetchPartnerPayoutsHistory()" style="padding:8px 12px;">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>আবেদনের তারিখ</th>
+                                        <th>উইথড্র অ্যামাউন্ট</th>
+                                        <th>পেমেন্ট মেথড</th>
+                                        <th>রিসিভিং এড্রেস / ID</th>
+                                        <th>ট্রানজেকশন ID (TX ID)</th>
+                                        <th>স্ট্যাটাস</th>
+                                        <th>পেইড তারিখ / মন্তব্য</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payoutHistoryTbody">
+                                    <tr>
+                                        <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                                            লোড হচ্ছে...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- ================= TAB 6: SETTINGS ================= -->
+                <div class="tab-panel" id="pane-settings">
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem;">
+                        <!-- Profile Info Form -->
+                        <div class="glass" style="padding:1.5rem; border-radius:18px;">
+                            <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-user-edit" style="color:var(--emerald);"></i> প্রোফাইল ও ডিফল্ট ওয়ালেট তথ্য
+                            </h3>
+
+                            <form id="partnerProfileForm" onsubmit="handleUpdateProfile(event)">
+                                <div class="auth-form-group">
+                                    <label>পূর্ণ নাম (Full Name)</label>
+                                    <input type="text" class="form-control" id="setProfileName" required>
+                                </div>
+                                <div class="auth-form-group">
+                                    <label>ইমেইল এড্রেস (Email - অপরিবর্তনযোগ্য)</label>
+                                    <input type="email" class="form-control" id="setProfileEmail" readonly style="opacity:0.7; background:rgba(0,0,0,0.5);">
+                                </div>
+                                <div class="auth-form-group">
+                                    <label>ফোন / হোয়াটসঅ্যাপ নাম্বার (Phone/WhatsApp)</label>
+                                    <input type="tel" class="form-control" id="setProfilePhone">
+                                </div>
+                                <div class="auth-form-group">
+                                    <label>ডিফল্ট উইথড্রয়াল মেথড (Default Payout Method)</label>
+                                    <select class="form-control" id="setPayoutMethod">
+                                        <option value="Binance Pay">Binance Pay (Pay ID / UID)</option>
+                                        <option value="USDT TRC20">USDT TRC-20 Address</option>
+                                        <option value="bKash">bKash Personal</option>
+                                        <option value="Nagad">Nagad Personal</option>
+                                    </select>
+                                </div>
+                                <div class="auth-form-group">
+                                    <label>ডিফল্ট রিসিভিং ওয়ালেট / একাউন্ট বিস্তারিত</label>
+                                    <input type="text" class="form-control" id="setPayoutDetails" placeholder="e.g. Binance Pay UID / Wallet Address">
+                                </div>
+
+                                <button type="submit" class="btn-emerald" id="btnSaveProfile" style="margin-top:8px;">
+                                    <i class="fas fa-save"></i> প্রোফাইল তথ্য সংরক্ষণ করুন
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Change Password Form -->
+                        <div class="glass" style="padding:1.5rem; border-radius:18px;">
+                            <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-shield-alt" style="color:var(--gold);"></i> পাসওয়ার্ড পরিবর্তন
+                            </h3>
+
+                            <form id="partnerPasswordForm" onsubmit="handleChangePassword(event)">
+                                <div class="auth-form-group">
+                                    <label>বর্তমান পাসওয়ার্ড (Current Password)</label>
+                                    <input type="password" class="form-control" id="setCurrPass" placeholder="••••••••" required autocomplete="current-password">
+                                </div>
+                                <div class="auth-form-group">
+                                    <label>নতুন পাসওয়ার্ড (New Password - কমপক্ষে ৬ অক্ষর)</label>
+                                    <input type="password" class="form-control" id="setNewPass" placeholder="••••••••" required autocomplete="new-password" minlength="6">
+                                </div>
+                                <div class="auth-form-group">
+                                    <label>নতুন পাসওয়ার্ড নিশ্চিত করুন (Confirm New Password)</label>
+                                    <input type="password" class="form-control" id="setConfirmPass" placeholder="••••••••" required autocomplete="new-password" minlength="6">
+                                </div>
+
+                                <button type="submit" class="btn-gold" id="btnSavePass" style="margin-top:8px;">
+                                    <i class="fas fa-key"></i> পাসওয়ার্ড আপডেট করুন
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- 3. MODALS                                  -->
+    <!-- ========================================== -->
+
+    <!-- REQUEST PAYOUT MODAL -->
+    <div class="modal-overlay" id="payoutModal">
+        <div class="modal-box glass">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                <h3 style="font-size:1.15rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-hand-holding-usd" style="color:var(--emerald);"></i> কমিশন উইথড্র রিকোয়েস্ট
+                </h3>
+                <button type="button" onclick="closeModal('payoutModal')" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="requestPayoutForm" onsubmit="handleConfirmPayoutRequest(event)">
+                <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.25); border-radius:12px; padding:12px; margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">উত্তোলনযোগ্য ব্যালেন্স</div>
+                        <div style="font-size:1.35rem; font-weight:900; color:var(--emerald);" id="modalWithdrawableText">$0.00</div>
+                    </div>
+                    <button type="button" class="btn-outline" onclick="fillMaxWithdraw()" style="padding:6px 14px; font-size:0.8rem;">
+                        সর্বোচ্চ (Max)
+                    </button>
+                </div>
+
+                <div class="auth-form-group">
+                    <label>উইথড্র অ্যামাউন্ট (Withdraw Amount in USD)</label>
+                    <input type="number" step="0.01" min="1" class="form-control" id="modalPayoutAmount" placeholder="e.g. 50" required>
+                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">
+                        ন্যূনতম উইথড্রয়াল সীমা: <strong style="color:#60a5fa;" id="modalMinPayoutText">$20.00</strong>
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label>পেমেন্ট মাধ্যম (Payout Method)</label>
+                    <select class="form-control" id="modalPayoutMethod" onchange="updateModalAddressLabel()">
+                        <option value="Binance Pay">Binance Pay (Pay ID / UID)</option>
+                        <option value="USDT TRC20">USDT (TRC-20)</option>
+                        <option value="bKash">bKash (বিকাশ পার্সোনাল)</option>
+                        <option value="Nagad">Nagad (নগদ পার্সোনাল)</option>
+                    </select>
+                </div>
+
+                <div class="auth-form-group">
+                    <label id="modalAddressLabel">Binance Pay ID / UID</label>
+                    <input type="text" class="form-control" id="modalPayoutAddress" placeholder="e.g. 123456789" required>
+                </div>
+
+                <div class="auth-form-group">
+                    <label>পার্টনার নোট (ঐচ্ছিক)</label>
+                    <input type="text" class="form-control" id="modalPayoutNotes" placeholder="আপনার কোনো নোট থাকলে এখানে লিখুন">
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:1.25rem;">
+                    <button type="button" class="btn-outline" onclick="closeModal('payoutModal')" style="flex:1;">বাতিল</button>
+                    <button type="submit" class="btn-emerald" id="btnSubmitPayout" style="flex:2;">
+                        <i class="fas fa-check-circle"></i> রিকোয়েস্ট নিশ্চিত করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- APPLY FOR CUSTOM PROMO CODE MODAL -->
+    <div class="modal-overlay" id="customPromoModal">
+        <div class="modal-box glass">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                <h3 style="font-size:1.15rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-tag" style="color:var(--gold);"></i> নতুন কাস্টম প্রোমো কোড আবেদন
+                </h3>
+                <button type="button" onclick="closeModal('customPromoModal')" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="customPromoForm" onsubmit="handleApplyCustomPromo(event)">
+                <div class="auth-form-group">
+                    <label>পছন্দের প্রোমো কোড (Desired Promo Code - e.g. SUMON10, RAKIBVIP)</label>
+                    <input type="text" class="form-control" id="customPromoCodeInput" placeholder="SUMON10" required style="text-transform:uppercase; font-weight:800; letter-spacing:1px;" minlength="3" maxlength="20">
+                </div>
+
+                <div class="auth-form-group">
+                    <label>ট্রেডার ডিসকাউন্ট পার্সেন্টেজ (Requested Trader Discount %)</label>
+                    <select class="form-control" id="customPromoDiscountInput">
+                        <option value="5">৫% ডিসকাউন্ট (প্রস্তাবিত)</option>
+                        <option value="10">১০% ডিসকাউন্ট (স্পেশাল ক্যাম্পেইন)</option>
+                        <option value="15">১৫% ডিসকাউন্ট (ভিআইপি পার্টনার)</option>
+                    </select>
+                </div>
+
+                <div class="auth-form-group">
+                    <label>আবেদনের উদ্দেশ্য / সোশ্যাল মিডিয়া কমিউনিটি নোট</label>
+                    <textarea class="form-control" id="customPromoReasonInput" rows="3" placeholder="e.g. আমার ২০ হাজার সদস্যের টেলিগ্রাম চ্যানেলে ক্যাম্পেইনের জন্য প্রয়োজন।" required></textarea>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:1.25rem;">
+                    <button type="button" class="btn-outline" onclick="closeModal('customPromoModal')" style="flex:1;">বাতিল</button>
+                    <button type="submit" class="btn-gold" id="btnSubmitPromoReq" style="flex:2;">
+                        <i class="fas fa-paper-plane"></i> আবেদন জমা দিন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- 4. JAVASCRIPT LOGIC                        -->
+    <!-- ========================================== -->
+    <script>
+        // State variables
+        let partnerToken = localStorage.getItem('bpf_partner_token') || '';
+        let partnerData = null;
+        let partnerTierInfo = null;
+        let partnerStats = null;
+        let partnerSettingsData = null;
+        let partnerSalesList = [];
+        let partnerPayoutsList = [];
+        let partnerPromoData = null;
+        let qrcodeInstance = null;
+
+        // On Page Load
+        document.addEventListener('DOMContentLoaded', () => {
+            initPartnerPortal();
+        });
+
+        async function initPartnerPortal() {
+            if (partnerToken) {
+                const ok = await fetchPartnerMe();
+                if (ok) {
+                    showDashboardView();
+                    return;
+                }
+            }
+            showAuthView();
+        }
+
+        function showAuthView() {
+            document.getElementById('authContainer').style.display = 'flex';
+            document.getElementById('dashContainer').style.display = 'none';
+        }
+
+        function showDashboardView() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('dashContainer').style.display = 'block';
+            renderDashboardData();
+            fetchPartnerSalesLog();
+            fetchPartnerPromoCodes();
+            fetchPartnerPayoutsHistory();
+        }
+
+        // ================= AUTH FUNCTIONS =================
+        function switchAuthTab(tab) {
+            const btnLogin = document.getElementById('tabBtnLogin');
+            const btnReg = document.getElementById('tabBtnRegister');
+            const formLogin = document.getElementById('partnerLoginForm');
+            const formReg = document.getElementById('partnerRegisterForm');
+
+            if (tab === 'login') {
+                btnLogin.classList.add('active');
+                btnReg.classList.remove('active');
+                formLogin.style.display = 'block';
+                formReg.style.display = 'none';
+            } else {
+                btnReg.classList.add('active');
+                btnLogin.classList.remove('active');
+                formReg.style.display = 'block';
+                formLogin.style.display = 'none';
+            }
+        }
+
+        function togglePasswordVis(inputId, btn) {
+            const el = document.getElementById(inputId);
+            if (!el) return;
+            if (el.type === 'password') {
+                el.type = 'text';
+                btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                el.type = 'password';
+                btn.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        }
+
+        function previewReferralCode(val) {
+            const clean = (val || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+            document.getElementById('regLinkPreview').innerText = `binarypropfirm.com/?ref=${clean || 'YOURCODE'}`;
+        }
+
+        function updatePayoutPlaceholder() {
+            const method = document.getElementById('regPayoutMethod').value;
+            const label = document.getElementById('regPayoutDetailsLabel');
+            const input = document.getElementById('regPayoutDetails');
+
+            if (method === 'Binance Pay') {
+                label.innerHTML = '<i class="fas fa-id-card"></i> Binance Pay ID / UID';
+                input.placeholder = 'e.g. 123456789';
+            } else if (method === 'USDT TRC20') {
+                label.innerHTML = '<i class="fas fa-wallet"></i> USDT (TRC-20) ওয়ালেট এড্রেস';
+                input.placeholder = 'e.g. Txxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+            } else {
+                label.innerHTML = `<i class="fas fa-mobile-alt"></i> ${method} পার্সোনাল নাম্বার`;
+                input.placeholder = 'e.g. 017xxxxxxxx';
+            }
+        }
+
+        // Handle Partner Login
+        async function handlePartnerLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('btnLoginSubmit');
+
+            if (!email || !password) return showToast('ইমেইল ও পাসওয়ার্ড প্রদান করুন', 'error');
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> লগইন হচ্ছে...';
+
+                const res = await fetch('/api/partner/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+                if (data.success && data.token) {
+                    partnerToken = data.token;
+                    localStorage.setItem('bpf_partner_token', data.token);
+                    partnerData = data.partner;
+                    showToast('সফলভাবে লগইন হয়েছে!', 'success');
+                    await fetchPartnerMe();
+                    showDashboardView();
+                } else {
+                    showToast(data.message || 'লগইন ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('সার্ভার কানেকশন ত্রুটি: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-arrow-right"></i> পার্টনার ড্যাশবোর্ডে প্রবেশ করুন';
+            }
+        }
+
+        // Handle Partner Registration
+        async function handlePartnerRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const promoCode = document.getElementById('regPromoCode').value.trim().toUpperCase();
+            const payoutMethod = document.getElementById('regPayoutMethod').value;
+            const payoutDetails = document.getElementById('regPayoutDetails').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const btn = document.getElementById('btnRegSubmit');
+
+            if (!name || !email || !password || !promoCode) {
+                return showToast('সকল আবশ্যকীয় তথ্য পূরণ করুন', 'error');
+            }
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> অ্যাকাউন্ট তৈরি হচ্ছে...';
+
+                const res = await fetch('/api/partner/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, phone, promoCode, payoutMethod, payoutDetails, password })
+                });
+
+                const data = await res.json();
+                if (data.success && data.token) {
+                    partnerToken = data.token;
+                    localStorage.setItem('bpf_partner_token', data.token);
+                    partnerData = data.partner;
+                    partnerTierInfo = data.tierInfo;
+                    showToast(data.message || 'অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!', 'success');
+                    await fetchPartnerMe();
+                    showDashboardView();
+                } else {
+                    showToast(data.message || 'রেজিস্ট্রেশন ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('সার্ভার কানেকশন ত্রুটি: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-user-check"></i> পার্টনার অ্যাকাউন্ট তৈরি করুন';
+            }
+        }
+
+        function handlePartnerLogout() {
+            if (!confirm('আপনি কি নিশ্চিত যে পার্টনার ড্যাশবোর্ড থেকে লগআউট করতে চান?')) return;
+            localStorage.removeItem('bpf_partner_token');
+            partnerToken = '';
+            partnerData = null;
+            showAuthView();
+            showToast('সফলভাবে লগআউট হয়েছেন', 'info');
+        }
+
+        // ================= DASHBOARD FETCHERS =================
+        async function fetchPartnerMe() {
+            if (!partnerToken) return false;
+            try {
+                const res = await fetch('/api/partner/me', {
+                    headers: { 'Authorization': `Bearer ${partnerToken}` }
+                });
+                if (res.status === 401 || res.status === 403) {
+                    localStorage.removeItem('bpf_partner_token');
+                    partnerToken = '';
+                    return false;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    partnerData = data.partner;
+                    partnerTierInfo = data.tierInfo;
+                    partnerStats = data.stats;
+                    partnerSettingsData = data.settings;
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                console.warn('[Fetch Partner Me Error]', e);
+                return false;
+            }
+        }
+
+        function renderDashboardData() {
+            if (!partnerData || !partnerTierInfo) return;
+
+            // Topbar
+            document.getElementById('topPartnerWelcome').innerText = `স্বাগতম, ${partnerData.name}!`;
+            document.getElementById('topWithdrawableAmount').innerText = `$${(partnerData.withdrawableCommission || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+            const topBadge = document.getElementById('topPartnerLevelBadge');
+            topBadge.className = `badge ${partnerTierInfo.badgeClass || 'badge-bronze'}`;
+            topBadge.innerHTML = `<i class="fas fa-medal"></i> ${partnerTierInfo.levelBadge}`;
+
+            // Hero Banner
+            const heroBadge = document.getElementById('heroLevelBadge');
+            heroBadge.className = `badge ${partnerTierInfo.badgeClass || 'badge-bronze'}`;
+            heroBadge.innerText = `LEVEL ${partnerTierInfo.level}: ${partnerTierInfo.levelBadge}`;
+
+            document.getElementById('heroCommissionRateBadge').innerText = `${partnerTierInfo.currentRate}% প্রতি চ্যালেঞ্জ সেল কমিশন`;
+            document.getElementById('heroPartnerNameGreeting').innerText = `হ্যালো, ${partnerData.name}!`;
+            document.getElementById('heroNextRateText').innerText = `${partnerTierInfo.nextRate}%`;
+
+            if (partnerTierInfo.salesUntilNextLevel > 0) {
+                document.getElementById('heroProgressionStatusText').innerText = 
+                    `আপনি বর্তমানে Level ${partnerTierInfo.level} (${partnerTierInfo.levelName})-এ আছেন। প্রতিটি চ্যালেঞ্জ সেলে ${partnerTierInfo.currentRate}% কমিশন পাচ্ছেন।`;
+                document.getElementById('heroSalesNeededText').innerText = `লেভেল ${partnerTierInfo.level + 1}-এ যেতে আরও ${partnerTierInfo.salesUntilNextLevel}টি সেল বাকি`;
+            } else {
+                document.getElementById('heroProgressionStatusText').innerText = 
+                    `অভিনন্দন! আপনি সর্বোচ্চ Master Level-এ পৌঁছেছেন এবং প্রতিটি চ্যালেঞ্জ সেলে স্থায়ীভাবে সর্বোচ্চ ৫০% কমিশন পাচ্ছেন! 🎉`;
+                document.getElementById('heroSalesNeededText').innerText = `সর্বোচ্চ লেভেল আনলকড`;
+            }
+
+            // Progress bar
+            const pBar = document.getElementById('heroProgressBar');
+            pBar.style.width = `${partnerTierInfo.progressPercent}%`;
+            document.getElementById('heroProgressLabelLeft').innerText = `${partnerTierInfo.salesInTier} / ${partnerTierInfo.tierTarget} সেলস সম্পন্ন`;
+            document.getElementById('heroProgressLabelRight').innerText = `${partnerTierInfo.progressPercent}% অগ্রগতি`;
+
+            // Active Tier in Ladder
+            for (let i = 1; i <= 6; i++) {
+                const el = document.getElementById(`tierCard-${i}`);
+                if (el) {
+                    if (i === partnerTierInfo.level) {
+                        el.classList.add('active');
+                    } else if (i < partnerTierInfo.level) {
+                        el.classList.remove('active');
+                        el.classList.add('completed');
+                    } else {
+                        el.classList.remove('active', 'completed');
+                    }
+                }
+            }
+
+            // 6 Top Stat Cards
+            document.getElementById('statWithdrawable').innerText = `$${(partnerData.withdrawableCommission || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('statTotalEarned').innerText = `$${(partnerData.totalCommissionEarned || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('statTotalPaid').innerText = `$${(partnerData.totalCommissionPaid || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('statSalesCount').innerText = partnerStats?.salesCount || partnerData.totalReferred || 0;
+            document.getElementById('statSalesVolume').innerText = `$${(partnerData.totalSales || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('statPromoCode').innerText = partnerData.promoCode || 'CODE';
+            document.getElementById('statTraderDiscount').innerText = `${partnerData.traderDiscount || 5}%`;
+
+            // Referral Links & Tools inputs
+            const refUrl = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData.promoCode || '')}`;
+            document.getElementById('overviewRefLinkInput').value = refUrl;
+            document.getElementById('toolsRefLink').value = refUrl;
+            document.getElementById('toolsPromoCode').value = partnerData.promoCode || '';
+            document.getElementById('toolsDiscountText').innerText = `${partnerData.traderDiscount || 5}%`;
+
+            // Payouts tab stat cards
+            document.getElementById('payoutWithdrawableVal').innerText = `$${(partnerData.withdrawableCommission || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('payoutPendingRequestsVal').innerText = `$${(partnerStats?.pendingPayoutRequestsAmount || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('payoutTotalPaidVal').innerText = `$${(partnerData.totalCommissionPaid || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('payoutMinLimitVal').innerText = `$${partnerSettingsData?.minPayoutAmount || 20}.00`;
+
+            // Settings Fields
+            document.getElementById('setProfileName').value = partnerData.name || '';
+            document.getElementById('setProfileEmail').value = partnerData.email || '';
+            document.getElementById('setProfilePhone').value = partnerData.phone || '';
+            document.getElementById('setPayoutMethod').value = partnerData.payoutMethod || 'Binance Pay';
+            document.getElementById('setPayoutDetails').value = partnerData.payoutDetails || '';
+
+            // Render QR Code
+            generatePartnerQRCode(refUrl);
+        }
+
+        // Generate QR Code with qrcode.js
+        function generatePartnerQRCode(url) {
+            const container = document.getElementById('qrcodeBox');
+            if (!container) return;
+            container.innerHTML = '';
+            try {
+                if (typeof QRCode !== 'undefined') {
+                    qrcodeInstance = new QRCode(container, {
+                        text: url,
+                        width: 150,
+                        height: 150,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }
+            } catch (err) {
+                console.warn('[QR Code Generation Error]', err);
+            }
+        }
+
+        function downloadQRCode() {
+            const img = document.querySelector('#qrcodeBox img');
+            if (!img || !img.src) {
+                return showToast('QR কোড তৈরি হচ্ছে, অনুগ্রহ করে ১ সেকেন্ড অপেক্ষা করুন', 'info');
+            }
+            const a = document.createElement('a');
+            a.href = img.src;
+            a.download = `BinaryPropFirm_Partner_QR_${partnerData?.promoCode || 'Ref'}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('QR কোড সফলভাবে ডাউনলোড হয়েছে!', 'success');
+        }
+
+        // ================= SALES LOG TAB =================
+        async function fetchPartnerSalesLog() {
+            if (!partnerToken) return;
+            try {
+                const res = await fetch('/api/partner/sales', {
+                    headers: { 'Authorization': `Bearer ${partnerToken}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    partnerSalesList = data.sales || [];
+                    renderSalesLogTable();
+                    renderOverviewRecentSales();
+                }
+            } catch (err) {
+                console.error('[Sales Log Error]', err);
+            }
+        }
+
+        function renderSalesLogTable() {
+            const tbody = document.getElementById('salesLogTbody');
+            if (!tbody) return;
+
+            const filter = document.getElementById('salesFilterStatus')?.value || 'all';
+            const filtered = partnerSalesList.filter(s => {
+                if (filter === 'all') return true;
+                if (filter === 'approved') return s.commissionStatus === 'approved';
+                if (filter === 'pending') return s.commissionStatus === 'pending_approval';
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
+                            <i class="fas fa-shopping-cart" style="font-size:2rem; color:var(--gold); display:block; margin-bottom:8px; opacity:0.6;"></i>
+                            এখনও কোনো রেফারেল বিক্রয় রেকর্ড হয়নি। আপনার রেফারেল লিংক প্রচার করে প্রথম সেল আনুন!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(s => {
+                const isApproved = s.commissionStatus === 'approved';
+                const dateStr = s.createdAt ? new Date(s.createdAt).toLocaleString('bn-BD', { dateStyle:'short', timeStyle:'short' }) : 'N/A';
+                return `
+                    <tr>
+                        <td style="font-size:0.8rem; color:var(--text-muted);">${dateStr}</td>
+                        <td>
+                            <div style="font-weight:700; color:#fff;">${escapeHtml(s.traderName)}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(s.traderEmail)}</div>
+                        </td>
+                        <td>
+                            <span style="font-weight:700; color:#60a5fa;">${escapeHtml(s.packageName)}</span>
+                        </td>
+                        <td style="font-weight:800; color:#fff;">$${(s.fundedAmount || 0).toLocaleString()}</td>
+                        <td style="font-weight:800; color:var(--gold);">$${(s.fee || 0).toLocaleString()}</td>
+                        <td>
+                            <span class="badge" style="background:rgba(0,230,118,0.12); color:var(--emerald); border:1px solid rgba(0,230,118,0.3);">
+                                ${s.commissionRate}%
+                            </span>
+                        </td>
+                        <td>
+                            <span style="font-size:1rem; font-weight:900; color:var(--emerald);">
+                                +$${(s.commissionAmount || 0).toFixed(2)}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge ${isApproved ? 'badge-success' : 'badge-pending'}">
+                                ${isApproved ? '<i class="fas fa-check-circle"></i> অনুমোদিত' : '<i class="fas fa-clock"></i> পেন্ডিং অনুমোদন'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderOverviewRecentSales() {
+            const tbody = document.getElementById('overviewRecentSalesTbody');
+            if (!tbody) return;
+
+            const recent = partnerSalesList.slice(0, 5);
+            if (recent.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:1.75rem; color:var(--text-muted);">
+                            এখনও কোনো সাম্প্রতিক সেলস নেই। আপনার রেফারেল লিংক শেয়ার করুন!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = recent.map(s => {
+                const isApproved = s.commissionStatus === 'approved';
+                const dateStr = s.createdAt ? new Date(s.createdAt).toLocaleDateString('bn-BD') : 'N/A';
+                return `
+                    <tr>
+                        <td style="font-size:0.8rem; color:var(--text-muted);">${dateStr}</td>
+                        <td style="font-weight:700; color:#fff;">${escapeHtml(s.traderName)}</td>
+                        <td style="color:#60a5fa; font-weight:700;">${escapeHtml(s.packageName)}</td>
+                        <td style="font-weight:800; color:var(--gold);">$${(s.fee || 0).toLocaleString()}</td>
+                        <td><span class="badge badge-success">${s.commissionRate}%</span></td>
+                        <td style="font-weight:900; color:var(--emerald);">+$${(s.commissionAmount || 0).toFixed(2)}</td>
+                        <td>
+                            <span class="badge ${isApproved ? 'badge-success' : 'badge-pending'}">
+                                ${isApproved ? 'অনুমোদিত' : 'পেন্ডিং'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterSalesLog() {
+            renderSalesLogTable();
+        }
+
+        // ================= PROMO CODES TAB =================
+        async function fetchPartnerPromoCodes() {
+            if (!partnerToken) return;
+            try {
+                const res = await fetch('/api/partner/promo-codes', {
+                    headers: { 'Authorization': `Bearer ${partnerToken}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    partnerPromoData = data;
+                    renderPromoCodesTable();
+                }
+            } catch (err) {
+                console.error('[Promo Codes Fetch Error]', err);
+            }
+        }
+
+        function renderPromoCodesTable() {
+            const tbody = document.getElementById('promoCodesTbody');
+            if (!tbody || !partnerPromoData) return;
+
+            const primary = partnerPromoData.primary;
+            const custom = partnerPromoData.customPromoCodes || [];
+            const requests = partnerPromoData.requests || [];
+
+            // Display primary
+            if (primary) {
+                document.getElementById('promoPrimaryCodeDisplay').innerText = primary.code;
+                document.getElementById('promoPrimaryDiscountDisplay').innerText = `${primary.discount}%`;
+            }
+
+            const rows = [];
+
+            // 1. Add approved custom codes
+            custom.forEach(c => {
+                rows.push(`
+                    <tr>
+                        <td>
+                            <span style="font-family:monospace; font-weight:900; color:var(--gold); font-size:1rem; background:rgba(245,176,65,0.1); padding:4px 10px; border-radius:6px; border:1px solid rgba(245,176,65,0.3);">
+                                ${escapeHtml(c.code)}
+                            </span>
+                        </td>
+                        <td style="font-weight:800; color:#60a5fa;">${c.discount}% ছাড়</td>
+                        <td style="font-size:0.8rem; color:var(--text-muted);">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('bn-BD') : 'N/A'}</td>
+                        <td>
+                            <span class="badge badge-success"><i class="fas fa-check"></i> সক্রিয় (Active)</span>
+                        </td>
+                        <td>
+                            <button type="button" class="btn-outline" onclick="copySpecificCode('${escapeHtml(c.code)}')" style="padding:4px 10px; font-size:0.75rem;">
+                                <i class="fas fa-copy"></i> কপি
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            // 2. Add pending / rejected requests
+            requests.forEach(r => {
+                const isPending = r.status === 'pending';
+                const isApproved = r.status === 'approved';
+                const isRejected = r.status === 'rejected';
+
+                let badgeHtml = '';
+                if (isPending) badgeHtml = `<span class="badge badge-pending"><i class="fas fa-clock"></i> অ্যাডমিন পর্যালোচনায়</span>`;
+                else if (isApproved) badgeHtml = `<span class="badge badge-success"><i class="fas fa-check"></i> অনুমোদিত</span>`;
+                else badgeHtml = `<span class="badge badge-danger"><i class="fas fa-times"></i> প্রত্যাখ্যাত</span>`;
+
+                rows.push(`
+                    <tr>
+                        <td>
+                            <span style="font-family:monospace; font-weight:800; color:#fff; font-size:0.95rem;">
+                                ${escapeHtml(r.promoCode)}
+                            </span>
+                        </td>
+                        <td style="font-weight:700; color:#cbd5e1;">${r.requestedDiscount}% আবেদন</td>
+                        <td style="font-size:0.8rem; color:var(--text-muted);">${r.createdAt ? new Date(r.createdAt).toLocaleDateString('bn-BD') : 'N/A'}</td>
+                        <td>
+                            ${badgeHtml}
+                            ${r.adminNotes ? `<div style="font-size:0.72rem; color:var(--text-muted); margin-top:3px;">নোট: ${escapeHtml(r.adminNotes)}</div>` : ''}
+                        </td>
+                        <td>
+                            ${isApproved ? `
+                                <button type="button" class="btn-outline" onclick="copySpecificCode('${escapeHtml(r.promoCode)}')" style="padding:4px 10px; font-size:0.75rem;">
+                                    <i class="fas fa-copy"></i> কপি
+                                </button>
+                            ` : '<span style="color:var(--text-muted); font-size:0.8rem;">-</span>'}
+                        </td>
+                    </tr>
+                `);
+            });
+
+            if (rows.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                            কোনো কাস্টম প্রোমো কোডের আবেদন পাওয়া যায়নি। উপরে "+ নতুন প্রোমো কোডের আবেদন করুন" বাটনে ক্লিক করে আবেদন করুন।
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = rows.join('');
+        }
+
+        function openCustomPromoModal() {
+            openModal('customPromoModal');
+        }
+
+        async function handleApplyCustomPromo(e) {
+            e.preventDefault();
+            const requestedCode = document.getElementById('customPromoCodeInput').value.trim();
+            const requestedDiscount = parseFloat(document.getElementById('customPromoDiscountInput').value);
+            const reason = document.getElementById('customPromoReasonInput').value.trim();
+            const btn = document.getElementById('btnSubmitPromoReq');
+
+            if (!requestedCode || requestedCode.length < 3) {
+                return showToast('প্রোমো কোড কমপক্ষে ৩ অক্ষরের হতে হবে', 'error');
+            }
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আবেদন জমা হচ্ছে...';
+
+                const res = await fetch('/api/partner/custom-promo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${partnerToken}`
+                    },
+                    body: JSON.stringify({ requestedCode, requestedDiscount, reason })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'আবেদন সফলভাবে জমা হয়েছে!', 'success');
+                    closeModal('customPromoModal');
+                    document.getElementById('customPromoForm').reset();
+                    fetchPartnerPromoCodes();
+                } else {
+                    showToast(data.message || 'আবেদন ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('সার্ভার ত্রুটি: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> আবেদন জমা দিন';
+            }
+        }
+
+        // ================= PAYOUTS TAB =================
+        async function fetchPartnerPayoutsHistory() {
+            if (!partnerToken) return;
+            try {
+                const res = await fetch('/api/partner/payouts', {
+                    headers: { 'Authorization': `Bearer ${partnerToken}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    partnerPayoutsList = data.payouts || [];
+                    renderPayoutHistoryTable();
+                }
+            } catch (err) {
+                console.error('[Payouts History Error]', err);
+            }
+        }
+
+        function renderPayoutHistoryTable() {
+            const tbody = document.getElementById('payoutHistoryTbody');
+            if (!tbody) return;
+
+            if (partnerPayoutsList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
+                            <i class="fas fa-money-check-alt" style="font-size:2rem; color:var(--emerald); display:block; margin-bottom:8px; opacity:0.6;"></i>
+                            এখনও কোনো পে-আউট রিকোয়েস্ট করা হয়নি। ব্যালেন্স ন্যূনতম $${partnerSettingsData?.minPayoutAmount || 20} হলে উইথড্র আবেদন করতে পারবেন।
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = partnerPayoutsList.map(p => {
+                const isCompleted = p.status === 'completed';
+                const isPending = p.status === 'pending';
+                const isRejected = p.status === 'rejected';
+
+                let badgeHtml = '';
+                if (isCompleted) badgeHtml = `<span class="badge badge-success"><i class="fas fa-check-double"></i> পেইড সম্পন্ন</span>`;
+                else if (isPending) badgeHtml = `<span class="badge badge-pending"><i class="fas fa-clock"></i> পেন্ডিং রিভিউ</span>`;
+                else badgeHtml = `<span class="badge badge-danger"><i class="fas fa-times-circle"></i> বাতিল</span>`;
+
+                const dateStr = p.requestedAt ? new Date(p.requestedAt).toLocaleString('bn-BD', { dateStyle:'short', timeStyle:'short' }) : 'N/A';
+
+                return `
+                    <tr>
+                        <td style="font-size:0.8rem; color:var(--text-muted);">${dateStr}</td>
+                        <td style="font-size:1.05rem; font-weight:900; color:var(--emerald);">$${(p.amount || 0).toFixed(2)}</td>
+                        <td style="font-weight:700; color:#fff;">${escapeHtml(p.paymentMethod || 'Binance Pay')}</td>
+                        <td style="font-family:monospace; font-size:0.85rem; color:#60a5fa;">${escapeHtml(p.payoutAddress || 'N/A')}</td>
+                        <td style="font-family:monospace; font-size:0.82rem; color:var(--gold); font-weight:700;">
+                            ${escapeHtml(p.txId || '-')}
+                        </td>
+                        <td>${badgeHtml}</td>
+                        <td style="font-size:0.78rem; color:var(--text-muted);">
+                            ${p.paidAt ? `পেইড: ${new Date(p.paidAt).toLocaleDateString('bn-BD')}` : (p.adminNotes || '-')}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openPayoutModal() {
+            if (!partnerData) return;
+            const withdrawable = partnerData.withdrawableCommission || 0;
+            const minPayout = partnerSettingsData?.minPayoutAmount || 20;
+
+            document.getElementById('modalWithdrawableText').innerText = `$${withdrawable.toFixed(2)}`;
+            document.getElementById('modalMinPayoutText').innerText = `$${minPayout}.00`;
+            document.getElementById('modalPayoutAmount').value = withdrawable >= minPayout ? withdrawable : '';
+            document.getElementById('modalPayoutMethod').value = partnerData.payoutMethod || 'Binance Pay';
+            document.getElementById('modalPayoutAddress').value = partnerData.payoutDetails || '';
+            updateModalAddressLabel();
+
+            openModal('payoutModal');
+        }
+
+        function fillMaxWithdraw() {
+            const withdrawable = partnerData?.withdrawableCommission || 0;
+            document.getElementById('modalPayoutAmount').value = withdrawable > 0 ? withdrawable : '';
+        }
+
+        function updateModalAddressLabel() {
+            const method = document.getElementById('modalPayoutMethod').value;
+            const label = document.getElementById('modalAddressLabel');
+            const input = document.getElementById('modalPayoutAddress');
+
+            if (method === 'Binance Pay') {
+                label.innerText = 'Binance Pay ID / UID';
+                input.placeholder = 'e.g. 123456789';
+            } else if (method === 'USDT TRC20') {
+                label.innerText = 'USDT (TRC-20) ওয়ালেট এড্রেস';
+                input.placeholder = 'e.g. Txxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+            } else {
+                label.innerText = `${method} পার্সোনাল নাম্বার`;
+                input.placeholder = 'e.g. 017xxxxxxxx';
+            }
+        }
+
+        async function handleConfirmPayoutRequest(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('modalPayoutAmount').value);
+            const paymentMethod = document.getElementById('modalPayoutMethod').value.trim();
+            const payoutAddress = document.getElementById('modalPayoutAddress').value.trim();
+            const notes = document.getElementById('modalPayoutNotes').value.trim();
+            const btn = document.getElementById('btnSubmitPayout');
+
+            if (!amount || amount <= 0) return showToast('সঠিক উইথড্র অ্যামাউন্ট দিন', 'error');
+            if (!payoutAddress) return showToast('রিসিভিং এড্রেস প্রদান করুন', 'error');
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেস হচ্ছে...';
+
+                const res = await fetch('/api/partner/payouts/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${partnerToken}`
+                    },
+                    body: JSON.stringify({ amount, paymentMethod, payoutAddress, notes })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'উইথড্র রিকোয়েস্ট সফলভাবে জমা হয়েছে!', 'success');
+                    closeModal('payoutModal');
+                    await fetchPartnerMe();
+                    renderDashboardData();
+                    fetchPartnerPayoutsHistory();
+                } else {
+                    showToast(data.message || 'রিকোয়েস্ট ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('সার্ভার ত্রুটি: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> রিকোয়েস্ট নিশ্চিত করুন';
+            }
+        }
+
+        // ================= SETTINGS TAB =================
+        async function handleUpdateProfile(e) {
+            e.preventDefault();
+            const name = document.getElementById('setProfileName').value.trim();
+            const phone = document.getElementById('setProfilePhone').value.trim();
+            const payoutMethod = document.getElementById('setPayoutMethod').value;
+            const payoutDetails = document.getElementById('setPayoutDetails').value.trim();
+            const btn = document.getElementById('btnSaveProfile');
+
+            if (!name) return showToast('নাম প্রদান আবশ্যক', 'error');
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...';
+
+                const res = await fetch('/api/partner/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${partnerToken}`
+                    },
+                    body: JSON.stringify({ name, phone, payoutMethod, payoutDetails })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast('প্রোফাইল তথ্য সফলভাবে সেভ হয়েছে!', 'success');
+                    await fetchPartnerMe();
+                    renderDashboardData();
+                } else {
+                    showToast(data.message || 'সেভ করতে সমস্যা হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('সার্ভার ত্রুটি: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> প্রোফাইল তথ্য সংরক্ষণ করুন';
+            }
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const currentPassword = document.getElementById('setCurrPass').value;
+            const newPassword = document.getElementById('setNewPass').value;
+            const confirmPassword = document.getElementById('setConfirmPass').value;
+            const btn = document.getElementById('btnSavePass');
+
+            if (!currentPassword || !newPassword) return showToast('সকল পাসওয়ার্ড ফিল্ড পূরণ করুন', 'error');
+            if (newPassword.length < 6) return showToast('নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে', 'error');
+            if (newPassword !== confirmPassword) return showToast('নতুন ও কনফার্ম পাসওয়ার্ড মিলছে না', 'error');
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> পাসওয়ার্ড পরিবর্তন হচ্ছে...';
+
+                const res = await fetch('/api/partner/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${partnerToken}`
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!', 'success');
+                    document.getElementById('partnerPasswordForm').reset();
+                } else {
+                    showToast(data.message || 'পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('সার্ভার ত্রুটি: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-key"></i> পাসওয়ার্ড আপডেট করুন';
+            }
+        }
+
+        // ================= NAVIGATION & TAB SWITCHING =================
+        function switchPartnerTab(tabKey, clickedEl) {
+            // Remove active from links
+            document.querySelectorAll('.sidebar-nav .nav-link').forEach(l => l.classList.remove('active'));
+            if (clickedEl) clickedEl.classList.add('active');
+
+            // Hide all tab panels
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+            const targetPane = document.getElementById(`pane-${tabKey}`);
+            if (targetPane) targetPane.classList.add('active');
+
+            // Close mobile sidebar
+            const sidebar = document.getElementById('partnerSidebar');
+            if (sidebar) sidebar.classList.remove('mobile-open');
+
+            // Auto-refresh data on tab open
+            if (tabKey === 'sales-log') fetchPartnerSalesLog();
+            if (tabKey === 'promo-codes') fetchPartnerPromoCodes();
+            if (tabKey === 'payouts') fetchPartnerPayoutsHistory();
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('partnerSidebar');
+            if (sidebar) sidebar.classList.toggle('mobile-open');
+        }
+
+        // ================= COPY & SHARE UTILITIES =================
+        function copyRefLink() {
+            const link = document.getElementById('overviewRefLinkInput').value;
+            if (!link) return;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('রেফারেল লিংক কপি হয়েছে!', 'success');
+            }).catch(() => {
+                showToast('কপি ব্যর্থ হয়েছে', 'error');
+            });
+        }
+
+        function copyToolsLink() {
+            const link = document.getElementById('toolsRefLink').value;
+            if (!link) return;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('রেফারেল লিংক কপি হয়েছে!', 'success');
+            });
+        }
+
+        function copyToolsCode() {
+            const code = document.getElementById('toolsPromoCode').value;
+            if (!code) return;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast(`প্রোমো কোড "${code}" কপি হয়েছে!`, 'success');
+            });
+        }
+
+        function copyPromoCodeText() {
+            if (!partnerData || !partnerData.promoCode) return;
+            navigator.clipboard.writeText(partnerData.promoCode).then(() => {
+                showToast(`প্রোমো কোড "${partnerData.promoCode}" কপি হয়েছে!`, 'success');
+            });
+        }
+
+        function copySpecificCode(code) {
+            if (!code) return;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast(`প্রোমো কোড "${code}" কপি হয়েছে!`, 'success');
+            });
+        }
+
+        function copyPromoTemplate(lang) {
+            const link = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
+            const code = partnerData?.promoCode || 'CODE';
+            let text = '';
+            if (lang === 'bn') {
+                text = document.getElementById('promoTemplateBn').innerText
+                    .replace('{LINK}', link)
+                    .replace('{CODE}', code);
+            } else {
+                text = document.getElementById('promoTemplateEn').innerText
+                    .replace('{LINK}', link)
+                    .replace('{CODE}', code);
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('প্রমোশনাল পোস্ট কপি হয়েছে!', 'success');
+            });
+        }
+
+        function shareOnWhatsApp() {
+            const link = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
+            const text = `Quotex বা পছন্দের ব্রোকারে ট্রেড করে ফান্ডেড একাউন্ট পেতে আজই Binary Prop Firm-এ যোগ দিন! আমার রেফারেল লিংক: ${link}`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function shareOnTelegram() {
+            const link = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
+            const text = `Binary Prop Firm - Get Funded up to $1,200 & keep 80% profits! Join with my link: ${link}`;
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function shareOnFacebook() {
+            const link = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`, '_blank');
+        }
+
+        // ================= MODAL HELPERS =================
+        function openModal(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.style.display = 'none';
+        }
+
+        // Close on clicking outside modal box
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.style.display = 'none';
+            }
+        });
+
+        // Toast Helper
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast-item toast-${type}`;
+            
+            let icon = 'info-circle';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'error') icon = 'exclamation-circle';
+
+            toast.innerHTML = `<i class="fas fa-${icon}"></i> <span>${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>

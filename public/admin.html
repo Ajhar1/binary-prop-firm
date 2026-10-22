@@ -2538,6 +2538,12 @@
                     <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-settings" onclick="switchPartnerSubtab('partner-settings')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
                         <i class="fas fa-sliders-h"></i> ৪. পলিসি ও সেটিংস
                     </button>
+                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-payout-requests" onclick="switchPartnerSubtab('payout-requests')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
+                        <i class="fas fa-hand-holding-usd" style="color:#00e676;"></i> ৫. উইথড্র রিকোয়েস্ট <span class="nav-badge" id="adminBadgePayoutReqs" style="display:none; background:#00e676; color:#000; font-size:0.75rem; padding:2px 7px; border-radius:10px; font-weight:800;">0</span>
+                    </button>
+                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-promo-requests" onclick="switchPartnerSubtab('promo-requests')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
+                        <i class="fas fa-tags" style="color:var(--gold);"></i> ৬. প্রোমো আবেদন <span class="nav-badge" id="adminBadgePromoReqs" style="display:none; background:var(--gold); color:#000; font-size:0.75rem; padding:2px 7px; border-radius:10px; font-weight:800;">0</span>
+                    </button>
                 </div>
 
                 <div style="display:flex; gap:10px; align-items:center;">
@@ -2708,6 +2714,85 @@
                             <i class="fas fa-save"></i> সেটিংস সেভ করুন
                         </button>
                     </form>
+                </div>
+            </div>
+
+            <!-- VIEW 5: Partner Payout Requests -->
+            <div id="partnerSubview-payout-requests" class="partner-subview" style="display:none;">
+                <div class="glass" style="border-radius:18px; padding:1.25rem 1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.2rem;">
+                        <div>
+                            <h3 style="margin:0; font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-hand-holding-usd" style="color:#00e676;"></i> পার্টনার কমিশন উইথড্র রিকোয়েস্ট তালিকা
+                            </h3>
+                            <p style="margin:3px 0 0 0; font-size:0.8rem; color:var(--text-secondary);">
+                                পার্টনারদের আবেদন করা উত্তোলন তালিকা। পেমেন্ট পাঠিয়ে TX ID দিয়ে অ্যাপ্রুভ করুন।
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>তারিখ</th>
+                                    <th>পার্টনার নাম ও ইমেইল</th>
+                                    <th>উইথড্র অ্যামাউন্ট</th>
+                                    <th>পেমেন্ট মেথড</th>
+                                    <th>রিসিভিং এড্রেস / ID</th>
+                                    <th>পার্টনার নোট</th>
+                                    <th>স্ট্যাটাস</th>
+                                    <th>অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPartnerPayoutRequestsTableBody">
+                                <tr>
+                                    <td colspan="8" style="text-align:center; padding:2rem; color:var(--text-secondary);">
+                                        লোড হচ্ছে...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 6: Partner Custom Promo Requests -->
+            <div id="partnerSubview-promo-requests" class="partner-subview" style="display:none;">
+                <div class="glass" style="border-radius:18px; padding:1.25rem 1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.2rem;">
+                        <div>
+                            <h3 style="margin:0; font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-tags" style="color:var(--gold);"></i> কাস্টম প্রোমো কোড আবেদন তালিকা
+                            </h3>
+                            <p style="margin:3px 0 0 0; font-size:0.8rem; color:var(--text-secondary);">
+                                পার্টনারদের নতুন প্রোমো কোড ও ডিসকাউন্ট আবেদন। অনুমোদন করলে ট্রেডাররা এই কোড দিয়ে চ্যালেঞ্জে ছাড় পাবে।
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>তারিখ</th>
+                                    <th>পার্টনার নাম ও ইমেইল</th>
+                                    <th>আবেদনকৃত কোড</th>
+                                    <th>প্রস্তাবিত ছাড়</th>
+                                    <th>উদ্দেশ্য / কমিউনিটি নোট</th>
+                                    <th>স্ট্যাটাস</th>
+                                    <th>অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPartnerPromoRequestsTableBody">
+                                <tr>
+                                    <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-secondary);">
+                                        লোড হচ্ছে...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -10515,6 +10600,7 @@
         let adminPartnersList = [];
         let adminPartnerReferralLogs = [];
         let adminPartnerPayoutsList = [];
+        let adminPartnerPromoRequestsList = [];
         let adminPartnerSettingsData = {};
         let currentPartnerActiveSubtab = 'partners-list';
 
@@ -10523,15 +10609,17 @@
             if (!token) return;
 
             try {
-                const [resPartners, resLogs, resPayouts] = await Promise.all([
+                const [resPartners, resLogs, resPayouts, resPromoReqs] = await Promise.all([
                     fetch('/api/admin/partners', { headers: { 'Authorization': `Bearer ${token}` } }),
                     fetch('/api/admin/partner-referral-logs', { headers: { 'Authorization': `Bearer ${token}` } }),
-                    fetch('/api/admin/partner-payouts', { headers: { 'Authorization': `Bearer ${token}` } })
+                    fetch('/api/admin/partner-payouts', { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch('/api/admin/partner-promo-requests', { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
 
                 const dataPartners = await resPartners.json();
                 const dataLogs = await resLogs.json();
                 const dataPayouts = await resPayouts.json();
+                const dataPromoReqs = await resPromoReqs.json();
 
                 if (dataPartners.success) {
                     adminPartnersList = dataPartners.partners || [];
@@ -10547,10 +10635,16 @@
                     adminPartnerPayoutsList = dataPayouts.payouts || [];
                 }
 
+                if (dataPromoReqs.success) {
+                    adminPartnerPromoRequestsList = dataPromoReqs.requests || [];
+                }
+
                 renderAdminPartnerStats();
                 renderAdminPartnersTable();
                 renderAdminPartnerLogsTable();
                 renderAdminPartnerPayoutsTable();
+                renderAdminPartnerPayoutRequestsTable();
+                renderAdminPartnerPromoRequestsTable();
             } catch (err) {
                 console.error('[Admin Partners Error]:', err);
             }
@@ -10563,6 +10657,9 @@
             const totalEarned = adminPartnersList.reduce((sum, p) => sum + (p.totalCommissionEarned || 0), 0);
             const totalPaid = adminPartnersList.reduce((sum, p) => sum + (p.totalCommissionPaid || 0), 0);
             const pendingCommission = adminPartnersList.reduce((sum, p) => sum + (p.pendingCommission || 0), 0);
+
+            const pendingPayouts = adminPartnerPayoutsList.filter(p => p.status === 'pending');
+            const pendingPromoReqs = adminPartnerPromoRequestsList.filter(r => r.status === 'pending');
 
             const elCount = document.getElementById('statPartnerCount');
             if (elCount) elCount.innerText = totalPartners;
@@ -10584,11 +10681,35 @@
 
             const badgeEl = document.getElementById('partnerPendingBadge');
             if (badgeEl) {
-                if (pendingCommission > 0) {
+                const totalActions = pendingPayouts.length + pendingPromoReqs.length;
+                if (totalActions > 0) {
+                    badgeEl.innerText = `${totalActions}`;
+                    badgeEl.style.display = 'inline-block';
+                } else if (pendingCommission > 0) {
                     badgeEl.innerText = `$${Math.round(pendingCommission)}`;
                     badgeEl.style.display = 'inline-block';
                 } else {
                     badgeEl.style.display = 'none';
+                }
+            }
+
+            const badgePayouts = document.getElementById('adminBadgePayoutReqs');
+            if (badgePayouts) {
+                if (pendingPayouts.length > 0) {
+                    badgePayouts.innerText = pendingPayouts.length;
+                    badgePayouts.style.display = 'inline-block';
+                } else {
+                    badgePayouts.style.display = 'none';
+                }
+            }
+
+            const badgePromo = document.getElementById('adminBadgePromoReqs');
+            if (badgePromo) {
+                if (pendingPromoReqs.length > 0) {
+                    badgePromo.innerText = pendingPromoReqs.length;
+                    badgePromo.style.display = 'inline-block';
+                } else {
+                    badgePromo.style.display = 'none';
                 }
             }
         }
@@ -10599,14 +10720,18 @@
                 'partners-list': 'partnerSubview-list',
                 'referral-logs': 'partnerSubview-logs',
                 'payout-history': 'partnerSubview-payouts',
-                'partner-settings': 'partnerSubview-settings'
+                'partner-settings': 'partnerSubview-settings',
+                'payout-requests': 'partnerSubview-payout-requests',
+                'promo-requests': 'partnerSubview-promo-requests'
             };
 
             const btns = {
                 'partners-list': 'btnPartnerTab-list',
                 'referral-logs': 'btnPartnerTab-logs',
                 'payout-history': 'btnPartnerTab-payouts',
-                'partner-settings': 'btnPartnerTab-settings'
+                'partner-settings': 'btnPartnerTab-settings',
+                'payout-requests': 'btnPartnerTab-payout-requests',
+                'promo-requests': 'btnPartnerTab-promo-requests'
             };
 
             Object.keys(views).forEach(k => {
@@ -10659,7 +10784,12 @@
                 return `
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition:background 0.2s;">
                         <td style="padding:12px;">
-                            <div style="font-weight:800; color:#fff; font-size:0.9rem;">${escapeHtml(p.name)}</div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="font-weight:800; color:#fff; font-size:0.9rem;">${escapeHtml(p.name)}</span>
+                                <span class="badge" style="font-size:0.65rem; padding:2px 6px; font-weight:800; border-radius:4px; ${p.tierInfo && p.tierInfo.level >= 5 ? 'background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid rgba(255,215,0,0.3);' : 'background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3);'}">
+                                    ${p.tierInfo ? p.tierInfo.levelBadge : 'BRONZE'}
+                                </span>
+                            </div>
                             <div style="font-size:0.75rem; color:var(--text-secondary);">${escapeHtml(p.email)}</div>
                             ${p.phone ? `<div style="font-size:0.72rem; color:#60a5fa;"><i class="fab fa-whatsapp"></i> ${escapeHtml(p.phone)}</div>` : ''}
                         </td>
@@ -10678,7 +10808,7 @@
                         </td>
                         <td style="padding:12px; text-align:center;">
                             <span style="font-weight:900; color:#00e676; font-size:0.95rem; background:rgba(0,230,118,0.1); padding:3px 8px; border-radius:6px; border:1px solid rgba(0,230,118,0.25);">
-                                ${p.commissionRate || 10}%
+                                ${p.dynamicRate || p.commissionRate || 10}%
                             </span>
                         </td>
                         <td style="padding:12px; text-align:center;">
@@ -10819,6 +10949,233 @@
                     </tr>
                 `;
             }).join('');
+        }
+
+        function renderAdminPartnerPayoutRequestsTable() {
+            const tbody = document.getElementById('adminPartnerPayoutRequestsTableBody');
+            if (!tbody) return;
+
+            const pendingPayouts = adminPartnerPayoutsList.filter(p => p.status === 'pending');
+
+            if (pendingPayouts.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="font-size:2rem; color:#00e676; display:block; margin-bottom:8px; opacity:0.6;"></i>
+                            বর্তমানে কোনো পেন্ডিং উইথড্র রিকোয়েস্ট নেই।
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = pendingPayouts.map(p => {
+                const dt = p.requestedAt ? new Date(p.requestedAt).toLocaleString('bn-BD', { dateStyle:'short', timeStyle:'short' }) : 'N/A';
+                return `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <td style="padding:12px; font-size:0.8rem; color:var(--text-secondary);">${dt}</td>
+                        <td style="padding:12px;">
+                            <div style="font-weight:700; color:#fff; font-size:0.88rem;">${escapeHtml(p.partnerName)}</div>
+                            <div style="font-size:0.74rem; color:var(--text-secondary);">${escapeHtml(p.partnerEmail || '')}</div>
+                        </td>
+                        <td style="padding:12px; font-weight:900; color:#00e676; font-size:1.05rem;">
+                            $${(p.amount || 0).toFixed(2)}
+                        </td>
+                        <td style="padding:12px; font-weight:700; color:#fff;">
+                            ${escapeHtml(p.paymentMethod || 'Binance Pay')}
+                        </td>
+                        <td style="padding:12px;">
+                            <code style="font-size:0.85rem; color:#60a5fa; font-family:monospace; background:rgba(96,165,250,0.1); padding:3px 8px; border-radius:6px;">
+                                ${escapeHtml(p.payoutAddress || '')}
+                            </code>
+                        </td>
+                        <td style="padding:12px; font-size:0.8rem; color:var(--text-secondary);">
+                            ${escapeHtml(p.notes || '-')}
+                        </td>
+                        <td style="padding:12px;">
+                            <span class="badge badge-pending" style="background:rgba(245,176,65,0.15); color:var(--gold); border:1px solid rgba(245,176,65,0.3); padding:4px 8px; border-radius:6px; font-weight:700; font-size:0.75rem;">
+                                <i class="fas fa-clock"></i> পেন্ডিং
+                            </span>
+                        </td>
+                        <td style="padding:12px;">
+                            <div style="display:flex; gap:6px;">
+                                <button type="button" class="btn-sm btn-gold" onclick="handleAdminApprovePayoutRequest('${p.id}', ${p.amount})" style="padding:5px 10px; font-size:0.75rem; border-radius:6px; cursor:pointer;">
+                                    <i class="fas fa-check"></i> অ্যাপ্রুভ ও পে
+                                </button>
+                                <button type="button" class="btn-sm btn-outline" onclick="handleAdminRejectPayoutRequest('${p.id}')" style="padding:5px 10px; font-size:0.75rem; border-radius:6px; color:#f87171; border-color:rgba(239,68,68,0.3); cursor:pointer;">
+                                    <i class="fas fa-times"></i> বাতিল
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function handleAdminApprovePayoutRequest(id, amount) {
+            const txId = prompt(`পে-আউট ($${amount}) অনুমোদন করতে ট্রানজেকশন আইডি (TX ID / Pay Order ID) লিখুন:`, `BP_PART_${Date.now()}`);
+            if (txId === null) return;
+
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            try {
+                const res = await fetch(`/api/admin/partner-payout-requests/${id}/action`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ action: 'approve', txId: txId.trim() })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'পে-আউট অনুমোদিত হয়েছে!', 'success');
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (e) {
+                showToast('ত্রুটি: ' + e.message, 'error');
+            }
+        }
+
+        async function handleAdminRejectPayoutRequest(id) {
+            const reason = prompt('পে-আউট রিকোয়েস্ট বাতিল করার কারণ লিখুন (পার্টনারের জন্য):', 'Invalid wallet address or verification required');
+            if (reason === null) return;
+
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            try {
+                const res = await fetch(`/api/admin/partner-payout-requests/${id}/action`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ action: 'reject', adminNotes: reason.trim() })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('পে-আউট রিকোয়েস্ট বাতিল করা হয়েছে। ব্যালেন্স পার্টনারের অ্যাকাউন্টে ফেরত দেওয়া হয়েছে।', 'info');
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (e) {
+                showToast('ত্রুটি: ' + e.message, 'error');
+            }
+        }
+
+        function renderAdminPartnerPromoRequestsTable() {
+            const tbody = document.getElementById('adminPartnerPromoRequestsTableBody');
+            if (!tbody) return;
+
+            if (adminPartnerPromoRequestsList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2.5rem; color:var(--text-secondary);">
+                            <i class="fas fa-tags" style="font-size:2rem; color:var(--gold); display:block; margin-bottom:8px; opacity:0.6;"></i>
+                            বর্তমানে কোনো কাস্টম প্রোমো কোডের আবেদন নেই।
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = adminPartnerPromoRequestsList.map(r => {
+                const dt = r.createdAt ? new Date(r.createdAt).toLocaleString('bn-BD', { dateStyle:'short', timeStyle:'short' }) : 'N/A';
+                const isPending = r.status === 'pending';
+                const isApproved = r.status === 'approved';
+
+                let badgeHtml = '';
+                if (isPending) badgeHtml = `<span class="badge badge-pending" style="background:rgba(245,176,65,0.15); color:var(--gold); border:1px solid rgba(245,176,65,0.3); padding:4px 8px; border-radius:6px; font-weight:700; font-size:0.75rem;"><i class="fas fa-clock"></i> পেন্ডিং আবেদন</span>`;
+                else if (isApproved) badgeHtml = `<span class="badge badge-success" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); padding:4px 8px; border-radius:6px; font-weight:700; font-size:0.75rem;"><i class="fas fa-check"></i> সক্রিয় / অনুমোদিত</span>`;
+                else badgeHtml = `<span class="badge badge-danger" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3); padding:4px 8px; border-radius:6px; font-weight:700; font-size:0.75rem;"><i class="fas fa-times"></i> প্রত্যাখ্যাত</span>`;
+
+                return `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <td style="padding:12px; font-size:0.8rem; color:var(--text-secondary);">${dt}</td>
+                        <td style="padding:12px;">
+                            <div style="font-weight:700; color:#fff; font-size:0.88rem;">${escapeHtml(r.partnerName)}</div>
+                            <div style="font-size:0.74rem; color:var(--text-secondary);">${escapeHtml(r.partnerEmail || '')}</div>
+                        </td>
+                        <td style="padding:12px;">
+                            <span style="font-family:monospace; font-weight:900; color:var(--gold); font-size:1rem; background:rgba(245,176,65,0.12); padding:3px 8px; border-radius:6px; border:1px solid rgba(245,176,65,0.3);">
+                                ${escapeHtml(r.promoCode)}
+                            </span>
+                        </td>
+                        <td style="padding:12px; font-weight:800; color:#60a5fa;">
+                            ${r.requestedDiscount || 5}% ছাড়
+                        </td>
+                        <td style="padding:12px; font-size:0.8rem; color:var(--text-secondary);">
+                            ${escapeHtml(r.reason || '-')}
+                        </td>
+                        <td style="padding:12px;">${badgeHtml}</td>
+                        <td style="padding:12px;">
+                            ${isPending ? `
+                                <div style="display:flex; gap:6px;">
+                                    <button type="button" class="btn-sm btn-gold" onclick="handleAdminApprovePromoRequest('${r.id}', ${r.requestedDiscount || 5})" style="padding:5px 10px; font-size:0.75rem; border-radius:6px; cursor:pointer;">
+                                        <i class="fas fa-check"></i> অনুমোদন
+                                    </button>
+                                    <button type="button" class="btn-sm btn-outline" onclick="handleAdminRejectPromoRequest('${r.id}')" style="padding:5px 10px; font-size:0.75rem; border-radius:6px; color:#f87171; border-color:rgba(239,68,68,0.3); cursor:pointer;">
+                                        <i class="fas fa-times"></i> বাতিল
+                                    </button>
+                                </div>
+                            ` : `<span style="font-size:0.75rem; color:var(--text-secondary);">${r.adminNotes || 'সম্পন্ন'}</span>`}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function handleAdminApprovePromoRequest(id, defaultDiscount) {
+            const discount = prompt(`কোডটি অনুমোদন করতে ট্রেডার ডিসকাউন্ট পার্সেন্টেজ লিখুন:`, defaultDiscount || 5);
+            if (discount === null) return;
+
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            try {
+                const res = await fetch(`/api/admin/partner-promo-requests/${id}/action`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ action: 'approve', discountValue: parseFloat(discount) || 5 })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'প্রোমো কোড অনুমোদিত হয়েছে!', 'success');
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (e) {
+                showToast('ত্রুটি: ' + e.message, 'error');
+            }
+        }
+
+        async function handleAdminRejectPromoRequest(id) {
+            const reason = prompt('প্রোমো কোড আবেদন বাতিল করার কারণ লিখুন:', 'Not suitable for current campaigns');
+            if (reason === null) return;
+
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            try {
+                const res = await fetch(`/api/admin/partner-promo-requests/${id}/action`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ action: 'reject', adminNotes: reason.trim() })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('আবেদনটি বাতিল করা হয়েছে।', 'info');
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (e) {
+                showToast('ত্রুটি: ' + e.message, 'error');
+            }
         }
 
         function populatePartnerSettingsFields(settings) {

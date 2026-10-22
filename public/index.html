@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -2847,6 +2847,7 @@
             <li><a href="#rules" onclick="closeMobileMenu()">3 Golden Rules</a></li>
             <li><a href="#how-it-works" onclick="closeMobileMenu()">How It Works</a></li>
             <li><a href="/dashboard" onclick="closeMobileMenu()">Dashboard</a></li>
+            <li><a href="/partner" style="color:var(--yellow); font-weight:700;"><i class="fas fa-handshake"></i> Partner</a></li>
         </ul>
         <div class="nav-buttons" id="navButtons">
             <button class="btn-outline" onclick="openLoginModal()" id="navLoginBtn">
@@ -3555,6 +3556,7 @@
                     <li><a href="#rules">3 Golden Rules</a></li>
                     <li><a href="#how-it-works">How It Works</a></li>
                     <li><a href="/dashboard">Trader Dashboard</a></li>
+                    <li><a href="/partner" style="color:var(--yellow); font-weight:700;"><i class="fas fa-handshake"></i> Affiliate & Partner Program</a></li>
                 </ul>
             </div>
             <div class="footer-col">
@@ -3577,6 +3579,17 @@
         // Store API packages
         let globalPackages = [];
         let globalPaymentMethods = [];
+
+        // Capture Referral Query Parameter (?ref=CODE or ?referral=CODE or ?partner=CODE)
+        (function captureReferral() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const ref = params.get('ref') || params.get('referral') || params.get('partner');
+                if (ref && ref.trim()) {
+                    localStorage.setItem('bpf_ref', ref.trim().toUpperCase());
+                }
+            } catch (e) {}
+        })();
 
         // Check user session
         function checkUserSession() {
@@ -4016,7 +4029,7 @@
                 const res = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password, telegram, preferredBroker })
+                    body: JSON.stringify({ name, email, password, telegram, preferredBroker, referralCode: localStorage.getItem('bpf_ref') || '' })
                 });
                 const data = await res.json();
                 if (data.success) {

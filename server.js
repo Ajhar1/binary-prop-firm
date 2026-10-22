@@ -50,6 +50,7 @@ const DEFAULT_PAYOUT_SETTINGS = {
 const PARTNERS_FILE = path.join(DATA_DIR, 'partners.json');
 const PARTNER_PAYOUTS_FILE = path.join(DATA_DIR, 'partner_payouts.json');
 const PARTNER_SETTINGS_FILE = path.join(DATA_DIR, 'partner_settings.json');
+const PARTNER_PROMO_REQUESTS_FILE = path.join(DATA_DIR, 'partner_promo_requests.json');
 const DEFAULT_PARTNER_SETTINGS = {
   defaultCommissionRate: 10,
   traderDiscountRate: 5,
@@ -81,6 +82,125 @@ function getPartnerSettings() {
 
 function savePartnerSettings(settings) {
   writeJson(PARTNER_SETTINGS_FILE, settings);
+}
+
+function getPartnerPromoRequests() {
+  return readJson(PARTNER_PROMO_REQUESTS_FILE, []);
+}
+
+function savePartnerPromoRequests(requests) {
+  writeJson(PARTNER_PROMO_REQUESTS_FILE, requests);
+}
+
+// Partner Tier & Level Helper Functions (Exact 10-sale milestone progression)
+function getPartnerTierInfo(salesCount) {
+  const count = Math.max(0, parseInt(salesCount, 10) || 0);
+  if (count <= 10) {
+    return {
+      level: 1,
+      levelName: 'Bronze Partner',
+      levelBadge: 'BRONZE',
+      badgeClass: 'badge-bronze',
+      color: '#CD7F32',
+      currentRate: 10,
+      nextRate: count < 10 ? 10 : 20,
+      minSales: 0,
+      maxSales: 10,
+      salesInTier: count,
+      tierTarget: 10,
+      salesUntilNextLevel: Math.max(0, 10 - count),
+      progressPercent: Math.min(100, Math.round((count / 10) * 100))
+    };
+  } else if (count <= 20) {
+    return {
+      level: 2,
+      levelName: 'Silver Partner',
+      levelBadge: 'SILVER',
+      badgeClass: 'badge-silver',
+      color: '#C0C0C0',
+      currentRate: 20,
+      nextRate: count < 20 ? 20 : 30,
+      minSales: 11,
+      maxSales: 20,
+      salesInTier: count - 10,
+      tierTarget: 10,
+      salesUntilNextLevel: Math.max(0, 20 - count),
+      progressPercent: Math.min(100, Math.round(((count - 10) / 10) * 100))
+    };
+  } else if (count <= 30) {
+    return {
+      level: 3,
+      levelName: 'Gold Partner',
+      levelBadge: 'GOLD',
+      badgeClass: 'badge-gold',
+      color: '#F5B041',
+      currentRate: 30,
+      nextRate: count < 30 ? 30 : 40,
+      minSales: 21,
+      maxSales: 30,
+      salesInTier: count - 20,
+      tierTarget: 10,
+      salesUntilNextLevel: Math.max(0, 30 - count),
+      progressPercent: Math.min(100, Math.round(((count - 20) / 10) * 100))
+    };
+  } else if (count <= 40) {
+    return {
+      level: 4,
+      levelName: 'Platinum Partner',
+      levelBadge: 'PLATINUM',
+      badgeClass: 'badge-platinum',
+      color: '#00D2D3',
+      currentRate: 40,
+      nextRate: count < 40 ? 40 : 50,
+      minSales: 31,
+      maxSales: 40,
+      salesInTier: count - 30,
+      tierTarget: 10,
+      salesUntilNextLevel: Math.max(0, 40 - count),
+      progressPercent: Math.min(100, Math.round(((count - 30) / 10) * 100))
+    };
+  } else if (count <= 50) {
+    return {
+      level: 5,
+      levelName: 'Diamond Partner',
+      levelBadge: 'DIAMOND',
+      badgeClass: 'badge-diamond',
+      color: '#9B59B6',
+      currentRate: 50,
+      nextRate: 50,
+      minSales: 41,
+      maxSales: 50,
+      salesInTier: count - 40,
+      tierTarget: 10,
+      salesUntilNextLevel: Math.max(0, 50 - count),
+      progressPercent: Math.min(100, Math.round(((count - 40) / 10) * 100))
+    };
+  } else {
+    return {
+      level: 6,
+      levelName: 'Master Partner',
+      levelBadge: 'MASTER',
+      badgeClass: 'badge-master',
+      color: '#FFD700',
+      currentRate: 50,
+      nextRate: 50,
+      minSales: 51,
+      maxSales: 999999,
+      salesInTier: count - 50,
+      tierTarget: 50,
+      salesUntilNextLevel: 0,
+      progressPercent: 100
+    };
+  }
+}
+
+function getPartnerDynamicRateForNextSale(existingSalesCount) {
+  const nextSaleNum = (parseInt(existingSalesCount, 10) || 0) + 1;
+  if (nextSaleNum <= 10) return 10;
+  if (nextSaleNum <= 20) return 20;
+  if (nextSaleNum <= 30) return 30;
+  if (nextSaleNum <= 40) return 40;
+  return 50; // 41 and above is 50%
 }
 
 const DOWNLOADS_DIR = path.join(__dirname, 'public', 'downloads');
@@ -2745,6 +2865,22 @@ function authenticateAdminToken(req, res, next) {
   });
 }
 
+// JWT Partner Auth Middleware
+function authenticatePartnerToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = (authHeader && authHeader.split(' ')[1]) || req.query.token;
+  if (!token) return res.status(401).json({ success: false, message: 'Partner authentication required. Please login.' });
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) return res.status(403).json({ success: false, message: 'Session expired or invalid. Please login again.' });
+    if (decoded.role !== 'partner' && decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Access denied. Partner account required.' });
+    }
+    req.partner = decoded;
+    next();
+  });
+}
+
 // ----------------- PACKAGES DATA -----------------
 const PACKAGES = [
   {
@@ -4209,17 +4345,57 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
 
   // Partner / Affiliate Attribution
   let matchedPartner = null;
+  let partnerCommRate = 0;
+  let partnerCommAmount = 0;
   try {
     const partners = getPartners();
     const targetCode = appliedPromo ? appliedPromo.code : (promoCode && typeof promoCode === 'string' && promoCode.trim() ? promoCode.trim().toUpperCase() : (currentUser.referredBy || ''));
     if (targetCode) {
-      matchedPartner = partners.find(p => p.promoCode && p.promoCode.toUpperCase() === targetCode.toUpperCase() && p.status === 'active');
+      const cleanTarget = targetCode.toUpperCase();
+      // Match by partner primary promoCode or partner id
+      matchedPartner = partners.find(p => p.status === 'active' && (
+        (p.promoCode && p.promoCode.toUpperCase() === cleanTarget) ||
+        p.id === cleanTarget
+      ));
+
+      // Or match by custom partner promo codes in promo_codes.json
+      if (!matchedPartner) {
+        const promoCodes = getPromoCodes();
+        const promoMatch = promoCodes.find(c => c.code && c.code.toUpperCase() === cleanTarget && c.isPartnerCode);
+        if (promoMatch && promoMatch.partnerId) {
+          matchedPartner = partners.find(p => p.id === promoMatch.partnerId && p.status === 'active');
+        }
+      }
+    }
+
+    if (matchedPartner) {
+      // Dynamic tiered commission scale:
+      // 1-10 sales: 10%
+      // 11-20 sales: 20%
+      // 21-30 sales: 30%
+      // 31-40 sales: 40%
+      // 41-50 sales: 50%
+      // 51+ sales: 50%
+      const allCh = readJson(CHALLENGES_FILE, []);
+      const pCode = (matchedPartner.promoCode || '').toUpperCase();
+      const previousSalesCount = allCh.filter(c =>
+        ((c.partnerId && c.partnerId === matchedPartner.id) ||
+         (c.partnerPromoCode && c.partnerPromoCode.toUpperCase() === pCode) ||
+         (c.promoCode && c.promoCode.toUpperCase() === pCode)) &&
+        c.status !== 'rejected' && c.status !== 'cancelled'
+      ).length;
+
+      // If partner has custom manual rate set by admin, honor it, otherwise use dynamic tiered rate
+      if (matchedPartner.useCustomRate && matchedPartner.commissionRate) {
+        partnerCommRate = parseFloat(matchedPartner.commissionRate) || 10;
+      } else {
+        partnerCommRate = getPartnerDynamicRateForNextSale(previousSalesCount);
+      }
+      partnerCommAmount = Math.round((finalFee * (partnerCommRate / 100)) * 100) / 100;
     }
   } catch (partErr) {
     console.warn('[Partner Attribution Error]:', partErr.message);
   }
-  const partnerCommRate = matchedPartner ? (parseFloat(matchedPartner.commissionRate) || 10) : 0;
-  const partnerCommAmount = matchedPartner ? Math.round((finalFee * (partnerCommRate / 100)) * 100) / 100 : 0;
 
   const newChallenge = {
     id: `ch_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
@@ -9100,8 +9276,14 @@ app.get('/api/admin/partners', authenticateAdminToken, (req, res) => {
       const totalCommissionPaid = partnerPayoutsList.reduce((sum, p) => sum + (p.amount || 0), 0);
       const pendingCommission = Math.max(0, Math.round((totalCommissionEarned - totalCommissionPaid) * 100) / 100);
 
+      const tierInfo = getPartnerTierInfo(approvedReferredChallenges.length);
       return {
         ...partner,
+        tierInfo,
+        accountLevel: tierInfo.level,
+        accountLevelName: tierInfo.levelName,
+        accountLevelBadge: tierInfo.levelBadge,
+        dynamicRate: tierInfo.currentRate,
         totalReferred: approvedReferredChallenges.length,
         totalSales: Math.round(totalSales * 100) / 100,
         totalCommissionEarned: Math.round(totalCommissionEarned * 100) / 100,
@@ -9434,6 +9616,681 @@ app.get('/api/public/partners/verify-ref/:code', (req, res) => {
   } catch (e) {
     res.status(500).json({ success: false, valid: false });
   }
+});
+
+// ==========================================
+// PARTNER PORTAL SELF-SERVICE & AUTH APIS
+// ==========================================
+
+// Partner Registration
+app.post('/api/partner/auth/register', async (req, res) => {
+  try {
+    const { name, email, password, phone, promoCode, payoutMethod, payoutDetails } = req.body;
+    if (!name || !name.trim() || !email || !email.trim() || !password) {
+      return res.status(400).json({ success: false, message: 'নাম, ইমেইল এবং পাসওয়ার্ড আবশ্যক।' });
+    }
+
+    const cleanedEmail = normalizeEmail(email);
+    if (!isValidEmail(cleanedEmail)) {
+      return res.status(400).json({ success: false, message: 'একটি সঠিক ইমেইল এড্রেস প্রদান করুন।' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।' });
+    }
+
+    const cleanPromo = (promoCode || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+    if (!cleanPromo || cleanPromo.length < 3) {
+      return res.status(400).json({ success: false, message: 'রেফারেল / প্রোমো কোড কমপক্ষে ৩ অক্ষরের হতে হবে।' });
+    }
+
+    const partners = getPartners();
+    if (partners.some(p => (p.email && p.email.toLowerCase() === cleanedEmail))) {
+      return res.status(400).json({ success: false, message: 'এই ইমেইল দিয়ে ইতিমধ্যে একটি পার্টনার অ্যাকাউন্ট তৈরি করা আছে।' });
+    }
+
+    if (partners.some(p => p.promoCode && p.promoCode.toUpperCase() === cleanPromo)) {
+      return res.status(400).json({ success: false, message: `"${cleanPromo}" রেফারেল কোডটি ইতিমধ্যে ব্যবহৃত হচ্ছে। অন্য একটি কোড দিন।` });
+    }
+
+    const promoCodes = getPromoCodes();
+    if (promoCodes.some(c => c.code && c.code.toUpperCase() === cleanPromo)) {
+      return res.status(400).json({ success: false, message: `"${cleanPromo}" কোডটি সিস্টেমের প্রোমো কোড হিসেবে সংরক্ষিত। অন্য কোড দিন।` });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const partnerSettings = getPartnerSettings();
+    const newPartner = {
+      id: `part_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      name: name.trim(),
+      email: cleanedEmail,
+      password: hashedPassword,
+      phone: (phone || '').trim(),
+      promoCode: cleanPromo,
+      commissionRate: 10, // Starting tier: 10%
+      traderDiscount: partnerSettings.traderDiscountRate || 5,
+      payoutMethod: payoutMethod || 'Binance Pay',
+      payoutDetails: (payoutDetails || '').trim(),
+      status: 'active',
+      role: 'partner',
+      totalReferred: 0,
+      totalSales: 0,
+      totalCommissionEarned: 0,
+      totalCommissionPaid: 0,
+      pendingCommission: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    partners.unshift(newPartner);
+    savePartners(partners);
+
+    // Register partner code in promo_codes.json so referred traders get their discount immediately
+    try {
+      promoCodes.unshift({
+        id: `promo_part_${newPartner.id}`,
+        code: cleanPromo,
+        discountType: 'percentage',
+        discountValue: newPartner.traderDiscount || 5,
+        packageId: 'all',
+        maxUses: 999999,
+        usedCount: 0,
+        expiresAt: null,
+        status: 'active',
+        notes: `Affiliate Partner Promo: ${newPartner.name} (${newPartner.email})`,
+        isPartnerCode: true,
+        partnerId: newPartner.id,
+        partnerName: newPartner.name,
+        createdAt: new Date().toISOString()
+      });
+      savePromoCodes(promoCodes);
+    } catch (e) {
+      console.warn('[Sync Promo on Partner Register]', e.message);
+    }
+
+    // Generate JWT Token
+    const token = jwt.sign(
+      { id: newPartner.id, role: 'partner', email: newPartner.email, name: newPartner.name },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    const tierInfo = getPartnerTierInfo(0);
+
+    const safePartner = { ...newPartner };
+    delete safePartner.password;
+
+    res.status(201).json({
+      success: true,
+      message: 'অভিনন্দন! আপনার পার্টনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।',
+      token,
+      partner: safePartner,
+      tierInfo
+    });
+  } catch (err) {
+    console.error('[Partner Register Error]', err);
+    res.status(500).json({ success: false, message: 'অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে: ' + err.message });
+  }
+});
+
+// Partner Login
+app.post('/api/partner/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'ইমেইল এবং পাসওয়ার্ড প্রদান করুন।' });
+    }
+
+    const cleanedEmail = normalizeEmail(email);
+    const partners = getPartners();
+    const partner = partners.find(p => p.email && p.email.toLowerCase() === cleanedEmail);
+
+    if (!partner) {
+      return res.status(401).json({ success: false, message: 'এই ইমেইলে কোনো পার্টনার অ্যাকাউন্ট পাওয়া যায়নি।' });
+    }
+
+    if (partner.status === 'blocked' || partner.status === 'banned') {
+      return res.status(403).json({ success: false, message: 'আপনার পার্টনার অ্যাকাউন্টটি স্থগিত করা হয়েছে। সাপোর্টে যোগাযোগ করুন।' });
+    }
+
+    // Verify password
+    if (partner.password) {
+      const match = await bcrypt.compare(password, partner.password);
+      if (!match) {
+        return res.status(401).json({ success: false, message: 'ভুল পাসওয়ার্ড। আবার চেষ্টা করুন।' });
+      }
+    } else {
+      // Legacy partner without password
+      if (password !== 'AJHAR1' && password !== '123456') {
+        return res.status(401).json({ success: false, message: 'ভুল পাসওয়ার্ড।' });
+      }
+    }
+
+    const token = jwt.sign(
+      { id: partner.id, role: 'partner', email: partner.email, name: partner.name },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    const safePartner = { ...partner };
+    delete safePartner.password;
+
+    res.json({
+      success: true,
+      message: 'সফলভাবে লগইন হয়েছে!',
+      token,
+      partner: safePartner
+    });
+  } catch (err) {
+    console.error('[Partner Login Error]', err);
+    res.status(500).json({ success: false, message: 'লগইন করতে সমস্যা হয়েছে: ' + err.message });
+  }
+});
+
+// Partner Profile & Live Dashboard Stats
+app.get('/api/partner/me', authenticatePartnerToken, (req, res) => {
+  try {
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id || (p.email && p.email.toLowerCase() === req.partner.email.toLowerCase()));
+    if (!partner) {
+      return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+    }
+
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const payouts = getPartnerPayouts();
+    const settings = getPartnerSettings();
+    const promoRequests = getPartnerPromoRequests();
+
+    const code = (partner.promoCode || '').toUpperCase();
+    const referredChallenges = challenges.filter(c =>
+      (c.partnerId && c.partnerId === partner.id) ||
+      (c.promoCode && c.promoCode.toUpperCase() === code) ||
+      (c.partnerPromoCode && c.partnerPromoCode.toUpperCase() === code)
+    );
+
+    const approvedReferred = referredChallenges.filter(c =>
+      c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled'
+    );
+
+    const totalSalesVolume = approvedReferred.reduce((sum, c) => sum + (c.fee || 0), 0);
+    const totalCommissionEarned = approvedReferred.reduce((sum, c) => {
+      if (c.partnerCommission) return sum + c.partnerCommission;
+      const rate = partner.commissionRate || 10;
+      return sum + Math.round(((c.fee || 0) * (rate / 100)) * 100) / 100;
+    }, 0);
+
+    const myPayouts = payouts.filter(p => p.partnerId === partner.id);
+    const completedPayouts = myPayouts.filter(p => p.status === 'completed');
+    const totalCommissionPaid = completedPayouts.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    // Pending payout requests submitted by partner
+    const pendingPayoutRequests = myPayouts.filter(p => p.status === 'pending');
+    const pendingPayoutRequestsAmount = pendingPayoutRequests.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    // Gross pending commission (Earned - Paid)
+    const grossPendingCommission = Math.max(0, Math.round((totalCommissionEarned - totalCommissionPaid) * 100) / 100);
+
+    // Net withdrawable commission (Gross - In-review Payout Requests)
+    const withdrawableCommission = Math.max(0, Math.round((grossPendingCommission - pendingPayoutRequestsAmount) * 100) / 100);
+
+    const salesCount = approvedReferred.length;
+    const tierInfo = getPartnerTierInfo(salesCount);
+
+    const safePartner = { ...partner };
+    delete safePartner.password;
+
+    res.json({
+      success: true,
+      partner: {
+        ...safePartner,
+        totalReferred: approvedReferred.length,
+        totalSales: Math.round(totalSalesVolume * 100) / 100,
+        totalCommissionEarned: Math.round(totalCommissionEarned * 100) / 100,
+        totalCommissionPaid: Math.round(totalCommissionPaid * 100) / 100,
+        pendingCommission: grossPendingCommission,
+        withdrawableCommission,
+        pendingPayoutRequestsAmount
+      },
+      tierInfo,
+      stats: {
+        salesCount,
+        totalSalesVolume: Math.round(totalSalesVolume * 100) / 100,
+        totalCommissionEarned: Math.round(totalCommissionEarned * 100) / 100,
+        totalCommissionPaid: Math.round(totalCommissionPaid * 100) / 100,
+        grossPendingCommission,
+        withdrawableCommission,
+        pendingPayoutRequestsAmount,
+        pendingRequestsCount: pendingPayoutRequests.length,
+        pendingPromoRequestsCount: promoRequests.filter(r => r.partnerId === partner.id && r.status === 'pending').length
+      },
+      settings
+    });
+  } catch (err) {
+    console.error('[Partner Me Error]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner Profile Update
+app.post('/api/partner/profile', authenticatePartnerToken, (req, res) => {
+  try {
+    const { name, phone, payoutMethod, payoutDetails } = req.body;
+    const partners = getPartners();
+    const idx = partners.findIndex(p => p.id === req.partner.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+
+    if (name && name.trim()) partners[idx].name = name.trim();
+    if (phone !== undefined) partners[idx].phone = phone.trim();
+    if (payoutMethod) partners[idx].payoutMethod = payoutMethod.trim();
+    if (payoutDetails !== undefined) partners[idx].payoutDetails = payoutDetails.trim();
+    partners[idx].updatedAt = new Date().toISOString();
+
+    savePartners(partners);
+
+    const safePartner = { ...partners[idx] };
+    delete safePartner.password;
+
+    res.json({ success: true, message: 'প্রোফাইল তথ্য সফলভাবে আপডেট হয়েছে!', partner: safePartner });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner Change Password
+app.post('/api/partner/change-password', authenticatePartnerToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'বর্তমান ও নতুন উভয় পাসওয়ার্ড প্রদান করুন।' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।' });
+    }
+
+    const partners = getPartners();
+    const idx = partners.findIndex(p => p.id === req.partner.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+
+    if (partners[idx].password) {
+      const match = await bcrypt.compare(currentPassword, partners[idx].password);
+      if (!match) return res.status(400).json({ success: false, message: 'বর্তমান পাসওয়ার্ড সঠিক নয়।' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    partners[idx].password = await bcrypt.hash(newPassword, salt);
+    partners[idx].updatedAt = new Date().toISOString();
+    savePartners(partners);
+
+    res.json({ success: true, message: 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner Referral Sales Log
+app.get('/api/partner/sales', authenticatePartnerToken, (req, res) => {
+  try {
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const code = (partner.promoCode || '').toUpperCase();
+
+    const referralChallenges = challenges.filter(c =>
+      (c.partnerId && c.partnerId === partner.id) ||
+      (c.promoCode && c.promoCode.toUpperCase() === code) ||
+      (c.partnerPromoCode && c.partnerPromoCode.toUpperCase() === code)
+    );
+
+    const sales = referralChallenges.map((c) => {
+      const rate = c.partnerCommissionRate || partner.commissionRate || 10;
+      const commission = c.partnerCommission || Math.round(((c.fee || 0) * (rate / 100)) * 100) / 100;
+      const maskedEmail = c.userEmail ? c.userEmail.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => a + '*'.repeat(Math.max(2, b.length)) + c) : 'trader@***.com';
+
+      return {
+        id: c.id,
+        createdAt: c.createdAt,
+        traderName: c.userName || 'Trader',
+        traderEmail: maskedEmail,
+        packageName: c.packageName || 'Challenge',
+        fundedAmount: c.fundedAmount || 100,
+        fee: c.fee || 0,
+        currency: c.currency || 'USD',
+        currencySymbol: c.currencySymbol || '$',
+        promoCode: c.promoCode || c.partnerPromoCode || code,
+        commissionRate: rate,
+        commissionAmount: commission,
+        status: c.status,
+        commissionStatus: (c.status === 'pending_approval' || c.status === 'rejected' || c.status === 'cancelled') ? 'pending_approval' : 'approved'
+      };
+    }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.json({ success: true, sales });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner Promo Codes (Primary + Approved Custom + Pending Applications)
+app.get('/api/partner/promo-codes', authenticatePartnerToken, (req, res) => {
+  try {
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+
+    const promoCodes = getPromoCodes();
+    const requests = getPartnerPromoRequests().filter(r => r.partnerId === partner.id);
+
+    // Primary referral code
+    const primary = {
+      code: partner.promoCode,
+      isPrimary: true,
+      discount: partner.traderDiscount || 5,
+      status: partner.status === 'active' ? 'active' : 'inactive',
+      createdAt: partner.createdAt
+    };
+
+    // Custom approved codes from promo_codes.json
+    const approvedCustom = promoCodes
+      .filter(c => c.partnerId === partner.id && c.code.toUpperCase() !== partner.promoCode.toUpperCase())
+      .map(c => ({
+        id: c.id,
+        code: c.code,
+        discount: c.discountValue || 5,
+        status: c.status,
+        isCustom: true,
+        createdAt: c.createdAt
+      }));
+
+    res.json({
+      success: true,
+      primary,
+      customPromoCodes: approvedCustom,
+      requests
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner Apply for Custom Promo Code
+app.post('/api/partner/custom-promo', authenticatePartnerToken, (req, res) => {
+  try {
+    const { requestedCode, requestedDiscount, reason } = req.body;
+    const cleanCode = (requestedCode || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+
+    if (!cleanCode || cleanCode.length < 3 || cleanCode.length > 20) {
+      return res.status(400).json({ success: false, message: 'প্রোমো কোড ৩ থেকে ২০ অক্ষরের মধ্যে হতে হবে।' });
+    }
+
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+
+    // Check if code taken
+    const promoCodes = getPromoCodes();
+    if (promoCodes.some(c => c.code && c.code.toUpperCase() === cleanCode) ||
+        partners.some(p => p.promoCode && p.promoCode.toUpperCase() === cleanCode)) {
+      return res.status(400).json({ success: false, message: `"${cleanCode}" কোডটি ইতিমধ্যে ব্যবহৃত হচ্ছে। অন্য একটি কোড বেছে নিন।` });
+    }
+
+    const requests = getPartnerPromoRequests();
+    if (requests.some(r => r.partnerId === partner.id && r.promoCode === cleanCode && r.status === 'pending')) {
+      return res.status(400).json({ success: false, message: `"${cleanCode}" কোডের জন্য আপনার একটি আবেদন ইতিমধ্যে বিবেচনাধীন রয়েছে।` });
+    }
+
+    const newRequest = {
+      id: `preq_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      partnerId: partner.id,
+      partnerName: partner.name,
+      partnerEmail: partner.email,
+      promoCode: cleanCode,
+      requestedDiscount: Math.min(20, Math.max(1, parseFloat(requestedDiscount) || 5)),
+      reason: (reason || '').trim(),
+      status: 'pending', // 'pending' | 'approved' | 'rejected'
+      createdAt: new Date().toISOString(),
+      reviewedAt: null,
+      adminNotes: ''
+    };
+
+    requests.unshift(newRequest);
+    savePartnerPromoRequests(requests);
+
+    res.status(201).json({
+      success: true,
+      message: `"${cleanCode}" প্রোমো কোডের আবেদনটি সফলভাবে জমা হয়েছে। অ্যাডমিন পর্যালোচনার পর এটি সক্রিয় হবে।`,
+      request: newRequest
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner Payouts History
+app.get('/api/partner/payouts', authenticatePartnerToken, (req, res) => {
+  try {
+    const payouts = getPartnerPayouts();
+    const myPayouts = payouts
+      .filter(p => p.partnerId === req.partner.id)
+      .sort((a, b) => new Date(b.requestedAt || b.paidAt || b.createdAt) - new Date(a.requestedAt || a.paidAt || a.createdAt));
+
+    res.json({ success: true, payouts: myPayouts });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner Request Commission Payout
+app.post('/api/partner/payouts/request', authenticatePartnerToken, (req, res) => {
+  try {
+    const { amount, paymentMethod, payoutAddress, notes } = req.body;
+    const numAmount = parseFloat(amount);
+
+    if (!numAmount || isNaN(numAmount) || numAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'সঠিক উইথড্রয়াল অ্যামাউন্ট দিন।' });
+    }
+
+    const settings = getPartnerSettings();
+    const minPayout = settings.minPayoutAmount || 20;
+    if (numAmount < minPayout) {
+      return res.status(400).json({ success: false, message: `ন্যূনতম পে-আউট অ্যামাউন্ট $${minPayout}।` });
+    }
+
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+
+    // Calculate actual withdrawable balance
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const payouts = getPartnerPayouts();
+
+    const code = (partner.promoCode || '').toUpperCase();
+    const approvedReferred = challenges.filter(c =>
+      ((c.partnerId && c.partnerId === partner.id) ||
+       (c.promoCode && c.promoCode.toUpperCase() === code) ||
+       (c.partnerPromoCode && c.partnerPromoCode.toUpperCase() === code)) &&
+      c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled'
+    );
+
+    const totalEarned = approvedReferred.reduce((sum, c) => {
+      if (c.partnerCommission) return sum + c.partnerCommission;
+      const rate = partner.commissionRate || 10;
+      return sum + Math.round(((c.fee || 0) * (rate / 100)) * 100) / 100;
+    }, 0);
+
+    const partnerPayouts = payouts.filter(p => p.partnerId === partner.id);
+    const totalPaid = partnerPayouts.filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount || 0), 0);
+    const pendingRequestsSum = partnerPayouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    const withdrawable = Math.max(0, Math.round((totalEarned - totalPaid - pendingRequestsSum) * 100) / 100);
+
+    if (numAmount > withdrawable) {
+      return res.status(400).json({
+        success: false,
+        message: `অপর্যাপ্ত ব্যালেন্স। আপনার বর্তমান উত্তোলনযোগ্য ব্যালেন্স $${withdrawable}।`
+      });
+    }
+
+    const cleanMethod = (paymentMethod || partner.payoutMethod || 'Binance Pay').trim();
+    const cleanAddress = (payoutAddress || partner.payoutDetails || '').trim();
+
+    if (!cleanAddress) {
+      return res.status(400).json({ success: false, message: 'অনুগ্রহ করে আপনার রিসিভিং ওয়ালেট / Binance Pay ID দিন।' });
+    }
+
+    const newPayout = {
+      id: `payout_part_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      partnerId: partner.id,
+      partnerName: partner.name,
+      partnerEmail: partner.email,
+      partnerPromoCode: partner.promoCode,
+      amount: numAmount,
+      paymentMethod: cleanMethod,
+      payoutAddress: cleanAddress,
+      txId: null,
+      status: 'pending',
+      notes: (notes || '').trim(),
+      adminNotes: '',
+      requestedAt: new Date().toISOString(),
+      paidAt: null
+    };
+
+    payouts.unshift(newPayout);
+    savePartnerPayouts(payouts);
+
+    res.status(201).json({
+      success: true,
+      message: `$${numAmount} কমিশন উইথড্র রিকোয়েস্ট সফলভাবে জমা হয়েছে! অ্যাডমিন পর্যালোচনার পর আপনার অ্যাকাউন্টে ডলার পাঠানো হবে।`,
+      payout: newPayout
+    });
+  } catch (err) {
+    console.error('[Partner Payout Request Error]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Admin: Approve / Reject partner payout request
+app.post('/api/admin/partner-payout-requests/:id/action', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action, txId, adminNotes } = req.body;
+    const payouts = getPartnerPayouts();
+    const idx = payouts.findIndex(p => p.id === id);
+
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'পে-আউট রিকোয়েস্ট পাওয়া যায়নি।' });
+    }
+
+    const payout = payouts[idx];
+    if (action === 'approve') {
+      payout.status = 'completed';
+      payout.txId = (txId || `BP_PART_${Date.now()}`).trim();
+      payout.adminNotes = (adminNotes || '').trim();
+      payout.paidAt = new Date().toISOString();
+
+      // Update partner totalCommissionPaid
+      const partners = getPartners();
+      const pIdx = partners.findIndex(p => p.id === payout.partnerId);
+      if (pIdx !== -1) {
+        partners[pIdx].totalCommissionPaid = Math.round(((partners[pIdx].totalCommissionPaid || 0) + payout.amount) * 100) / 100;
+        savePartners(partners);
+      }
+
+      savePartnerPayouts(payouts);
+      return res.json({ success: true, message: `পে-আউট রিকোয়েস্ট সফলভাবে অ্যাপ্রুভ ও সম্পন্ন করা হয়েছে! ($${payout.amount})`, payout });
+    } else if (action === 'reject') {
+      payout.status = 'rejected';
+      payout.adminNotes = (adminNotes || 'Rejected by administrator').trim();
+      payout.processedAt = new Date().toISOString();
+      savePartnerPayouts(payouts);
+      return res.json({ success: true, message: 'পে-আউট রিকোয়েস্ট প্রত্যাখ্যাত (Rejected) হয়েছে।', payout });
+    } else {
+      return res.status(400).json({ success: false, message: 'সঠিক অ্যাকশন দিন (approve অথবা reject)।' });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Admin: Get all custom promo code requests
+app.get('/api/admin/partner-promo-requests', authenticateAdminToken, (req, res) => {
+  try {
+    const requests = getPartnerPromoRequests();
+    res.json({ success: true, requests });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Admin: Approve / Reject custom promo code request
+app.post('/api/admin/partner-promo-requests/:id/action', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action, discountValue, adminNotes } = req.body;
+    const requests = getPartnerPromoRequests();
+    const idx = requests.findIndex(r => r.id === id);
+
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'প্রোমো রিকোয়েস্ট পাওয়া যায়নি।' });
+    }
+
+    const item = requests[idx];
+    if (action === 'approve') {
+      const discount = parseFloat(discountValue) || item.requestedDiscount || 5;
+      item.status = 'approved';
+      item.discountValue = discount;
+      item.adminNotes = (adminNotes || '').trim();
+      item.reviewedAt = new Date().toISOString();
+      savePartnerPromoRequests(requests);
+
+      // Add to promo_codes.json
+      const promoCodes = getPromoCodes();
+      const existingIdx = promoCodes.findIndex(c => c.code && c.code.toUpperCase() === item.promoCode.toUpperCase());
+      const newPromoObj = {
+        id: `promo_part_${item.id}`,
+        code: item.promoCode.toUpperCase(),
+        discountType: 'percentage',
+        discountValue: discount,
+        packageId: 'all',
+        maxUses: 999999,
+        usedCount: 0,
+        expiresAt: null,
+        status: 'active',
+        notes: `Affiliate Partner Custom Promo: ${item.partnerName} (${item.partnerEmail})`,
+        isPartnerCode: true,
+        partnerId: item.partnerId,
+        partnerName: item.partnerName,
+        createdAt: new Date().toISOString()
+      };
+
+      if (existingIdx !== -1) {
+        promoCodes[existingIdx] = newPromoObj;
+      } else {
+        promoCodes.unshift(newPromoObj);
+      }
+      savePromoCodes(promoCodes);
+
+      return res.json({ success: true, message: `প্রোমো কোড "${item.promoCode}" (${discount}% ছাড়) সফলভাবে অ্যাপ্রুভ হয়েছে!`, request: item });
+    } else if (action === 'reject') {
+      item.status = 'rejected';
+      item.adminNotes = (adminNotes || 'Rejected by administrator').trim();
+      item.reviewedAt = new Date().toISOString();
+      savePartnerPromoRequests(requests);
+      return res.json({ success: true, message: `প্রোমো কোড "${item.promoCode}" আবেদন বাতিল করা হয়েছে।`, request: item });
+    } else {
+      return res.status(400).json({ success: false, message: 'সঠিক অ্যাকশন দিন (approve অথবা reject)।' });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner & Affiliate Portal Routing (both URLs work seamlessly)
+app.get(['/partner', '/partner.html', '/affiliate', '/affiliate.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'partner.html'));
 });
 
 // Serve Single Page Apps / Fallback
