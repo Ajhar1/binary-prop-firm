@@ -10695,10 +10695,6 @@
 
         function masRecordTrade(outcome) {
             if (outcome !== 'w' && outcome !== 'l') return;
-            if (!window.isExtensionLiveConnected) {
-                showToast('ট্রেড করার পূর্বে অনুগ্রহ করে Quotex ব্রাউজারে এক্সটেনশনটি কানেক্ট করুন।', 'warning');
-                return;
-            }
             const pendingProof = localStorage.getItem('aj_funded_mas_pending_proof');
             if (pendingProof && masSessionStatus !== 'RUNNING') {
                 showToast('পূর্ববর্তী সেশনের প্রুফ এখনও আপলোড করা হয়নি! আগে প্রুফ সাবমিট করুন।', 'warning');
@@ -10974,22 +10970,16 @@
                             <tr class="mas-active-row">
                                 <td><strong style="color:var(--yellow); font-size:1.05rem;">#${tradeNum}</strong></td>
                                 <td>
-                                    ${window.isExtensionLiveConnected ? `
-                                        <div style="font-size:1.15rem; font-weight:900; color:var(--yellow); text-shadow:0 0 10px rgba(245,176,65,0.4);">
-                                            $${stake}
-                                        </div>
-                                    ` : `
-                                        <span class="badge" style="background:rgba(245,176,65,0.18); color:var(--yellow); border:1px solid rgba(245,176,65,0.45); font-size:0.78rem; padding:5px 10px; border-radius:8px; font-weight:800; display:inline-flex; align-items:center; gap:5px;">
-                                            <i class="fas fa-plug"></i> Connect Ext.
-                                        </span>
-                                    `}
+                                    <div style="font-size:1.15rem; font-weight:900; color:var(--yellow); text-shadow:0 0 10px rgba(245,176,65,0.4);">
+                                        $${stake}
+                                    </div>
                                 </td>
                                 <td style="text-align:center;">
                                     <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
-                                        <button class="btn-mas-w" onclick="masRecordTrade('w')" style="${window.isExtensionLiveConnected ? '' : 'opacity:0.45; cursor:not-allowed; filter:grayscale(70%);'}" title="${window.isExtensionLiveConnected ? 'ট্রেড উইন হলে চাপুন (কীবোর্ড: W)' : 'ট্রেড করার পূর্বে অনুগ্রহ করে Quotex ব্রাউজারে এক্সটেনশনটি কানেক্ট করুন'}">
+                                        <button class="btn-mas-w" onclick="masRecordTrade('w')" title="ট্রেড উইন হলে চাপুন (কীবোর্ড: W)">
                                             <i class="fas fa-check"></i> WIN (W)
                                         </button>
-                                        <button class="btn-mas-l" onclick="masRecordTrade('l')" style="${window.isExtensionLiveConnected ? '' : 'opacity:0.45; cursor:not-allowed; filter:grayscale(70%);'}" title="${window.isExtensionLiveConnected ? 'ট্রেড লস হলে চাপুন (কীবোর্ড: L)' : 'ট্রেড করার পূর্বে অনুগ্রহ করে Quotex ব্রাউজারে এক্সটেনশনটি কানেক্ট করুন'}">
+                                        <button class="btn-mas-l" onclick="masRecordTrade('l')" title="ট্রেড লস হলে চাপুন (কীবোর্ড: L)">
                                             <i class="fas fa-times"></i> LOSS (L)
                                         </button>
                                     </div>
