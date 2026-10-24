@@ -621,7 +621,7 @@ const CORE_PERMANENT_TRADERS = [
     "isEmailVerified": true,
     "createdAt": "2026-10-02T13:15:00.000Z",
     "updatedAt": "2026-10-02T13:20:00.000Z",
-    "traderId": "AJ-1009",
+    "traderId": "AJ-1003",
     "profilePicture": null
   },
   {
@@ -2373,6 +2373,10 @@ function syncUsersWithAllData() {
         modified = true;
         console.log("[CORE-RECOVERY] Restored core trader: " + cu.name + " (" + cu.email + ") [" + cu.traderId + "]");
       } else {
+        if (existing.email === 'rsgaming6321@gmail.com' && existing.traderId === 'AJ-1009') {
+          existing.traderId = 'AJ-1003';
+          modified = true;
+        }
         if (!existing.traderId && cu.traderId) { existing.traderId = cu.traderId; modified = true; }
         if (!existing.password && cu.password) { existing.password = cu.password; modified = true; }
       }
@@ -5021,7 +5025,8 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     const candidateTrades = allSynced.filter(t => {
       const isUserMatch = (t.userId === user.id || 
         (t.userEmail && t.userEmail.toLowerCase() === (user.email || '').toLowerCase()) ||
-        (t.traderId && t.traderId.toLowerCase() === (user.traderId || '').toLowerCase()));
+        (t.traderId && t.traderId.toLowerCase() === (user.traderId || '').toLowerCase()) ||
+        (t.challengeId && t.challengeId === activeChallenge.id));
       if (t.challengeId && t.challengeId !== activeChallenge.id) return false;
       if (usedTicketIds.has(t.ticketId) || (t.id && usedTicketIds.has(t.id))) return false;
       if (effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 1000)) return false;
@@ -5731,18 +5736,25 @@ app.post('/api/extension/heartbeat', (req, res) => {
 
     // Find matched user
     const users = readJson(USERS_FILE, []);
-    const matchedUser = users.find(u => 
+    const matchingUsers = users.filter(u => 
       (u.traderId && u.traderId.toLowerCase() === cleanId) ||
       (u.email && u.email.toLowerCase() === cleanId) ||
       (u.id && u.id.toLowerCase() === cleanId)
     );
 
-    if (!matchedUser) {
+    if (matchingUsers.length === 0) {
       return res.status(404).json({ success: false, active: false, message: 'ট্রেডার অ্যাকাউন্ট পাওয়া যায়নি।' });
     }
 
-    // Verify if user has an active, running challenge
     const challenges = readJson(CHALLENGES_FILE, []);
+    const cleanDetDigits = String(detectedBrokerAccountId || '').trim().replace(/[^0-9]/g, '');
+
+    // Select the best matched user: prioritize the one who has an active running challenge or matching Quotex account
+    const matchedUser = matchingUsers.find(u => challenges.some(c => c.status === 'in_progress' && c.isActive !== false && (c.userId === u.id || (c.userEmail && c.userEmail.toLowerCase() === (u.email || '').toLowerCase())))) ||
+                        matchingUsers.find(u => cleanDetDigits && u.brokerAccountId && u.brokerAccountId.replace(/[^0-9]/g, '') === cleanDetDigits) ||
+                        matchingUsers[0];
+
+    // Verify if user has an active, running challenge
     const activeChallenge = challenges.find(c => 
       c.status === 'in_progress' && 
       c.isActive !== false &&
@@ -5826,6 +5838,9 @@ app.post('/api/extension/heartbeat', (req, res) => {
     // Instant SSE broadcast to trader dashboard (0ms update)
     const liveStatus = getLiveExtensionStatus(matchedUser);
     broadcastExtensionStatus(matchedUser.id, liveStatus);
+    if (activeChallenge && activeChallenge.userId && activeChallenge.userId !== matchedUser.id) {
+      broadcastExtensionStatus(activeChallenge.userId, liveStatus);
+    }
 
     res.json({
       success: true,
@@ -6010,19 +6025,26 @@ app.post('/api/extension/sync-trades', (req, res) => {
 
     const users = readJson(USERS_FILE, []);
     const cleanId = traderId.trim().toLowerCase();
-    const user = users.find(u => 
+    const matchingUsers = users.filter(u => 
       (u.traderId && u.traderId.toLowerCase() === cleanId) || 
       (u.email && u.email.toLowerCase() === cleanId) ||
       (u.id && u.id.toLowerCase() === cleanId)
     );
 
-    if (!user) {
+    if (matchingUsers.length === 0) {
       return res.status(404).json({ success: false, message: `Trader ID (${traderId}) প্ল্যাটফর্মে খুঁজে পাওয়া যায়নি। আপনার প্রোফাইলে থাকা সঠিক Trader ID দিন।` });
     }
 
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const cleanDetDigits = String(detectedBrokerAccountId || '').trim().replace(/[^0-9]/g, '');
+
+    // Select the best matched user: prioritize the one who has an active running challenge or matching Quotex account
+    const user = matchingUsers.find(u => challenges.some(c => c.status === 'in_progress' && c.isActive !== false && (c.userId === u.id || (c.userEmail && c.userEmail.toLowerCase() === (u.email || '').toLowerCase())))) ||
+                 matchingUsers.find(u => cleanDetDigits && u.brokerAccountId && u.brokerAccountId.replace(/[^0-9]/g, '') === cleanDetDigits) ||
+                 matchingUsers[0];
+
     // Module 1: Challenge Time-Lock Filter
     // Find active challenge for this user (status === 'in_progress')
-    const challenges = readJson(CHALLENGES_FILE, []);
     const activeChallenge = challenges.find(c => 
       c.status === 'in_progress' && 
       c.isActive !== false &&
@@ -6105,6 +6127,9 @@ app.post('/api/extension/sync-trades', (req, res) => {
 
     const liveStatus = getLiveExtensionStatus(user);
     broadcastExtensionStatus(user.id, liveStatus);
+    if (activeChallenge && activeChallenge.userId && activeChallenge.userId !== user.id) {
+      broadcastExtensionStatus(activeChallenge.userId, liveStatus);
+    }
 
     // Determine the exact activation timestamp:
     // If reactivated: use reactivatedAt
@@ -6187,13 +6212,19 @@ app.post('/api/extension/sync-trades', (req, res) => {
 
       // Permanent duplicate guard: check ticketId or identical trade execution attributes
       const existingTrade = allSynced.find(existing => 
-        existing.userId === user.id && (
+        (existing.userId === user.id || (activeChallenge && (existing.challengeId === activeChallenge.id || existing.userId === activeChallenge.userId))) && (
           (existing.ticketId && existing.ticketId === ticketId) ||
           (existing.id && existing.id === ticketId) ||
           (existing.asset === t.asset && existing.openTime === t.openTime && Math.abs(existing.amount - t.amount) < 0.001)
         )
       );
       if (existingTrade) {
+        if (activeChallenge) {
+          if (existingTrade.challengeId !== activeChallenge.id) existingTrade.challengeId = activeChallenge.id;
+          if (activeChallenge.userId && existingTrade.userId !== activeChallenge.userId) existingTrade.userId = activeChallenge.userId;
+          if (activeChallenge.userEmail && existingTrade.userEmail !== activeChallenge.userEmail) existingTrade.userEmail = activeChallenge.userEmail;
+          if (activeChallenge.userTraderId && existingTrade.traderId !== activeChallenge.userTraderId) existingTrade.traderId = activeChallenge.userTraderId;
+        }
         if (payout && payout !== '90%' && (!existingTrade.payout || existingTrade.payout === '90%')) {
           existingTrade.payout = payout;
           newCount++;
@@ -6204,10 +6235,10 @@ app.post('/api/extension/sync-trades', (req, res) => {
 
       allSynced.push({
         id: `sync_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-        userId: user.id,
-        traderId: user.traderId || traderId,
-        userName: user.name || 'Trader',
-        userEmail: user.email || '',
+        userId: activeChallenge.userId || user.id,
+        traderId: activeChallenge.userTraderId || user.traderId || traderId,
+        userName: activeChallenge.userName || user.name || 'Trader',
+        userEmail: activeChallenge.userEmail || user.email || '',
         challengeId: activeChallenge.id,
         challengePackage: activeChallenge.packageName || '',
         challengeStartedAt: new Date(effectiveStartTime).toISOString(),
@@ -6320,11 +6351,33 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
     }
 
     // Only return trades belonging to current active challenge and executed on/after activation time
-    const userTrades = activeChallenge ? allSynced.filter(t => 
-      (t.userId === req.user.id || (t.userEmail && t.userEmail.toLowerCase() === (req.user.email || '').toLowerCase())) &&
-      (t.challengeId === activeChallenge.id) &&
-      (!effectiveStartTime || getTradeExecutionTime(t) >= (effectiveStartTime - 60000))
-    ) : [];
+    let didRepairOwnership = false;
+    const userTrades = activeChallenge ? allSynced.filter(t => {
+      const isChallengeMatch = (t.challengeId === activeChallenge.id);
+      const isUserMatch = (
+        t.userId === req.user.id || 
+        (t.userEmail && t.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()) ||
+        (t.traderId && req.user.traderId && t.traderId.toLowerCase() === req.user.traderId.toLowerCase()) ||
+        (activeChallenge && (t.userId === activeChallenge.userId || (t.userEmail && activeChallenge.userEmail && t.userEmail.toLowerCase() === activeChallenge.userEmail.toLowerCase())))
+      );
+      if (!isChallengeMatch && !isUserMatch) return false;
+      if (t.challengeId && t.challengeId !== activeChallenge.id) return false;
+      if (effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 60000)) return false;
+
+      // Auto-heal trade ownership if misaligned
+      if (isChallengeMatch && (t.userId !== activeChallenge.userId || t.userEmail !== activeChallenge.userEmail)) {
+        t.userId = activeChallenge.userId || t.userId;
+        t.userEmail = activeChallenge.userEmail || t.userEmail;
+        t.userName = activeChallenge.userName || t.userName;
+        t.traderId = activeChallenge.userTraderId || t.traderId;
+        didRepairOwnership = true;
+      }
+      return true;
+    }) : [];
+
+    if (didRepairOwnership) {
+      writeJson(SYNCED_TRADES_FILE, allSynced);
+    }
 
     // Strict sort newest-first (latest trade on top)
     userTrades.sort((a, b) => getTradeExecutionTime(b) - getTradeExecutionTime(a));
