@@ -3939,8 +3939,39 @@
     </div>
 
     <!-- 12. PROMO CODE CREATE / EDIT MODAL -->
+    <style>
+        .promo-pkg-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .promo-pkg-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(187, 134, 252, 0.4);
+        }
+        .promo-pkg-card.selected {
+            background: rgba(0, 230, 118, 0.12);
+            border-color: rgba(0, 230, 118, 0.6);
+            box-shadow: 0 0 10px rgba(0, 230, 118, 0.15);
+        }
+        .promo-pkg-card input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #00e676;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin: 0;
+        }
+    </style>
     <div class="modal-overlay" id="adminPromoCodeFormModal">
-        <div class="modal-box" style="max-width:520px; max-height:92vh; overflow-y:auto; padding:20px;">
+        <div class="modal-box" style="max-width:620px; width:95%; max-height:92vh; overflow-y:auto; padding:22px;">
             <button class="modal-close" onclick="closeModal('adminPromoCodeFormModal')">&times;</button>
             <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1rem; display:flex; align-items:center; gap:8px;" id="promoFormModalTitle">
                 <i class="fas fa-tag" style="color:#bb86fc;"></i>
@@ -3969,11 +4000,55 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Applicable Package</label>
-                    <select class="form-control" id="promoFormPackageId">
-                        <option value="all">All Challenge Packages</option>
-                    </select>
+                <!-- Applicable Challenges / Packages Multi-Selector -->
+                <div class="form-group" style="margin-bottom:1.2rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+                        <label style="font-weight:700; color:#fff; font-size:0.88rem; margin-bottom:0;">
+                            <i class="fas fa-cubes" style="color:#bb86fc;"></i> Applicable Challenges:
+                        </label>
+                        <span id="promoSelectedPkgCountText" style="font-size:0.76rem; font-weight:800; color:var(--neon-green); background:rgba(46,204,113,0.15); border:1px solid rgba(46,204,113,0.3); padding:2px 8px; border-radius:6px;">
+                            All Packages Selected
+                        </span>
+                    </div>
+
+                    <!-- Quick Preset Buttons -->
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                        <button type="button" class="btn-outline" onclick="selectPromoPkgPreset('all')" style="padding:4px 9px; font-size:0.75rem; border-radius:6px;">
+                            <i class="fas fa-check-double text-emerald"></i> All Packages
+                        </button>
+                        <button type="button" class="btn-outline" onclick="selectPromoPkgPreset('tiers3to10')" style="padding:4px 9px; font-size:0.75rem; border-radius:6px;">
+                            <i class="fas fa-layer-group text-gold"></i> Tiers 3 - 10 (Gold+)
+                        </button>
+                        <button type="button" class="btn-outline" onclick="selectPromoPkgPreset('tiers1to5')" style="padding:4px 9px; font-size:0.75rem; border-radius:6px;">
+                            <i class="fas fa-coins text-cyan"></i> Tiers 1 - 5 (Bronze-Diamond)
+                        </button>
+                        <button type="button" class="btn-outline" onclick="selectPromoPkgPreset('clear')" style="padding:4px 8px; font-size:0.75rem; border-radius:6px; color:#e74c3c; border-color:rgba(231,76,60,0.3);">
+                            <i class="fas fa-times"></i> Clear All
+                        </button>
+                    </div>
+
+                    <!-- Quick Range Selector -->
+                    <div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); padding:6px 10px; border-radius:8px; margin-bottom:8px; flex-wrap:wrap;">
+                        <span style="font-size:0.78rem; color:var(--text-secondary); font-weight:700;"><i class="fas fa-arrows-alt-h text-gold"></i> Range:</span>
+                        <div style="display:inline-flex; align-items:center; gap:5px;">
+                            <span style="font-size:0.75rem; color:#cbd5e1;">From</span>
+                            <select id="promoRangeFromSelect" class="form-control" style="width:auto; padding:2px 8px; font-size:0.78rem; height:28px;">
+                            </select>
+                        </div>
+                        <div style="display:inline-flex; align-items:center; gap:5px;">
+                            <span style="font-size:0.75rem; color:#cbd5e1;">To</span>
+                            <select id="promoRangeToSelect" class="form-control" style="width:auto; padding:2px 8px; font-size:0.78rem; height:28px;">
+                            </select>
+                        </div>
+                        <button type="button" class="btn-gold" onclick="applyPromoPkgRange()" style="padding:3px 10px; font-size:0.75rem; font-weight:700; height:28px; border-radius:6px;">
+                            Apply Range
+                        </button>
+                    </div>
+
+                    <!-- Package Checkbox Grid -->
+                    <div id="promoPackageCheckboxesGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:6px; max-height:200px; overflow-y:auto; padding:8px; background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:10px;">
+                        <!-- Dynamically populated package cards -->
+                    </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
@@ -9164,17 +9239,159 @@
             openModal('adminPromoCodeModal');
         }
 
-        function populatePromoPackageDropdown(selectedPkgId = 'all') {
-            const select = document.getElementById('promoFormPackageId');
-            if (!select) return;
-            let html = '<option value="all">🌐 All Challenge Packages</option>';
-            if (Array.isArray(adminPackages) && adminPackages.length > 0) {
-                adminPackages.forEach(pkg => {
-                    const sel = (selectedPkgId === pkg.id) ? 'selected' : '';
-                    html += `<option value="${pkg.id}" ${sel}>📦 ${escapeHtml(pkg.name)} ($${(pkg.fundedAmount || 0).toLocaleString()} Capital)</option>`;
+        function populatePromoPackageSelector(selectedIds = ['all']) {
+            const grid = document.getElementById('promoPackageCheckboxesGrid');
+            const fromSelect = document.getElementById('promoRangeFromSelect');
+            const toSelect = document.getElementById('promoRangeToSelect');
+            if (!grid) return;
+
+            // Sort packages by tierNumber
+            const sorted = [...(adminPackages || [])].sort((a, b) => (parseInt(a.tierNumber) || 0) - (parseInt(b.tierNumber) || 0));
+
+            // Populate range dropdowns if empty or outdated
+            if (fromSelect && toSelect) {
+                const optionsHtml = sorted.map(pkg => 
+                    `<option value="${pkg.tierNumber || 1}">Tier ${pkg.tierNumber || 1}: ${escapeHtml(pkg.name)}</option>`
+                ).join('');
+                fromSelect.innerHTML = optionsHtml;
+                toSelect.innerHTML = optionsHtml;
+                if (sorted.length >= 3) {
+                    fromSelect.value = sorted[2]?.tierNumber || 3;
+                }
+                if (sorted.length >= 9) {
+                    toSelect.value = sorted[8]?.tierNumber || 9;
+                } else if (sorted.length > 0) {
+                    toSelect.value = sorted[sorted.length - 1]?.tierNumber || 10;
+                }
+            }
+
+            // Determine if 'all' is selected
+            const isAll = !selectedIds || selectedIds.length === 0 || selectedIds.includes('all');
+
+            // Render cards
+            grid.innerHTML = sorted.map(pkg => {
+                const isChecked = isAll || selectedIds.includes(pkg.id);
+                const pColor = pkg.color || '#bb86fc';
+                return `
+                    <label class="promo-pkg-card ${isChecked ? 'selected' : ''}" id="promoCard_${pkg.id}" onclick="handlePromoCardClick(event, '${pkg.id}')">
+                        <input type="checkbox" class="promo-pkg-checkbox" value="${pkg.id}" data-tier="${pkg.tierNumber || 1}" ${isChecked ? 'checked' : ''} onchange="updatePromoSelectedPkgSummary()">
+                        <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:0;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span class="badge" style="background:${pColor}22; color:${pColor}; border:1px solid ${pColor}55; font-size:0.68rem; padding:1px 5px; border-radius:4px; font-weight:800;">
+                                    T${pkg.tierNumber || 1}
+                                </span>
+                                <strong style="font-size:0.83rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    ${escapeHtml(pkg.name)}
+                                </strong>
+                            </div>
+                            <div style="font-size:0.73rem; color:var(--text-secondary); display:flex; justify-content:space-between;">
+                                <span>$${(pkg.fundedAmount || 0).toLocaleString()} Capital</span>
+                                <span style="color:#00e676; font-weight:600;">$${pkg.fee || 0} Fee</span>
+                            </div>
+                        </div>
+                    </label>
+                `;
+            }).join('');
+
+            updatePromoSelectedPkgSummary();
+        }
+
+        function handlePromoCardClick(e, pkgId) {
+            if (e.target && e.target.tagName.toLowerCase() === 'input') return;
+            const cb = document.querySelector(`.promo-pkg-checkbox[value="${pkgId}"]`);
+            if (cb) {
+                cb.checked = !cb.checked;
+                updatePromoSelectedPkgSummary();
+            }
+        }
+
+        function updatePromoSelectedPkgSummary() {
+            const checkboxes = Array.from(document.querySelectorAll('.promo-pkg-checkbox'));
+            const checked = checkboxes.filter(c => c.checked);
+            const total = checkboxes.length;
+            const textEl = document.getElementById('promoSelectedPkgCountText');
+
+            // Sync visual .selected classes
+            checkboxes.forEach(cb => {
+                const card = document.getElementById(`promoCard_${cb.value}`);
+                if (card) {
+                    if (cb.checked) card.classList.add('selected');
+                    else card.classList.remove('selected');
+                }
+            });
+
+            if (!textEl) return;
+
+            if (checked.length === 0) {
+                textEl.innerText = '0 Selected (Please select at least 1)';
+                textEl.style.color = '#e74c3c';
+                textEl.style.background = 'rgba(231,76,60,0.15)';
+                textEl.style.borderColor = 'rgba(231,76,60,0.3)';
+            } else if (checked.length === total) {
+                textEl.innerText = `All ${total} Packages Selected`;
+                textEl.style.color = '#00e676';
+                textEl.style.background = 'rgba(0,230,118,0.15)';
+                textEl.style.borderColor = 'rgba(0,230,118,0.3)';
+            } else {
+                const tiers = checked.map(c => parseInt(c.dataset.tier) || 0).sort((a,b) => a - b);
+                const isContiguous = tiers.length > 1 && tiers.every((t, idx, arr) => idx === 0 || t === arr[idx-1] + 1);
+
+                if (isContiguous) {
+                    textEl.innerText = `${checked.length} of ${total} (Tier ${tiers[0]} - ${tiers[tiers.length-1]})`;
+                } else {
+                    const tierNames = checked.map(c => `T${c.dataset.tier}`).join(', ');
+                    textEl.innerText = `${checked.length} of ${total} (${tierNames})`;
+                }
+                textEl.style.color = '#f5b041';
+                textEl.style.background = 'rgba(245,176,65,0.15)';
+                textEl.style.borderColor = 'rgba(245,176,65,0.3)';
+            }
+        }
+
+        function selectPromoPkgPreset(preset) {
+            const checkboxes = Array.from(document.querySelectorAll('.promo-pkg-checkbox'));
+            if (preset === 'all') {
+                checkboxes.forEach(cb => cb.checked = true);
+            } else if (preset === 'clear') {
+                checkboxes.forEach(cb => cb.checked = false);
+            } else if (preset === 'tiers3to10') {
+                checkboxes.forEach(cb => {
+                    const tier = parseInt(cb.dataset.tier) || 0;
+                    cb.checked = (tier >= 3 && tier <= 10);
+                });
+            } else if (preset === 'tiers1to5') {
+                checkboxes.forEach(cb => {
+                    const tier = parseInt(cb.dataset.tier) || 0;
+                    cb.checked = (tier >= 1 && tier <= 5);
                 });
             }
-            select.innerHTML = html;
+            updatePromoSelectedPkgSummary();
+        }
+
+        function applyPromoPkgRange() {
+            const fromTier = parseInt(document.getElementById('promoRangeFromSelect')?.value, 10) || 1;
+            const toTier = parseInt(document.getElementById('promoRangeToSelect')?.value, 10) || 10;
+            const minT = Math.min(fromTier, toTier);
+            const maxT = Math.max(fromTier, toTier);
+
+            const checkboxes = Array.from(document.querySelectorAll('.promo-pkg-checkbox'));
+            let count = 0;
+            checkboxes.forEach(cb => {
+                const tier = parseInt(cb.dataset.tier) || 0;
+                const inRange = (tier >= minT && tier <= maxT);
+                cb.checked = inRange;
+                if (inRange) count++;
+            });
+            updatePromoSelectedPkgSummary();
+            showToast(`Selected Tiers ${minT} to ${maxT} (${count} challenges)`, 'success');
+        }
+
+        function getSelectedPromoPackageIds() {
+            const checkboxes = Array.from(document.querySelectorAll('.promo-pkg-checkbox'));
+            const checked = checkboxes.filter(cb => cb.checked);
+            if (checked.length === 0) return [];
+            if (checked.length === checkboxes.length) return ['all'];
+            return checked.map(cb => cb.value);
         }
 
         function updatePromoDiscountSymbol() {
@@ -9197,7 +9414,7 @@
             document.getElementById('promoFormStatus').value = 'active';
             document.getElementById('promoFormNotes').value = '';
             updatePromoDiscountSymbol();
-            populatePromoPackageDropdown('all');
+            populatePromoPackageSelector(['all']);
             openModal('adminPromoCodeFormModal');
         }
 
@@ -9229,7 +9446,14 @@
             document.getElementById('promoFormStatus').value = p.status || 'active';
             document.getElementById('promoFormNotes').value = p.notes || '';
             updatePromoDiscountSymbol();
-            populatePromoPackageDropdown(p.packageId || 'all');
+
+            let selectedIds = ['all'];
+            if (Array.isArray(p.packageIds) && p.packageIds.length > 0) {
+                selectedIds = p.packageIds;
+            } else if (p.packageId && p.packageId !== 'all') {
+                selectedIds = [p.packageId];
+            }
+            populatePromoPackageSelector(selectedIds);
             openModal('adminPromoCodeFormModal');
         }
 
@@ -9285,10 +9509,35 @@
                     statusBadge = '<span class="badge" style="background:rgba(46,204,113,0.15); color:#2ecc71; border:1px solid #2ecc71; font-weight:700;">Active</span>';
                 }
 
-                let pkgLabel = '<span style="color:#bb86fc; font-weight:600;">All Packages</span>';
-                if (p.packageId && p.packageId !== 'all') {
-                    const foundPkg = adminPackages.find(pk => pk.id === p.packageId);
-                    pkgLabel = foundPkg ? `<span style="color:#fff;">${escapeHtml(foundPkg.name)} ($${(foundPkg.fundedAmount || 0).toLocaleString()})</span>` : escapeHtml(p.packageId);
+                let pkgLabel = '<span style="color:#bb86fc; font-weight:700;"><i class="fas fa-layer-group"></i> All Packages</span>';
+                const pkgIds = Array.isArray(p.packageIds) && p.packageIds.length > 0 
+                    ? p.packageIds 
+                    : (p.packageId && p.packageId !== 'all' ? [p.packageId] : ['all']);
+
+                if (pkgIds.includes('all') || pkgIds.length === 0) {
+                    pkgLabel = '<span class="badge" style="background:rgba(187,134,252,0.15); color:#bb86fc; border:1px solid rgba(187,134,252,0.3); font-weight:700;"><i class="fas fa-layer-group"></i> All Packages (10)</span>';
+                } else if (pkgIds.length === 1) {
+                    const foundPkg = adminPackages.find(pk => pk.id === pkgIds[0]);
+                    pkgLabel = foundPkg 
+                        ? `<span style="color:#fff; font-weight:700; background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.12);">T${foundPkg.tierNumber || 1}: ${escapeHtml(foundPkg.name)} ($${(foundPkg.fundedAmount || 0).toLocaleString()})</span>` 
+                        : escapeHtml(pkgIds[0]);
+                } else {
+                    const matchedPkgs = adminPackages.filter(pk => pkgIds.includes(pk.id)).sort((a,b) => (a.tierNumber||0) - (b.tierNumber||0));
+                    const tierNums = matchedPkgs.map(pk => pk.tierNumber || 0).filter(n => n > 0);
+                    const isConsecutive = tierNums.length > 1 && tierNums.every((num, idx, arr) => idx === 0 || num === arr[idx-1] + 1);
+
+                    const tooltip = matchedPkgs.map(m => `Tier ${m.tierNumber}: ${m.name}`).join(', ');
+
+                    if (isConsecutive && tierNums.length === matchedPkgs.length) {
+                        pkgLabel = `<span class="badge" style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); font-size:0.78rem;" title="${escapeHtml(tooltip)}">
+                            <i class="fas fa-sliders-h"></i> Tiers ${tierNums[0]}–${tierNums[tierNums.length-1]} (${matchedPkgs.length} Tiers)
+                        </span>`;
+                    } else {
+                        const tierTags = matchedPkgs.map(m => `T${m.tierNumber || m.name}`).join(', ');
+                        pkgLabel = `<span class="badge" style="background:rgba(245,176,65,0.15); color:#f5b041; border:1px solid rgba(245,176,65,0.3); font-size:0.78rem;" title="${escapeHtml(tooltip)}">
+                            <i class="fas fa-check-double"></i> ${matchedPkgs.length} Challenges (${tierTags})
+                        </span>`;
+                    }
                 }
 
                 let expiryLabel = '<span style="color:#2ecc71; font-weight:600;">No Expiry</span>';
@@ -9353,7 +9602,7 @@
             const code = document.getElementById('promoFormCode').value.trim();
             const discountType = document.getElementById('promoFormDiscountType').value;
             const discountValue = parseFloat(document.getElementById('promoFormDiscountValue').value);
-            const packageId = document.getElementById('promoFormPackageId').value;
+            const selectedPkgIds = getSelectedPromoPackageIds();
             const maxUses = document.getElementById('promoFormMaxUses').value.trim();
             const expiresAt = document.getElementById('promoFormExpiresAt').value;
             const status = document.getElementById('promoFormStatus').value;
@@ -9367,12 +9616,26 @@
                 showToast('Please enter a valid discount value', 'error');
                 return;
             }
+            if (selectedPkgIds.length === 0) {
+                showToast('Please select at least one applicable challenge package', 'error');
+                return;
+            }
+
+            const finalPackageId = selectedPkgIds.includes('all') 
+                ? 'all' 
+                : (selectedPkgIds.length === 1 ? selectedPkgIds[0] : 'custom');
 
             const payload = {
                 code,
                 discountType,
                 discountValue,
-                packageId,
+                packageId: finalPackageId,
+                packageIds: selectedPkgIds,
+                maxUses: maxUses ? parseInt(maxUses) : null,
+                expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+                status,
+                notes
+            };
                 maxUses: maxUses ? parseInt(maxUses) : null,
                 expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
                 status,

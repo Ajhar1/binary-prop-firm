@@ -3240,6 +3240,21 @@ function savePromoCodes(codes) {
   }
 }
 
+function isPromoApplicableToPackage(promo, targetPkgId) {
+  if (!promo || !targetPkgId) return true;
+  // If 'all' or empty restrictions, applies to everything
+  if (!promo.packageId && (!promo.packageIds || promo.packageIds.length === 0)) return true;
+  if (promo.packageId === 'all') return true;
+  if (Array.isArray(promo.packageIds)) {
+    if (promo.packageIds.includes('all') || promo.packageIds.length === 0) return true;
+    return promo.packageIds.includes(targetPkgId);
+  }
+  if (typeof promo.packageId === 'string' && promo.packageId !== 'all') {
+    return promo.packageId === targetPkgId;
+  }
+  return true;
+}
+
 function getEnrichedPackages(includeInactive = false) {
   const promo = getLaunchPromo();
   const isPromoActive = promo && promo.active && new Date(promo.expiresAt) > new Date();
@@ -4428,7 +4443,7 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
     if (foundPromo.maxUses && foundPromo.usedCount >= foundPromo.maxUses) {
       return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটির সর্বোচ্চ ব্যবহার সম্পন্ন হয়েছে।' });
     }
-    if (foundPromo.packageId && foundPromo.packageId !== 'all' && foundPromo.packageId !== pkg.id) {
+    if (!isPromoApplicableToPackage(foundPromo, pkg.id)) {
       return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটি নির্বাচিত প্যাকেজে প্রযোজ্য নয়।' });
     }
 
@@ -8480,7 +8495,7 @@ app.get('/api/admin/promo-codes', authenticateAdminToken, (req, res) => {
 
 // 2. Admin: Create a promo code
 app.post('/api/admin/promo-codes', authenticateAdminToken, (req, res) => {
-  const { code, discountType, discountValue, packageId, maxUses, expiresAt, status, notes } = req.body;
+  const { code, discountType, discountValue, packageId, packageIds, maxUses, expiresAt, status, notes } = req.body;
 
   if (!code || !code.trim()) {
     return res.status(400).json({ success: false, message: 'প্রোমো কোড প্রদান করুন।' });
@@ -8511,12 +8526,26 @@ app.post('/api/admin/promo-codes', authenticateAdminToken, (req, res) => {
     formattedExpiresAt = new Date(expiresAt).toISOString();
   }
 
+  let cleanPkgIds = [];
+  if (Array.isArray(packageIds) && packageIds.length > 0) {
+    cleanPkgIds = packageIds;
+  } else if (packageId && packageId !== 'all') {
+    cleanPkgIds = [packageId];
+  } else {
+    cleanPkgIds = ['all'];
+  }
+
+  const finalPkgId = (cleanPkgIds.includes('all') || cleanPkgIds.length === 0)
+    ? 'all'
+    : (cleanPkgIds.length === 1 ? cleanPkgIds[0] : 'custom');
+
   const newPromo = {
     id: `promo_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
     code: cleanCode,
     discountType: type,
     discountValue: numValue,
-    packageId: packageId || 'all',
+    packageId: finalPkgId,
+    packageIds: cleanPkgIds,
     maxUses: (maxUses && parseInt(maxUses) > 0) ? parseInt(maxUses) : null,
     usedCount: 0,
     expiresAt: formattedExpiresAt,
@@ -8547,7 +8576,7 @@ app.put('/api/admin/promo-codes/:id', authenticateAdminToken, (req, res) => {
     return res.status(404).json({ success: false, message: 'প্রোমো কোডটি পাওয়া যায়নি।' });
   }
 
-  const { code, discountType, discountValue, packageId, maxUses, expiresAt, status, notes } = req.body;
+  const { code, discountType, discountValue, packageId, packageIds, maxUses, expiresAt, status, notes } = req.body;
   const currentPromo = codes[index];
 
   if (code && code.trim()) {
@@ -8576,8 +8605,19 @@ app.put('/api/admin/promo-codes/:id', authenticateAdminToken, (req, res) => {
     currentPromo.discountValue = numValue;
   }
 
-  if (packageId !== undefined) {
-    currentPromo.packageId = packageId || 'all';
+  if (packageIds !== undefined || packageId !== undefined) {
+    let cleanPkgIds = [];
+    if (Array.isArray(packageIds) && packageIds.length > 0) {
+      cleanPkgIds = packageIds;
+    } else if (packageId && packageId !== 'all') {
+      cleanPkgIds = [packageId];
+    } else {
+      cleanPkgIds = ['all'];
+    }
+    currentPromo.packageIds = cleanPkgIds;
+    currentPromo.packageId = (cleanPkgIds.includes('all') || cleanPkgIds.length === 0)
+      ? 'all'
+      : (cleanPkgIds.length === 1 ? cleanPkgIds[0] : 'custom');
   }
 
   if (maxUses !== undefined) {
@@ -8660,7 +8700,7 @@ app.post('/api/promo-codes/validate', (req, res) => {
     return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটির ব্যবহারের সর্বোচ্চ সীমা শেষ হয়ে গেছে।' });
   }
 
-  if (promo.packageId && promo.packageId !== 'all' && packageId && promo.packageId !== packageId) {
+  if (packageId && !isPromoApplicableToPackage(promo, packageId)) {
     return res.status(400).json({ success: false, message: 'এই প্রোমো কোডটি নির্বাচিত চ্যালেঞ্জ প্যাকেজের জন্য প্রযোজ্য নয়।' });
   }
 
@@ -8693,6 +8733,7 @@ app.post('/api/promo-codes/validate', (req, res) => {
       discountType: promo.discountType,
       discountValue: promo.discountValue,
       packageId: promo.packageId,
+      packageIds: promo.packageIds || (promo.packageId ? [promo.packageId] : ['all']),
       notes: promo.notes
     },
     baseFee,
