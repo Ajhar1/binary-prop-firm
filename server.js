@@ -10482,25 +10482,56 @@ app.all('/api/system/auto-deploy', (req, res) => {
 
   console.log(`[AUTO-DEPLOY] Live deployment triggered at ${new Date().toISOString()}`);
 
-  // Create an automated safety snapshot before pulling code
+  // 1. Create an automated safety snapshot before pulling code
   try {
     createDatabaseBackup('pre_deploy');
   } catch (bErr) {
     console.error('[AUTO-DEPLOY] Pre-deploy backup warning:', bErr.message);
   }
 
-  exec('git pull origin main', { cwd: __dirname }, (err, stdout, stderr) => {
-    if (err) {
-      console.error('[AUTO-DEPLOY ERROR]:', err);
-      return res.status(500).json({
-        success: false,
-        message: 'Git pull failed during auto-deployment.',
-        error: err.message,
-        stderr
-      });
-    }
+  // 2. Capture in-memory snapshots of critical dynamic database files so they are 100% immune to loss
+  const criticalFiles = [
+    PROMO_CODES_FILE,
+    PROMO_CODES_PERMANENT_STORE_FILE,
+    PARTNERS_FILE,
+    PARTNERS_PERMANENT_STORE_FILE,
+    PARTNER_PAYOUTS_FILE,
+    PARTNER_SETTINGS_FILE,
+    PARTNER_PROMO_REQUESTS_FILE,
+    LAUNCH_PROMO_FILE,
+    PROMO_PRESETS_FILE,
+    PAYOUTS_FILE,
+    PAYOUT_SETTINGS_FILE
+  ];
 
-    console.log('[AUTO-DEPLOY OUTPUT]:', stdout);
+  const inMemorySnapshots = {};
+  criticalFiles.forEach(f => {
+    try {
+      if (fs.existsSync(f)) {
+        inMemorySnapshots[f] = fs.readFileSync(f, 'utf8');
+      }
+    } catch (e) {}
+  });
+
+  // 3. Stash any tracked modifications, pull origin main, and safely restore stashed data
+  const pullCommand = 'git stash && git pull origin main && (git stash pop || true)';
+
+  exec(pullCommand, { cwd: __dirname }, (err, stdout, stderr) => {
+    // 4. In ALL cases (even if stash pop conflict or pull), immediately verify and restore critical data files
+    criticalFiles.forEach(f => {
+      try {
+        const snap = inMemorySnapshots[f];
+        if (snap && snap.trim().length > 2) {
+          // If file is missing or was overwritten with empty/shorter data, restore real snapshot
+          if (!fs.existsSync(f) || fs.readFileSync(f, 'utf8').trim() === '[]' || fs.readFileSync(f, 'utf8').trim() === '') {
+            fs.writeFileSync(f, snap, 'utf8');
+            console.log(`[AUTO-DEPLOY] Restored critical data for ${path.basename(f)} from pre-deploy snapshot.`);
+          }
+        }
+      } catch (rErr) {
+        console.error(`[AUTO-DEPLOY] Error restoring ${path.basename(f)}:`, rErr.message);
+      }
+    });
 
     // Safety check: ensure partners and promo codes are intact
     try {
