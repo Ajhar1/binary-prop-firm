@@ -1033,6 +1033,22 @@
             margin-top: 2px;
         }
 
+        /* Desktop defaults for mobile proof components */
+        .proof-mobile-subtabs {
+            display: none;
+        }
+        .mobile-proof-submit-cta {
+            display: none;
+        }
+        @media (min-width: 769px) {
+            #submissionFormCard.proof-mobile-hidden {
+                display: block !important;
+            }
+            .proof-history-card.proof-mobile-hidden {
+                display: block !important;
+            }
+        }
+
         .form-group {
             margin-bottom: 1rem;
         }
@@ -2201,43 +2217,141 @@
                 padding: 0 !important;
             }
             #pane-submission .submission-container {
+                display: flex !important;
+                flex-direction: column !important;
                 gap: 10px !important;
                 width: 100% !important;
                 max-width: 100% !important;
             }
-            #pane-submission .glass-card {
-                padding: 10px 8px !important;
-                border-radius: 14px !important;
-                margin-bottom: 10px !important;
+
+            /* Subtab Switcher for Mobile Proof */
+            .proof-mobile-subtabs {
+                display: flex !important;
+                background: rgba(18, 22, 34, 0.95) !important;
+                border: 1px solid rgba(255, 255, 255, 0.12) !important;
+                border-radius: 12px !important;
+                padding: 4px !important;
+                gap: 6px !important;
+                margin-bottom: 12px !important;
                 width: 100% !important;
-                max-width: 100% !important;
                 box-sizing: border-box !important;
             }
-            .user-ch-group-card {
-                border-radius: 12px !important;
+            .proof-subtab-btn {
+                flex: 1 1 0% !important;
+                padding: 9px 8px !important;
+                font-size: 0.82rem !important;
+                font-weight: 800 !important;
+                border-radius: 8px !important;
+                border: none !important;
+                background: transparent !important;
+                color: var(--text-secondary) !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 6px !important;
+                cursor: pointer !important;
+                transition: all 0.2s ease !important;
+                white-space: nowrap !important;
+            }
+            .proof-subtab-btn.active {
+                background: linear-gradient(135deg, var(--yellow), #d48817) !important;
+                color: #000 !important;
+                box-shadow: 0 2px 10px rgba(245, 176, 65, 0.3) !important;
+            }
+
+            .proof-mobile-hidden {
+                display: none !important;
+            }
+
+            .mobile-proof-submit-cta {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                background: linear-gradient(135deg, rgba(245, 176, 65, 0.12), rgba(0, 230, 118, 0.08)) !important;
+                border: 1px solid rgba(245, 176, 65, 0.35) !important;
+                border-radius: 10px !important;
+                padding: 9px 12px !important;
                 margin-bottom: 10px !important;
+                cursor: pointer !important;
                 width: 100% !important;
                 box-sizing: border-box !important;
+            }
+
+            /* Elimination of redundant outer layers on mobile */
+            #pane-submission .glass-card.proof-history-card,
+            #pane-submission .proof-history-card {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+            .proof-history-header {
+                padding: 4px 2px 10px 2px !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+                margin-bottom: 10px !important;
+            }
+
+            /* Elimination of redundant Challenge Group outer frame on mobile */
+            .user-ch-group-card {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                margin-bottom: 12px !important;
+                padding: 0 !important;
+                width: 100% !important;
             }
             .user-ch-group-header {
-                padding: 8px 10px !important;
-                gap: 6px !important;
+                background: rgba(18, 22, 34, 0.95) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 12px !important;
+                padding: 10px 12px !important;
+                margin-bottom: 8px !important;
+                gap: 8px !important;
             }
             .user-ch-group-body {
-                padding: 6px 4px !important;
-                gap: 6px !important;
+                padding: 0 !important;
+                gap: 8px !important;
+                background: transparent !important;
+                border: none !important;
             }
+
+            /* Main Session Card - crisp primary container */
             .serial-session-card {
-                border-radius: 10px !important;
-                margin-bottom: 6px !important;
+                background: rgba(18, 22, 34, 0.95) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 12px !important;
+                margin-bottom: 8px !important;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
             .serial-session-card-header {
-                padding: 8px 10px !important;
-                gap: 6px !important;
+                padding: 10px 12px !important;
+                gap: 8px !important;
             }
             .serial-session-card-body {
-                padding: 8px 6px !important;
+                padding: 10px 8px !important;
             }
+
+            /* Flatten inner Auto Audit box on mobile (removes redundant 4th border & padding) */
+            .session-audit-box {
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+                margin-bottom: 8px !important;
+            }
+            .session-media-proof-box {
+                background: rgba(0, 0, 0, 0.3) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                border-radius: 10px !important;
+                padding: 8px !important;
+                margin-bottom: 8px !important;
+            }
+
+            /* Full-width edge-to-edge trade cards on mobile */
             .audit-table-desktop {
                 display: none !important;
             }
@@ -2245,17 +2359,40 @@
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 6px !important;
+                width: 100% !important;
             }
+            .audit-trades-mobile > div {
+                background: rgba(10, 14, 22, 0.8) !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                border-radius: 8px !important;
+                padding: 9px 10px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            /* 2x2 Clean KPI Grid */
             .session-kpi-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 6px !important;
-                margin-bottom: 10px !important;
+                margin-bottom: 8px !important;
             }
             .session-kpi-card {
                 padding: 7px 8px !important;
+                border-radius: 8px !important;
             }
             .session-kpi-val {
                 font-size: 0.84rem !important;
+            }
+
+            /* Submission Form Card Mobile Styling */
+            #submissionFormCard {
+                background: rgba(18, 22, 34, 0.95) !important;
+                border: 1px solid rgba(255, 255, 255, 0.12) !important;
+                border-radius: 14px !important;
+                padding: 14px 12px !important;
+                box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
             }
             .active-session-card-box {
                 padding: 10px 8px !important;
@@ -3163,6 +3300,16 @@
             <!-- Locked Notice Card (Displayed when no active in_progress challenge exists) -->
             <div id="submissionLockedCard" style="display:none; margin-bottom:1.5rem;"></div>
 
+            <!-- Mobile Proof Subtabs (Only visible on mobile screens <= 768px) -->
+            <div class="proof-mobile-subtabs" id="proofMobileSubtabs">
+                <button type="button" class="proof-subtab-btn active" id="btnProofSubtabHistory" onclick="switchProofSubtab('history')">
+                    <i class="fas fa-layer-group"></i> সেশন হিস্টোরি (History)
+                </button>
+                <button type="button" class="proof-subtab-btn" id="btnProofSubtabUpload" onclick="switchProofSubtab('upload')">
+                    <i class="fas fa-cloud-upload-alt"></i> প্রুফ সাবমিট (Submit)
+                </button>
+            </div>
+
             <div class="submission-container">
                 <!-- Upload Form Card (Displayed only when challenge is active/in_progress) -->
                 <div class="glass-card" id="submissionFormCard">
@@ -3300,8 +3447,8 @@
                 </div>
 
                 <!-- Past Submissions History Card (Admin-Style Sequential Sessions) -->
-                <div class="glass-card" style="padding:1.25rem;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.75rem;">
+                <div class="glass-card proof-history-card" style="padding:1.25rem;">
+                    <div class="proof-history-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.75rem;">
                         <div>
                             <h2 style="font-size:1.15rem; font-weight:800; margin:0; display:flex; align-items:center; gap:8px;">
                                 <i class="fas fa-layer-group" style="color:var(--yellow);"></i> সেশন ট্রেডিং হিস্টোরি (Session Records)
@@ -3313,6 +3460,20 @@
                                 <i class="fas fa-sync-alt"></i> রিফ্রেশ
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Mobile Quick CTA to switch to upload tab -->
+                    <div class="mobile-proof-submit-cta" id="mobileProofSubmitCta" onclick="switchProofSubtab('upload')">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:1.15rem; color:var(--yellow);"><i class="fas fa-bolt"></i></span>
+                            <div>
+                                <div style="font-weight:800; font-size:0.84rem; color:#fff;">আজকের সেশন প্রুফ জমা দিন</div>
+                                <div style="font-size:0.72rem; color:var(--text-secondary);">শীট ও কোটেক্স থেকে অটো-লোড হবে</div>
+                            </div>
+                        </div>
+                        <span class="btn-gold" style="padding:5px 12px; font-size:0.75rem; border-radius:6px; font-weight:800; pointer-events:none;">
+                            সাবমিট &rarr;
+                        </span>
                     </div>
 
                     <!-- Container for Sequential Session Accordion Cards -->
@@ -7311,6 +7472,48 @@
             }
         }
 
+        // ==================== MOBILE PROOF SUBTABS CONTROLLER ====================
+        let currentProofMobileTab = 'history';
+
+        function switchProofSubtab(tab) {
+            currentProofMobileTab = tab;
+            const btnHistory = document.getElementById('btnProofSubtabHistory');
+            const btnUpload = document.getElementById('btnProofSubtabUpload');
+            const formCard = document.getElementById('submissionFormCard');
+            const historyCard = document.querySelector('#pane-submission .proof-history-card');
+            const lockedCard = document.getElementById('submissionLockedCard');
+
+            const hasActiveChallenge = (myChallenges || []).some(c => c.status === 'in_progress');
+
+            if (tab === 'upload' && !hasActiveChallenge) {
+                if (lockedCard && lockedCard.style.display !== 'none') {
+                    lockedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                showToast('আপনার কোনো রানিং বা সক্রিয় চ্যালেঞ্জ নেই। প্রুফ জমা দিতে নতুন চ্যালেঞ্জ শুরু করুন।', 'info');
+                tab = 'history';
+                currentProofMobileTab = 'history';
+            }
+
+            if (btnHistory) btnHistory.classList.toggle('active', tab === 'history');
+            if (btnUpload) btnUpload.classList.toggle('active', tab === 'upload');
+
+            if (formCard) {
+                if (tab === 'upload') {
+                    formCard.classList.remove('proof-mobile-hidden');
+                } else {
+                    formCard.classList.add('proof-mobile-hidden');
+                }
+            }
+
+            if (historyCard) {
+                if (tab === 'history') {
+                    historyCard.classList.remove('proof-mobile-hidden');
+                } else {
+                    historyCard.classList.add('proof-mobile-hidden');
+                }
+            }
+        }
+
         // Check whether user has an active challenge to allow submission
         function checkSubmissionEligibility() {
             const lockedCard = document.getElementById('submissionLockedCard');
@@ -7320,6 +7523,7 @@
             const lockDesc = document.getElementById('subLockDesc');
             const lockActionBtn = document.getElementById('subLockActionBtn');
             const activeNotice = document.getElementById('subActiveChallengeNotice');
+            const proofCta = document.getElementById('mobileProofSubmitCta');
 
             if (!lockedCard || !formCard) return;
 
@@ -7333,11 +7537,13 @@
             if (activeChallenge && activeChallenge.challengePhase === 'evaluation' && activeChallenge.expiresAt && Date.now() > new Date(activeChallenge.expiresAt).getTime()) {
                 lockedCard.style.display = 'block';
                 formCard.style.display = 'none';
+                if (proofCta) proofCta.style.display = 'none';
                 lockedCard.innerHTML = getUnifiedFailedChallengeHTML(Object.assign({}, activeChallenge, {
                     status: 'failed',
                     failReason: 'TIME_LIMIT_EXCEEDED',
                     failReasonText: 'চ্যালেঞ্জের সর্বোচ্চ ১৫ দিনের সময়সীমা অতিক্রান্ত হয়েছে। নির্দিষ্ট মেয়াদের মধ্যে ১৫টি সেশন সম্পন্ন না করায় চ্যালেঞ্জটি স্বয়ংক্রিয়ভাবে বন্ধ করা হয়েছে এবং আপনি এই চ্যালেঞ্জ থেকে বাদ পড়েছেন।'
                 }), 'submission');
+                switchProofSubtab('history');
                 return;
             }
 
@@ -7345,6 +7551,7 @@
                 // User has an active challenge! Show upload form
                 lockedCard.style.display = 'none';
                 formCard.style.display = 'block';
+                if (proofCta) proofCta.style.display = '';
 
                 const practiceCompleted = activeChallenge.practiceSessionsCompleted || 0;
                 const isPractice = (activeChallenge.challengePhase === 'practice' && practiceCompleted < 3);
@@ -7410,6 +7617,7 @@
             } else {
                 lockedCard.style.display = 'block';
                 formCard.style.display = 'none';
+                if (proofCta) proofCta.style.display = 'none';
 
                 if (passedChallenge) {
                     lockedCard.innerHTML = getUnifiedPassedChallengeHTML(passedChallenge, 'submission');
@@ -7423,6 +7631,8 @@
                     lockedCard.innerHTML = getUnifiedNoChallengeHTML('submission');
                 }
             }
+
+            switchProofSubtab(currentProofMobileTab || 'history');
         }
 
         // ==================== USER SEQUENTIAL SESSIONS & TRADE HISTORY CONTROLLER ====================
@@ -7704,7 +7914,7 @@
 
                         <!-- Auto Audit Trades Table -->
                         ${(sub.auditReport && sub.auditReport.length > 0) ? `
-                            <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px; margin-bottom:12px;">
+                            <div class="session-audit-box" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px; margin-bottom:12px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
                                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                         <span style="background:rgba(0,230,118,0.15); color:#00e676; padding:2px 8px; border-radius:5px; font-weight:800; font-size:0.72rem; border:1px solid rgba(0,230,118,0.35);">
@@ -7839,7 +8049,7 @@
 
                         <!-- Media Proofs (if video or screenshot exists) -->
                         ${(videoSrc || imageSrc || externalVideoLink) ? `
-                            <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px; margin-bottom:12px;">
+                            <div class="session-media-proof-box" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px; margin-bottom:12px;">
                                 <div style="display:flex; flex-direction:column; gap:10px;">
                                     ${videoSrc ? `
                                         <div>
@@ -8279,7 +8489,7 @@
                                             ${pnlSign}$${unsubmittedPnl.toFixed(2)}
                                         </span>
                                     </div>
-                                    <button type="button" class="btn-gold" onclick="switchTab('submission')" style="padding:5px 14px; font-size:0.78rem; border-radius:6px; display:inline-flex; align-items:center; gap:6px; font-weight:800;">
+                                    <button type="button" class="btn-gold" onclick="switchTab('submission'); switchProofSubtab('upload');" style="padding:5px 14px; font-size:0.78rem; border-radius:6px; display:inline-flex; align-items:center; gap:6px; font-weight:800;">
                                         <i class="fas fa-bolt"></i> সেশন অডিট ও সাবমিট করুন &rarr;
                                     </button>
                                 </div>
@@ -9755,6 +9965,9 @@
                 closeModal('masAuditProgressModal');
                 modal.style.display = 'none';
             }
+            if (typeof switchProofSubtab === 'function') {
+                switchProofSubtab('history');
+            }
             fetchChallenges();
             fetchSubmissions();
         }
@@ -11039,6 +11252,9 @@
         function proceedToProofUploadFromSheet() {
             closeMasCompleteModal();
             switchTab('submission');
+            if (typeof switchProofSubtab === 'function') {
+                switchProofSubtab('upload');
+            }
             syncMasanielloToProofForm(false);
             const formCard = document.getElementById('submissionFormCard');
             if (formCard) {
