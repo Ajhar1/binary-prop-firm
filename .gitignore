@@ -22,3 +22,20 @@ data/backups/
 data_secure_snapshot_*
 secure_vault_backup_*
 problem box/
+
+# Affiliate & Partner Program Database Files (Never overwrite or wipe)
+data/partners.json
+data/partners_permanent_store.json
+data/partner_payouts.json
+data/partner_settings.json
+data/partner_promo_requests.json
+
+# Admin Discount & Promo Code Database Files (Never overwrite or wipe)
+data/promo_codes.json
+data/promo_codes_permanent_store.json
+data/launch_promo.json
+data/promo_presets.json
+
+# Trader Payout Database Files
+data/payouts.json
+data/payout_settings.json

@@ -32,6 +32,7 @@ const LAUNCH_PROMO_FILE = path.join(DATA_DIR, 'launch_promo.json');
 const PROMO_PRESETS_FILE = path.join(DATA_DIR, 'promo_presets.json');
 const PACKAGES_FILE = path.join(DATA_DIR, 'packages.json');
 const PROMO_CODES_FILE = path.join(DATA_DIR, 'promo_codes.json');
+const PROMO_CODES_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'promo_codes_permanent_store.json');
 const SUPPORT_FILE = path.join(DATA_DIR, 'support_tickets.json');
 const TRADER_STATES_FILE = path.join(DATA_DIR, 'trader_states.json');
 const SYNCED_TRADES_FILE = path.join(DATA_DIR, 'synced_trades.json');
@@ -48,6 +49,7 @@ const DEFAULT_PAYOUT_SETTINGS = {
 
 // Partner / Affiliate Program Stores
 const PARTNERS_FILE = path.join(DATA_DIR, 'partners.json');
+const PARTNERS_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'partners_permanent_store.json');
 const PARTNER_PAYOUTS_FILE = path.join(DATA_DIR, 'partner_payouts.json');
 const PARTNER_SETTINGS_FILE = path.join(DATA_DIR, 'partner_settings.json');
 const PARTNER_PROMO_REQUESTS_FILE = path.join(DATA_DIR, 'partner_promo_requests.json');
@@ -61,11 +63,24 @@ const DEFAULT_PARTNER_SETTINGS = {
 };
 
 function getPartners() {
-  return readJson(PARTNERS_FILE, []);
+  let partners = readJson(PARTNERS_FILE, null);
+  if (!Array.isArray(partners) || partners.length === 0) {
+    const perm = readJson(PARTNERS_PERMANENT_STORE_FILE, []);
+    if (Array.isArray(perm) && perm.length > 0) {
+      partners = perm;
+      writeJson(PARTNERS_FILE, partners);
+    } else {
+      partners = partners || [];
+    }
+  }
+  return partners;
 }
 
 function savePartners(partners) {
   writeJson(PARTNERS_FILE, partners);
+  if (Array.isArray(partners) && partners.length > 0) {
+    writeJson(PARTNERS_PERMANENT_STORE_FILE, partners);
+  }
 }
 
 function getPartnerPayouts() {
@@ -483,7 +498,18 @@ function createDatabaseBackup(type = 'auto') {
       MM_LINKS_FILE,
       PAYMENT_METHODS_FILE,
       EMAIL_SETTINGS_FILE,
-      ARCHIVE_FILE
+      ARCHIVE_FILE,
+      PARTNERS_FILE,
+      PARTNERS_PERMANENT_STORE_FILE,
+      PARTNER_PAYOUTS_FILE,
+      PARTNER_SETTINGS_FILE,
+      PARTNER_PROMO_REQUESTS_FILE,
+      PROMO_CODES_FILE,
+      PROMO_CODES_PERMANENT_STORE_FILE,
+      LAUNCH_PROMO_FILE,
+      PROMO_PRESETS_FILE,
+      PAYOUTS_FILE,
+      PAYOUT_SETTINGS_FILE
     ];
 
     let totalFilesCopied = 0;
@@ -3194,11 +3220,24 @@ function getPromoPresets() {
 }
 
 function getPromoCodes() {
-  return readJson(PROMO_CODES_FILE, []);
+  let codes = readJson(PROMO_CODES_FILE, null);
+  if (!Array.isArray(codes) || codes.length === 0) {
+    const perm = readJson(PROMO_CODES_PERMANENT_STORE_FILE, []);
+    if (Array.isArray(perm) && perm.length > 0) {
+      codes = perm;
+      writeJson(PROMO_CODES_FILE, codes);
+    } else {
+      codes = codes || [];
+    }
+  }
+  return codes;
 }
 
 function savePromoCodes(codes) {
   writeJson(PROMO_CODES_FILE, codes);
+  if (Array.isArray(codes) && codes.length > 0) {
+    writeJson(PROMO_CODES_PERMANENT_STORE_FILE, codes);
+  }
 }
 
 function getEnrichedPackages(includeInactive = false) {
@@ -10443,6 +10482,13 @@ app.all('/api/system/auto-deploy', (req, res) => {
 
   console.log(`[AUTO-DEPLOY] Live deployment triggered at ${new Date().toISOString()}`);
 
+  // Create an automated safety snapshot before pulling code
+  try {
+    createDatabaseBackup('pre_deploy');
+  } catch (bErr) {
+    console.error('[AUTO-DEPLOY] Pre-deploy backup warning:', bErr.message);
+  }
+
   exec('git pull origin main', { cwd: __dirname }, (err, stdout, stderr) => {
     if (err) {
       console.error('[AUTO-DEPLOY ERROR]:', err);
@@ -10455,6 +10501,14 @@ app.all('/api/system/auto-deploy', (req, res) => {
     }
 
     console.log('[AUTO-DEPLOY OUTPUT]:', stdout);
+
+    // Safety check: ensure partners and promo codes are intact
+    try {
+      getPartners();
+      getPromoCodes();
+    } catch (e) {
+      console.error('[AUTO-DEPLOY] Post-deploy store check warning:', e.message);
+    }
 
     res.json({
       success: true,

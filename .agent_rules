@@ -8,3 +8,16 @@
 - During any feature update or refactoring, ALWAYS preserve all registered traders and their original credentials.
 - All registered traders must permanently retain lifelong login capabilities (5-10+ years).
 - The "TOTAL TRADERS" directory and count must always reflect all registered traders.
+
+[CRITICAL - AFFILIATE & PARTNER DATA IMMUTABILITY]
+- NEVER drop, seed, clear, truncate, overwrite, or delete any Affiliate or Partner data in `data/partners.json`, `data/partners_permanent_store.json`, `data/partner_payouts.json`, `data/partner_settings.json`, or `data/partner_promo_requests.json`.
+- All affiliate accounts, referral tracking histories, partner earnings, payout wallets, commission tiers, and withdrawal records must be permanently preserved across all feature updates and deployments.
+- Never run mock seeders, dummy initializers, or reset scripts that touch affiliate or partner files.
+
+[CRITICAL - PROMO CODE & DISCOUNT DATA IMMUTABILITY]
+- NEVER drop, seed, reset, clear, truncate, or overwrite Admin Discount Promo Codes or Partner Promo Codes in `data/promo_codes.json`, `data/promo_codes_permanent_store.json`, `data/launch_promo.json`, or `data/promo_presets.json`.
+- Admin-created promo codes, discount percentages, usage limits, custom affiliate coupons, and active promo campaign configurations must remain 100% persistent and intact during all code updates.
+- Under NO circumstance should `data/promo_codes.json` ever be replaced with an empty array `[]` or dummy placeholder data during any updates or commits.
+
+[CRITICAL - GIT & DEPLOYMENT SAFETY]
+- All database and dynamic JSON stores (`data/users.json`, `data/challenges.json`, `data/partners.json`, `data/promo_codes.json`, `data/payouts.json`, etc.) must remain strictly untracked in `.gitignore` so that git pulls/pushes can never overwrite, reset, or wipe live production records.
