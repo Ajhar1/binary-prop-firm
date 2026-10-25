@@ -1370,6 +1370,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: transform 0.25s ease;
+        }
+        .broker-card:hover .broker-logo-box {
+            transform: scale(1.08);
+        }
+        .broker-logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
         }
         .broker-name {
             font-size: 1.15rem;
@@ -1798,7 +1813,7 @@
                     <span class="hero-gradient-text">50% Lifetime Commission</span>
                 </h1>
                 <p class="hero-subtext">
-                    Monetize your binary trading audience. Introduce traders to funded challenges on Quotex, Pocket Option, and Deriv with zero risk and instant automated payouts.
+                    Monetize your binary trading audience. Introduce traders to funded challenges on Quotex, Pocket Option, Olymp Trade, Binomo, and IQ Option with zero risk and instant automated payouts.
                 </p>
 
                 <div class="hero-cta-group">
@@ -1820,16 +1835,16 @@
                         <div class="hero-stat-label">Max Commission Tier</div>
                     </div>
                     <div class="hero-stat-box">
-                        <div class="hero-stat-num text-cyan">3 Brokers</div>
-                        <div class="hero-stat-label">Quotex, Pocket &amp; Deriv</div>
+                        <div class="hero-stat-num text-cyan">5 Brokers</div>
+                        <div class="hero-stat-label">Quotex, Pocket, Olymp, Binomo, IQ</div>
                     </div>
                     <div class="hero-stat-box">
-                        <div class="hero-stat-num text-gold">$0 Free</div>
-                        <div class="hero-stat-label">Zero Upfront Investment</div>
+                        <div class="hero-stat-num text-gold">$4 Entry</div>
+                        <div class="hero-stat-label">Funded From $100 - $65,000</div>
                     </div>
                     <div class="hero-stat-box">
-                        <div class="hero-stat-num text-emerald">Instant</div>
-                        <div class="hero-stat-label">Binance Pay &amp; Local Payouts</div>
+                        <div class="hero-stat-num text-emerald">85% Split</div>
+                        <div class="hero-stat-label">Trader Profit Guarantee</div>
                     </div>
                 </div>
 
@@ -1854,7 +1869,7 @@
                             </div>
                             <div class="mid-cell">
                                 <div class="lbl">Supported Brokers</div>
-                                <div class="val text-cyan">Quotex / Pocket / Deriv</div>
+                                <div class="val text-cyan">Quotex / Pocket / Olymp / Binomo / IQ</div>
                             </div>
                             <div class="mid-cell">
                                 <div class="lbl">Payout Methods</div>
@@ -2019,11 +2034,11 @@
                                     <i class="fas fa-box text-gold"></i> Select Average Challenge Plan:
                                 </label>
                                 <div class="calc-package-chips">
-                                    <button type="button" class="pkg-chip" data-fee="15" onclick="selectCalcPackage(this, 15)">$100 Starter ($15 Fee)</button>
-                                    <button type="button" class="pkg-chip" data-fee="25" onclick="selectCalcPackage(this, 25)">$200 Pro ($25 Fee)</button>
-                                    <button type="button" class="pkg-chip active" data-fee="50" onclick="selectCalcPackage(this, 50)">$500 Elite ($50 Fee)</button>
-                                    <button type="button" class="pkg-chip" data-fee="90" onclick="selectCalcPackage(this, 90)">$1,000 Master ($90 Fee)</button>
-                                    <button type="button" class="pkg-chip" data-fee="105" onclick="selectCalcPackage(this, 105)">$1,200 Grand ($105 Fee)</button>
+                                    <button type="button" class="pkg-chip" data-fee="4" onclick="selectCalcPackage(this, 4)">$100 Bronze ($4 Fee)</button>
+                                    <button type="button" class="pkg-chip" data-fee="15" onclick="selectCalcPackage(this, 15)">$525 Gold ($15 Fee)</button>
+                                    <button type="button" class="pkg-chip active" data-fee="30" onclick="selectCalcPackage(this, 30)">$1,200 Platinum ($30 Fee)</button>
+                                    <button type="button" class="pkg-chip" data-fee="60" onclick="selectCalcPackage(this, 60)">$2,500 Diamond ($60 Fee)</button>
+                                    <button type="button" class="pkg-chip" data-fee="120" onclick="selectCalcPackage(this, 120)">$5,200 Legendary ($120 Fee)</button>
                                 </div>
                             </div>
 
@@ -2051,19 +2066,19 @@
 
                             <div class="calc-result-main">
                                 <div class="res-label">Estimated Monthly Earnings</div>
-                                <div class="res-amount-usd text-emerald" id="calcMonthlyUsd">$375.00</div>
-                                <div class="res-amount-bdt" id="calcMonthlyBdt">≈ ৳45,750 BDT / Mo</div>
+                                <div class="res-amount-usd text-emerald" id="calcMonthlyUsd">$225.00</div>
+                                <div class="res-amount-bdt" id="calcMonthlyBdt">≈ ৳27,450 BDT / Mo</div>
                             </div>
 
                             <div class="calc-result-sub-grid">
                                 <div class="sub-cell">
                                     <div class="sub-lbl">Estimated Annual Earnings</div>
-                                    <div class="sub-val text-gold" id="calcAnnualUsd">$4,500.00</div>
-                                    <div class="sub-bdt" id="calcAnnualBdt">≈ ৳5,49,000 BDT / Year</div>
+                                    <div class="sub-val text-gold" id="calcAnnualUsd">$2,700.00</div>
+                                    <div class="sub-bdt" id="calcAnnualBdt">≈ ৳3,29,400 BDT / Year</div>
                                 </div>
                                 <div class="sub-cell">
                                     <div class="sub-lbl">Monthly Sales Volume</div>
-                                    <div class="sub-val text-cyan" id="calcVolumeUsd">$1,250.00</div>
+                                    <div class="sub-val text-cyan" id="calcVolumeUsd">$750.00</div>
                                     <div class="sub-bdt" id="calcVolumeBdt">25 challenge sales</div>
                                 </div>
                             </div>
@@ -2082,7 +2097,7 @@
             <div class="landing-container">
                 <div class="section-header">
                     <span class="section-tag"><i class="fas fa-handshake"></i> Supported Brokers</span>
-                    <h2 class="section-title">100% Compatible with <span class="hero-gradient-text">Top Binary Brokers</span></h2>
+                    <h2 class="section-title">100% Compatible with <span class="hero-gradient-text">Top 5 Binary Brokers</span></h2>
                     <p class="section-desc">
                         Your community trades directly on their preferred brokers with automated evaluation verification:
                     </p>
@@ -2092,16 +2107,16 @@
                     <!-- Quotex -->
                     <div class="broker-card glass">
                         <div class="broker-top">
-                            <div class="broker-logo-box" style="background:rgba(0,230,118,0.15); color:var(--emerald);">
-                                <i class="fas fa-chart-line" style="font-size:1.8rem;"></i>
+                            <div class="broker-logo-box">
+                                <img src="/assets/brokers/quotex.png" alt="Quotex">
                             </div>
                             <div>
-                                <h3 class="broker-name">Quotex Broker</h3>
+                                <h3 class="broker-name">Quotex</h3>
                                 <span class="badge badge-success">Verified Integration</span>
                             </div>
                         </div>
                         <p class="broker-desc">
-                            Traders complete challenges using personal Quotex accounts with automated performance audits and instant sync.
+                            1-Min OTC &amp; Forex trading with automated evaluation verification and zero broker login sharing required.
                         </p>
                         <div class="broker-perks-list">
                             <span><i class="fas fa-check text-emerald"></i> No broker credential sharing required</span>
@@ -2113,8 +2128,8 @@
                     <!-- Pocket Option -->
                     <div class="broker-card glass">
                         <div class="broker-top">
-                            <div class="broker-logo-box" style="background:rgba(0,240,255,0.15); color:var(--cyan);">
-                                <i class="fas fa-wallet" style="font-size:1.8rem;"></i>
+                            <div class="broker-logo-box">
+                                <img src="/assets/brokers/pocketoption.png" alt="Pocket Option">
                             </div>
                             <div>
                                 <h3 class="broker-name">Pocket Option</h3>
@@ -2122,7 +2137,7 @@
                             </div>
                         </div>
                         <p class="broker-desc">
-                            Exceptional conversion rates among binary traders. Simple 15-session money management rules make passing straightforward.
+                            High payout &amp; OTC market compatibility. Simple 15-session risk management rules make passing straightforward.
                         </p>
                         <div class="broker-perks-list">
                             <span><i class="fas fa-check text-cyan"></i> OTC &amp; regular market compatible</span>
@@ -2131,24 +2146,66 @@
                         </div>
                     </div>
 
-                    <!-- Deriv -->
+                    <!-- Olymp Trade -->
                     <div class="broker-card glass">
                         <div class="broker-top">
-                            <div class="broker-logo-box" style="background:rgba(239,68,68,0.15); color:#f87171;">
-                                <i class="fas fa-globe" style="font-size:1.8rem;"></i>
+                            <div class="broker-logo-box">
+                                <img src="/assets/brokers/olymp.png" alt="Olymp Trade">
                             </div>
                             <div>
-                                <h3 class="broker-name">Deriv (Binary.com)</h3>
-                                <span class="badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3);">Global Leader</span>
+                                <h3 class="broker-name">Olymp Trade</h3>
+                                <span class="badge badge-gold">Verified Integration</span>
                             </div>
                         </div>
                         <p class="broker-desc">
-                            Backed by 25 years of broker leadership. Synthetic indices and options traders access institutional funded capital.
+                            Fixed Time Trading (FTT) support with seamless trade record verification and global trader acceptance.
                         </p>
                         <div class="broker-perks-list">
-                            <span><i class="fas fa-check text-emerald"></i> 24/7 synthetic indices trading</span>
-                            <span><i class="fas fa-check text-emerald"></i> Global acceptance across 150+ countries</span>
-                            <span><i class="fas fa-check text-emerald"></i> 80% trader profit split guarantee</span>
+                            <span><i class="fas fa-check text-gold"></i> High payout FTT &amp; Forex assets</span>
+                            <span><i class="fas fa-check text-gold"></i> Mobile &amp; desktop app compatibility</span>
+                            <span><i class="fas fa-check text-gold"></i> Instant trade session submission</span>
+                        </div>
+                    </div>
+
+                    <!-- Binomo -->
+                    <div class="broker-card glass">
+                        <div class="broker-top">
+                            <div class="broker-logo-box">
+                                <img src="/assets/brokers/binomo.png" alt="Binomo">
+                            </div>
+                            <div>
+                                <h3 class="broker-name">Binomo</h3>
+                                <span class="badge badge-success">Fast Execution</span>
+                            </div>
+                        </div>
+                        <p class="broker-desc">
+                            Fast execution and clean charting. Traders easily verify and log trades to advance toward funded capital.
+                        </p>
+                        <div class="broker-perks-list">
+                            <span><i class="fas fa-check text-emerald"></i> Fast 5-sec to 1-min trade verification</span>
+                            <span><i class="fas fa-check text-emerald"></i> Trusted by millions across Asia &amp; LatAm</span>
+                            <span><i class="fas fa-check text-emerald"></i> Smooth session audit process</span>
+                        </div>
+                    </div>
+
+                    <!-- IQ Option -->
+                    <div class="broker-card glass">
+                        <div class="broker-top">
+                            <div class="broker-logo-box">
+                                <img src="/assets/brokers/iqoption.png" alt="IQ Option">
+                            </div>
+                            <div>
+                                <h3 class="broker-name">IQ Option</h3>
+                                <span class="badge badge-platinum">Technical Charts</span>
+                            </div>
+                        </div>
+                        <p class="broker-desc">
+                            Advanced technical indicators and multi-asset options trading backed by institutional evaluation standards.
+                        </p>
+                        <div class="broker-perks-list">
+                            <span><i class="fas fa-check text-cyan"></i> Advanced technical indicators &amp; charts</span>
+                            <span><i class="fas fa-check text-cyan"></i> Millions of active global binary traders</span>
+                            <span><i class="fas fa-check text-cyan"></i> Direct trade history validation</span>
                         </div>
                     </div>
                 </div>
@@ -2174,8 +2231,8 @@
                         <div class="strip-item">
                             <div class="strip-icon"><i class="fas fa-hand-holding-usd text-gold"></i></div>
                             <div>
-                                <strong>80% Direct Profit Split</strong>
-                                <p>Funded traders keep 80% of all profits made directly to their wallets.</p>
+                                <strong>85% Direct Profit Split</strong>
+                                <p>Funded traders keep up to 85% of all profits made directly to their wallets.</p>
                             </div>
                         </div>
                         <div class="strip-item">
@@ -2343,7 +2400,7 @@
                             <i class="fas fa-chevron-down faq-chevron"></i>
                         </div>
                         <div class="faq-answer">
-                            Not at all. Traders trade directly on their own personal broker accounts (Quotex, Pocket Option, Deriv). Binary Prop Firm is an evaluation and prop funding platform and never touches or requires broker logins.
+                            Not at all. Traders trade directly on their own personal broker accounts (Quotex, Pocket Option, Olymp Trade, Binomo, IQ Option). Binary Prop Firm is an evaluation and prop funding platform and never touches or requires broker logins.
                         </div>
                     </div>
 
@@ -2394,7 +2451,7 @@
                             <span style="font-weight:900; font-size:1.1rem; color:#fff;">Binary Prop Firm</span>
                         </div>
                         <p style="font-size:0.82rem; color:var(--text-muted); max-width:320px; line-height:1.5;">
-                            The leading evaluation platform for binary options traders. Seamless broker compatibility and 80% trader profit split.
+                            The leading evaluation platform for binary options traders. Seamless compatibility across 5 top brokers and up to 85% trader profit split.
                         </p>
                     </div>
 
@@ -2864,7 +2921,7 @@ Binary Prop Firm-এ পাস করলেই পাবেন ৭৫% থেক
                                 </div>
                                 <div id="promoTemplateEn" style="font-size:0.82rem; line-height:1.6; color:#cbd5e1; white-space:pre-wrap; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; border:1px solid var(--border-subtle);">
 🚀 Trade on Quotex Demo & Get Funded with Binary Prop Firm!
-Pass the evaluation and keep up to 80% profit with bi-weekly automated payouts.
+Pass the evaluation and keep up to 85% profit with bi-weekly automated payouts.
 
 Sign up using my exclusive partner link:
 🔗 {LINK}
@@ -3494,7 +3551,7 @@ Start your funded trading journey today! 📈
         }
 
         // ================= LANDING PAGE HELPERS =================
-        let currentCalcPackageFee = 50;
+        let currentCalcPackageFee = 30;
 
         function updateCalculator() {
             const slider = document.getElementById('calcReferralSlider');
@@ -4530,7 +4587,7 @@ Start your funded trading journey today! 📈
 
         function shareOnTelegram() {
             const link = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
-            const text = `Binary Prop Firm - Get Funded up to $1,200 & keep 80% profits! Join with my link: ${link}`;
+            const text = `Binary Prop Firm - Get Funded up to $65,000 & keep 85% profits! Join with my link: ${link}`;
             window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank');
         }
 
