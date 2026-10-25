@@ -1004,6 +1004,35 @@
             }
         }
 
+        .audit-table-desktop {
+            display: block;
+        }
+        .audit-trades-mobile {
+            display: none;
+        }
+        .session-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .session-kpi-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .session-kpi-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+        .session-kpi-val {
+            font-weight: 700;
+            color: #fff;
+            font-size: 0.86rem;
+            margin-top: 2px;
+        }
+
         .form-group {
             margin-bottom: 1rem;
         }
@@ -2162,6 +2191,74 @@
                 padding: 1.15rem 0.95rem !important;
                 border-radius: 16px !important;
                 overflow: hidden !important;
+            }
+
+            /* --- MOBILE PROOF TAB (PANE-SUBMISSION) OPTIMIZATION --- */
+            #pane-submission {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                padding: 0 !important;
+            }
+            #pane-submission .submission-container {
+                gap: 10px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            #pane-submission .glass-card {
+                padding: 10px 8px !important;
+                border-radius: 14px !important;
+                margin-bottom: 10px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .user-ch-group-card {
+                border-radius: 12px !important;
+                margin-bottom: 10px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .user-ch-group-header {
+                padding: 8px 10px !important;
+                gap: 6px !important;
+            }
+            .user-ch-group-body {
+                padding: 6px 4px !important;
+                gap: 6px !important;
+            }
+            .serial-session-card {
+                border-radius: 10px !important;
+                margin-bottom: 6px !important;
+            }
+            .serial-session-card-header {
+                padding: 8px 10px !important;
+                gap: 6px !important;
+            }
+            .serial-session-card-body {
+                padding: 8px 6px !important;
+            }
+            .audit-table-desktop {
+                display: none !important;
+            }
+            .audit-trades-mobile {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 6px !important;
+            }
+            .session-kpi-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 6px !important;
+                margin-bottom: 10px !important;
+            }
+            .session-kpi-card {
+                padding: 7px 8px !important;
+            }
+            .session-kpi-val {
+                font-size: 0.84rem !important;
+            }
+            .active-session-card-box {
+                padding: 10px 8px !important;
             }
             .unified-alert-card {
                 padding: 1.15rem 0.95rem !important;
@@ -7531,7 +7628,7 @@
                 <div class="serial-session-card" id="${prefix}SessionCard_${sub.id}" style="background:rgba(22,22,26,0.92); border:1px solid ${sub.status === 'under_review' ? 'rgba(245,176,65,0.45)' : 'rgba(255,255,255,0.08)'}; border-radius:10px; overflow:hidden; transition:all 0.2s ease;">
                     
                     <!-- Clean Single-Line Session Header (Admin Panel Exact 1:1) -->
-                    <div onclick="toggleUserSessionCard('${sub.id}', '${prefix}')" style="padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; cursor:pointer; background:rgba(255,255,255,0.015); border-bottom:${isOpen ? '1px solid rgba(255,255,255,0.07)' : 'none'}; user-select:none;">
+                    <div class="serial-session-card-header" onclick="toggleUserSessionCard('${sub.id}', '${prefix}')" style="padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; cursor:pointer; background:rgba(255,255,255,0.015); border-bottom:${isOpen ? '1px solid rgba(255,255,255,0.07)' : 'none'}; user-select:none;">
                         
                         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                             <span style="background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); font-weight:800; font-size:0.72rem; padding:3px 8px; border-radius:6px;">
@@ -7569,25 +7666,25 @@
                     </div>
 
                     <!-- Session Body Details (Expandable) -->
-                    <div id="${prefix}SessionBody_${sub.id}" style="display:${isOpen ? 'block' : 'none'}; padding:14px;">
+                    <div id="${prefix}SessionBody_${sub.id}" class="serial-session-card-body" style="display:${isOpen ? 'block' : 'none'}; padding:14px;">
                         
                         <!-- 4 Key Stat Blocks -->
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:12px;">
-                            <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
-                                <div style="font-size:0.7rem; color:var(--text-secondary);">Broker</div>
-                                <div style="font-weight:700; color:#fff; font-size:0.86rem; margin-top:2px;">${sub.brokerName || ch?.brokerName || 'Quotex'}</div>
+                        <div class="session-kpi-grid">
+                            <div class="session-kpi-card">
+                                <div class="session-kpi-label">Broker</div>
+                                <div class="session-kpi-val">${sub.brokerName || ch?.brokerName || 'Quotex'}</div>
                             </div>
-                            <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
-                                <div style="font-size:0.7rem; color:var(--text-secondary);">Total Trades</div>
-                                <div style="font-weight:700; color:#fff; font-size:0.86rem; margin-top:2px;">${sub.tradesCount || 0}</div>
+                            <div class="session-kpi-card">
+                                <div class="session-kpi-label">Total Trades</div>
+                                <div class="session-kpi-val">${sub.tradesCount || 0}</div>
                             </div>
-                            <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
-                                <div style="font-size:0.7rem; color:var(--text-secondary);">Win Rate</div>
-                                <div style="font-weight:700; color:var(--yellow); font-size:0.86rem; margin-top:2px;">${sub.winRate || '0%'} (${sub.winTrades || 0}W / ${sub.lossTrades || 0}L)</div>
+                            <div class="session-kpi-card">
+                                <div class="session-kpi-label">Win Rate</div>
+                                <div class="session-kpi-val" style="color:var(--yellow);">${sub.winRate || '0%'} (${sub.winTrades || 0}W / ${sub.lossTrades || 0}L)</div>
                             </div>
-                            <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);">
-                                <div style="font-size:0.7rem; color:var(--text-secondary);">Net P&L</div>
-                                <div style="font-weight:800; color:${pnlColor}; font-size:0.88rem; margin-top:2px;">${pnlSign}$${subPnl.toFixed(2)}</div>
+                            <div class="session-kpi-card">
+                                <div class="session-kpi-label">Net P&L</div>
+                                <div class="session-kpi-val" style="color:${pnlColor};">${pnlSign}$${subPnl.toFixed(2)}</div>
                             </div>
                         </div>
 
@@ -7622,7 +7719,8 @@
                                     </button>
                                 </div>
 
-                                <div style="overflow-x:auto; background:rgba(0,0,0,0.4); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                <!-- Desktop Table View (>= 769px) -->
+                                <div class="audit-table-desktop" style="overflow-x:auto; background:rgba(0,0,0,0.4); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
                                     <table style="width:100%; font-size:0.76rem; text-align:left; border-collapse:collapse;">
                                         <thead>
                                             <tr style="border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
@@ -7682,6 +7780,59 @@
                                             }).join('')}
                                         </tbody>
                                     </table>
+                                </div>
+
+                                <!-- Mobile Clean Trade Cards (< 769px) -->
+                                <div class="audit-trades-mobile">
+                                    ${sub.auditReport.map((a, aIdx) => {
+                                        const stepNum = a.tradeNum || a.stepIndex || (aIdx + 1);
+                                        const planned = (a.plannedStake != null && a.plannedStake % 1 === 0) ? String(a.plannedStake) : Number(a.plannedStake || 0).toFixed(0);
+                                        const actual = Number(a.actualStake || 0).toFixed(2);
+                                        const outcome = a.outcome || a.result || 'N/A';
+                                        const isWin = outcome === 'WIN';
+                                        const isRefund = a.isRefund || outcome === 'REFUND';
+                                        const payout = a.payout || (a.payoutPercent ? a.payoutPercent + '%' : 'N/A');
+                                        const isPassed = (a.isPassed !== undefined ? a.isPassed : (a.isCompliant !== undefined ? a.isCompliant : true));
+                                        const pnlNum = Number(a.pnl || 0);
+                                        const badgeBg = isWin ? 'rgba(0,230,118,0.18)' : (isRefund ? 'rgba(245,176,65,0.18)' : 'rgba(239,68,68,0.18)');
+                                        const badgeColor = isWin ? '#00e676' : (isRefund ? '#fbbf24' : '#f87171');
+                                        const badgeBorder = isWin ? 'rgba(0,230,118,0.35)' : (isRefund ? 'rgba(245,176,65,0.35)' : 'rgba(239,68,68,0.35)');
+                                        const pnlColor = pnlNum >= 0 ? 'var(--neon-green)' : 'var(--danger-red)';
+                                        const pnlSign = pnlNum >= 0 ? '+' : '';
+
+                                        return `
+                                            <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:5px;">
+                                                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                                    <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                                                        <span style="font-weight:900; color:var(--yellow); font-size:0.85rem;">#${stepNum}</span>
+                                                        <span style="font-weight:700; color:#fff; font-size:0.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(a.asset || 'Quotex')}</span>
+                                                    </div>
+                                                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                                                        <span style="background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeBorder}; padding:2px 8px; border-radius:5px; font-size:0.72rem; font-weight:800;">
+                                                            ${outcome}
+                                                        </span>
+                                                        <span style="font-weight:900; font-size:0.86rem; color:${pnlColor};">
+                                                            ${pnlSign}$${pnlNum.toFixed(2)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.74rem; color:var(--text-secondary); border-top:1px dashed rgba(255,255,255,0.06); padding-top:4px;">
+                                                    <div>
+                                                        স্টেক: <strong style="color:var(--yellow);">$${planned}</strong> <span style="opacity:0.6;">/</span> <strong style="color:#38bdf8;">$${actual}</strong> • পেআউট: <strong style="color:#00e676;">${payout}</strong>
+                                                    </div>
+                                                    <div>
+                                                        ${isRefund ? `
+                                                            <span style="color:#f59e0b; font-weight:700;">Refund</span>
+                                                        ` : isPassed ? `
+                                                            <span style="color:#00e676; font-weight:700;"><i class="fas fa-check-circle"></i> OK</span>
+                                                        ` : `
+                                                            <span style="color:#ef4444; font-weight:700;"><i class="fas fa-times-circle"></i> Error</span>
+                                                        `}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
                                 </div>
                             </div>
                         ` : ''}
@@ -7762,9 +7913,9 @@
                 `;
 
             return `
-                <div style="border:1px solid ${borderColor}; border-radius:12px; background:rgba(15,15,20,0.6); overflow:hidden; margin-bottom:12px;">
+                <div class="user-ch-group-card" style="border:1px solid ${borderColor}; border-radius:12px; background:rgba(15,15,20,0.6); overflow:hidden; margin-bottom:12px;">
                     <!-- Challenge Header -->
-                    <div style="background:${headerBg}; padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div class="user-ch-group-header" style="background:${headerBg}; padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                             <span style="background:linear-gradient(135deg, var(--yellow), #d48817); color:#000; font-weight:900; font-size:0.8rem; padding:3px 10px; border-radius:6px;">
                                 Challenge #${chGroup.challengeNumber}
@@ -7797,7 +7948,7 @@
                         </div>
                     ` : ''}
 
-                    <div style="padding:10px; display:flex; flex-direction:column; gap:8px;">
+                    <div class="user-ch-group-body" style="padding:10px; display:flex; flex-direction:column; gap:8px;">
                         ${sessionsHtml}
                     </div>
                 </div>
@@ -8114,7 +8265,7 @@
 
                         activeSessionCard.style.display = 'block';
                         activeSessionCard.innerHTML = `
-                            <div style="background:rgba(245,176,65,0.06); border:1.5px solid rgba(245,176,65,0.4); border-radius:12px; padding:12px 14px; box-shadow:0 0 16px rgba(245,176,65,0.12);">
+                            <div class="active-session-card-box" style="background:rgba(245,176,65,0.06); border:1.5px solid rgba(245,176,65,0.4); border-radius:12px; padding:12px 14px; box-shadow:0 0 16px rgba(245,176,65,0.12);">
                                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
                                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                         <span style="background:linear-gradient(135deg, #00e676, #10b981); color:#000; font-weight:900; font-size:0.78rem; padding:3px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:5px; box-shadow:0 0 10px rgba(0,230,118,0.25);">
@@ -8149,7 +8300,8 @@
                                     </div>
                                 `}
 
-                                <div style="overflow-x:auto; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                                <!-- Desktop Table View (>= 769px) -->
+                                <div class="audit-table-desktop" style="overflow-x:auto; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
                                     <table style="width:100%; font-size:0.76rem; text-align:left; border-collapse:collapse;">
                                         <thead>
                                             <tr style="border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
@@ -8225,6 +8377,64 @@
                                             }).join('')}
                                         </tbody>
                                     </table>
+                                </div>
+
+                                <!-- Mobile Clean Trade Cards (< 769px) -->
+                                <div class="audit-trades-mobile">
+                                    ${unsubmittedTrades.map((t, idx) => {
+                                        const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                                        const audit = auditMap.get(tick);
+                                        const stepNum = audit ? audit.stepNum : (idx + 1);
+                                        const isWin = (t.result === 'WIN');
+                                        const tradeProfit = isWin ? (t.profit > t.amount ? (t.profit - t.amount) : (t.profit || 0)) : -(t.amount || 0);
+                                        const pColor = isWin ? 'var(--neon-green)' : 'var(--danger-red)';
+                                        const tSign = tradeProfit >= 0 ? '+' : '';
+                                        const badgeBg = isWin ? 'rgba(0,230,118,0.18)' : 'rgba(239,68,68,0.18)';
+                                        const badgeColor = isWin ? '#00e676' : '#f87171';
+                                        const badgeBorder = isWin ? 'rgba(0,230,118,0.35)' : 'rgba(239,68,68,0.35)';
+
+                                        let checkBadgeHtml = '';
+                                        if (audit && audit.isRefund) {
+                                            checkBadgeHtml = '<span style="color:#fbbf24; font-weight:700;"><i class="fas fa-undo"></i> রিফান্ড</span>';
+                                        } else if (audit && audit.isPassed) {
+                                            checkBadgeHtml = '<span style="color:#00e676; font-weight:700;"><i class="fas fa-check-circle"></i> ✓ নিয়ম মেনে ট্রেড</span>';
+                                        } else if (audit && !audit.isPassed) {
+                                            checkBadgeHtml = `<span style="color:#ef4444; font-weight:700;"><i class="fas fa-times-circle"></i> ${escapeHtml(audit.errorReason || 'ভুল')}</span>`;
+                                        } else {
+                                            checkBadgeHtml = '<span style="color:#00e676; font-weight:700;">✓ ট্রেড রেকর্ড</span>';
+                                        }
+
+                                        const planStakeDisplay = (audit && audit.plannedStake != null && audit.plannedStake > 0)
+                                            ? `$${audit.plannedStake} / $${Number(t.amount || 0).toFixed(2)}`
+                                            : `$${Number(t.amount || 0).toFixed(2)}`;
+
+                                        return `
+                                            <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:5px;">
+                                                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                                    <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                                                        <span style="font-weight:900; color:var(--yellow); font-size:0.85rem;">#${idx + 1}</span>
+                                                        <span style="font-weight:700; color:#fff; font-size:0.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(t.asset || 'Quotex')}</span>
+                                                    </div>
+                                                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                                                        <span style="background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeBorder}; padding:2px 8px; border-radius:5px; font-size:0.72rem; font-weight:800;">
+                                                            ${t.result || 'WIN'}
+                                                        </span>
+                                                        <span style="font-weight:900; font-size:0.86rem; color:${pColor};">
+                                                            ${tSign}$${tradeProfit.toFixed(2)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.74rem; color:var(--text-secondary); border-top:1px dashed rgba(255,255,255,0.06); padding-top:4px;">
+                                                    <div>
+                                                        স্টেক: <strong style="color:var(--yellow);">${planStakeDisplay}</strong> • পেআউট: <strong style="color:#00e676;">${escapeHtml(t.payout || '85%')}</strong>
+                                                    </div>
+                                                    <div>
+                                                        ${checkBadgeHtml}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
                                 </div>
                             </div>
                         `;
