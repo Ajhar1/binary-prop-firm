@@ -331,12 +331,13 @@
         .header-lang-dropdown {
             position: absolute;
             top: calc(100% + 8px);
-            right: 0;
+            left: 0;
+            right: auto;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 14px;
             padding: 6px;
-            min-width: 200px;
+            min-width: 210px;
             max-height: 380px;
             overflow-y: auto;
             box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
@@ -372,6 +373,115 @@
             background: var(--yellow);
             color: #000 !important;
             font-weight: 800;
+        }
+
+        /* Language Modal / Bottom Sheet (Mobile First) */
+        .lang-modal-box {
+            max-width: 520px;
+            text-align: left;
+            padding: 1.3rem;
+            max-height: 85vh;
+            overflow-y: auto;
+            border-radius: 20px;
+            background: var(--card-bg, #0e121a);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6);
+        }
+        .lang-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 0.75rem;
+        }
+        .lang-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 9px;
+        }
+        .lang-modal-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .lang-modal-card:hover, .lang-modal-card:active {
+            background: rgba(245, 176, 65, 0.12);
+            border-color: rgba(245, 176, 65, 0.4);
+            transform: translateY(-1px);
+        }
+        .lang-modal-card.active {
+            background: rgba(245, 176, 65, 0.18) !important;
+            border: 1.5px solid var(--yellow) !important;
+            box-shadow: 0 0 14px rgba(245, 176, 65, 0.25);
+        }
+        .lang-card-flag {
+            font-size: 1.45rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .lang-card-text {
+            flex: 1;
+            min-width: 0;
+        }
+        .lang-card-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .lang-modal-card.active .lang-card-name {
+            color: var(--yellow);
+        }
+        .lang-card-sub {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .lang-card-check {
+            display: none;
+            color: var(--yellow);
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .lang-modal-card.active .lang-card-check {
+            display: inline-block;
+        }
+
+        @media (max-width: 600px) {
+            #languageSelectModal .lang-modal-box {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                border-radius: 20px 20px 0 0 !important;
+                max-height: 80vh !important;
+                padding: 1.1rem 1rem 2rem 1rem !important;
+                margin: 0 !important;
+                animation: slideUpMobileLang 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            }
+            #languageSelectModal .lang-grid {
+                grid-template-columns: 1fr !important;
+                gap: 7px !important;
+            }
+        }
+        @keyframes slideUpMobileLang {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
         }
 
         /* Hide Google Translate Banner and tooltips cleanly */
@@ -2027,6 +2137,9 @@
             .header-actions::-webkit-scrollbar {
                 display: none !important;
             }
+            .header-lang-dropdown {
+                display: none !important;
+            }
             .header-actions .btn-gold, .header-actions .btn-outline-header {
                 padding: 7px 12px !important;
                 font-size: 0.76rem !important;
@@ -2677,6 +2790,16 @@
                     <div class="user-email" id="sideUserEmail" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">trader@example.com</div>
                 </div>
                 <i class="fas fa-user-cog" style="font-size:0.85rem; color:var(--text-secondary); opacity:0.7;" title="প্রোফাইল সেটিংস"></i>
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+                <button type="button" class="btn-outline-header" onclick="openLanguageModal()" style="flex:1; justify-content:center; padding:7px 8px; font-size:0.78rem; border-radius:8px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:#fff; cursor:pointer;" title="Change Language">
+                    <i class="fas fa-globe" style="color:var(--yellow); margin-right:4px;"></i>
+                    <span id="sidebarLangLabel">বাংলা</span>
+                </button>
+                <button type="button" class="btn-outline-header" onclick="cycleThemeTemplate()" style="flex:1; justify-content:center; padding:7px 8px; font-size:0.78rem; border-radius:8px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:#fff; cursor:pointer;" title="Change Theme">
+                    <i class="fas fa-moon" style="color:var(--yellow); margin-right:4px;"></i>
+                    <span id="sidebarThemeLabel">Theme</span>
+                </button>
             </div>
             <button class="btn-logout" onclick="handleLogout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -5169,6 +5292,28 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- 9. GLOBAL LANGUAGE SELECTOR MODAL / BOTTOM SHEET -->
+    <div class="modal-overlay" id="languageSelectModal" onclick="if(event.target === this) closeLanguageModal()">
+        <div class="modal-box lang-modal-box">
+            <div class="lang-modal-header">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:38px; height:38px; border-radius:12px; background:rgba(245,176,65,0.18); border:1px solid var(--yellow); display:flex; align-items:center; justify-content:center; color:var(--yellow); font-size:1.15rem; flex-shrink:0;">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size:1.05rem; font-weight:800; color:#fff; margin:0;" data-i18n="select_lang_title">ভাষা নির্বাচন / Select Language</h3>
+                        <p style="font-size:0.75rem; color:var(--text-secondary); margin:2px 0 0 0;">Choose your preferred platform language</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeLanguageModal()" style="position:static; margin:0; line-height:1; font-size:1.6rem; cursor:pointer;" aria-label="Close language modal">&times;</button>
+            </div>
+
+            <div class="lang-grid" id="langModalGrid">
+                <!-- Dynamically populated by renderLanguageModalGrid() -->
+            </div>
         </div>
     </div>
 
@@ -12607,7 +12752,7 @@
 
             if (persist) {
                 localStorage.setItem('dash_theme_template', theme);
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('aj_token') || localStorage.getItem('token');
                 if (token) {
                     fetch('/api/auth/update-profile', {
                         method: 'POST',
@@ -12629,11 +12774,74 @@
         }
 
         function toggleHeaderLangMenu(e) {
-            if (e) e.stopPropagation();
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            if (window.innerWidth <= 768) {
+                openLanguageModal();
+                return;
+            }
             const dd = document.getElementById('headerLangDropdown');
-            if (!dd) return;
+            if (!dd) {
+                openLanguageModal();
+                return;
+            }
             const isOpen = dd.style.display === 'block';
             dd.style.display = isOpen ? 'none' : 'block';
+        }
+
+        function openLanguageModal() {
+            renderLanguageModalGrid();
+            const modal = document.getElementById('languageSelectModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeLanguageModal() {
+            const modal = document.getElementById('languageSelectModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function renderLanguageModalGrid() {
+            const currentLang = localStorage.getItem('dash_selected_lang') || 'default';
+            const grid = document.getElementById('langModalGrid');
+            if (!grid) return;
+
+            const list = [
+                { code: 'default', flag: '🇧🇩', name: 'বাংলা', sub: 'Bengali (Default)' },
+                { code: 'en', flag: '🇺🇸', name: 'English', sub: 'English' },
+                { code: 'hi', flag: '🇮🇳', name: 'हिन्दी', sub: 'Hindi' },
+                { code: 'ar', flag: '🇸🇦', name: 'العربية', sub: 'Arabic' },
+                { code: 'es', flag: '🇪🇸', name: 'Español', sub: 'Spanish' },
+                { code: 'fr', flag: '🇫🇷', name: 'Français', sub: 'French' },
+                { code: 'pt', flag: '🇧🇷', name: 'Português', sub: 'Portuguese' },
+                { code: 'id', flag: '🇮🇩', name: 'Bahasa Indonesia', sub: 'Indonesian' },
+                { code: 'ru', flag: '🇷🇺', name: 'Русский', sub: 'Russian' },
+                { code: 'tr', flag: '🇹🇷', name: 'Türkçe', sub: 'Turkish' },
+                { code: 'vi', flag: '🇻🇳', name: 'Tiếng Việt', sub: 'Vietnamese' },
+                { code: 'zh-CN', flag: '🇨🇳', name: '中文', sub: 'Chinese' }
+            ];
+
+            grid.innerHTML = list.map(item => {
+                const isActive = item.code === currentLang;
+                return `
+                    <div class="lang-modal-card ${isActive ? 'active' : ''}" onclick="selectLanguageFromModal('${item.code}')" data-lang="${item.code}">
+                        <span class="lang-card-flag">${item.flag}</span>
+                        <div class="lang-card-text">
+                            <div class="lang-card-name">${item.name}</div>
+                            <div class="lang-card-sub">${item.sub}</div>
+                        </div>
+                        <span class="lang-card-check"><i class="fas fa-check-circle"></i></span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectLanguageFromModal(langCode) {
+            changeLanguage(langCode, true);
+            closeLanguageModal();
+            const meta = LANG_META[langCode] || { label: langCode };
+            showToast(`🌐 Language: ${meta.label} (${meta.name || ''})`, 'info');
         }
 
         document.addEventListener('click', (e) => {
@@ -12649,7 +12857,7 @@
 
             if (persist) {
                 localStorage.setItem('dash_selected_lang', langCode);
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('aj_token') || localStorage.getItem('token');
                 if (token) {
                     fetch('/api/auth/update-profile', {
                         method: 'POST',
@@ -12668,6 +12876,11 @@
             const headerLabel = document.getElementById('headerCurrentLangLabel');
             if (headerLabel) {
                 headerLabel.textContent = LANG_META[langCode].label;
+            }
+
+            const sidebarLangLabel = document.getElementById('sidebarLangLabel');
+            if (sidebarLangLabel) {
+                sidebarLangLabel.textContent = LANG_META[langCode].label;
             }
 
             const ddItems = document.querySelectorAll('.lang-option-item');
@@ -12732,6 +12945,19 @@
 
             if (!googleTranslateInitialized && !window.google?.translate) {
                 initGoogleTranslateScript();
+                let checkCount = 0;
+                const checkInterval = setInterval(() => {
+                    checkCount++;
+                    const combo = document.querySelector('.goog-te-combo');
+                    if (combo) {
+                        clearInterval(checkInterval);
+                        combo.value = langCode;
+                        combo.dispatchEvent(new Event('change'));
+                    } else if (checkCount > 15) {
+                        clearInterval(checkInterval);
+                        window.location.reload();
+                    }
+                }, 150);
             } else {
                 const combo = document.querySelector('.goog-te-combo');
                 if (combo) {
@@ -13622,6 +13848,6 @@
             setInterval(fetchUserSyncedTrades, 15000);
         });
     </script>
-    <div id="google_translate_element" style="display:none;"></div>
+    <div id="google_translate_element" style="position:fixed; left:-9999px; top:-9999px; opacity:0; pointer-events:none; width:1px; height:1px; z-index:-1;"></div>
 </body>
 </html>
