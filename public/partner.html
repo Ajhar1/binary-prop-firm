@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Partner & Affiliate Portal | Binary Prop Firm</title>
+    <title>Partner &amp; Affiliate Program | Binary Prop Firm</title>
     
     <link rel="icon" type="image/png" href="/assets/logo.png">
     <link rel="apple-touch-icon" href="/assets/logo.png">
@@ -174,22 +174,19 @@
 
         /* ================= AUTH VIEW ================= */
         #authContainer {
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem 0;
+            padding: 2rem 1rem;
             position: relative;
             z-index: 2;
-            width: 100%;
         }
         .auth-box {
             width: 100%;
-            max-width: 480px;
-            padding: 2rem 2rem;
+            max-width: 520px;
+            padding: 2.5rem 2rem;
             border-radius: 20px;
-            background: rgba(15, 22, 38, 0.88);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 35px rgba(0, 230, 118, 0.08);
         }
         .auth-brand {
             display: flex;
@@ -819,7 +816,7 @@
             margin-bottom: 1.25rem;
         }
         .hero-gradient-text {
-            background: linear-gradient(135deg, #00e676 0%, #00f0ff 100%);
+            background: linear-gradient(135deg, #00e676 0%, #00f0ff 50%, #f5b041 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -1674,7 +1671,7 @@
     <div id="previewReturnBar" style="display:none; background:linear-gradient(90deg, #00e676, #00f0ff); color:#070a12; padding:9px 16px; font-weight:800; font-size:0.86rem; text-align:center; position:sticky; top:0; z-index:10000; box-shadow:0 4px 20px rgba(0,0,0,0.5);">
         <span><i class="fas fa-info-circle"></i> You are currently signed in as an official partner.</span>
         <button type="button" onclick="returnToDashboard()" style="background:#070a12; color:#fff; border:none; padding:5px 14px; border-radius:8px; font-weight:700; margin-left:12px; cursor:pointer;">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
+            <i class="fas fa-arrow-left"></i> Return to Dashboard
         </button>
     </div>
 
@@ -1696,10 +1693,11 @@
 
                 <!-- Desktop Nav Menu -->
                 <nav class="landing-menu" id="landingNavMenu">
-                    <a href="#tiers" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-layer-group"></i> Tiers</a>
+                    <a href="#howItWorks" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-stream"></i> How It Works</a>
+                    <a href="#tiers" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-layer-group"></i> Commission Tiers</a>
                     <a href="#calculator" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-calculator"></i> Calculator</a>
                     <a href="#brokers" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-handshake"></i> Brokers</a>
-                    <a href="#howItWorks" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-stream"></i> How It Works</a>
+                    <a href="#benefits" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-gem"></i> Benefits</a>
                     <a href="#faq" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-question-circle"></i> FAQ</a>
 
                     <div class="mobile-nav-ctas">
@@ -1707,7 +1705,7 @@
                             <i class="fas fa-sign-in-alt"></i> Sign In
                         </button>
                         <button type="button" class="btn-emerald" onclick="scrollToAuth('register'); closeLandingMobileMenu();" style="flex:1; justify-content:center; padding:9px;">
-                            <i class="fas fa-rocket"></i> Join Free
+                            <i class="fas fa-rocket"></i> Become a Partner
                         </button>
                     </div>
                 </nav>
@@ -1720,7 +1718,7 @@
                     <button type="button" class="btn-emerald btn-sm" onclick="scrollToAuth('register')">
                         <i class="fas fa-rocket"></i> Become a Partner
                     </button>
-                    <button type="button" class="landing-mobile-toggle" onclick="toggleLandingMobileMenu()" aria-label="Toggle navigation">
+                    <button type="button" class="landing-mobile-toggle" onclick="toggleLandingMobileMenu()" aria-label="Toggle menu">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
@@ -1728,47 +1726,91 @@
         </header>
 
         <!-- HERO SECTION -->
-        <section class="landing-hero" style="padding-bottom: 3.5rem;">
+        <section class="landing-hero">
             <div class="hero-glow-blob blob-1"></div>
             <div class="hero-glow-blob blob-2"></div>
             <div class="landing-container">
                 <div class="hero-badge">
-                    <i class="fas fa-crown"></i> Official Partner Program
+                    <i class="fas fa-crown"></i> #1 BINARY OPTIONS AFFILIATE PROGRAM
                 </div>
                 <h1 class="hero-headline">
-                    Refer Traders. Earn Up to<br>
+                    Refer Traders &amp; Earn Up To <br>
                     <span class="hero-gradient-text">50% Lifetime Commission</span>
                 </h1>
                 <p class="hero-subtext">
-                    Monetize your trading traffic. Refer Quotex, Pocket Option &amp; Deriv traders with zero trading risk and instant automated payouts.
+                    Monetize your binary trading audience. Introduce traders to funded challenges on Quotex, Pocket Option, and Deriv with zero risk and instant automated payouts.
                 </p>
 
-                <div class="hero-cta-group" style="margin-bottom: 2.5rem;">
+                <div class="hero-cta-group">
                     <button type="button" class="btn-emerald hero-btn-lg" onclick="scrollToAuth('register')">
-                        <i class="fas fa-rocket"></i> Become a Partner — Free
+                        <i class="fas fa-rocket"></i> Become a Partner Free
+                    </button>
+                    <button type="button" class="btn-gold hero-btn-lg" onclick="scrollToSection('calculator')">
+                        <i class="fas fa-calculator"></i> Earnings Calculator
                     </button>
                     <button type="button" class="btn-outline hero-btn-lg" onclick="scrollToAuth('login')">
                         <i class="fas fa-sign-in-alt"></i> Partner Sign In
                     </button>
                 </div>
 
-                <!-- Clean Minimalist Stats Strip -->
-                <div class="hero-stats-strip" style="margin-bottom: 0;">
+                <!-- Hero Trust Stats Strip -->
+                <div class="hero-stats-strip">
                     <div class="hero-stat-box">
                         <div class="hero-stat-num text-emerald">50%</div>
-                        <div class="hero-stat-label">Max Commission</div>
+                        <div class="hero-stat-label">Max Commission Tier</div>
                     </div>
                     <div class="hero-stat-box">
                         <div class="hero-stat-num text-cyan">3 Brokers</div>
-                        <div class="hero-stat-label">Quotex • Pocket • Deriv</div>
+                        <div class="hero-stat-label">Quotex, Pocket &amp; Deriv</div>
                     </div>
                     <div class="hero-stat-box">
                         <div class="hero-stat-num text-gold">$0 Free</div>
-                        <div class="hero-stat-label">Instant Registration</div>
+                        <div class="hero-stat-label">Zero Upfront Investment</div>
                     </div>
                     <div class="hero-stat-box">
                         <div class="hero-stat-num text-emerald">Instant</div>
                         <div class="hero-stat-label">Binance Pay &amp; Local Payouts</div>
+                    </div>
+                </div>
+
+                <!-- Hero Visual Pass Card -->
+                <div class="hero-preview-wrapper">
+                    <div class="hero-partner-card glass glass-glow">
+                        <div class="card-top-row">
+                            <div class="card-partner-info">
+                                <div class="avatar-circle"><i class="fas fa-shield-alt"></i></div>
+                                <div>
+                                    <div class="partner-card-name">VIP AFFILIATE PASS</div>
+                                    <div class="partner-card-status"><i class="fas fa-check-circle"></i> Officially Verified Partner</div>
+                                </div>
+                            </div>
+                            <span class="badge badge-master"><i class="fas fa-medal"></i> MASTER TIER (50%)</span>
+                        </div>
+
+                        <div class="card-mid-grid">
+                            <div class="mid-cell">
+                                <div class="lbl">Lifetime Commission</div>
+                                <div class="val text-emerald">50% Permanent</div>
+                            </div>
+                            <div class="mid-cell">
+                                <div class="lbl">Supported Brokers</div>
+                                <div class="val text-cyan">Quotex / Pocket / Deriv</div>
+                            </div>
+                            <div class="mid-cell">
+                                <div class="lbl">Payout Methods</div>
+                                <div class="val text-gold">Binance Pay / USDT / Local</div>
+                            </div>
+                        </div>
+
+                        <div class="card-bottom-bar">
+                            <div class="ref-link-chip">
+                                <span>https://binarypropfirm.com/?ref=VIPPRO</span>
+                                <span class="chip-copy"><i class="fas fa-check text-emerald"></i> Active</span>
+                            </div>
+                            <div class="card-discount-notice">
+                                <i class="fas fa-tag text-gold"></i> Includes 5%–15% Trader Discount
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1777,11 +1819,11 @@
         <!-- 6-TIER COMMISSION LADDER SECTION -->
         <section class="landing-section" id="tiers">
             <div class="landing-container">
-                <div class="section-header" style="margin-bottom: 2.5rem;">
-                    <span class="section-tag"><i class="fas fa-layer-group"></i> Commission Ladder</span>
-                    <h2 class="section-title">Transparent <span class="hero-gradient-text">Commission Ladder</span></h2>
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-layer-group"></i> Dynamic Commission Tiers</span>
+                    <h2 class="section-title">More Sales, <span class="hero-gradient-text">Higher Lifetime Rates</span></h2>
                     <p class="section-desc">
-                        Unlock higher permanent lifetime commissions as your referrals grow:
+                        Start at 10% from your very first referral. Reach 51 total challenge sales to unlock permanent 50% commission for life.
                     </p>
                 </div>
 
@@ -1792,11 +1834,11 @@
                         <div class="tier-card-icon" style="color:#cd7f32;"><i class="fas fa-medal"></i></div>
                         <h3 class="tier-card-title" style="color:#cd7f32;">Bronze Partner</h3>
                         <div class="tier-card-rate text-emerald">10% <span class="rate-sub">Commission</span></div>
-                        <div class="tier-card-range">1 – 10 Challenge Sales</div>
+                        <div class="tier-card-range">1 to 10 Challenge Sales</div>
                         <ul class="tier-perks">
-                            <li><i class="fas fa-check text-emerald"></i> Automatic link tracking</li>
-                            <li><i class="fas fa-check text-emerald"></i> 5% trader discount code</li>
-                            <li><i class="fas fa-check text-emerald"></i> $20 minimum payout</li>
+                            <li><i class="fas fa-check text-emerald"></i> Automated referral tracking &amp; link</li>
+                            <li><i class="fas fa-check text-emerald"></i> 5% discount code for your traders</li>
+                            <li><i class="fas fa-check text-emerald"></i> Low $20 minimum payout threshold</li>
                         </ul>
                     </div>
 
@@ -1806,11 +1848,11 @@
                         <div class="tier-card-icon" style="color:#e2e8f0;"><i class="fas fa-award"></i></div>
                         <h3 class="tier-card-title" style="color:#e2e8f0;">Silver Partner</h3>
                         <div class="tier-card-rate text-emerald">20% <span class="rate-sub">Commission</span></div>
-                        <div class="tier-card-range">11 – 20 Challenge Sales</div>
+                        <div class="tier-card-range">11 to 20 Challenge Sales</div>
                         <ul class="tier-perks">
-                            <li><i class="fas fa-check text-emerald"></i> 20% double commission</li>
-                            <li><i class="fas fa-check text-emerald"></i> Custom promo code request</li>
-                            <li><i class="fas fa-check text-emerald"></i> Live sales alerts</li>
+                            <li><i class="fas fa-check text-emerald"></i> Doubled 20% commission rate</li>
+                            <li><i class="fas fa-check text-emerald"></i> Custom promo code branding</li>
+                            <li><i class="fas fa-check text-emerald"></i> Real-time sale &amp; commission alerts</li>
                         </ul>
                     </div>
 
@@ -1820,11 +1862,11 @@
                         <div class="tier-card-icon" style="color:#f5b041;"><i class="fas fa-trophy"></i></div>
                         <h3 class="tier-card-title" style="color:#f5b041;">Gold Partner</h3>
                         <div class="tier-card-rate text-emerald">30% <span class="rate-sub">Commission</span></div>
-                        <div class="tier-card-range">21 – 30 Challenge Sales</div>
+                        <div class="tier-card-range">21 to 30 Challenge Sales</div>
                         <ul class="tier-perks">
-                            <li><i class="fas fa-check text-emerald"></i> High 30% commission</li>
-                            <li><i class="fas fa-check text-emerald"></i> Priority payout approvals</li>
-                            <li><i class="fas fa-check text-emerald"></i> Up to 10% promo codes</li>
+                            <li><i class="fas fa-check text-emerald"></i> High 30% commission rate</li>
+                            <li><i class="fas fa-check text-emerald"></i> Priority payout review &amp; approval</li>
+                            <li><i class="fas fa-check text-emerald"></i> Up to 10% custom promo codes</li>
                         </ul>
                     </div>
 
@@ -1834,11 +1876,11 @@
                         <div class="tier-card-icon" style="color:#00d2d3;"><i class="fas fa-gem"></i></div>
                         <h3 class="tier-card-title" style="color:#00d2d3;">Platinum Partner</h3>
                         <div class="tier-card-rate text-emerald">40% <span class="rate-sub">Commission</span></div>
-                        <div class="tier-card-range">31 – 40 Challenge Sales</div>
+                        <div class="tier-card-range">31 to 40 Challenge Sales</div>
                         <ul class="tier-perks">
-                            <li><i class="fas fa-check text-emerald"></i> 40% premium payout tier</li>
+                            <li><i class="fas fa-check text-emerald"></i> Elite 40% commission level</li>
                             <li><i class="fas fa-check text-emerald"></i> Same-day express payouts</li>
-                            <li><i class="fas fa-check text-emerald"></i> Marketing banner kit</li>
+                            <li><i class="fas fa-check text-emerald"></i> High-converting banner &amp; promo kit</li>
                         </ul>
                     </div>
 
@@ -1848,34 +1890,35 @@
                         <div class="tier-card-icon" style="color:#c084fc;"><i class="fas fa-chess-queen"></i></div>
                         <h3 class="tier-card-title" style="color:#c084fc;">Diamond Partner</h3>
                         <div class="tier-card-rate text-emerald">50% <span class="rate-sub">Commission</span></div>
-                        <div class="tier-card-range">41 – 50 Challenge Sales</div>
+                        <div class="tier-card-range">41 to 50 Challenge Sales</div>
                         <ul class="tier-perks">
-                            <li><i class="fas fa-check text-emerald"></i> Maximum 50% commission</li>
-                            <li><i class="fas fa-check text-emerald"></i> Dedicated VIP manager</li>
-                            <li><i class="fas fa-check text-emerald"></i> 15% custom vouchers</li>
+                            <li><i class="fas fa-check text-emerald"></i> Top-tier 50% profit share</li>
+                            <li><i class="fas fa-check text-emerald"></i> Dedicated VIP affiliate manager</li>
+                            <li><i class="fas fa-check text-emerald"></i> 15% special trader discount vouchers</li>
                         </ul>
                     </div>
 
                     <!-- Tier 6 -->
-                    <div class="tier-card glass glass-glow" style="border-color:rgba(255,215,0,0.55); background:radial-gradient(circle at 50% 0%, rgba(255,215,0,0.12) 0%, rgba(18,24,38,0.95) 75%);">
-                        <div class="tier-card-badge" style="background:#ffd700; color:#070a12; font-weight:900;">Lifetime Max</div>
+                    <div class="tier-card glass glass-glow" style="border-color:rgba(255,215,0,0.55); background:radial-gradient(circle at 50% 0%, rgba(255,215,0,0.14) 0%, rgba(18,24,38,0.95) 75%);">
+                        <div class="tier-card-badge" style="background:#ffd700; color:#070a12; font-weight:900;">PERMANENT MAX</div>
                         <div class="tier-card-icon" style="color:#ffd700;"><i class="fas fa-crown"></i></div>
                         <h3 class="tier-card-title" style="color:#ffd700;">Master Partner</h3>
                         <div class="tier-card-rate" style="color:#ffd700;">50% <span class="rate-sub">Permanent</span></div>
-                        <div class="tier-card-range" style="color:#ffd700; font-weight:800;">51+ Lifetime Sales</div>
+                        <div class="tier-card-range" style="color:#ffd700; font-weight:800;">51+ Lifetime Milestone</div>
                         <ul class="tier-perks">
-                            <li><i class="fas fa-check text-gold"></i> Permanent 50% lifetime rate</li>
-                            <li><i class="fas fa-check text-gold"></i> Never downgraded guarantee</li>
-                            <li><i class="fas fa-check text-gold"></i> 1-hour fast withdrawals</li>
+                            <li><i class="fas fa-check text-gold"></i> Permanent 50% commission for life</li>
+                            <li><i class="fas fa-check text-gold"></i> Zero quotas — never downgraded</li>
+                            <li><i class="fas fa-check text-gold"></i> Commissions on renewals &amp; repeat buys</li>
+                            <li><i class="fas fa-check text-gold"></i> 1-hour priority express payouts</li>
                         </ul>
                     </div>
                 </div>
 
                 <div class="tier-guarantee-box glass">
-                    <i class="fas fa-shield-alt text-emerald" style="font-size:1.5rem; flex-shrink:0;"></i>
+                    <i class="fas fa-shield-alt text-emerald" style="font-size:1.6rem; flex-shrink:0;"></i>
                     <div>
-                        <strong style="color:#fff;">Never Downgraded Guarantee:</strong> 
-                        Once you unlock a tier, your commission rate is locked for life. No monthly sales quotas, no demotions.
+                        <strong style="color:#fff;">Level Protection Guarantee (Never Downgraded):</strong> 
+                        Once you achieve a tier, your commission rate is locked in permanently. Even during low-activity months, your level will never drop.
                     </div>
                 </div>
             </div>
@@ -1884,11 +1927,11 @@
         <!-- INTERACTIVE LIVE EARNINGS CALCULATOR -->
         <section class="landing-section" id="calculator" style="background:rgba(0,0,0,0.25);">
             <div class="landing-container">
-                <div class="section-header" style="margin-bottom: 2.5rem;">
+                <div class="section-header">
                     <span class="section-tag"><i class="fas fa-calculator"></i> Earnings Simulator</span>
-                    <h2 class="section-title">Earnings <span class="hero-gradient-text">Calculator</span></h2>
+                    <h2 class="section-title">Calculate Your <span class="hero-gradient-text">Monthly Earnings</span></h2>
                     <p class="section-desc">
-                        Move the slider to estimate your monthly earnings based on referrals:
+                        Adjust your projected monthly referrals and select challenge plans to estimate your earnings:
                     </p>
                 </div>
 
@@ -1899,7 +1942,7 @@
                             <div class="calc-input-group">
                                 <div class="calc-input-header">
                                     <label><i class="fas fa-users text-cyan"></i> Estimated Monthly Referrals:</label>
-                                    <span class="calc-badge-val" id="calcReferralCountBadge">25 Traders / month</span>
+                                    <span class="calc-badge-val" id="calcReferralCountBadge">25 Traders</span>
                                 </div>
                                 <input type="range" class="calc-slider" id="calcReferralSlider" min="1" max="100" value="25" oninput="updateCalculator()">
                                 <div class="calc-slider-ticks">
@@ -1913,7 +1956,7 @@
 
                             <div class="calc-input-group" style="margin-top:1.5rem;">
                                 <label style="display:block; margin-bottom:8px; font-weight:700; font-size:0.88rem; color:#cbd5e1;">
-                                    <i class="fas fa-box text-gold"></i> Select Average Package:
+                                    <i class="fas fa-box text-gold"></i> Select Average Challenge Plan:
                                 </label>
                                 <div class="calc-package-chips">
                                     <button type="button" class="pkg-chip" data-fee="15" onclick="selectCalcPackage(this, 15)">$100 Starter ($15 Fee)</button>
@@ -1927,14 +1970,14 @@
                             <!-- Progress toward Master Tier -->
                             <div class="calc-tier-progress-box">
                                 <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:6px;">
-                                    <span style="color:#cbd5e1;">Master Tier Progress (50% Lifetime):</span>
+                                    <span style="color:#cbd5e1;">Master Partner (50% Lifetime) Progress:</span>
                                     <strong id="calcMasterTierPctText" style="color:var(--emerald);">49%</strong>
                                 </div>
                                 <div class="progress-bar-wrap" style="height:8px; margin:0;">
                                     <div class="progress-bar-fill" id="calcMasterTierBar" style="width:49%;"></div>
                                 </div>
                                 <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;" id="calcNextTierHint">
-                                    26 more sales to unlock permanent 50% commission!
+                                    Only 26 more sales to reach permanent 50% commission!
                                 </div>
                             </div>
                         </div>
@@ -1947,26 +1990,26 @@
                             </div>
 
                             <div class="calc-result-main">
-                                <div class="res-label">Estimated Monthly Income</div>
+                                <div class="res-label">Estimated Monthly Earnings</div>
                                 <div class="res-amount-usd text-emerald" id="calcMonthlyUsd">$375.00</div>
-                                <div class="res-amount-bdt" id="calcMonthlyBdt">≈ ৳45,750 BDT / month</div>
+                                <div class="res-amount-bdt" id="calcMonthlyBdt">≈ ৳45,750 BDT / Mo</div>
                             </div>
 
                             <div class="calc-result-sub-grid">
                                 <div class="sub-cell">
-                                    <div class="sub-lbl">Estimated Annual Income</div>
+                                    <div class="sub-lbl">Estimated Annual Earnings</div>
                                     <div class="sub-val text-gold" id="calcAnnualUsd">$4,500.00</div>
-                                    <div class="sub-bdt" id="calcAnnualBdt">≈ ৳549,000 BDT / year</div>
+                                    <div class="sub-bdt" id="calcAnnualBdt">≈ ৳5,49,000 BDT / Year</div>
                                 </div>
                                 <div class="sub-cell">
                                     <div class="sub-lbl">Monthly Sales Volume</div>
                                     <div class="sub-val text-cyan" id="calcVolumeUsd">$1,250.00</div>
-                                    <div class="sub-bdt" id="calcVolumeBdt">25 Challenges Sold</div>
+                                    <div class="sub-bdt" id="calcVolumeBdt">25 challenge sales</div>
                                 </div>
                             </div>
 
                             <button type="button" class="btn-emerald" onclick="scrollToAuth('register')" style="width:100%; padding:14px; margin-top:1.25rem; font-size:0.96rem;">
-                                <i class="fas fa-arrow-right"></i> Start Earning Now — Join Free
+                                <i class="fas fa-arrow-right"></i> Start Earning This Today
                             </button>
                         </div>
                     </div>
@@ -1974,14 +2017,14 @@
             </div>
         </section>
 
-        <!-- BROKER ECOSYSTEM -->
+        <!-- BROKER ECOSYSTEM & TRADER ADVANTAGES -->
         <section class="landing-section" id="brokers">
             <div class="landing-container">
-                <div class="section-header" style="margin-bottom: 2.5rem;">
+                <div class="section-header">
                     <span class="section-tag"><i class="fas fa-handshake"></i> Supported Brokers</span>
-                    <h2 class="section-title">Compatible with <span class="hero-gradient-text">Top Binary Brokers</span></h2>
+                    <h2 class="section-title">100% Compatible with <span class="hero-gradient-text">Top Binary Brokers</span></h2>
                     <p class="section-desc">
-                        Your audience trades directly on Quotex, Pocket Option, or Deriv with zero software friction:
+                        Your community trades directly on their preferred brokers with automated evaluation verification:
                     </p>
                 </div>
 
@@ -1990,20 +2033,20 @@
                     <div class="broker-card glass">
                         <div class="broker-top">
                             <div class="broker-logo-box" style="background:rgba(0,230,118,0.15); color:var(--emerald);">
-                                <i class="fas fa-chart-line" style="font-size:1.6rem;"></i>
+                                <i class="fas fa-chart-line" style="font-size:1.8rem;"></i>
                             </div>
                             <div>
                                 <h3 class="broker-name">Quotex Broker</h3>
-                                <span class="badge badge-success">Verified Support</span>
+                                <span class="badge badge-success">Verified Integration</span>
                             </div>
                         </div>
                         <p class="broker-desc">
-                            Automated synchronization verifies evaluation performance instantly on Web and Mobile platforms.
+                            Traders complete challenges using personal Quotex accounts with automated performance audits and instant sync.
                         </p>
                         <div class="broker-perks-list">
-                            <span><i class="fas fa-check text-emerald"></i> No broker passwords shared</span>
-                            <span><i class="fas fa-check text-emerald"></i> Web &amp; Mobile app compatible</span>
-                            <span><i class="fas fa-check text-emerald"></i> 85%–95% high payout assets</span>
+                            <span><i class="fas fa-check text-emerald"></i> No broker credential sharing required</span>
+                            <span><i class="fas fa-check text-emerald"></i> Mobile app &amp; web platform compatible</span>
+                            <span><i class="fas fa-check text-emerald"></i> Supports 85%–95% high-payout pairs</span>
                         </div>
                     </div>
 
@@ -2011,20 +2054,20 @@
                     <div class="broker-card glass">
                         <div class="broker-top">
                             <div class="broker-logo-box" style="background:rgba(0,240,255,0.15); color:var(--cyan);">
-                                <i class="fas fa-wallet" style="font-size:1.6rem;"></i>
+                                <i class="fas fa-wallet" style="font-size:1.8rem;"></i>
                             </div>
                             <div>
                                 <h3 class="broker-name">Pocket Option</h3>
-                                <span class="badge badge-platinum">Full Automation</span>
+                                <span class="badge badge-platinum">Fully Automated</span>
                             </div>
                         </div>
                         <p class="broker-desc">
-                            High trader conversion with simple 15-session money management rules for quick evaluation passing.
+                            Exceptional conversion rates among binary traders. Simple 15-session money management rules make passing straightforward.
                         </p>
                         <div class="broker-perks-list">
-                            <span><i class="fas fa-check text-cyan"></i> OTC &amp; regular market support</span>
-                            <span><i class="fas fa-check text-cyan"></i> Automated audit &amp; fast sync</span>
-                            <span><i class="fas fa-check text-cyan"></i> Most popular binary broker</span>
+                            <span><i class="fas fa-check text-cyan"></i> OTC &amp; regular market compatible</span>
+                            <span><i class="fas fa-check text-cyan"></i> Fast trade history audit &amp; approval</span>
+                            <span><i class="fas fa-check text-cyan"></i> Most popular broker worldwide</span>
                         </div>
                     </div>
 
@@ -2032,48 +2075,107 @@
                     <div class="broker-card glass">
                         <div class="broker-top">
                             <div class="broker-logo-box" style="background:rgba(239,68,68,0.15); color:#f87171;">
-                                <i class="fas fa-globe" style="font-size:1.6rem;"></i>
+                                <i class="fas fa-globe" style="font-size:1.8rem;"></i>
                             </div>
                             <div>
                                 <h3 class="broker-name">Deriv (Binary.com)</h3>
-                                <span class="badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3);">Global Pioneer</span>
+                                <span class="badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3);">Global Leader</span>
                             </div>
                         </div>
                         <p class="broker-desc">
-                            25-year industry pioneer. Support for synthetic indices and digital options evaluations around the clock.
+                            Backed by 25 years of broker leadership. Synthetic indices and options traders access institutional funded capital.
                         </p>
                         <div class="broker-perks-list">
                             <span><i class="fas fa-check text-emerald"></i> 24/7 synthetic indices trading</span>
-                            <span><i class="fas fa-check text-emerald"></i> Worldwide trader acceptance</span>
+                            <span><i class="fas fa-check text-emerald"></i> Global acceptance across 150+ countries</span>
                             <span><i class="fas fa-check text-emerald"></i> 80% trader profit split guarantee</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Clean 3-Chip Value Strip -->
-                <div class="traders-love-strip glass" style="margin-top: 1.5rem; padding: 1.25rem 1.75rem;">
-                    <div class="strip-grid" style="margin-top:0;">
+                <!-- Why Traders Buy Strip -->
+                <div class="traders-love-strip glass">
+                    <div class="strip-header">
+                        <h3 style="font-size:1.15rem; font-weight:800; color:#fff;">
+                            <i class="fas fa-fire text-gold"></i> Why Traders Buy Our Challenges Instantly
+                        </h3>
+                        <p style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">
+                            Simple rules and high profit sharing deliver market-leading conversion rates:
+                        </p>
+                    </div>
+                    <div class="strip-grid">
                         <div class="strip-item">
                             <div class="strip-icon"><i class="fas fa-clipboard-check text-emerald"></i></div>
                             <div>
-                                <strong>15-Session Rule</strong>
-                                <p>Simple money management sheet rules make passing clear and objective.</p>
+                                <strong>15-Session MM Rules</strong>
+                                <p>No hidden drawdown traps. Follow the structured sheet to pass smoothly.</p>
                             </div>
                         </div>
                         <div class="strip-item">
                             <div class="strip-icon"><i class="fas fa-hand-holding-usd text-gold"></i></div>
                             <div>
-                                <strong>80% Profit Split</strong>
-                                <p>Funded traders keep 80% of profits paid directly to their wallet.</p>
+                                <strong>80% Direct Profit Split</strong>
+                                <p>Funded traders keep 80% of all profits made directly to their wallets.</p>
                             </div>
                         </div>
                         <div class="strip-item">
                             <div class="strip-icon"><i class="fas fa-bolt text-cyan"></i></div>
                             <div>
-                                <strong>Instant Setup</strong>
-                                <p>Evaluation accounts activate immediately upon checkout.</p>
+                                <strong>Instant License Delivery</strong>
+                                <p>Traders receive portal access and credentials immediately upon payment.</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WHY PARTNER WITH US SECTION -->
+        <section class="landing-section" id="benefits" style="background:rgba(0,0,0,0.2);">
+            <div class="landing-container">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-gem"></i> Partner Perks</span>
+                    <h2 class="section-title">Why Partner with <span class="hero-gradient-text">Binary Prop Firm?</span></h2>
+                    <p class="section-desc">
+                        Everything you need to turn your trading community into predictable recurring income:
+                    </p>
+                </div>
+
+                <div class="benefits-grid">
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-emerald"><i class="fas fa-percentage"></i></div>
+                        <h3>Up to 50% Commission</h3>
+                        <p>Industry-leading payout rates scaling from 10% up to 50% permanent lifetime cash commission on all sales.</p>
+                    </div>
+
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-gold"><i class="fas fa-money-bill-wave"></i></div>
+                        <h3>Instant Payouts from $20</h3>
+                        <p>No waiting weeks for your money. Withdraw anytime via Binance Pay, USDT, bKash, or Nagad.</p>
+                    </div>
+
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-cyan"><i class="fas fa-tags"></i></div>
+                        <h3>Custom Promo Codes</h3>
+                        <p>Create branded promo codes for your YouTube or Telegram channel offering your traders 5%–15% discounts.</p>
+                    </div>
+
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-purple"><i class="fas fa-qrcode"></i></div>
+                        <h3>QR Codes &amp; Media Kit</h3>
+                        <p>Generate one-click QR codes and access high-converting promotional banners and copy for fast sharing.</p>
+                    </div>
+
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-emerald"><i class="fas fa-chart-pie"></i></div>
+                        <h3>Live Dashboard &amp; Tracking</h3>
+                        <p>Transparent analytics detailing every referral click, conversion, challenge purchase, and pending payout.</p>
+                    </div>
+
+                    <div class="benefit-card glass">
+                        <div class="benefit-icon text-gold"><i class="fas fa-headset"></i></div>
+                        <h3>Dedicated Partner Support</h3>
+                        <p>Direct Telegram support line for personalized campaign assistance, custom vouchers, and quick approvals.</p>
                     </div>
                 </div>
             </div>
@@ -2082,11 +2184,11 @@
         <!-- HOW IT WORKS (3 SIMPLE STEPS) -->
         <section class="landing-section" id="howItWorks">
             <div class="landing-container">
-                <div class="section-header" style="margin-bottom: 2.5rem;">
-                    <span class="section-tag"><i class="fas fa-stream"></i> Quick Start</span>
-                    <h2 class="section-title">Simple <span class="hero-gradient-text">3 Steps</span></h2>
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-stream"></i> How It Works</span>
+                    <h2 class="section-title">Start Earning in <span class="hero-gradient-text">3 Simple Steps</span></h2>
                     <p class="section-desc">
-                        Start earning in under a minute with zero upfront costs:
+                        No fees, no approval delay. Start sharing within minutes:
                     </p>
                 </div>
 
@@ -2116,11 +2218,19 @@
         </section>
 
         <!-- AUTH SECTION (EMBEDDED LOGIN & REGISTER) -->
-        <section class="landing-section" id="authSection" style="padding: 3.5rem 1.25rem; background:radial-gradient(circle at 50% 50%, rgba(0,230,118,0.05) 0%, transparent 70%);">
-            <div class="landing-container" style="max-width:520px;">
-                <div id="authContainer" style="padding:0;">
-                    <div class="auth-box glass glass-glow" style="margin:0 auto;">
-                        <div class="auth-brand" style="margin-bottom: 1.25rem;">
+        <section class="landing-section" id="authSection" style="background:radial-gradient(circle at 50% 50%, rgba(0,230,118,0.06) 0%, transparent 70%);">
+            <div class="landing-container">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-user-lock"></i> Partner Portal</span>
+                    <h2 class="section-title">Access Your <span class="hero-gradient-text">Partner Account</span></h2>
+                    <p class="section-desc">
+                        Create a free account or sign in to access your live affiliate dashboard:
+                    </p>
+                </div>
+
+                <div id="authContainer">
+                    <div class="auth-box glass glass-glow">
+                        <div class="auth-brand">
                             <img src="/assets/logo.png" alt="Binary Prop Firm">
                             <div>
                                 <h1>Binary Prop Firm</h1>
@@ -2134,7 +2244,7 @@
                                 <i class="fas fa-sign-in-alt"></i> Sign In
                             </button>
                             <button type="button" class="auth-tab-btn" id="tabBtnRegister" onclick="switchAuthTab('register')">
-                                <i class="fas fa-user-plus"></i> Partner Register
+                                <i class="fas fa-user-plus"></i> Register
                             </button>
                         </div>
 
@@ -2158,7 +2268,7 @@
                                 <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--text-muted);">
                                     <input type="checkbox" id="rememberMe" checked style="accent-color:var(--emerald);"> Remember me
                                 </label>
-                                <a href="https://t.me/BinaryPropFirmSupport" target="_blank" style="color:var(--emerald); text-decoration:none; font-weight:600;">Need Help?</a>
+                                <a href="https://t.me/BinaryPropFirmSupport" target="_blank" style="color:var(--emerald); text-decoration:none; font-weight:600;">Forgot password?</a>
                             </div>
 
                             <button type="submit" class="btn-emerald" id="btnLoginSubmit" style="width:100%; padding:13px; font-size:0.95rem;">
@@ -2177,23 +2287,23 @@
                                 <input type="email" class="form-control" id="regEmail" placeholder="name@gmail.com" required autocomplete="email">
                             </div>
                             <div class="auth-form-group">
-                                <label><i class="fab fa-whatsapp"></i> WhatsApp / Phone (Optional)</label>
-                                <input type="tel" class="form-control" id="regPhone" placeholder="+1234567890" autocomplete="tel">
+                                <label><i class="fab fa-whatsapp"></i> WhatsApp / Phone Number</label>
+                                <input type="tel" class="form-control" id="regPhone" placeholder="+8801700000000" autocomplete="tel">
                             </div>
                             <div class="auth-form-group">
-                                <label><i class="fas fa-tag"></i> Choose Custom Referral Code</label>
-                                <input type="text" class="form-control" id="regPromoCode" placeholder="e.g. VIPPRO, TRADER10" required oninput="previewReferralCode(this.value)" style="text-transform:uppercase; font-weight:800; letter-spacing:1px;">
+                                <label><i class="fas fa-tag"></i> Custom Referral Promo Code</label>
+                                <input type="text" class="form-control" id="regPromoCode" placeholder="e.g. VIPPRO, FOREX10" required oninput="previewReferralCode(this.value)" style="text-transform:uppercase; font-weight:800; letter-spacing:1px;">
                                 <div style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">
-                                    Your link will be: <span id="regLinkPreview" style="color:var(--emerald); font-weight:700;">binarypropfirm.com/?ref=YOURCODE</span>
+                                    Your referral link: <span id="regLinkPreview" style="color:var(--emerald); font-weight:700;">binarypropfirm.com/?ref=YOURCODE</span>
                                 </div>
                             </div>
                             <div class="auth-form-group">
                                 <label><i class="fas fa-wallet"></i> Payout Method</label>
                                 <select class="form-control" id="regPayoutMethod" onchange="updatePayoutPlaceholder()">
-                                    <option value="Binance Pay">Binance Pay (Pay ID / UID) — Instant</option>
+                                    <option value="Binance Pay">Binance Pay (Pay ID / UID) - Instant</option>
                                     <option value="USDT TRC20">USDT (TRC-20 Address)</option>
-                                    <option value="bKash">bKash Personal</option>
-                                    <option value="Nagad">Nagad Personal</option>
+                                    <option value="bKash">bKash (Personal)</option>
+                                    <option value="Nagad">Nagad (Personal)</option>
                                 </select>
                             </div>
                             <div class="auth-form-group">
@@ -2201,7 +2311,7 @@
                                 <input type="text" class="form-control" id="regPayoutDetails" placeholder="e.g. 123456789" required>
                             </div>
                             <div class="auth-form-group">
-                                <label><i class="fas fa-lock"></i> Password (Min. 6 characters)</label>
+                                <label><i class="fas fa-lock"></i> Password (min. 6 characters)</label>
                                 <div style="position:relative;">
                                     <input type="password" class="form-control" id="regPassword" placeholder="••••••••" required autocomplete="new-password" minlength="6" style="padding-right:40px;">
                                     <button type="button" onclick="togglePasswordVis('regPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer;">
@@ -2211,35 +2321,35 @@
                             </div>
 
                             <button type="submit" class="btn-emerald" id="btnRegSubmit" style="width:100%; padding:13px; font-size:0.95rem; margin-top:6px;">
-                                <i class="fas fa-user-check"></i> Create Partner Account
+                                <i class="fas fa-user-check"></i> Create Free Partner Account
                             </button>
                         </form>
 
                         <!-- Commission Scale Quick Highlights Strip -->
                         <div class="tier-preview-strip">
                             <div class="tier-mini-card">
-                                <strong>1–10</strong>
-                                <span>10%</span>
+                                <strong>1–10 Sales</strong>
+                                <span>10% Comm</span>
                             </div>
                             <div class="tier-mini-card">
-                                <strong>11–20</strong>
-                                <span>20%</span>
+                                <strong>11–20 Sales</strong>
+                                <span>20% Comm</span>
                             </div>
                             <div class="tier-mini-card">
-                                <strong>21–30</strong>
-                                <span>30%</span>
+                                <strong>21–30 Sales</strong>
+                                <span>30% Comm</span>
                             </div>
                             <div class="tier-mini-card">
-                                <strong>31–40</strong>
-                                <span>40%</span>
+                                <strong>31–40 Sales</strong>
+                                <span>40% Comm</span>
                             </div>
                             <div class="tier-mini-card">
-                                <strong>41–50</strong>
-                                <span>50%</span>
+                                <strong>41–50 Sales</strong>
+                                <span>50% Comm</span>
                             </div>
                             <div class="tier-mini-card" style="border-color:rgba(255,215,0,0.4); background:rgba(255,215,0,0.06);">
-                                <strong style="color:#ffd700;">51+</strong>
-                                <span style="color:#ffd700;">50% Max</span>
+                                <strong style="color:#ffd700;">51+ Lifetime</strong>
+                                <span style="color:#ffd700;">50% Master</span>
                             </div>
                         </div>
 
@@ -2255,12 +2365,12 @@
 
         <!-- FAQ ACCORDION -->
         <section class="landing-section" id="faq">
-            <div class="landing-container" style="max-width:800px;">
-                <div class="section-header" style="margin-bottom: 2.5rem;">
-                    <span class="section-tag"><i class="fas fa-question-circle"></i> FAQ</span>
-                    <h2 class="section-title">Frequently Asked <span class="hero-gradient-text">Questions</span></h2>
+            <div class="landing-container" style="max-width:850px;">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fas fa-question-circle"></i> Frequently Asked Questions</span>
+                    <h2 class="section-title">Got Questions? <span class="hero-gradient-text">We Have Answers</span></h2>
                     <p class="section-desc">
-                        Quick answers about our partner program:
+                        Everything you need to know about our partner and affiliate program:
                     </p>
                 </div>
 
@@ -2268,22 +2378,22 @@
                     <!-- FAQ 1 -->
                     <div class="faq-card glass" onclick="toggleFaq(this)">
                         <div class="faq-question">
-                            <span>1. Is there any fee to join the partner program?</span>
+                            <span>1. Is there any registration fee to become a partner?</span>
                             <i class="fas fa-chevron-down faq-chevron"></i>
                         </div>
                         <div class="faq-answer">
-                            No, joining is 100% free. Create your account in 30 seconds and start sharing your link immediately without any upfront costs.
+                            No, joining is 100% free. Create your account in 30 seconds, get your unique referral link and custom promo code, and start earning immediately. No upfront costs or hidden fees.
                         </div>
                     </div>
 
                     <!-- FAQ 2 -->
                     <div class="faq-card glass" onclick="toggleFaq(this)">
                         <div class="faq-question">
-                            <span>2. What is the minimum payout and how fast are withdrawals?</span>
+                            <span>2. What is the minimum payout and how fast is it processed?</span>
                             <i class="fas fa-chevron-down faq-chevron"></i>
                         </div>
                         <div class="faq-answer">
-                            The minimum withdrawal is just $20. You can request payouts anytime via Binance Pay, USDT (TRC-20), bKash, or Nagad with fast processing.
+                            The minimum payout is just $20. You can request withdrawals anytime via Binance Pay, USDT (TRC-20), bKash, or Nagad. Payouts are reviewed and approved swiftly with full transaction proof.
                         </div>
                     </div>
 
@@ -2294,18 +2404,40 @@
                             <i class="fas fa-chevron-down faq-chevron"></i>
                         </div>
                         <div class="faq-answer">
-                            Visitors who click your link are tracked for 90 days. If they register or buy anytime within 90 days, or use your promo code, they are permanently linked to you.
+                            When a visitor clicks your referral link, a 90-day tracking cookie is stored in their browser. If they sign up and buy any challenge within 90 days, you get credited. Additionally, if they enter your promo code at checkout, they are permanently linked to your account.
                         </div>
                     </div>
 
                     <!-- FAQ 4 -->
                     <div class="faq-card glass" onclick="toggleFaq(this)">
                         <div class="faq-question">
-                            <span>4. Can my commission tier ever be downgraded?</span>
+                            <span>4. Do my referred traders get a discount?</span>
                             <i class="fas fa-chevron-down faq-chevron"></i>
                         </div>
                         <div class="faq-answer">
-                            No. Once you unlock a level, your commission rate is locked permanently. There are no monthly quotas or tier resets.
+                            Yes! Your default promo code provides your traders with an immediate 5% discount at checkout. As your sales grow, you can request custom promo codes with discounts up to 15%.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 5 -->
+                    <div class="faq-card glass" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>5. Will traders experience any broker conflicts or issues?</span>
+                            <i class="fas fa-chevron-down faq-chevron"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Not at all. Traders trade directly on their own personal broker accounts (Quotex, Pocket Option, Deriv). Binary Prop Firm is an evaluation and prop funding platform and never touches or requires broker logins.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 6 -->
+                    <div class="faq-card glass" onclick="toggleFaq(this)">
+                        <div class="faq-question">
+                            <span>6. Can my commission rate ever be downgraded?</span>
+                            <i class="fas fa-chevron-down faq-chevron"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Never. Once you reach a tier (such as Gold 30% or Master 50%), that rate is locked in permanently. Even if you have a month with fewer sales, your tier and commission rate are never downgraded.
                         </div>
                     </div>
                 </div>
@@ -2317,17 +2449,17 @@
             <div class="landing-container">
                 <div class="bottom-cta-banner glass glass-glow">
                     <div class="cta-banner-content">
-                        <span class="badge badge-master"><i class="fas fa-rocket"></i> Start Earning Today</span>
-                        <h2 class="cta-banner-title">Ready to Monetize Your Trading Traffic?</h2>
+                        <span class="badge badge-master"><i class="fas fa-rocket"></i> Start Earning Lifetime Commissions</span>
+                        <h2 class="cta-banner-title">Monetize Your Binary Trading <br>Audience Today</h2>
                         <p class="cta-banner-sub">
-                            Join hundreds of successful affiliates and earn up to 50% lifetime commission with instant automated payouts.
+                            Join top affiliates earning up to 50% commission with zero risk and instant payouts.
                         </p>
                         <div class="cta-banner-btns">
                             <button type="button" class="btn-emerald hero-btn-lg" onclick="scrollToAuth('register')">
                                 <i class="fas fa-user-plus"></i> Create Free Partner Account
                             </button>
                             <a href="https://t.me/BinaryPropFirmSupport" target="_blank" class="btn-outline hero-btn-lg" style="text-decoration:none;">
-                                <i class="fab fa-telegram-plane"></i> Partner Support Telegram
+                                <i class="fab fa-telegram-plane"></i> Partner Support on Telegram
                             </a>
                         </div>
                     </div>
@@ -2345,7 +2477,7 @@
                             <span style="font-weight:900; font-size:1.1rem; color:#fff;">Binary Prop Firm</span>
                         </div>
                         <p style="font-size:0.82rem; color:var(--text-muted); max-width:320px; line-height:1.5;">
-                            The premier binary options evaluation and capital funding platform. Seamless broker integration and industry-leading profit splits.
+                            The leading evaluation platform for binary options traders. Seamless broker compatibility and 80% trader profit split.
                         </p>
                     </div>
 
@@ -2379,7 +2511,7 @@
                         &copy; 2026 Binary Prop Firm. All rights reserved.
                     </div>
                     <div style="font-size:0.75rem; color:var(--text-muted); max-width:550px; text-align:right;">
-                        Risk Warning: Options and derivatives trading involves financial risk. We provide trader evaluations and capital funding.
+                        Risk Disclosure: Options and derivatives trading involves financial risk. Binary Prop Firm provides evaluation services and capital funding.
                     </div>
                 </div>
             </div>
@@ -3306,7 +3438,7 @@ Start your funded trading journey today! 📈
             if (!slider) return;
             const count = parseInt(slider.value, 10) || 1;
             const badge = document.getElementById('calcReferralCountBadge');
-            if (badge) badge.innerText = `${count} Traders / month`;
+            if (badge) badge.innerText = `${count} Traders`;
 
             // Tier calculation matching server.js
             let rate = 10;
@@ -3357,19 +3489,19 @@ Start your funded trading journey today! 📈
             if (monthlyUsdEl) monthlyUsdEl.innerText = `$${monthlyCommission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
             const monthlyBdtEl = document.getElementById('calcMonthlyBdt');
-            if (monthlyBdtEl) monthlyBdtEl.innerText = `≈ ৳${Math.round(monthlyCommission * bdtRate).toLocaleString('en-US')} BDT / month`;
+            if (monthlyBdtEl) monthlyBdtEl.innerText = `≈ ৳${Math.round(monthlyCommission * bdtRate).toLocaleString('en-US')} BDT / Mo`;
 
             const annualUsdEl = document.getElementById('calcAnnualUsd');
             if (annualUsdEl) annualUsdEl.innerText = `$${annualCommission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
             const annualBdtEl = document.getElementById('calcAnnualBdt');
-            if (annualBdtEl) annualBdtEl.innerText = `≈ ৳${Math.round(annualCommission * bdtRate).toLocaleString('en-US')} BDT / year`;
+            if (annualBdtEl) annualBdtEl.innerText = `≈ ৳${Math.round(annualCommission * bdtRate).toLocaleString('en-US')} BDT / Year`;
 
             const volUsdEl = document.getElementById('calcVolumeUsd');
             if (volUsdEl) volUsdEl.innerText = `$${monthlySalesVolume.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
             const volBdtEl = document.getElementById('calcVolumeBdt');
-            if (volBdtEl) volBdtEl.innerText = `${count} Challenges Sold`;
+            if (volBdtEl) volBdtEl.innerText = `${count} challenge sales`;
 
             // Master Tier Progress Bar (Target: 51 sales)
             const masterPct = Math.min(100, Math.round((count / 51) * 100));
@@ -3382,10 +3514,10 @@ Start your funded trading journey today! 📈
             const hint = document.getElementById('calcNextTierHint');
             if (hint) {
                 if (count >= 51) {
-                    hint.innerHTML = `<span style="color:var(--emerald); font-weight:800;"><i class="fas fa-check-circle"></i> Congratulations! You have unlocked permanent Master Partner (50% Lifetime)!</span>`;
+                    hint.innerHTML = `<span style="color:var(--emerald); font-weight:800;"><i class="fas fa-check-circle"></i> Congratulations! You unlocked Master Partner (50% Permanent)!</span>`;
                 } else {
                     const remaining = 51 - count;
-                    hint.innerText = `${remaining} more sales to unlock permanent 50% commission!`;
+                    hint.innerText = `Only ${remaining} more sales to reach permanent 50% commission!`;
                 }
             }
         }
@@ -3494,7 +3626,7 @@ Start your funded trading journey today! 📈
             const password = document.getElementById('loginPassword').value;
             const btn = document.getElementById('btnLoginSubmit');
 
-            if (!email || !password) return showToast('Please enter your email and password.', 'error');
+            if (!email || !password) return showToast('Please enter your email and password', 'error');
 
             try {
                 btn.disabled = true;
@@ -3511,11 +3643,11 @@ Start your funded trading journey today! 📈
                     partnerToken = data.token;
                     localStorage.setItem('bpf_partner_token', data.token);
                     partnerData = data.partner;
-                    showToast('Signed in successfully!', 'success');
+                    showToast('Login successful!', 'success');
                     await fetchPartnerMe();
                     showDashboardView();
                 } else {
-                    showToast(data.message || 'Login failed. Please check your credentials.', 'error');
+                    showToast(data.message || 'Login failed', 'error');
                 }
             } catch (err) {
                 showToast('Server connection error: ' + err.message, 'error');
@@ -3538,7 +3670,7 @@ Start your funded trading journey today! 📈
             const btn = document.getElementById('btnRegSubmit');
 
             if (!name || !email || !password || !promoCode) {
-                return showToast('Please fill in all required fields.', 'error');
+                return showToast('Please fill in all required fields', 'error');
             }
 
             try {
@@ -3561,23 +3693,23 @@ Start your funded trading journey today! 📈
                     await fetchPartnerMe();
                     showDashboardView();
                 } else {
-                    showToast(data.message || 'Registration failed.', 'error');
+                    showToast(data.message || 'Registration failed', 'error');
                 }
             } catch (err) {
                 showToast('Server connection error: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-user-check"></i> Create Partner Account';
+                btn.innerHTML = '<i class="fas fa-user-check"></i> Create Free Partner Account';
             }
         }
 
         function handlePartnerLogout() {
-            if (!confirm('Are you sure you want to sign out of the partner dashboard?')) return;
+            if (!confirm('Are you sure you want to sign out from your partner dashboard?')) return;
             localStorage.removeItem('bpf_partner_token');
             partnerToken = '';
             partnerData = null;
             showAuthView();
-            showToast('Signed out successfully.', 'info');
+            showToast('Successfully signed out', 'info');
         }
 
         // ================= DASHBOARD FETCHERS =================
