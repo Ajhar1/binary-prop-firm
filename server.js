@@ -10915,8 +10915,8 @@ app.all('/api/system/auto-deploy', (req, res) => {
     } catch (e) {}
   });
 
-  // 4. Stash any tracked modifications, pull origin main, safely install secure dependencies, and run audit fix
-  const pullCommand = 'git stash && git pull origin main && (git stash pop || true) && npm install --no-audit && (npm audit fix --production || true)';
+  // 4. Reset tracked files to clean origin/main state (ignoring untracked files), install dependencies and audit fix
+  const pullCommand = 'git checkout -f && git fetch origin main && git reset --hard origin/main && npm install --no-audit && (npm audit fix --production || true)';
 
   exec(pullCommand, { cwd: __dirname }, (err, stdout, stderr) => {
     // 5. In ALL cases, immediately run external auto-restore to guarantee zero data loss
