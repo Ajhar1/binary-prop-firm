@@ -172,15 +172,75 @@
         .badge-pending { background: rgba(245, 176, 65, 0.15); color: #f5b041; border: 1px solid rgba(245, 176, 65, 0.3); }
         .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 
-        /* ================= AUTH VIEW ================= */
-        #authContainer {
-            min-height: 100vh;
+        /* ================= AUTH POPUP MODAL ================= */
+        .auth-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(4, 7, 15, 0.86);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
+            animation: modalFadeIn 0.22s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .auth-modal-dialog {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: 2.25rem 2rem 2rem 2rem;
+            border-radius: 22px;
+            background: linear-gradient(145deg, rgba(18, 24, 38, 0.98) 0%, rgba(10, 15, 26, 0.98) 100%);
+            border: 1px solid rgba(0, 230, 118, 0.25);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 230, 118, 0.12);
+            animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalPopIn {
+            from { opacity: 0; transform: scale(0.92) translateY(14px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .auth-modal-dialog::-webkit-scrollbar {
+            width: 5px;
+        }
+        .auth-modal-dialog::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 4px;
+        }
+        .auth-modal-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #94a3b8;
+            font-size: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem 1rem;
-            position: relative;
-            z-index: 2;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .auth-modal-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+            transform: scale(1.06);
         }
         .auth-box {
             width: 100%;
@@ -610,9 +670,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.82);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 20000;
             align-items: center;
             justify-content: center;
             padding: 1rem;
@@ -1701,10 +1761,10 @@
                     <a href="#faq" class="nav-item-link" onclick="closeLandingMobileMenu()"><i class="fas fa-question-circle"></i> FAQ</a>
 
                     <div class="mobile-nav-ctas">
-                        <button type="button" class="btn-outline" onclick="scrollToAuth('login'); closeLandingMobileMenu();" style="flex:1; justify-content:center; padding:9px;">
+                        <button type="button" class="btn-outline" onclick="openAuthModal('login'); closeLandingMobileMenu();" style="flex:1; justify-content:center; padding:9px;">
                             <i class="fas fa-sign-in-alt"></i> Sign In
                         </button>
-                        <button type="button" class="btn-emerald" onclick="scrollToAuth('register'); closeLandingMobileMenu();" style="flex:1; justify-content:center; padding:9px;">
+                        <button type="button" class="btn-emerald" onclick="openAuthModal('register'); closeLandingMobileMenu();" style="flex:1; justify-content:center; padding:9px;">
                             <i class="fas fa-rocket"></i> Become a Partner
                         </button>
                     </div>
@@ -1712,10 +1772,10 @@
 
                 <!-- Right Action Buttons -->
                 <div class="landing-nav-actions">
-                    <button type="button" class="btn-outline btn-sm" onclick="scrollToAuth('login')">
+                    <button type="button" class="btn-outline btn-sm" onclick="openAuthModal('login')">
                         <i class="fas fa-sign-in-alt"></i> Sign In
                     </button>
-                    <button type="button" class="btn-emerald btn-sm" onclick="scrollToAuth('register')">
+                    <button type="button" class="btn-emerald btn-sm" onclick="openAuthModal('register')">
                         <i class="fas fa-rocket"></i> Become a Partner
                     </button>
                     <button type="button" class="landing-mobile-toggle" onclick="toggleLandingMobileMenu()" aria-label="Toggle menu">
@@ -1742,13 +1802,13 @@
                 </p>
 
                 <div class="hero-cta-group">
-                    <button type="button" class="btn-emerald hero-btn-lg" onclick="scrollToAuth('register')">
+                    <button type="button" class="btn-emerald hero-btn-lg" onclick="openAuthModal('register')">
                         <i class="fas fa-rocket"></i> Become a Partner Free
                     </button>
                     <button type="button" class="btn-gold hero-btn-lg" onclick="scrollToSection('calculator')">
                         <i class="fas fa-calculator"></i> Earnings Calculator
                     </button>
-                    <button type="button" class="btn-outline hero-btn-lg" onclick="scrollToAuth('login')">
+                    <button type="button" class="btn-outline hero-btn-lg" onclick="openAuthModal('login')">
                         <i class="fas fa-sign-in-alt"></i> Partner Sign In
                     </button>
                 </div>
@@ -2008,7 +2068,7 @@
                                 </div>
                             </div>
 
-                            <button type="button" class="btn-emerald" onclick="scrollToAuth('register')" style="width:100%; padding:14px; margin-top:1.25rem; font-size:0.96rem;">
+                            <button type="button" class="btn-emerald" onclick="openAuthModal('register')" style="width:100%; padding:14px; margin-top:1.25rem; font-size:0.96rem;">
                                 <i class="fas fa-arrow-right"></i> Start Earning This Today
                             </button>
                         </div>
@@ -2193,11 +2253,14 @@
                 </div>
 
                 <div class="steps-grid">
-                    <div class="step-card glass">
+                    <div class="step-card glass" onclick="openAuthModal('register')" style="cursor:pointer;" title="Click to create free account">
                         <div class="step-num">01</div>
                         <div class="step-icon text-emerald"><i class="fas fa-user-check"></i></div>
                         <h3>Create Free Account</h3>
                         <p>Sign up in 30 seconds with your email and desired custom referral promo code.</p>
+                        <div style="margin-top:10px; font-size:0.82rem; font-weight:700; color:var(--emerald); display:inline-flex; align-items:center; gap:6px;">
+                            <span>Register now</span> <i class="fas fa-arrow-right"></i>
+                        </div>
                     </div>
 
                     <div class="step-card glass">
@@ -2212,152 +2275,6 @@
                         <div class="step-icon text-gold"><i class="fas fa-wallet"></i></div>
                         <h3>Get Paid Instantly</h3>
                         <p>Receive 10%–50% commission on every challenge sold. Withdraw anytime via Binance Pay or Local Banking.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- AUTH SECTION (EMBEDDED LOGIN & REGISTER) -->
-        <section class="landing-section" id="authSection" style="background:radial-gradient(circle at 50% 50%, rgba(0,230,118,0.06) 0%, transparent 70%);">
-            <div class="landing-container">
-                <div class="section-header">
-                    <span class="section-tag"><i class="fas fa-user-lock"></i> Partner Portal</span>
-                    <h2 class="section-title">Access Your <span class="hero-gradient-text">Partner Account</span></h2>
-                    <p class="section-desc">
-                        Create a free account or sign in to access your live affiliate dashboard:
-                    </p>
-                </div>
-
-                <div id="authContainer">
-                    <div class="auth-box glass glass-glow">
-                        <div class="auth-brand">
-                            <img src="/assets/logo.png" alt="Binary Prop Firm">
-                            <div>
-                                <h1>Binary Prop Firm</h1>
-                                <div style="font-size:0.75rem; font-weight:700; color:var(--emerald); letter-spacing:0.8px;">OFFICIAL PARTNER PROGRAM</div>
-                            </div>
-                        </div>
-
-                        <!-- Tab Switcher -->
-                        <div class="auth-tabs">
-                            <button type="button" class="auth-tab-btn active" id="tabBtnLogin" onclick="switchAuthTab('login')">
-                                <i class="fas fa-sign-in-alt"></i> Sign In
-                            </button>
-                            <button type="button" class="auth-tab-btn" id="tabBtnRegister" onclick="switchAuthTab('register')">
-                                <i class="fas fa-user-plus"></i> Register
-                            </button>
-                        </div>
-
-                        <!-- LOGIN FORM -->
-                        <form id="partnerLoginForm" onsubmit="handlePartnerLogin(event)">
-                            <div class="auth-form-group">
-                                <label><i class="fas fa-envelope"></i> Partner Email</label>
-                                <input type="email" class="form-control" id="loginEmail" placeholder="yourname@gmail.com" required autocomplete="email">
-                            </div>
-                            <div class="auth-form-group">
-                                <label><i class="fas fa-lock"></i> Password</label>
-                                <div style="position:relative;">
-                                    <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" style="padding-right:40px;">
-                                    <button type="button" onclick="togglePasswordVis('loginPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer;">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; font-size:0.82rem;">
-                                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--text-muted);">
-                                    <input type="checkbox" id="rememberMe" checked style="accent-color:var(--emerald);"> Remember me
-                                </label>
-                                <a href="https://t.me/BinaryPropFirmSupport" target="_blank" style="color:var(--emerald); text-decoration:none; font-weight:600;">Forgot password?</a>
-                            </div>
-
-                            <button type="submit" class="btn-emerald" id="btnLoginSubmit" style="width:100%; padding:13px; font-size:0.95rem;">
-                                <i class="fas fa-arrow-right"></i> Sign In to Partner Dashboard
-                            </button>
-                        </form>
-
-                        <!-- REGISTER FORM -->
-                        <form id="partnerRegisterForm" onsubmit="handlePartnerRegister(event)" style="display:none;">
-                            <div class="auth-form-group">
-                                <label><i class="fas fa-user"></i> Full Name</label>
-                                <input type="text" class="form-control" id="regName" placeholder="e.g. Alex Morgan" required autocomplete="name">
-                            </div>
-                            <div class="auth-form-group">
-                                <label><i class="fas fa-envelope"></i> Email Address</label>
-                                <input type="email" class="form-control" id="regEmail" placeholder="name@gmail.com" required autocomplete="email">
-                            </div>
-                            <div class="auth-form-group">
-                                <label><i class="fab fa-whatsapp"></i> WhatsApp / Phone Number</label>
-                                <input type="tel" class="form-control" id="regPhone" placeholder="+8801700000000" autocomplete="tel">
-                            </div>
-                            <div class="auth-form-group">
-                                <label><i class="fas fa-tag"></i> Custom Referral Promo Code</label>
-                                <input type="text" class="form-control" id="regPromoCode" placeholder="e.g. VIPPRO, FOREX10" required oninput="previewReferralCode(this.value)" style="text-transform:uppercase; font-weight:800; letter-spacing:1px;">
-                                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">
-                                    Your referral link: <span id="regLinkPreview" style="color:var(--emerald); font-weight:700;">binarypropfirm.com/?ref=YOURCODE</span>
-                                </div>
-                            </div>
-                            <div class="auth-form-group">
-                                <label><i class="fas fa-wallet"></i> Payout Method</label>
-                                <select class="form-control" id="regPayoutMethod" onchange="updatePayoutPlaceholder()">
-                                    <option value="Binance Pay">Binance Pay (Pay ID / UID) - Instant</option>
-                                    <option value="USDT TRC20">USDT (TRC-20 Address)</option>
-                                    <option value="bKash">bKash (Personal)</option>
-                                    <option value="Nagad">Nagad (Personal)</option>
-                                </select>
-                            </div>
-                            <div class="auth-form-group">
-                                <label id="regPayoutDetailsLabel"><i class="fas fa-id-card"></i> Binance Pay ID / UID</label>
-                                <input type="text" class="form-control" id="regPayoutDetails" placeholder="e.g. 123456789" required>
-                            </div>
-                            <div class="auth-form-group">
-                                <label><i class="fas fa-lock"></i> Password (min. 6 characters)</label>
-                                <div style="position:relative;">
-                                    <input type="password" class="form-control" id="regPassword" placeholder="••••••••" required autocomplete="new-password" minlength="6" style="padding-right:40px;">
-                                    <button type="button" onclick="togglePasswordVis('regPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer;">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn-emerald" id="btnRegSubmit" style="width:100%; padding:13px; font-size:0.95rem; margin-top:6px;">
-                                <i class="fas fa-user-check"></i> Create Free Partner Account
-                            </button>
-                        </form>
-
-                        <!-- Commission Scale Quick Highlights Strip -->
-                        <div class="tier-preview-strip">
-                            <div class="tier-mini-card">
-                                <strong>1–10 Sales</strong>
-                                <span>10% Comm</span>
-                            </div>
-                            <div class="tier-mini-card">
-                                <strong>11–20 Sales</strong>
-                                <span>20% Comm</span>
-                            </div>
-                            <div class="tier-mini-card">
-                                <strong>21–30 Sales</strong>
-                                <span>30% Comm</span>
-                            </div>
-                            <div class="tier-mini-card">
-                                <strong>31–40 Sales</strong>
-                                <span>40% Comm</span>
-                            </div>
-                            <div class="tier-mini-card">
-                                <strong>41–50 Sales</strong>
-                                <span>50% Comm</span>
-                            </div>
-                            <div class="tier-mini-card" style="border-color:rgba(255,215,0,0.4); background:rgba(255,215,0,0.06);">
-                                <strong style="color:#ffd700;">51+ Lifetime</strong>
-                                <span style="color:#ffd700;">50% Master</span>
-                            </div>
-                        </div>
-
-                        <div style="text-align:center; margin-top:1.25rem;">
-                            <a href="/" style="font-size:0.8rem; color:var(--text-muted); text-decoration:none;">
-                                <i class="fas fa-arrow-left"></i> Back to Main Website
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -2455,7 +2372,7 @@
                             Join top affiliates earning up to 50% commission with zero risk and instant payouts.
                         </p>
                         <div class="cta-banner-btns">
-                            <button type="button" class="btn-emerald hero-btn-lg" onclick="scrollToAuth('register')">
+                            <button type="button" class="btn-emerald hero-btn-lg" onclick="openAuthModal('register')">
                                 <i class="fas fa-user-plus"></i> Create Free Partner Account
                             </button>
                             <a href="https://t.me/BinaryPropFirmSupport" target="_blank" class="btn-outline hero-btn-lg" style="text-decoration:none;">
@@ -3249,6 +3166,138 @@ Start your funded trading journey today! 📈
     <!-- 3. MODALS                                  -->
     <!-- ========================================== -->
 
+    <!-- PARTNER AUTH POPUP MODAL (LOGIN & REGISTER) -->
+    <div class="modal-overlay auth-modal-overlay" id="partnerAuthModal" onclick="handleAuthModalOverlayClick(event)">
+        <div class="auth-modal-dialog glass glass-glow" id="authModalDialog">
+            <button type="button" class="auth-modal-close" onclick="closeAuthModal()" aria-label="Close modal">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="auth-brand">
+                <img src="/assets/logo.png" alt="Binary Prop Firm">
+                <div>
+                    <h1>Binary Prop Firm</h1>
+                    <div style="font-size:0.75rem; font-weight:700; color:var(--emerald); letter-spacing:0.8px;">OFFICIAL PARTNER PROGRAM</div>
+                </div>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab-btn active" id="tabBtnLogin" onclick="switchAuthTab('login')">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+                <button type="button" class="auth-tab-btn" id="tabBtnRegister" onclick="switchAuthTab('register')">
+                    <i class="fas fa-user-plus"></i> Register
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="partnerLoginForm" onsubmit="handlePartnerLogin(event)">
+                <div class="auth-form-group">
+                    <label><i class="fas fa-envelope"></i> Partner Email</label>
+                    <input type="email" class="form-control" id="loginEmail" placeholder="yourname@gmail.com" required autocomplete="email">
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <div style="position:relative;">
+                        <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" style="padding-right:40px;">
+                        <button type="button" onclick="togglePasswordVis('loginPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; font-size:0.82rem;">
+                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--text-muted);">
+                        <input type="checkbox" id="rememberMe" checked style="accent-color:var(--emerald);"> Remember me
+                    </label>
+                    <a href="https://t.me/BinaryPropFirmSupport" target="_blank" style="color:var(--emerald); text-decoration:none; font-weight:600;">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-emerald" id="btnLoginSubmit" style="width:100%; padding:13px; font-size:0.95rem;">
+                    <i class="fas fa-arrow-right"></i> Sign In to Partner Dashboard
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="partnerRegisterForm" onsubmit="handlePartnerRegister(event)" style="display:none;">
+                <div class="auth-form-group">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" class="form-control" id="regName" placeholder="e.g. Alex Morgan" required autocomplete="name">
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" class="form-control" id="regEmail" placeholder="name@gmail.com" required autocomplete="email">
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fab fa-whatsapp"></i> WhatsApp / Phone Number</label>
+                    <input type="tel" class="form-control" id="regPhone" placeholder="+8801700000000" autocomplete="tel">
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fas fa-tag"></i> Custom Referral Promo Code</label>
+                    <input type="text" class="form-control" id="regPromoCode" placeholder="e.g. VIPPRO, FOREX10" required oninput="previewReferralCode(this.value)" style="text-transform:uppercase; font-weight:800; letter-spacing:1px;">
+                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">
+                        Your referral link: <span id="regLinkPreview" style="color:var(--emerald); font-weight:700;">binarypropfirm.com/?ref=YOURCODE</span>
+                    </div>
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fas fa-wallet"></i> Payout Method</label>
+                    <select class="form-control" id="regPayoutMethod" onchange="updatePayoutPlaceholder()">
+                        <option value="Binance Pay">Binance Pay (Pay ID / UID) - Instant</option>
+                        <option value="USDT TRC20">USDT (TRC-20 Address)</option>
+                        <option value="bKash">bKash (Personal)</option>
+                        <option value="Nagad">Nagad (Personal)</option>
+                    </select>
+                </div>
+                <div class="auth-form-group">
+                    <label id="regPayoutDetailsLabel"><i class="fas fa-id-card"></i> Binance Pay ID / UID</label>
+                    <input type="text" class="form-control" id="regPayoutDetails" placeholder="e.g. 123456789" required>
+                </div>
+                <div class="auth-form-group">
+                    <label><i class="fas fa-lock"></i> Password (min. 6 characters)</label>
+                    <div style="position:relative;">
+                        <input type="password" class="form-control" id="regPassword" placeholder="••••••••" required autocomplete="new-password" minlength="6" style="padding-right:40px;">
+                        <button type="button" onclick="togglePasswordVis('regPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-emerald" id="btnRegSubmit" style="width:100%; padding:13px; font-size:0.95rem; margin-top:6px;">
+                    <i class="fas fa-user-check"></i> Create Free Partner Account
+                </button>
+            </form>
+
+            <!-- Commission Scale Quick Highlights Strip -->
+            <div class="tier-preview-strip">
+                <div class="tier-mini-card">
+                    <strong>1–10 Sales</strong>
+                    <span>10% Comm</span>
+                </div>
+                <div class="tier-mini-card">
+                    <strong>11–20 Sales</strong>
+                    <span>20% Comm</span>
+                </div>
+                <div class="tier-mini-card">
+                    <strong>21–30 Sales</strong>
+                    <span>30% Comm</span>
+                </div>
+                <div class="tier-mini-card">
+                    <strong>31–40 Sales</strong>
+                    <span>40% Comm</span>
+                </div>
+                <div class="tier-mini-card">
+                    <strong>41–50 Sales</strong>
+                    <span>50% Comm</span>
+                </div>
+                <div class="tier-mini-card" style="border-color:rgba(255,215,0,0.4); background:rgba(255,215,0,0.06);">
+                    <strong style="color:#ffd700;">51+ Lifetime</strong>
+                    <span style="color:#ffd700;">50% Master</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- REQUEST PAYOUT MODAL -->
     <div class="modal-overlay" id="payoutModal">
         <div class="modal-box glass">
@@ -3371,7 +3420,23 @@ Start your funded trading journey today! 📈
         // On Page Load
         document.addEventListener('DOMContentLoaded', () => {
             initPartnerPortal();
+            checkUrlAuthIntent();
         });
+
+        function checkUrlAuthIntent() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const tab = params.get('tab') || params.get('auth');
+                const hash = (window.location.hash || '').toLowerCase();
+                if (tab === 'login' || tab === 'register') {
+                    openAuthModal(tab);
+                } else if (hash === '#login' || hash === '#signin') {
+                    openAuthModal('login');
+                } else if (hash === '#register' || hash === '#signup') {
+                    openAuthModal('register');
+                }
+            } catch (e) {}
+        }
 
         async function initPartnerPortal() {
             if (partnerToken) {
@@ -3387,8 +3452,6 @@ Start your funded trading journey today! 📈
         function showAuthView() {
             const landing = document.getElementById('landingView');
             if (landing) landing.style.display = 'block';
-            const authBox = document.getElementById('authContainer');
-            if (authBox) authBox.style.display = 'flex';
             const dash = document.getElementById('dashContainer');
             if (dash) dash.style.display = 'none';
             showPreviewReturnBar(false);
@@ -3545,15 +3608,39 @@ Start your funded trading journey today! 📈
             }
         }
 
-        function scrollToAuth(tab) {
-            const el = document.getElementById('authSection');
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            if (tab) {
+        function openAuthModal(tab = 'login') {
+            const modal = document.getElementById('partnerAuthModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
                 switchAuthTab(tab);
             }
         }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('partnerAuthModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleAuthModalOverlayClick(event) {
+            if (event.target && (event.target.id === 'partnerAuthModal' || event.target.classList.contains('auth-modal-overlay'))) {
+                closeAuthModal();
+            }
+        }
+
+        function scrollToAuth(tab) {
+            openAuthModal(tab);
+        }
+
+        // Close auth modal with ESC key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAuthModal();
+            }
+        });
 
         function toggleLandingMobileMenu() {
             const menu = document.getElementById('landingNavMenu');
@@ -3644,6 +3731,7 @@ Start your funded trading journey today! 📈
                     localStorage.setItem('bpf_partner_token', data.token);
                     partnerData = data.partner;
                     showToast('Login successful!', 'success');
+                    closeAuthModal();
                     await fetchPartnerMe();
                     showDashboardView();
                 } else {
@@ -3690,6 +3778,7 @@ Start your funded trading journey today! 📈
                     partnerData = data.partner;
                     partnerTierInfo = data.tierInfo;
                     showToast(data.message || 'Account created successfully!', 'success');
+                    closeAuthModal();
                     await fetchPartnerMe();
                     showDashboardView();
                 } else {
