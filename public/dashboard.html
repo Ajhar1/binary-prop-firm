@@ -1040,6 +1040,9 @@
         .mobile-proof-submit-cta {
             display: none;
         }
+        #syncedTradesCardsMobile {
+            display: none;
+        }
         @media (min-width: 769px) {
             #submissionFormCard.proof-mobile-hidden {
                 display: block !important;
@@ -2396,6 +2399,82 @@
             }
             .active-session-card-box {
                 padding: 10px 8px !important;
+            }
+
+            /* --- MOBILE TRADE HISTORY TAB OPTIMIZATION --- */
+            #pane-trade-history {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                padding: 0 !important;
+            }
+            .trade-history-container-box {
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            #extStatusBanner {
+                padding: 8px 12px !important;
+                border-radius: 10px !important;
+                margin-bottom: 8px !important;
+            }
+            #extActionBtnWrap {
+                display: none !important;
+            }
+            #extChallengeFilterInfo {
+                padding: 6px 10px !important;
+                border-radius: 8px !important;
+                margin-bottom: 8px !important;
+            }
+            .ext-setup-video-btn {
+                display: none !important;
+            }
+            .trade-history-view-switcher {
+                display: flex !important;
+                background: rgba(18, 22, 34, 0.95) !important;
+                border: 1px solid rgba(255, 255, 255, 0.12) !important;
+                border-radius: 12px !important;
+                padding: 4px !important;
+                gap: 6px !important;
+                margin-top: 6px !important;
+                margin-bottom: 10px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .trade-history-view-switcher button {
+                flex: 1 1 0% !important;
+                padding: 9px 8px !important;
+                font-size: 0.82rem !important;
+                font-weight: 800 !important;
+                border-radius: 8px !important;
+                justify-content: center !important;
+                white-space: nowrap !important;
+            }
+            .trade-history-view-switcher button.active {
+                background: var(--yellow) !important;
+                color: #000 !important;
+                font-weight: 800 !important;
+            }
+            .user-ch-group-card {
+                border-radius: 10px !important;
+                margin-bottom: 8px !important;
+            }
+            .user-ch-group-header {
+                padding: 8px 10px !important;
+            }
+            .serial-session-card {
+                border-radius: 8px !important;
+                margin-bottom: 6px !important;
+            }
+            .serial-session-card-header {
+                padding: 8px 10px !important;
+            }
+            .serial-session-card-body {
+                padding: 8px !important;
             }
             .unified-alert-card {
                 padding: 1.15rem 0.95rem !important;
@@ -4306,7 +4385,7 @@
                     <div style="font-size:0.75rem; color:#cbd5e1; background:rgba(255,255,255,0.05); padding:3px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.1);" id="extChallengeActiveBadge">
                         যাচাই হচ্ছে...
                     </div>
-                    <button type="button" onclick="openSetupVideoModal()" style="background:linear-gradient(135deg, rgba(255,184,0,0.22), rgba(255,145,0,0.32)); border:1px solid rgba(255,184,0,0.6); color:#ffb800; padding:4px 12px; border-radius:20px; font-weight:800; font-size:0.78rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 0 12px rgba(255,184,0,0.2); transition:all 0.25s ease;">
+                    <button type="button" class="ext-setup-video-btn" onclick="openSetupVideoModal()" style="background:linear-gradient(135deg, rgba(255,184,0,0.22), rgba(255,145,0,0.32)); border:1px solid rgba(255,184,0,0.6); color:#ffb800; padding:4px 12px; border-radius:20px; font-weight:800; font-size:0.78rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 0 12px rgba(255,184,0,0.2); transition:all 0.25s ease;">
                         <i class="fas fa-play-circle" style="font-size:0.9rem; color:#ffb800;"></i> Setup Video
                     </button>
                 </div>
@@ -4337,7 +4416,7 @@
             </div>
 
             <!-- Trade History Records Table / Session View -->
-            <div style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+            <div class="trade-history-container-box" style="background:#171922; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.2rem; box-shadow:0 8px 30px rgba(0,0,0,0.3);">
                 <!-- Header with View Switcher -->
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.75rem;">
                     <div>
@@ -4351,8 +4430,8 @@
                     
                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                         <!-- View Toggle Tabs -->
-                        <div style="display:inline-flex; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:2px;">
-                            <button type="button" id="tradeHistViewBtnSessions" onclick="switchTradeHistoryView('sessions')" style="background:var(--yellow); color:#000; font-weight:800; border:none; padding:5px 12px; font-size:0.76rem; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s ease;">
+                        <div class="trade-history-view-switcher" style="display:inline-flex; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:2px;">
+                            <button type="button" id="tradeHistViewBtnSessions" class="active" onclick="switchTradeHistoryView('sessions')" style="background:var(--yellow); color:#000; font-weight:800; border:none; padding:5px 12px; font-size:0.76rem; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s ease;">
                                 <i class="fas fa-layer-group"></i> সেশন অনুযায়ী
                             </button>
                             <button type="button" id="tradeHistViewBtnRaw" onclick="switchTradeHistoryView('raw')" style="background:transparent; color:var(--text-secondary); font-weight:700; border:none; padding:5px 12px; font-size:0.76rem; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s ease;">
@@ -4381,31 +4460,42 @@
                 </div>
 
                 <!-- 2. Raw Stream Table View -->
-                <div id="tradeHistoryRawView" style="display:none; overflow-x:auto;">
-                    <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
-                        <thead>
-                            <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.76rem; text-transform:uppercase; letter-spacing:0.5px;">
-                                <th style="padding:10px 12px; width:45px; text-align:center;">#</th>
-                                <th style="padding:10px 12px; min-width:145px;">সেশন ও ধাপ (Session)</th>
-                                <th style="padding:10px 12px; min-width:160px;">নিয়ম / ভুল চেক (Status)</th>
-                                <th style="padding:10px 12px;">Asset</th>
-                                <th style="padding:10px 12px;">Info (Ticket / Payout)</th>
-                                <th style="padding:10px 12px;">Opening Quote</th>
-                                <th style="padding:10px 12px;">Closing Quote</th>
-                                <th style="padding:10px 12px;">Amount</th>
-                                <th style="padding:10px 12px;">Profit / Return</th>
-                                <th style="padding:10px 12px;">Account</th>
-                            </tr>
-                        </thead>
-                        <tbody id="syncedTradesTableBody">
-                            <tr>
-                                <td colspan="10" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
-                                    <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
-                                    ট্রেড হিস্টোরি লোড হচ্ছে...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div id="tradeHistoryRawView" style="display:none;">
+                    <!-- Desktop Table View (>= 769px) -->
+                    <div class="audit-table-desktop" style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
+                            <thead>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.76rem; text-transform:uppercase; letter-spacing:0.5px;">
+                                    <th style="padding:10px 12px; width:45px; text-align:center;">#</th>
+                                    <th style="padding:10px 12px; min-width:145px;">সেশন ও ধাপ (Session)</th>
+                                    <th style="padding:10px 12px; min-width:160px;">নিয়ম / ভুল চেক (Status)</th>
+                                    <th style="padding:10px 12px;">Asset</th>
+                                    <th style="padding:10px 12px;">Info (Ticket / Payout)</th>
+                                    <th style="padding:10px 12px;">Opening Quote</th>
+                                    <th style="padding:10px 12px;">Closing Quote</th>
+                                    <th style="padding:10px 12px;">Amount</th>
+                                    <th style="padding:10px 12px;">Profit / Return</th>
+                                    <th style="padding:10px 12px;">Account</th>
+                                </tr>
+                            </thead>
+                            <tbody id="syncedTradesTableBody">
+                                <tr>
+                                    <td colspan="10" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
+                                        <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
+                                        ট্রেড হিস্টোরি লোড হচ্ছে...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Clean Trade Cards (< 769px, Exact 1:1 like Proof tab) -->
+                    <div id="syncedTradesCardsMobile" class="audit-trades-mobile">
+                        <div style="text-align:center; padding:2rem 1rem; color:var(--text-secondary); font-size:0.84rem;">
+                            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--yellow); margin-bottom:8px; display:block;"></i>
+                            ট্রেড হিস্টোরি লোড হচ্ছে...
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -7649,11 +7739,13 @@
                 if (sessView) sessView.style.display = 'block';
                 if (rawView) rawView.style.display = 'none';
                 if (btnSess) {
+                    btnSess.classList.add('active');
                     btnSess.style.background = 'var(--yellow)';
                     btnSess.style.color = '#000';
                     btnSess.style.fontWeight = '800';
                 }
                 if (btnRaw) {
+                    btnRaw.classList.remove('active');
                     btnRaw.style.background = 'transparent';
                     btnRaw.style.color = 'var(--text-secondary)';
                     btnRaw.style.fontWeight = '700';
@@ -7663,14 +7755,19 @@
                 if (sessView) sessView.style.display = 'none';
                 if (rawView) rawView.style.display = 'block';
                 if (btnRaw) {
+                    btnRaw.classList.add('active');
                     btnRaw.style.background = 'var(--yellow)';
                     btnRaw.style.color = '#000';
                     btnRaw.style.fontWeight = '800';
                 }
                 if (btnSess) {
+                    btnSess.classList.remove('active');
                     btnSess.style.background = 'transparent';
                     btnSess.style.color = 'var(--text-secondary)';
                     btnSess.style.fontWeight = '700';
+                }
+                if (Array.isArray(userSyncedTradesData) && userSyncedTradesData.length > 0) {
+                    renderSyncedTrades({ trades: userSyncedTradesData, stats: lastSyncedTradesStats });
                 }
             }
         }
@@ -8604,24 +8701,26 @@
 
                                         let checkBadgeHtml = '';
                                         if (audit && audit.isRefund) {
-                                            checkBadgeHtml = '<span style="color:#fbbf24; font-weight:700;"><i class="fas fa-undo"></i> রিফান্ড</span>';
+                                            checkBadgeHtml = '<span style="color:#f59e0b; font-weight:700;">Refund</span>';
                                         } else if (audit && audit.isPassed) {
-                                            checkBadgeHtml = '<span style="color:#00e676; font-weight:700;"><i class="fas fa-check-circle"></i> ✓ নিয়ম মেনে ট্রেড</span>';
+                                            checkBadgeHtml = '<span style="color:#00e676; font-weight:700;"><i class="fas fa-check-circle"></i> OK</span>';
                                         } else if (audit && !audit.isPassed) {
-                                            checkBadgeHtml = `<span style="color:#ef4444; font-weight:700;"><i class="fas fa-times-circle"></i> ${escapeHtml(audit.errorReason || 'ভুল')}</span>`;
+                                            checkBadgeHtml = `<span style="color:#ef4444; font-weight:700;"><i class="fas fa-times-circle"></i> Error</span>`;
                                         } else {
-                                            checkBadgeHtml = '<span style="color:#00e676; font-weight:700;">✓ ট্রেড রেকর্ড</span>';
+                                            checkBadgeHtml = '<span style="color:#00e676; font-weight:700;"><i class="fas fa-check-circle"></i> OK</span>';
                                         }
 
-                                        const planStakeDisplay = (audit && audit.plannedStake != null && audit.plannedStake > 0)
-                                            ? `$${audit.plannedStake} / $${Number(t.amount || 0).toFixed(2)}`
-                                            : `$${Number(t.amount || 0).toFixed(2)}`;
+                                        const planned = (audit && audit.plannedStake != null && audit.plannedStake > 0)
+                                            ? (audit.plannedStake % 1 === 0 ? String(audit.plannedStake) : Number(audit.plannedStake).toFixed(0))
+                                            : String(Math.round(t.amount || 0));
+                                        const actual = Number(t.amount || 0).toFixed(2);
+                                        const payout = escapeHtml(t.payout || '85%');
 
                                         return `
                                             <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:5px;">
                                                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                                                     <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-                                                        <span style="font-weight:900; color:var(--yellow); font-size:0.85rem;">#${idx + 1}</span>
+                                                        <span style="font-weight:900; color:var(--yellow); font-size:0.85rem;">#${stepNum}</span>
                                                         <span style="font-weight:700; color:#fff; font-size:0.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(t.asset || 'Quotex')}</span>
                                                     </div>
                                                     <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
@@ -8635,7 +8734,7 @@
                                                 </div>
                                                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.74rem; color:var(--text-secondary); border-top:1px dashed rgba(255,255,255,0.06); padding-top:4px;">
                                                     <div>
-                                                        স্টেক: <strong style="color:var(--yellow);">${planStakeDisplay}</strong> • পেআউট: <strong style="color:#00e676;">${escapeHtml(t.payout || '85%')}</strong>
+                                                        স্টেক: <strong style="color:var(--yellow);">$${planned}</strong> <span style="opacity:0.6;">/</span> <strong style="color:#38bdf8;">$${actual}</strong> • পেআউট: <strong style="color:#00e676;">${payout}</strong>
                                                     </div>
                                                     <div>
                                                         ${checkBadgeHtml}
@@ -12773,15 +12872,26 @@
             if (badgeEl) badgeEl.innerText = traderId;
 
             const tbody = document.getElementById('syncedTradesTableBody');
-            if (tbody && userSyncedTradesData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
-                            <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
+            const mobileCardsWrap = document.getElementById('syncedTradesCardsMobile');
+            if (userSyncedTradesData.length === 0) {
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="10" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
+                                <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
+                                ট্রেড হিস্টোরি লোড হচ্ছে...
+                            </td>
+                        </tr>
+                    `;
+                }
+                if (mobileCardsWrap) {
+                    mobileCardsWrap.innerHTML = `
+                        <div style="text-align:center; padding:2rem 1rem; color:var(--text-secondary); font-size:0.84rem;">
+                            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--yellow); margin-bottom:8px; display:block;"></i>
                             ট্রেড হিস্টোরি লোড হচ্ছে...
-                        </td>
-                    </tr>
-                `;
+                        </div>
+                    `;
+                }
             }
 
             try {
@@ -12893,22 +13003,33 @@
             if (grossEl) grossEl.innerText = `Return: $${(stats.grossReturn || 0).toFixed(2)}`;
 
             const tbody = document.getElementById('syncedTradesTableBody');
-            if (!tbody) return;
+            const mobileCardsContainer = document.getElementById('syncedTradesCardsMobile');
+            if (!tbody && !mobileCardsContainer) return;
 
             if (trades.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="10" style="text-align:center; padding:2.5rem 1rem; color:var(--text-secondary);">
-                            <div style="width:48px; height:48px; border-radius:50%; background:rgba(255,184,0,0.1); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem auto; font-size:1.3rem; color:var(--yellow);">
-                                <i class="fas fa-cloud-download-alt"></i>
-                            </div>
-                            <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.8rem;">এখনও কোনো ট্রেড সিঙ্ক হয়নি</h4>
-                            <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-gold" style="padding:7px 16px; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                                <i class="fas fa-chart-line"></i> Quotex চার্ট ওপেন করুন
-                            </a>
-                        </td>
-                    </tr>
-                `;
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="10" style="text-align:center; padding:2.5rem 1rem; color:var(--text-secondary);">
+                                <div style="width:48px; height:48px; border-radius:50%; background:rgba(255,184,0,0.1); border:1px solid rgba(255,184,0,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem auto; font-size:1.3rem; color:var(--yellow);">
+                                    <i class="fas fa-cloud-download-alt"></i>
+                                </div>
+                                <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.8rem;">এখনও কোনো ট্রেড সিঙ্ক হয়নি</h4>
+                                <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-gold" style="padding:7px 16px; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                    <i class="fas fa-chart-line"></i> Quotex চার্ট ওপেন করুন
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                }
+                if (mobileCardsContainer) {
+                    mobileCardsContainer.innerHTML = `
+                        <div style="text-align:center; padding:2rem 1rem; color:var(--text-secondary); background:rgba(0,0,0,0.3); border-radius:10px; border:1px dashed rgba(255,255,255,0.1);">
+                            <i class="fas fa-cloud-download-alt" style="font-size:1.6rem; color:var(--yellow); margin-bottom:8px; display:block;"></i>
+                            <h4 style="color:#fff; font-size:0.95rem; margin:0;">এখনও কোনো ট্রেড সিঙ্ক হয়নি</h4>
+                        </div>
+                    `;
+                }
                 return;
             }
 
@@ -13056,6 +13177,93 @@
                     </tr>
                 `;
             }).join('');
+
+            // Populate mobile trade cards identical to Proof format (< 769px)
+            if (mobileCardsContainer) {
+                mobileCardsContainer.innerHTML = trades.map((t, idx) => {
+                    const serialNum = trades.length - idx;
+                    const isWin = t.result === 'WIN';
+                    const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                    const audit = auditMap.get(tick);
+                    const isRefund = (audit && audit.isRefund) || (t.result === 'REFUND');
+
+                    let tradeProfit = 0;
+                    if (isWin) {
+                        tradeProfit = t.profit > t.amount ? (t.profit - t.amount) : (t.profit || 0);
+                    } else if (isRefund) {
+                        tradeProfit = 0;
+                    } else {
+                        tradeProfit = -(t.amount || 0);
+                    }
+
+                    const pColor = tradeProfit >= 0 ? 'var(--neon-green)' : 'var(--danger-red)';
+                    const tSign = tradeProfit >= 0 ? '+' : '';
+                    const badgeBg = isWin ? 'rgba(0,230,118,0.18)' : (isRefund ? 'rgba(245,176,65,0.18)' : 'rgba(239,68,68,0.18)');
+                    const badgeColor = isWin ? '#00e676' : (isRefund ? '#fbbf24' : '#f87171');
+                    const badgeBorder = isWin ? 'rgba(0,230,118,0.35)' : (isRefund ? 'rgba(245,176,65,0.35)' : 'rgba(239,68,68,0.35)');
+                    const outcome = isRefund ? 'REFUND' : (t.result || 'WIN');
+
+                    let checkBadgeHtml = '';
+                    if (audit && audit.isRefund) {
+                        checkBadgeHtml = '<span style="color:#f59e0b; font-weight:700;">Refund</span>';
+                    } else if (audit && audit.isPassed) {
+                        checkBadgeHtml = '<span style="color:#00e676; font-weight:700;"><i class="fas fa-check-circle"></i> OK</span>';
+                    } else if (audit && !audit.isPassed) {
+                        checkBadgeHtml = `<span style="color:#ef4444; font-weight:700;"><i class="fas fa-times-circle"></i> Error</span>`;
+                    } else {
+                        checkBadgeHtml = '<span style="color:#00e676; font-weight:700;"><i class="fas fa-check-circle"></i> OK</span>';
+                    }
+
+                    let resolvedPayout = (t.payout || '').trim();
+                    if (!resolvedPayout || resolvedPayout === '90%') {
+                        const amt = parseFloat(t.amount) || 0;
+                        const prof = parseFloat(t.profit) || 0;
+                        if (amt > 0 && prof > 0) {
+                            if (prof > amt) {
+                                const calcP = Math.round(((prof - amt) / amt) * 100);
+                                if (calcP >= 40 && calcP <= 100) resolvedPayout = `${calcP}%`;
+                            } else {
+                                const calcP = Math.round((prof / amt) * 100);
+                                if (calcP >= 40 && calcP <= 100) resolvedPayout = `${calcP}%`;
+                            }
+                        }
+                    }
+                    if (!resolvedPayout) resolvedPayout = '85%';
+
+                    const planned = (audit && audit.plannedStake != null && audit.plannedStake > 0)
+                        ? (audit.plannedStake % 1 === 0 ? String(audit.plannedStake) : Number(audit.plannedStake).toFixed(0))
+                        : String(Math.round(t.amount || 0));
+                    const actual = Number(t.amount || 0).toFixed(2);
+                    const stepNum = (audit && audit.stepNum) ? audit.stepNum : serialNum;
+
+                    return `
+                        <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:5px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                                    <span style="font-weight:900; color:var(--yellow); font-size:0.85rem;">#${stepNum}</span>
+                                    <span style="font-weight:700; color:#fff; font-size:0.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(t.asset || 'Quotex')}</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                                    <span style="background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeBorder}; padding:2px 8px; border-radius:5px; font-size:0.72rem; font-weight:800;">
+                                        ${outcome}
+                                    </span>
+                                    <span style="font-weight:900; font-size:0.86rem; color:${pColor};">
+                                        ${tSign}$${tradeProfit.toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.74rem; color:var(--text-secondary); border-top:1px dashed rgba(255,255,255,0.06); padding-top:4px;">
+                                <div>
+                                    স্টেক: <strong style="color:var(--yellow);">$${planned}</strong> <span style="opacity:0.6;">/</span> <strong style="color:#38bdf8;">$${actual}</strong> • পেআউট: <strong style="color:#00e676;">${escapeHtml(resolvedPayout)}</strong>
+                                </div>
+                                <div>
+                                    ${checkBadgeHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
 
             // Trigger serial sessions render for session-wise view
             try {
