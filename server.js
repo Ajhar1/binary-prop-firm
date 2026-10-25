@@ -3376,7 +3376,56 @@ app.post('/api/auth/register', async (req, res) => {
     const users = syncUsersWithAllData();
     const existing = users.find(u => u.email.toLowerCase() === cleanedEmail);
     if (existing) {
-      return res.status(400).json({ success: false, message: 'An account with this email already exists.' });
+      if (existing.isEmailVerified === false) {
+        // User previously submitted registration but has not verified email yet; refresh OTP and allow them to proceed
+        const salt = await bcrypt.genSalt(10);
+        existing.password = await bcrypt.hash(password, salt);
+        if (name && name.trim()) existing.name = name.trim();
+        if (telegram) existing.telegram = telegram.trim();
+        if (preferredBroker) existing.preferredBroker = preferredBroker;
+
+        const verificationCode = generateVerificationCode();
+        existing.emailVerificationCode = verificationCode;
+        existing.emailVerificationExpires = Date.now() + 15 * 60 * 1000;
+
+        writeJson(USERS_FILE, users);
+        writeJson(USERS_PERMANENT_STORE_FILE, users);
+        saveTraderToLifelongVault(existing);
+
+        if (db && db.isMySqlActive()) {
+          await db.saveUser(existing);
+        }
+
+        logUserArchive('USER_REGISTRATION_RESUMED', existing, { ip: req.ip || req.connection.remoteAddress });
+        sendVerificationEmail(existing.email, verificationCode, existing.name);
+
+        return res.status(200).json({
+          success: true,
+          message: '🎉 Congratulations! আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। ইমেইলে পাঠানো কোডটি দিন।',
+          requiresVerification: true,
+          email: existing.email,
+          user: {
+            id: existing.id,
+            traderId: existing.traderId,
+            name: existing.name,
+            email: existing.email,
+            role: existing.role || 'user',
+            telegram: existing.telegram,
+            preferredBroker: existing.preferredBroker,
+            payoutWallet: existing.payoutWallet || '',
+            brokerAccountId: existing.brokerAccountId || '',
+            profilePicture: null,
+            isEmailVerified: false
+          }
+        });
+      }
+
+      return res.status(400).json({
+        success: false,
+        alreadyExists: true,
+        message: 'An account with this email already exists.',
+        email: cleanedEmail
+      });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -3421,7 +3470,7 @@ app.post('/api/auth/register', async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'অ্যাকাউন্ট তৈরি হয়েছে! আপনার ইমেইলে একটি ৬-সংখ্যার ভেরিফিকেশন কোড পাঠানো হয়েছে। অ্যাকাউন্ট সচল করতে কোডটি দিন।',
+      message: '🎉 Congratulations! আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। ইমেইলে পাঠানো কোডটি দিন।',
       requiresVerification: true,
       email: newUser.email,
       user: {
@@ -3463,7 +3512,22 @@ app.post('/api/auth/verify-email', async (req, res) => {
     }
 
     if (user.isEmailVerified) {
-      return res.json({ success: true, message: 'এই ইমেইলটি ইতিমধ্যে ভেরিফাইড!', alreadyVerified: true });
+      const token = jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role || 'user' }, JWT_SECRET, { expiresIn: '15d' });
+      return res.json({
+        success: true,
+        message: 'এই ইমেইলটি ইতিমধ্যে ভেরিফাইড!',
+        alreadyVerified: true,
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role || 'user',
+          telegram: user.telegram,
+          preferredBroker: user.preferredBroker,
+          isEmailVerified: true
+        }
+      });
     }
 
     if (!user.emailVerificationCode || user.emailVerificationCode !== otp.trim()) {

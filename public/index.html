@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -4005,8 +4005,11 @@
         }
 
         // Handle Register
+        let isRegistering = false;
         async function handleRegister(e) {
             e.preventDefault();
+            if (isRegistering) return;
+
             const name = document.getElementById('regName').value;
             const emailInput = document.getElementById('regEmail');
             let email = emailInput.value ? emailInput.value.trim() : '';
@@ -4018,8 +4021,9 @@
             const password = document.getElementById('regPassword').value;
             const telegram = document.getElementById('regTelegram').value;
             const preferredBroker = document.getElementById('regBroker').value;
-            const submitBtn = document.querySelector('#regForm button[type="submit"]');
+            const submitBtn = document.querySelector('#registerForm button[type="submit"]');
 
+            isRegistering = true;
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> অ্যাকাউন্ট তৈরি হচ্ছে...`;
@@ -4035,17 +4039,36 @@
                 if (data.success) {
                     // Mandatory OTP verification required - do not store token until verified
                     pendingVerificationEmail = data.email || email;
-                    showToast(data.message || 'অ্যাকাউন্ট তৈরি হয়েছে! ইমেইল ভেরিফাই করুন।', 'success');
+                    showToast('🎉 Congratulations! আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। ইমেইলে পাঠানো কোডটি দিন।', 'success');
                     openEmailVerifyModal(pendingVerificationEmail);
                 } else {
-                    showToast(data.message || 'Registration failed', 'error');
+                    const isAlreadyExists = data.alreadyExists || (data.message && data.message.toLowerCase().includes('already exists'));
+                    if (isAlreadyExists) {
+                        showToast('An account with this email already exists.', 'warning');
+                        // Close register modal and open login modal pre-filled with the user's email
+                        closeModals();
+                        openLoginModal();
+                        const loginEmailEl = document.getElementById('loginEmail');
+                        if (loginEmailEl) {
+                            loginEmailEl.value = email;
+                        }
+                        setTimeout(() => {
+                            const loginPasswordEl = document.getElementById('loginPassword');
+                            if (loginPasswordEl) {
+                                loginPasswordEl.focus();
+                            }
+                        }, 250);
+                    } else {
+                        showToast(data.message || 'Registration failed', 'error');
+                    }
                 }
             } catch (err) {
                 showToast('Network error during registration', 'error');
             } finally {
+                isRegistering = false;
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = `Register & Get Funded`;
+                    submitBtn.innerHTML = `<i class="fas fa-user-plus"></i> Register & Continue`;
                 }
             }
         }
