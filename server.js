@@ -18,6 +18,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'aj_funded_super_secure_jwt_secret_
 const DATA_DIR = path.join(__dirname, 'data');
 const UPLOADS_DIR = path.join(__dirname, 'public', 'uploads');
 const BACKUPS_DIR = path.join(DATA_DIR, 'backups');
+const DOWNLOADS_DIR = path.join(__dirname, 'public', 'downloads');
+const TRADERS_VAULT_DIR = path.join(DATA_DIR, 'lifelong_traders_vault');
+const TRADERS_VAULT_FILE = path.join(TRADERS_VAULT_DIR, 'master_registered_traders_vault.json');
+const TRADERS_VAULT_PROFILES_DIR = path.join(TRADERS_VAULT_DIR, 'traders');
+const TRADERS_VAULT_AUDIT_LOG = path.join(TRADERS_VAULT_DIR, 'vault_audit_log.jsonl');
+const MASTER_SECURITY_PASSWORD = 'AJHAR1';
+
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const USERS_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'users_permanent_store.json');
 const CHALLENGES_FILE = path.join(DATA_DIR, 'challenges.json');
@@ -62,15 +69,419 @@ const DEFAULT_PARTNER_SETTINGS = {
   updatedAt: new Date().toISOString()
 };
 
+// ==================== EXTERNAL AUTO-BACKUP & FAIL-SAFE STORAGE SYSTEM ====================
+// Completely OUTSIDE the Git repository scope to guarantee 100% immunity to git pull/stash/reset
+let EXTERNAL_BACKUP_DIR = path.resolve(__dirname, '..', 'safe_database_backups');
+
+// Ensure directories exist safely
+[DATA_DIR, UPLOADS_DIR, BACKUPS_DIR, DOWNLOADS_DIR, TRADERS_VAULT_DIR, TRADERS_VAULT_PROFILES_DIR, EXTERNAL_BACKUP_DIR].forEach(dir => {
+  try {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  } catch (err) {
+    if (dir === EXTERNAL_BACKUP_DIR) {
+      console.warn('[EXTERNAL-BACKUP] Parent folder permission restricted, falling back to local safe vault:', err.message);
+      EXTERNAL_BACKUP_DIR = path.join(DATA_DIR, 'safe_database_backups_vault');
+      try { if (!fs.existsSync(EXTERNAL_BACKUP_DIR)) fs.mkdirSync(EXTERNAL_BACKUP_DIR, { recursive: true }); } catch (_) {}
+    }
+  }
+});
+
+// Critical Data Files: must NEVER be wiped, deleted, or overwritten with empty arrays
+const CRITICAL_DATA_FILES = [
+  // Partner & Affiliate stores
+  PARTNERS_FILE,
+  PARTNERS_PERMANENT_STORE_FILE,
+  PARTNER_PAYOUTS_FILE,
+  PARTNER_SETTINGS_FILE,
+  PARTNER_PROMO_REQUESTS_FILE,
+  // Promo codes & presets
+  PROMO_CODES_FILE,
+  PROMO_CODES_PERMANENT_STORE_FILE,
+  LAUNCH_PROMO_FILE,
+  PROMO_PRESETS_FILE,
+  // User & challenge stores
+  USERS_FILE,
+  USERS_PERMANENT_STORE_FILE,
+  CHALLENGES_FILE,
+  CHALLENGES_PERMANENT_STORE_FILE,
+  SUBMISSIONS_FILE,
+  ARCHIVE_FILE,
+  // Payout stores
+  PAYOUTS_FILE,
+  PAYOUT_SETTINGS_FILE,
+  // Lifelong vault
+  TRADERS_VAULT_FILE
+];
+
+function isCriticalFile(filePath) {
+  if (!filePath) return false;
+  const base = path.basename(filePath);
+  return CRITICAL_DATA_FILES.some(f => path.basename(f) === base);
+}
+
+// High-Speed In-Memory Cache
+const memoryJsonCache = new Map();
+
+// External Safe Backup: Save a copy of critical file outside Git scope
+function backupToExternalSafeDir(filePath, data = null) {
+  try {
+    if (!fs.existsSync(EXTERNAL_BACKUP_DIR)) {
+      fs.mkdirSync(EXTERNAL_BACKUP_DIR, { recursive: true });
+    }
+    const baseName = path.basename(filePath);
+    const destFile = path.join(EXTERNAL_BACKUP_DIR, baseName);
+
+    let contentToWrite = null;
+    if (data !== null && data !== undefined) {
+      const isCandidateEmpty = (Array.isArray(data) && data.length === 0) || 
+        (typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length === 0);
+
+      // NEVER overwrite a populated backup with an empty array or empty object!
+      if (isCandidateEmpty && fs.existsSync(destFile)) {
+        try {
+          const cur = fs.readFileSync(destFile, 'utf8').trim();
+          if (cur && cur !== '[]' && cur !== '{}') {
+            const curP = JSON.parse(cur);
+            if ((Array.isArray(curP) && curP.length > 0) || (curP && typeof curP === 'object' && Object.keys(curP).length > 0)) {
+              return; // Guard existing safe backup from wipe
+            }
+          }
+        } catch (_) {}
+      }
+      contentToWrite = JSON.stringify(data, null, 2);
+    } else if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, 'utf8').trim();
+      if (!raw || raw === '[]' || raw === '{}' || raw === 'null') {
+        return; // Do not back up empty stubs
+      }
+      contentToWrite = raw;
+    }
+
+    if (contentToWrite) {
+      const tempDest = `${destFile}.tmp.${Date.now()}.${Math.random().toString(36).substr(2, 4)}`;
+      fs.writeFileSync(tempDest, contentToWrite, 'utf8');
+      try {
+        fs.renameSync(tempDest, destFile);
+      } catch (_) {
+        fs.copyFileSync(tempDest, destFile);
+        try { fs.unlinkSync(tempDest); } catch (_) {}
+      }
+    }
+  } catch (err) {
+    console.error(`[EXTERNAL-BACKUP] Error saving copy of ${path.basename(filePath)}:`, err.message);
+  }
+}
+
+// Full sync of all existing populated critical files to external backup folder
+function backupAllCriticalFilesToExternal() {
+  try {
+    if (!fs.existsSync(EXTERNAL_BACKUP_DIR)) {
+      fs.mkdirSync(EXTERNAL_BACKUP_DIR, { recursive: true });
+    }
+    let count = 0;
+    CRITICAL_DATA_FILES.forEach(filePath => {
+      if (fs.existsSync(filePath)) {
+        try {
+          const raw = fs.readFileSync(filePath, 'utf8').trim();
+          if (raw && raw !== '[]' && raw !== '{}' && raw !== 'null') {
+            backupToExternalSafeDir(filePath);
+            count++;
+          }
+        } catch (_) {}
+      }
+    });
+    console.log(`[EXTERNAL-BACKUP] Safe external backup synchronized (${count} critical files secured to: ${EXTERNAL_BACKUP_DIR})`);
+  } catch (err) {
+    console.error('[EXTERNAL-BACKUP] Full backup error:', err.message);
+  }
+}
+
+// Restore single file from external backup (or from historical snapshots if external is empty)
+function restoreSingleFileFromExternal(filePath, onlyIfHasData = true) {
+  try {
+    const baseName = path.basename(filePath);
+    
+    // 1. Try reading from EXTERNAL_BACKUP_DIR (completely outside git)
+    const backupFile = path.join(EXTERNAL_BACKUP_DIR, baseName);
+    let parsed = null;
+    
+    if (fs.existsSync(backupFile)) {
+      try {
+        const raw = fs.readFileSync(backupFile, 'utf8').replace(/^\uFEFF/, '').trim();
+        if (raw && raw !== '[]' && raw !== '{}' && raw !== 'null') {
+          parsed = JSON.parse(raw);
+        }
+      } catch (err) {
+        console.warn(`[EXTERNAL-RESTORE] Error reading backup file ${backupFile}:`, err.message);
+      }
+    }
+
+    // 2. If not found in EXTERNAL_BACKUP_DIR, scan local BACKUPS_DIR (data/backups) for newest valid historical copy!
+    if (!parsed && fs.existsSync(BACKUPS_DIR)) {
+      try {
+        const backupDirs = fs.readdirSync(BACKUPS_DIR)
+          .filter(d => {
+            try { return fs.statSync(path.join(BACKUPS_DIR, d)).isDirectory(); } catch (_) { return false; }
+          })
+          .sort((a, b) => {
+            const timeA = fs.statSync(path.join(BACKUPS_DIR, a)).mtimeMs;
+            const timeB = fs.statSync(path.join(BACKUPS_DIR, b)).mtimeMs;
+            return timeB - timeA;
+          });
+
+        for (const dirName of backupDirs) {
+          const candidateFile = path.join(BACKUPS_DIR, dirName, baseName);
+          if (fs.existsSync(candidateFile)) {
+            try {
+              const rawCandidate = fs.readFileSync(candidateFile, 'utf8').replace(/^\uFEFF/, '').trim();
+              if (rawCandidate && rawCandidate !== '[]' && rawCandidate !== '{}' && rawCandidate !== 'null') {
+                const testParse = JSON.parse(rawCandidate);
+                const hasRecords = (Array.isArray(testParse) && testParse.length > 0) || 
+                                   (testParse && typeof testParse === 'object' && Object.keys(testParse).length > 0);
+                if (hasRecords) {
+                  parsed = testParse;
+                  console.log(`[EXTERNAL-RESTORE] Salvaged ${baseName} from historical snapshot '${dirName}'.`);
+                  break;
+                }
+              }
+            } catch (_) {}
+          }
+        }
+      } catch (snapErr) {
+        console.warn(`[EXTERNAL-RESTORE] Historical snapshot scan warning:`, snapErr.message);
+      }
+    }
+
+    if (!parsed) return null;
+
+    if (onlyIfHasData) {
+      const hasRecords = (Array.isArray(parsed) && parsed.length > 0) || 
+                         (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0);
+      if (!hasRecords) return null;
+    }
+
+    // Restore to primary filePath atomically
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    const tempFile = `${filePath}.safe_restore.${Date.now()}`;
+    fs.writeFileSync(tempFile, JSON.stringify(parsed, null, 2), 'utf8');
+    try {
+      fs.renameSync(tempFile, filePath);
+    } catch (_) {
+      fs.copyFileSync(tempFile, filePath);
+      try { fs.unlinkSync(tempFile); } catch (_) {}
+    }
+
+    // Ensure external backup folder also has this pristine copy
+    if (fs.existsSync(EXTERNAL_BACKUP_DIR)) {
+      const extDest = path.join(EXTERNAL_BACKUP_DIR, baseName);
+      try {
+        fs.writeFileSync(extDest, JSON.stringify(parsed, null, 2), 'utf8');
+      } catch (_) {}
+    }
+
+    console.log(`[EXTERNAL-RESTORE] ✅ Restored ${baseName} (${Array.isArray(parsed) ? parsed.length + ' records' : 'config data'}) from safe backup.`);
+    return parsed;
+  } catch (err) {
+    console.error(`[EXTERNAL-RESTORE] Failed to restore ${path.basename(filePath)}:`, err.message);
+    return null;
+  }
+}
+
+// Auto-Restore: verify and restore missing, empty, or corrupted critical files on server startup
+function restoreFromExternalSafeDir() {
+  console.log('[EXTERNAL-RESTORE] Verifying integrity of critical database files against safe external backups...');
+  try {
+    CRITICAL_DATA_FILES.forEach(filePath => {
+      let isMissingOrEmpty = false;
+
+      if (!fs.existsSync(filePath)) {
+        isMissingOrEmpty = true;
+      } else {
+        try {
+          const raw = fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '').trim();
+          if (!raw || raw === '[]' || raw === '{}' || raw === 'null') {
+            isMissingOrEmpty = true;
+          } else {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length === 0) {
+              isMissingOrEmpty = true;
+            } else if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Object.keys(parsed).length === 0) {
+              isMissingOrEmpty = true;
+            }
+          }
+        } catch (parseErr) {
+          isMissingOrEmpty = true; // Corrupted file
+        }
+      }
+
+      if (isMissingOrEmpty) {
+        restoreSingleFileFromExternal(filePath, true);
+      } else {
+        // Healthy primary file exists; sync it to external backup immediately to keep backup fresh!
+        backupToExternalSafeDir(filePath);
+      }
+    });
+  } catch (err) {
+    console.error('[EXTERNAL-RESTORE] Error during startup scan:', err.message);
+  }
+}
+
+// JSON DB Helper functions (Optimized O(1) in-memory cache with stat verification)
+// NEVER writes empty JSON arrays ([] or {}) to critical database files!
+function readJson(file, defaultValue = []) {
+  try {
+    if (!fs.existsSync(file)) {
+      // 1. If critical file, attempt immediate restore from safe external backup!
+      if (isCriticalFile(file)) {
+        const restored = restoreSingleFileFromExternal(file, true);
+        if (restored !== null) {
+          try {
+            memoryJsonCache.set(file, { data: restored, mtime: fs.statSync(file).mtimeMs });
+          } catch (_) {}
+          return restored;
+        }
+        // Critical file missing and no backup exists: NEVER write empty [] or {} to disk!
+        return defaultValue;
+      }
+
+      // 2. Non-critical configuration files:
+      fs.writeFileSync(file, JSON.stringify(defaultValue, null, 2), 'utf8');
+      try {
+        memoryJsonCache.set(file, { data: defaultValue, mtime: fs.statSync(file).mtimeMs });
+      } catch (_) {}
+      return defaultValue;
+    }
+
+    const currentMtime = fs.statSync(file).mtimeMs;
+    const cached = memoryJsonCache.get(file);
+    if (cached && cached.mtime === currentMtime) {
+      return cached.data;
+    }
+
+    const rawData = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '').trim();
+    if (!rawData) {
+      if (isCriticalFile(file)) {
+        const restored = restoreSingleFileFromExternal(file, true);
+        if (restored !== null) {
+          try { memoryJsonCache.set(file, { data: restored, mtime: fs.statSync(file).mtimeMs }); } catch (_) {}
+          return restored;
+        }
+      }
+      return defaultValue;
+    }
+
+    const parsed = JSON.parse(rawData);
+
+    // If critical file is an empty array [] on disk, check if backup has actual records to restore!
+    if (isCriticalFile(file)) {
+      const isEmpty = (Array.isArray(parsed) && parsed.length === 0) || 
+                      (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Object.keys(parsed).length === 0);
+      if (isEmpty) {
+        const restored = restoreSingleFileFromExternal(file, true);
+        if (restored !== null) {
+          try { memoryJsonCache.set(file, { data: restored, mtime: fs.statSync(file).mtimeMs }); } catch (_) {}
+          return restored;
+        }
+      }
+    }
+
+    memoryJsonCache.set(file, { data: parsed, mtime: currentMtime });
+    return parsed;
+  } catch (err) {
+    console.error(`Error reading ${file}:`, err.message);
+    if (isCriticalFile(file)) {
+      const restored = restoreSingleFileFromExternal(file, true);
+      if (restored !== null) return restored;
+    }
+    return defaultValue;
+  }
+}
+
+// Atomic crash-proof JSON writer with data wiping guard
+function writeJson(file, data, singleItemToMirror = null) {
+  try {
+    const jsonStr = JSON.stringify(data, null, 2);
+    if (!jsonStr || jsonStr === 'undefined') return;
+
+    // Safety guard: NEVER write empty data over a populated critical file!
+    if (isCriticalFile(file)) {
+      const isEmpty = (Array.isArray(data) && data.length === 0) || 
+                      (data && typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length === 0);
+      if (isEmpty && fs.existsSync(file)) {
+        try {
+          const currentRaw = fs.readFileSync(file, 'utf8').trim();
+          if (currentRaw && currentRaw !== '[]' && currentRaw !== '{}') {
+            const currentParsed = JSON.parse(currentRaw);
+            const currentHasData = (Array.isArray(currentParsed) && currentParsed.length > 0) || 
+                                   (currentParsed && typeof currentParsed === 'object' && Object.keys(currentParsed).length > 0);
+            if (currentHasData) {
+              console.warn(`[DATABASE-SAFETY] Blocked attempt to wipe critical file ${path.basename(file)} with empty data! Existing records preserved.`);
+              return;
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    const tempFile = `${file}.tmp.${Date.now()}.${Math.random().toString(36).substr(2, 4)}`;
+    fs.writeFileSync(tempFile, jsonStr, 'utf8');
+    try {
+      fs.renameSync(tempFile, file);
+    } catch (renameErr) {
+      fs.copyFileSync(tempFile, file);
+      try { fs.unlinkSync(tempFile); } catch (e) {}
+    }
+
+    // Update in-memory cache instantly
+    try {
+      const mtime = fs.statSync(file).mtimeMs;
+      memoryJsonCache.set(file, { data, mtime });
+    } catch (e) {
+      memoryJsonCache.set(file, { data, mtime: Date.now() });
+    }
+
+    // Auto-save external backup copy to ../safe_database_backups/
+    if (isCriticalFile(file)) {
+      backupToExternalSafeDir(file, data);
+    }
+
+    // Double Safety Mirroring to MySQL
+    mirrorToMySql(file, data, singleItemToMirror);
+  } catch (err) {
+    console.error(`Error writing ${file}:`, err);
+  }
+}
+
+// Synchronously run external auto-restore on module boot before routes or state load
+try {
+  restoreFromExternalSafeDir();
+} catch (startupRestoreErr) {
+  console.error('[STARTUP RESTORE ERROR]:', startupRestoreErr.message);
+}
+
 function getPartners() {
   let partners = readJson(PARTNERS_FILE, null);
   if (!Array.isArray(partners) || partners.length === 0) {
-    const perm = readJson(PARTNERS_PERMANENT_STORE_FILE, []);
+    const perm = readJson(PARTNERS_PERMANENT_STORE_FILE, null);
     if (Array.isArray(perm) && perm.length > 0) {
       partners = perm;
       writeJson(PARTNERS_FILE, partners);
     } else {
-      partners = partners || [];
+      const restored = restoreSingleFileFromExternal(PARTNERS_FILE, true);
+      if (Array.isArray(restored) && restored.length > 0) {
+        partners = restored;
+        writeJson(PARTNERS_PERMANENT_STORE_FILE, partners);
+      } else {
+        partners = [];
+      }
+    }
+  } else {
+    backupToExternalSafeDir(PARTNERS_FILE, partners);
+    const perm = readJson(PARTNERS_PERMANENT_STORE_FILE, null);
+    if (!Array.isArray(perm) || perm.length === 0) {
+      writeJson(PARTNERS_PERMANENT_STORE_FILE, partners);
     }
   }
   return partners;
@@ -80,6 +491,8 @@ function savePartners(partners) {
   writeJson(PARTNERS_FILE, partners);
   if (Array.isArray(partners) && partners.length > 0) {
     writeJson(PARTNERS_PERMANENT_STORE_FILE, partners);
+    backupToExternalSafeDir(PARTNERS_FILE, partners);
+    backupToExternalSafeDir(PARTNERS_PERMANENT_STORE_FILE, partners);
   }
 }
 
@@ -89,6 +502,9 @@ function getPartnerPayouts() {
 
 function savePartnerPayouts(payouts) {
   writeJson(PARTNER_PAYOUTS_FILE, payouts);
+  if (Array.isArray(payouts) && payouts.length > 0) {
+    backupToExternalSafeDir(PARTNER_PAYOUTS_FILE, payouts);
+  }
 }
 
 function getPartnerSettings() {
@@ -97,6 +513,7 @@ function getPartnerSettings() {
 
 function savePartnerSettings(settings) {
   writeJson(PARTNER_SETTINGS_FILE, settings);
+  backupToExternalSafeDir(PARTNER_SETTINGS_FILE, settings);
 }
 
 function getPartnerPromoRequests() {
@@ -105,6 +522,9 @@ function getPartnerPromoRequests() {
 
 function savePartnerPromoRequests(requests) {
   writeJson(PARTNER_PROMO_REQUESTS_FILE, requests);
+  if (Array.isArray(requests) && requests.length > 0) {
+    backupToExternalSafeDir(PARTNER_PROMO_REQUESTS_FILE, requests);
+  }
 }
 
 // Partner Tier & Level Helper Functions (Exact 10-sale milestone progression)
@@ -218,74 +638,8 @@ function getPartnerDynamicRateForNextSale(existingSalesCount) {
   return 50; // 41 and above is 50%
 }
 
-const DOWNLOADS_DIR = path.join(__dirname, 'public', 'downloads');
-const TRADERS_VAULT_DIR = path.join(DATA_DIR, 'lifelong_traders_vault');
-const TRADERS_VAULT_FILE = path.join(TRADERS_VAULT_DIR, 'master_registered_traders_vault.json');
-const TRADERS_VAULT_PROFILES_DIR = path.join(TRADERS_VAULT_DIR, 'traders');
-const TRADERS_VAULT_AUDIT_LOG = path.join(TRADERS_VAULT_DIR, 'vault_audit_log.jsonl');
-const MASTER_SECURITY_PASSWORD = 'AJHAR1';
-
-// Ensure directories exist
-[DATA_DIR, UPLOADS_DIR, BACKUPS_DIR, DOWNLOADS_DIR, TRADERS_VAULT_DIR, TRADERS_VAULT_PROFILES_DIR].forEach(dir => {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-});
-
-// High-Speed In-Memory Cache for High Concurrency (20k-50k users)
-const memoryJsonCache = new Map();
-
-// JSON DB Helper functions (Optimized O(1) in-memory cache with stat verification)
-function readJson(file, defaultValue = []) {
-  try {
-    if (!fs.existsSync(file)) {
-      fs.writeFileSync(file, JSON.stringify(defaultValue, null, 2), 'utf8');
-      memoryJsonCache.set(file, { data: defaultValue, mtime: fs.statSync(file).mtimeMs });
-      return defaultValue;
-    }
-
-    const currentMtime = fs.statSync(file).mtimeMs;
-    const cached = memoryJsonCache.get(file);
-    if (cached && cached.mtime === currentMtime) {
-      return cached.data;
-    }
-
-    const data = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
-    const parsed = JSON.parse(data || '[]');
-    memoryJsonCache.set(file, { data: parsed, mtime: currentMtime });
-    return parsed;
-  } catch (err) {
-    console.error(`Error reading ${file}:`, err);
-    return defaultValue;
-  }
-}
-
-// Atomic crash-proof JSON writer to prevent data loss or corruption
-function writeJson(file, data, singleItemToMirror = null) {
-  try {
-    const jsonStr = JSON.stringify(data, null, 2);
-    if (!jsonStr || jsonStr === 'undefined') return;
-    const tempFile = `${file}.tmp.${Date.now()}.${Math.random().toString(36).substr(2, 4)}`;
-    fs.writeFileSync(tempFile, jsonStr, 'utf8');
-    try {
-      fs.renameSync(tempFile, file);
-    } catch (renameErr) {
-      fs.copyFileSync(tempFile, file);
-      try { fs.unlinkSync(tempFile); } catch (e) {}
-    }
-
-    // Update in-memory cache instantly
-    try {
-      const mtime = fs.statSync(file).mtimeMs;
-      memoryJsonCache.set(file, { data, mtime });
-    } catch (e) {
-      memoryJsonCache.set(file, { data, mtime: Date.now() });
-    }
-
-    // Double Safety Mirroring to MySQL (Efficient, non-blocking)
-    mirrorToMySql(file, data, singleItemToMirror);
-  } catch (err) {
-    console.error(`Error writing ${file}:`, err);
-  }
-}
+// Note: Core storage paths, memoryJsonCache, readJson, writeJson and external auto-backup system
+// are initialized and secured at the top of server.js
 
 // Asynchronously mirror local writes to MySQL when active
 function mirrorToMySql(file, data, singleItemToMirror = null) {
@@ -3222,12 +3576,24 @@ function getPromoPresets() {
 function getPromoCodes() {
   let codes = readJson(PROMO_CODES_FILE, null);
   if (!Array.isArray(codes) || codes.length === 0) {
-    const perm = readJson(PROMO_CODES_PERMANENT_STORE_FILE, []);
+    const perm = readJson(PROMO_CODES_PERMANENT_STORE_FILE, null);
     if (Array.isArray(perm) && perm.length > 0) {
       codes = perm;
       writeJson(PROMO_CODES_FILE, codes);
     } else {
-      codes = codes || [];
+      const restored = restoreSingleFileFromExternal(PROMO_CODES_FILE, true);
+      if (Array.isArray(restored) && restored.length > 0) {
+        codes = restored;
+        writeJson(PROMO_CODES_PERMANENT_STORE_FILE, codes);
+      } else {
+        codes = [];
+      }
+    }
+  } else {
+    backupToExternalSafeDir(PROMO_CODES_FILE, codes);
+    const perm = readJson(PROMO_CODES_PERMANENT_STORE_FILE, null);
+    if (!Array.isArray(perm) || perm.length === 0) {
+      writeJson(PROMO_CODES_PERMANENT_STORE_FILE, codes);
     }
   }
   return codes;
@@ -3237,6 +3603,8 @@ function savePromoCodes(codes) {
   writeJson(PROMO_CODES_FILE, codes);
   if (Array.isArray(codes) && codes.length > 0) {
     writeJson(PROMO_CODES_PERMANENT_STORE_FILE, codes);
+    backupToExternalSafeDir(PROMO_CODES_FILE, codes);
+    backupToExternalSafeDir(PROMO_CODES_PERMANENT_STORE_FILE, codes);
   }
 }
 
@@ -10523,30 +10891,23 @@ app.all('/api/system/auto-deploy', (req, res) => {
 
   console.log(`[AUTO-DEPLOY] Live deployment triggered at ${new Date().toISOString()}`);
 
-  // 1. Create an automated safety snapshot before pulling code
+  // 1. Fully backup all critical files to external safe folder outside git repository scope
+  try {
+    backupAllCriticalFilesToExternal();
+  } catch (extErr) {
+    console.error('[AUTO-DEPLOY] External backup warning:', extErr.message);
+  }
+
+  // 2. Create an automated safety snapshot before pulling code
   try {
     createDatabaseBackup('pre_deploy');
   } catch (bErr) {
     console.error('[AUTO-DEPLOY] Pre-deploy backup warning:', bErr.message);
   }
 
-  // 2. Capture in-memory snapshots of critical dynamic database files so they are 100% immune to loss
-  const criticalFiles = [
-    PROMO_CODES_FILE,
-    PROMO_CODES_PERMANENT_STORE_FILE,
-    PARTNERS_FILE,
-    PARTNERS_PERMANENT_STORE_FILE,
-    PARTNER_PAYOUTS_FILE,
-    PARTNER_SETTINGS_FILE,
-    PARTNER_PROMO_REQUESTS_FILE,
-    LAUNCH_PROMO_FILE,
-    PROMO_PRESETS_FILE,
-    PAYOUTS_FILE,
-    PAYOUT_SETTINGS_FILE
-  ];
-
+  // 3. Capture in-memory snapshots of critical dynamic database files so they are 100% immune to loss
   const inMemorySnapshots = {};
-  criticalFiles.forEach(f => {
+  CRITICAL_DATA_FILES.forEach(f => {
     try {
       if (fs.existsSync(f)) {
         inMemorySnapshots[f] = fs.readFileSync(f, 'utf8');
@@ -10554,19 +10915,25 @@ app.all('/api/system/auto-deploy', (req, res) => {
     } catch (e) {}
   });
 
-  // 3. Stash any tracked modifications, pull origin main, and safely restore stashed data
+  // 4. Stash any tracked modifications, pull origin main, and safely restore stashed data
   const pullCommand = 'git stash && git pull origin main && (git stash pop || true)';
 
   exec(pullCommand, { cwd: __dirname }, (err, stdout, stderr) => {
-    // 4. In ALL cases (even if stash pop conflict or pull), immediately verify and restore critical data files
-    criticalFiles.forEach(f => {
+    // 5. In ALL cases, immediately run external auto-restore to guarantee zero data loss
+    try {
+      restoreFromExternalSafeDir();
+    } catch (rErr) {
+      console.error('[AUTO-DEPLOY] External restore error:', rErr.message);
+    }
+
+    // Secondary memory fallback
+    CRITICAL_DATA_FILES.forEach(f => {
       try {
         const snap = inMemorySnapshots[f];
         if (snap && snap.trim().length > 2) {
-          // If file is missing or was overwritten with empty/shorter data, restore real snapshot
           if (!fs.existsSync(f) || fs.readFileSync(f, 'utf8').trim() === '[]' || fs.readFileSync(f, 'utf8').trim() === '') {
             fs.writeFileSync(f, snap, 'utf8');
-            console.log(`[AUTO-DEPLOY] Restored critical data for ${path.basename(f)} from pre-deploy snapshot.`);
+            console.log(`[AUTO-DEPLOY] Restored critical data for ${path.basename(f)} from pre-deploy in-memory snapshot.`);
           }
         }
       } catch (rErr) {
@@ -10574,10 +10941,11 @@ app.all('/api/system/auto-deploy', (req, res) => {
       }
     });
 
-    // Safety check: ensure partners and promo codes are intact
+    // 6. Safety check: ensure partners and promo codes are intact
     try {
       getPartners();
       getPromoCodes();
+      backupAllCriticalFilesToExternal();
     } catch (e) {
       console.error('[AUTO-DEPLOY] Post-deploy store check warning:', e.message);
     }
@@ -10614,6 +10982,14 @@ app.listen(PORT, async () => {
   console.log(`📊 External Binary Prop Challenges | 85% Profit Share`);
   console.log(`⚡ Supported Brokers: Quotex, Pocket Option, Olymp, etc.`);
   console.log(`💾 Enterprise Data Permanence & Crash-Proof Storage: ACTIVE`);
+
+  // Verify and auto-restore all critical database files from safe external backups
+  try {
+    restoreFromExternalSafeDir();
+    backupAllCriticalFilesToExternal();
+  } catch (bootSafeErr) {
+    console.error('[BOOT DATABASE RESTORE ERROR]:', bootSafeErr.message);
+  }
 
   // Initialize MySQL Database (Hostinger / Live Environment)
   try {
