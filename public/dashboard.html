@@ -2423,7 +2423,8 @@
                 margin-bottom: 8px !important;
             }
             #extActionBtnWrap {
-                display: none !important;
+                display: flex !important;
+                flex-shrink: 0 !important;
             }
             #extChallengeFilterInfo {
                 padding: 6px 10px !important;
@@ -3018,14 +3019,44 @@
                 display: none !important; /* Hide redundant clutter text on mobile completely! */
             }
             #extStatusBanner {
-                padding: 10px 14px !important;
-                gap: 10px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                flex-wrap: nowrap !important;
+                gap: 8px !important;
+                padding: 9px 12px !important;
+                border-radius: 10px !important;
+                margin-bottom: 8px !important;
+            }
+            #extStatusBanner > div:first-child {
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                flex: 1 1 auto !important;
+                min-width: 0 !important;
             }
             #extStatusTitle {
-                font-size: 0.88rem !important;
+                font-size: 0.86rem !important;
+                line-height: 1.25 !important;
             }
             #extStatusSub {
+                font-size: 0.72rem !important;
+                line-height: 1.35 !important;
+            }
+            #extActionBtnWrap {
+                display: flex !important;
+                flex-shrink: 0 !important;
+                align-items: center !important;
+            }
+            #extActionBtnWrap a {
+                padding: 6px 10px !important;
                 font-size: 0.74rem !important;
+                white-space: nowrap !important;
+                border-radius: 6px !important;
+                font-weight: 800 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 5px !important;
             }
             #extChallengeFilterInfo {
                 padding: 8px 12px !important;
