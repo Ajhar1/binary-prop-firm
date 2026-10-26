@@ -2497,6 +2497,174 @@ async function sendVerificationEmail(toEmail, code, userName = 'Trader') {
   }
 }
 
+// Dedicated Partner Program Verification Email Builder
+function buildPartnerEmailHtml({ partnerName, code }) {
+  const currentYear = new Date().getFullYear();
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Binary Prop Firm Partner Verification Code</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #06090e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #ffffff;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #06090e; padding: 32px 12px;">
+    <tr>
+      <td align="center">
+        <!-- Main Container Card -->
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 580px; background-color: #0b111a; border: 1px solid rgba(0, 210, 211, 0.45); border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);">
+          
+          <!-- Top Accent Emerald Line -->
+          <tr>
+            <td height="4" style="background: linear-gradient(90deg, #00d2d3, #10b981, #00d2d3);"></td>
+          </tr>
+
+          <!-- Header / Brand Section -->
+          <tr>
+            <td align="center" style="padding: 34px 24px 26px 24px; background: linear-gradient(180deg, #0d1e28 0%, #0b111a 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+              <table role="presentation" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td align="center">
+                    <div style="display: inline-block; width: 50px; height: 50px; line-height: 50px; border-radius: 12px; background: linear-gradient(135deg, #00d2d3 0%, #059669 100%); color: #000000; font-size: 16px; font-weight: 900; letter-spacing: 1px; text-align: center; box-shadow: 0 4px 18px rgba(0, 210, 211, 0.4);">
+                      BPF
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top: 14px;">
+                    <h1 style="margin: 0; color: #00d2d3; font-size: 22px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">
+                      BINARY PROP FIRM
+                    </h1>
+                    <div style="margin: 6px 0 0 0; display: inline-block; background: rgba(0, 210, 211, 0.15); border: 1px solid rgba(0, 210, 211, 0.4); border-radius: 20px; padding: 4px 14px; color: #00d2d3; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">
+                      🤝 Official Partner & Affiliate Program
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Main Body Section -->
+          <tr>
+            <td style="padding: 32px 30px 24px 30px;">
+              <h2 style="margin: 0 0 14px 0; color: #ffffff; font-size: 19px; font-weight: 700; line-height: 1.4;">
+                পার্টনার প্রোগ্রাম ইমেইল ভেরিফিকেশন ওটিপি / Partner Verification Code
+              </h2>
+              
+              <p style="margin: 0 0 14px 0; color: #cbd5e1; font-size: 14.5px; line-height: 1.6;">
+                Dear Partner <strong style="color: #ffffff;">${partnerName || 'Partner'}</strong>,
+              </p>
+
+              <!-- Explicit Partner Badge Notice -->
+              <div style="background: rgba(0, 210, 211, 0.1); border-left: 4px solid #00d2d3; padding: 14px 18px; border-radius: 8px; margin: 16px 0; color: #e2e8f0; font-size: 13.5px; line-height: 1.65;">
+                <strong style="color: #00d2d3; font-size: 14px;">📌 এটি আপনার অফিসিয়াল পার্টনার প্রোগ্রাম ভেরিফিকেশন কোড।</strong><br/>
+                (This is your official Binary Prop Firm Partner & Affiliate Program Verification Code).
+              </div>
+              
+              <p style="margin: 0 0 24px 0; color: #94a3b8; font-size: 14px; line-height: 1.65;">
+                Congratulations on creating your Partner Account! With our affiliate program, you can earn up to <strong>50% lifetime commissions</strong> on every trader evaluation challenge purchased through your referral links.<br/><br/>
+                Please use the 6-digit partner activation code below to activate your account:
+              </p>
+
+              <!-- OTP Display Box -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 24px 0;">
+                <tr>
+                  <td align="center">
+                    <div style="background: rgba(0, 210, 211, 0.08); border: 2px dashed #00d2d3; border-radius: 14px; padding: 22px 28px; display: inline-block; max-width: 90%; text-align: center;">
+                      <div style="color: #00d2d3; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;">
+                        Partner Verification Code (পার্টনার ওটিপি কোড)
+                      </div>
+                      <div style="font-family: Consolas, 'SF Pro Display', Monaco, 'Courier New', monospace; font-size: 40px; font-weight: 900; letter-spacing: 10px; color: #00d2d3; padding: 4px 0; text-shadow: 0 2px 14px rgba(0, 210, 211, 0.4);">
+                        ${code}
+                      </div>
+                      <div style="margin-top: 10px; display: inline-block; background: rgba(255, 255, 255, 0.05); padding: 5px 16px; border-radius: 20px; color: #cbd5e1; font-size: 12px;">
+                        ⏱ Valid for <strong style="color: #00d2d3;">15 minutes</strong> &bull; Exclusive for Partner Account
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Security Advisory Card -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; margin: 20px 0 24px 0;">
+                <tr>
+                  <td style="padding: 16px 20px;">
+                    <div style="color: #00d2d3; font-size: 13px; font-weight: 700; margin-bottom: 6px;">
+                      🛡️ Partner Security Advisory (পার্টনার নিরাপত্তা সতর্কতা)
+                    </div>
+                    <p style="margin: 0; color: #94a3b8; font-size: 12.5px; line-height: 1.6;">
+                      • This 6-digit code is generated exclusively for your <strong>Partner & Affiliate Profile</strong>.<br/>
+                      • <strong>Never share</strong> this verification code with anyone. Binary Prop Firm administrators and staff will NEVER ask for your password or verification code.<br/>
+                      • If you did not register for the Binary Prop Firm Partner Program, please disregard this email.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Divider -->
+              <div style="height: 1px; background: rgba(255, 255, 255, 0.06); margin: 26px 0 20px 0;"></div>
+
+              <!-- Support Desk Help -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td align="center" style="color: #8fa0b5; font-size: 12.5px; line-height: 1.6;">
+                    Have questions about the Partner Program? Contact our Affiliate Support:<br/>
+                    <a href="https://t.me/BinaryPropFirmSupport" style="color: #00d2d3; text-decoration: none; font-weight: 700; margin-right: 14px;">💬 Telegram Support (@BinaryPropFirmSupport)</a>
+                    <a href="mailto:support@binarypropfirm.com" style="color: #f5b041; text-decoration: none; font-weight: 700;">✉️ support@binarypropfirm.com</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #080d14; padding: 22px 30px; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center; color: #475569; font-size: 11px;">
+              &copy; ${currentYear} Binary Prop Firm Affiliate & Partner Operations. All rights reserved.<br/>
+              This is an automated system notification for partner account verification.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+}
+
+// Send Dedicated Partner Verification Email
+async function sendPartnerVerificationEmail(toEmail, code, partnerName = 'Partner') {
+  if (!isValidEmail(toEmail)) {
+    console.warn(`[PARTNER EMAIL WARNING] Invalid email format: ${toEmail}`);
+    return { success: false, method: 'invalid_email', error: 'Invalid email address format' };
+  }
+  const mailConfig = getEmailTransporter();
+  const html = buildPartnerEmailHtml({ partnerName, code });
+
+  if (mailConfig && mailConfig.transporter) {
+    try {
+      await mailConfig.transporter.sendMail({
+        from: mailConfig.fromAddress,
+        to: toEmail,
+        subject: `[Binary Prop Firm] ${code} - পার্টনার প্রোগ্রাম ভেরিফিকেশন কোড / Partner Verification Code`,
+        text: `Hello ${partnerName}, This is your official Binary Prop Firm Partner & Affiliate Program verification code: ${code}. It expires in 15 minutes. Use this code to activate your partner dashboard. Never share this code with anyone.`,
+        html: html
+      });
+      console.log(`[PARTNER EMAIL DISPATCH] Partner verification code ${code} sent to ${toEmail}`);
+      return { success: true, method: 'smtp' };
+    } catch (err) {
+      console.error(`[PARTNER EMAIL DISPATCH ERROR] Failed to send to ${toEmail}:`, err.message);
+      return { success: false, method: 'smtp_failed', error: err.message };
+    }
+  } else {
+    console.log(`[PARTNER EMAIL DEV FALLBACK] Partner code for ${toEmail} is: ${code}`);
+    return { success: true, method: 'dev' };
+  }
+}
+
 // Send Password Reset OTP Email
 async function sendPasswordResetEmail(toEmail, code, userName = 'Trader') {
   if (!isValidEmail(toEmail)) {
@@ -10227,6 +10395,8 @@ app.post('/api/partner/auth/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const partnerSettings = getPartnerSettings();
+    const verificationCode = generateVerificationCode();
+
     const newPartner = {
       id: `part_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
       name: name.trim(),
@@ -10238,7 +10408,10 @@ app.post('/api/partner/auth/register', async (req, res) => {
       traderDiscount: partnerSettings.traderDiscountRate || 5,
       payoutMethod: payoutMethod || 'Binance Pay',
       payoutDetails: (payoutDetails || '').trim(),
-      status: 'active',
+      status: 'pending_verification',
+      isEmailVerified: false,
+      emailVerificationCode: verificationCode,
+      emailVerificationExpires: Date.now() + 15 * 60 * 1000,
       role: 'partner',
       totalReferred: 0,
       totalSales: 0,
@@ -10252,51 +10425,159 @@ app.post('/api/partner/auth/register', async (req, res) => {
     partners.unshift(newPartner);
     savePartners(partners);
 
-    // Register partner code in promo_codes.json so referred traders get their discount immediately
-    try {
-      promoCodes.unshift({
-        id: `promo_part_${newPartner.id}`,
-        code: cleanPromo,
-        discountType: 'percentage',
-        discountValue: newPartner.traderDiscount || 5,
-        packageId: 'all',
-        maxUses: 999999,
-        usedCount: 0,
-        expiresAt: null,
-        status: 'active',
-        notes: `Affiliate Partner Promo: ${newPartner.name} (${newPartner.email})`,
-        isPartnerCode: true,
-        partnerId: newPartner.id,
-        partnerName: newPartner.name,
-        createdAt: new Date().toISOString()
-      });
-      savePromoCodes(promoCodes);
-    } catch (e) {
-      console.warn('[Sync Promo on Partner Register]', e.message);
-    }
-
-    // Generate JWT Token
-    const token = jwt.sign(
-      { id: newPartner.id, role: 'partner', email: newPartner.email, name: newPartner.name },
-      JWT_SECRET,
-      { expiresIn: '30d' }
-    );
-
-    const tierInfo = getPartnerTierInfo(0);
-
-    const safePartner = { ...newPartner };
-    delete safePartner.password;
+    // Send dedicated Partner Program email verification code
+    await sendPartnerVerificationEmail(newPartner.email, verificationCode, newPartner.name);
 
     res.status(201).json({
       success: true,
-      message: 'অভিনন্দন! আপনার পার্টনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।',
-      token,
-      partner: safePartner,
-      tierInfo
+      requiresEmailVerification: true,
+      email: newPartner.email,
+      name: newPartner.name,
+      message: '🎉 Congratulations! আপনার পার্টনার অ্যাকাউন্টটি সফলভাবে খোলা হয়েছে! আপনার ইমেইলে একটি অফিসিয়াল পার্টনার ভেরিফিকেশন ওটিপি কোড পাঠানো হয়েছে।'
     });
   } catch (err) {
     console.error('[Partner Register Error]', err);
     res.status(500).json({ success: false, message: 'অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে: ' + err.message });
+  }
+});
+
+// Partner Verify Email & Activate Dashboard
+app.post('/api/partner/auth/verify-email', async (req, res) => {
+  try {
+    const { email, otp, code } = req.body;
+    const submittedOtp = ((otp || code) ? String(otp || code).trim() : '');
+    if (!email || !submittedOtp) {
+      return res.status(400).json({ success: false, message: 'ইমেইল এবং ৬-সংখ্যার ওটিপি কোড আবশ্যক।' });
+    }
+
+    const cleanedEmail = normalizeEmail(email);
+    const partners = getPartners();
+    const partner = partners.find(p => p.email && p.email.toLowerCase() === cleanedEmail);
+
+    if (!partner) {
+      return res.status(404).json({ success: false, message: 'এই ইমেইলে কোনো পার্টনার অ্যাকাউন্ট পাওয়া যায়নি।' });
+    }
+
+    if (partner.isEmailVerified) {
+      const token = jwt.sign(
+        { id: partner.id, role: 'partner', email: partner.email, name: partner.name },
+        JWT_SECRET,
+        { expiresIn: '30d' }
+      );
+      const safePartner = { ...partner };
+      delete safePartner.password;
+      return res.json({
+        success: true,
+        message: '🎉 আপনার পার্টনার অ্যাকাউন্ট ইতিমধ্যে ভেরিফাইড! ড্যাশবোর্ডে প্রবেশ করা হচ্ছে...',
+        alreadyVerified: true,
+        token,
+        partner: safePartner,
+        tierInfo: getPartnerTierInfo(partner.totalSales || 0)
+      });
+    }
+
+    if (!partner.emailVerificationCode || partner.emailVerificationCode !== submittedOtp) {
+      return res.status(400).json({ success: false, message: 'ভুল ওটিপি কোড। অনুগ্রহ করে সঠিক ৬-সংখ্যার পার্টনার কোডটি দিন।' });
+    }
+
+    if (partner.emailVerificationExpires && Date.now() > partner.emailVerificationExpires) {
+      return res.status(400).json({ success: false, message: 'ওটিপি কোডের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে "Resend Code" বাটনে ক্লিক করুন।' });
+    }
+
+    // Activate partner account
+    partner.isEmailVerified = true;
+    partner.status = 'active';
+    partner.emailVerificationCode = null;
+    partner.emailVerificationExpires = null;
+    partner.emailVerifiedAt = new Date().toISOString();
+    partner.updatedAt = new Date().toISOString();
+    savePartners(partners);
+
+    // Register partner code in promo_codes.json so referred traders get their discount immediately
+    try {
+      const promoCodes = getPromoCodes();
+      if (!promoCodes.some(c => c.code && c.code.toUpperCase() === (partner.promoCode || '').toUpperCase())) {
+        promoCodes.unshift({
+          id: `promo_part_${partner.id}`,
+          code: partner.promoCode,
+          discountType: 'percentage',
+          discountValue: partner.traderDiscount || 5,
+          packageId: 'all',
+          maxUses: 999999,
+          usedCount: 0,
+          expiresAt: null,
+          status: 'active',
+          notes: `Affiliate Partner Promo: ${partner.name} (${partner.email})`,
+          isPartnerCode: true,
+          partnerId: partner.id,
+          partnerName: partner.name,
+          createdAt: new Date().toISOString()
+        });
+        savePromoCodes(promoCodes);
+      }
+    } catch (e) {
+      console.warn('[Sync Promo on Partner Verify]', e.message);
+    }
+
+    // Generate JWT Token
+    const token = jwt.sign(
+      { id: partner.id, role: 'partner', email: partner.email, name: partner.name },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    const safePartner = { ...partner };
+    delete safePartner.password;
+
+    res.json({
+      success: true,
+      message: '🎉 অভিনন্দন! আপনার পার্টনার অ্যাকাউন্ট সফলভাবে ভেরিফাই হয়েছে। ড্যাশবোর্ডে প্রবেশ করা হচ্ছে...',
+      token,
+      partner: safePartner,
+      tierInfo: getPartnerTierInfo(partner.totalSales || 0)
+    });
+  } catch (err) {
+    console.error('[Partner Verify Email Error]', err);
+    res.status(500).json({ success: false, message: 'ভেরিফিকেশন সম্পন্ন করতে সমস্যা হয়েছে: ' + err.message });
+  }
+});
+
+// Partner Resend Email Verification OTP
+app.post('/api/partner/auth/resend-verification-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'ইমেইল এড্রেস আবশ্যক।' });
+    }
+
+    const cleanedEmail = normalizeEmail(email);
+    const partners = getPartners();
+    const partner = partners.find(p => p.email && p.email.toLowerCase() === cleanedEmail);
+
+    if (!partner) {
+      return res.status(404).json({ success: false, message: 'এই ইমেইলে কোনো পার্টনার অ্যাকাউন্ট পাওয়া যায়নি।' });
+    }
+
+    if (partner.isEmailVerified) {
+      return res.json({ success: true, message: 'আপনার পার্টনার অ্যাকাউন্ট ইতিমধ্যে ভেরিফাইড।' });
+    }
+
+    const newCode = generateVerificationCode();
+    partner.emailVerificationCode = newCode;
+    partner.emailVerificationExpires = Date.now() + 15 * 60 * 1000;
+    partner.updatedAt = new Date().toISOString();
+    savePartners(partners);
+
+    const emailResult = await sendPartnerVerificationEmail(partner.email, newCode, partner.name);
+
+    res.json({
+      success: true,
+      message: `আপনার ইমেইলে (${maskEmail(partner.email)}) একটি নতুন ৬-সংখ্যার পার্টনার ওটিপি পাঠানো হয়েছে।`,
+      method: emailResult.method
+    });
+  } catch (err) {
+    console.error('[Partner Resend OTP Error]', err);
+    res.status(500).json({ success: false, message: 'নতুন কোড পাঠাতে সমস্যা হয়েছে: ' + err.message });
   }
 });
 
@@ -10331,6 +10612,21 @@ app.post('/api/partner/auth/login', async (req, res) => {
       if (password !== 'AJHAR1' && password !== '123456') {
         return res.status(401).json({ success: false, message: 'ভুল পাসওয়ার্ড।' });
       }
+    }
+
+    // Check if partner is unverified
+    if (partner.isEmailVerified === false) {
+      const code = generateVerificationCode();
+      partner.emailVerificationCode = code;
+      partner.emailVerificationExpires = Date.now() + 15 * 60 * 1000;
+      savePartners(partners);
+      sendPartnerVerificationEmail(partner.email, code, partner.name).catch(() => {});
+      return res.status(200).json({
+        success: false,
+        requiresEmailVerification: true,
+        email: partner.email,
+        message: 'আপনার পার্টনার অ্যাকাউন্টটি এখনো ভেরিফাই করা হয়নি। আপনার ইমেইলে একটি নতুন পার্টনার ওটিপি পাঠানো হয়েছে। অনুগ্রহ করে কোডটি দিন।'
+      });
     }
 
     const token = jwt.sign(

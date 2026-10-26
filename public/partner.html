@@ -3239,7 +3239,7 @@ Start your funded trading journey today! 📈
             </div>
 
             <!-- Tab Switcher -->
-            <div class="auth-tabs">
+            <div class="auth-tabs" id="partnerAuthTabs">
                 <button type="button" class="auth-tab-btn active" id="tabBtnLogin" onclick="switchAuthTab('login')">
                     <i class="fas fa-sign-in-alt"></i> Sign In
                 </button>
@@ -3325,8 +3325,57 @@ Start your funded trading journey today! 📈
                 </button>
             </form>
 
+            <!-- EMAIL VERIFICATION SECTION (CONGRATULATIONS & OTP) -->
+            <div id="partnerVerifySection" style="display:none; text-align:center; padding:8px 4px 4px 4px;">
+                <div style="width:72px; height:72px; margin:0 auto 16px auto; border-radius:50%; background:linear-gradient(135deg, rgba(0,230,118,0.2) 0%, rgba(0,229,255,0.25) 100%); border:2px solid var(--emerald); display:flex; align-items:center; justify-content:center; box-shadow:0 0 30px rgba(0,230,118,0.4);">
+                    <i class="fas fa-check-circle" style="font-size:2.4rem; color:var(--emerald);"></i>
+                </div>
+
+                <div style="display:inline-block; padding:5px 16px; background:rgba(0,230,118,0.12); border:1px solid rgba(0,230,118,0.3); border-radius:30px; font-size:0.75rem; font-weight:800; color:var(--emerald); letter-spacing:0.8px; margin-bottom:12px; text-transform:uppercase;">
+                    🎉 Congratulations! Partner Account Created
+                </div>
+
+                <h2 style="font-size:1.4rem; font-weight:900; color:#ffffff; margin:0 0 8px 0; letter-spacing:-0.3px; line-height:1.3;">
+                    অভিনন্দন! আপনার পার্টনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে
+                </h2>
+
+                <p style="font-size:0.88rem; color:#b0bec5; line-height:1.55; margin:0 0 16px 0;">
+                    আপনার পার্টনার অ্যাকাউন্টের নিরাপত্তা নিশ্চিত করতে এবং পার্টনার ড্যাশবোর্ডে প্রবেশ করতে আপনার ইমেইলে পাঠানো <strong style="color:var(--emerald);">৬-সংখ্যার পার্টনার ভেরিফিকেশন কোডটি</strong> নিচে প্রবেশ করান:
+                </p>
+
+                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:9px 16px; margin:0 auto 18px auto; display:inline-flex; align-items:center; gap:8px; max-width:100%;">
+                    <i class="fas fa-envelope-open-text" style="color:var(--emerald);"></i>
+                    <span id="partnerVerifyTargetEmail" style="font-weight:700; color:#fff; font-size:0.92rem; word-break:break-all;">partner@example.com</span>
+                </div>
+
+                <form id="partnerVerifyForm" onsubmit="handlePartnerVerifyEmail(event)">
+                    <div class="auth-form-group" style="text-align:left; margin-bottom:14px;">
+                        <label style="display:block; margin-bottom:6px; font-size:0.82rem; font-weight:700; color:#cfd8dc;">
+                            <i class="fas fa-key" style="color:var(--emerald);"></i> পার্টনার প্রোগ্রাম ভেরিফিকেশন কোড (OTP)
+                        </label>
+                        <input type="text" class="form-control" id="partnerVerifyOtpInput" placeholder="• • • • • •" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" required autocomplete="one-time-code" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" style="font-size:1.6rem; letter-spacing:8px; text-align:center; font-weight:900; color:var(--emerald); background:rgba(0,0,0,0.45); border:2px solid rgba(0,230,118,0.4); height:54px;">
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px; text-align:center;">
+                            কোডটি ১৫ মিনিটের জন্য কার্যকর থাকবে। স্প্যাম ফোল্ডারও চেক করতে পারেন।
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-emerald" id="btnPartnerVerifySubmit" style="width:100%; padding:14px; font-size:1rem; font-weight:800; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fas fa-unlock-alt"></i> ড্যাশবোর্ডে প্রবেশ করুন (Verify & Access)
+                    </button>
+                </form>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; font-size:0.83rem; gap:10px; flex-wrap:wrap;">
+                    <button type="button" onclick="cancelPartnerVerify()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:600; padding:6px 0;">
+                        <i class="fas fa-arrow-left"></i> অন্য ইমেইল ব্যবহার করুন
+                    </button>
+                    <button type="button" id="btnPartnerResendOtp" onclick="handlePartnerResendOtp()" style="background:none; border:none; color:var(--emerald); cursor:pointer; font-weight:700; padding:6px 0;">
+                        <i class="fas fa-redo-alt"></i> কোড পুনরায় পাঠান <span id="partnerResendTimer"></span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Commission Scale Quick Highlights Strip -->
-            <div class="tier-preview-strip">
+            <div class="tier-preview-strip" id="partnerAuthTierStrip">
                 <div class="tier-mini-card">
                     <strong>1–10 Sales</strong>
                     <span>10% Comm</span>
@@ -3710,22 +3759,167 @@ Start your funded trading journey today! 📈
         }
 
         // ================= AUTH FUNCTIONS =================
+        let pendingPartnerVerifyEmail = '';
+        let partnerResendCooldown = 0;
+        let partnerResendTimerInterval = null;
+
         function switchAuthTab(tab) {
             const btnLogin = document.getElementById('tabBtnLogin');
             const btnReg = document.getElementById('tabBtnRegister');
             const formLogin = document.getElementById('partnerLoginForm');
             const formReg = document.getElementById('partnerRegisterForm');
+            const tabs = document.getElementById('partnerAuthTabs');
+            const verifySec = document.getElementById('partnerVerifySection');
+            const tierStrip = document.getElementById('partnerAuthTierStrip');
+
+            if (tabs) tabs.style.display = 'flex';
+            if (verifySec) verifySec.style.display = 'none';
+            if (tierStrip) tierStrip.style.display = '';
 
             if (tab === 'login') {
-                btnLogin.classList.add('active');
-                btnReg.classList.remove('active');
-                formLogin.style.display = 'block';
-                formReg.style.display = 'none';
+                if (btnLogin) btnLogin.classList.add('active');
+                if (btnReg) btnReg.classList.remove('active');
+                if (formLogin) formLogin.style.display = 'block';
+                if (formReg) formReg.style.display = 'none';
             } else {
-                btnReg.classList.add('active');
-                btnLogin.classList.remove('active');
-                formReg.style.display = 'block';
-                formLogin.style.display = 'none';
+                if (btnReg) btnReg.classList.add('active');
+                if (btnLogin) btnLogin.classList.remove('active');
+                if (formReg) formReg.style.display = 'block';
+                if (formLogin) formLogin.style.display = 'none';
+            }
+        }
+
+        function showPartnerVerifySection(email, successMessage) {
+            pendingPartnerVerifyEmail = email || '';
+            const tabs = document.getElementById('partnerAuthTabs');
+            const formLogin = document.getElementById('partnerLoginForm');
+            const formReg = document.getElementById('partnerRegisterForm');
+            const verifySec = document.getElementById('partnerVerifySection');
+            const tierStrip = document.getElementById('partnerAuthTierStrip');
+            const emailSpan = document.getElementById('partnerVerifyTargetEmail');
+            const otpInput = document.getElementById('partnerVerifyOtpInput');
+
+            if (tabs) tabs.style.display = 'none';
+            if (formLogin) formLogin.style.display = 'none';
+            if (formReg) formReg.style.display = 'none';
+            if (tierStrip) tierStrip.style.display = 'none';
+            if (emailSpan) emailSpan.textContent = email || '';
+            if (otpInput) {
+                otpInput.value = '';
+                setTimeout(() => otpInput.focus(), 250);
+            }
+            if (verifySec) verifySec.style.display = 'block';
+
+            startPartnerResendCooldown(60);
+        }
+
+        function cancelPartnerVerify() {
+            switchAuthTab('register');
+        }
+
+        function startPartnerResendCooldown(seconds) {
+            partnerResendCooldown = seconds;
+            const btn = document.getElementById('btnPartnerResendOtp');
+            const timerSpan = document.getElementById('partnerResendTimer');
+            if (btn) btn.disabled = true;
+
+            if (partnerResendTimerInterval) clearInterval(partnerResendTimerInterval);
+
+            partnerResendTimerInterval = setInterval(() => {
+                partnerResendCooldown--;
+                if (timerSpan) {
+                    timerSpan.textContent = `(${partnerResendCooldown}s)`;
+                }
+                if (partnerResendCooldown <= 0) {
+                    clearInterval(partnerResendTimerInterval);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-redo-alt"></i> কোড পুনরায় পাঠান';
+                    }
+                    if (timerSpan) timerSpan.textContent = '';
+                }
+            }, 1000);
+        }
+
+        async function handlePartnerVerifyEmail(e) {
+            e.preventDefault();
+            const otp = (document.getElementById('partnerVerifyOtpInput').value || '').trim();
+            const email = pendingPartnerVerifyEmail;
+            const btn = document.getElementById('btnPartnerVerifySubmit');
+
+            if (!email) {
+                showToast('সেশন পাওয়া যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।', 'error');
+                switchAuthTab('register');
+                return;
+            }
+            if (!otp || otp.length !== 6) {
+                showToast('অনুগ্রহ করে সঠিক ৬-সংখ্যার পার্টনার কোডটি দিন।', 'error');
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ভেরিফাই করা হচ্ছে...';
+
+                const res = await fetch('/api/partner/auth/verify-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp, code: otp })
+                });
+
+                const data = await res.json();
+                if (data.success && data.token) {
+                    partnerToken = data.token;
+                    localStorage.setItem('bpf_partner_token', data.token);
+                    partnerData = data.partner;
+                    partnerTierInfo = data.tierInfo;
+                    showToast('🎉 অভিনন্দন! আপনার পার্টনার অ্যাকাউন্ট সফলভাবে সক্রিয় করা হয়েছে।', 'success');
+                    closeAuthModal();
+                    await fetchPartnerMe();
+                    showDashboardView();
+                } else {
+                    showToast(data.message || 'ভুল বা মেয়াদোত্তীর্ণ ওটিপি কোড।', 'error');
+                }
+            } catch (err) {
+                showToast('ভেরিফিকেশন ত্রুটি: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-unlock-alt"></i> ড্যাশবোর্ডে প্রবেশ করুন (Verify & Access)';
+            }
+        }
+
+        async function handlePartnerResendOtp() {
+            if (partnerResendCooldown > 0) return;
+            const email = pendingPartnerVerifyEmail;
+            if (!email) {
+                showToast('অনুগ্রহ করে আগে রেজিস্টার বা সাইন ইন করুন।', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btnPartnerResendOtp');
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> কোড পাঠানো হচ্ছে...';
+
+                const res = await fetch('/api/partner/auth/resend-verification-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'নতুন ভেরিফিকেশন কোড আপনার ইমেইলে পাঠানো হয়েছে!', 'success');
+                    startPartnerResendCooldown(60);
+                } else {
+                    showToast(data.message || 'কোড পুনরায় পাঠাতে ব্যর্থ হয়েছে।', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-redo-alt"></i> কোড পুনরায় পাঠান';
+                }
+            } catch (err) {
+                showToast('সার্ভার ত্রুটি: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-redo-alt"></i> কোড পুনরায় পাঠান';
             }
         }
 
@@ -3783,6 +3977,12 @@ Start your funded trading journey today! 📈
                 });
 
                 const data = await res.json();
+                if (data.requiresEmailVerification) {
+                    showToast(data.message || 'Please verify your partner email.', 'info');
+                    showPartnerVerifySection(data.email || email);
+                    return;
+                }
+
                 if (data.success && data.token) {
                     partnerToken = data.token;
                     localStorage.setItem('bpf_partner_token', data.token);
@@ -3829,6 +4029,12 @@ Start your funded trading journey today! 📈
                 });
 
                 const data = await res.json();
+                if (data.requiresEmailVerification) {
+                    showToast(data.message || 'Account created! Enter the verification code sent to your email.', 'success');
+                    showPartnerVerifySection(data.email || email, data.message);
+                    return;
+                }
+
                 if (data.success && data.token) {
                     partnerToken = data.token;
                     localStorage.setItem('bpf_partner_token', data.token);
