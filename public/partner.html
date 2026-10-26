@@ -2696,44 +2696,44 @@
             <nav class="sidebar-nav">
                 <div class="nav-link active" onclick="switchPartnerTab('overview', this)">
                     <i class="fas fa-tachometer-alt" style="color:var(--emerald);"></i>
-                    <span>ওভারভিউ (Overview)</span>
+                    <span>Overview</span>
                 </div>
                 <div class="nav-link" onclick="switchPartnerTab('referral-tools', this)">
                     <i class="fas fa-qrcode" style="color:var(--cyan);"></i>
-                    <span>রেফারেল লিংক ও QR</span>
+                    <span>Referral Link &amp; QR</span>
                 </div>
                 <div class="nav-link" onclick="switchPartnerTab('sales-log', this)">
                     <i class="fas fa-shopping-cart" style="color:var(--gold);"></i>
-                    <span>সেলস ও কমিশন হিস্টোরি</span>
+                    <span>Sales &amp; Earnings</span>
                 </div>
                 <div class="nav-link" onclick="switchPartnerTab('promo-codes', this)">
                     <i class="fas fa-tags" style="color:var(--purple);"></i>
-                    <span>কাস্টম প্রোমো কোড</span>
+                    <span>Custom Promo Codes</span>
                 </div>
                 <div class="nav-link" onclick="switchPartnerTab('payouts', this)">
                     <i class="fas fa-hand-holding-usd" style="color:#10b981;"></i>
-                    <span>কমিশন উইথড্রয়াল</span>
+                    <span>Payouts &amp; Withdraw</span>
                 </div>
                 <div class="nav-link" onclick="switchPartnerTab('settings', this)">
                     <i class="fas fa-user-cog" style="color:#94a3b8;"></i>
-                    <span>প্রোফাইল সেটিংস</span>
+                    <span>Settings</span>
                 </div>
 
                 <div style="margin-top:auto; padding-top:1rem; border-top:1px solid var(--border-subtle); display:flex; flex-direction:column; gap:4px;">
                     <div class="nav-link" onclick="previewLandingPage(event)" style="color:var(--cyan); cursor:pointer;">
                         <i class="fas fa-globe"></i>
-                        <span>ল্যান্ডিং পেজ প্রিভিউ</span>
+                        <span>Preview Landing Page</span>
                     </div>
                     <a href="/dashboard" target="_blank" class="nav-link" style="color:#60a5fa;">
                         <i class="fas fa-external-link-alt"></i>
-                        <span>ট্রেডার ড্যাশবোর্ড</span>
+                        <span>Trader Dashboard</span>
                     </a>
                 </div>
             </nav>
 
             <div class="sidebar-footer">
                 <button type="button" class="btn-outline" onclick="handlePartnerLogout()" style="width:100%; justify-content:center; padding:9px; font-size:0.84rem; border-color:rgba(239,68,68,0.3); color:#f87171;">
-                    <i class="fas fa-sign-out-alt"></i> লগআউট (Logout)
+                    <i class="fas fa-sign-out-alt"></i> Sign Out
                 </button>
             </div>
         </aside>
@@ -2747,8 +2747,8 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <div>
-                        <div style="font-size:1.05rem; font-weight:800; color:#fff;" id="topPartnerWelcome">স্বাগতম, পার্টনার!</div>
-                        <div style="font-size:0.75rem; color:var(--text-muted);">Binary Prop Firm অফিসিয়াল পার্টনার ড্যাশবোর্ড</div>
+                        <div style="font-size:1.05rem; font-weight:800; color:#fff;" id="topPartnerWelcome">Welcome, Partner!</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">Binary Prop Firm Partner Portal</div>
                     </div>
                 </div>
 
@@ -2759,16 +2759,16 @@
                     </span>
 
                     <!-- Withdrawable commission pill -->
-                    <div class="partner-pill clickable" onclick="openPayoutModal()" title="উইথড্র করতে ক্লিক করুন">
+                    <div class="partner-pill clickable" onclick="openPayoutModal()" title="Click to withdraw">
                         <i class="fas fa-wallet" style="color:var(--emerald);"></i>
                         <div>
-                            <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">উত্তোলনযোগ্য ব্যালেন্স</div>
+                            <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Available Balance</div>
                             <div style="font-size:0.92rem; font-weight:900; color:#fff;" id="topWithdrawableAmount">$0.00</div>
                         </div>
                     </div>
 
                     <button type="button" class="btn-gold" onclick="openPayoutModal()" style="padding:8px 16px; font-size:0.84rem;">
-                        <i class="fas fa-arrow-down"></i> উইথড্র দিন
+                        <i class="fas fa-arrow-down"></i> Withdraw
                     </button>
                 </div>
             </header>
@@ -2788,21 +2788,21 @@
                                         LEVEL 1: BRONZE
                                     </span>
                                     <span style="font-size:0.85rem; font-weight:800; color:#fff;" id="heroCommissionRateBadge">
-                                        ১০% প্রতি চ্যালেঞ্জ সেল
+                                        10% Commission / Sale
                                     </span>
                                 </div>
                                 <h2 style="font-size:1.45rem; font-weight:900; margin:8px 0 4px 0; color:#fff;" id="heroPartnerNameGreeting">
-                                    হ্যালো, পার্টনার!
+                                    Hello, Partner!
                                 </h2>
                                 <p style="font-size:0.85rem; color:var(--text-muted); max-width:620px;" id="heroProgressionStatusText">
-                                    আপনি প্রতিটি রেফারেল চ্যালেঞ্জ বিক্রয় থেকে লাইভ কমিশন পাচ্ছেন। পরবর্তী লেভেলে পৌঁছাতে আরও সেলস সম্পন্ন করুন!
+                                    Earn instant commission on every referred challenge sale. Refer more traders to unlock higher tiers.
                                 </p>
                             </div>
 
                             <div style="text-align:right;">
-                                <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">পরবর্তী লেভেল কমিশন রেট</div>
-                                <div style="font-size:1.6rem; font-weight:900; color:var(--emerald);" id="heroNextRateText">২০%</div>
-                                <div style="font-size:0.75rem; color:#60a5fa;" id="heroSalesNeededText">আরও ১০টি সেল প্রয়োজন</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Next Tier Rate</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:var(--emerald);" id="heroNextRateText">20%</div>
+                                <div style="font-size:0.75rem; color:#60a5fa;" id="heroSalesNeededText">10 more sales needed</div>
                             </div>
                         </div>
 
@@ -2812,8 +2812,8 @@
                         </div>
 
                         <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted);">
-                            <span id="heroProgressLabelLeft">০ / ১০ সেলস সম্পন্ন</span>
-                            <span id="heroProgressLabelRight">০% অগ্রগতি</span>
+                            <span id="heroProgressLabelLeft">0 / 10 Sales</span>
+                            <span id="heroProgressLabelRight">0% Progress</span>
                         </div>
                     </div>
 
@@ -2821,92 +2821,92 @@
                     <div class="stats-grid">
                         <div class="stat-card glass">
                             <div class="stat-header">
-                                <span class="stat-title">উত্তোলনযোগ্য ব্যালেন্স</span>
+                                <span class="stat-title">Available Balance</span>
                                 <div class="stat-icon" style="background:rgba(0, 230, 118, 0.15); color:var(--emerald);">
                                     <i class="fas fa-wallet"></i>
                                 </div>
                             </div>
                             <div class="stat-value" id="statWithdrawable" style="color:var(--emerald);">$0.00</div>
-                            <div class="stat-sub">সরাসরি উইথড্র করার জন্য প্রস্তুত</div>
+                            <div class="stat-sub">Ready for withdrawal</div>
                         </div>
 
                         <div class="stat-card glass">
                             <div class="stat-header">
-                                <span class="stat-title">মোট কমিশন আয়</span>
+                                <span class="stat-title">Total Earned</span>
                                 <div class="stat-icon" style="background:rgba(168, 85, 247, 0.15); color:var(--purple);">
                                     <i class="fas fa-coins"></i>
                                 </div>
                             </div>
                             <div class="stat-value" id="statTotalEarned" style="color:#c084fc;">$0.00</div>
-                            <div class="stat-sub">আজ পর্যন্ত অর্জিত সর্বমোট কমিশন</div>
+                            <div class="stat-sub">All-time commissions</div>
                         </div>
 
                         <div class="stat-card glass">
                             <div class="stat-header">
-                                <span class="stat-title">মোট পেইড আউট</span>
+                                <span class="stat-title">Total Paid Out</span>
                                 <div class="stat-icon" style="background:rgba(16, 185, 129, 0.15); color:#10b981;">
                                     <i class="fas fa-check-circle"></i>
                                 </div>
                             </div>
                             <div class="stat-value" id="statTotalPaid" style="color:#10b981;">$0.00</div>
-                            <div class="stat-sub">আপনার ওয়ালেটে পাঠানো সম্পন্ন</div>
+                            <div class="stat-sub">Transferred to wallet</div>
                         </div>
 
                         <div class="stat-card glass">
                             <div class="stat-header">
-                                <span class="stat-title">রেফারেল চ্যালেঞ্জ সেলস</span>
+                                <span class="stat-title">Referred Sales</span>
                                 <div class="stat-icon" style="background:rgba(245, 176, 65, 0.15); color:var(--gold);">
                                     <i class="fas fa-trophy"></i>
                                 </div>
                             </div>
                             <div class="stat-value" id="statSalesCount" style="color:var(--gold);">0</div>
-                            <div class="stat-sub">সফলভাবে বিক্রি হওয়া চ্যালেঞ্জ সংখ্যা</div>
+                            <div class="stat-sub">Completed challenge sales</div>
                         </div>
 
                         <div class="stat-card glass">
                             <div class="stat-header">
-                                <span class="stat-title">রেফারেল সেলস ভলিউম</span>
+                                <span class="stat-title">Sales Volume</span>
                                 <div class="stat-icon" style="background:rgba(0, 240, 255, 0.15); color:var(--cyan);">
                                     <i class="fas fa-chart-line"></i>
                                 </div>
                             </div>
                             <div class="stat-value" id="statSalesVolume" style="color:var(--cyan);">$0.00</div>
-                            <div class="stat-sub">ট্রেডারদের মোট পেইড ভলিউম</div>
+                            <div class="stat-sub">Total trader purchases</div>
                         </div>
 
                         <div class="stat-card glass">
                             <div class="stat-header">
-                                <span class="stat-title">রেফারেল প্রোমো কোড</span>
+                                <span class="stat-title">Referral Promo Code</span>
                                 <div class="stat-icon" style="background:rgba(59, 130, 246, 0.15); color:#60a5fa;">
                                     <i class="fas fa-ticket-alt"></i>
                                 </div>
                             </div>
                             <div class="stat-value" id="statPromoCode" style="color:#fff; font-size:1.35rem; font-family:monospace;">CODE</div>
-                            <div class="stat-sub">ট্রেডার ছাড়: <strong id="statTraderDiscount">৫%</strong></div>
+                            <div class="stat-sub">Trader discount: <strong id="statTraderDiscount">5%</strong></div>
                         </div>
                     </div>
 
                     <!-- Quick Referral Link Share Box -->
                     <div class="glass" style="padding:1.5rem; border-radius:16px; margin-bottom:1.5rem;">
                         <h3 style="font-size:1.05rem; font-weight:800; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-share-alt" style="color:var(--emerald);"></i> আপনার ইউনিক রেফারেল লিংক ও প্রচার টুল
+                            <i class="fas fa-share-alt" style="color:var(--emerald);"></i> Your Referral Link &amp; Promotion Tools
                         </h3>
 
                         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
                             <div style="flex:1; min-width:260px; position:relative;">
                                 <input type="text" class="form-control" id="overviewRefLinkInput" readonly style="font-family:monospace; font-size:0.9rem; padding-right:85px; background:rgba(0,0,0,0.4);">
                                 <button type="button" class="btn-emerald" onclick="copyRefLink()" style="position:absolute; right:4px; top:4px; bottom:4px; padding:0 16px; font-size:0.82rem; border-radius:7px;">
-                                    <i class="fas fa-copy"></i> কপি
+                                    <i class="fas fa-copy"></i> Copy
                                 </button>
                             </div>
                             <button type="button" class="btn-outline" onclick="copyPromoCodeText()">
-                                <i class="fas fa-ticket-alt" style="color:var(--gold);"></i> কোড কপি করুন
+                                <i class="fas fa-ticket-alt" style="color:var(--gold);"></i> Copy Code
                             </button>
                         </div>
 
                         <!-- Instant Social Share Buttons -->
                         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-                            <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">তাৎক্ষণিক শেয়ার করুন:</span>
+                            <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Share directly:</span>
                             <button type="button" class="btn-outline" onclick="shareOnWhatsApp()" style="padding:6px 12px; font-size:0.8rem; border-color:rgba(37,211,102,0.3); color:#25D366;">
                                 <i class="fab fa-whatsapp"></i> WhatsApp
                             </button>
@@ -2924,50 +2924,50 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
                             <div>
                                 <h3 style="font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:8px;">
-                                    <i class="fas fa-layer-group" style="color:var(--gold);"></i> পার্টনার লেভেল ও ডায়নামিক কমিশন সিঁড়ি
+                                    <i class="fas fa-layer-group" style="color:var(--gold);"></i> Dynamic Commission Ladder
                                 </h3>
                                 <p style="font-size:0.8rem; color:var(--text-muted);">
-                                    চ্যালেঞ্জ সেল বৃদ্ধির সাথে সাথে আপনার একাউন্টের লেভেল ও কমিশন পার্সেন্টেজ স্বয়ংক্রিয়ভাবে বৃদ্ধি পাবে।
+                                    Commission increases automatically as your total challenge sales grow.
                                 </p>
                             </div>
                         </div>
 
                         <div class="tier-roadmap">
                             <div class="tier-step" id="tierCard-1">
-                                <div class="tier-num">লেভেল ১</div>
+                                <div class="tier-num">Tier 1</div>
                                 <div class="tier-name" style="color:#38bdf8;">Starter</div>
-                                <div class="tier-rate">১০%</div>
-                                <div class="tier-range">০+ সেলস (০ - ৪)</div>
+                                <div class="tier-rate">10%</div>
+                                <div class="tier-range">0–4 sales</div>
                             </div>
                             <div class="tier-step" id="tierCard-2">
-                                <div class="tier-num">লেভেল ২</div>
+                                <div class="tier-num">Tier 2</div>
                                 <div class="tier-name" style="color:#f59e0b;">Bronze</div>
-                                <div class="tier-rate">২০%</div>
-                                <div class="tier-range">৫+ সেলস (৫ - ১৪)</div>
+                                <div class="tier-rate">20%</div>
+                                <div class="tier-range">5–14 sales</div>
                             </div>
                             <div class="tier-step" id="tierCard-3">
-                                <div class="tier-num">লেভেল ৩</div>
+                                <div class="tier-num">Tier 3</div>
                                 <div class="tier-name" style="color:#cbd5e1;">Silver</div>
-                                <div class="tier-rate">৩০%</div>
-                                <div class="tier-range">১৫+ সেলস (১৫ - ২৯)</div>
+                                <div class="tier-rate">30%</div>
+                                <div class="tier-range">15–29 sales</div>
                             </div>
                             <div class="tier-step" id="tierCard-4">
-                                <div class="tier-num">লেভেল ৪</div>
+                                <div class="tier-num">Tier 4</div>
                                 <div class="tier-name" style="color:#fbbf24;">Gold</div>
-                                <div class="tier-rate">৪০%</div>
-                                <div class="tier-range">৩০+ সেলস (৩০ - ৪৯)</div>
+                                <div class="tier-rate">40%</div>
+                                <div class="tier-range">30–49 sales</div>
                             </div>
                             <div class="tier-step" id="tierCard-5">
-                                <div class="tier-num">লেভেল ৫</div>
+                                <div class="tier-num">Tier 5</div>
                                 <div class="tier-name" style="color:#c084fc;">Elite</div>
-                                <div class="tier-rate">৫০%</div>
-                                <div class="tier-range">৫০+ সেলস (৫০ - ৫৯)</div>
+                                <div class="tier-rate">50%</div>
+                                <div class="tier-range">50–59 sales</div>
                             </div>
                             <div class="tier-step" id="tierCard-6" style="border-color:rgba(255,215,0,0.4); background:radial-gradient(circle at 50% 0%, rgba(255,215,0,0.12) 0%, rgba(0,0,0,0.4) 100%);">
-                                <div class="tier-num" style="color:#ffd700;">মাস্টার লেভেল</div>
+                                <div class="tier-num" style="color:#ffd700;">Master Tier</div>
                                 <div class="tier-name" style="color:#ffd700;">Master</div>
-                                <div class="tier-rate" style="color:#ffd700;">৫৫%</div>
-                                <div class="tier-range" style="color:#ffd700; font-weight:800;">৬০+ পার্মানেন্ট</div>
+                                <div class="tier-rate" style="color:#ffd700;">55%</div>
+                                <div class="tier-range" style="color:#ffd700; font-weight:800;">60+ sales (Lifetime)</div>
                             </div>
                         </div>
                     </div>
@@ -2976,10 +2976,10 @@
                     <div class="glass" style="padding:1.5rem; border-radius:16px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                             <h3 style="font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:8px;">
-                                <i class="fas fa-history" style="color:var(--emerald);"></i> সাম্প্রতিক রেফারেল বিক্রয় ও কমিশন
+                                <i class="fas fa-history" style="color:var(--emerald);"></i> Recent Referral Sales & Commission
                             </h3>
                             <button type="button" class="btn-outline" onclick="switchPartnerTab('sales-log')" style="padding:6px 14px; font-size:0.8rem;">
-                                সম্পূর্ণ লগ দেখুন &rarr;
+                                View Full Log &rarr;
                             </button>
                         </div>
 
@@ -2987,19 +2987,19 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>তারিখ</th>
-                                        <th>ট্রেডার</th>
-                                        <th>প্যাকেজ</th>
-                                        <th>পেইড ফি</th>
-                                        <th>কমিশন রেট</th>
-                                        <th>আপনার কমিশন</th>
-                                        <th>স্ট্যাটাস</th>
+                                        <th>Date</th>
+                                        <th>Trader</th>
+                                        <th>Package</th>
+                                        <th>Fee Paid</th>
+                                        <th>Commission Rate</th>
+                                        <th>Your Commission</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="overviewRecentSalesTbody">
                                     <tr>
                                         <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">
-                                            লোড হচ্ছে...
+                                            Loading...
                                         </td>
                                     </tr>
                                 </tbody>
@@ -3013,35 +3013,35 @@
                 <div class="tab-panel" id="pane-referral-tools">
                     <div class="glass" style="padding:1.5rem; border-radius:18px; margin-bottom:1.5rem;">
                         <h2 style="font-size:1.25rem; font-weight:900; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-qrcode" style="color:var(--cyan);"></i> রেফারেল লিংক ও ডাউনলোডযোগ্য QR কোড
+                            <i class="fas fa-qrcode" style="color:var(--cyan);"></i> Referral Link & QR Code
                         </h2>
                         <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">
-                            এই লিঙ্ক বা QR কোড ব্যবহার করে যেকোনো ট্রেডার Binary Prop Firm-এ একাউন্ট খুলে চ্যালেঞ্জ কিনলে আপনি স্বয়ংক্রিয়ভাবে কমিশন পাবেন।
+                            Share your referral link or QR code. You earn lifetime commission on every challenge purchased.
                         </p>
 
                         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
                             <!-- QR Card -->
                             <div class="glass" style="padding:1.5rem; border-radius:14px; text-align:center; background:rgba(0,0,0,0.3);">
                                 <div style="font-weight:800; font-size:0.95rem; margin-bottom:12px; color:#fff;">
-                                    অফিশিয়াল পার্টনার QR কোড
+                                    Official Partner QR Code
                                 </div>
                                 <div id="qrcodeBox" style="background:#fff; padding:12px; border-radius:12px; display:inline-block; margin-bottom:14px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
                                     <!-- QR Code injected here -->
                                 </div>
                                 <div>
                                     <button type="button" class="btn-emerald" onclick="downloadQRCode()" style="padding:8px 18px; font-size:0.84rem;">
-                                        <i class="fas fa-download"></i> QR কোড ডাউনলোড করুন (PNG)
+                                        <i class="fas fa-download"></i> Download QR Code (PNG)
                                     </button>
                                 </div>
                                 <p style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
-                                    পোস্টার, ব্যানার, ফেসবুক ও ইউটিউব থাম্বনেইলে ব্যবহারের জন্য উপযোগী।
+                                    Use on banners, social media, videos, and channels.
                                 </p>
                             </div>
 
                             <!-- Link Details Card -->
                             <div style="display:flex; flex-direction:column; gap:12px;">
                                 <div class="glass" style="padding:1.25rem; border-radius:12px;">
-                                    <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">আপনার প্রাইমারি রেফারেল লিংক</label>
+                                    <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Primary Referral Link</label>
                                     <div style="display:flex; gap:8px; margin-top:6px;">
                                         <input type="text" class="form-control" id="toolsRefLink" readonly style="font-family:monospace; font-size:0.85rem; background:rgba(0,0,0,0.35);">
                                         <button type="button" class="btn-emerald" onclick="copyToolsLink()" style="padding:0 14px; font-size:0.84rem; flex-shrink:0;">
@@ -3051,7 +3051,7 @@
                                 </div>
 
                                 <div class="glass" style="padding:1.25rem; border-radius:12px;">
-                                    <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">প্রোমো কোড (Promo Code)</label>
+                                    <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Promo Code</label>
                                     <div style="display:flex; gap:8px; margin-top:6px;">
                                         <input type="text" class="form-control" id="toolsPromoCode" readonly style="font-family:monospace; font-weight:800; font-size:1.1rem; color:var(--gold); background:rgba(0,0,0,0.35);">
                                         <button type="button" class="btn-gold" onclick="copyToolsCode()" style="padding:0 14px; font-size:0.84rem; flex-shrink:0;">
@@ -3059,7 +3059,7 @@
                                         </button>
                                     </div>
                                     <p style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
-                                        ট্রেডাররা চ্যালেঞ্জ কেনার সময় এই কোডটি দিলে তাৎক্ষণিক <strong style="color:#60a5fa;" id="toolsDiscountText">৫%</strong> ডিসকাউন্ট পাবে।
+                                        Traders receive an instant <strong style="color:#60a5fa;" id="toolsDiscountText">5%</strong> discount at checkout.
                                     </p>
                                 </div>
                             </div>
@@ -3069,51 +3069,44 @@
                     <!-- Marketing Copy / Promotional Blurbs -->
                     <div class="glass" style="padding:1.5rem; border-radius:18px;">
                         <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-bullhorn" style="color:var(--gold);"></i> তৈরি প্রমোশনাল টেক্সট (Ready-to-use Marketing Copy)
+                            <i class="fas fa-bullhorn" style="color:var(--gold);"></i> Ready Marketing Copy
                         </h3>
                         <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">
-                            সোশ্যাল মিডিয়া, ফেসবুক গ্রুপ বা টেলিগ্রাম চ্যানেলে এক ক্লিকে পোস্ট করার জন্য নিচের তৈরি পোস্টগুলো কপি করে শেয়ার করুন:
+                            Copy and share these pre-made posts on social media or trading groups:
                         </p>
 
                         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1rem;">
-                            <!-- Bangla Template -->
+                            <!-- Short Post -->
                             <div class="glass" style="padding:1.25rem; border-radius:12px; background:rgba(0,0,0,0.25);">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <strong style="color:var(--emerald); font-size:0.85rem;"><i class="fas fa-comment-dots"></i> বাংলা প্রমো পোস্ট</strong>
+                                    <strong style="color:var(--emerald); font-size:0.85rem;"><i class="fas fa-comment-dots"></i> Short Social Post</strong>
                                     <button type="button" class="btn-outline" onclick="copyPromoTemplate('bn')" style="padding:4px 10px; font-size:0.75rem;">
-                                        <i class="fas fa-copy"></i> কপি করুন
+                                        <i class="fas fa-copy"></i> Copy Text
                                     </button>
                                 </div>
-                                <div id="promoTemplateBn" style="font-size:0.82rem; line-height:1.6; color:#cbd5e1; white-space:pre-wrap; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; border:1px solid var(--border-subtle);">
-🔥 Quotex বা পছন্দের ব্রোকারে ট্রেড করে ফান্ডেড একাউন্ট পেতে চান? 
-Binary Prop Firm-এ পাস করলেই পাবেন ৭৫% থেকে ৮০% প্রফিট স্প্লিট এবং ইন্সট্যান্ট পে-আউট!
+                                <div id="promoTemplateBn" style="font-size:0.82rem; line-height:1.6; color:#cbd5e1; white-space:pre-wrap; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; border:1px solid var(--border-subtle);">🚀 Trade & get funded up to $65,000 with Binary Prop Firm!
+Keep up to 85% profit split with instant payouts.
 
-আমার রেফারেল লিংক থেকে জয়েন করে ডিসকাউন্ট উপভোগ করুন:
-🔗 {LINK}
-অথবা চ্যালেঞ্জ কেনার সময় প্রোমো কোড দিন: {CODE}
-
-আজই শুরু করুন এবং প্রফেশনাল ফান্ডেড ট্রেডার হোন! 🚀
-                                </div>
+🔗 Join here: {LINK}
+Use code for discount: {CODE}</div>
                             </div>
 
-                            <!-- English Template -->
+                            <!-- Detailed Post -->
                             <div class="glass" style="padding:1.25rem; border-radius:12px; background:rgba(0,0,0,0.25);">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <strong style="color:#60a5fa; font-size:0.85rem;"><i class="fas fa-globe"></i> English Promo Copy</strong>
+                                    <strong style="color:#60a5fa; font-size:0.85rem;"><i class="fas fa-globe"></i> Detailed Community Post</strong>
                                     <button type="button" class="btn-outline" onclick="copyPromoTemplate('en')" style="padding:4px 10px; font-size:0.75rem;">
                                         <i class="fas fa-copy"></i> Copy Text
                                     </button>
                                 </div>
-                                <div id="promoTemplateEn" style="font-size:0.82rem; line-height:1.6; color:#cbd5e1; white-space:pre-wrap; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; border:1px solid var(--border-subtle);">
-🚀 Trade on Quotex Demo & Get Funded with Binary Prop Firm!
+                                <div id="promoTemplateEn" style="font-size:0.82rem; line-height:1.6; color:#cbd5e1; white-space:pre-wrap; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; border:1px solid var(--border-subtle);">🚀 Trade on Quotex Demo & Get Funded with Binary Prop Firm!
 Pass the evaluation and keep up to 85% profit with bi-weekly automated payouts.
 
 Sign up using my exclusive partner link:
 🔗 {LINK}
 Use Promo Code for special discount: {CODE}
 
-Start your funded trading journey today! 📈
-                                </div>
+Start your funded trading journey today! 📈</div>
                             </div>
                         </div>
                     </div>
@@ -3126,21 +3119,21 @@ Start your funded trading journey today! 📈
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.25rem;">
                             <div>
                                 <h2 style="font-size:1.25rem; font-weight:900; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                                    <i class="fas fa-shopping-cart" style="color:var(--gold);"></i> রেফারেল সেলস ও কমিশন হিস্টোরি
+                                    <i class="fas fa-shopping-cart" style="color:var(--gold);"></i> Referral Sales & Commission History
                                 </h2>
                                 <p style="font-size:0.85rem; color:var(--text-muted);">
-                                    আপনার রেফারেল লিংকের মাধ্যমে কেনা প্রতিটি চ্যালেঞ্জের বিস্তারিত ও অর্জিত কমিশন লগ।
+                                    Detailed log of challenge sales and commissions earned via your link.
                                 </p>
                             </div>
 
                             <!-- Filter & Search -->
                             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                                 <select class="form-control" id="salesFilterStatus" onchange="filterSalesLog()" style="width:auto; padding:8px 12px; font-size:0.85rem;">
-                                    <option value="all">সকল স্ট্যাটাস (All)</option>
-                                    <option value="approved">অনুমোদিত (Approved)</option>
-                                    <option value="pending">পেন্ডিং পেমেন্ট (Pending)</option>
+                                    <option value="all">All Statuses</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="pending">Pending Payment</option>
                                 </select>
-                                <button type="button" class="btn-outline" onclick="fetchPartnerSalesLog()" title="রিফ্রেশ" style="padding:8px 12px;">
+                                <button type="button" class="btn-outline" onclick="fetchPartnerSalesLog()" title="Refresh" style="padding:8px 12px;">
                                     <i class="fas fa-sync-alt"></i>
                                 </button>
                             </div>
@@ -3150,20 +3143,20 @@ Start your funded trading journey today! 📈
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>তারিখ ও সময়</th>
-                                        <th>ট্রেডার নাম / ইমেইল</th>
-                                        <th>প্যাকেজ</th>
-                                        <th>ফান্ডিং সাইজ</th>
-                                        <th>পেইড ফি</th>
-                                        <th>লেভেল রেট</th>
-                                        <th>আপনার কমিশন</th>
-                                        <th>কমিশন স্ট্যাটাস</th>
+                                        <th>Date & Time</th>
+                                        <th>Trader</th>
+                                        <th>Package</th>
+                                        <th>Account Size</th>
+                                        <th>Fee Paid</th>
+                                        <th>Tier Rate</th>
+                                        <th>Your Commission</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="salesLogTbody">
                                     <tr>
                                         <td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
-                                            লোড হচ্ছে...
+                                            Loading...
                                         </td>
                                     </tr>
                                 </tbody>
@@ -3179,14 +3172,14 @@ Start your funded trading journey today! 📈
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.25rem;">
                             <div>
                                 <h2 style="font-size:1.25rem; font-weight:900; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                                    <i class="fas fa-tags" style="color:var(--purple);"></i> কাস্টম প্রোমো কোড ও ক্যাম্পেইন
+                                    <i class="fas fa-tags" style="color:var(--purple);"></i> Custom Promo Codes & Campaigns
                                 </h2>
                                 <p style="font-size:0.85rem; color:var(--text-muted);">
-                                    আপনার নামে কাস্টম প্রোমো কোড তৈরি করুন। অ্যাডমিন অনুমোদনের পর ট্রেডাররা এই কোড দিয়ে চ্যালেঞ্জে ডিসকাউন্ট পাবে।
+                                    Create custom promo codes for your audience. Once approved, traders receive special discounts.
                                 </p>
                             </div>
                             <button type="button" class="btn-gold" onclick="openCustomPromoModal()">
-                                <i class="fas fa-plus-circle"></i> নতুন প্রোমো কোডের আবেদন করুন
+                                <i class="fas fa-plus-circle"></i> Request New Promo Code
                             </button>
                         </div>
 
@@ -3194,13 +3187,13 @@ Start your funded trading journey today! 📈
                         <div class="glass" style="padding:1.25rem; border-radius:14px; margin-bottom:1.5rem; background:rgba(0,0,0,0.3); border-color:rgba(0,230,118,0.3);">
                             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                                 <div>
-                                    <span class="badge badge-success">ডিফল্ট প্রাইমারি কোড</span>
+                                    <span class="badge badge-success">Primary Promo Code</span>
                                     <div style="font-size:1.4rem; font-weight:900; color:var(--emerald); margin-top:4px; font-family:monospace;" id="promoPrimaryCodeDisplay">CODE</div>
-                                    <div style="font-size:0.8rem; color:var(--text-muted);">ট্রেডারদের ডিসকাউন্ট: <strong style="color:#60a5fa;" id="promoPrimaryDiscountDisplay">৫%</strong></div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">Trader Discount: <strong style="color:#60a5fa;" id="promoPrimaryDiscountDisplay">5%</strong></div>
                                 </div>
                                 <div>
                                     <button type="button" class="btn-outline" onclick="copyPromoCodeText()">
-                                        <i class="fas fa-copy"></i> কোড কপি
+                                        <i class="fas fa-copy"></i> Copy Code
                                     </button>
                                 </div>
                             </div>
@@ -3208,23 +3201,23 @@ Start your funded trading journey today! 📈
 
                         <!-- Custom Promo Codes & Requests List -->
                         <h3 style="font-size:1rem; font-weight:800; margin-bottom:10px; color:#fff;">
-                            কাস্টম প্রোমো কোড তালিকা ও আবেদন হিস্ট্রি
+                            Custom Promo Codes & Request History
                         </h3>
                         <div class="table-responsive">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>প্রোমো কোড</th>
-                                        <th>ট্রেডার ছাড় (%)</th>
-                                        <th>আবেদনের তারিখ</th>
-                                        <th>অ্যাডমিন নোট / স্ট্যাটাস</th>
-                                        <th>অ্যাকশন</th>
+                                        <th>Promo Code</th>
+                                        <th>Discount (%)</th>
+                                        <th>Request Date</th>
+                                        <th>Status / Admin Note</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="promoCodesTbody">
                                     <tr>
                                         <td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">
-                                            লোড হচ্ছে...
+                                            Loading...
                                         </td>
                                     </tr>
                                 </tbody>
@@ -3240,7 +3233,7 @@ Start your funded trading journey today! 📈
                     <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
                         <div class="stat-card glass" style="border-color:rgba(0, 230, 118, 0.4); background:linear-gradient(135deg, rgba(0, 230, 118, 0.08) 0%, rgba(18, 24, 38, 0.9) 100%);">
                             <div class="stat-header">
-                                <span class="stat-title" style="color:var(--emerald);">উত্তোলনযোগ্য ব্যালেন্স</span>
+                                <span class="stat-title" style="color:var(--emerald);">Available Balance</span>
                                 <div class="stat-icon" style="background:rgba(0, 230, 118, 0.2); color:var(--emerald);">
                                     <i class="fas fa-dollar-sign"></i>
                                 </div>
@@ -3248,42 +3241,42 @@ Start your funded trading journey today! 📈
                             <div class="stat-value" id="payoutWithdrawableVal" style="color:var(--emerald);">$0.00</div>
                             <div style="margin-top:12px;">
                                 <button type="button" class="btn-emerald" onclick="openPayoutModal()" style="width:100%; padding:10px; font-size:0.88rem;">
-                                    <i class="fas fa-paper-plane"></i> উইথড্র রিকোয়েস্ট পাঠান
+                                    <i class="fas fa-paper-plane"></i> Request Payout
                                 </button>
                             </div>
                         </div>
 
                         <div class="stat-card glass">
                             <div class="stat-header">
-                                <span class="stat-title">বিবেচনাধীন উইথড্র রিকোয়েস্ট</span>
+                                <span class="stat-title">Pending Payouts</span>
                                 <div class="stat-icon" style="background:rgba(245, 176, 65, 0.15); color:var(--gold);">
                                     <i class="fas fa-hourglass-half"></i>
                                 </div>
                             </div>
                             <div class="stat-value" id="payoutPendingRequestsVal" style="color:var(--gold);">$0.00</div>
-                            <div class="stat-sub">অ্যাডমিন প্রসেসিংয়ে রয়েছে</div>
+                            <div class="stat-sub">Under Admin Review</div>
                         </div>
 
                         <div class="stat-card glass">
                             <div class="stat-header">
-                                <span class="stat-title">সর্বমোট পেইড কমিশন</span>
+                                <span class="stat-title">Total Paid Commission</span>
                                 <div class="stat-icon" style="background:rgba(16, 185, 129, 0.15); color:#10b981;">
                                     <i class="fas fa-check-double"></i>
                                 </div>
                             </div>
                             <div class="stat-value" id="payoutTotalPaidVal" style="color:#10b981;">$0.00</div>
-                            <div class="stat-sub">সফলভাবে ট্রান্সফার করা হয়েছে</div>
+                            <div class="stat-sub">Successfully Transferred</div>
                         </div>
 
                         <div class="stat-card glass">
                             <div class="stat-header">
-                                <span class="stat-title">ন্যূনতম পে-আউট লিমিট</span>
+                                <span class="stat-title">Minimum Payout</span>
                                 <div class="stat-icon" style="background:rgba(59, 130, 246, 0.15); color:#60a5fa;">
                                     <i class="fas fa-info-circle"></i>
                                 </div>
                             </div>
                             <div class="stat-value" id="payoutMinLimitVal" style="color:#60a5fa;">$20.00</div>
-                            <div class="stat-sub">সর্বনিম্ন উইথড্রয়াল সীমা</div>
+                            <div class="stat-sub">Minimum Withdrawal Limit</div>
                         </div>
                     </div>
 
@@ -3292,10 +3285,10 @@ Start your funded trading journey today! 📈
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
                             <div>
                                 <h3 style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:8px;">
-                                    <i class="fas fa-list-ul" style="color:var(--emerald);"></i> পে-আউট রিকোয়েস্ট ও পেমেন্ট হিস্টোরি
+                                    <i class="fas fa-list-ul" style="color:var(--emerald);"></i> Payout Requests & History
                                 </h3>
                                 <p style="font-size:0.82rem; color:var(--text-muted);">
-                                    আপনার সকল উত্তোলন আবেদন এবং সম্পন্ন হওয়া পেমেন্টের ট্রানজেকশন আইডি ও হিস্টোরি।
+                                    All your withdrawal requests, status, and transaction details.
                                 </p>
                             </div>
                             <button type="button" class="btn-outline" onclick="fetchPartnerPayoutsHistory()" style="padding:8px 12px;">
@@ -3307,19 +3300,19 @@ Start your funded trading journey today! 📈
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>আবেদনের তারিখ</th>
-                                        <th>উইথড্র অ্যামাউন্ট</th>
-                                        <th>পেমেন্ট মেথড</th>
-                                        <th>রিসিভিং এড্রেস / ID</th>
-                                        <th>ট্রানজেকশন ID (TX ID)</th>
-                                        <th>স্ট্যাটাস</th>
-                                        <th>পেইড তারিখ / মন্তব্য</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Receiving Address / ID</th>
+                                        <th>Transaction ID (TXID)</th>
+                                        <th>Status</th>
+                                        <th>Paid Date / Notes</th>
                                     </tr>
                                 </thead>
                                 <tbody id="payoutHistoryTbody">
                                     <tr>
                                         <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">
-                                            লোড হচ্ছে...
+                                            Loading...
                                         </td>
                                     </tr>
                                 </tbody>
@@ -3335,24 +3328,24 @@ Start your funded trading journey today! 📈
                         <!-- Profile Info Form -->
                         <div class="glass" style="padding:1.5rem; border-radius:18px;">
                             <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
-                                <i class="fas fa-user-edit" style="color:var(--emerald);"></i> প্রোফাইল ও ডিফল্ট ওয়ালেট তথ্য
+                                <i class="fas fa-user-edit" style="color:var(--emerald);"></i> Profile & Payout Settings
                             </h3>
 
                             <form id="partnerProfileForm" onsubmit="handleUpdateProfile(event)">
                                 <div class="auth-form-group">
-                                    <label>পূর্ণ নাম (Full Name)</label>
+                                    <label>Full Name</label>
                                     <input type="text" class="form-control" id="setProfileName" required>
                                 </div>
                                 <div class="auth-form-group">
-                                    <label>ইমেইল এড্রেস (Email - অপরিবর্তনযোগ্য)</label>
+                                    <label>Email Address</label>
                                     <input type="email" class="form-control" id="setProfileEmail" readonly style="opacity:0.7; background:rgba(0,0,0,0.5);">
                                 </div>
                                 <div class="auth-form-group">
-                                    <label>ফোন / হোয়াটসঅ্যাপ নাম্বার (Phone/WhatsApp)</label>
+                                    <label>Phone / WhatsApp</label>
                                     <input type="tel" class="form-control" id="setProfilePhone">
                                 </div>
                                 <div class="auth-form-group">
-                                    <label>ডিফল্ট উইথড্রয়াল মেথড (Default Payout Method)</label>
+                                    <label>Default Payout Method</label>
                                     <select class="form-control" id="setPayoutMethod">
                                         <option value="Binance Pay">Binance Pay (Pay ID / UID)</option>
                                         <option value="USDT TRC20">USDT TRC-20 Address</option>
@@ -3361,12 +3354,12 @@ Start your funded trading journey today! 📈
                                     </select>
                                 </div>
                                 <div class="auth-form-group">
-                                    <label>ডিফল্ট রিসিভিং ওয়ালেট / একাউন্ট বিস্তারিত</label>
+                                    <label>Default Receiving Address / ID</label>
                                     <input type="text" class="form-control" id="setPayoutDetails" placeholder="e.g. Binance Pay UID / Wallet Address">
                                 </div>
 
                                 <button type="submit" class="btn-emerald" id="btnSaveProfile" style="margin-top:8px;">
-                                    <i class="fas fa-save"></i> প্রোফাইল তথ্য সংরক্ষণ করুন
+                                    <i class="fas fa-save"></i> Save Profile Settings
                                 </button>
                             </form>
                         </div>
@@ -3374,25 +3367,25 @@ Start your funded trading journey today! 📈
                         <!-- Change Password Form -->
                         <div class="glass" style="padding:1.5rem; border-radius:18px;">
                             <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
-                                <i class="fas fa-shield-alt" style="color:var(--gold);"></i> পাসওয়ার্ড পরিবর্তন
+                                <i class="fas fa-shield-alt" style="color:var(--gold);"></i> Change Password
                             </h3>
 
                             <form id="partnerPasswordForm" onsubmit="handleChangePassword(event)">
                                 <div class="auth-form-group">
-                                    <label>বর্তমান পাসওয়ার্ড (Current Password)</label>
+                                    <label>Current Password</label>
                                     <input type="password" class="form-control" id="setCurrPass" placeholder="••••••••" required autocomplete="current-password">
                                 </div>
                                 <div class="auth-form-group">
-                                    <label>নতুন পাসওয়ার্ড (New Password - কমপক্ষে ৬ অক্ষর)</label>
+                                    <label>New Password (min. 6 characters)</label>
                                     <input type="password" class="form-control" id="setNewPass" placeholder="••••••••" required autocomplete="new-password" minlength="6">
                                 </div>
                                 <div class="auth-form-group">
-                                    <label>নতুন পাসওয়ার্ড নিশ্চিত করুন (Confirm New Password)</label>
+                                    <label>Confirm New Password</label>
                                     <input type="password" class="form-control" id="setConfirmPass" placeholder="••••••••" required autocomplete="new-password" minlength="6">
                                 </div>
 
                                 <button type="submit" class="btn-gold" id="btnSavePass" style="margin-top:8px;">
-                                    <i class="fas fa-key"></i> পাসওয়ার্ড আপডেট করুন
+                                    <i class="fas fa-key"></i> Update Password
                                 </button>
                             </form>
                         </div>
@@ -3521,11 +3514,11 @@ Start your funded trading journey today! 📈
                 </div>
 
                 <h2 style="font-size:1.4rem; font-weight:900; color:#ffffff; margin:0 0 8px 0; letter-spacing:-0.3px; line-height:1.3;">
-                    অভিনন্দন! আপনার পার্টনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে
+                    Partner Account Created Successfully
                 </h2>
 
                 <p style="font-size:0.88rem; color:#b0bec5; line-height:1.55; margin:0 0 16px 0;">
-                    আপনার পার্টনার অ্যাকাউন্টের নিরাপত্তা নিশ্চিত করতে এবং পার্টনার ড্যাশবোর্ডে প্রবেশ করতে আপনার ইমেইলে পাঠানো <strong style="color:var(--emerald);">৬-সংখ্যার পার্টনার ভেরিফিকেশন কোডটি</strong> নিচে প্রবেশ করান:
+                    Enter the <strong style="color:var(--emerald);">6-digit partner verification code</strong> sent to your email to access your dashboard:
                 </p>
 
                 <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:9px 16px; margin:0 auto 18px auto; display:inline-flex; align-items:center; gap:8px; max-width:100%;">
@@ -3536,25 +3529,25 @@ Start your funded trading journey today! 📈
                 <form id="partnerVerifyForm" onsubmit="handlePartnerVerifyEmail(event)">
                     <div class="auth-form-group" style="text-align:left; margin-bottom:14px;">
                         <label style="display:block; margin-bottom:6px; font-size:0.82rem; font-weight:700; color:#cfd8dc;">
-                            <i class="fas fa-key" style="color:var(--emerald);"></i> পার্টনার প্রোগ্রাম ভেরিফিকেশন কোড (OTP)
+                            <i class="fas fa-key" style="color:var(--emerald);"></i> Partner Verification Code (OTP)
                         </label>
                         <input type="text" class="form-control" id="partnerVerifyOtpInput" placeholder="• • • • • •" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" required autocomplete="one-time-code" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" style="font-size:1.6rem; letter-spacing:8px; text-align:center; font-weight:900; color:var(--emerald); background:rgba(0,0,0,0.45); border:2px solid rgba(0,230,118,0.4); height:54px;">
                         <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px; text-align:center;">
-                            কোডটি ১৫ মিনিটের জন্য কার্যকর থাকবে। স্প্যাম ফোল্ডারও চেক করতে পারেন।
+                            Code is valid for 15 minutes. Check spam folder if not received.
                         </div>
                     </div>
 
                     <button type="submit" class="btn-emerald" id="btnPartnerVerifySubmit" style="width:100%; padding:14px; font-size:1rem; font-weight:800; display:flex; align-items:center; justify-content:center; gap:8px;">
-                        <i class="fas fa-unlock-alt"></i> ড্যাশবোর্ডে প্রবেশ করুন (Verify & Access)
+                        <i class="fas fa-unlock-alt"></i> Verify & Access Dashboard
                     </button>
                 </form>
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; font-size:0.83rem; gap:10px; flex-wrap:wrap;">
                     <button type="button" onclick="cancelPartnerVerify()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:600; padding:6px 0;">
-                        <i class="fas fa-arrow-left"></i> অন্য ইমেইল ব্যবহার করুন
+                        <i class="fas fa-arrow-left"></i> Use different email
                     </button>
                     <button type="button" id="btnPartnerResendOtp" onclick="handlePartnerResendOtp()" style="background:none; border:none; color:var(--emerald); cursor:pointer; font-weight:700; padding:6px 0;">
-                        <i class="fas fa-redo-alt"></i> কোড পুনরায় পাঠান <span id="partnerResendTimer"></span>
+                        <i class="fas fa-redo-alt"></i> Resend Code <span id="partnerResendTimer"></span>
                     </button>
                 </div>
             </div>
@@ -3594,7 +3587,7 @@ Start your funded trading journey today! 📈
         <div class="modal-box glass">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
                 <h3 style="font-size:1.15rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-hand-holding-usd" style="color:var(--emerald);"></i> কমিশন উইথড্র রিকোয়েস্ট
+                    <i class="fas fa-hand-holding-usd" style="color:var(--emerald);"></i> Request Commission Payout
                 </h3>
                 <button type="button" onclick="closeModal('payoutModal')" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">
                     <i class="fas fa-times"></i>
@@ -3604,29 +3597,29 @@ Start your funded trading journey today! 📈
             <form id="requestPayoutForm" onsubmit="handleConfirmPayoutRequest(event)">
                 <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.25); border-radius:12px; padding:12px; margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <div style="font-size:0.75rem; color:var(--text-muted);">উত্তোলনযোগ্য ব্যালেন্স</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">Available Balance</div>
                         <div style="font-size:1.35rem; font-weight:900; color:var(--emerald);" id="modalWithdrawableText">$0.00</div>
                     </div>
                     <button type="button" class="btn-outline" onclick="fillMaxWithdraw()" style="padding:6px 14px; font-size:0.8rem;">
-                        সর্বোচ্চ (Max)
+                        Max
                     </button>
                 </div>
 
                 <div class="auth-form-group">
-                    <label>উইথড্র অ্যামাউন্ট (Withdraw Amount in USD)</label>
+                    <label>Withdraw Amount (USD)</label>
                     <input type="number" step="0.01" min="1" class="form-control" id="modalPayoutAmount" placeholder="e.g. 50" required>
                     <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">
-                        ন্যূনতম উইথড্রয়াল সীমা: <strong style="color:#60a5fa;" id="modalMinPayoutText">$20.00</strong>
+                        Minimum payout limit: <strong style="color:#60a5fa;" id="modalMinPayoutText">$20.00</strong>
                     </div>
                 </div>
 
                 <div class="auth-form-group">
-                    <label>পেমেন্ট মাধ্যম (Payout Method)</label>
+                    <label>Payout Method</label>
                     <select class="form-control" id="modalPayoutMethod" onchange="updateModalAddressLabel()">
                         <option value="Binance Pay">Binance Pay (Pay ID / UID)</option>
                         <option value="USDT TRC20">USDT (TRC-20)</option>
-                        <option value="bKash">bKash (বিকাশ পার্সোনাল)</option>
-                        <option value="Nagad">Nagad (নগদ পার্সোনাল)</option>
+                        <option value="bKash">bKash (Personal)</option>
+                        <option value="Nagad">Nagad (Personal)</option>
                     </select>
                 </div>
 
@@ -3636,14 +3629,14 @@ Start your funded trading journey today! 📈
                 </div>
 
                 <div class="auth-form-group">
-                    <label>পার্টনার নোট (ঐচ্ছিক)</label>
-                    <input type="text" class="form-control" id="modalPayoutNotes" placeholder="আপনার কোনো নোট থাকলে এখানে লিখুন">
+                    <label>Partner Note (Optional)</label>
+                    <input type="text" class="form-control" id="modalPayoutNotes" placeholder="Optional notes for admin">
                 </div>
 
                 <div style="display:flex; gap:10px; margin-top:1.25rem;">
-                    <button type="button" class="btn-outline" onclick="closeModal('payoutModal')" style="flex:1;">বাতিল</button>
+                    <button type="button" class="btn-outline" onclick="closeModal('payoutModal')" style="flex:1;">Cancel</button>
                     <button type="submit" class="btn-emerald" id="btnSubmitPayout" style="flex:2;">
-                        <i class="fas fa-check-circle"></i> রিকোয়েস্ট নিশ্চিত করুন
+                        <i class="fas fa-check-circle"></i> Confirm Payout Request
                     </button>
                 </div>
             </form>
@@ -3655,7 +3648,7 @@ Start your funded trading journey today! 📈
         <div class="modal-box glass">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
                 <h3 style="font-size:1.15rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-tag" style="color:var(--gold);"></i> নতুন কাস্টম প্রোমো কোড আবেদন
+                    <i class="fas fa-tag" style="color:var(--gold);"></i> Request Custom Promo Code
                 </h3>
                 <button type="button" onclick="closeModal('customPromoModal')" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">
                     <i class="fas fa-times"></i>
@@ -3664,28 +3657,28 @@ Start your funded trading journey today! 📈
 
             <form id="customPromoForm" onsubmit="handleApplyCustomPromo(event)">
                 <div class="auth-form-group">
-                    <label>পছন্দের প্রোমো কোড (Desired Promo Code - e.g. SUMON10, RAKIBVIP)</label>
-                    <input type="text" class="form-control" id="customPromoCodeInput" placeholder="SUMON10" required style="text-transform:uppercase; font-weight:800; letter-spacing:1px;" minlength="3" maxlength="20">
+                    <label>Desired Promo Code (e.g. TRADER10, VIPPRO)</label>
+                    <input type="text" class="form-control" id="customPromoCodeInput" placeholder="VIPPRO" required style="text-transform:uppercase; font-weight:800; letter-spacing:1px;" minlength="3" maxlength="20">
                 </div>
 
                 <div class="auth-form-group">
-                    <label>ট্রেডার ডিসকাউন্ট পার্সেন্টেজ (Requested Trader Discount %)</label>
+                    <label>Trader Discount Percentage</label>
                     <select class="form-control" id="customPromoDiscountInput">
-                        <option value="5">৫% ডিসকাউন্ট (প্রস্তাবিত)</option>
-                        <option value="10">১০% ডিসকাউন্ট (স্পেশাল ক্যাম্পেইন)</option>
-                        <option value="15">১৫% ডিসকাউন্ট (ভিআইপি পার্টনার)</option>
+                        <option value="5">5% Discount (Standard)</option>
+                        <option value="10">10% Discount (Special Campaign)</option>
+                        <option value="15">15% Discount (VIP Partner)</option>
                     </select>
                 </div>
 
                 <div class="auth-form-group">
-                    <label>আবেদনের উদ্দেশ্য / সোশ্যাল মিডিয়া কমিউনিটি নোট</label>
-                    <textarea class="form-control" id="customPromoReasonInput" rows="3" placeholder="e.g. আমার ২০ হাজার সদস্যের টেলিগ্রাম চ্যানেলে ক্যাম্পেইনের জন্য প্রয়োজন।" required></textarea>
+                    <label>Campaign / Audience Details</label>
+                    <textarea class="form-control" id="customPromoReasonInput" rows="3" placeholder="e.g. Promotional campaign for my trading channel / group" required></textarea>
                 </div>
 
                 <div style="display:flex; gap:10px; margin-top:1.25rem;">
-                    <button type="button" class="btn-outline" onclick="closeModal('customPromoModal')" style="flex:1;">বাতিল</button>
+                    <button type="button" class="btn-outline" onclick="closeModal('customPromoModal')" style="flex:1;">Cancel</button>
                     <button type="submit" class="btn-gold" id="btnSubmitPromoReq" style="flex:2;">
-                        <i class="fas fa-paper-plane"></i> আবেদন জমা দিন
+                        <i class="fas fa-paper-plane"></i> Submit Request
                     </button>
                 </div>
             </form>
@@ -4019,7 +4012,7 @@ Start your funded trading journey today! 📈
                     clearInterval(partnerResendTimerInterval);
                     if (btn) {
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-redo-alt"></i> কোড পুনরায় পাঠান';
+                        btn.innerHTML = '<i class="fas fa-redo-alt"></i> Resend Code';
                     }
                     if (timerSpan) timerSpan.textContent = '';
                 }
@@ -4033,18 +4026,18 @@ Start your funded trading journey today! 📈
             const btn = document.getElementById('btnPartnerVerifySubmit');
 
             if (!email) {
-                showToast('সেশন পাওয়া যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।', 'error');
+                showToast('Session expired. Please try again.', 'error');
                 switchAuthTab('register');
                 return;
             }
             if (!otp || otp.length !== 6) {
-                showToast('অনুগ্রহ করে সঠিক ৬-সংখ্যার পার্টনার কোডটি দিন।', 'error');
+                showToast('Please enter a valid 6-digit verification code.', 'error');
                 return;
             }
 
             try {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ভেরিফাই করা হচ্ছে...';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
 
                 const res = await fetch('/api/partner/auth/verify-email', {
                     method: 'POST',
@@ -4058,18 +4051,18 @@ Start your funded trading journey today! 📈
                     localStorage.setItem('bpf_partner_token', data.token);
                     partnerData = data.partner;
                     partnerTierInfo = data.tierInfo;
-                    showToast('🎉 অভিনন্দন! আপনার পার্টনার অ্যাকাউন্ট সফলভাবে সক্রিয় করা হয়েছে।', 'success');
+                    showToast('🎉 Congratulations! Partner account verified successfully.', 'success');
                     closeAuthModal();
                     await fetchPartnerMe();
                     showDashboardView();
                 } else {
-                    showToast(data.message || 'ভুল বা মেয়াদোত্তীর্ণ ওটিপি কোড।', 'error');
+                    showToast(data.message || 'Invalid or expired OTP code.', 'error');
                 }
             } catch (err) {
-                showToast('ভেরিফিকেশন ত্রুটি: ' + err.message, 'error');
+                showToast('Verification error: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-unlock-alt"></i> ড্যাশবোর্ডে প্রবেশ করুন (Verify & Access)';
+                btn.innerHTML = '<i class="fas fa-unlock-alt"></i> Verify & Access Dashboard';
             }
         }
 
@@ -4077,14 +4070,14 @@ Start your funded trading journey today! 📈
             if (partnerResendCooldown > 0) return;
             const email = pendingPartnerVerifyEmail;
             if (!email) {
-                showToast('অনুগ্রহ করে আগে রেজিস্টার বা সাইন ইন করুন।', 'error');
+                showToast('Please register or sign in first.', 'error');
                 return;
             }
 
             const btn = document.getElementById('btnPartnerResendOtp');
             try {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> কোড পাঠানো হচ্ছে...';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending code...';
 
                 const res = await fetch('/api/partner/auth/resend-verification-otp', {
                     method: 'POST',
@@ -4094,17 +4087,17 @@ Start your funded trading journey today! 📈
 
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message || 'নতুন ভেরিফিকেশন কোড আপনার ইমেইলে পাঠানো হয়েছে!', 'success');
+                    showToast(data.message || 'A new verification code has been sent to your email!', 'success');
                     startPartnerResendCooldown(60);
                 } else {
-                    showToast(data.message || 'কোড পুনরায় পাঠাতে ব্যর্থ হয়েছে।', 'error');
+                    showToast(data.message || 'Failed to resend verification code.', 'error');
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-redo-alt"></i> কোড পুনরায় পাঠান';
+                    btn.innerHTML = '<i class="fas fa-redo-alt"></i> Resend Code';
                 }
             } catch (err) {
-                showToast('সার্ভার ত্রুটি: ' + err.message, 'error');
+                showToast('Server error: ' + err.message, 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-redo-alt"></i> কোড পুনরায় পাঠান';
+                btn.innerHTML = '<i class="fas fa-redo-alt"></i> Resend Code';
             }
         }
 
@@ -4280,7 +4273,7 @@ Start your funded trading journey today! 📈
             if (!partnerData || !partnerTierInfo) return;
 
             // Topbar
-            document.getElementById('topPartnerWelcome').innerText = `স্বাগতম, ${partnerData.name}!`;
+            document.getElementById('topPartnerWelcome').innerText = `Welcome, ${partnerData.name}!`;
             document.getElementById('topWithdrawableAmount').innerText = `$${(partnerData.withdrawableCommission || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
             const topBadge = document.getElementById('topPartnerLevelBadge');
@@ -4292,25 +4285,25 @@ Start your funded trading journey today! 📈
             heroBadge.className = `badge ${partnerTierInfo.badgeClass || 'badge-bronze'}`;
             heroBadge.innerText = `LEVEL ${partnerTierInfo.level}: ${partnerTierInfo.levelBadge}`;
 
-            document.getElementById('heroCommissionRateBadge').innerText = `${partnerTierInfo.currentRate}% প্রতি চ্যালেঞ্জ সেল কমিশন`;
-            document.getElementById('heroPartnerNameGreeting').innerText = `হ্যালো, ${partnerData.name}!`;
+            document.getElementById('heroCommissionRateBadge').innerText = `${partnerTierInfo.currentRate}% Commission per Challenge Sale`;
+            document.getElementById('heroPartnerNameGreeting').innerText = `Hello, ${partnerData.name}!`;
             document.getElementById('heroNextRateText').innerText = `${partnerTierInfo.nextRate}%`;
 
             if (partnerTierInfo.salesUntilNextLevel > 0) {
                 document.getElementById('heroProgressionStatusText').innerText = 
-                    `আপনি বর্তমানে Level ${partnerTierInfo.level} (${partnerTierInfo.levelName})-এ আছেন। প্রতিটি চ্যালেঞ্জ সেলে ${partnerTierInfo.currentRate}% কমিশন পাচ্ছেন।`;
-                document.getElementById('heroSalesNeededText').innerText = `লেভেল ${partnerTierInfo.level + 1}-এ যেতে আরও ${partnerTierInfo.salesUntilNextLevel}টি সেল বাকি`;
+                    `You are currently Level ${partnerTierInfo.level} (${partnerTierInfo.levelName}) earning ${partnerTierInfo.currentRate}% commission per challenge sale.`;
+                document.getElementById('heroSalesNeededText').innerText = `${partnerTierInfo.salesUntilNextLevel} more sales to reach Level ${partnerTierInfo.level + 1}`;
             } else {
                 document.getElementById('heroProgressionStatusText').innerText = 
-                    `অভিনন্দন! আপনি সর্বোচ্চ Master Level-এ পৌঁছেছেন এবং প্রতিটি চ্যালেঞ্জ সেলে স্থায়ীভাবে সর্বোচ্চ ৫৫% কমিশন পাচ্ছেন! 🎉`;
-                document.getElementById('heroSalesNeededText').innerText = `সর্বোচ্চ লেভেল আনলকড`;
+                    `Congratulations! You unlocked Master Level with 55% lifetime commission on all sales! 🎉`;
+                document.getElementById('heroSalesNeededText').innerText = `Maximum Level Reached`;
             }
 
             // Progress bar
             const pBar = document.getElementById('heroProgressBar');
             pBar.style.width = `${partnerTierInfo.progressPercent}%`;
-            document.getElementById('heroProgressLabelLeft').innerText = `${partnerTierInfo.salesInTier} / ${partnerTierInfo.tierTarget} সেলস সম্পন্ন`;
-            document.getElementById('heroProgressLabelRight').innerText = `${partnerTierInfo.progressPercent}% অগ্রগতি`;
+            document.getElementById('heroProgressLabelLeft').innerText = `${partnerTierInfo.salesInTier} / ${partnerTierInfo.tierTarget} Sales`;
+            document.getElementById('heroProgressLabelRight').innerText = `${partnerTierInfo.progressPercent}% Progress`;
 
             // Active Tier in Ladder
             for (let i = 1; i <= 6; i++) {
@@ -4384,7 +4377,7 @@ Start your funded trading journey today! 📈
         function downloadQRCode() {
             const img = document.querySelector('#qrcodeBox img');
             if (!img || !img.src) {
-                return showToast('QR কোড তৈরি হচ্ছে, অনুগ্রহ করে ১ সেকেন্ড অপেক্ষা করুন', 'info');
+                return showToast('Generating QR code, please wait a moment', 'info');
             }
             const a = document.createElement('a');
             a.href = img.src;
@@ -4392,7 +4385,7 @@ Start your funded trading journey today! 📈
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            showToast('QR কোড সফলভাবে ডাউনলোড হয়েছে!', 'success');
+            showToast('QR code downloaded successfully!', 'success');
         }
 
         // ================= SALES LOG TAB =================
@@ -4430,7 +4423,7 @@ Start your funded trading journey today! 📈
                     <tr>
                         <td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
                             <i class="fas fa-shopping-cart" style="font-size:2rem; color:var(--gold); display:block; margin-bottom:8px; opacity:0.6;"></i>
-                            এখনও কোনো রেফারেল বিক্রয় রেকর্ড হয়নি। আপনার রেফারেল লিংক প্রচার করে প্রথম সেল আনুন!
+                            No referral sales recorded yet. Share your referral link to earn commissions!
                         </td>
                     </tr>
                 `;
@@ -4439,7 +4432,7 @@ Start your funded trading journey today! 📈
 
             tbody.innerHTML = filtered.map(s => {
                 const isApproved = s.commissionStatus === 'approved';
-                const dateStr = s.createdAt ? new Date(s.createdAt).toLocaleString('bn-BD', { dateStyle:'short', timeStyle:'short' }) : 'N/A';
+                const dateStr = s.createdAt ? new Date(s.createdAt).toLocaleString('en-US', { dateStyle:'short', timeStyle:'short' }) : 'N/A';
                 return `
                     <tr>
                         <td style="font-size:0.8rem; color:var(--text-muted);">${dateStr}</td>
@@ -4464,7 +4457,7 @@ Start your funded trading journey today! 📈
                         </td>
                         <td>
                             <span class="badge ${isApproved ? 'badge-success' : 'badge-pending'}">
-                                ${isApproved ? '<i class="fas fa-check-circle"></i> অনুমোদিত' : '<i class="fas fa-clock"></i> পেন্ডিং অনুমোদন'}
+                                ${isApproved ? '<i class="fas fa-check-circle"></i> Approved' : '<i class="fas fa-clock"></i> Pending'}
                             </span>
                         </td>
                     </tr>
@@ -4481,7 +4474,7 @@ Start your funded trading journey today! 📈
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="7" style="text-align:center; padding:1.75rem; color:var(--text-muted);">
-                            এখনও কোনো সাম্প্রতিক সেলস নেই। আপনার রেফারেল লিংক শেয়ার করুন!
+                            No recent sales yet. Share your referral link to get started!
                         </td>
                     </tr>
                 `;
@@ -4490,7 +4483,7 @@ Start your funded trading journey today! 📈
 
             tbody.innerHTML = recent.map(s => {
                 const isApproved = s.commissionStatus === 'approved';
-                const dateStr = s.createdAt ? new Date(s.createdAt).toLocaleDateString('bn-BD') : 'N/A';
+                const dateStr = s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-US') : 'N/A';
                 return `
                     <tr>
                         <td style="font-size:0.8rem; color:var(--text-muted);">${dateStr}</td>
@@ -4501,7 +4494,7 @@ Start your funded trading journey today! 📈
                         <td style="font-weight:900; color:var(--emerald);">+$${(s.commissionAmount || 0).toFixed(2)}</td>
                         <td>
                             <span class="badge ${isApproved ? 'badge-success' : 'badge-pending'}">
-                                ${isApproved ? 'অনুমোদিত' : 'পেন্ডিং'}
+                                ${isApproved ? 'Approved' : 'Pending'}
                             </span>
                         </td>
                     </tr>
@@ -4555,14 +4548,14 @@ Start your funded trading journey today! 📈
                                 ${escapeHtml(c.code)}
                             </span>
                         </td>
-                        <td style="font-weight:800; color:#60a5fa;">${c.discount}% ছাড়</td>
-                        <td style="font-size:0.8rem; color:var(--text-muted);">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('bn-BD') : 'N/A'}</td>
+                        <td style="font-weight:800; color:#60a5fa;">${c.discount}% Discount</td>
+                        <td style="font-size:0.8rem; color:var(--text-muted);">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-US') : 'N/A'}</td>
                         <td>
-                            <span class="badge badge-success"><i class="fas fa-check"></i> সক্রিয় (Active)</span>
+                            <span class="badge badge-success"><i class="fas fa-check"></i> Active</span>
                         </td>
                         <td>
                             <button type="button" class="btn-outline" onclick="copySpecificCode('${escapeHtml(c.code)}')" style="padding:4px 10px; font-size:0.75rem;">
-                                <i class="fas fa-copy"></i> কপি
+                                <i class="fas fa-copy"></i> Copy
                             </button>
                         </td>
                     </tr>
@@ -4576,9 +4569,9 @@ Start your funded trading journey today! 📈
                 const isRejected = r.status === 'rejected';
 
                 let badgeHtml = '';
-                if (isPending) badgeHtml = `<span class="badge badge-pending"><i class="fas fa-clock"></i> অ্যাডমিন পর্যালোচনায়</span>`;
-                else if (isApproved) badgeHtml = `<span class="badge badge-success"><i class="fas fa-check"></i> অনুমোদিত</span>`;
-                else badgeHtml = `<span class="badge badge-danger"><i class="fas fa-times"></i> প্রত্যাখ্যাত</span>`;
+                if (isPending) badgeHtml = `<span class="badge badge-pending"><i class="fas fa-clock"></i> Pending Review</span>`;
+                else if (isApproved) badgeHtml = `<span class="badge badge-success"><i class="fas fa-check"></i> Approved</span>`;
+                else badgeHtml = `<span class="badge badge-danger"><i class="fas fa-times"></i> Rejected</span>`;
 
                 rows.push(`
                     <tr>
@@ -4587,16 +4580,16 @@ Start your funded trading journey today! 📈
                                 ${escapeHtml(r.promoCode)}
                             </span>
                         </td>
-                        <td style="font-weight:700; color:#cbd5e1;">${r.requestedDiscount}% আবেদন</td>
-                        <td style="font-size:0.8rem; color:var(--text-muted);">${r.createdAt ? new Date(r.createdAt).toLocaleDateString('bn-BD') : 'N/A'}</td>
+                        <td style="font-weight:700; color:#cbd5e1;">${r.requestedDiscount}% Discount</td>
+                        <td style="font-size:0.8rem; color:var(--text-muted);">${r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US') : 'N/A'}</td>
                         <td>
                             ${badgeHtml}
-                            ${r.adminNotes ? `<div style="font-size:0.72rem; color:var(--text-muted); margin-top:3px;">নোট: ${escapeHtml(r.adminNotes)}</div>` : ''}
+                            ${r.adminNotes ? `<div style="font-size:0.72rem; color:var(--text-muted); margin-top:3px;">Note: ${escapeHtml(r.adminNotes)}</div>` : ''}
                         </td>
                         <td>
                             ${isApproved ? `
                                 <button type="button" class="btn-outline" onclick="copySpecificCode('${escapeHtml(r.promoCode)}')" style="padding:4px 10px; font-size:0.75rem;">
-                                    <i class="fas fa-copy"></i> কপি
+                                    <i class="fas fa-copy"></i> Copy
                                 </button>
                             ` : '<span style="color:var(--text-muted); font-size:0.8rem;">-</span>'}
                         </td>
@@ -4608,7 +4601,7 @@ Start your funded trading journey today! 📈
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">
-                            কোনো কাস্টম প্রোমো কোডের আবেদন পাওয়া যায়নি। উপরে "+ নতুন প্রোমো কোডের আবেদন করুন" বাটনে ক্লিক করে আবেদন করুন।
+                            No custom promo codes found. Click "+ Request New Promo Code" above to submit a request.
                         </td>
                     </tr>
                 `;
@@ -4630,12 +4623,12 @@ Start your funded trading journey today! 📈
             const btn = document.getElementById('btnSubmitPromoReq');
 
             if (!requestedCode || requestedCode.length < 3) {
-                return showToast('প্রোমো কোড কমপক্ষে ৩ অক্ষরের হতে হবে', 'error');
+                return showToast('Promo code must be at least 3 characters', 'error');
             }
 
             try {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আবেদন জমা হচ্ছে...';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
                 const res = await fetch('/api/partner/custom-promo', {
                     method: 'POST',
@@ -4648,18 +4641,18 @@ Start your funded trading journey today! 📈
 
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message || 'আবেদন সফলভাবে জমা হয়েছে!', 'success');
+                    showToast(data.message || 'Promo code request submitted successfully!', 'success');
                     closeModal('customPromoModal');
                     document.getElementById('customPromoForm').reset();
                     fetchPartnerPromoCodes();
                 } else {
-                    showToast(data.message || 'আবেদন ব্যর্থ হয়েছে', 'error');
+                    showToast(data.message || 'Failed to submit request', 'error');
                 }
             } catch (err) {
-                showToast('সার্ভার ত্রুটি: ' + err.message, 'error');
+                showToast('Server error: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane"></i> আবেদন জমা দিন';
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Request';
             }
         }
 
@@ -4689,7 +4682,7 @@ Start your funded trading journey today! 📈
                     <tr>
                         <td colspan="7" style="text-align:center; padding:2.5rem; color:var(--text-muted);">
                             <i class="fas fa-money-check-alt" style="font-size:2rem; color:var(--emerald); display:block; margin-bottom:8px; opacity:0.6;"></i>
-                            এখনও কোনো পে-আউট রিকোয়েস্ট করা হয়নি। ব্যালেন্স ন্যূনতম $${partnerSettingsData?.minPayoutAmount || 20} হলে উইথড্র আবেদন করতে পারবেন।
+                            No payout requests yet. Minimum withdrawal threshold is $${partnerSettingsData?.minPayoutAmount || 20}.00.
                         </td>
                     </tr>
                 `;
@@ -4702,11 +4695,11 @@ Start your funded trading journey today! 📈
                 const isRejected = p.status === 'rejected';
 
                 let badgeHtml = '';
-                if (isCompleted) badgeHtml = `<span class="badge badge-success"><i class="fas fa-check-double"></i> পেইড সম্পন্ন</span>`;
-                else if (isPending) badgeHtml = `<span class="badge badge-pending"><i class="fas fa-clock"></i> পেন্ডিং রিভিউ</span>`;
-                else badgeHtml = `<span class="badge badge-danger"><i class="fas fa-times-circle"></i> বাতিল</span>`;
+                if (isCompleted) badgeHtml = `<span class="badge badge-success"><i class="fas fa-check-double"></i> Paid</span>`;
+                else if (isPending) badgeHtml = `<span class="badge badge-pending"><i class="fas fa-clock"></i> Pending Review</span>`;
+                else badgeHtml = `<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Rejected</span>`;
 
-                const dateStr = p.requestedAt ? new Date(p.requestedAt).toLocaleString('bn-BD', { dateStyle:'short', timeStyle:'short' }) : 'N/A';
+                const dateStr = p.requestedAt ? new Date(p.requestedAt).toLocaleString('en-US', { dateStyle:'short', timeStyle:'short' }) : 'N/A';
 
                 return `
                     <tr>
@@ -4719,7 +4712,7 @@ Start your funded trading journey today! 📈
                         </td>
                         <td>${badgeHtml}</td>
                         <td style="font-size:0.78rem; color:var(--text-muted);">
-                            ${p.paidAt ? `পেইড: ${new Date(p.paidAt).toLocaleDateString('bn-BD')}` : (p.adminNotes || '-')}
+                            ${p.paidAt ? `Paid: ${new Date(p.paidAt).toLocaleDateString('en-US')}` : (p.adminNotes || '-')}
                         </td>
                     </tr>
                 `;
@@ -4755,10 +4748,10 @@ Start your funded trading journey today! 📈
                 label.innerText = 'Binance Pay ID / UID';
                 input.placeholder = 'e.g. 123456789';
             } else if (method === 'USDT TRC20') {
-                label.innerText = 'USDT (TRC-20) ওয়ালেট এড্রেস';
+                label.innerText = 'USDT (TRC-20) Wallet Address';
                 input.placeholder = 'e.g. Txxxxxxxxxxxxxxxxxxxxxxxxxxxx';
             } else {
-                label.innerText = `${method} পার্সোনাল নাম্বার`;
+                label.innerText = `${method} Personal Number`;
                 input.placeholder = 'e.g. 017xxxxxxxx';
             }
         }
@@ -4771,12 +4764,12 @@ Start your funded trading journey today! 📈
             const notes = document.getElementById('modalPayoutNotes').value.trim();
             const btn = document.getElementById('btnSubmitPayout');
 
-            if (!amount || amount <= 0) return showToast('সঠিক উইথড্র অ্যামাউন্ট দিন', 'error');
-            if (!payoutAddress) return showToast('রিসিভিং এড্রেস প্রদান করুন', 'error');
+            if (!amount || amount <= 0) return showToast('Please enter a valid withdrawal amount', 'error');
+            if (!payoutAddress) return showToast('Please enter your payout receiving address / ID', 'error');
 
             try {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেস হচ্ছে...';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
                 const res = await fetch('/api/partner/payouts/request', {
                     method: 'POST',
@@ -4789,19 +4782,19 @@ Start your funded trading journey today! 📈
 
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message || 'উইথড্র রিকোয়েস্ট সফলভাবে জমা হয়েছে!', 'success');
+                    showToast(data.message || 'Payout request submitted successfully!', 'success');
                     closeModal('payoutModal');
                     await fetchPartnerMe();
                     renderDashboardData();
                     fetchPartnerPayoutsHistory();
                 } else {
-                    showToast(data.message || 'রিকোয়েস্ট ব্যর্থ হয়েছে', 'error');
+                    showToast(data.message || 'Payout request failed', 'error');
                 }
             } catch (err) {
-                showToast('সার্ভার ত্রুটি: ' + err.message, 'error');
+                showToast('Server error: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check-circle"></i> রিকোয়েস্ট নিশ্চিত করুন';
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Payout Request';
             }
         }
 
@@ -4814,11 +4807,11 @@ Start your funded trading journey today! 📈
             const payoutDetails = document.getElementById('setPayoutDetails').value.trim();
             const btn = document.getElementById('btnSaveProfile');
 
-            if (!name) return showToast('নাম প্রদান আবশ্যক', 'error');
+            if (!name) return showToast('Name is required', 'error');
 
             try {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
                 const res = await fetch('/api/partner/profile', {
                     method: 'POST',
@@ -4831,17 +4824,17 @@ Start your funded trading journey today! 📈
 
                 const data = await res.json();
                 if (data.success) {
-                    showToast('প্রোফাইল তথ্য সফলভাবে সেভ হয়েছে!', 'success');
+                    showToast('Profile updated successfully!', 'success');
                     await fetchPartnerMe();
                     renderDashboardData();
                 } else {
-                    showToast(data.message || 'সেভ করতে সমস্যা হয়েছে', 'error');
+                    showToast(data.message || 'Failed to update profile', 'error');
                 }
             } catch (err) {
-                showToast('সার্ভার ত্রুটি: ' + err.message, 'error');
+                showToast('Server error: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save"></i> প্রোফাইল তথ্য সংরক্ষণ করুন';
+                btn.innerHTML = '<i class="fas fa-save"></i> Save Profile Settings';
             }
         }
 
@@ -4852,13 +4845,13 @@ Start your funded trading journey today! 📈
             const confirmPassword = document.getElementById('setConfirmPass').value;
             const btn = document.getElementById('btnSavePass');
 
-            if (!currentPassword || !newPassword) return showToast('সকল পাসওয়ার্ড ফিল্ড পূরণ করুন', 'error');
-            if (newPassword.length < 6) return showToast('নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে', 'error');
-            if (newPassword !== confirmPassword) return showToast('নতুন ও কনফার্ম পাসওয়ার্ড মিলছে না', 'error');
+            if (!currentPassword || !newPassword) return showToast('Please fill in all password fields', 'error');
+            if (newPassword.length < 6) return showToast('New password must be at least 6 characters', 'error');
+            if (newPassword !== confirmPassword) return showToast('Passwords do not match', 'error');
 
             try {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> পাসওয়ার্ড পরিবর্তন হচ্ছে...';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating password...';
 
                 const res = await fetch('/api/partner/change-password', {
                     method: 'POST',
@@ -4871,16 +4864,16 @@ Start your funded trading journey today! 📈
 
                 const data = await res.json();
                 if (data.success) {
-                    showToast('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!', 'success');
+                    showToast('Password updated successfully!', 'success');
                     document.getElementById('partnerPasswordForm').reset();
                 } else {
-                    showToast(data.message || 'পাসওয়ার্ড পরিবর্তন ব্যর্থ হয়েছে', 'error');
+                    showToast(data.message || 'Failed to change password', 'error');
                 }
             } catch (err) {
-                showToast('সার্ভার ত্রুটি: ' + err.message, 'error');
+                showToast('Server error: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-key"></i> পাসওয়ার্ড আপডেট করুন';
+                btn.innerHTML = '<i class="fas fa-key"></i> Update Password';
             }
         }
 
@@ -4916,9 +4909,9 @@ Start your funded trading journey today! 📈
             const link = document.getElementById('overviewRefLinkInput').value;
             if (!link) return;
             navigator.clipboard.writeText(link).then(() => {
-                showToast('রেফারেল লিংক কপি হয়েছে!', 'success');
+                showToast('Referral link copied!', 'success');
             }).catch(() => {
-                showToast('কপি ব্যর্থ হয়েছে', 'error');
+                showToast('Failed to copy', 'error');
             });
         }
 
@@ -4926,7 +4919,7 @@ Start your funded trading journey today! 📈
             const link = document.getElementById('toolsRefLink').value;
             if (!link) return;
             navigator.clipboard.writeText(link).then(() => {
-                showToast('রেফারেল লিংক কপি হয়েছে!', 'success');
+                showToast('Referral link copied!', 'success');
             });
         }
 
@@ -4934,21 +4927,21 @@ Start your funded trading journey today! 📈
             const code = document.getElementById('toolsPromoCode').value;
             if (!code) return;
             navigator.clipboard.writeText(code).then(() => {
-                showToast(`প্রোমো কোড "${code}" কপি হয়েছে!`, 'success');
+                showToast(`Promo code "${code}" copied!`, 'success');
             });
         }
 
         function copyPromoCodeText() {
             if (!partnerData || !partnerData.promoCode) return;
             navigator.clipboard.writeText(partnerData.promoCode).then(() => {
-                showToast(`প্রোমো কোড "${partnerData.promoCode}" কপি হয়েছে!`, 'success');
+                showToast(`Promo code "${partnerData.promoCode}" copied!`, 'success');
             });
         }
 
         function copySpecificCode(code) {
             if (!code) return;
             navigator.clipboard.writeText(code).then(() => {
-                showToast(`প্রোমো কোড "${code}" কপি হয়েছে!`, 'success');
+                showToast(`Promo code "${code}" copied!`, 'success');
             });
         }
 
@@ -4966,13 +4959,13 @@ Start your funded trading journey today! 📈
                     .replace('{CODE}', code);
             }
             navigator.clipboard.writeText(text).then(() => {
-                showToast('প্রমোশনাল পোস্ট কপি হয়েছে!', 'success');
+                showToast('Marketing post copied!', 'success');
             });
         }
 
         function shareOnWhatsApp() {
             const link = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
-            const text = `Quotex বা পছন্দের ব্রোকারে ট্রেড করে ফান্ডেড একাউন্ট পেতে আজই Binary Prop Firm-এ যোগ দিন! আমার রেফারেল লিংক: ${link}`;
+            const text = `Trade and get funded up to $65,000 with Binary Prop Firm! Join now with my referral link: ${link}`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         }
 

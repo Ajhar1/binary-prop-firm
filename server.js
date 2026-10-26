@@ -2589,7 +2589,7 @@ function buildPartnerEmailHtml({ partnerName, code }) {
           <tr>
             <td style="padding: 32px 30px 24px 30px;">
               <h2 style="margin: 0 0 14px 0; color: #ffffff; font-size: 19px; font-weight: 700; line-height: 1.4;">
-                পার্টনার প্রোগ্রাম ইমেইল ভেরিফিকেশন ওটিপি / Partner Verification Code
+                Partner Account Verification
               </h2>
               
               <p style="margin: 0 0 14px 0; color: #cbd5e1; font-size: 14.5px; line-height: 1.6;">
@@ -2598,13 +2598,12 @@ function buildPartnerEmailHtml({ partnerName, code }) {
 
               <!-- Explicit Partner Badge Notice -->
               <div style="background: rgba(0, 210, 211, 0.1); border-left: 4px solid #00d2d3; padding: 14px 18px; border-radius: 8px; margin: 16px 0; color: #e2e8f0; font-size: 13.5px; line-height: 1.65;">
-                <strong style="color: #00d2d3; font-size: 14px;">📌 এটি আপনার অফিসিয়াল পার্টনার প্রোগ্রাম ভেরিফিকেশন কোড।</strong><br/>
-                (This is your official Binary Prop Firm Partner & Affiliate Program Verification Code).
+                <strong style="color: #00d2d3; font-size: 14px;">📌 Official Partner Program Verification Code</strong><br/>
+                Use the 6-digit code below to activate your partner dashboard and start earning up to 55% commissions.
               </div>
               
               <p style="margin: 0 0 24px 0; color: #94a3b8; font-size: 14px; line-height: 1.65;">
-                Congratulations on creating your Partner Account! With our affiliate program, you can earn up to <strong>50% lifetime commissions</strong> on every trader evaluation challenge purchased through your referral links.<br/><br/>
-                Please use the 6-digit partner activation code below to activate your account:
+                Please enter this code on the verification screen:
               </p>
 
               <!-- OTP Display Box -->
@@ -2613,13 +2612,13 @@ function buildPartnerEmailHtml({ partnerName, code }) {
                   <td align="center">
                     <div style="background: rgba(0, 210, 211, 0.08); border: 2px dashed #00d2d3; border-radius: 14px; padding: 22px 28px; display: inline-block; max-width: 90%; text-align: center;">
                       <div style="color: #00d2d3; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;">
-                        Partner Verification Code (পার্টনার ওটিপি কোড)
+                        Partner Activation Code
                       </div>
                       <div style="font-family: Consolas, 'SF Pro Display', Monaco, 'Courier New', monospace; font-size: 40px; font-weight: 900; letter-spacing: 10px; color: #00d2d3; padding: 4px 0; text-shadow: 0 2px 14px rgba(0, 210, 211, 0.4);">
                         ${code}
                       </div>
                       <div style="margin-top: 10px; display: inline-block; background: rgba(255, 255, 255, 0.05); padding: 5px 16px; border-radius: 20px; color: #cbd5e1; font-size: 12px;">
-                        ⏱ Valid for <strong style="color: #00d2d3;">15 minutes</strong> &bull; Exclusive for Partner Account
+                        ⏱ Valid for <strong style="color: #00d2d3;">15 minutes</strong> &bull; Partner Account
                       </div>
                     </div>
                   </td>
@@ -2631,12 +2630,12 @@ function buildPartnerEmailHtml({ partnerName, code }) {
                 <tr>
                   <td style="padding: 16px 20px;">
                     <div style="color: #00d2d3; font-size: 13px; font-weight: 700; margin-bottom: 6px;">
-                      🛡️ Partner Security Advisory (পার্টনার নিরাপত্তা সতর্কতা)
+                      🛡️ Security Notice
                     </div>
                     <p style="margin: 0; color: #94a3b8; font-size: 12.5px; line-height: 1.6;">
-                      • This 6-digit code is generated exclusively for your <strong>Partner & Affiliate Profile</strong>.<br/>
-                      • <strong>Never share</strong> this verification code with anyone. Binary Prop Firm administrators and staff will NEVER ask for your password or verification code.<br/>
-                      • If you did not register for the Binary Prop Firm Partner Program, please disregard this email.
+                      • This code is for your <strong>Partner Dashboard</strong>.<br/>
+                      • <strong>Never share</strong> this code with anyone. Staff will never ask for your code or password.<br/>
+                      • If you did not create a Partner Account, please ignore this email.
                     </p>
                   </td>
                 </tr>
@@ -2649,8 +2648,8 @@ function buildPartnerEmailHtml({ partnerName, code }) {
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center" style="color: #8fa0b5; font-size: 12.5px; line-height: 1.6;">
-                    Have questions about the Partner Program? Contact our Affiliate Support:<br/>
-                    <a href="https://t.me/BinaryPropFirmSupport" style="color: #00d2d3; text-decoration: none; font-weight: 700; margin-right: 14px;">💬 Telegram Support (@BinaryPropFirmSupport)</a>
+                    Questions? Contact Affiliate Support:<br/>
+                    <a href="https://t.me/BinaryPropFirmSupport" style="color: #00d2d3; text-decoration: none; font-weight: 700; margin-right: 14px;">💬 Telegram (@BinaryPropFirmSupport)</a>
                     <a href="mailto:support@binarypropfirm.com" style="color: #f5b041; text-decoration: none; font-weight: 700;">✉️ support@binarypropfirm.com</a>
                   </td>
                 </tr>
@@ -2661,8 +2660,8 @@ function buildPartnerEmailHtml({ partnerName, code }) {
           <!-- Footer -->
           <tr>
             <td style="background-color: #080d14; padding: 22px 30px; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center; color: #475569; font-size: 11px;">
-              &copy; ${currentYear} Binary Prop Firm Affiliate & Partner Operations. All rights reserved.<br/>
-              This is an automated system notification for partner account verification.
+              &copy; ${currentYear} Binary Prop Firm Partner Operations. All rights reserved.<br/>
+              Automated verification email.
             </td>
           </tr>
         </table>
@@ -2688,8 +2687,8 @@ async function sendPartnerVerificationEmail(toEmail, code, partnerName = 'Partne
       await mailConfig.transporter.sendMail({
         from: mailConfig.fromAddress,
         to: toEmail,
-        subject: `[Binary Prop Firm] ${code} - পার্টনার প্রোগ্রাম ভেরিফিকেশন কোড / Partner Verification Code`,
-        text: `Hello ${partnerName}, This is your official Binary Prop Firm Partner & Affiliate Program verification code: ${code}. It expires in 15 minutes. Use this code to activate your partner dashboard. Never share this code with anyone.`,
+        subject: `[Binary Prop Firm] ${code} — Partner Verification Code`,
+        text: `Hello ${partnerName}, Your Binary Prop Firm Partner Program verification code is: ${code}. It expires in 15 minutes. Use this code to activate your partner dashboard.`,
         html: html
       });
       console.log(`[PARTNER EMAIL DISPATCH] Partner verification code ${code} sent to ${toEmail}`);
@@ -10415,35 +10414,35 @@ app.post('/api/partner/auth/register', async (req, res) => {
   try {
     const { name, email, password, phone, promoCode, payoutMethod, payoutDetails } = req.body;
     if (!name || !name.trim() || !email || !email.trim() || !password) {
-      return res.status(400).json({ success: false, message: 'নাম, ইমেইল এবং পাসওয়ার্ড আবশ্যক।' });
+      return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
     }
 
     const cleanedEmail = normalizeEmail(email);
     if (!isValidEmail(cleanedEmail)) {
-      return res.status(400).json({ success: false, message: 'একটি সঠিক ইমেইল এড্রেস প্রদান করুন।' });
+      return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ success: false, message: 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।' });
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
     }
 
     const cleanPromo = (promoCode || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
     if (!cleanPromo || cleanPromo.length < 3) {
-      return res.status(400).json({ success: false, message: 'রেফারেল / প্রোমো কোড কমপক্ষে ৩ অক্ষরের হতে হবে।' });
+      return res.status(400).json({ success: false, message: 'Referral promo code must be at least 3 characters.' });
     }
 
     const partners = getPartners();
     if (partners.some(p => (p.email && p.email.toLowerCase() === cleanedEmail))) {
-      return res.status(400).json({ success: false, message: 'এই ইমেইল দিয়ে ইতিমধ্যে একটি পার্টনার অ্যাকাউন্ট তৈরি করা আছে।' });
+      return res.status(400).json({ success: false, message: 'A partner account with this email already exists.' });
     }
 
     if (partners.some(p => p.promoCode && p.promoCode.toUpperCase() === cleanPromo)) {
-      return res.status(400).json({ success: false, message: `"${cleanPromo}" রেফারেল কোডটি ইতিমধ্যে ব্যবহৃত হচ্ছে। অন্য একটি কোড দিন।` });
+      return res.status(400).json({ success: false, message: `Promo code "${cleanPromo}" is already taken. Please choose another.` });
     }
 
     const promoCodes = getPromoCodes();
     if (promoCodes.some(c => c.code && c.code.toUpperCase() === cleanPromo)) {
-      return res.status(400).json({ success: false, message: `"${cleanPromo}" কোডটি সিস্টেমের প্রোমো কোড হিসেবে সংরক্ষিত। অন্য কোড দিন।` });
+      return res.status(400).json({ success: false, message: `Code "${cleanPromo}" is reserved as a system discount code. Please choose another.` });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -10488,11 +10487,11 @@ app.post('/api/partner/auth/register', async (req, res) => {
       requiresEmailVerification: true,
       email: newPartner.email,
       name: newPartner.name,
-      message: '🎉 Congratulations! আপনার পার্টনার অ্যাকাউন্টটি সফলভাবে খোলা হয়েছে! আপনার ইমেইলে একটি অফিসিয়াল পার্টনার ভেরিফিকেশন ওটিপি কোড পাঠানো হয়েছে।'
+      message: 'Congratulations! Your partner account has been created. A verification code was sent to your email.'
     });
   } catch (err) {
     console.error('[Partner Register Error]', err);
-    res.status(500).json({ success: false, message: 'অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে: ' + err.message });
+    res.status(500).json({ success: false, message: 'Registration failed: ' + err.message });
   }
 });
 
@@ -10502,7 +10501,7 @@ app.post('/api/partner/auth/verify-email', async (req, res) => {
     const { email, otp, code } = req.body;
     const submittedOtp = ((otp || code) ? String(otp || code).trim() : '');
     if (!email || !submittedOtp) {
-      return res.status(400).json({ success: false, message: 'ইমেইল এবং ৬-সংখ্যার ওটিপি কোড আবশ্যক।' });
+      return res.status(400).json({ success: false, message: 'Email and 6-digit code are required.' });
     }
 
     const cleanedEmail = normalizeEmail(email);
@@ -10510,7 +10509,7 @@ app.post('/api/partner/auth/verify-email', async (req, res) => {
     const partner = partners.find(p => p.email && p.email.toLowerCase() === cleanedEmail);
 
     if (!partner) {
-      return res.status(404).json({ success: false, message: 'এই ইমেইলে কোনো পার্টনার অ্যাকাউন্ট পাওয়া যায়নি।' });
+      return res.status(404).json({ success: false, message: 'Partner account not found.' });
     }
 
     if (partner.isEmailVerified) {
@@ -10523,7 +10522,7 @@ app.post('/api/partner/auth/verify-email', async (req, res) => {
       delete safePartner.password;
       return res.json({
         success: true,
-        message: '🎉 আপনার পার্টনার অ্যাকাউন্ট ইতিমধ্যে ভেরিফাইড! ড্যাশবোর্ডে প্রবেশ করা হচ্ছে...',
+        message: 'Account already verified. Signing in...',
         alreadyVerified: true,
         token,
         partner: safePartner,
@@ -10532,11 +10531,11 @@ app.post('/api/partner/auth/verify-email', async (req, res) => {
     }
 
     if (!partner.emailVerificationCode || partner.emailVerificationCode !== submittedOtp) {
-      return res.status(400).json({ success: false, message: 'ভুল ওটিপি কোড। অনুগ্রহ করে সঠিক ৬-সংখ্যার পার্টনার কোডটি দিন।' });
+      return res.status(400).json({ success: false, message: 'Invalid verification code. Please check your email.' });
     }
 
     if (partner.emailVerificationExpires && Date.now() > partner.emailVerificationExpires) {
-      return res.status(400).json({ success: false, message: 'ওটিপি কোডের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে "Resend Code" বাটনে ক্লিক করুন।' });
+      return res.status(400).json({ success: false, message: 'Verification code expired. Click "Resend Code".' });
     }
 
     // Activate partner account
@@ -10586,14 +10585,14 @@ app.post('/api/partner/auth/verify-email', async (req, res) => {
 
     res.json({
       success: true,
-      message: '🎉 অভিনন্দন! আপনার পার্টনার অ্যাকাউন্ট সফলভাবে ভেরিফাই হয়েছে। ড্যাশবোর্ডে প্রবেশ করা হচ্ছে...',
+      message: 'Account verified successfully. Accessing dashboard...',
       token,
       partner: safePartner,
       tierInfo: getPartnerTierInfo(partner.totalSales || 0)
     });
   } catch (err) {
     console.error('[Partner Verify Email Error]', err);
-    res.status(500).json({ success: false, message: 'ভেরিফিকেশন সম্পন্ন করতে সমস্যা হয়েছে: ' + err.message });
+    res.status(500).json({ success: false, message: 'Verification error: ' + err.message });
   }
 });
 
@@ -10602,7 +10601,7 @@ app.post('/api/partner/auth/resend-verification-otp', async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
-      return res.status(400).json({ success: false, message: 'ইমেইল এড্রেস আবশ্যক।' });
+      return res.status(400).json({ success: false, message: 'Email address is required.' });
     }
 
     const cleanedEmail = normalizeEmail(email);
@@ -10610,11 +10609,11 @@ app.post('/api/partner/auth/resend-verification-otp', async (req, res) => {
     const partner = partners.find(p => p.email && p.email.toLowerCase() === cleanedEmail);
 
     if (!partner) {
-      return res.status(404).json({ success: false, message: 'এই ইমেইলে কোনো পার্টনার অ্যাকাউন্ট পাওয়া যায়নি।' });
+      return res.status(404).json({ success: false, message: 'Partner account not found.' });
     }
 
     if (partner.isEmailVerified) {
-      return res.json({ success: true, message: 'আপনার পার্টনার অ্যাকাউন্ট ইতিমধ্যে ভেরিফাইড।' });
+      return res.json({ success: true, message: 'Account is already verified.' });
     }
 
     const newCode = generateVerificationCode();
@@ -10627,12 +10626,12 @@ app.post('/api/partner/auth/resend-verification-otp', async (req, res) => {
 
     res.json({
       success: true,
-      message: `আপনার ইমেইলে (${maskEmail(partner.email)}) একটি নতুন ৬-সংখ্যার পার্টনার ওটিপি পাঠানো হয়েছে।`,
+      message: `A new verification code was sent to ${maskEmail(partner.email)}.`,
       method: emailResult.method
     });
   } catch (err) {
     console.error('[Partner Resend OTP Error]', err);
-    res.status(500).json({ success: false, message: 'নতুন কোড পাঠাতে সমস্যা হয়েছে: ' + err.message });
+    res.status(500).json({ success: false, message: 'Failed to resend code: ' + err.message });
   }
 });
 
@@ -10641,7 +10640,7 @@ app.post('/api/partner/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'ইমেইল এবং পাসওয়ার্ড প্রদান করুন।' });
+      return res.status(400).json({ success: false, message: 'Please enter email and password.' });
     }
 
     const cleanedEmail = normalizeEmail(email);
@@ -10649,23 +10648,23 @@ app.post('/api/partner/auth/login', async (req, res) => {
     const partner = partners.find(p => p.email && p.email.toLowerCase() === cleanedEmail);
 
     if (!partner) {
-      return res.status(401).json({ success: false, message: 'এই ইমেইলে কোনো পার্টনার অ্যাকাউন্ট পাওয়া যায়নি।' });
+      return res.status(401).json({ success: false, message: 'Partner account not found.' });
     }
 
     if (partner.status === 'blocked' || partner.status === 'banned') {
-      return res.status(403).json({ success: false, message: 'আপনার পার্টনার অ্যাকাউন্টটি স্থগিত করা হয়েছে। সাপোর্টে যোগাযোগ করুন।' });
+      return res.status(403).json({ success: false, message: 'Your partner account is suspended. Contact support.' });
     }
 
     // Verify password
     if (partner.password) {
       const match = await bcrypt.compare(password, partner.password);
       if (!match) {
-        return res.status(401).json({ success: false, message: 'ভুল পাসওয়ার্ড। আবার চেষ্টা করুন।' });
+        return res.status(401).json({ success: false, message: 'Incorrect password.' });
       }
     } else {
       // Legacy partner without password
       if (password !== 'AJHAR1' && password !== '123456') {
-        return res.status(401).json({ success: false, message: 'ভুল পাসওয়ার্ড।' });
+        return res.status(401).json({ success: false, message: 'Incorrect password.' });
       }
     }
 
@@ -10680,7 +10679,7 @@ app.post('/api/partner/auth/login', async (req, res) => {
         success: false,
         requiresEmailVerification: true,
         email: partner.email,
-        message: 'আপনার পার্টনার অ্যাকাউন্টটি এখনো ভেরিফাই করা হয়নি। আপনার ইমেইলে একটি নতুন পার্টনার ওটিপি পাঠানো হয়েছে। অনুগ্রহ করে কোডটি দিন।'
+        message: 'Account pending verification. A code has been sent to your email.'
       });
     }
 
@@ -10695,13 +10694,13 @@ app.post('/api/partner/auth/login', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'সফলভাবে লগইন হয়েছে!',
+      message: 'Signed in successfully!',
       token,
       partner: safePartner
     });
   } catch (err) {
     console.error('[Partner Login Error]', err);
-    res.status(500).json({ success: false, message: 'লগইন করতে সমস্যা হয়েছে: ' + err.message });
+    res.status(500).json({ success: false, message: 'Sign in failed: ' + err.message });
   }
 });
 
@@ -10711,7 +10710,7 @@ app.get('/api/partner/me', authenticatePartnerToken, (req, res) => {
     const partners = getPartners();
     const partner = partners.find(p => p.id === req.partner.id || (p.email && p.email.toLowerCase() === req.partner.email.toLowerCase()));
     if (!partner) {
-      return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+      return res.status(404).json({ success: false, message: 'Partner not found.' });
     }
 
     const challenges = readJson(CHALLENGES_FILE, []);
@@ -10795,7 +10794,7 @@ app.post('/api/partner/profile', authenticatePartnerToken, (req, res) => {
     const { name, phone, payoutMethod, payoutDetails } = req.body;
     const partners = getPartners();
     const idx = partners.findIndex(p => p.id === req.partner.id);
-    if (idx === -1) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Partner not found.' });
 
     if (name && name.trim()) partners[idx].name = name.trim();
     if (phone !== undefined) partners[idx].phone = phone.trim();
@@ -10808,7 +10807,7 @@ app.post('/api/partner/profile', authenticatePartnerToken, (req, res) => {
     const safePartner = { ...partners[idx] };
     delete safePartner.password;
 
-    res.json({ success: true, message: 'প্রোফাইল তথ্য সফলভাবে আপডেট হয়েছে!', partner: safePartner });
+    res.json({ success: true, message: 'Profile updated successfully!', partner: safePartner });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -10819,19 +10818,19 @@ app.post('/api/partner/change-password', authenticatePartnerToken, async (req, r
   try {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ success: false, message: 'বর্তমান ও নতুন উভয় পাসওয়ার্ড প্রদান করুন।' });
+      return res.status(400).json({ success: false, message: 'Please provide both current and new password.' });
     }
     if (newPassword.length < 6) {
-      return res.status(400).json({ success: false, message: 'নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।' });
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters.' });
     }
 
     const partners = getPartners();
     const idx = partners.findIndex(p => p.id === req.partner.id);
-    if (idx === -1) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Partner not found.' });
 
     if (partners[idx].password) {
       const match = await bcrypt.compare(currentPassword, partners[idx].password);
-      if (!match) return res.status(400).json({ success: false, message: 'বর্তমান পাসওয়ার্ড সঠিক নয়।' });
+      if (!match) return res.status(400).json({ success: false, message: 'Current password is incorrect.' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -10839,7 +10838,7 @@ app.post('/api/partner/change-password', authenticatePartnerToken, async (req, r
     partners[idx].updatedAt = new Date().toISOString();
     savePartners(partners);
 
-    res.json({ success: true, message: 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!' });
+    res.json({ success: true, message: 'Password changed successfully!' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -10850,7 +10849,7 @@ app.get('/api/partner/sales', authenticatePartnerToken, (req, res) => {
   try {
     const partners = getPartners();
     const partner = partners.find(p => p.id === req.partner.id);
-    if (!partner) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
 
     const challenges = readJson(CHALLENGES_FILE, []);
     const code = (partner.promoCode || '').toUpperCase();
@@ -10895,7 +10894,7 @@ app.get('/api/partner/promo-codes', authenticatePartnerToken, (req, res) => {
   try {
     const partners = getPartners();
     const partner = partners.find(p => p.id === req.partner.id);
-    if (!partner) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
 
     const promoCodes = getPromoCodes();
     const requests = getPartnerPromoRequests().filter(r => r.partnerId === partner.id);
@@ -10939,23 +10938,23 @@ app.post('/api/partner/custom-promo', authenticatePartnerToken, (req, res) => {
     const cleanCode = (requestedCode || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
 
     if (!cleanCode || cleanCode.length < 3 || cleanCode.length > 20) {
-      return res.status(400).json({ success: false, message: 'প্রোমো কোড ৩ থেকে ২০ অক্ষরের মধ্যে হতে হবে।' });
+      return res.status(400).json({ success: false, message: 'Promo code must be 3 to 20 characters.' });
     }
 
     const partners = getPartners();
     const partner = partners.find(p => p.id === req.partner.id);
-    if (!partner) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
 
     // Check if code taken
     const promoCodes = getPromoCodes();
     if (promoCodes.some(c => c.code && c.code.toUpperCase() === cleanCode) ||
         partners.some(p => p.promoCode && p.promoCode.toUpperCase() === cleanCode)) {
-      return res.status(400).json({ success: false, message: `"${cleanCode}" কোডটি ইতিমধ্যে ব্যবহৃত হচ্ছে। অন্য একটি কোড বেছে নিন।` });
+      return res.status(400).json({ success: false, message: `Promo code "${cleanCode}" is already in use. Please choose another.` });
     }
 
     const requests = getPartnerPromoRequests();
     if (requests.some(r => r.partnerId === partner.id && r.promoCode === cleanCode && r.status === 'pending')) {
-      return res.status(400).json({ success: false, message: `"${cleanCode}" কোডের জন্য আপনার একটি আবেদন ইতিমধ্যে বিবেচনাধীন রয়েছে।` });
+      return res.status(400).json({ success: false, message: `A request for "${cleanCode}" is already pending review.` });
     }
 
     const newRequest = {
@@ -10977,7 +10976,7 @@ app.post('/api/partner/custom-promo', authenticatePartnerToken, (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: `"${cleanCode}" প্রোমো কোডের আবেদনটি সফলভাবে জমা হয়েছে। অ্যাডমিন পর্যালোচনার পর এটি সক্রিয় হবে।`,
+      message: `Request for promo code "${cleanCode}" submitted. It will activate once approved by admin.`,
       request: newRequest
     });
   } catch (err) {
@@ -11006,18 +11005,18 @@ app.post('/api/partner/payouts/request', authenticatePartnerToken, (req, res) =>
     const numAmount = parseFloat(amount);
 
     if (!numAmount || isNaN(numAmount) || numAmount <= 0) {
-      return res.status(400).json({ success: false, message: 'সঠিক উইথড্রয়াল অ্যামাউন্ট দিন।' });
+      return res.status(400).json({ success: false, message: 'Please enter a valid withdrawal amount.' });
     }
 
     const settings = getPartnerSettings();
     const minPayout = settings.minPayoutAmount || 20;
     if (numAmount < minPayout) {
-      return res.status(400).json({ success: false, message: `ন্যূনতম পে-আউট অ্যামাউন্ট $${minPayout}।` });
+      return res.status(400).json({ success: false, message: `Minimum payout amount is $${minPayout}.` });
     }
 
     const partners = getPartners();
     const partner = partners.find(p => p.id === req.partner.id);
-    if (!partner) return res.status(404).json({ success: false, message: 'পার্টনার পাওয়া যায়নি।' });
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
 
     // Calculate actual withdrawable balance
     const challenges = readJson(CHALLENGES_FILE, []);
@@ -11046,7 +11045,7 @@ app.post('/api/partner/payouts/request', authenticatePartnerToken, (req, res) =>
     if (numAmount > withdrawable) {
       return res.status(400).json({
         success: false,
-        message: `অপর্যাপ্ত ব্যালেন্স। আপনার বর্তমান উত্তোলনযোগ্য ব্যালেন্স $${withdrawable}।`
+        message: `Insufficient balance. Your current available balance is $${withdrawable}.`
       });
     }
 
@@ -11054,7 +11053,7 @@ app.post('/api/partner/payouts/request', authenticatePartnerToken, (req, res) =>
     const cleanAddress = (payoutAddress || partner.payoutDetails || '').trim();
 
     if (!cleanAddress) {
-      return res.status(400).json({ success: false, message: 'অনুগ্রহ করে আপনার রিসিভিং ওয়ালেট / Binance Pay ID দিন।' });
+      return res.status(400).json({ success: false, message: 'Please provide your payout wallet or Binance Pay ID.' });
     }
 
     const newPayout = {
@@ -11079,7 +11078,7 @@ app.post('/api/partner/payouts/request', authenticatePartnerToken, (req, res) =>
 
     res.status(201).json({
       success: true,
-      message: `$${numAmount} কমিশন উইথড্র রিকোয়েস্ট সফলভাবে জমা হয়েছে! অ্যাডমিন পর্যালোচনার পর আপনার অ্যাকাউন্টে ডলার পাঠানো হবে।`,
+      message: `Withdrawal request for $${numAmount} submitted successfully! Funds will be processed shortly.`,
       payout: newPayout
     });
   } catch (err) {
@@ -11097,7 +11096,7 @@ app.post('/api/admin/partner-payout-requests/:id/action', authenticateAdminToken
     const idx = payouts.findIndex(p => p.id === id);
 
     if (idx === -1) {
-      return res.status(404).json({ success: false, message: 'পে-আউট রিকোয়েস্ট পাওয়া যায়নি।' });
+      return res.status(404).json({ success: false, message: 'Payout request not found.' });
     }
 
     const payout = payouts[idx];
@@ -11116,15 +11115,15 @@ app.post('/api/admin/partner-payout-requests/:id/action', authenticateAdminToken
       }
 
       savePartnerPayouts(payouts);
-      return res.json({ success: true, message: `পে-আউট রিকোয়েস্ট সফলভাবে অ্যাপ্রুভ ও সম্পন্ন করা হয়েছে! ($${payout.amount})`, payout });
+      return res.json({ success: true, message: `Payout request approved and completed! ($${payout.amount})`, payout });
     } else if (action === 'reject') {
       payout.status = 'rejected';
       payout.adminNotes = (adminNotes || 'Rejected by administrator').trim();
       payout.processedAt = new Date().toISOString();
       savePartnerPayouts(payouts);
-      return res.json({ success: true, message: 'পে-আউট রিকোয়েস্ট প্রত্যাখ্যাত (Rejected) হয়েছে।', payout });
+      return res.json({ success: true, message: 'Payout request rejected.', payout });
     } else {
-      return res.status(400).json({ success: false, message: 'সঠিক অ্যাকশন দিন (approve অথবা reject)।' });
+      return res.status(400).json({ success: false, message: 'Invalid action (must be "approve" or "reject").' });
     }
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -11150,7 +11149,7 @@ app.post('/api/admin/partner-promo-requests/:id/action', authenticateAdminToken,
     const idx = requests.findIndex(r => r.id === id);
 
     if (idx === -1) {
-      return res.status(404).json({ success: false, message: 'প্রোমো রিকোয়েস্ট পাওয়া যায়নি।' });
+      return res.status(404).json({ success: false, message: 'Promo request not found.' });
     }
 
     const item = requests[idx];
@@ -11189,15 +11188,15 @@ app.post('/api/admin/partner-promo-requests/:id/action', authenticateAdminToken,
       }
       savePromoCodes(promoCodes);
 
-      return res.json({ success: true, message: `প্রোমো কোড "${item.promoCode}" (${discount}% ছাড়) সফলভাবে অ্যাপ্রুভ হয়েছে!`, request: item });
+      return res.json({ success: true, message: `Promo code "${item.promoCode}" (${discount}% discount) approved successfully!`, request: item });
     } else if (action === 'reject') {
       item.status = 'rejected';
       item.adminNotes = (adminNotes || 'Rejected by administrator').trim();
       item.reviewedAt = new Date().toISOString();
       savePartnerPromoRequests(requests);
-      return res.json({ success: true, message: `প্রোমো কোড "${item.promoCode}" আবেদন বাতিল করা হয়েছে।`, request: item });
+      return res.json({ success: true, message: `Promo code request "${item.promoCode}" rejected.`, request: item });
     } else {
-      return res.status(400).json({ success: false, message: 'সঠিক অ্যাকশন দিন (approve অথবা reject)।' });
+      return res.status(400).json({ success: false, message: 'Invalid action (must be "approve" or "reject").' });
     }
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
