@@ -8,7 +8,12 @@
  * 5. Double Safety Mirroring: Writes to MySQL as primary and mirrors to permanent JSON vault
  */
 
-const mysql = require('mysql2/promise');
+let mysql = null;
+try {
+  mysql = require('mysql2/promise');
+} catch (e) {
+  // mysql2 not installed in this environment; fallback to local safe store
+}
 const fs = require('fs');
 const path = require('path');
 
@@ -22,7 +27,7 @@ let pool = null;
 let isConnected = false;
 
 function isMySqlConfigured() {
-  return Boolean(DB_HOST && DB_DATABASE && DB_USERNAME);
+  return Boolean(mysql && DB_HOST && DB_DATABASE && DB_USERNAME);
 }
 
 function isMySqlActive() {
@@ -256,11 +261,163 @@ async function initSchema() {
       userId VARCHAR(120) PRIMARY KEY,
       stateData JSON DEFAULT NULL,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS partners (
+      id VARCHAR(120) PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL UNIQUE,
+      password VARCHAR(255) NOT NULL,
+      phone VARCHAR(100) DEFAULT '',
+      promoCode VARCHAR(100) DEFAULT '',
+      commissionRate INT DEFAULT 10,
+      traderDiscount INT DEFAULT 5,
+      payoutMethod VARCHAR(100) DEFAULT 'Binance Pay',
+      payoutDetails VARCHAR(255) DEFAULT '',
+      status VARCHAR(50) DEFAULT 'active',
+      isEmailVerified TINYINT(1) DEFAULT 0,
+      emailVerificationCode VARCHAR(100) DEFAULT NULL,
+      emailVerificationExpires DATETIME DEFAULT NULL,
+      emailVerifiedAt DATETIME DEFAULT NULL,
+      role VARCHAR(50) DEFAULT 'partner',
+      totalReferred INT DEFAULT 0,
+      totalSales INT DEFAULT 0,
+      totalCommissionEarned DECIMAL(12,2) DEFAULT 0,
+      totalCommissionPaid DECIMAL(12,2) DEFAULT 0,
+      pendingCommission DECIMAL(12,2) DEFAULT 0,
+      notes TEXT DEFAULT NULL,
+      useCustomRate TINYINT(1) DEFAULT 0,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      rawPartnerData JSON DEFAULT NULL,
+      INDEX idx_partner_email (email),
+      INDEX idx_partner_code (promoCode)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS promo_codes (
+      id VARCHAR(120) PRIMARY KEY,
+      code VARCHAR(100) NOT NULL UNIQUE,
+      discountType VARCHAR(50) DEFAULT 'percentage',
+      discountValue DECIMAL(10,2) DEFAULT 0,
+      packageId VARCHAR(100) DEFAULT 'all',
+      packageIds JSON DEFAULT NULL,
+      maxUses INT DEFAULT NULL,
+      usedCount INT DEFAULT 0,
+      expiresAt DATETIME DEFAULT NULL,
+      status VARCHAR(50) DEFAULT 'active',
+      notes TEXT DEFAULT NULL,
+      isPartnerCode TINYINT(1) DEFAULT 0,
+      partnerId VARCHAR(120) DEFAULT NULL,
+      partnerName VARCHAR(255) DEFAULT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      rawPromoData JSON DEFAULT NULL,
+      INDEX idx_promo_code (code),
+      INDEX idx_promo_partner (partnerId)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS partner_payouts (
+      id VARCHAR(120) PRIMARY KEY,
+      partnerId VARCHAR(120) NOT NULL,
+      partnerName VARCHAR(255) DEFAULT '',
+      partnerEmail VARCHAR(255) DEFAULT '',
+      partnerPromoCode VARCHAR(100) DEFAULT '',
+      amount DECIMAL(12,2) DEFAULT 0,
+      paymentMethod VARCHAR(100) DEFAULT 'Binance Pay',
+      payoutAddress VARCHAR(255) DEFAULT '',
+      status VARCHAR(50) DEFAULT 'pending',
+      adminNotes TEXT DEFAULT NULL,
+      rejectionReason TEXT DEFAULT NULL,
+      transactionProofUrl TEXT DEFAULT NULL,
+      requestedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      paidAt DATETIME DEFAULT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      rawPayoutData JSON DEFAULT NULL,
+      INDEX idx_pp_partner (partnerId),
+      INDEX idx_pp_status (status)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS partner_settings (
+      id VARCHAR(60) PRIMARY KEY DEFAULT 'default',
+      settingsData JSON DEFAULT NULL,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS partner_promo_requests (
+      id VARCHAR(120) PRIMARY KEY,
+      partnerId VARCHAR(120) NOT NULL,
+      partnerName VARCHAR(255) DEFAULT '',
+      partnerEmail VARCHAR(255) DEFAULT '',
+      promoCode VARCHAR(100) DEFAULT '',
+      requestedDiscount INT DEFAULT 5,
+      status VARCHAR(50) DEFAULT 'pending',
+      adminFeedback TEXT DEFAULT NULL,
+      requestedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      reviewedAt DATETIME DEFAULT NULL,
+      rawRequestData JSON DEFAULT NULL,
+      INDEX idx_pr_partner (partnerId),
+      INDEX idx_pr_status (status)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS payouts (
+      id VARCHAR(120) PRIMARY KEY,
+      userId VARCHAR(120) DEFAULT '',
+      payoutId VARCHAR(120) DEFAULT '',
+      amount DECIMAL(12,2) DEFAULT 0,
+      status VARCHAR(50) DEFAULT 'pending',
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      rawPayoutData JSON DEFAULT NULL,
+      INDEX idx_payout_user (userId),
+      INDEX idx_payout_status (status)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS payout_settings (
+      id VARCHAR(60) PRIMARY KEY DEFAULT 'default',
+      settingsData JSON DEFAULT NULL,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS launch_promo (
+      id VARCHAR(60) PRIMARY KEY DEFAULT 'default',
+      promoData JSON DEFAULT NULL,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS promo_presets (
+      id VARCHAR(60) PRIMARY KEY DEFAULT 'default',
+      presetsData JSON DEFAULT NULL,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
   ];
 
   for (const q of queries) {
     await pool.query(q);
+  }
+
+  // Non-destructive addition of partner referral columns to challenges table
+  try {
+    const alterColumns = [
+      "ALTER TABLE challenges ADD COLUMN partnerId VARCHAR(120) DEFAULT NULL",
+      "ALTER TABLE challenges ADD COLUMN partnerName VARCHAR(255) DEFAULT NULL",
+      "ALTER TABLE challenges ADD COLUMN partnerPromoCode VARCHAR(100) DEFAULT NULL",
+      "ALTER TABLE challenges ADD COLUMN partnerCommissionRate INT DEFAULT 0",
+      "ALTER TABLE challenges ADD COLUMN partnerCommission DECIMAL(12,2) DEFAULT 0",
+      "ALTER TABLE challenges ADD COLUMN partnerCommissionStatus VARCHAR(50) DEFAULT NULL",
+      "ALTER TABLE challenges ADD COLUMN promoCode VARCHAR(100) DEFAULT NULL"
+    ];
+    for (const ac of alterColumns) {
+      try {
+        await pool.query(ac);
+      } catch (colErr) {
+        // Ignore column already exists error (ER_DUP_FIELDNAME / 1060)
+        if (!colErr.message.includes('Duplicate column') && !colErr.message.includes('already exists')) {
+          // Silent or info log
+        }
+      }
+    }
+  } catch (altErr) {
+    // Non-fatal, rawChallengeData JSON preserves all extra columns regardless
   }
   console.log('[DATABASE] ✅ Database schema verified and ready.');
 }
@@ -497,6 +654,166 @@ async function autoMigrateFromJson() {
       }
       if (count > 0) console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} archive entries into MySQL.`);
     }
+
+    // 5. Partners Initial Migration
+    const partnersFile = path.join(dataDir, 'partners.json');
+    const permPartnersFile = path.join(dataDir, 'partners_permanent_store.json');
+    let partnerItems = [];
+    if (fs.existsSync(partnersFile)) {
+      try { partnerItems = JSON.parse(fs.readFileSync(partnersFile, 'utf8') || '[]'); } catch (e) {}
+    }
+    if ((!partnerItems || partnerItems.length === 0) && fs.existsSync(permPartnersFile)) {
+      try { partnerItems = JSON.parse(fs.readFileSync(permPartnersFile, 'utf8') || '[]'); } catch (e) {}
+    }
+    if (Array.isArray(partnerItems) && partnerItems.length > 0) {
+      let count = 0;
+      for (const p of partnerItems) {
+        if (!p || !p.id) continue;
+        const [existing] = await pool.query('SELECT id FROM partners WHERE id = ? LIMIT 1', [p.id]);
+        if (existing.length === 0) {
+          await savePartner(p);
+          count++;
+        }
+      }
+      if (count > 0) console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} partners into MySQL.`);
+    }
+
+    // 6. Promo Codes Initial Migration
+    const promoFile = path.join(dataDir, 'promo_codes.json');
+    const permPromoFile = path.join(dataDir, 'promo_codes_permanent_store.json');
+    let promoItems = [];
+    if (fs.existsSync(promoFile)) {
+      try { promoItems = JSON.parse(fs.readFileSync(promoFile, 'utf8') || '[]'); } catch (e) {}
+    }
+    if ((!promoItems || promoItems.length === 0) && fs.existsSync(permPromoFile)) {
+      try { promoItems = JSON.parse(fs.readFileSync(permPromoFile, 'utf8') || '[]'); } catch (e) {}
+    }
+    if (Array.isArray(promoItems) && promoItems.length > 0) {
+      let count = 0;
+      for (const pr of promoItems) {
+        if (!pr || !pr.id) continue;
+        const [existing] = await pool.query('SELECT id FROM promo_codes WHERE id = ? LIMIT 1', [pr.id]);
+        if (existing.length === 0) {
+          await savePromoCode(pr);
+          count++;
+        }
+      }
+      if (count > 0) console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} promo codes into MySQL.`);
+    }
+
+    // 7. Partner Payouts Initial Migration
+    const ppFile = path.join(dataDir, 'partner_payouts.json');
+    if (fs.existsSync(ppFile)) {
+      let ppItems = [];
+      try { ppItems = JSON.parse(fs.readFileSync(ppFile, 'utf8') || '[]'); } catch (e) {}
+      if (Array.isArray(ppItems) && ppItems.length > 0) {
+        let count = 0;
+        for (const pp of ppItems) {
+          if (!pp || !pp.id) continue;
+          const [existing] = await pool.query('SELECT id FROM partner_payouts WHERE id = ? LIMIT 1', [pp.id]);
+          if (existing.length === 0) {
+            await savePartnerPayout(pp);
+            count++;
+          }
+        }
+        if (count > 0) console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} partner payouts into MySQL.`);
+      }
+    }
+
+    // 8. Partner Settings Initial Migration
+    const psFile = path.join(dataDir, 'partner_settings.json');
+    if (fs.existsSync(psFile)) {
+      try {
+        const ps = JSON.parse(fs.readFileSync(psFile, 'utf8') || '{}');
+        if (ps && Object.keys(ps).length > 0) {
+          const [existing] = await pool.query("SELECT id FROM partner_settings WHERE id = 'default' LIMIT 1");
+          if (existing.length === 0) {
+            await savePartnerSettings(ps);
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 9. Partner Promo Requests Initial Migration
+    const prqFile = path.join(dataDir, 'partner_promo_requests.json');
+    if (fs.existsSync(prqFile)) {
+      let prqItems = [];
+      try { prqItems = JSON.parse(fs.readFileSync(prqFile, 'utf8') || '[]'); } catch (e) {}
+      if (Array.isArray(prqItems) && prqItems.length > 0) {
+        let count = 0;
+        for (const prq of prqItems) {
+          if (!prq || !prq.id) continue;
+          const [existing] = await pool.query('SELECT id FROM partner_promo_requests WHERE id = ? LIMIT 1', [prq.id]);
+          if (existing.length === 0) {
+            await savePartnerPromoRequest(prq);
+            count++;
+          }
+        }
+        if (count > 0) console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} partner promo requests into MySQL.`);
+      }
+    }
+
+    // 10. Trader Payouts Initial Migration
+    const tpFile = path.join(dataDir, 'payouts.json');
+    if (fs.existsSync(tpFile)) {
+      let tpItems = [];
+      try { tpItems = JSON.parse(fs.readFileSync(tpFile, 'utf8') || '[]'); } catch (e) {}
+      if (Array.isArray(tpItems) && tpItems.length > 0) {
+        let count = 0;
+        for (const tp of tpItems) {
+          if (!tp || (!tp.id && !tp.payoutId)) continue;
+          const tid = tp.id || tp.payoutId;
+          const [existing] = await pool.query('SELECT id FROM payouts WHERE id = ? LIMIT 1', [tid]);
+          if (existing.length === 0) {
+            await savePayout(tp);
+            count++;
+          }
+        }
+        if (count > 0) console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} trader payouts into MySQL.`);
+      }
+    }
+
+    // 11. Payout Settings Initial Migration
+    const tpsFile = path.join(dataDir, 'payout_settings.json');
+    if (fs.existsSync(tpsFile)) {
+      try {
+        const tps = JSON.parse(fs.readFileSync(tpsFile, 'utf8') || '{}');
+        if (tps && Object.keys(tps).length > 0) {
+          const [existing] = await pool.query("SELECT id FROM payout_settings WHERE id = 'default' LIMIT 1");
+          if (existing.length === 0) {
+            await savePayoutSettings(tps);
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 12. Launch Promo Initial Migration
+    const lpFile = path.join(dataDir, 'launch_promo.json');
+    if (fs.existsSync(lpFile)) {
+      try {
+        const lp = JSON.parse(fs.readFileSync(lpFile, 'utf8') || '{}');
+        if (lp && Object.keys(lp).length > 0) {
+          const [existing] = await pool.query("SELECT id FROM launch_promo WHERE id = 'default' LIMIT 1");
+          if (existing.length === 0) {
+            await saveLaunchPromo(lp);
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 13. Promo Presets Initial Migration
+    const prsFile = path.join(dataDir, 'promo_presets.json');
+    if (fs.existsSync(prsFile)) {
+      try {
+        const prs = JSON.parse(fs.readFileSync(prsFile, 'utf8') || '[]');
+        if (Array.isArray(prs) && prs.length > 0) {
+          const [existing] = await pool.query("SELECT id FROM promo_presets WHERE id = 'default' LIMIT 1");
+          if (existing.length === 0) {
+            await savePromoPresets(prs);
+          }
+        }
+      } catch (e) {}
+    }
   } catch (err) {
     console.error('[DATABASE AUTO-MIGRATE ERROR]:', err.message);
   }
@@ -649,6 +966,145 @@ function formatSubmission(row) {
     forgivenOnReactivation: Boolean(row.forgivenOnReactivation),
     reactivatedAt: row.reactivatedAt ? new Date(row.reactivatedAt).toISOString() : null,
     resubmissionRequestedAt: row.resubmissionRequestedAt ? new Date(row.resubmissionRequestedAt).toISOString() : null
+  };
+}
+
+// Format a MySQL partner row into platform JSON representation
+function formatPartner(row) {
+  if (!row) return null;
+  let parsed = {};
+  if (row.rawPartnerData) {
+    try { parsed = typeof row.rawPartnerData === 'string' ? JSON.parse(row.rawPartnerData) : row.rawPartnerData; } catch (e) {}
+  }
+  return {
+    ...parsed,
+    id: row.id,
+    name: row.name || parsed.name || '',
+    email: row.email ? row.email.trim().toLowerCase() : parsed.email,
+    password: row.password || parsed.password || '',
+    phone: row.phone || parsed.phone || '',
+    promoCode: row.promoCode || parsed.promoCode || '',
+    commissionRate: Number(row.commissionRate !== undefined ? row.commissionRate : (parsed.commissionRate || 10)),
+    traderDiscount: Number(row.traderDiscount !== undefined ? row.traderDiscount : (parsed.traderDiscount || 5)),
+    payoutMethod: row.payoutMethod || parsed.payoutMethod || 'Binance Pay',
+    payoutDetails: row.payoutDetails || parsed.payoutDetails || '',
+    status: row.status || parsed.status || 'active',
+    isEmailVerified: Boolean(row.isEmailVerified !== undefined ? row.isEmailVerified : parsed.isEmailVerified),
+    emailVerificationCode: row.emailVerificationCode || parsed.emailVerificationCode || null,
+    emailVerificationExpires: row.emailVerificationExpires ? (new Date(row.emailVerificationExpires).getTime() || parsed.emailVerificationExpires) : (parsed.emailVerificationExpires || null),
+    emailVerifiedAt: row.emailVerifiedAt ? new Date(row.emailVerifiedAt).toISOString() : (parsed.emailVerifiedAt || null),
+    role: row.role || parsed.role || 'partner',
+    totalReferred: Number(row.totalReferred !== undefined ? row.totalReferred : (parsed.totalReferred || 0)),
+    totalSales: Number(row.totalSales !== undefined ? row.totalSales : (parsed.totalSales || 0)),
+    totalCommissionEarned: Number(row.totalCommissionEarned !== undefined ? row.totalCommissionEarned : (parsed.totalCommissionEarned || 0)),
+    totalCommissionPaid: Number(row.totalCommissionPaid !== undefined ? row.totalCommissionPaid : (parsed.totalCommissionPaid || 0)),
+    pendingCommission: Number(row.pendingCommission !== undefined ? row.pendingCommission : (parsed.pendingCommission || 0)),
+    notes: row.notes !== undefined ? row.notes : (parsed.notes || ''),
+    useCustomRate: Boolean(row.useCustomRate !== undefined ? row.useCustomRate : parsed.useCustomRate),
+    createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : (parsed.createdAt || new Date().toISOString()),
+    updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : (parsed.updatedAt || new Date().toISOString())
+  };
+}
+
+// Format a MySQL promo code row into platform JSON representation
+function formatPromoCode(row) {
+  if (!row) return null;
+  let parsed = {};
+  if (row.rawPromoData) {
+    try { parsed = typeof row.rawPromoData === 'string' ? JSON.parse(row.rawPromoData) : row.rawPromoData; } catch (e) {}
+  }
+  let pkgIds = ['all'];
+  if (row.packageIds) {
+    try { pkgIds = typeof row.packageIds === 'string' ? JSON.parse(row.packageIds) : row.packageIds; } catch (e) {}
+  } else if (parsed.packageIds) {
+    pkgIds = parsed.packageIds;
+  }
+  return {
+    ...parsed,
+    id: row.id,
+    code: row.code,
+    discountType: row.discountType || parsed.discountType || 'percentage',
+    discountValue: Number(row.discountValue !== undefined ? row.discountValue : (parsed.discountValue || 0)),
+    packageId: row.packageId || parsed.packageId || 'all',
+    packageIds: Array.isArray(pkgIds) ? pkgIds : ['all'],
+    maxUses: row.maxUses !== null && row.maxUses !== undefined ? Number(row.maxUses) : (parsed.maxUses || null),
+    usedCount: Number(row.usedCount || parsed.usedCount || 0),
+    expiresAt: row.expiresAt ? new Date(row.expiresAt).toISOString() : (parsed.expiresAt || null),
+    status: row.status || parsed.status || 'active',
+    notes: row.notes !== undefined ? row.notes : (parsed.notes || ''),
+    isPartnerCode: Boolean(row.isPartnerCode || parsed.isPartnerCode),
+    partnerId: row.partnerId || parsed.partnerId || null,
+    partnerName: row.partnerName || parsed.partnerName || null,
+    createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : (parsed.createdAt || new Date().toISOString()),
+    updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : (parsed.updatedAt || new Date().toISOString())
+  };
+}
+
+// Format a MySQL partner payout row
+function formatPartnerPayout(row) {
+  if (!row) return null;
+  let parsed = {};
+  if (row.rawPayoutData) {
+    try { parsed = typeof row.rawPayoutData === 'string' ? JSON.parse(row.rawPayoutData) : row.rawPayoutData; } catch (e) {}
+  }
+  return {
+    ...parsed,
+    id: row.id,
+    partnerId: row.partnerId || parsed.partnerId,
+    partnerName: row.partnerName || parsed.partnerName || '',
+    partnerEmail: row.partnerEmail || parsed.partnerEmail || '',
+    partnerPromoCode: row.partnerPromoCode || parsed.partnerPromoCode || '',
+    amount: Number(row.amount !== undefined ? row.amount : (parsed.amount || 0)),
+    paymentMethod: row.paymentMethod || parsed.paymentMethod || 'Binance Pay',
+    payoutAddress: row.payoutAddress || parsed.payoutAddress || '',
+    status: row.status || parsed.status || 'pending',
+    adminNotes: row.adminNotes || parsed.adminNotes || null,
+    rejectionReason: row.rejectionReason || parsed.rejectionReason || null,
+    transactionProofUrl: row.transactionProofUrl || parsed.transactionProofUrl || null,
+    requestedAt: row.requestedAt ? new Date(row.requestedAt).toISOString() : (parsed.requestedAt || new Date().toISOString()),
+    paidAt: row.paidAt ? new Date(row.paidAt).toISOString() : (parsed.paidAt || null),
+    createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : (parsed.createdAt || new Date().toISOString())
+  };
+}
+
+// Format a MySQL partner promo request row
+function formatPartnerPromoRequest(row) {
+  if (!row) return null;
+  let parsed = {};
+  if (row.rawRequestData) {
+    try { parsed = typeof row.rawRequestData === 'string' ? JSON.parse(row.rawRequestData) : row.rawRequestData; } catch (e) {}
+  }
+  return {
+    ...parsed,
+    id: row.id,
+    partnerId: row.partnerId || parsed.partnerId,
+    partnerName: row.partnerName || parsed.partnerName || '',
+    partnerEmail: row.partnerEmail || parsed.partnerEmail || '',
+    promoCode: row.promoCode || parsed.promoCode || '',
+    requestedDiscount: Number(row.requestedDiscount !== undefined ? row.requestedDiscount : (parsed.requestedDiscount || 5)),
+    status: row.status || parsed.status || 'pending',
+    adminFeedback: row.adminFeedback || parsed.adminFeedback || null,
+    requestedAt: row.requestedAt ? new Date(row.requestedAt).toISOString() : (parsed.requestedAt || new Date().toISOString()),
+    reviewedAt: row.reviewedAt ? new Date(row.reviewedAt).toISOString() : (parsed.reviewedAt || null)
+  };
+}
+
+// Format a MySQL trader payout row
+function formatTraderPayout(row) {
+  if (!row) return null;
+  let parsed = {};
+  if (row.rawPayoutData) {
+    try { parsed = typeof row.rawPayoutData === 'string' ? JSON.parse(row.rawPayoutData) : row.rawPayoutData; } catch (e) {}
+  }
+  return {
+    ...parsed,
+    id: row.id,
+    userId: row.userId || parsed.userId || '',
+    payoutId: row.payoutId || parsed.payoutId || row.id,
+    amount: Number(row.amount !== undefined ? row.amount : (parsed.amount || 0)),
+    status: row.status || parsed.status || 'pending',
+    createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : (parsed.createdAt || new Date().toISOString()),
+    updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : (parsed.updatedAt || new Date().toISOString())
   };
 }
 
@@ -1086,6 +1542,508 @@ async function deleteSubmission(id) {
   }
 }
 
+// ==================== PARTNER / AFFILIATE PROGRAM CRUD ====================
+
+async function getAllPartners() {
+  if (!isMySqlActive()) return null;
+  const [rows] = await pool.query('SELECT * FROM partners ORDER BY createdAt DESC');
+  return rows.map(formatPartner);
+}
+
+async function getPartnerById(id) {
+  if (!isMySqlActive() || !id) return null;
+  const [rows] = await pool.query('SELECT * FROM partners WHERE id = ? LIMIT 1', [id]);
+  return rows.length > 0 ? formatPartner(rows[0]) : null;
+}
+
+async function getPartnerByEmail(email) {
+  if (!isMySqlActive() || !email) return null;
+  const [rows] = await pool.query('SELECT * FROM partners WHERE email = ? LIMIT 1', [email.trim().toLowerCase()]);
+  return rows.length > 0 ? formatPartner(rows[0]) : null;
+}
+
+async function getPartnerByPromoCode(code) {
+  if (!isMySqlActive() || !code) return null;
+  const [rows] = await pool.query('SELECT * FROM partners WHERE UPPER(promoCode) = ? LIMIT 1', [code.trim().toUpperCase()]);
+  return rows.length > 0 ? formatPartner(rows[0]) : null;
+}
+
+async function savePartner(partner) {
+  if (!isMySqlActive() || !partner || !partner.id) return false;
+  try {
+    const normEmail = partner.email ? partner.email.trim().toLowerCase() : '';
+    const [existing] = await pool.query('SELECT id FROM partners WHERE id = ? OR (email != "" AND email = ?) LIMIT 1', [partner.id, normEmail]);
+
+    if (existing.length === 0) {
+      await pool.query(`INSERT INTO partners (
+        id, name, email, password, phone, promoCode, commissionRate, traderDiscount,
+        payoutMethod, payoutDetails, status, isEmailVerified, emailVerificationCode,
+        emailVerificationExpires, emailVerifiedAt, role, totalReferred, totalSales,
+        totalCommissionEarned, totalCommissionPaid, pendingCommission, notes, useCustomRate,
+        createdAt, updatedAt, rawPartnerData
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+        partner.id,
+        partner.name || '',
+        normEmail,
+        partner.password || '',
+        partner.phone || '',
+        partner.promoCode || '',
+        partner.commissionRate || 10,
+        partner.traderDiscount || 5,
+        partner.payoutMethod || 'Binance Pay',
+        partner.payoutDetails || '',
+        partner.status || 'active',
+        partner.isEmailVerified ? 1 : 0,
+        partner.emailVerificationCode || null,
+        toMySqlDateTime(partner.emailVerificationExpires),
+        toMySqlDateTime(partner.emailVerifiedAt),
+        partner.role || 'partner',
+        partner.totalReferred || 0,
+        partner.totalSales || 0,
+        partner.totalCommissionEarned || 0,
+        partner.totalCommissionPaid || 0,
+        partner.pendingCommission || 0,
+        partner.notes || '',
+        partner.useCustomRate ? 1 : 0,
+        toMySqlDateTime(partner.createdAt) || new Date(),
+        toMySqlDateTime(partner.updatedAt) || new Date(),
+        JSON.stringify(partner)
+      ]);
+    } else {
+      await pool.query(`UPDATE partners SET
+        name = ?, email = ?, password = ?, phone = ?, promoCode = ?, commissionRate = ?,
+        traderDiscount = ?, payoutMethod = ?, payoutDetails = ?, status = ?,
+        isEmailVerified = ?, emailVerificationCode = ?, emailVerificationExpires = ?,
+        emailVerifiedAt = ?, role = ?, totalReferred = ?, totalSales = ?,
+        totalCommissionEarned = ?, totalCommissionPaid = ?, pendingCommission = ?,
+        notes = ?, useCustomRate = ?, updatedAt = ?, rawPartnerData = ?
+        WHERE id = ?`, [
+        partner.name || '',
+        normEmail,
+        partner.password || '',
+        partner.phone || '',
+        partner.promoCode || '',
+        partner.commissionRate || 10,
+        partner.traderDiscount || 5,
+        partner.payoutMethod || 'Binance Pay',
+        partner.payoutDetails || '',
+        partner.status || 'active',
+        partner.isEmailVerified ? 1 : 0,
+        partner.emailVerificationCode || null,
+        toMySqlDateTime(partner.emailVerificationExpires),
+        toMySqlDateTime(partner.emailVerifiedAt),
+        partner.role || 'partner',
+        partner.totalReferred || 0,
+        partner.totalSales || 0,
+        partner.totalCommissionEarned || 0,
+        partner.totalCommissionPaid || 0,
+        partner.pendingCommission || 0,
+        partner.notes || '',
+        partner.useCustomRate ? 1 : 0,
+        toMySqlDateTime(partner.updatedAt) || new Date(),
+        JSON.stringify(partner),
+        partner.id
+      ]);
+    }
+    return true;
+  } catch (err) {
+    console.error('[DATABASE SAVE PARTNER ERROR]:', err.message);
+    return false;
+  }
+}
+
+async function deletePartner(id) {
+  if (!isMySqlActive() || !id) return false;
+  try {
+    await pool.query('DELETE FROM partners WHERE id = ?', [id]);
+    return true;
+  } catch (err) {
+    console.error('[DATABASE DELETE PARTNER ERROR]:', err.message);
+    return false;
+  }
+}
+
+// ==================== PROMO CODES CRUD ====================
+
+async function getAllPromoCodes() {
+  if (!isMySqlActive()) return null;
+  const [rows] = await pool.query('SELECT * FROM promo_codes ORDER BY createdAt DESC');
+  return rows.map(formatPromoCode);
+}
+
+async function getPromoCodeByCode(code) {
+  if (!isMySqlActive() || !code) return null;
+  const [rows] = await pool.query('SELECT * FROM promo_codes WHERE UPPER(code) = ? LIMIT 1', [code.trim().toUpperCase()]);
+  return rows.length > 0 ? formatPromoCode(rows[0]) : null;
+}
+
+async function savePromoCode(promo) {
+  if (!isMySqlActive() || !promo || !promo.id) return false;
+  try {
+    const cleanCode = promo.code ? promo.code.trim().toUpperCase() : '';
+    const [existing] = await pool.query('SELECT id FROM promo_codes WHERE id = ? OR (code != "" AND UPPER(code) = ?) LIMIT 1', [promo.id, cleanCode]);
+
+    const pkgIdsJson = promo.packageIds ? JSON.stringify(promo.packageIds) : JSON.stringify(['all']);
+
+    if (existing.length === 0) {
+      await pool.query(`INSERT INTO promo_codes (
+        id, code, discountType, discountValue, packageId, packageIds,
+        maxUses, usedCount, expiresAt, status, notes,
+        isPartnerCode, partnerId, partnerName, createdAt, updatedAt, rawPromoData
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+        promo.id,
+        cleanCode,
+        promo.discountType || 'percentage',
+        promo.discountValue || 0,
+        promo.packageId || 'all',
+        pkgIdsJson,
+        promo.maxUses !== undefined ? promo.maxUses : null,
+        promo.usedCount || 0,
+        toMySqlDateTime(promo.expiresAt),
+        promo.status || 'active',
+        promo.notes || '',
+        promo.isPartnerCode ? 1 : 0,
+        promo.partnerId || null,
+        promo.partnerName || null,
+        toMySqlDateTime(promo.createdAt) || new Date(),
+        toMySqlDateTime(promo.updatedAt) || new Date(),
+        JSON.stringify(promo)
+      ]);
+    } else {
+      await pool.query(`UPDATE promo_codes SET
+        code = ?, discountType = ?, discountValue = ?, packageId = ?, packageIds = ?,
+        maxUses = ?, usedCount = ?, expiresAt = ?, status = ?, notes = ?,
+        isPartnerCode = ?, partnerId = ?, partnerName = ?, updatedAt = ?, rawPromoData = ?
+        WHERE id = ?`, [
+        cleanCode,
+        promo.discountType || 'percentage',
+        promo.discountValue || 0,
+        promo.packageId || 'all',
+        pkgIdsJson,
+        promo.maxUses !== undefined ? promo.maxUses : null,
+        promo.usedCount || 0,
+        toMySqlDateTime(promo.expiresAt),
+        promo.status || 'active',
+        promo.notes || '',
+        promo.isPartnerCode ? 1 : 0,
+        promo.partnerId || null,
+        promo.partnerName || null,
+        toMySqlDateTime(promo.updatedAt) || new Date(),
+        JSON.stringify(promo),
+        promo.id
+      ]);
+    }
+    return true;
+  } catch (err) {
+    console.error('[DATABASE SAVE PROMO ERROR]:', err.message);
+    return false;
+  }
+}
+
+async function deletePromoCode(id) {
+  if (!isMySqlActive() || !id) return false;
+  try {
+    await pool.query('DELETE FROM promo_codes WHERE id = ? OR UPPER(code) = ?', [id, id.toUpperCase()]);
+    return true;
+  } catch (err) {
+    console.error('[DATABASE DELETE PROMO ERROR]:', err.message);
+    return false;
+  }
+}
+
+// ==================== PARTNER PAYOUTS CRUD ====================
+
+async function getAllPartnerPayouts() {
+  if (!isMySqlActive()) return null;
+  const [rows] = await pool.query('SELECT * FROM partner_payouts ORDER BY requestedAt DESC');
+  return rows.map(formatPartnerPayout);
+}
+
+async function savePartnerPayout(payout) {
+  if (!isMySqlActive() || !payout || !payout.id) return false;
+  try {
+    const [existing] = await pool.query('SELECT id FROM partner_payouts WHERE id = ? LIMIT 1', [payout.id]);
+    if (existing.length === 0) {
+      await pool.query(`INSERT INTO partner_payouts (
+        id, partnerId, partnerName, partnerEmail, partnerPromoCode, amount,
+        paymentMethod, payoutAddress, status, adminNotes, rejectionReason,
+        transactionProofUrl, requestedAt, paidAt, createdAt, rawPayoutData
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+        payout.id,
+        payout.partnerId || '',
+        payout.partnerName || '',
+        payout.partnerEmail || '',
+        payout.partnerPromoCode || '',
+        payout.amount || 0,
+        payout.paymentMethod || 'Binance Pay',
+        payout.payoutAddress || '',
+        payout.status || 'pending',
+        payout.adminNotes || null,
+        payout.rejectionReason || null,
+        payout.transactionProofUrl || null,
+        toMySqlDateTime(payout.requestedAt) || new Date(),
+        toMySqlDateTime(payout.paidAt),
+        toMySqlDateTime(payout.createdAt) || new Date(),
+        JSON.stringify(payout)
+      ]);
+    } else {
+      await pool.query(`UPDATE partner_payouts SET
+        partnerName = ?, partnerEmail = ?, partnerPromoCode = ?, amount = ?,
+        paymentMethod = ?, payoutAddress = ?, status = ?, adminNotes = ?,
+        rejectionReason = ?, transactionProofUrl = ?, paidAt = ?, rawPayoutData = ?
+        WHERE id = ?`, [
+        payout.partnerName || '',
+        payout.partnerEmail || '',
+        payout.partnerPromoCode || '',
+        payout.amount || 0,
+        payout.paymentMethod || 'Binance Pay',
+        payout.payoutAddress || '',
+        payout.status || 'pending',
+        payout.adminNotes || null,
+        payout.rejectionReason || null,
+        payout.transactionProofUrl || null,
+        toMySqlDateTime(payout.paidAt),
+        JSON.stringify(payout),
+        payout.id
+      ]);
+    }
+    return true;
+  } catch (err) {
+    console.error('[DATABASE SAVE PARTNER PAYOUT ERROR]:', err.message);
+    return false;
+  }
+}
+
+async function deletePartnerPayout(id) {
+  if (!isMySqlActive() || !id) return false;
+  try {
+    await pool.query('DELETE FROM partner_payouts WHERE id = ?', [id]);
+    return true;
+  } catch (err) {
+    console.error('[DATABASE DELETE PARTNER PAYOUT ERROR]:', err.message);
+    return false;
+  }
+}
+
+// ==================== PARTNER SETTINGS CRUD ====================
+
+async function getPartnerSettings() {
+  if (!isMySqlActive()) return null;
+  try {
+    const [rows] = await pool.query("SELECT settingsData FROM partner_settings WHERE id = 'default' LIMIT 1");
+    if (rows.length > 0 && rows[0].settingsData) {
+      return typeof rows[0].settingsData === 'string' ? JSON.parse(rows[0].settingsData) : rows[0].settingsData;
+    }
+  } catch (e) {
+    console.error('[DATABASE GET PARTNER SETTINGS ERROR]:', e.message);
+  }
+  return null;
+}
+
+async function savePartnerSettings(settings) {
+  if (!isMySqlActive() || !settings) return false;
+  try {
+    const dataStr = JSON.stringify(settings);
+    await pool.query(`INSERT INTO partner_settings (id, settingsData, updatedAt)
+      VALUES ('default', ?, NOW())
+      ON DUPLICATE KEY UPDATE settingsData = VALUES(settingsData), updatedAt = NOW()`, [dataStr]);
+    return true;
+  } catch (e) {
+    console.error('[DATABASE SAVE PARTNER SETTINGS ERROR]:', e.message);
+    return false;
+  }
+}
+
+// ==================== PARTNER PROMO REQUESTS CRUD ====================
+
+async function getAllPartnerPromoRequests() {
+  if (!isMySqlActive()) return null;
+  const [rows] = await pool.query('SELECT * FROM partner_promo_requests ORDER BY requestedAt DESC');
+  return rows.map(formatPartnerPromoRequest);
+}
+
+async function savePartnerPromoRequest(r) {
+  if (!isMySqlActive() || !r || !r.id) return false;
+  try {
+    const [existing] = await pool.query('SELECT id FROM partner_promo_requests WHERE id = ? LIMIT 1', [r.id]);
+    if (existing.length === 0) {
+      await pool.query(`INSERT INTO partner_promo_requests (
+        id, partnerId, partnerName, partnerEmail, promoCode,
+        requestedDiscount, status, adminFeedback, requestedAt, reviewedAt, rawRequestData
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+        r.id,
+        r.partnerId || '',
+        r.partnerName || '',
+        r.partnerEmail || '',
+        r.promoCode || '',
+        r.requestedDiscount || 5,
+        r.status || 'pending',
+        r.adminFeedback || null,
+        toMySqlDateTime(r.requestedAt) || new Date(),
+        toMySqlDateTime(r.reviewedAt),
+        JSON.stringify(r)
+      ]);
+    } else {
+      await pool.query(`UPDATE partner_promo_requests SET
+        status = ?, adminFeedback = ?, reviewedAt = ?, rawRequestData = ?
+        WHERE id = ?`, [
+        r.status || 'pending',
+        r.adminFeedback || null,
+        toMySqlDateTime(r.reviewedAt) || new Date(),
+        JSON.stringify(r),
+        r.id
+      ]);
+    }
+    return true;
+  } catch (err) {
+    console.error('[DATABASE SAVE PARTNER PROMO REQUEST ERROR]:', err.message);
+    return false;
+  }
+}
+
+// ==================== TRADER PAYOUTS CRUD ====================
+
+async function getAllPayouts() {
+  if (!isMySqlActive()) return null;
+  const [rows] = await pool.query('SELECT * FROM payouts ORDER BY createdAt DESC');
+  return rows.map(formatTraderPayout);
+}
+
+async function savePayout(payout) {
+  if (!isMySqlActive() || !payout || (!payout.id && !payout.payoutId)) return false;
+  try {
+    const primaryId = payout.id || payout.payoutId;
+    const [existing] = await pool.query('SELECT id FROM payouts WHERE id = ? OR payoutId = ? LIMIT 1', [primaryId, payout.payoutId || primaryId]);
+    if (existing.length === 0) {
+      await pool.query(`INSERT INTO payouts (
+        id, userId, payoutId, amount, status, createdAt, updatedAt, rawPayoutData
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [
+        primaryId,
+        payout.userId || '',
+        payout.payoutId || primaryId,
+        payout.amount || 0,
+        payout.status || 'pending',
+        toMySqlDateTime(payout.createdAt) || new Date(),
+        toMySqlDateTime(payout.updatedAt) || new Date(),
+        JSON.stringify(payout)
+      ]);
+    } else {
+      await pool.query(`UPDATE payouts SET
+        amount = ?, status = ?, updatedAt = ?, rawPayoutData = ?
+        WHERE id = ? OR payoutId = ?`, [
+        payout.amount || 0,
+        payout.status || 'pending',
+        toMySqlDateTime(payout.updatedAt) || new Date(),
+        JSON.stringify(payout),
+        primaryId,
+        payout.payoutId || primaryId
+      ]);
+    }
+    return true;
+  } catch (err) {
+    console.error('[DATABASE SAVE PAYOUT ERROR]:', err.message);
+    return false;
+  }
+}
+
+async function deletePayout(id) {
+  if (!isMySqlActive() || !id) return false;
+  try {
+    await pool.query('DELETE FROM payouts WHERE id = ? OR payoutId = ?', [id, id]);
+    return true;
+  } catch (err) {
+    console.error('[DATABASE DELETE PAYOUT ERROR]:', err.message);
+    return false;
+  }
+}
+
+// ==================== PAYOUT SETTINGS CRUD ====================
+
+async function getPayoutSettings() {
+  if (!isMySqlActive()) return null;
+  try {
+    const [rows] = await pool.query("SELECT settingsData FROM payout_settings WHERE id = 'default' LIMIT 1");
+    if (rows.length > 0 && rows[0].settingsData) {
+      return typeof rows[0].settingsData === 'string' ? JSON.parse(rows[0].settingsData) : rows[0].settingsData;
+    }
+  } catch (e) {
+    console.error('[DATABASE GET PAYOUT SETTINGS ERROR]:', e.message);
+  }
+  return null;
+}
+
+async function savePayoutSettings(settings) {
+  if (!isMySqlActive() || !settings) return false;
+  try {
+    const dataStr = JSON.stringify(settings);
+    await pool.query(`INSERT INTO payout_settings (id, settingsData, updatedAt)
+      VALUES ('default', ?, NOW())
+      ON DUPLICATE KEY UPDATE settingsData = VALUES(settingsData), updatedAt = NOW()`, [dataStr]);
+    return true;
+  } catch (e) {
+    console.error('[DATABASE SAVE PAYOUT SETTINGS ERROR]:', e.message);
+    return false;
+  }
+}
+
+// ==================== LAUNCH PROMO CRUD ====================
+
+async function getLaunchPromo() {
+  if (!isMySqlActive()) return null;
+  try {
+    const [rows] = await pool.query("SELECT promoData FROM launch_promo WHERE id = 'default' LIMIT 1");
+    if (rows.length > 0 && rows[0].promoData) {
+      return typeof rows[0].promoData === 'string' ? JSON.parse(rows[0].promoData) : rows[0].promoData;
+    }
+  } catch (e) {
+    console.error('[DATABASE GET LAUNCH PROMO ERROR]:', e.message);
+  }
+  return null;
+}
+
+async function saveLaunchPromo(promo) {
+  if (!isMySqlActive() || !promo) return false;
+  try {
+    const dataStr = JSON.stringify(promo);
+    await pool.query(`INSERT INTO launch_promo (id, promoData, updatedAt)
+      VALUES ('default', ?, NOW())
+      ON DUPLICATE KEY UPDATE promoData = VALUES(promoData), updatedAt = NOW()`, [dataStr]);
+    return true;
+  } catch (e) {
+    console.error('[DATABASE SAVE LAUNCH PROMO ERROR]:', e.message);
+    return false;
+  }
+}
+
+// ==================== PROMO PRESETS CRUD ====================
+
+async function getPromoPresets() {
+  if (!isMySqlActive()) return null;
+  try {
+    const [rows] = await pool.query("SELECT presetsData FROM promo_presets WHERE id = 'default' LIMIT 1");
+    if (rows.length > 0 && rows[0].presetsData) {
+      return typeof rows[0].presetsData === 'string' ? JSON.parse(rows[0].presetsData) : rows[0].presetsData;
+    }
+  } catch (e) {
+    console.error('[DATABASE GET PROMO PRESETS ERROR]:', e.message);
+  }
+  return null;
+}
+
+async function savePromoPresets(presets) {
+  if (!isMySqlActive() || !presets) return false;
+  try {
+    const dataStr = JSON.stringify(presets);
+    await pool.query(`INSERT INTO promo_presets (id, presetsData, updatedAt)
+      VALUES ('default', ?, NOW())
+      ON DUPLICATE KEY UPDATE presetsData = VALUES(presetsData), updatedAt = NOW()`, [dataStr]);
+    return true;
+  } catch (e) {
+    console.error('[DATABASE SAVE PROMO PRESETS ERROR]:', e.message);
+    return false;
+  }
+}
+
 async function hydrateFromMySql(dataDir) {
   if (!isMySqlActive()) return false;
   try {
@@ -1151,6 +2109,103 @@ async function hydrateFromMySql(dataDir) {
       fs.writeFileSync(arcFile, JSON.stringify(mergedArc, null, 2), 'utf8');
     }
 
+    // 5. Partners Hydration
+    const partners = await getAllPartners();
+    if (partners && partners.length > 0) {
+      const pFile = path.join(dataDir, 'partners.json');
+      const permPFile = path.join(dataDir, 'partners_permanent_store.json');
+      let existing = [];
+      try { if (fs.existsSync(pFile)) existing = JSON.parse(fs.readFileSync(pFile, 'utf8') || '[]'); } catch (e) {}
+      const pMap = new Map();
+      existing.forEach(p => { if (p && p.id) pMap.set(p.id, p); });
+      partners.forEach(p => { if (p && p.id) pMap.set(p.id, p); });
+      const merged = Array.from(pMap.values());
+      fs.writeFileSync(pFile, JSON.stringify(merged, null, 2), 'utf8');
+      fs.writeFileSync(permPFile, JSON.stringify(merged, null, 2), 'utf8');
+    }
+
+    // 6. Promo Codes Hydration
+    const promos = await getAllPromoCodes();
+    if (promos && promos.length > 0) {
+      const prFile = path.join(dataDir, 'promo_codes.json');
+      const permPrFile = path.join(dataDir, 'promo_codes_permanent_store.json');
+      let existing = [];
+      try { if (fs.existsSync(prFile)) existing = JSON.parse(fs.readFileSync(prFile, 'utf8') || '[]'); } catch (e) {}
+      const prMap = new Map();
+      existing.forEach(pr => { if (pr && (pr.id || pr.code)) prMap.set(pr.id || pr.code, pr); });
+      promos.forEach(pr => { if (pr && (pr.id || pr.code)) prMap.set(pr.id || pr.code, pr); });
+      const merged = Array.from(prMap.values());
+      fs.writeFileSync(prFile, JSON.stringify(merged, null, 2), 'utf8');
+      fs.writeFileSync(permPrFile, JSON.stringify(merged, null, 2), 'utf8');
+    }
+
+    // 7. Partner Payouts Hydration
+    const ppayouts = await getAllPartnerPayouts();
+    if (ppayouts && ppayouts.length > 0) {
+      const ppFile = path.join(dataDir, 'partner_payouts.json');
+      let existing = [];
+      try { if (fs.existsSync(ppFile)) existing = JSON.parse(fs.readFileSync(ppFile, 'utf8') || '[]'); } catch (e) {}
+      const ppMap = new Map();
+      existing.forEach(p => { if (p && p.id) ppMap.set(p.id, p); });
+      ppayouts.forEach(p => { if (p && p.id) ppMap.set(p.id, p); });
+      const merged = Array.from(ppMap.values());
+      fs.writeFileSync(ppFile, JSON.stringify(merged, null, 2), 'utf8');
+    }
+
+    // 8. Partner Settings Hydration
+    const psettings = await getPartnerSettings();
+    if (psettings && Object.keys(psettings).length > 0) {
+      const psFile = path.join(dataDir, 'partner_settings.json');
+      fs.writeFileSync(psFile, JSON.stringify(psettings, null, 2), 'utf8');
+    }
+
+    // 9. Partner Promo Requests Hydration
+    const prequests = await getAllPartnerPromoRequests();
+    if (prequests && prequests.length > 0) {
+      const prqFile = path.join(dataDir, 'partner_promo_requests.json');
+      let existing = [];
+      try { if (fs.existsSync(prqFile)) existing = JSON.parse(fs.readFileSync(prqFile, 'utf8') || '[]'); } catch (e) {}
+      const prqMap = new Map();
+      existing.forEach(r => { if (r && r.id) prqMap.set(r.id, r); });
+      prequests.forEach(r => { if (r && r.id) prqMap.set(r.id, r); });
+      const merged = Array.from(prqMap.values());
+      fs.writeFileSync(prqFile, JSON.stringify(merged, null, 2), 'utf8');
+    }
+
+    // 10. Trader Payouts Hydration
+    const tpayouts = await getAllPayouts();
+    if (tpayouts && tpayouts.length > 0) {
+      const tpFile = path.join(dataDir, 'payouts.json');
+      let existing = [];
+      try { if (fs.existsSync(tpFile)) existing = JSON.parse(fs.readFileSync(tpFile, 'utf8') || '[]'); } catch (e) {}
+      const tpMap = new Map();
+      existing.forEach(p => { if (p && (p.id || p.payoutId)) tpMap.set(p.id || p.payoutId, p); });
+      tpayouts.forEach(p => { if (p && (p.id || p.payoutId)) tpMap.set(p.id || p.payoutId, p); });
+      const merged = Array.from(tpMap.values());
+      fs.writeFileSync(tpFile, JSON.stringify(merged, null, 2), 'utf8');
+    }
+
+    // 11. Payout Settings Hydration
+    const tpsettings = await getPayoutSettings();
+    if (tpsettings && Object.keys(tpsettings).length > 0) {
+      const tpsFile = path.join(dataDir, 'payout_settings.json');
+      fs.writeFileSync(tpsFile, JSON.stringify(tpsettings, null, 2), 'utf8');
+    }
+
+    // 12. Launch Promo Hydration
+    const lpromo = await getLaunchPromo();
+    if (lpromo && Object.keys(lpromo).length > 0) {
+      const lpFile = path.join(dataDir, 'launch_promo.json');
+      fs.writeFileSync(lpFile, JSON.stringify(lpromo, null, 2), 'utf8');
+    }
+
+    // 13. Promo Presets Hydration
+    const ppresets = await getPromoPresets();
+    if (ppresets && Array.isArray(ppresets) && ppresets.length > 0) {
+      const prsFile = path.join(dataDir, 'promo_presets.json');
+      fs.writeFileSync(prsFile, JSON.stringify(ppresets, null, 2), 'utf8');
+    }
+
     console.log('[DATABASE] ✅ Local safe cache hydrated with live MySQL data.');
     return true;
   } catch (err) {
@@ -1180,5 +2235,34 @@ module.exports = {
   deleteSubmission,
   logArchiveEntry,
   getAllArchiveLogs,
+  // Affiliate / Partner Program
+  getAllPartners,
+  getPartnerById,
+  getPartnerByEmail,
+  getPartnerByPromoCode,
+  savePartner,
+  deletePartner,
+  getAllPartnerPayouts,
+  savePartnerPayout,
+  deletePartnerPayout,
+  getPartnerSettings,
+  savePartnerSettings,
+  getAllPartnerPromoRequests,
+  savePartnerPromoRequest,
+  // Promo Codes & Presets
+  getAllPromoCodes,
+  getPromoCodeByCode,
+  savePromoCode,
+  deletePromoCode,
+  getLaunchPromo,
+  saveLaunchPromo,
+  getPromoPresets,
+  savePromoPresets,
+  // Payouts
+  getAllPayouts,
+  savePayout,
+  deletePayout,
+  getPayoutSettings,
+  savePayoutSettings,
   getPool: () => pool
 };

@@ -647,33 +647,71 @@ function mirrorToMySql(file, data, singleItemToMirror = null) {
   if (!db || !db.isMySqlActive() || !data) return;
   try {
     // If a specific modified item was provided, only mirror that single entity!
-    if (singleItemToMirror && singleItemToMirror.id) {
+    if (singleItemToMirror && (singleItemToMirror.id || singleItemToMirror.code)) {
       if (file === USERS_FILE || file === USERS_PERMANENT_STORE_FILE) {
         db.saveUser(singleItemToMirror).catch(e => console.error('[MYSQL USER MIRROR ERROR]:', e.message));
       } else if (file === CHALLENGES_FILE || file === CHALLENGES_PERMANENT_STORE_FILE) {
         db.saveChallenge(singleItemToMirror).catch(e => console.error('[MYSQL CHALLENGE MIRROR ERROR]:', e.message));
       } else if (file === SUBMISSIONS_FILE) {
         db.saveSubmission(singleItemToMirror).catch(e => console.error('[MYSQL SUBMISSION MIRROR ERROR]:', e.message));
+      } else if (file === PARTNERS_FILE || file === PARTNERS_PERMANENT_STORE_FILE) {
+        db.savePartner(singleItemToMirror).catch(e => console.error('[MYSQL PARTNER MIRROR ERROR]:', e.message));
+      } else if (file === PROMO_CODES_FILE || file === PROMO_CODES_PERMANENT_STORE_FILE) {
+        db.savePromoCode(singleItemToMirror).catch(e => console.error('[MYSQL PROMO MIRROR ERROR]:', e.message));
+      } else if (file === PARTNER_PAYOUTS_FILE) {
+        db.savePartnerPayout(singleItemToMirror).catch(e => console.error('[MYSQL PARTNER PAYOUT MIRROR ERROR]:', e.message));
+      } else if (file === PARTNER_PROMO_REQUESTS_FILE) {
+        db.savePartnerPromoRequest(singleItemToMirror).catch(e => console.error('[MYSQL PROMO REQ MIRROR ERROR]:', e.message));
+      } else if (file === PAYOUTS_FILE) {
+        db.savePayout(singleItemToMirror).catch(e => console.error('[MYSQL PAYOUT MIRROR ERROR]:', e.message));
       }
       return;
     }
 
+    // Config / Single document objects
+    if (file === PARTNER_SETTINGS_FILE) {
+      db.savePartnerSettings(data).catch(e => console.error('[MYSQL PARTNER SETTINGS MIRROR ERROR]:', e.message));
+      return;
+    }
+    if (file === PAYOUT_SETTINGS_FILE) {
+      db.savePayoutSettings(data).catch(e => console.error('[MYSQL PAYOUT SETTINGS MIRROR ERROR]:', e.message));
+      return;
+    }
+    if (file === LAUNCH_PROMO_FILE) {
+      db.saveLaunchPromo(data).catch(e => console.error('[MYSQL LAUNCH PROMO MIRROR ERROR]:', e.message));
+      return;
+    }
+    if (file === PROMO_PRESETS_FILE) {
+      db.savePromoPresets(data).catch(e => console.error('[MYSQL PROMO PRESETS MIRROR ERROR]:', e.message));
+      return;
+    }
+
     // If an array was passed without single item:
-    // Only mirror if small dataset (<= 50 items) to prevent choking connection pool with 50,000 queries
+    // Only mirror if dataset (<= 100 items) to prevent choking connection pool
     if (Array.isArray(data)) {
-      if (data.length <= 50) {
+      if (data.length <= 100) {
         data.forEach(item => {
-          if (item && item.id) {
+          if (item && (item.id || item.code)) {
             if (file === USERS_FILE || file === USERS_PERMANENT_STORE_FILE) db.saveUser(item).catch(e => {});
             else if (file === CHALLENGES_FILE || file === CHALLENGES_PERMANENT_STORE_FILE) db.saveChallenge(item).catch(e => {});
             else if (file === SUBMISSIONS_FILE) db.saveSubmission(item).catch(e => {});
+            else if (file === PARTNERS_FILE || file === PARTNERS_PERMANENT_STORE_FILE) db.savePartner(item).catch(e => {});
+            else if (file === PROMO_CODES_FILE || file === PROMO_CODES_PERMANENT_STORE_FILE) db.savePromoCode(item).catch(e => {});
+            else if (file === PARTNER_PAYOUTS_FILE) db.savePartnerPayout(item).catch(e => {});
+            else if (file === PARTNER_PROMO_REQUESTS_FILE) db.savePartnerPromoRequest(item).catch(e => {});
+            else if (file === PAYOUTS_FILE) db.savePayout(item).catch(e => {});
           }
         });
       }
-    } else if (data && data.id) {
+    } else if (data && (data.id || data.code)) {
       if (file === USERS_FILE || file === USERS_PERMANENT_STORE_FILE) db.saveUser(data).catch(e => {});
       else if (file === CHALLENGES_FILE || file === CHALLENGES_PERMANENT_STORE_FILE) db.saveChallenge(data).catch(e => {});
       else if (file === SUBMISSIONS_FILE) db.saveSubmission(data).catch(e => {});
+      else if (file === PARTNERS_FILE || file === PARTNERS_PERMANENT_STORE_FILE) db.savePartner(data).catch(e => {});
+      else if (file === PROMO_CODES_FILE || file === PROMO_CODES_PERMANENT_STORE_FILE) db.savePromoCode(data).catch(e => {});
+      else if (file === PARTNER_PAYOUTS_FILE) db.savePartnerPayout(data).catch(e => {});
+      else if (file === PARTNER_PROMO_REQUESTS_FILE) db.savePartnerPromoRequest(data).catch(e => {});
+      else if (file === PAYOUTS_FILE) db.savePayout(data).catch(e => {});
     }
   } catch (err) {
     console.error('[MYSQL MIRROR ERROR]:', err.message);
@@ -9202,6 +9240,10 @@ app.delete('/api/admin/promo-codes/:id', authenticateAdminToken, (req, res) => {
   codes = codes.filter(c => c.id !== targetId);
   savePromoCodes(codes);
 
+  if (db && db.isMySqlActive()) {
+    db.deletePromoCode(targetId).catch(e => console.error('[MYSQL DELETE PROMO ERROR]:', e.message));
+  }
+
   res.json({
     success: true,
     message: `প্রোমো কোড "${found.code}" মুছে ফেলা হয়েছে!`,
@@ -9926,6 +9968,11 @@ app.delete('/api/admin/payouts/:id', authenticateAdminToken, (req, res) => {
     let allPayouts = readJson(PAYOUTS_FILE, []);
     allPayouts = allPayouts.filter(p => p.id !== id && p.payoutId !== id);
     writeJson(PAYOUTS_FILE, allPayouts);
+
+    if (db && db.isMySqlActive()) {
+      db.deletePayout(id).catch(e => console.error('[MYSQL DELETE PAYOUT ERROR]:', e.message));
+    }
+
     res.json({ success: true, message: 'পে-আউট রেকর্ডটি সফলভাবে ডিলিট করা হয়েছে।' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'ডিলিট করতে সমস্যা হয়েছে।' });
@@ -10192,6 +10239,13 @@ app.delete('/api/admin/partners/:id', authenticateAdminToken, (req, res) => {
       const updatedCodes = promoCodes.filter(c => c.partnerId !== id && c.code.toUpperCase() !== (found.promoCode || '').toUpperCase());
       savePromoCodes(updatedCodes);
     } catch (e) {}
+
+    if (db && db.isMySqlActive()) {
+      db.deletePartner(id).catch(e => console.error('[MYSQL DELETE PARTNER ERROR]:', e.message));
+      if (found.promoCode) {
+        db.deletePromoCode(found.promoCode).catch(e => {});
+      }
+    }
 
     res.json({ success: true, message: `পার্টনার "${found.name}" সফলভাবে মুছে ফেলা হয়েছে।` });
   } catch (err) {
