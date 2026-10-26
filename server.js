@@ -527,88 +527,88 @@ function savePartnerPromoRequests(requests) {
   }
 }
 
-// Partner Tier & Level Helper Functions (Exact 10-sale milestone progression)
+// Partner Tier & Level Helper Functions (Challenge sales milestone progression)
 function getPartnerTierInfo(salesCount) {
   const count = Math.max(0, parseInt(salesCount, 10) || 0);
-  if (count <= 10) {
+  if (count < 5) {
     return {
       level: 1,
+      levelName: 'Starter Partner',
+      levelBadge: 'STARTER',
+      badgeClass: 'badge-starter',
+      color: '#38bdf8',
+      currentRate: 10,
+      nextRate: 20,
+      minSales: 0,
+      maxSales: 4,
+      salesInTier: count,
+      tierTarget: 5,
+      salesUntilNextLevel: Math.max(0, 5 - count),
+      progressPercent: Math.min(100, Math.round((count / 5) * 100))
+    };
+  } else if (count < 15) {
+    return {
+      level: 2,
       levelName: 'Bronze Partner',
       levelBadge: 'BRONZE',
       badgeClass: 'badge-bronze',
-      color: '#CD7F32',
-      currentRate: 10,
-      nextRate: count < 10 ? 10 : 20,
-      minSales: 0,
-      maxSales: 10,
-      salesInTier: count,
+      color: '#cd7f32',
+      currentRate: 20,
+      nextRate: 30,
+      minSales: 5,
+      maxSales: 14,
+      salesInTier: count - 5,
       tierTarget: 10,
-      salesUntilNextLevel: Math.max(0, 10 - count),
-      progressPercent: Math.min(100, Math.round((count / 10) * 100))
+      salesUntilNextLevel: Math.max(0, 15 - count),
+      progressPercent: Math.min(100, Math.round(((count - 5) / 10) * 100))
     };
-  } else if (count <= 20) {
+  } else if (count < 30) {
     return {
-      level: 2,
+      level: 3,
       levelName: 'Silver Partner',
       levelBadge: 'SILVER',
       badgeClass: 'badge-silver',
-      color: '#C0C0C0',
-      currentRate: 20,
-      nextRate: count < 20 ? 20 : 30,
-      minSales: 11,
-      maxSales: 20,
-      salesInTier: count - 10,
-      tierTarget: 10,
-      salesUntilNextLevel: Math.max(0, 20 - count),
-      progressPercent: Math.min(100, Math.round(((count - 10) / 10) * 100))
+      color: '#e2e8f0',
+      currentRate: 30,
+      nextRate: 40,
+      minSales: 15,
+      maxSales: 29,
+      salesInTier: count - 15,
+      tierTarget: 15,
+      salesUntilNextLevel: Math.max(0, 30 - count),
+      progressPercent: Math.min(100, Math.round(((count - 15) / 15) * 100))
     };
-  } else if (count <= 30) {
+  } else if (count < 50) {
     return {
-      level: 3,
+      level: 4,
       levelName: 'Gold Partner',
       levelBadge: 'GOLD',
       badgeClass: 'badge-gold',
-      color: '#F5B041',
-      currentRate: 30,
-      nextRate: count < 30 ? 30 : 40,
-      minSales: 21,
-      maxSales: 30,
-      salesInTier: count - 20,
-      tierTarget: 10,
-      salesUntilNextLevel: Math.max(0, 30 - count),
-      progressPercent: Math.min(100, Math.round(((count - 20) / 10) * 100))
-    };
-  } else if (count <= 40) {
-    return {
-      level: 4,
-      levelName: 'Platinum Partner',
-      levelBadge: 'PLATINUM',
-      badgeClass: 'badge-platinum',
-      color: '#00D2D3',
+      color: '#f5b041',
       currentRate: 40,
-      nextRate: count < 40 ? 40 : 50,
-      minSales: 31,
-      maxSales: 40,
+      nextRate: 50,
+      minSales: 30,
+      maxSales: 49,
       salesInTier: count - 30,
-      tierTarget: 10,
-      salesUntilNextLevel: Math.max(0, 40 - count),
-      progressPercent: Math.min(100, Math.round(((count - 30) / 10) * 100))
+      tierTarget: 20,
+      salesUntilNextLevel: Math.max(0, 50 - count),
+      progressPercent: Math.min(100, Math.round(((count - 30) / 20) * 100))
     };
-  } else if (count <= 50) {
+  } else if (count < 60) {
     return {
       level: 5,
-      levelName: 'Diamond Partner',
-      levelBadge: 'DIAMOND',
-      badgeClass: 'badge-diamond',
-      color: '#9B59B6',
+      levelName: 'Elite Partner',
+      levelBadge: 'ELITE',
+      badgeClass: 'badge-elite',
+      color: '#a855f7',
       currentRate: 50,
-      nextRate: 50,
-      minSales: 41,
-      maxSales: 50,
-      salesInTier: count - 40,
+      nextRate: 55,
+      minSales: 50,
+      maxSales: 59,
+      salesInTier: count - 50,
       tierTarget: 10,
-      salesUntilNextLevel: Math.max(0, 50 - count),
-      progressPercent: Math.min(100, Math.round(((count - 40) / 10) * 100))
+      salesUntilNextLevel: Math.max(0, 60 - count),
+      progressPercent: Math.min(100, Math.round(((count - 50) / 10) * 100))
     };
   } else {
     return {
@@ -616,13 +616,13 @@ function getPartnerTierInfo(salesCount) {
       levelName: 'Master Partner',
       levelBadge: 'MASTER',
       badgeClass: 'badge-master',
-      color: '#FFD700',
-      currentRate: 50,
-      nextRate: 50,
-      minSales: 51,
+      color: '#ffd700',
+      currentRate: 55,
+      nextRate: 55,
+      minSales: 60,
       maxSales: 999999,
-      salesInTier: count - 50,
-      tierTarget: 50,
+      salesInTier: count - 60,
+      tierTarget: 60,
       salesUntilNextLevel: 0,
       progressPercent: 100
     };
@@ -631,11 +631,12 @@ function getPartnerTierInfo(salesCount) {
 
 function getPartnerDynamicRateForNextSale(existingSalesCount) {
   const nextSaleNum = (parseInt(existingSalesCount, 10) || 0) + 1;
-  if (nextSaleNum <= 10) return 10;
-  if (nextSaleNum <= 20) return 20;
-  if (nextSaleNum <= 30) return 30;
-  if (nextSaleNum <= 40) return 40;
-  return 50; // 41 and above is 50%
+  if (nextSaleNum < 5) return 10;
+  if (nextSaleNum < 15) return 20;
+  if (nextSaleNum < 30) return 30;
+  if (nextSaleNum < 50) return 40;
+  if (nextSaleNum < 60) return 50;
+  return 55; // 60+ challenge sales is 55%
 }
 
 // Note: Core storage paths, memoryJsonCache, readJson, writeJson and external auto-backup system

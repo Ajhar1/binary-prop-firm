@@ -162,11 +162,13 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
+        .badge-starter { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); }
         .badge-bronze { background: rgba(205, 127, 50, 0.15); color: #cd7f32; border: 1px solid rgba(205, 127, 50, 0.35); }
         .badge-silver { background: rgba(192, 192, 192, 0.15); color: #e2e8f0; border: 1px solid rgba(192, 192, 192, 0.35); }
         .badge-gold { background: rgba(245, 176, 65, 0.15); color: #f5b041; border: 1px solid rgba(245, 176, 65, 0.35); }
         .badge-platinum { background: rgba(0, 210, 211, 0.15); color: #00d2d3; border: 1px solid rgba(0, 210, 211, 0.35); }
         .badge-diamond { background: rgba(155, 89, 182, 0.15); color: #c084fc; border: 1px solid rgba(155, 89, 182, 0.35); }
+        .badge-elite { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); }
         .badge-master { background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(245, 176, 65, 0.25)); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.5); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
         .badge-success { background: rgba(0, 230, 118, 0.15); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.3); }
         .badge-pending { background: rgba(245, 176, 65, 0.15); color: #f5b041; border: 1px solid rgba(245, 176, 65, 0.3); }
@@ -1073,7 +1075,145 @@
             line-height: 1.65;
         }
 
-        /* 6-Tier Cards Grid */
+        /* 6-Tier Cards Grid & Affiliate Showcase Grid */
+        .affiliate-showcase-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 1fr;
+            gap: 1.75rem;
+            align-items: stretch;
+            margin-bottom: 1.5rem;
+        }
+        @media (max-width: 900px) {
+            .affiliate-showcase-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+        .affiliate-tiers-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+        }
+        .affiliate-tier-row {
+            border-radius: 14px;
+            padding: 14px 20px 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(18, 24, 38, 0.7);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .affiliate-tier-row:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.22);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+        .affiliate-tier-elite {
+            border: 1.5px solid rgba(168, 85, 247, 0.55) !important;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+        }
+        .affiliate-tier-master {
+            border: 1.5px solid rgba(255, 215, 0, 0.55) !important;
+            background: radial-gradient(circle at 50% 0%, rgba(255, 215, 0, 0.1) 0%, rgba(18, 24, 38, 0.8) 100%) !important;
+            box-shadow: 0 0 22px rgba(255, 215, 0, 0.2);
+        }
+        .tier-row-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .tier-row-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .tier-row-sub {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            margin-top: 3px;
+            font-weight: 600;
+        }
+        .tier-row-rate {
+            font-size: 1.75rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+        .tier-row-progress-track {
+            width: 100%;
+            height: 4px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+        }
+        .tier-row-progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .affiliate-how-it-works {
+            border-radius: 20px;
+            padding: 2.25rem 2rem;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            background: linear-gradient(160deg, rgba(20, 24, 40, 0.95) 0%, rgba(14, 18, 30, 0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .how-icon-box {
+            font-size: 2.4rem;
+            margin-bottom: 1rem;
+            line-height: 1;
+        }
+        .how-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #ffffff;
+            margin: 0 0 1.25rem 0;
+        }
+        .how-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .how-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.92rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+        .how-list li i {
+            margin-top: 3px;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .btn-challenge-cta {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+            border: none;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+            transition: all 0.25s ease;
+        }
+        .btn-challenge-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(124, 58, 237, 0.6);
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+        }
+
         .tiers-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1810,7 +1950,7 @@
                 </div>
                 <h1 class="hero-headline">
                     Refer Traders &amp; Earn Up To <br>
-                    <span class="hero-gradient-text">50% Lifetime Commission</span>
+                    <span class="hero-gradient-text">55% Lifetime Commission</span>
                 </h1>
                 <p class="hero-subtext">
                     Monetize your binary trading audience. Introduce traders to funded challenges on Quotex, Pocket Option, Olymp Trade, Binomo, and IQ Option with zero risk and instant automated payouts.
@@ -1831,7 +1971,7 @@
                 <!-- Hero Trust Stats Strip -->
                 <div class="hero-stats-strip">
                     <div class="hero-stat-box">
-                        <div class="hero-stat-num text-emerald">50%</div>
+                        <div class="hero-stat-num text-emerald">55%</div>
                         <div class="hero-stat-label">Max Commission Tier</div>
                     </div>
                     <div class="hero-stat-box">
@@ -1859,13 +1999,13 @@
                                     <div class="partner-card-status"><i class="fas fa-check-circle"></i> Officially Verified Partner</div>
                                 </div>
                             </div>
-                            <span class="badge badge-master"><i class="fas fa-medal"></i> MASTER TIER (50%)</span>
+                            <span class="badge badge-master"><i class="fas fa-medal"></i> MASTER TIER (55%)</span>
                         </div>
 
                         <div class="card-mid-grid">
                             <div class="mid-cell">
                                 <div class="lbl">Lifetime Commission</div>
-                                <div class="val text-emerald">50% Permanent</div>
+                                <div class="val text-emerald">55% Permanent</div>
                             </div>
                             <div class="mid-cell">
                                 <div class="lbl">Supported Brokers</div>
@@ -1891,105 +2031,149 @@
             </div>
         </section>
 
-        <!-- 6-TIER COMMISSION LADDER SECTION -->
+        <!-- CHALLENGE AFFILIATE COMMISSION LADDER SECTION -->
         <section class="landing-section" id="tiers">
             <div class="landing-container">
-                <div class="section-header">
-                    <span class="section-tag"><i class="fas fa-layer-group"></i> Dynamic Commission Tiers</span>
-                    <h2 class="section-title">More Sales, <span class="hero-gradient-text">Higher Lifetime Rates</span></h2>
-                    <p class="section-desc">
-                        Start at 10% from your very first referral. Reach 51 total challenge sales to unlock permanent 50% commission for life.
+                <div class="section-header" style="text-align:left; margin-bottom:2.2rem;">
+                    <div style="font-size:0.85rem; font-weight:800; color:#c084fc; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                        <span>—</span> CHALLENGE AFFILIATE
+                    </div>
+                    <h2 class="section-title" style="font-size:2.5rem; font-weight:900; margin-bottom:12px; letter-spacing:-0.5px;">
+                        Earn on every challenge package sale
+                    </h2>
+                    <p class="section-desc" style="margin:0; max-width:740px; font-size:1.02rem; color:#94a3b8; line-height:1.6;">
+                        Beyond trading commissions, earn a % of the purchase price every time a referred user buys a challenge package. Rates grow with your total sales.
                     </p>
                 </div>
 
-                <div class="tiers-grid">
-                    <!-- Tier 1 -->
-                    <div class="tier-card glass" style="border-color:rgba(205,127,50,0.3);">
-                        <div class="tier-card-badge">Level 1</div>
-                        <div class="tier-card-icon" style="color:#cd7f32;"><i class="fas fa-medal"></i></div>
-                        <h3 class="tier-card-title" style="color:#cd7f32;">Bronze Partner</h3>
-                        <div class="tier-card-rate text-emerald">10% <span class="rate-sub">Commission</span></div>
-                        <div class="tier-card-range">1 to 10 Challenge Sales</div>
-                        <ul class="tier-perks">
-                            <li><i class="fas fa-check text-emerald"></i> Automated referral tracking &amp; link</li>
-                            <li><i class="fas fa-check text-emerald"></i> 5% discount code for your traders</li>
-                            <li><i class="fas fa-check text-emerald"></i> Low $20 minimum payout threshold</li>
-                        </ul>
+                <div class="affiliate-showcase-grid">
+                    <!-- Left: Tier Cards Stack -->
+                    <div class="affiliate-tiers-stack">
+                        <!-- Starter (0+ sales -> 10%) -->
+                        <div class="affiliate-tier-row glass">
+                            <div class="tier-row-info">
+                                <div class="tier-row-left">
+                                    <h4 class="tier-row-name" style="color:#ffffff;">Starter</h4>
+                                    <div class="tier-row-sub">0+ challenge sales</div>
+                                </div>
+                                <div class="tier-row-rate" style="color:#ffffff;">10%</div>
+                            </div>
+                            <div class="tier-row-progress-track">
+                                <div class="tier-row-progress-bar" style="width:16%; background:#38bdf8;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Bronze (5+ sales -> 20%) -->
+                        <div class="affiliate-tier-row glass">
+                            <div class="tier-row-info">
+                                <div class="tier-row-left">
+                                    <h4 class="tier-row-name" style="color:#f59e0b;">Bronze</h4>
+                                    <div class="tier-row-sub">5+ challenge sales</div>
+                                </div>
+                                <div class="tier-row-rate" style="color:#f59e0b;">20%</div>
+                            </div>
+                            <div class="tier-row-progress-track">
+                                <div class="tier-row-progress-bar" style="width:33%; background:#f59e0b;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Silver (15+ sales -> 30%) -->
+                        <div class="affiliate-tier-row glass">
+                            <div class="tier-row-info">
+                                <div class="tier-row-left">
+                                    <h4 class="tier-row-name" style="color:#cbd5e1;">Silver</h4>
+                                    <div class="tier-row-sub">15+ challenge sales</div>
+                                </div>
+                                <div class="tier-row-rate" style="color:#cbd5e1;">30%</div>
+                            </div>
+                            <div class="tier-row-progress-track">
+                                <div class="tier-row-progress-bar" style="width:50%; background:#94a3b8;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Gold (30+ sales -> 40%) -->
+                        <div class="affiliate-tier-row glass">
+                            <div class="tier-row-info">
+                                <div class="tier-row-left">
+                                    <h4 class="tier-row-name" style="color:#fbbf24;">Gold</h4>
+                                    <div class="tier-row-sub">30+ challenge sales</div>
+                                </div>
+                                <div class="tier-row-rate" style="color:#fbbf24;">40%</div>
+                            </div>
+                            <div class="tier-row-progress-track">
+                                <div class="tier-row-progress-bar" style="width:68%; background:#fbbf24;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Elite (50+ sales -> 50%) -->
+                        <div class="affiliate-tier-row glass affiliate-tier-elite">
+                            <div class="tier-row-info">
+                                <div class="tier-row-left">
+                                    <h4 class="tier-row-name" style="color:#c084fc;">Elite</h4>
+                                    <div class="tier-row-sub">50+ challenge sales</div>
+                                </div>
+                                <div class="tier-row-rate" style="color:#c084fc;">50%</div>
+                            </div>
+                            <div class="tier-row-progress-track">
+                                <div class="tier-row-progress-bar" style="width:85%; background:#a855f7;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Master (60+ sales -> 55%) -->
+                        <div class="affiliate-tier-row glass affiliate-tier-master">
+                            <div class="tier-row-info">
+                                <div class="tier-row-left">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <h4 class="tier-row-name" style="color:#ffd700;">Master</h4>
+                                        <span class="badge" style="background:rgba(255,215,0,0.2); color:#ffd700; border:1px solid rgba(255,215,0,0.4); font-size:0.68rem; padding:2px 8px;">PERMANENT MAX</span>
+                                    </div>
+                                    <div class="tier-row-sub" style="color:#ffd700;">60+ challenge sales</div>
+                                </div>
+                                <div class="tier-row-rate" style="color:#ffd700;">55%</div>
+                            </div>
+                            <div class="tier-row-progress-track">
+                                <div class="tier-row-progress-bar" style="width:100%; background:linear-gradient(90deg, #f59e0b 0%, #ffd700 50%, #00e676 100%); box-shadow:0 0 10px rgba(255,215,0,0.5);"></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Tier 2 -->
-                    <div class="tier-card glass" style="border-color:rgba(192,192,192,0.3);">
-                        <div class="tier-card-badge">Level 2</div>
-                        <div class="tier-card-icon" style="color:#e2e8f0;"><i class="fas fa-award"></i></div>
-                        <h3 class="tier-card-title" style="color:#e2e8f0;">Silver Partner</h3>
-                        <div class="tier-card-rate text-emerald">20% <span class="rate-sub">Commission</span></div>
-                        <div class="tier-card-range">11 to 20 Challenge Sales</div>
-                        <ul class="tier-perks">
-                            <li><i class="fas fa-check text-emerald"></i> Doubled 20% commission rate</li>
-                            <li><i class="fas fa-check text-emerald"></i> Custom promo code branding</li>
-                            <li><i class="fas fa-check text-emerald"></i> Real-time sale &amp; commission alerts</li>
-                        </ul>
-                    </div>
-
-                    <!-- Tier 3 -->
-                    <div class="tier-card glass" style="border-color:rgba(245,176,65,0.35);">
-                        <div class="tier-card-badge">Level 3</div>
-                        <div class="tier-card-icon" style="color:#f5b041;"><i class="fas fa-trophy"></i></div>
-                        <h3 class="tier-card-title" style="color:#f5b041;">Gold Partner</h3>
-                        <div class="tier-card-rate text-emerald">30% <span class="rate-sub">Commission</span></div>
-                        <div class="tier-card-range">21 to 30 Challenge Sales</div>
-                        <ul class="tier-perks">
-                            <li><i class="fas fa-check text-emerald"></i> High 30% commission rate</li>
-                            <li><i class="fas fa-check text-emerald"></i> Priority payout review &amp; approval</li>
-                            <li><i class="fas fa-check text-emerald"></i> Up to 10% custom promo codes</li>
-                        </ul>
-                    </div>
-
-                    <!-- Tier 4 -->
-                    <div class="tier-card glass" style="border-color:rgba(0,210,211,0.35);">
-                        <div class="tier-card-badge">Level 4</div>
-                        <div class="tier-card-icon" style="color:#00d2d3;"><i class="fas fa-gem"></i></div>
-                        <h3 class="tier-card-title" style="color:#00d2d3;">Platinum Partner</h3>
-                        <div class="tier-card-rate text-emerald">40% <span class="rate-sub">Commission</span></div>
-                        <div class="tier-card-range">31 to 40 Challenge Sales</div>
-                        <ul class="tier-perks">
-                            <li><i class="fas fa-check text-emerald"></i> Elite 40% commission level</li>
-                            <li><i class="fas fa-check text-emerald"></i> Same-day express payouts</li>
-                            <li><i class="fas fa-check text-emerald"></i> High-converting banner &amp; promo kit</li>
-                        </ul>
-                    </div>
-
-                    <!-- Tier 5 -->
-                    <div class="tier-card glass" style="border-color:rgba(192,132,252,0.35);">
-                        <div class="tier-card-badge">Level 5</div>
-                        <div class="tier-card-icon" style="color:#c084fc;"><i class="fas fa-chess-queen"></i></div>
-                        <h3 class="tier-card-title" style="color:#c084fc;">Diamond Partner</h3>
-                        <div class="tier-card-rate text-emerald">50% <span class="rate-sub">Commission</span></div>
-                        <div class="tier-card-range">41 to 50 Challenge Sales</div>
-                        <ul class="tier-perks">
-                            <li><i class="fas fa-check text-emerald"></i> Top-tier 50% profit share</li>
-                            <li><i class="fas fa-check text-emerald"></i> Dedicated VIP affiliate manager</li>
-                            <li><i class="fas fa-check text-emerald"></i> 15% special trader discount vouchers</li>
-                        </ul>
-                    </div>
-
-                    <!-- Tier 6 -->
-                    <div class="tier-card glass glass-glow" style="border-color:rgba(255,215,0,0.55); background:radial-gradient(circle at 50% 0%, rgba(255,215,0,0.14) 0%, rgba(18,24,38,0.95) 75%);">
-                        <div class="tier-card-badge" style="background:#ffd700; color:#070a12; font-weight:900;">PERMANENT MAX</div>
-                        <div class="tier-card-icon" style="color:#ffd700;"><i class="fas fa-crown"></i></div>
-                        <h3 class="tier-card-title" style="color:#ffd700;">Master Partner</h3>
-                        <div class="tier-card-rate" style="color:#ffd700;">50% <span class="rate-sub">Permanent</span></div>
-                        <div class="tier-card-range" style="color:#ffd700; font-weight:800;">51+ Lifetime Milestone</div>
-                        <ul class="tier-perks">
-                            <li><i class="fas fa-check text-gold"></i> Permanent 50% commission for life</li>
-                            <li><i class="fas fa-check text-gold"></i> Zero quotas — never downgraded</li>
-                            <li><i class="fas fa-check text-gold"></i> Commissions on renewals &amp; repeat buys</li>
-                            <li><i class="fas fa-check text-gold"></i> 1-hour priority express payouts</li>
-                        </ul>
+                    <!-- Right: How It Works Card -->
+                    <div class="affiliate-how-it-works glass glass-glow">
+                        <div>
+                            <div class="how-icon-box">
+                                🏆
+                            </div>
+                            <h3 class="how-title">How it works</h3>
+                            <ul class="how-list">
+                                <li>
+                                    <i class="fas fa-check text-emerald"></i>
+                                    <span>Separate from trading commissions — a second income stream</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-check text-emerald"></i>
+                                    <span>Earn on Starter, Standard, Advanced, and Pro package purchases</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-check text-emerald"></i>
+                                    <span>Rate upgrades automatically as your total sales grow</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-check text-emerald"></i>
+                                    <span>Tracked in your dashboard under "Challenge Commissions"</span>
+                                </li>
+                                <li>
+                                    <i class="fas fa-check text-emerald"></i>
+                                    <span>Paid alongside your weekly trading commissions</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <button type="button" class="btn-challenge-cta" onclick="openAuthModal('register')">
+                            Start Earning Challenge Commissions <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
 
-                <div class="tier-guarantee-box glass">
+                <div class="tier-guarantee-box glass" style="margin-top:1.5rem;">
                     <i class="fas fa-shield-alt text-emerald" style="font-size:1.6rem; flex-shrink:0;"></i>
                     <div>
                         <strong style="color:#fff;">Level Protection Guarantee (Never Downgraded):</strong> 
@@ -2021,11 +2205,12 @@
                                 </div>
                                 <input type="range" class="calc-slider" id="calcReferralSlider" min="1" max="100" value="25" oninput="updateCalculator()">
                                 <div class="calc-slider-ticks">
-                                    <span>1 (10%)</span>
-                                    <span>20 (20%)</span>
-                                    <span>30 (30%)</span>
-                                    <span>40 (40%)</span>
-                                    <span>50+ (50% Master)</span>
+                                    <span>0+ (10%)</span>
+                                    <span>5+ (20%)</span>
+                                    <span>15+ (30%)</span>
+                                    <span>30+ (40%)</span>
+                                    <span>50+ (50%)</span>
+                                    <span>60+ (55% Master)</span>
                                 </div>
                             </div>
 
@@ -2045,14 +2230,14 @@
                             <!-- Progress toward Master Tier -->
                             <div class="calc-tier-progress-box">
                                 <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:6px;">
-                                    <span style="color:#cbd5e1;">Master Partner (50% Lifetime) Progress:</span>
-                                    <strong id="calcMasterTierPctText" style="color:var(--emerald);">49%</strong>
+                                    <span style="color:#cbd5e1;">Master Partner (55% Lifetime) Progress:</span>
+                                    <strong id="calcMasterTierPctText" style="color:var(--emerald);">42%</strong>
                                 </div>
                                 <div class="progress-bar-wrap" style="height:8px; margin:0;">
-                                    <div class="progress-bar-fill" id="calcMasterTierBar" style="width:49%;"></div>
+                                    <div class="progress-bar-fill" id="calcMasterTierBar" style="width:42%;"></div>
                                 </div>
                                 <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;" id="calcNextTierHint">
-                                    Only 26 more sales to reach permanent 50% commission!
+                                    Only 35 more sales to reach permanent 55% commission!
                                 </div>
                             </div>
                         </div>
@@ -2261,8 +2446,8 @@
                 <div class="benefits-grid">
                     <div class="benefit-card glass">
                         <div class="benefit-icon text-emerald"><i class="fas fa-percentage"></i></div>
-                        <h3>Up to 50% Commission</h3>
-                        <p>Industry-leading payout rates scaling from 10% up to 50% permanent lifetime cash commission on all sales.</p>
+                        <h3>Up to 55% Commission</h3>
+                        <p>Industry-leading payout rates scaling from 10% up to 55% permanent lifetime cash commission on all sales.</p>
                     </div>
 
                     <div class="benefit-card glass">
@@ -2331,7 +2516,7 @@
                         <div class="step-num">03</div>
                         <div class="step-icon text-gold"><i class="fas fa-wallet"></i></div>
                         <h3>Get Paid Instantly</h3>
-                        <p>Receive 10%–50% commission on every challenge sold. Withdraw anytime via Binance Pay or Local Banking.</p>
+                        <p>Receive 10%–55% commission on every challenge sold. Withdraw anytime via Binance Pay or Local Banking.</p>
                     </div>
                 </div>
             </div>
@@ -2411,7 +2596,7 @@
                             <i class="fas fa-chevron-down faq-chevron"></i>
                         </div>
                         <div class="faq-answer">
-                            Never. Once you reach a tier (such as Gold 30% or Master 50%), that rate is locked in permanently. Even if you have a month with fewer sales, your tier and commission rate are never downgraded.
+                            Never. Once you reach a tier (such as Elite 50% or Master 55%), that rate is locked in permanently. Even if you have a month with fewer sales, your tier and commission rate are never downgraded.
                         </div>
                     </div>
                 </div>
@@ -2426,7 +2611,7 @@
                         <span class="badge badge-master"><i class="fas fa-rocket"></i> Start Earning Lifetime Commissions</span>
                         <h2 class="cta-banner-title">Monetize Your Binary Trading <br>Audience Today</h2>
                         <p class="cta-banner-sub">
-                            Join top affiliates earning up to 50% commission with zero risk and instant payouts.
+                            Join top affiliates earning up to 55% commission with zero risk and instant payouts.
                         </p>
                         <div class="cta-banner-btns">
                             <button type="button" class="btn-emerald hero-btn-lg" onclick="openAuthModal('register')">
@@ -2750,39 +2935,39 @@
                         <div class="tier-roadmap">
                             <div class="tier-step" id="tierCard-1">
                                 <div class="tier-num">লেভেল ১</div>
-                                <div class="tier-name" style="color:#cd7f32;">Bronze</div>
+                                <div class="tier-name" style="color:#38bdf8;">Starter</div>
                                 <div class="tier-rate">১০%</div>
-                                <div class="tier-range">১ - ১০ সেলস</div>
+                                <div class="tier-range">০+ সেলস (০ - ৪)</div>
                             </div>
                             <div class="tier-step" id="tierCard-2">
                                 <div class="tier-num">লেভেল ২</div>
-                                <div class="tier-name" style="color:#e2e8f0;">Silver</div>
+                                <div class="tier-name" style="color:#f59e0b;">Bronze</div>
                                 <div class="tier-rate">২০%</div>
-                                <div class="tier-range">১১ - ২০ সেলস</div>
+                                <div class="tier-range">৫+ সেলস (৫ - ১৪)</div>
                             </div>
                             <div class="tier-step" id="tierCard-3">
                                 <div class="tier-num">লেভেল ৩</div>
-                                <div class="tier-name" style="color:#f5b041;">Gold</div>
+                                <div class="tier-name" style="color:#cbd5e1;">Silver</div>
                                 <div class="tier-rate">৩০%</div>
-                                <div class="tier-range">২১ - ৩০ সেলস</div>
+                                <div class="tier-range">১৫+ সেলস (১৫ - ২৯)</div>
                             </div>
                             <div class="tier-step" id="tierCard-4">
                                 <div class="tier-num">লেভেল ৪</div>
-                                <div class="tier-name" style="color:#00d2d3;">Platinum</div>
+                                <div class="tier-name" style="color:#fbbf24;">Gold</div>
                                 <div class="tier-rate">৪০%</div>
-                                <div class="tier-range">৩১ - ৪০ সেলস</div>
+                                <div class="tier-range">৩০+ সেলস (৩০ - ৪৯)</div>
                             </div>
                             <div class="tier-step" id="tierCard-5">
                                 <div class="tier-num">লেভেল ৫</div>
-                                <div class="tier-name" style="color:#c084fc;">Diamond</div>
+                                <div class="tier-name" style="color:#c084fc;">Elite</div>
                                 <div class="tier-rate">৫০%</div>
-                                <div class="tier-range">৪১ - ৫০ সেলস</div>
+                                <div class="tier-range">৫০+ সেলস (৫০ - ৫৯)</div>
                             </div>
-                            <div class="tier-step" id="tierCard-6" style="border-color:rgba(255,215,0,0.3);">
+                            <div class="tier-step" id="tierCard-6" style="border-color:rgba(255,215,0,0.4); background:radial-gradient(circle at 50% 0%, rgba(255,215,0,0.12) 0%, rgba(0,0,0,0.4) 100%);">
                                 <div class="tier-num" style="color:#ffd700;">মাস্টার লেভেল</div>
                                 <div class="tier-name" style="color:#ffd700;">Master</div>
-                                <div class="tier-rate" style="color:#ffd700;">৫০%</div>
-                                <div class="tier-range">৫১+ পার্মানেন্ট</div>
+                                <div class="tier-rate" style="color:#ffd700;">৫৫%</div>
+                                <div class="tier-range" style="color:#ffd700; font-weight:800;">৬০+ পার্মানেন্ট</div>
                             </div>
                         </div>
                     </div>
@@ -3377,28 +3562,28 @@ Start your funded trading journey today! 📈
             <!-- Commission Scale Quick Highlights Strip -->
             <div class="tier-preview-strip" id="partnerAuthTierStrip">
                 <div class="tier-mini-card">
-                    <strong>1–10 Sales</strong>
-                    <span>10% Comm</span>
+                    <strong>0+ Sales</strong>
+                    <span>10% Starter</span>
                 </div>
                 <div class="tier-mini-card">
-                    <strong>11–20 Sales</strong>
-                    <span>20% Comm</span>
+                    <strong>5+ Sales</strong>
+                    <span>20% Bronze</span>
                 </div>
                 <div class="tier-mini-card">
-                    <strong>21–30 Sales</strong>
-                    <span>30% Comm</span>
+                    <strong>15+ Sales</strong>
+                    <span>30% Silver</span>
                 </div>
                 <div class="tier-mini-card">
-                    <strong>31–40 Sales</strong>
-                    <span>40% Comm</span>
+                    <strong>30+ Sales</strong>
+                    <span>40% Gold</span>
                 </div>
                 <div class="tier-mini-card">
-                    <strong>41–50 Sales</strong>
-                    <span>50% Comm</span>
+                    <strong>50+ Sales</strong>
+                    <span>50% Elite</span>
                 </div>
                 <div class="tier-mini-card" style="border-color:rgba(255,215,0,0.4); background:rgba(255,215,0,0.06);">
-                    <strong style="color:#ffd700;">51+ Lifetime</strong>
-                    <span style="color:#ffd700;">50% Master</span>
+                    <strong style="color:#ffd700;">60+ Lifetime</strong>
+                    <span style="color:#ffd700;">55% Master</span>
                 </div>
             </div>
         </div>
@@ -3611,31 +3796,31 @@ Start your funded trading journey today! 📈
 
             // Tier calculation matching server.js
             let rate = 10;
-            let levelBadge = 'LEVEL 1: BRONZE';
-            let badgeClass = 'badge-bronze';
+            let levelBadge = 'LEVEL 1: STARTER';
+            let badgeClass = 'badge-starter';
 
-            if (count <= 10) {
+            if (count < 5) {
                 rate = 10;
-                levelBadge = 'LEVEL 1: BRONZE';
-                badgeClass = 'badge-bronze';
-            } else if (count <= 20) {
+                levelBadge = 'LEVEL 1: STARTER';
+                badgeClass = 'badge-starter';
+            } else if (count < 15) {
                 rate = 20;
-                levelBadge = 'LEVEL 2: SILVER';
-                badgeClass = 'badge-silver';
-            } else if (count <= 30) {
+                levelBadge = 'LEVEL 2: BRONZE';
+                badgeClass = 'badge-bronze';
+            } else if (count < 30) {
                 rate = 30;
-                levelBadge = 'LEVEL 3: GOLD';
-                badgeClass = 'badge-gold';
-            } else if (count <= 40) {
+                levelBadge = 'LEVEL 3: SILVER';
+                badgeClass = 'badge-silver';
+            } else if (count < 50) {
                 rate = 40;
-                levelBadge = 'LEVEL 4: PLATINUM';
-                badgeClass = 'badge-platinum';
-            } else if (count <= 50) {
+                levelBadge = 'LEVEL 4: GOLD';
+                badgeClass = 'badge-gold';
+            } else if (count < 60) {
                 rate = 50;
-                levelBadge = 'LEVEL 5: DIAMOND';
-                badgeClass = 'badge-diamond';
+                levelBadge = 'LEVEL 5: ELITE';
+                badgeClass = 'badge-elite';
             } else {
-                rate = 50;
+                rate = 55;
                 levelBadge = 'LEVEL 6: MASTER (LIFETIME)';
                 badgeClass = 'badge-master';
             }
@@ -3672,8 +3857,8 @@ Start your funded trading journey today! 📈
             const volBdtEl = document.getElementById('calcVolumeBdt');
             if (volBdtEl) volBdtEl.innerText = `${count} challenge sales`;
 
-            // Master Tier Progress Bar (Target: 51 sales)
-            const masterPct = Math.min(100, Math.round((count / 51) * 100));
+            // Master Tier Progress Bar (Target: 60 sales)
+            const masterPct = Math.min(100, Math.round((count / 60) * 100));
             const bar = document.getElementById('calcMasterTierBar');
             if (bar) bar.style.width = `${masterPct}%`;
 
@@ -3682,11 +3867,11 @@ Start your funded trading journey today! 📈
 
             const hint = document.getElementById('calcNextTierHint');
             if (hint) {
-                if (count >= 51) {
-                    hint.innerHTML = `<span style="color:var(--emerald); font-weight:800;"><i class="fas fa-check-circle"></i> Congratulations! You unlocked Master Partner (50% Permanent)!</span>`;
+                if (count >= 60) {
+                    hint.innerHTML = `<span style="color:var(--emerald); font-weight:800;"><i class="fas fa-check-circle"></i> Congratulations! You unlocked Master Partner (55% Permanent)!</span>`;
                 } else {
-                    const remaining = 51 - count;
-                    hint.innerText = `Only ${remaining} more sales to reach permanent 50% commission!`;
+                    const remaining = 60 - count;
+                    hint.innerText = `Only ${remaining} more sales to reach permanent 55% commission!`;
                 }
             }
         }
@@ -4117,7 +4302,7 @@ Start your funded trading journey today! 📈
                 document.getElementById('heroSalesNeededText').innerText = `লেভেল ${partnerTierInfo.level + 1}-এ যেতে আরও ${partnerTierInfo.salesUntilNextLevel}টি সেল বাকি`;
             } else {
                 document.getElementById('heroProgressionStatusText').innerText = 
-                    `অভিনন্দন! আপনি সর্বোচ্চ Master Level-এ পৌঁছেছেন এবং প্রতিটি চ্যালেঞ্জ সেলে স্থায়ীভাবে সর্বোচ্চ ৫০% কমিশন পাচ্ছেন! 🎉`;
+                    `অভিনন্দন! আপনি সর্বোচ্চ Master Level-এ পৌঁছেছেন এবং প্রতিটি চ্যালেঞ্জ সেলে স্থায়ীভাবে সর্বোচ্চ ৫৫% কমিশন পাচ্ছেন! 🎉`;
                 document.getElementById('heroSalesNeededText').innerText = `সর্বোচ্চ লেভেল আনলকড`;
             }
 
