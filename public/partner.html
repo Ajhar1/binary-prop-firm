@@ -724,6 +724,113 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
+        /* Referral Destination Selectors & Custom Campaign Links */
+        .dest-selector-strip {
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+        }
+        .dest-btn {
+            flex: 1;
+            min-width: 105px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .dest-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .dest-btn.active {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+            border-color: rgba(16, 185, 129, 0.5);
+            color: #34d399;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+        }
+        .campaign-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+        .campaign-card:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+        .badge-dest {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-dest-register {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .badge-dest-landing {
+            background: rgba(6, 182, 212, 0.15);
+            color: #22d3ee;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        .badge-dest-login {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .campaign-tag-input-group {
+            display: flex;
+            align-items: stretch;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .campaign-tag-prefix {
+            padding: 0 14px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--gold);
+            font-family: monospace;
+            font-weight: 800;
+            font-size: 0.92rem;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid var(--border-subtle);
+            user-select: none;
+            white-space: nowrap;
+        }
+        .campaign-tag-input-group input {
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }
+
         /* ================= LANDING PAGE STYLES ================= */
         html {
             scroll-behavior: smooth;
@@ -1874,6 +1981,9 @@
             .stats-grid { grid-template-columns: 1fr; }
             .topbar { padding: 0 1rem; }
             .auth-box { padding: 1.75rem 1.25rem; }
+            .dest-selector-strip { flex-direction: column; }
+            .dest-btn { width: 100%; justify-content: center; }
+            .campaign-tag-prefix { font-size: 0.82rem; padding: 0 10px; }
         }
     </style>
 </head>
@@ -2892,6 +3002,21 @@
                             <i class="fas fa-share-alt" style="color:var(--emerald);"></i> Your Referral Link &amp; Promotion Tools
                         </h3>
 
+                        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                            <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Link Destination (Where visitors land):</span>
+                            <div class="dest-selector-strip" style="padding:4px;">
+                                <button type="button" class="dest-btn active" id="overviewDestBtnRegister" onclick="setPrimaryLinkDestination('register')">
+                                    <i class="fas fa-user-plus"></i> Sign Up Page
+                                </button>
+                                <button type="button" class="dest-btn" id="overviewDestBtnLanding" onclick="setPrimaryLinkDestination('landing')">
+                                    <i class="fas fa-home"></i> Landing Page
+                                </button>
+                                <button type="button" class="dest-btn" id="overviewDestBtnLogin" onclick="setPrimaryLinkDestination('login')">
+                                    <i class="fas fa-sign-in-alt"></i> Login Page
+                                </button>
+                            </div>
+                        </div>
+
                         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
                             <div style="flex:1; min-width:260px; position:relative;">
                                 <input type="text" class="form-control" id="overviewRefLinkInput" readonly style="font-family:monospace; font-size:0.9rem; padding-right:85px; background:rgba(0,0,0,0.4);">
@@ -2899,6 +3024,9 @@
                                     <i class="fas fa-copy"></i> Copy
                                 </button>
                             </div>
+                            <a id="overviewTestLinkBtn" href="#" target="_blank" class="btn-outline" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-size:0.84rem;">
+                                <i class="fas fa-external-link-alt"></i> Test
+                            </a>
                             <button type="button" class="btn-outline" onclick="copyPromoCodeText()">
                                 <i class="fas fa-ticket-alt" style="color:var(--gold);"></i> Copy Code
                             </button>
@@ -3041,12 +3169,33 @@
                             <!-- Link Details Card -->
                             <div style="display:flex; flex-direction:column; gap:12px;">
                                 <div class="glass" style="padding:1.25rem; border-radius:12px;">
-                                    <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Primary Referral Link</label>
-                                    <div style="display:flex; gap:8px; margin-top:6px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                        <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin:0;">Primary Referral Link</label>
+                                        <span style="font-size:0.72rem; color:var(--cyan); font-weight:700;"><i class="fas fa-sliders-h"></i> Choose Destination</span>
+                                    </div>
+
+                                    <div style="margin-bottom:10px;">
+                                        <div class="dest-selector-strip" style="padding:4px;">
+                                            <button type="button" class="dest-btn active" id="primaryDestBtnRegister" onclick="setPrimaryLinkDestination('register')">
+                                                <i class="fas fa-user-plus"></i> Sign Up Page
+                                            </button>
+                                            <button type="button" class="dest-btn" id="primaryDestBtnLanding" onclick="setPrimaryLinkDestination('landing')">
+                                                <i class="fas fa-home"></i> Landing Page
+                                            </button>
+                                            <button type="button" class="dest-btn" id="primaryDestBtnLogin" onclick="setPrimaryLinkDestination('login')">
+                                                <i class="fas fa-sign-in-alt"></i> Login Page
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div style="display:flex; gap:8px;">
                                         <input type="text" class="form-control" id="toolsRefLink" readonly style="font-family:monospace; font-size:0.85rem; background:rgba(0,0,0,0.35);">
-                                        <button type="button" class="btn-emerald" onclick="copyToolsLink()" style="padding:0 14px; font-size:0.84rem; flex-shrink:0;">
+                                        <button type="button" class="btn-emerald" onclick="copyToolsLink()" title="Copy link" style="padding:0 14px; font-size:0.84rem; flex-shrink:0;">
                                             <i class="fas fa-copy"></i>
                                         </button>
+                                        <a id="toolsTestPrimaryBtn" href="#" target="_blank" class="btn-outline" title="Test link in new tab" style="padding:0 14px; font-size:0.84rem; display:inline-flex; align-items:center; text-decoration:none; flex-shrink:0;">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
                                     </div>
                                 </div>
 
@@ -3063,6 +3212,91 @@
                                     </p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- CREATE CUSTOM CAMPAIGN LINK -->
+                    <div class="glass" style="padding:1.5rem; border-radius:18px; margin-bottom:1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:1.25rem;">
+                            <div>
+                                <h3 style="font-size:1.15rem; font-weight:900; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-plus-circle" style="color:var(--emerald);"></i> Create Custom Campaign Link
+                                </h3>
+                                <p style="font-size:0.82rem; color:var(--text-muted); margin:0;">
+                                    Generate unique targeted referral links for YouTube, Telegram, or ads and decide where visitors land directly.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-outline" onclick="autoGenerateCampaignCode()" style="font-size:0.8rem; padding:8px 14px; border-color:rgba(16, 185, 129, 0.4); color:#34d399;">
+                                <i class="fas fa-bolt"></i> Auto-Generate Unique Link
+                            </button>
+                        </div>
+
+                        <form id="createCampaignLinkForm" onsubmit="handleCreateCampaignLink(event)">
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:1rem; margin-bottom:1rem;">
+                                <!-- Campaign Title -->
+                                <div>
+                                    <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:6px;">Campaign Title / Label</label>
+                                    <input type="text" class="form-control" id="campaignTitleInput" placeholder="e.g. YouTube Video, Telegram Channel" required maxlength="60" oninput="updateCampaignLinkPreview()">
+                                </div>
+
+                                <!-- Landing Destination -->
+                                <div>
+                                    <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:6px;">Landing Destination</label>
+                                    <select class="form-control" id="campaignDestInput" onchange="updateCampaignLinkPreview()">
+                                        <option value="register" selected>🚀 Direct Sign Up Modal (Auto Register)</option>
+                                        <option value="landing">🏠 Home / Landing Page</option>
+                                        <option value="login">🔑 Login Modal (Sign In)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Campaign Code Tag -->
+                                <div>
+                                    <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:6px;">Campaign Unique Tag</label>
+                                    <div class="campaign-tag-input-group">
+                                        <span class="campaign-tag-prefix" id="campaignCodePrefix">CODE-</span>
+                                        <input type="text" class="form-control" id="campaignTagInput" placeholder="YT" required maxlength="15" oninput="updateCampaignLinkPreview()" style="text-transform:uppercase; font-weight:700;">
+                                    </div>
+                                    <div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">
+                                        Letters & numbers only (e.g. YT, TG, PROMO, C1)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Live Link Preview Box -->
+                            <div style="background:rgba(0,0,0,0.35); border:1px dashed rgba(6, 182, 212, 0.4); border-radius:12px; padding:12px 16px; margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                                <div style="display:flex; align-items:center; gap:10px; overflow:hidden; min-width:240px; flex:1;">
+                                    <span style="font-size:0.72rem; font-weight:800; color:var(--cyan); text-transform:uppercase; letter-spacing:0.5px; flex-shrink:0;">
+                                        <i class="fas fa-eye"></i> Live Preview:
+                                    </span>
+                                    <span id="campaignPreviewUrlText" style="font-family:monospace; font-size:0.85rem; color:#fff; word-break:break-all;">
+                                        https://binarypropfirm.com/?ref=...
+                                    </span>
+                                </div>
+                                <button type="submit" class="btn-emerald" id="btnSaveCampaignLink" style="padding:8px 20px; font-size:0.85rem; flex-shrink:0;">
+                                    <i class="fas fa-plus"></i> Save Campaign Link
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- MY CUSTOM CAMPAIGN LINKS -->
+                    <div class="glass" style="padding:1.5rem; border-radius:18px; margin-bottom:1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1.25rem;">
+                            <div>
+                                <h3 style="font-size:1.15rem; font-weight:900; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-link" style="color:var(--cyan);"></i> My Custom Campaign Links
+                                </h3>
+                                <p style="font-size:0.82rem; color:var(--text-muted); margin:0;">
+                                    All your active custom referral links with destination routing and QR codes.
+                                </p>
+                            </div>
+                            <div style="font-size:0.82rem; font-weight:700; color:var(--cyan); background:rgba(6,182,212,0.1); padding:4px 12px; border-radius:20px; border:1px solid rgba(6,182,212,0.3);" id="campaignLinksCountText">
+                                0 Links
+                            </div>
+                        </div>
+
+                        <div id="campaignLinksContainer">
+                            <!-- Rendered custom links cards or empty state -->
                         </div>
                     </div>
 
@@ -3685,6 +3919,40 @@ Start your funded trading journey today! 📈</div>
         </div>
     </div>
 
+    <!-- CAMPAIGN QR CODE MODAL -->
+    <div class="modal-overlay" id="campaignQrModal">
+        <div class="modal-box glass" style="max-width:440px; text-align:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="font-size:1.1rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-qrcode" style="color:var(--cyan);"></i> Campaign QR Code
+                </h3>
+                <button type="button" onclick="closeModal('campaignQrModal')" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="campaignQrTitleText" style="font-weight:800; font-size:0.95rem; color:#fff; margin-bottom:6px;"></div>
+            <div id="campaignQrDestBadge" style="margin-bottom:14px;"></div>
+
+            <div id="campaignQrBox" style="background:#fff; padding:14px; border-radius:14px; display:inline-block; margin-bottom:14px; box-shadow:0 0 25px rgba(0,0,0,0.5);">
+                <!-- Dynamic QR code injected here -->
+            </div>
+
+            <div style="margin-bottom:1.25rem;">
+                <input type="text" class="form-control" id="campaignQrUrlInput" readonly style="font-family:monospace; font-size:0.8rem; background:rgba(0,0,0,0.4); text-align:center;">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button type="button" class="btn-outline" onclick="copyCampaignModalUrl()" style="flex:1; font-size:0.82rem;">
+                    <i class="fas fa-copy"></i> Copy Link
+                </button>
+                <button type="button" class="btn-emerald" onclick="downloadCampaignModalQr()" style="flex:1; font-size:0.82rem;">
+                    <i class="fas fa-download"></i> Download PNG
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- ========================================== -->
     <!-- 4. JAVASCRIPT LOGIC                        -->
@@ -3699,6 +3967,10 @@ Start your funded trading journey today! 📈</div>
         let partnerSalesList = [];
         let partnerPayoutsList = [];
         let partnerPromoData = null;
+        let partnerCustomLinks = [];
+        let primaryLinkDest = 'register';
+        let currentModalCampaignLink = null;
+        let campaignQrInstance = null;
         let qrcodeInstance = null;
 
         // On Page Load
@@ -4330,11 +4602,17 @@ Start your funded trading journey today! 📈</div>
             document.getElementById('statTraderDiscount').innerText = `${partnerData.traderDiscount || 5}%`;
 
             // Referral Links & Tools inputs
-            const refUrl = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData.promoCode || '')}`;
-            document.getElementById('overviewRefLinkInput').value = refUrl;
-            document.getElementById('toolsRefLink').value = refUrl;
+            setPrimaryLinkDestination(primaryLinkDest || 'register');
             document.getElementById('toolsPromoCode').value = partnerData.promoCode || '';
             document.getElementById('toolsDiscountText').innerText = `${partnerData.traderDiscount || 5}%`;
+
+            // Campaign Code Tag Prefix & Live Preview
+            const prefixEl = document.getElementById('campaignCodePrefix');
+            if (prefixEl) prefixEl.innerText = `${partnerData.promoCode || 'CODE'}-`;
+            updateCampaignLinkPreview();
+
+            // Fetch Custom Campaign Links
+            fetchPartnerCustomLinks();
 
             // Payouts tab stat cards
             document.getElementById('payoutWithdrawableVal').innerText = `$${(partnerData.withdrawableCommission || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -4348,9 +4626,6 @@ Start your funded trading journey today! 📈</div>
             document.getElementById('setProfilePhone').value = partnerData.phone || '';
             document.getElementById('setPayoutMethod').value = partnerData.payoutMethod || 'Binance Pay';
             document.getElementById('setPayoutDetails').value = partnerData.payoutDetails || '';
-
-            // Render QR Code
-            generatePartnerQRCode(refUrl);
         }
 
         // Generate QR Code with qrcode.js
@@ -4946,7 +5221,7 @@ Start your funded trading journey today! 📈</div>
         }
 
         function copyPromoTemplate(lang) {
-            const link = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
+            const link = document.getElementById('toolsRefLink')?.value || `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
             const code = partnerData?.promoCode || 'CODE';
             let text = '';
             if (lang === 'bn') {
@@ -4964,20 +5239,329 @@ Start your funded trading journey today! 📈</div>
         }
 
         function shareOnWhatsApp() {
-            const link = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
+            const link = document.getElementById('overviewRefLinkInput')?.value || `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
             const text = `Trade and get funded up to $65,000 with Binary Prop Firm! Join now with my referral link: ${link}`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         function shareOnTelegram() {
-            const link = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
+            const link = document.getElementById('overviewRefLinkInput')?.value || `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
             const text = `Binary Prop Firm - Get Funded up to $65,000 & keep 85% profits! Join with my link: ${link}`;
             window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank');
         }
 
         function shareOnFacebook() {
-            const link = `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
+            const link = document.getElementById('overviewRefLinkInput')?.value || `https://binarypropfirm.com/?ref=${encodeURIComponent(partnerData?.promoCode || '')}`;
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`, '_blank');
+        }
+
+        // ================= REFERRAL DESTINATIONS & CAMPAIGN LINKS =================
+        function setPrimaryLinkDestination(dest) {
+            primaryLinkDest = dest || 'register';
+
+            ['Register', 'Landing', 'Login'].forEach(d => {
+                const lower = d.toLowerCase();
+                const pBtn = document.getElementById(`primaryDestBtn${d}`);
+                const oBtn = document.getElementById(`overviewDestBtn${d}`);
+                if (pBtn) pBtn.classList.toggle('active', lower === primaryLinkDest);
+                if (oBtn) oBtn.classList.toggle('active', lower === primaryLinkDest);
+            });
+
+            const code = partnerData?.promoCode || '';
+            const finalUrl = `https://binarypropfirm.com/?ref=${encodeURIComponent(code)}&dest=${encodeURIComponent(primaryLinkDest)}`;
+
+            const overviewInput = document.getElementById('overviewRefLinkInput');
+            const toolsInput = document.getElementById('toolsRefLink');
+            const overviewTestBtn = document.getElementById('overviewTestLinkBtn');
+            const toolsTestBtn = document.getElementById('toolsTestPrimaryBtn');
+
+            if (overviewInput) overviewInput.value = finalUrl;
+            if (toolsInput) toolsInput.value = finalUrl;
+            if (overviewTestBtn) overviewTestBtn.href = finalUrl;
+            if (toolsTestBtn) toolsTestBtn.href = finalUrl;
+
+            generatePartnerQRCode(finalUrl);
+        }
+
+        async function fetchPartnerCustomLinks() {
+            try {
+                const res = await partnerFetch('/api/partner/links');
+                const data = await res.json();
+                if (data.success && Array.isArray(data.links)) {
+                    partnerCustomLinks = data.links;
+                    renderCustomLinksTable();
+                }
+            } catch (err) {
+                console.warn('[Fetch Custom Links Error]', err);
+            }
+        }
+
+        function renderCustomLinksTable() {
+            const container = document.getElementById('campaignLinksContainer');
+            const countText = document.getElementById('campaignLinksCountText');
+            if (!container) return;
+
+            if (countText) {
+                countText.innerText = `${partnerCustomLinks.length} ${partnerCustomLinks.length === 1 ? 'Link' : 'Links'}`;
+            }
+
+            if (!partnerCustomLinks || partnerCustomLinks.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted); background:rgba(0,0,0,0.2); border-radius:12px; border:1px dashed var(--border-subtle);">
+                        <i class="fas fa-link" style="font-size:2rem; opacity:0.35; margin-bottom:10px; display:block;"></i>
+                        <div style="font-size:0.92rem; font-weight:700; color:#e2e8f0; margin-bottom:4px;">No Custom Campaign Links Yet</div>
+                        <div style="font-size:0.78rem;">Create your first custom link above to direct traders straight to registration or landing page.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = partnerCustomLinks.map(link => {
+                let destLabel = 'Sign Up Page';
+                let destClass = 'register';
+                let destIcon = 'user-plus';
+                if (link.destination === 'landing') {
+                    destLabel = 'Landing Page';
+                    destClass = 'landing';
+                    destIcon = 'home';
+                } else if (link.destination === 'login') {
+                    destLabel = 'Login Page';
+                    destClass = 'login';
+                    destIcon = 'sign-in-alt';
+                }
+
+                const dateStr = link.createdAt ? new Date(link.createdAt).toLocaleDateString() : 'Active';
+
+                return `
+                    <div class="campaign-card">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                            <div>
+                                <div style="font-weight:800; font-size:0.92rem; color:#fff; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                    <span>${escapeHtml(link.title || 'Campaign Link')}</span>
+                                    <span class="badge-dest badge-dest-${destClass}">
+                                        <i class="fas fa-${destIcon}"></i> ${destLabel}
+                                    </span>
+                                </div>
+                                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:3px;">
+                                    Code: <strong style="color:var(--gold); font-family:monospace; font-size:0.85rem;">${escapeHtml(link.code)}</strong> &bull; Created: ${dateStr}
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:6px;">
+                                <button type="button" class="btn-outline" onclick="openCampaignQrModal('${escapeHtml(link.id)}')" title="View QR Code" style="padding:6px 11px; font-size:0.78rem;">
+                                    <i class="fas fa-qrcode" style="color:var(--cyan);"></i> QR
+                                </button>
+                                <a href="${escapeHtml(link.url)}" target="_blank" class="btn-outline" title="Test link in new tab" style="padding:6px 11px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center;">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                                <button type="button" class="btn-outline" onclick="handleDeleteCampaignLink('${escapeHtml(link.id)}')" title="Delete link" style="padding:6px 11px; font-size:0.78rem; border-color:rgba(239, 68, 68, 0.3); color:#ef4444;">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+                            <input type="text" class="form-control" value="${escapeHtml(link.url)}" readonly style="font-family:monospace; font-size:0.82rem; background:rgba(0,0,0,0.35);">
+                            <button type="button" class="btn-emerald" onclick="copySpecificUrl('${escapeHtml(link.url)}')" title="Copy URL" style="padding:0 14px; font-size:0.82rem; flex-shrink:0;">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div style="display:flex; flex-direction:column; gap:12px;">${html}</div>`;
+        }
+
+        async function autoGenerateCampaignCode() {
+            try {
+                const res = await partnerFetch('/api/partner/links/generate-unique');
+                const data = await res.json();
+                if (data.success && data.uniqueCode) {
+                    const fullCode = data.uniqueCode;
+                    const prefix = `${partnerData?.promoCode || ''}-`;
+                    let tag = fullCode;
+                    if (fullCode.startsWith(prefix)) {
+                        tag = fullCode.slice(prefix.length);
+                    }
+                    const tagInput = document.getElementById('campaignTagInput');
+                    if (tagInput) tagInput.value = tag;
+
+                    const titleInput = document.getElementById('campaignTitleInput');
+                    if (titleInput && !titleInput.value) {
+                        titleInput.value = `Campaign ${tag}`;
+                    }
+                    updateCampaignLinkPreview();
+                    showToast(`Unique tag "${tag}" generated!`, 'success');
+                } else {
+                    showToast(data.error || 'Failed to auto-generate code', 'error');
+                }
+            } catch (err) {
+                showToast('Error generating unique link', 'error');
+            }
+        }
+
+        function updateCampaignLinkPreview() {
+            const baseCode = partnerData?.promoCode || 'CODE';
+            let tag = (document.getElementById('campaignTagInput')?.value || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+            const dest = document.getElementById('campaignDestInput')?.value || 'register';
+
+            const fullCode = tag ? `${baseCode}-${tag}` : baseCode;
+            const previewUrl = `https://binarypropfirm.com/?ref=${encodeURIComponent(fullCode)}&dest=${encodeURIComponent(dest)}`;
+
+            const previewEl = document.getElementById('campaignPreviewUrlText');
+            if (previewEl) previewEl.innerText = previewUrl;
+        }
+
+        async function handleCreateCampaignLink(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveCampaignLink');
+            const originalText = btn.innerHTML;
+
+            const title = (document.getElementById('campaignTitleInput').value || '').trim();
+            const destination = document.getElementById('campaignDestInput').value || 'register';
+            let tag = (document.getElementById('campaignTagInput').value || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+
+            if (!tag) {
+                return showToast('Please enter a campaign code tag or click Auto-Generate', 'error');
+            }
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+                const res = await partnerFetch('/api/partner/links', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        title,
+                        tag,
+                        destination
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to create campaign link');
+                }
+
+                showToast('Campaign link created successfully!', 'success');
+                document.getElementById('campaignTitleInput').value = '';
+                document.getElementById('campaignTagInput').value = '';
+                updateCampaignLinkPreview();
+
+                if (Array.isArray(data.links)) {
+                    partnerCustomLinks = data.links;
+                    renderCustomLinksTable();
+                } else {
+                    fetchPartnerCustomLinks();
+                }
+            } catch (err) {
+                showToast(err.message || 'Error saving link', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function handleDeleteCampaignLink(id) {
+            if (!confirm('Are you sure you want to delete this custom campaign link?')) return;
+
+            try {
+                const res = await partnerFetch(`/api/partner/links/${encodeURIComponent(id)}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to delete link');
+                }
+
+                showToast('Campaign link deleted', 'success');
+                if (Array.isArray(data.links)) {
+                    partnerCustomLinks = data.links;
+                    renderCustomLinksTable();
+                } else {
+                    fetchPartnerCustomLinks();
+                }
+            } catch (err) {
+                showToast(err.message || 'Error deleting link', 'error');
+            }
+        }
+
+        function openCampaignQrModal(linkId) {
+            const link = partnerCustomLinks.find(l => l.id === linkId);
+            if (!link) return;
+
+            currentModalCampaignLink = link;
+
+            document.getElementById('campaignQrTitleText').innerText = link.title || 'Campaign Link';
+
+            let destLabel = 'Sign Up Page';
+            let destClass = 'register';
+            let destIcon = 'user-plus';
+            if (link.destination === 'landing') {
+                destLabel = 'Landing Page';
+                destClass = 'landing';
+                destIcon = 'home';
+            } else if (link.destination === 'login') {
+                destLabel = 'Login Page';
+                destClass = 'login';
+                destIcon = 'sign-in-alt';
+            }
+
+            document.getElementById('campaignQrDestBadge').innerHTML = `
+                <span class="badge-dest badge-dest-${destClass}">
+                    <i class="fas fa-${destIcon}"></i> ${destLabel} &bull; Code: ${escapeHtml(link.code)}
+                </span>
+            `;
+
+            document.getElementById('campaignQrUrlInput').value = link.url;
+
+            const container = document.getElementById('campaignQrBox');
+            container.innerHTML = '';
+            try {
+                if (typeof QRCode !== 'undefined') {
+                    campaignQrInstance = new QRCode(container, {
+                        text: link.url,
+                        width: 170,
+                        height: 170,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }
+            } catch (err) {
+                console.warn('[Campaign QR Error]', err);
+            }
+
+            openModal('campaignQrModal');
+        }
+
+        function downloadCampaignModalQr() {
+            const img = document.querySelector('#campaignQrBox img');
+            if (!img || !img.src) {
+                return showToast('QR code is generating, please wait', 'info');
+            }
+            const a = document.createElement('a');
+            a.href = img.src;
+            const codeName = currentModalCampaignLink?.code || 'Campaign';
+            a.download = `BinaryPropFirm_QR_${codeName}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('Campaign QR code downloaded!', 'success');
+        }
+
+        function copyCampaignModalUrl() {
+            const url = document.getElementById('campaignQrUrlInput')?.value;
+            if (!url) return;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('Campaign link copied!', 'success');
+            });
+        }
+
+        function copySpecificUrl(url) {
+            if (!url) return;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('Referral link copied!', 'success');
+            });
         }
 
         // ================= MODAL HELPERS =================

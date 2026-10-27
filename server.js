@@ -5048,11 +5048,18 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
     const targetCode = appliedPromo ? appliedPromo.code : (promoCode && typeof promoCode === 'string' && promoCode.trim() ? promoCode.trim().toUpperCase() : (currentUser.referredBy || ''));
     if (targetCode) {
       const cleanTarget = targetCode.toUpperCase();
-      // Match by partner primary promoCode or partner id
+      // Match by partner primary promoCode or partner id or custom campaign link
       matchedPartner = partners.find(p => p.status === 'active' && (
         (p.promoCode && p.promoCode.toUpperCase() === cleanTarget) ||
-        p.id === cleanTarget
+        p.id === cleanTarget ||
+        (Array.isArray(p.customLinks) && p.customLinks.some(l => l.code && l.code.toUpperCase() === cleanTarget))
       ));
+
+      // Fail-safe: if cleanTarget has a separator (e.g. AJHAR-YT -> base: AJHAR)
+      if (!matchedPartner && (cleanTarget.includes('-') || cleanTarget.includes('_'))) {
+        const baseCode = cleanTarget.split(/[-_]/)[0];
+        matchedPartner = partners.find(p => p.status === 'active' && p.promoCode && p.promoCode.toUpperCase() === baseCode);
+      }
 
       // Or match by custom partner promo codes in promo_codes.json
       if (!matchedPartner) {
@@ -10719,11 +10726,19 @@ app.get('/api/partner/me', authenticatePartnerToken, (req, res) => {
     const promoRequests = getPartnerPromoRequests();
 
     const code = (partner.promoCode || '').toUpperCase();
-    const referredChallenges = challenges.filter(c =>
-      (c.partnerId && c.partnerId === partner.id) ||
-      (c.promoCode && c.promoCode.toUpperCase() === code) ||
-      (c.partnerPromoCode && c.partnerPromoCode.toUpperCase() === code)
-    );
+    const customCodes = Array.isArray(partner.customLinks) ? partner.customLinks.map(l => (l.code || '').toUpperCase()).filter(Boolean) : [];
+    const isMatchingChallenge = (c) => {
+      const pCode = (c.promoCode || '').toUpperCase();
+      const ppCode = (c.partnerPromoCode || '').toUpperCase();
+      return (c.partnerId && c.partnerId === partner.id) ||
+             (pCode && pCode === code) ||
+             (ppCode && ppCode === code) ||
+             (pCode && customCodes.includes(pCode)) ||
+             (ppCode && customCodes.includes(ppCode)) ||
+             (pCode && (pCode.startsWith(`${code}-`) || pCode.startsWith(`${code}_`))) ||
+             (ppCode && (ppCode.startsWith(`${code}-`) || ppCode.startsWith(`${code}_`)));
+    };
+    const referredChallenges = challenges.filter(isMatchingChallenge);
 
     const approvedReferred = referredChallenges.filter(c =>
       c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled'
@@ -10853,12 +10868,20 @@ app.get('/api/partner/sales', authenticatePartnerToken, (req, res) => {
 
     const challenges = readJson(CHALLENGES_FILE, []);
     const code = (partner.promoCode || '').toUpperCase();
+    const customCodes = Array.isArray(partner.customLinks) ? partner.customLinks.map(l => (l.code || '').toUpperCase()).filter(Boolean) : [];
+    const isMatchingChallenge = (c) => {
+      const pCode = (c.promoCode || '').toUpperCase();
+      const ppCode = (c.partnerPromoCode || '').toUpperCase();
+      return (c.partnerId && c.partnerId === partner.id) ||
+             (pCode && pCode === code) ||
+             (ppCode && ppCode === code) ||
+             (pCode && customCodes.includes(pCode)) ||
+             (ppCode && customCodes.includes(ppCode)) ||
+             (pCode && (pCode.startsWith(`${code}-`) || pCode.startsWith(`${code}_`))) ||
+             (ppCode && (ppCode.startsWith(`${code}-`) || ppCode.startsWith(`${code}_`)));
+    };
 
-    const referralChallenges = challenges.filter(c =>
-      (c.partnerId && c.partnerId === partner.id) ||
-      (c.promoCode && c.promoCode.toUpperCase() === code) ||
-      (c.partnerPromoCode && c.partnerPromoCode.toUpperCase() === code)
-    );
+    const referralChallenges = challenges.filter(isMatchingChallenge);
 
     const sales = referralChallenges.map((c) => {
       const rate = c.partnerCommissionRate || partner.commissionRate || 10;
@@ -10926,6 +10949,185 @@ app.get('/api/partner/promo-codes', authenticatePartnerToken, (req, res) => {
       customPromoCodes: approvedCustom,
       requests
     });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ==========================================
+// PARTNER CUSTOM REFERRAL LINKS & CAMPAIGNS
+// ==========================================
+
+function generateCollisionFreeCampaignCode(baseCode, existingCodes) {
+  const cleanBase = (baseCode || 'REF').toUpperCase();
+  for (let i = 1; i <= 50; i++) {
+    const candidate = `${cleanBase}-C${i}`;
+    if (!existingCodes.has(candidate)) return candidate;
+  }
+  for (let attempt = 0; attempt < 100; attempt++) {
+    const rand = Math.random().toString(36).substring(2, 5).toUpperCase();
+    const candidate = `${cleanBase}-${rand}`;
+    if (!existingCodes.has(candidate)) return candidate;
+  }
+  return `${cleanBase}-${Date.now().toString(36).toUpperCase()}`;
+}
+
+// Get all custom campaign links
+app.get('/api/partner/links', authenticatePartnerToken, (req, res) => {
+  try {
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    res.json({
+      success: true,
+      links: Array.isArray(partner.customLinks) ? partner.customLinks : [],
+      primaryPromoCode: partner.promoCode || 'CODE'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Auto-generate a guaranteed unique code for partner
+app.get('/api/partner/links/generate-unique', authenticatePartnerToken, (req, res) => {
+  try {
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    const promoCodes = getPromoCodes();
+    const existingCodes = new Set();
+    partners.forEach(p => {
+      if (p.promoCode) existingCodes.add(p.promoCode.toUpperCase());
+      if (Array.isArray(p.customLinks)) {
+        p.customLinks.forEach(l => { if (l.code) existingCodes.add(l.code.toUpperCase()); });
+      }
+    });
+    promoCodes.forEach(c => { if (c.code) existingCodes.add(c.code.toUpperCase()); });
+
+    const uniqueCode = generateCollisionFreeCampaignCode(partner.promoCode, existingCodes);
+    const suffix = uniqueCode.replace(`${partner.promoCode.toUpperCase()}-`, '');
+
+    res.json({
+      success: true,
+      uniqueCode,
+      suffix,
+      primaryCode: partner.promoCode
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Create a new custom campaign link
+app.post('/api/partner/links', authenticatePartnerToken, (req, res) => {
+  try {
+    const { title, destination, customTag, autoGenerate } = req.body;
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    const pCode = (partner.promoCode || 'REF').toUpperCase();
+    const cleanDest = ['register', 'login', 'landing'].includes(String(destination || '').toLowerCase())
+      ? String(destination).toLowerCase()
+      : 'register';
+
+    const promoCodes = getPromoCodes();
+    const existingCodes = new Set();
+    partners.forEach(p => {
+      if (p.promoCode) existingCodes.add(p.promoCode.toUpperCase());
+      if (Array.isArray(p.customLinks)) {
+        p.customLinks.forEach(l => { if (l.code) existingCodes.add(l.code.toUpperCase()); });
+      }
+    });
+    promoCodes.forEach(c => { if (c.code) existingCodes.add(c.code.toUpperCase()); });
+
+    let finalCode = '';
+    if (autoGenerate || !customTag || !customTag.trim()) {
+      finalCode = generateCollisionFreeCampaignCode(pCode, existingCodes);
+    } else {
+      const cleanTag = customTag.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+      if (!cleanTag) {
+        return res.status(400).json({ success: false, message: 'Please provide a valid campaign tag (alphanumeric).' });
+      }
+
+      if (cleanTag.startsWith(`${pCode}-`) || cleanTag.startsWith(`${pCode}_`)) {
+        finalCode = cleanTag;
+      } else {
+        finalCode = `${pCode}-${cleanTag}`;
+      }
+
+      // Check if taken by any other partner or promo code
+      const isTakenByOtherPartner = partners.some(p =>
+        p.id !== partner.id && (
+          (p.promoCode && p.promoCode.toUpperCase() === finalCode) ||
+          (Array.isArray(p.customLinks) && p.customLinks.some(l => l.code && l.code.toUpperCase() === finalCode))
+        )
+      );
+
+      const isTakenByPromo = promoCodes.some(c => c.code && c.code.toUpperCase() === finalCode);
+
+      if (isTakenByOtherPartner || isTakenByPromo) {
+        return res.status(400).json({
+          success: false,
+          message: `Referral code "${finalCode}" is already in use by another partner or promo code. Please choose a different tag or use Auto-Generate.`
+        });
+      }
+
+      if (Array.isArray(partner.customLinks) && partner.customLinks.some(l => l.code && l.code.toUpperCase() === finalCode)) {
+        return res.status(400).json({
+          success: false,
+          message: `You already have a campaign link with code "${finalCode}".`
+        });
+      }
+    }
+
+    const newLink = {
+      id: `link_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      title: (title || 'Campaign Link').trim(),
+      code: finalCode,
+      destination: cleanDest,
+      url: `https://binarypropfirm.com/?ref=${encodeURIComponent(finalCode)}&dest=${cleanDest}`,
+      clicks: 0,
+      createdAt: new Date().toISOString()
+    };
+
+    partner.customLinks = Array.isArray(partner.customLinks) ? partner.customLinks : [];
+    partner.customLinks.unshift(newLink);
+    savePartners(partners);
+
+    res.status(201).json({
+      success: true,
+      message: `Campaign link "${finalCode}" created successfully!`,
+      link: newLink
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Delete a custom campaign link
+app.delete('/api/partner/links/:id', authenticatePartnerToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    if (!Array.isArray(partner.customLinks)) {
+      return res.status(404).json({ success: false, message: 'Link not found.' });
+    }
+
+    const initialLen = partner.customLinks.length;
+    partner.customLinks = partner.customLinks.filter(l => l.id !== id);
+
+    if (partner.customLinks.length === initialLen) {
+      return res.status(404).json({ success: false, message: 'Link not found.' });
+    }
+
+    savePartners(partners);
+    res.json({ success: true, message: 'Campaign link deleted successfully.' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -11023,10 +11225,21 @@ app.post('/api/partner/payouts/request', authenticatePartnerToken, (req, res) =>
     const payouts = getPartnerPayouts();
 
     const code = (partner.promoCode || '').toUpperCase();
+    const customCodes = Array.isArray(partner.customLinks) ? partner.customLinks.map(l => (l.code || '').toUpperCase()).filter(Boolean) : [];
+    const isMatchingChallenge = (c) => {
+      const pCode = (c.promoCode || '').toUpperCase();
+      const ppCode = (c.partnerPromoCode || '').toUpperCase();
+      return (c.partnerId && c.partnerId === partner.id) ||
+             (pCode && pCode === code) ||
+             (ppCode && ppCode === code) ||
+             (pCode && customCodes.includes(pCode)) ||
+             (ppCode && customCodes.includes(ppCode)) ||
+             (pCode && (pCode.startsWith(`${code}-`) || pCode.startsWith(`${code}_`))) ||
+             (ppCode && (ppCode.startsWith(`${code}-`) || ppCode.startsWith(`${code}_`)));
+    };
+
     const approvedReferred = challenges.filter(c =>
-      ((c.partnerId && c.partnerId === partner.id) ||
-       (c.promoCode && c.promoCode.toUpperCase() === code) ||
-       (c.partnerPromoCode && c.partnerPromoCode.toUpperCase() === code)) &&
+      isMatchingChallenge(c) &&
       c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled'
     );
 
@@ -11225,6 +11438,17 @@ app.get(['/admin', '/admin/*'], (req, res) => {
 
 app.get(['/landing', '/ad'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+});
+
+// Direct trader shortcuts with referral preservation
+app.get(['/register', '/signup'], (req, res) => {
+  const ref = req.query.ref ? `&ref=${encodeURIComponent(req.query.ref)}` : '';
+  res.redirect(`/?dest=register${ref}`);
+});
+
+app.get('/login', (req, res) => {
+  const ref = req.query.ref ? `&ref=${encodeURIComponent(req.query.ref)}` : '';
+  res.redirect(`/?dest=login${ref}`);
 });
 
 // ==========================================
