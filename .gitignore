@@ -24,18 +24,33 @@ secure_vault_backup_*
 problem box/
 
 # Affiliate & Partner Program Database Files (Never overwrite or wipe)
+partners.json
+affiliates.json
+partner_*.json
+affiliate_*.json
+**/partners.json
+**/affiliates.json
+**/partner_*.json
+**/affiliate_*.json
 data/partners.json
+data/affiliates.json
 data/partners_permanent_store.json
 data/partner_payouts.json
 data/partner_settings.json
 data/partner_promo_requests.json
 
 # Admin Discount & Promo Code Database Files (Never overwrite or wipe)
+promo_codes.json
+promo_codes_permanent_store.json
+**/promo_codes*.json
 data/promo_codes.json
 data/promo_codes_permanent_store.json
 data/launch_promo.json
 data/promo_presets.json
 
 # Trader Payout Database Files
+payouts.json
+payout_settings.json
+**/payouts*.json
 data/payouts.json
 data/payout_settings.json
