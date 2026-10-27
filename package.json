@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "deploy": "node scripts/deploy.js"
+    "deploy": "node scripts/deploy.js",
+    "sync:partner-schema": "node scripts/sync-partner-schema.js",
+    "migrate:mysql": "node scripts/migrate-to-mysql.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

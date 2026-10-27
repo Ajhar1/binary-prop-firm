@@ -44,7 +44,7 @@ async function runMigration() {
 
   console.log('\n[1/4] Verifying schema and tables...');
   await db.initSchema();
-  console.log('✅ Tables verified: users, challenges, submissions, user_archive, support_tickets, synced_trades, trader_states.');
+  console.log('✅ Tables verified: users, challenges, submissions, user_archive, partners, partner_payouts, partner_settings, partner_promo_requests, promo_codes.');
 
   console.log('\n[2/4] Migrating JSON data into MySQL...');
   await db.autoMigrateFromJson();
@@ -55,11 +55,15 @@ async function runMigration() {
   const [[{ chCount }]] = await pool.query('SELECT COUNT(*) as chCount FROM challenges');
   const [[{ subCount }]] = await pool.query('SELECT COUNT(*) as subCount FROM submissions');
   const [[{ arcCount }]] = await pool.query('SELECT COUNT(*) as arcCount FROM user_archive');
+  const [[{ partnerCount }]] = await pool.query('SELECT COUNT(*) as partnerCount FROM partners');
+  const [[{ payoutCount }]] = await pool.query('SELECT COUNT(*) as payoutCount FROM partner_payouts');
 
   console.log(`  📊 Users in MySQL:        ${userCount}`);
   console.log(`  📊 Challenges in MySQL:   ${chCount}`);
   console.log(`  📊 Submissions in MySQL:  ${subCount}`);
-  console.log(`  📊 Archive logs in MySQL: ${arcCount}`);
+  console.log(`  📊 Archive logs in MySQL:     ${arcCount}`);
+  console.log(`  📊 Partners in MySQL:         ${partnerCount}`);
+  console.log(`  📊 Partner Payouts in MySQL:  ${payoutCount}`);
 
   console.log('\n[4/4] Migration completed successfully with ZERO data loss!');
   console.log('====================================================\n');

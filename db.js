@@ -289,7 +289,8 @@ async function initSchema() {
       useCustomRate TINYINT(1) DEFAULT 0,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      rawPartnerData JSON DEFAULT NULL,
+      customLinks JSON DEFAULT NULL,
+      rawPartnerData LONGTEXT DEFAULT NULL,
       INDEX idx_partner_email (email),
       INDEX idx_partner_code (promoCode)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
@@ -404,7 +405,11 @@ async function initSchema() {
       "ALTER TABLE challenges ADD COLUMN partnerCommissionRate INT DEFAULT 0",
       "ALTER TABLE challenges ADD COLUMN partnerCommission DECIMAL(12,2) DEFAULT 0",
       "ALTER TABLE challenges ADD COLUMN partnerCommissionStatus VARCHAR(50) DEFAULT NULL",
-      "ALTER TABLE challenges ADD COLUMN promoCode VARCHAR(100) DEFAULT NULL"
+      "ALTER TABLE challenges ADD COLUMN promoCode VARCHAR(100) DEFAULT NULL",
+      "ALTER TABLE partners ADD COLUMN customLinks JSON DEFAULT NULL",
+      "ALTER TABLE partners ADD COLUMN rawPartnerData LONGTEXT DEFAULT NULL",
+      "ALTER TABLE partner_payouts ADD COLUMN rawPayoutData LONGTEXT DEFAULT NULL",
+      "ALTER TABLE partner_promo_requests ADD COLUMN rawRequestData LONGTEXT DEFAULT NULL"
     ];
     for (const ac of alterColumns) {
       try {
@@ -976,6 +981,12 @@ function formatPartner(row) {
   if (row.rawPartnerData) {
     try { parsed = typeof row.rawPartnerData === 'string' ? JSON.parse(row.rawPartnerData) : row.rawPartnerData; } catch (e) {}
   }
+  let cLinks = [];
+  if (row.customLinks) {
+    try { cLinks = typeof row.customLinks === 'string' ? JSON.parse(row.customLinks) : row.customLinks; } catch (e) {}
+  } else if (parsed && parsed.customLinks) {
+    cLinks = parsed.customLinks;
+  }
   return {
     ...parsed,
     id: row.id,
@@ -1001,6 +1012,7 @@ function formatPartner(row) {
     pendingCommission: Number(row.pendingCommission !== undefined ? row.pendingCommission : (parsed.pendingCommission || 0)),
     notes: row.notes !== undefined ? row.notes : (parsed.notes || ''),
     useCustomRate: Boolean(row.useCustomRate !== undefined ? row.useCustomRate : parsed.useCustomRate),
+    customLinks: Array.isArray(cLinks) ? cLinks : [],
     createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : (parsed.createdAt || new Date().toISOString()),
     updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : (parsed.updatedAt || new Date().toISOString())
   };
@@ -1573,6 +1585,7 @@ async function savePartner(partner) {
   try {
     const normEmail = partner.email ? partner.email.trim().toLowerCase() : '';
     const [existing] = await pool.query('SELECT id FROM partners WHERE id = ? OR (email != "" AND email = ?) LIMIT 1', [partner.id, normEmail]);
+    const targetId = existing.length > 0 ? existing[0].id : partner.id;
 
     if (existing.length === 0) {
       await pool.query(`INSERT INTO partners (
@@ -1580,8 +1593,8 @@ async function savePartner(partner) {
         payoutMethod, payoutDetails, status, isEmailVerified, emailVerificationCode,
         emailVerificationExpires, emailVerifiedAt, role, totalReferred, totalSales,
         totalCommissionEarned, totalCommissionPaid, pendingCommission, notes, useCustomRate,
-        createdAt, updatedAt, rawPartnerData
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+        createdAt, updatedAt, customLinks, rawPartnerData
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
         partner.id,
         partner.name || '',
         normEmail,
@@ -1607,6 +1620,7 @@ async function savePartner(partner) {
         partner.useCustomRate ? 1 : 0,
         toMySqlDateTime(partner.createdAt) || new Date(),
         toMySqlDateTime(partner.updatedAt) || new Date(),
+        JSON.stringify(partner.customLinks || []),
         JSON.stringify(partner)
       ]);
     } else {
@@ -1616,7 +1630,7 @@ async function savePartner(partner) {
         isEmailVerified = ?, emailVerificationCode = ?, emailVerificationExpires = ?,
         emailVerifiedAt = ?, role = ?, totalReferred = ?, totalSales = ?,
         totalCommissionEarned = ?, totalCommissionPaid = ?, pendingCommission = ?,
-        notes = ?, useCustomRate = ?, updatedAt = ?, rawPartnerData = ?
+        notes = ?, useCustomRate = ?, updatedAt = ?, customLinks = ?, rawPartnerData = ?
         WHERE id = ?`, [
         partner.name || '',
         normEmail,
@@ -1641,12 +1655,62 @@ async function savePartner(partner) {
         partner.notes || '',
         partner.useCustomRate ? 1 : 0,
         toMySqlDateTime(partner.updatedAt) || new Date(),
+        JSON.stringify(partner.customLinks || []),
         JSON.stringify(partner),
-        partner.id
+        targetId
       ]);
     }
     return true;
   } catch (err) {
+    // If error was about missing customLinks column, fallback to standard query
+    if (err.message && (err.message.includes('customLinks') || err.message.includes('Unknown column'))) {
+      try {
+        const normEmail = partner.email ? partner.email.trim().toLowerCase() : '';
+        const [existing] = await pool.query('SELECT id FROM partners WHERE id = ? OR (email != "" AND email = ?) LIMIT 1', [partner.id, normEmail]);
+        const targetId = existing.length > 0 ? existing[0].id : partner.id;
+        if (existing.length === 0) {
+          await pool.query(`INSERT INTO partners (
+            id, name, email, password, phone, promoCode, commissionRate, traderDiscount,
+            payoutMethod, payoutDetails, status, isEmailVerified, emailVerificationCode,
+            emailVerificationExpires, emailVerifiedAt, role, totalReferred, totalSales,
+            totalCommissionEarned, totalCommissionPaid, pendingCommission, notes, useCustomRate,
+            createdAt, updatedAt, rawPartnerData
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+            partner.id, partner.name || '', normEmail, partner.password || '', partner.phone || '',
+            partner.promoCode || '', partner.commissionRate || 10, partner.traderDiscount || 5,
+            partner.payoutMethod || 'Binance Pay', partner.payoutDetails || '', partner.status || 'active',
+            partner.isEmailVerified ? 1 : 0, partner.emailVerificationCode || null,
+            toMySqlDateTime(partner.emailVerificationExpires), toMySqlDateTime(partner.emailVerifiedAt),
+            partner.role || 'partner', partner.totalReferred || 0, partner.totalSales || 0,
+            partner.totalCommissionEarned || 0, partner.totalCommissionPaid || 0, partner.pendingCommission || 0,
+            partner.notes || '', partner.useCustomRate ? 1 : 0, toMySqlDateTime(partner.createdAt) || new Date(),
+            toMySqlDateTime(partner.updatedAt) || new Date(), JSON.stringify(partner)
+          ]);
+        } else {
+          await pool.query(`UPDATE partners SET
+            name = ?, email = ?, password = ?, phone = ?, promoCode = ?, commissionRate = ?,
+            traderDiscount = ?, payoutMethod = ?, payoutDetails = ?, status = ?,
+            isEmailVerified = ?, emailVerificationCode = ?, emailVerificationExpires = ?,
+            emailVerifiedAt = ?, role = ?, totalReferred = ?, totalSales = ?,
+            totalCommissionEarned = ?, totalCommissionPaid = ?, pendingCommission = ?,
+            notes = ?, useCustomRate = ?, updatedAt = ?, rawPartnerData = ?
+            WHERE id = ?`, [
+            partner.name || '', normEmail, partner.password || '', partner.phone || '', partner.promoCode || '',
+            partner.commissionRate || 10, partner.traderDiscount || 5, partner.payoutMethod || 'Binance Pay',
+            partner.payoutDetails || '', partner.status || 'active', partner.isEmailVerified ? 1 : 0,
+            partner.emailVerificationCode || null, toMySqlDateTime(partner.emailVerificationExpires),
+            toMySqlDateTime(partner.emailVerifiedAt), partner.role || 'partner', partner.totalReferred || 0,
+            partner.totalSales || 0, partner.totalCommissionEarned || 0, partner.totalCommissionPaid || 0,
+            partner.pendingCommission || 0, partner.notes || '', partner.useCustomRate ? 1 : 0,
+            toMySqlDateTime(partner.updatedAt) || new Date(), JSON.stringify(partner), targetId
+          ]);
+        }
+        return true;
+      } catch (retryErr) {
+        console.error('[DATABASE SAVE PARTNER RETRY ERROR]:', retryErr.message);
+        return false;
+      }
+    }
     console.error('[DATABASE SAVE PARTNER ERROR]:', err.message);
     return false;
   }

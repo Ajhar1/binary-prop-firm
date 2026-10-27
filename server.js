@@ -461,6 +461,31 @@ try {
   console.error('[STARTUP RESTORE ERROR]:', startupRestoreErr.message);
 }
 
+let lastPartnerMySqlSync = 0;
+
+// Sync partners in-memory cache directly from MySQL (Double Safety Mirroring)
+async function syncPartnersFromMySql(force = false) {
+  if (!db || !db.isMySqlActive()) return;
+  const now = Date.now();
+  if (!force && (now - lastPartnerMySqlSync < 20000)) return; // throttle to once every 20s
+  try {
+    const mysqlPartners = await db.getAllPartners();
+    if (Array.isArray(mysqlPartners) && mysqlPartners.length > 0) {
+      lastPartnerMySqlSync = now;
+      let localPartners = readJson(PARTNERS_FILE, []);
+      const pMap = new Map();
+      localPartners.forEach(p => { if (p && p.id) pMap.set(p.id, p); });
+      mysqlPartners.forEach(p => { if (p && p.id) pMap.set(p.id, p); });
+      const merged = Array.from(pMap.values());
+      memoryJsonCache[PARTNERS_FILE] = merged;
+      writeJson(PARTNERS_FILE, merged);
+      writeJson(PARTNERS_PERMANENT_STORE_FILE, merged);
+    }
+  } catch (err) {
+    console.error('[SYNC PARTNERS FROM MYSQL ERROR]:', err.message);
+  }
+}
+
 function getPartners() {
   let partners = readJson(PARTNERS_FILE, null);
   if (!Array.isArray(partners) || partners.length === 0) {
@@ -484,15 +509,32 @@ function getPartners() {
       writeJson(PARTNERS_PERMANENT_STORE_FILE, partners);
     }
   }
+
+  // Trigger non-blocking background refresh from MySQL if active
+  if (db && db.isMySqlActive()) {
+    syncPartnersFromMySql(false).catch(() => {});
+  }
+
   return partners;
 }
 
-function savePartners(partners) {
-  writeJson(PARTNERS_FILE, partners);
+function savePartners(partners, singlePartner = null) {
+  writeJson(PARTNERS_FILE, partners, singlePartner);
   if (Array.isArray(partners) && partners.length > 0) {
-    writeJson(PARTNERS_PERMANENT_STORE_FILE, partners);
+    writeJson(PARTNERS_PERMANENT_STORE_FILE, partners, singlePartner);
     backupToExternalSafeDir(PARTNERS_FILE, partners);
     backupToExternalSafeDir(PARTNERS_PERMANENT_STORE_FILE, partners);
+  }
+
+  // Direct MySQL save when active (Double Safety Mirroring)
+  if (db && db.isMySqlActive()) {
+    if (singlePartner && singlePartner.id) {
+      db.savePartner(singlePartner).catch(e => console.error('[DIRECT MYSQL PARTNER SAVE ERROR]:', e.message));
+    } else if (Array.isArray(partners)) {
+      partners.forEach(p => {
+        if (p && p.id) db.savePartner(p).catch(e => {});
+      });
+    }
   }
 }
 
@@ -500,10 +542,19 @@ function getPartnerPayouts() {
   return readJson(PARTNER_PAYOUTS_FILE, []);
 }
 
-function savePartnerPayouts(payouts) {
-  writeJson(PARTNER_PAYOUTS_FILE, payouts);
+function savePartnerPayouts(payouts, singlePayout = null) {
+  writeJson(PARTNER_PAYOUTS_FILE, payouts, singlePayout);
   if (Array.isArray(payouts) && payouts.length > 0) {
     backupToExternalSafeDir(PARTNER_PAYOUTS_FILE, payouts);
+  }
+  if (db && db.isMySqlActive()) {
+    if (singlePayout && singlePayout.id) {
+      db.savePartnerPayout(singlePayout).catch(e => console.error('[DIRECT MYSQL PAYOUT SAVE ERROR]:', e.message));
+    } else if (Array.isArray(payouts)) {
+      payouts.forEach(p => {
+        if (p && p.id) db.savePartnerPayout(p).catch(e => {});
+      });
+    }
   }
 }
 
@@ -514,16 +565,28 @@ function getPartnerSettings() {
 function savePartnerSettings(settings) {
   writeJson(PARTNER_SETTINGS_FILE, settings);
   backupToExternalSafeDir(PARTNER_SETTINGS_FILE, settings);
+  if (db && db.isMySqlActive()) {
+    db.savePartnerSettings(settings).catch(e => console.error('[DIRECT MYSQL PARTNER SETTINGS ERROR]:', e.message));
+  }
 }
 
 function getPartnerPromoRequests() {
   return readJson(PARTNER_PROMO_REQUESTS_FILE, []);
 }
 
-function savePartnerPromoRequests(requests) {
-  writeJson(PARTNER_PROMO_REQUESTS_FILE, requests);
+function savePartnerPromoRequests(requests, singleRequest = null) {
+  writeJson(PARTNER_PROMO_REQUESTS_FILE, requests, singleRequest);
   if (Array.isArray(requests) && requests.length > 0) {
     backupToExternalSafeDir(PARTNER_PROMO_REQUESTS_FILE, requests);
+  }
+  if (db && db.isMySqlActive()) {
+    if (singleRequest && singleRequest.id) {
+      db.savePartnerPromoRequest(singleRequest).catch(e => console.error('[DIRECT MYSQL PROMO REQ ERROR]:', e.message));
+    } else if (Array.isArray(requests)) {
+      requests.forEach(r => {
+        if (r && r.id) db.savePartnerPromoRequest(r).catch(e => {});
+      });
+    }
   }
 }
 
@@ -11571,6 +11634,7 @@ app.listen(PORT, async () => {
     if (mysqlConnected) {
       console.log(`🐬 MySQL Database Engine: CONNECTED & SYNCHRONIZED`);
       await db.hydrateFromMySql(DATA_DIR);
+      await syncPartnersFromMySql(true);
     } else {
       console.log(`📁 Database Mode: Local JSON Safe Store & Lifelong Vault`);
     }
@@ -11604,4 +11668,11 @@ app.listen(PORT, async () => {
       console.error('Scheduled backup error:', e.message);
     }
   }, 6 * 60 * 60 * 1000);
+
+  // Background MySQL Partner Sync every 60 seconds (Double Safety Mirroring)
+  setInterval(() => {
+    try {
+      syncPartnersFromMySql(false);
+    } catch (e) {}
+  }, 60000);
 });
