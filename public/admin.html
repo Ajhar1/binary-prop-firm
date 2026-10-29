@@ -234,6 +234,26 @@
             transform: rotate(180deg);
             color: var(--gold);
         }
+        #adminNav-partnerController.parent-active {
+            background: linear-gradient(135deg, rgba(0, 230, 118, 0.15) 0%, rgba(22, 27, 34, 0.95) 100%) !important;
+            border-color: rgba(0, 230, 118, 0.45) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.1) !important;
+        }
+        #adminNav-partnerController.expanded .nav-accordion-arrow {
+            transform: rotate(180deg);
+            color: #00e676 !important;
+        }
+        #partnerControllerSubmenu .nav-sub-item.active {
+            color: #000 !important;
+            background: #00e676 !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 14px rgba(0, 230, 118, 0.35) !important;
+            transform: translateX(4px);
+        }
+        #partnerControllerSubmenu .nav-sub-item.active i {
+            color: #000 !important;
+        }
         .sidebar-submenu {
             list-style: none;
             padding-left: 0.65rem;
@@ -1358,20 +1378,43 @@
                     <li class="nav-sub-item" id="subnav-payment-methods" onclick="switchAdminTab('payment-methods', this)">
                         <i class="fas fa-credit-card" style="color:#34d399;"></i> 8. Payment Methods
                     </li>
-                    <li class="nav-sub-item" id="subnav-mm-links" onclick="switchAdminTab('mm-links', this)" style="opacity:0.85; font-size:0.82rem;">
-                        <i class="fas fa-file-excel"></i> MM Sheet Pool
-                    </li>
-                    <li class="nav-sub-item" id="subnav-courses" onclick="switchAdminTab('courses', this)" style="opacity:0.85; font-size:0.82rem;">
-                        <i class="fas fa-graduation-cap"></i> Trading Courses
+                    <li class="nav-sub-item" id="subnav-courses" onclick="switchAdminTab('courses', this)">
+                        <i class="fas fa-graduation-cap" style="color:#a78bfa;"></i> 9. Trading Courses
                     </li>
                 </ul>
             </li>
 
-            <!-- 2. PARTNER CONTROLLER -->
-            <li class="nav-item" id="adminNav-partners" onclick="switchAdminTab('partner-controller', this)" style="margin-top:6px;">
-                <i class="fas fa-handshake" style="color:#00e676;"></i>
-                <span>2. Partner Controller</span>
-                <span class="nav-badge" id="partnerPendingBadge" style="display:none; background:#00e676; color:#000; font-weight:800;">0</span>
+            <!-- 2. PARTNER CONTROLLER (Accordion / Collapsible Submenu) -->
+            <li class="nav-group-wrapper" id="adminNavGroup-partner" style="list-style:none; margin-top:6px;">
+                <div class="nav-group-header" id="adminNav-partnerController" onclick="togglePartnerControllerMenu(event)">
+                    <i class="fas fa-handshake" style="color:#00e676; font-size:1.05rem;"></i>
+                    <span>2. Partner Controller</span>
+                    <span class="nav-badge" id="partnerPendingBadge" style="display:none; background:#00e676; color:#000; font-weight:800; margin-left:auto; margin-right:8px;">0</span>
+                    <i class="fas fa-chevron-down nav-accordion-arrow" id="partnerControllerArrow" style="margin-left:auto;"></i>
+                </div>
+
+                <ul class="sidebar-submenu collapsed" id="partnerControllerSubmenu" style="border-left-color:rgba(0, 230, 118, 0.35);">
+                    <li class="nav-sub-item active" id="subnav-partner-list" onclick="switchPartnerControllerTab('partners-list', this)">
+                        <i class="fas fa-users" style="color:#00e676;"></i> 1. পার্টনার তালিকা
+                    </li>
+                    <li class="nav-sub-item" id="subnav-partner-logs" onclick="switchPartnerControllerTab('referral-logs', this)">
+                        <i class="fas fa-list-alt" style="color:#60a5fa;"></i> 2. রেফারেল সেলস লগ
+                    </li>
+                    <li class="nav-sub-item" id="subnav-partner-payouts" onclick="switchPartnerControllerTab('payout-history', this)">
+                        <i class="fas fa-money-check-alt" style="color:#10b981;"></i> 3. পে-আউট হিস্ট্রি
+                    </li>
+                    <li class="nav-sub-item" id="subnav-partner-settings" onclick="switchPartnerControllerTab('partner-settings', this)">
+                        <i class="fas fa-sliders-h" style="color:var(--gold);"></i> 4. পলিসি ও সেটিংস
+                    </li>
+                    <li class="nav-sub-item" id="subnav-partner-payout-requests" onclick="switchPartnerControllerTab('payout-requests', this)">
+                        <i class="fas fa-hand-holding-usd" style="color:#00e676;"></i> 5. উইথড্র রিকোয়েস্ট
+                        <span class="nav-badge" id="subnavBadgePayoutReqs" style="display:none; background:#00e676; color:#000; font-weight:800;">0</span>
+                    </li>
+                    <li class="nav-sub-item" id="subnav-partner-promo-requests" onclick="switchPartnerControllerTab('promo-requests', this)">
+                        <i class="fas fa-tags" style="color:var(--gold);"></i> 6. প্রোমো আবেদন
+                        <span class="nav-badge" id="subnavBadgePromoReqs" style="display:none; background:var(--gold); color:#000; font-weight:800;">0</span>
+                    </li>
+                </ul>
             </li>
 
             <!-- 3. EMAIL & SMTP -->
@@ -1841,34 +1884,6 @@
                         <!-- Injected by renderTraderSerialSessions() -->
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- ==================== TAB 5: MONEY MANAGEMENT SERIAL POOL ==================== -->
-        <div class="tab-content" id="pane-mm-links">
-            <div class="table-card glass">
-                <div class="table-card-header">
-                    <div class="table-title"><i class="fas fa-file-excel" style="color:var(--neon-green);"></i> MM Sheet Pool</div>
-                    <button class="btn-gold" onclick="openAddMmLinkModal()">
-                        <i class="fas fa-plus"></i> Add Sheet
-                    </button>
-                </div>
-
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Serial</th>
-                            <th>Title</th>
-                            <th>Sheet Link</th>
-                            <th>Notes</th>
-                            <th>Assigned</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mmLinksTableBody">
-                        <!-- Injected -->
-                    </tbody>
-                </table>
             </div>
         </div>
 
@@ -2524,26 +2539,26 @@
                 </div>
             </div>
 
-            <!-- Subtab Navigation Bar -->
+            <!-- Subtab Navigation Bar (Sleek User Controller Style) -->
             <div class="glass" style="padding:10px 14px; border-radius:14px; margin-bottom:1.4rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-                    <button type="button" class="btn-outline partner-tab-btn active" id="btnPartnerTab-list" onclick="switchPartnerSubtab('partners-list')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
-                        <i class="fas fa-users"></i> ১. পার্টনার তালিকা (Partners)
+                    <button type="button" class="btn-outline partner-tab-btn active" id="btnPartnerTab-list" onclick="switchPartnerControllerTab('partners-list')" style="padding:7px 14px; font-size:0.84rem; border-radius:9px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-users" style="color:#00e676;"></i> 1. পার্টনার তালিকা
                     </button>
-                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-logs" onclick="switchPartnerSubtab('referral-logs')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
-                        <i class="fas fa-list-alt"></i> ২. রেফারেল অর্ডার লগ (Sales Log)
+                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-logs" onclick="switchPartnerControllerTab('referral-logs')" style="padding:7px 14px; font-size:0.84rem; border-radius:9px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-list-alt" style="color:#60a5fa;"></i> 2. রেফারেল সেলস লগ
                     </button>
-                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-payouts" onclick="switchPartnerSubtab('payout-history')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
-                        <i class="fas fa-money-check-alt"></i> ৩. কমিশন পে-আউট হিস্ট্রি
+                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-payouts" onclick="switchPartnerControllerTab('payout-history')" style="padding:7px 14px; font-size:0.84rem; border-radius:9px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-money-check-alt" style="color:#10b981;"></i> 3. পে-আউট হিস্ট্রি
                     </button>
-                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-settings" onclick="switchPartnerSubtab('partner-settings')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
-                        <i class="fas fa-sliders-h"></i> ৪. পলিসি ও সেটিংস
+                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-settings" onclick="switchPartnerControllerTab('partner-settings')" style="padding:7px 14px; font-size:0.84rem; border-radius:9px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-sliders-h" style="color:var(--gold);"></i> 4. পলিসি ও সেটিংস
                     </button>
-                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-payout-requests" onclick="switchPartnerSubtab('payout-requests')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
-                        <i class="fas fa-hand-holding-usd" style="color:#00e676;"></i> ৫. উইথড্র রিকোয়েস্ট <span class="nav-badge" id="adminBadgePayoutReqs" style="display:none; background:#00e676; color:#000; font-size:0.75rem; padding:2px 7px; border-radius:10px; font-weight:800;">0</span>
+                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-payout-requests" onclick="switchPartnerControllerTab('payout-requests')" style="padding:7px 14px; font-size:0.84rem; border-radius:9px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-hand-holding-usd" style="color:#00e676;"></i> 5. উইথড্র রিকোয়েস্ট <span class="nav-badge" id="adminBadgePayoutReqs" style="display:none; background:#00e676; color:#000; font-size:0.72rem; padding:1px 6px; border-radius:10px; font-weight:800;">0</span>
                     </button>
-                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-promo-requests" onclick="switchPartnerSubtab('promo-requests')" style="padding:8px 16px; font-size:0.86rem; border-radius:10px; font-weight:700;">
-                        <i class="fas fa-tags" style="color:var(--gold);"></i> ৬. প্রোমো আবেদন <span class="nav-badge" id="adminBadgePromoReqs" style="display:none; background:var(--gold); color:#000; font-size:0.75rem; padding:2px 7px; border-radius:10px; font-weight:800;">0</span>
+                    <button type="button" class="btn-outline partner-tab-btn" id="btnPartnerTab-promo-requests" onclick="switchPartnerControllerTab('promo-requests')" style="padding:7px 14px; font-size:0.84rem; border-radius:9px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-tags" style="color:var(--gold);"></i> 6. প্রোমো আবেদন <span class="nav-badge" id="adminBadgePromoReqs" style="display:none; background:var(--gold); color:#000; font-size:0.72rem; padding:1px 6px; border-radius:10px; font-weight:800;">0</span>
                     </button>
                 </div>
 
@@ -3614,41 +3629,6 @@
                 <i class="fas fa-video" style="color:var(--neon-green);"></i> Daily Proof Submissions
             </h3>
             <div id="historySubmissionsContainer"></div>
-        </div>
-    </div>
-
-    <!-- 4. ADD / EDIT MM SERIAL LINK MODAL -->
-    <div class="modal-overlay" id="mmLinkModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeModal('mmLinkModal')">&times;</button>
-            <h2 style="font-size:1.25rem; font-weight:800; margin-bottom:1rem;" id="mmLinkModalTitle">
-                <i class="fas fa-file-excel" style="color:var(--neon-green);"></i> Add MM Sheet Link
-            </h2>
-            <form onsubmit="submitMmLink(event)">
-                <input type="hidden" id="mmLinkId" value="" />
-                <div class="form-group">
-                    <label>Serial Number</label>
-                    <input type="number" class="form-control" id="mmSerial" min="1" placeholder="1" required />
-                </div>
-                <div class="form-group">
-                    <label>Sheet Title</label>
-                    <input type="text" class="form-control" id="mmTitle" placeholder="Official MM Sheet #1" required />
-                </div>
-                <div class="form-group">
-                    <label>Google Sheet URL</label>
-                    <input type="url" class="form-control" id="mmUrl" placeholder="https://docs.google.com/spreadsheets/d/..." required />
-                </div>
-                <div class="form-group">
-                    <label>Note (Optional)</label>
-                    <input type="text" class="form-control" id="mmNote" placeholder="25% Max Drawdown Formula" />
-                </div>
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.2rem;">
-                    <button type="button" class="btn-outline" onclick="closeModal('mmLinkModal')">Cancel</button>
-                    <button type="submit" class="btn-gold">
-                        <i class="fas fa-save"></i> Save Sheet
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -4738,6 +4718,56 @@
             }
         }
 
+        function togglePartnerControllerMenu(e) {
+            if (e) e.stopPropagation();
+            const partnerControllerHeader = document.getElementById('adminNav-partnerController');
+            const partnerControllerSubmenu = document.getElementById('partnerControllerSubmenu');
+            if (!partnerControllerSubmenu) return;
+
+            const isCollapsed = partnerControllerSubmenu.classList.contains('collapsed');
+            if (isCollapsed) {
+                partnerControllerSubmenu.classList.remove('collapsed');
+                partnerControllerHeader?.classList.add('expanded');
+                switchAdminTab('partner-controller');
+                switchPartnerSubtab(currentPartnerActiveSubtab || 'partners-list');
+            } else {
+                partnerControllerSubmenu.classList.add('collapsed');
+                partnerControllerHeader?.classList.remove('expanded');
+            }
+        }
+
+        function switchPartnerControllerTab(subtab, element) {
+            switchAdminTab('partner-controller');
+
+            const partnerControllerHeader = document.getElementById('adminNav-partnerController');
+            const partnerControllerSubmenu = document.getElementById('partnerControllerSubmenu');
+            if (partnerControllerHeader) {
+                partnerControllerHeader.classList.add('parent-active');
+                partnerControllerHeader.classList.add('expanded');
+            }
+            if (partnerControllerSubmenu) {
+                partnerControllerSubmenu.classList.remove('collapsed');
+            }
+
+            document.querySelectorAll('#partnerControllerSubmenu .nav-sub-item').forEach(el => el.classList.remove('active'));
+            const subnavs = {
+                'partners-list': 'subnav-partner-list',
+                'referral-logs': 'subnav-partner-logs',
+                'payout-history': 'subnav-partner-payouts',
+                'partner-settings': 'subnav-partner-settings',
+                'payout-requests': 'subnav-partner-payout-requests',
+                'promo-requests': 'subnav-partner-promo-requests'
+            };
+            const targetSubnav = element || document.getElementById(subnavs[subtab]);
+            if (targetSubnav) targetSubnav.classList.add('active');
+
+            switchPartnerSubtab(subtab);
+
+            if (window.innerWidth <= 900) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
         function updateUserControllerBadge() {
             const ch = parseInt(document.getElementById('pendingChallengesBadge')?.innerText || '0', 10) || 0;
             const sub = parseInt(document.getElementById('pendingSubmissionsBadge')?.innerText || '0', 10) || 0;
@@ -4766,7 +4796,7 @@
             }
 
             // Sync User Controller Submenu & Parent Active State
-            const userTabs = ['overview', 'challenges', 'package-manage', 'users', 'submissions', 'payouts', 'support', 'payment-methods', 'mm-links', 'courses'];
+            const userTabs = ['overview', 'challenges', 'package-manage', 'users', 'submissions', 'payouts', 'support', 'payment-methods', 'courses'];
             const isUserTab = userTabs.includes(tabKey);
             const userControllerHeader = document.getElementById('adminNav-userController');
             const userControllerSubmenu = document.getElementById('userControllerSubmenu');
@@ -4784,6 +4814,36 @@
             } else {
                 if (userControllerHeader) {
                     userControllerHeader.classList.remove('parent-active');
+                }
+            }
+
+            // Sync Partner Controller Submenu & Parent Active State
+            const isPartnerTab = (tabKey === 'partner-controller');
+            const partnerControllerHeader = document.getElementById('adminNav-partnerController');
+            const partnerControllerSubmenu = document.getElementById('partnerControllerSubmenu');
+
+            if (isPartnerTab) {
+                if (partnerControllerHeader) {
+                    partnerControllerHeader.classList.add('parent-active');
+                    partnerControllerHeader.classList.add('expanded');
+                }
+                if (partnerControllerSubmenu) {
+                    partnerControllerSubmenu.classList.remove('collapsed');
+                }
+                const subnavs = {
+                    'partners-list': 'subnav-partner-list',
+                    'referral-logs': 'subnav-partner-logs',
+                    'payout-history': 'subnav-partner-payouts',
+                    'partner-settings': 'subnav-partner-settings',
+                    'payout-requests': 'subnav-partner-payout-requests',
+                    'promo-requests': 'subnav-partner-promo-requests'
+                };
+                const activeSubnavId = subnavs[currentPartnerActiveSubtab || 'partners-list'];
+                const curSub = document.getElementById(activeSubnavId);
+                if (curSub) curSub.classList.add('active');
+            } else {
+                if (partnerControllerHeader) {
+                    partnerControllerHeader.classList.remove('parent-active');
                 }
             }
 
@@ -4815,7 +4875,6 @@
                 'package-manage': ['Challenge Manage', 'Plan Packages, Pricing & Rules'],
                 'users': ['Users & History', 'Trader Database & Full Profile History'],
                 'submissions': ['Daily Trade Proofs', 'Verification of Daily Trader Session Proofs'],
-                'mm-links': ['MM Sheet Pool', 'Money Management Google Spreadsheets'],
                 'courses': ['Trading Courses', 'Trader Academy Video & Lesson Pool'],
                 'payment-methods': ['Payment Methods', 'Deposit Accounts & Gateways'],
                 'partner-controller': ['Partner Controller', 'Affiliate Partners, Referral Tracking, Commissions & Payouts'],
@@ -8039,33 +8098,7 @@
 
         // ==================== MM SERIAL LINKS ====================
         function renderMmLinksTable() {
-            const container = document.getElementById('mmLinksTableBody');
-            if (adminMmLimits.length === 0) {
-                container.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-secondary);">No MM sheet links added yet.</td></tr>`;
-                return;
-            }
-
-            container.innerHTML = adminMmLimits.map(link => {
-                return `
-                    <tr>
-                        <td><span class="badge badge-active" style="font-size:0.85rem;">#${link.serial}</span></td>
-                        <td><strong>${link.title}</strong></td>
-                        <td>
-                            <a href="${link.url}" target="_blank" style="color:var(--gold); word-break:break-all; font-size:0.82rem;">
-                                <i class="fas fa-external-link-alt"></i> ${link.url}
-                            </a>
-                        </td>
-                        <td><span style="color:var(--text-secondary); font-size:0.82rem;">${link.note || '-'}</span></td>
-                        <td><strong>${link.assignedCount || 0}</strong> traders</td>
-                        <td>
-                            <div style="display:flex; gap:6px;">
-                                <button class="btn-outline" style="padding:4px 8px;" onclick="editMmLink('${link.id}')"><i class="fas fa-edit"></i></button>
-                                <button class="btn-danger" style="padding:4px 8px;" onclick="deleteMmLink('${link.id}')"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+            // MM Sheet Pool permanently removed
         }
 
         function openAddMmLinkModal() {
@@ -11427,23 +11460,23 @@
             }
 
             const badgePayouts = document.getElementById('adminBadgePayoutReqs');
-            if (badgePayouts) {
-                if (pendingPayouts.length > 0) {
-                    badgePayouts.innerText = pendingPayouts.length;
-                    badgePayouts.style.display = 'inline-block';
-                } else {
-                    badgePayouts.style.display = 'none';
-                }
+            const subnavBadgePayouts = document.getElementById('subnavBadgePayoutReqs');
+            if (pendingPayouts.length > 0) {
+                if (badgePayouts) { badgePayouts.innerText = pendingPayouts.length; badgePayouts.style.display = 'inline-block'; }
+                if (subnavBadgePayouts) { subnavBadgePayouts.innerText = pendingPayouts.length; subnavBadgePayouts.style.display = 'inline-block'; }
+            } else {
+                if (badgePayouts) badgePayouts.style.display = 'none';
+                if (subnavBadgePayouts) subnavBadgePayouts.style.display = 'none';
             }
 
             const badgePromo = document.getElementById('adminBadgePromoReqs');
-            if (badgePromo) {
-                if (pendingPromoReqs.length > 0) {
-                    badgePromo.innerText = pendingPromoReqs.length;
-                    badgePromo.style.display = 'inline-block';
-                } else {
-                    badgePromo.style.display = 'none';
-                }
+            const subnavBadgePromo = document.getElementById('subnavBadgePromoReqs');
+            if (pendingPromoReqs.length > 0) {
+                if (badgePromo) { badgePromo.innerText = pendingPromoReqs.length; badgePromo.style.display = 'inline-block'; }
+                if (subnavBadgePromo) { subnavBadgePromo.innerText = pendingPromoReqs.length; subnavBadgePromo.style.display = 'inline-block'; }
+            } else {
+                if (badgePromo) badgePromo.style.display = 'none';
+                if (subnavBadgePromo) subnavBadgePromo.style.display = 'none';
             }
         }
 
@@ -11467,6 +11500,15 @@
                 'promo-requests': 'btnPartnerTab-promo-requests'
             };
 
+            const subnavs = {
+                'partners-list': 'subnav-partner-list',
+                'referral-logs': 'subnav-partner-logs',
+                'payout-history': 'subnav-partner-payouts',
+                'partner-settings': 'subnav-partner-settings',
+                'payout-requests': 'subnav-partner-payout-requests',
+                'promo-requests': 'subnav-partner-promo-requests'
+            };
+
             Object.keys(views).forEach(k => {
                 const viewEl = document.getElementById(views[k]);
                 if (viewEl) viewEl.style.display = (k === subtab) ? 'block' : 'none';
@@ -11474,9 +11516,9 @@
                 if (btnEl) {
                     if (k === subtab) {
                         btnEl.classList.add('active');
-                        btnEl.style.background = 'var(--gold)';
+                        btnEl.style.background = '#00e676';
                         btnEl.style.color = '#000';
-                        btnEl.style.borderColor = 'var(--gold)';
+                        btnEl.style.borderColor = '#00e676';
                     } else {
                         btnEl.classList.remove('active');
                         btnEl.style.background = 'transparent';
@@ -11484,7 +11526,42 @@
                         btnEl.style.borderColor = 'rgba(255, 255, 255, 0.2)';
                     }
                 }
+                const subnavEl = document.getElementById(subnavs[k]);
+                if (subnavEl) {
+                    if (k === subtab) {
+                        subnavEl.classList.add('active');
+                    } else {
+                        subnavEl.classList.remove('active');
+                    }
+                }
             });
+
+            // Keep Partner Controller parent header active & expanded
+            const pHeader = document.getElementById('adminNav-partnerController');
+            const pSubmenu = document.getElementById('partnerControllerSubmenu');
+            if (pHeader) {
+                pHeader.classList.add('parent-active');
+                pHeader.classList.add('expanded');
+            }
+            if (pSubmenu) {
+                pSubmenu.classList.remove('collapsed');
+            }
+
+            // Update tab header title & description
+            const subtabTitles = {
+                'partners-list': ['Partner Controller — পার্টনার তালিকা', 'Affiliate Partners, Referral Tracking & Commission Wallets'],
+                'referral-logs': ['Partner Controller — রেফারেল সেলস লগ', 'Live Referral Order Conversions & Package Sales Log'],
+                'payout-history': ['Partner Controller — পে-আউট হিস্ট্রি', 'Completed Affiliate Commission Payout History'],
+                'partner-settings': ['Partner Controller — পলিসি ও সেটিংস', 'Global Commission Rates, Discount Promo Policy & Configuration'],
+                'payout-requests': ['Partner Controller — উইথড্র রিকোয়েস্ট', 'Pending Partner Commission Withdrawal Requests'],
+                'promo-requests': ['Partner Controller — প্রোমো আবেদন', 'Partner Custom Promo Code Application Requests']
+            };
+            if (subtabTitles[subtab]) {
+                const tEl = document.getElementById('tabHeaderTitle');
+                const dEl = document.getElementById('tabHeaderDesc');
+                if (tEl) tEl.innerHTML = `<i class="fas fa-handshake" style="color:#00e676;"></i> ${subtabTitles[subtab][0]}`;
+                if (dEl) dEl.innerText = subtabTitles[subtab][1];
+            }
         }
 
         // ================= GLOBAL CURRENT PARTNER COMMAND STATE =================
