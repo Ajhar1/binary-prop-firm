@@ -1751,8 +1751,9 @@
                         </div>
                         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
                             <input type="text" id="runningTradersSearch" class="form-control" placeholder="Search name, email, ID..." style="min-width:220px;" oninput="renderRunningTradersList()" />
-                            <select class="form-control" id="runningTradersFilter" style="width:185px;" onchange="renderRunningTradersList()">
+                            <select class="form-control" id="runningTradersFilter" style="min-width:185px;" onchange="renderRunningTradersList()">
                                 <option value="running" selected>Running Traders</option>
+                                <option value="closed">Close Traders</option>
                                 <option value="pending_review">Pending Review</option>
                                 <option value="all_challenges">All Traders</option>
                                 <option value="flat_submissions">Flat Log</option>
@@ -5458,6 +5459,17 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // Jump to Daily Trade Proofs tab and filter by closed / eliminated traders
+        function viewClosedTraders() {
+            switchAdminTab('submissions');
+            const select = document.getElementById('runningTradersFilter');
+            if (select) {
+                select.value = 'closed';
+            }
+            renderRunningTradersList();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         // ==================== CHALLENGES MANAGEMENT ====================
         function renderChallengesTable() {
             const filterSelect = document.getElementById('challengeStatusFilter');
@@ -6679,6 +6691,17 @@
             }
 
             const allCh = [...(adminChallenges || [])];
+
+            // Set of user IDs/emails who have an active in_progress challenge
+            const runningTraderUids = new Set(
+                allCh.filter(c => c.status === 'in_progress')
+                     .map(c => (c.userId || c.userEmail || '').trim().toLowerCase())
+                     .filter(Boolean)
+            );
+
+            // Build traderChallengeMap: For each unique trader, pick their representative challenge
+            // If they have an in_progress challenge, keep the latest in_progress challenge
+            // If they have no in_progress challenge, keep their latest past/failed challenge
             const traderChallengeMap = new Map();
 
             allCh.forEach(ch => {
@@ -6690,9 +6713,33 @@
                 } else {
                     if (existing.status !== 'in_progress' && ch.status === 'in_progress') {
                         traderChallengeMap.set(uid, ch);
-                    } else if (existing.status === ch.status && new Date(ch.createdAt || 0) > new Date(existing.createdAt || 0)) {
+                    } else if (existing.status === 'in_progress' && ch.status === 'in_progress' && new Date(ch.createdAt || 0) > new Date(existing.createdAt || 0)) {
+                        traderChallengeMap.set(uid, ch);
+                    } else if (existing.status !== 'in_progress' && ch.status !== 'in_progress' && new Date(ch.createdAt || 0) > new Date(existing.createdAt || 0)) {
                         traderChallengeMap.set(uid, ch);
                     }
+                }
+            });
+
+            // Also check adminSubmissions: if any past trader submitted proofs but wasn't in adminChallenges, track them
+            (adminSubmissions || []).forEach(s => {
+                const uid = (s.userId || s.userEmail || '').trim().toLowerCase();
+                if (uid && !traderChallengeMap.has(uid)) {
+                    traderChallengeMap.set(uid, {
+                        id: s.challengeId || ('ch_' + uid),
+                        userId: s.userId,
+                        userEmail: s.userEmail,
+                        userName: s.userName || 'Trader',
+                        userTraderId: s.userTraderId || 'AJ-1001',
+                        packageName: s.packageName || 'Master',
+                        fundedAmount: s.fundedAmount || 100,
+                        brokerName: s.brokerName || 'Quotex',
+                        brokerAccountId: s.brokerAccountId || 'N/A',
+                        sessionsRequired: 15,
+                        status: 'failed',
+                        failReason: 'Eliminated / Closed',
+                        createdAt: s.submittedAt || s.sessionDate || '2025-01-01'
+                    });
                 }
             });
 
@@ -6700,6 +6747,12 @@
 
             if (filter === 'running') {
                 challengeList = challengeList.filter(c => c.status === 'in_progress');
+            } else if (filter === 'closed') {
+                // Closed/eliminated traders: have past challenge history but NO active running challenge
+                challengeList = challengeList.filter(c => {
+                    const uid = (c.userId || c.userEmail || '').trim().toLowerCase();
+                    return !runningTraderUids.has(uid) && c.status !== 'in_progress';
+                });
             } else if (filter === 'pending_review') {
                 challengeList = challengeList.filter(c => {
                     const subs = (adminSubmissions || []).filter(s => (s.challengeId === c.id || s.userId === c.userId || (s.userEmail && c.userEmail && s.userEmail.toLowerCase() === c.userEmail.toLowerCase())) && s.status === 'under_review');
@@ -6718,6 +6771,7 @@
                 const totalPnl = subs.reduce((sum, s) => sum + (parseFloat(s.profitLoss) || 0), 0);
                 const winTradesTotal = subs.reduce((sum, s) => sum + (parseInt(s.winTrades) || 0), 0);
                 const lossTradesTotal = subs.reduce((sum, s) => sum + (parseInt(s.lossTrades) || 0), 0);
+                const isRunning = ch.status === 'in_progress';
 
                 return {
                     challenge: ch,
@@ -6739,6 +6793,7 @@
                     sessionsRequired: ch.sessionsRequired || 15,
                     sessionsCompleted: (ch.sessionsCompleted !== undefined && ch.sessionsCompleted !== null) ? ch.sessionsCompleted : verifiedSubs,
                     challengeStatus: ch.status,
+                    isRunning,
                     submissions: subs,
                     submissionsCount: subs.length,
                     pendingReviews,
@@ -6760,14 +6815,15 @@
                 );
             }
 
-            const uniqueRunningUsers = new Set((adminChallenges || []).filter(c => c.status === 'in_progress').map(c => (c.userId || c.userEmail || '').toLowerCase()).filter(Boolean));
-            const totalRunning = uniqueRunningUsers.size;
+            const totalRunning = runningTraderUids.size;
+            const allTraderUids = new Set(Array.from(traderChallengeMap.keys()));
+            const totalClosed = Array.from(allTraderUids).filter(uid => !runningTraderUids.has(uid)).length;
             const totalPendingReviews = (adminSubmissions || []).filter(s => s.status === 'under_review').length;
             const totalVerified = (adminSubmissions || []).filter(s => s.status === 'verified' || s.status === 'auto_verified').length;
 
             if (statsBar) {
                 statsBar.innerHTML = `
-                    <div style="background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:12px;">
+                    <div style="background:${filter === 'running' ? 'rgba(245,176,65,0.18)' : 'rgba(245,176,65,0.08)'}; border:1px solid ${filter === 'running' ? 'var(--gold)' : 'rgba(245,176,65,0.25)'}; border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="document.getElementById('runningTradersFilter').value='running'; renderRunningTradersList();" title="Click to view Running Traders">
                         <div style="width:40px; height:40px; border-radius:10px; background:rgba(245,176,65,0.18); display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:1.15rem;">
                             <i class="fas fa-user-check"></i>
                         </div>
@@ -6777,7 +6833,17 @@
                         </div>
                     </div>
 
-                    <div style="background:${totalPendingReviews > 0 ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.04)'}; border:1px solid ${totalPendingReviews > 0 ? 'rgba(239,68,68,0.35)' : 'rgba(255,255,255,0.08)'}; border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:12px;">
+                    <div style="background:${filter === 'closed' ? 'rgba(239,68,68,0.18)' : 'rgba(239,68,68,0.08)'}; border:1px solid ${filter === 'closed' ? 'var(--neon-red)' : 'rgba(239,68,68,0.25)'}; border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="document.getElementById('runningTradersFilter').value='closed'; renderRunningTradersList();" title="Click to view Close Traders">
+                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(239,68,68,0.18); display:flex; align-items:center; justify-content:center; color:var(--neon-red); font-size:1.15rem;">
+                            <i class="fas fa-user-slash"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:0.72rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Close Traders</div>
+                            <div style="font-size:1.25rem; font-weight:900; color:#fff;">${totalClosed}</div>
+                        </div>
+                    </div>
+
+                    <div style="background:${filter === 'pending_review' ? 'rgba(239,68,68,0.25)' : (totalPendingReviews > 0 ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.04)')}; border:1px solid ${filter === 'pending_review' ? 'var(--neon-red)' : (totalPendingReviews > 0 ? 'rgba(239,68,68,0.35)' : 'rgba(255,255,255,0.08)')}; border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="document.getElementById('runningTradersFilter').value='pending_review'; renderRunningTradersList();" title="Click to view Pending Reviews">
                         <div style="width:40px; height:40px; border-radius:10px; background:${totalPendingReviews > 0 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.08)'}; display:flex; align-items:center; justify-content:center; color:${totalPendingReviews > 0 ? 'var(--neon-red)' : 'var(--text-secondary)'}; font-size:1.15rem;">
                             <i class="fas fa-clock"></i>
                         </div>
@@ -6802,10 +6868,13 @@
             if (!container) return;
 
             if (traderCards.length === 0) {
+                const emptyTitle = filter === 'closed' ? 'No Close Traders Found' : (filter === 'running' ? 'No Running Traders Found' : 'No Traders Found');
+                const emptyDesc = filter === 'closed' ? 'There are currently no closed or eliminated traders with past challenge history.' : 'No challenge records match your current filter and search query.';
                 container.innerHTML = `
                     <div style="text-align:center; padding:3rem 1.5rem; background:rgba(255,255,255,0.02); border-radius:14px; border:1px dashed rgba(255,255,255,0.1);">
                         <i class="fas fa-user-clock" style="font-size:2.6rem; color:var(--text-secondary); opacity:0.4; margin-bottom:10px;"></i>
-                        <h4 style="font-size:1.05rem; color:#fff; font-weight:700; margin:0;">No Traders Found</h4>
+                        <h4 style="font-size:1.05rem; color:#fff; font-weight:700; margin:0 0 6px 0;">${emptyTitle}</h4>
+                        <p style="font-size:0.82rem; color:var(--text-secondary); margin:0;">${emptyDesc}</p>
                     </div>
                 `;
                 return;
@@ -6819,7 +6888,7 @@
                         const pnlSign = t.totalPnl >= 0 ? '+' : '';
 
                         return `
-                            <div class="trader-card-item" onclick="openTraderSessionsView('${t.userId}', '${t.challengeId}')" style="background:rgba(22,22,26,0.85); border:1px solid ${t.pendingReviews > 0 ? 'rgba(245,176,65,0.5)' : 'rgba(255,255,255,0.08)'}; border-radius:14px; padding:1.15rem; transition:all 0.2s ease; cursor:pointer; position:relative;" onmouseover="this.style.borderColor='var(--gold)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='${t.pendingReviews > 0 ? 'rgba(245,176,65,0.5)' : 'rgba(255,255,255,0.08)'}'; this.style.transform='none';">
+                            <div class="trader-card-item" onclick="openTraderSessionsView('${t.userId}', '${t.challengeId}')" style="background:rgba(22,22,26,0.85); border:1px solid ${t.pendingReviews > 0 ? 'rgba(245,176,65,0.5)' : (t.isRunning ? 'rgba(255,255,255,0.08)' : 'rgba(239,68,68,0.25)')}; border-radius:14px; padding:1.15rem; transition:all 0.2s ease; cursor:pointer; position:relative;" onmouseover="this.style.borderColor='var(--gold)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='${t.pendingReviews > 0 ? 'rgba(245,176,65,0.5)' : (t.isRunning ? 'rgba(255,255,255,0.08)' : 'rgba(239,68,68,0.25)')}'; this.style.transform='none';">
                                 
                                 ${t.pendingReviews > 0 ? `
                                     <div style="position:absolute; top:12px; right:12px; background:linear-gradient(135deg, #ef4444, #dc2626); color:#fff; font-size:0.7rem; font-weight:800; padding:2px 9px; border-radius:20px; display:inline-flex; align-items:center; gap:4px;">
@@ -6843,15 +6912,25 @@
                                 </div>
 
                                 <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:0.85rem;">
-                                    <span style="background:rgba(46,204,113,0.14); color:#2ecc71; border:1px solid rgba(46,204,113,0.35); font-size:0.72rem; padding:2px 7px; border-radius:5px; font-weight:800;">
+                                    <span style="background:${t.isRunning ? 'rgba(46,204,113,0.14)' : 'rgba(239,68,68,0.14)'}; color:${t.isRunning ? '#2ecc71' : '#f87171'}; border:1px solid ${t.isRunning ? 'rgba(46,204,113,0.35)' : 'rgba(239,68,68,0.35)'}; font-size:0.72rem; padding:2px 7px; border-radius:5px; font-weight:800;">
                                         CH #${t.challengeNumber}
                                     </span>
+                                    ${!t.isRunning ? `
+                                        <span style="background:rgba(239,68,68,0.18); color:#fca5a5; border:1px solid rgba(239,68,68,0.35); font-size:0.72rem; padding:2px 7px; border-radius:5px; font-weight:800; display:inline-flex; align-items:center; gap:4px;">
+                                            <i class="fas fa-ban"></i> ${(t.challengeStatus || 'closed').replace('_', ' ').toUpperCase()}
+                                        </span>
+                                    ` : ''}
                                     <span style="background:rgba(255,255,255,0.06); color:#fff; border:1px solid rgba(255,255,255,0.1); font-size:0.72rem; padding:2px 7px; border-radius:5px; font-weight:700;">
                                         ${t.packageName} ($${t.fundedAmount.toLocaleString()})
                                     </span>
                                     <span style="background:rgba(59,130,246,0.12); color:#60a5fa; border:1px solid rgba(59,130,246,0.25); font-size:0.72rem; padding:2px 7px; border-radius:5px; font-weight:700;">
                                         ${t.brokerName} (${t.brokerAccountId})
                                     </span>
+                                    ${t.failedChallengesCount > 1 ? `
+                                        <span style="background:rgba(239,68,68,0.1); color:#f87171; border:1px solid rgba(239,68,68,0.25); font-size:0.7rem; padding:2px 6px; border-radius:5px; font-weight:700;">
+                                            ${t.failedChallengesCount} Failed
+                                        </span>
+                                    ` : ''}
                                 </div>
 
                                 <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:8px 10px; margin-bottom:0.85rem; border:1px solid rgba(255,255,255,0.05);">
