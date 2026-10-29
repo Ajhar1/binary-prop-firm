@@ -1943,13 +1943,13 @@
                     </div>
                 </div>
 
-                <div class="glass" style="border-radius:16px; padding:1.25rem; border:1px solid rgba(245,176,65,0.25); background:rgba(245,176,65,0.06); display:flex; align-items:center; gap:14px;">
-                    <div style="width:48px; height:48px; border-radius:12px; background:rgba(245,176,65,0.2); display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:1.4rem;">
-                        <i class="fas fa-shield-alt"></i>
+                <div class="glass" style="border-radius:16px; padding:1.25rem; border:1px solid rgba(244,63,94,0.25); background:rgba(244,63,94,0.06); display:flex; align-items:center; gap:14px;">
+                    <div style="width:48px; height:48px; border-radius:12px; background:rgba(244,63,94,0.2); display:flex; align-items:center; justify-content:center; color:#f43f5e; font-size:1.4rem;">
+                        <i class="fas fa-times-circle"></i>
                     </div>
                     <div>
-                        <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Official Lessons</div>
-                        <div style="font-size:1.6rem; font-weight:900; color:var(--gold);" id="adminAcadKpiOfficial">12</div>
+                        <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Rejected Profiles</div>
+                        <div style="font-size:1.6rem; font-weight:900; color:#f43f5e;" id="adminAcadKpiRejected">0</div>
                     </div>
                 </div>
             </div>
@@ -1964,17 +1964,11 @@
                         <button type="button" class="btn-subtab" id="btnAcadSubApproved" onclick="switchAcademySubTab('approved')">
                             <i class="fas fa-check-circle" style="color:#10b981;"></i> Approved Mentors (<span id="acadSubCountApproved">0</span>)
                         </button>
+                        <button type="button" class="btn-subtab" id="btnAcadSubRejected" onclick="switchAcademySubTab('rejected')">
+                            <i class="fas fa-times-circle" style="color:#f43f5e;"></i> Rejected / Feedback (<span id="acadSubCountRejected">0</span>)
+                        </button>
                         <button type="button" class="btn-subtab" id="btnAcadSubAll" onclick="switchAcademySubTab('all')">
                             <i class="fas fa-users" style="color:#60a5fa;"></i> All Profiles (<span id="acadSubCountAll">0</span>)
-                        </button>
-                        <button type="button" class="btn-subtab" id="btnAcadSubOfficial" onclick="switchAcademySubTab('official')">
-                            <i class="fas fa-shield-alt" style="color:var(--gold);"></i> Official Lessons
-                        </button>
-                    </div>
-
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <button class="btn-gold" id="btnAdminAddOfficialLesson" onclick="openAddCourseModal()" style="display:none;">
-                            <i class="fas fa-plus"></i> Add Official Lesson
                         </button>
                     </div>
                 </div>
@@ -8389,12 +8383,12 @@
                     // Update KPI cards
                     const kpiPending = document.getElementById('adminAcadKpiPending');
                     const kpiApproved = document.getElementById('adminAcadKpiApproved');
+                    const kpiRejected = document.getElementById('adminAcadKpiRejected');
                     const kpiItems = document.getElementById('adminAcadKpiItems');
-                    const kpiOfficial = document.getElementById('adminAcadKpiOfficial');
 
                     if (kpiPending) kpiPending.innerText = adminAcademySummary.pending || 0;
                     if (kpiApproved) kpiApproved.innerText = adminAcademySummary.approved || 0;
-                    if (kpiOfficial) kpiOfficial.innerText = (adminCourses ? adminCourses.length : 12);
+                    if (kpiRejected) kpiRejected.innerText = adminAcademySummary.rejected || 0;
 
                     let totalItems = 0;
                     adminAcademyProfiles.forEach(p => {
@@ -8405,9 +8399,11 @@
                     // Update subtab counts
                     const subPen = document.getElementById('acadSubCountPending');
                     const subApp = document.getElementById('acadSubCountApproved');
+                    const subRej = document.getElementById('acadSubCountRejected');
                     const subAll = document.getElementById('acadSubCountAll');
                     if (subPen) subPen.innerText = adminAcademySummary.pending || 0;
                     if (subApp) subApp.innerText = adminAcademySummary.approved || 0;
+                    if (subRej) subRej.innerText = adminAcademySummary.rejected || 0;
                     if (subAll) subAll.innerText = adminAcademySummary.total || 0;
 
                     // Update sidebar pending badge
@@ -8435,27 +8431,13 @@
             const tabBtnMap = {
                 'pending': 'btnAcadSubPending',
                 'approved': 'btnAcadSubApproved',
-                'all': 'btnAcadSubAll',
-                'official': 'btnAcadSubOfficial'
+                'rejected': 'btnAcadSubRejected',
+                'all': 'btnAcadSubAll'
             };
             const activeBtn = document.getElementById(tabBtnMap[subTab]);
             if (activeBtn) activeBtn.classList.add('active');
 
-            const mentorsView = document.getElementById('academyMentorsTableView');
-            const officialView = document.getElementById('academyOfficialLessonsTableView');
-            const addOfficialBtn = document.getElementById('btnAdminAddOfficialLesson');
-
-            if (subTab === 'official') {
-                if (mentorsView) mentorsView.style.display = 'none';
-                if (officialView) officialView.style.display = 'block';
-                if (addOfficialBtn) addOfficialBtn.style.display = 'inline-flex';
-                renderCoursesTable();
-            } else {
-                if (mentorsView) mentorsView.style.display = 'block';
-                if (officialView) officialView.style.display = 'none';
-                if (addOfficialBtn) addOfficialBtn.style.display = 'none';
-                renderAdminAcademyMentorsTable();
-            }
+            renderAdminAcademyMentorsTable();
         }
 
         function renderAdminAcademyMentorsTable() {
@@ -8467,6 +8449,8 @@
                 filtered = adminAcademyProfiles.filter(p => p.status === 'pending');
             } else if (adminAcademySubTab === 'approved') {
                 filtered = adminAcademyProfiles.filter(p => p.status === 'approved');
+            } else if (adminAcademySubTab === 'rejected') {
+                filtered = adminAcademyProfiles.filter(p => p.status === 'rejected');
             }
 
             if (filtered.length === 0) {

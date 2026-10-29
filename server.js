@@ -7294,46 +7294,7 @@ app.get('/api/courses', (req, res) => {
   });
 });
 
-// Helper: Official Academy Mentor representation
-function getOfficialAcademyMentor() {
-  const officialCourses = readJson(COURSES_FILE, COURSE_LESSONS);
-  officialCourses.sort((a, b) => (parseInt(a.serial) || 0) - (parseInt(b.serial) || 0));
-  const enrichedLessons = officialCourses.map(c => ({
-    id: c.id,
-    type: 'youtube',
-    title: c.title,
-    category: c.category || 'Platform Strategy',
-    duration: c.duration || '20:00',
-    summary: c.summary || '',
-    videoEmbed: convertToEmbedUrl(c.videoEmbed),
-    videoUrl: c.videoEmbed,
-    thumbnailUrl: c.thumbnailUrl || extractVideoThumbnail(c.videoEmbed) || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&auto=format&fit=crop&q=60',
-    serial: c.serial || 1
-  }));
-
-  return {
-    id: 'official-bpf-academy',
-    isOfficial: true,
-    partnerId: 'admin',
-    mentorName: 'Binary Prop Firm Official Academy',
-    mentorTagline: 'Master Binary Options, Risk & Strategy Roadmap',
-    mentorBio: 'The official certified curriculum of Binary Prop Firm. Master binary options price action, institutional psychology, risk mitigation, and disciplined execution.',
-    avatarUrl: '/images/bpf-logo.png',
-    bannerUrl: 'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=1200&auto=format&fit=crop&q=80',
-    telegramChannel: 'https://t.me/binarypropfirm',
-    youtubeChannel: 'https://youtube.com',
-    status: 'approved',
-    totalItems: enrichedLessons.length,
-    stats: {
-      videosCount: enrichedLessons.length,
-      freeDriveCount: 0,
-      paidCoursesCount: 0
-    },
-    items: enrichedLessons
-  };
-}
-
-// Public API: List all approved mentors + official academy
+// Public API: List all approved mentors (Affiliate Partners Only)
 app.get('/api/academy/mentors', (req, res) => {
   try {
     const profiles = getAcademyProfiles();
@@ -7369,11 +7330,10 @@ app.get('/api/academy/mentors', (req, res) => {
         };
       });
 
-    const official = getOfficialAcademyMentor();
-    // Official academy always first, followed by mentors
+    // Only approved partner mentor profiles are returned
     res.json({
       success: true,
-      mentors: [official, ...approvedMentors]
+      mentors: approvedMentors
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -7384,10 +7344,6 @@ app.get('/api/academy/mentors', (req, res) => {
 app.get('/api/academy/mentors/:id', (req, res) => {
   try {
     const { id } = req.params;
-    if (id === 'official-bpf-academy' || id === 'official') {
-      return res.json({ success: true, mentor: getOfficialAcademyMentor() });
-    }
-
     const profiles = getAcademyProfiles();
     const profile = profiles.find(p => p && (p.id === id || p.partnerId === id));
     if (!profile) {

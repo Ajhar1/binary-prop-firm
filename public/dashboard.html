@@ -3981,25 +3981,19 @@
                         <div>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <h2 style="margin:0; font-size:1.35rem; font-weight:900; color:#fff;">Binary Prop Firm Trading Academy</h2>
-                                <span class="badge-status badge-verified" style="font-size:0.7rem; padding:2px 8px;">Official Hub</span>
+                                <span class="badge-status badge-verified" style="font-size:0.7rem; padding:2px 8px;">Mentors Hub</span>
                             </div>
                             <p style="margin:4px 0 0 0; color:var(--text-secondary); font-size:0.88rem; line-height:1.4;">
-                                অফিসিয়াল প্রফেশনাল রোডম্যাপ এবং ভেরিফাইড কমিউনিটি মেন্টরদের ভিডিও ক্লাস, ফ্রি ড্রাইভ রিসোর্স ও ভিআইপি মেন্টরশিপ।
+                                ভেরিফাইড কমিউনিটি মেন্টর ও পার্টনারদের তৈরি এক্সক্লুসিভ ভিডিও ক্লাস, ফ্রি ড্রাইভ রিসোর্স ও ভিআইপি পেইড কোর্স।
                             </p>
                         </div>
                     </div>
 
                     <!-- Directory Category Filters -->
-                    <div id="academyDirectoryFilters" style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <button type="button" class="dash-acad-filter-btn active" id="btnFilterAllMentors" onclick="filterDashAcademyMentors('all', this)">
-                            <i class="fas fa-th-large"></i> সকল একাডেমি (<span id="dashAcadCountAll">0</span>)
-                        </button>
-                        <button type="button" class="dash-acad-filter-btn" id="btnFilterOfficialMentors" onclick="filterDashAcademyMentors('official', this)">
-                            <i class="fas fa-shield-alt" style="color:var(--yellow);"></i> অফিসিয়াল একাডেমি
-                        </button>
-                        <button type="button" class="dash-acad-filter-btn" id="btnFilterCommunityMentors" onclick="filterDashAcademyMentors('community', this)">
-                            <i class="fas fa-user-graduate" style="color:var(--accent-green);"></i> কমিউনিটি মেন্টর (<span id="dashAcadCountCommunity">0</span>)
-                        </button>
+                    <div id="academyDirectoryFilters" style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:0.82rem; font-weight:800; color:var(--yellow); background:rgba(245,176,65,0.12); padding:7px 14px; border-radius:12px; border:1px solid rgba(245,176,65,0.25); display:inline-flex; align-items:center; gap:6px;">
+                            <i class="fas fa-user-graduate"></i> লাইভ মেন্টর একাডেমি: <strong id="dashAcadCountAll">0</strong>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -12450,7 +12444,6 @@
 
         // ==================== TRADING ACADEMY (MENTORS & CLASSROOMS) ====================
         let allDashMentors = [];
-        let currentDashMentorFilter = 'all';
         let activeMentorClassroom = null;
         let currentClassroomSubtab = 'videos';
 
@@ -12461,82 +12454,62 @@
                 if (data.success && Array.isArray(data.mentors)) {
                     allDashMentors = data.mentors;
                     
-                    // Update Filter Counts
-                    const totalCount = allDashMentors.length;
-                    const commCount = allDashMentors.filter(m => !m.isOfficial).length;
                     const elAll = document.getElementById('dashAcadCountAll');
-                    const elComm = document.getElementById('dashAcadCountCommunity');
-                    if (elAll) elAll.innerText = totalCount;
-                    if (elComm) elComm.innerText = commCount;
+                    if (elAll) elAll.innerText = allDashMentors.length;
 
                     renderAcademyDirectory();
-
-                    // If we don't have an active classroom, default official lessons into allCourses for background readiness
-                    const official = allDashMentors.find(m => m.isOfficial);
-                    if (official && official.items && (!allCourses || allCourses.length === 0)) {
-                        allCourses = official.items;
-                    }
                 }
             } catch (err) {
                 console.error('Error fetching academy mentors:', err);
             }
         }
 
-        function filterDashAcademyMentors(filterType, btn) {
-            currentDashMentorFilter = filterType;
-            document.querySelectorAll('.dash-acad-filter-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            renderAcademyDirectory();
-        }
-
         function renderAcademyDirectory() {
             const grid = document.getElementById('academyMentorsGrid');
             if (!grid) return;
 
-            let filtered = allDashMentors;
-            if (currentDashMentorFilter === 'official') {
-                filtered = allDashMentors.filter(m => m.isOfficial);
-            } else if (currentDashMentorFilter === 'community') {
-                filtered = allDashMentors.filter(m => !m.isOfficial);
-            }
+            const elAll = document.getElementById('dashAcadCountAll');
+            if (elAll) elAll.innerText = allDashMentors.length;
 
-            if (filtered.length === 0) {
+            if (allDashMentors.length === 0) {
                 grid.innerHTML = `
-                    <div style="grid-column:1/-1; text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
-                        <i class="fas fa-graduation-cap" style="font-size:3rem; opacity:0.3; margin-bottom:12px; display:block;"></i>
-                        <h3 style="color:#fff; font-size:1.1rem; margin:0 0 6px 0;">কোনো একাডেমি পাওয়া যায়নি</h3>
-                        <p style="font-size:0.88rem; margin:0;">বর্তমানে এই ক্যাটাগরিতে কোনো মেন্টর প্রোফাইল সক্রিয় নেই।</p>
+                    <div style="grid-column:1/-1; text-align:center; padding:3.5rem 1.5rem; color:var(--text-secondary); background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.1); border-radius:18px;">
+                        <div style="width:64px; height:64px; border-radius:50%; background:rgba(245,176,65,0.1); display:inline-flex; align-items:center; justify-content:center; color:var(--yellow); font-size:1.8rem; margin-bottom:14px;">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3 style="color:#fff; font-size:1.2rem; font-weight:800; margin:0 0 8px 0;">কোনো পার্টনার মেন্টর একাডেমি এখনো লাইভ নেই</h3>
+                        <p style="font-size:0.9rem; margin:0 auto; max-width:480px; line-height:1.6; color:var(--text-secondary);">
+                            আমাদের ভেরিফাইড অ্যাফিলিয়েট পার্টনাররা তাদের একাডেমি প্রোফাইল ও কনটেন্ট প্রস্তুত করছেন। এডমিন প্যানেল থেকে অনুমোদনের সাথে সাথে তা এখানে প্রদর্শিত হবে।
+                        </p>
                     </div>
                 `;
                 return;
             }
 
-            grid.innerHTML = filtered.map(m => {
+            grid.innerHTML = allDashMentors.map(m => {
                 const stats = m.stats || { videosCount: 0, freeDriveCount: 0, paidCoursesCount: 0 };
                 const banner = m.bannerUrl || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80';
-                const avatar = m.avatarUrl || '/images/bpf-logo.png';
-                const badgeLabel = m.isOfficial ? 'Official Platform' : 'Verified Mentor';
-                const badgeColor = m.isOfficial ? 'var(--yellow)' : 'var(--accent-green)';
+                const avatar = m.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
 
                 return `
                     <div class="dash-mentor-card">
                         <!-- Banner -->
                         <div style="height:110px; background:url('${banner}') center/cover no-repeat; position:relative;">
                             <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(7,10,18,0.2) 0%, rgba(7,10,18,0.85) 100%);"></div>
-                            <span style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); color:${badgeColor}; font-size:0.7rem; font-weight:800; padding:3px 9px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); display:inline-flex; align-items:center; gap:5px;">
-                                <i class="fas fa-check-circle"></i> ${badgeLabel}
+                            <span style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); color:var(--accent-green); font-size:0.7rem; font-weight:800; padding:3px 9px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); display:inline-flex; align-items:center; gap:5px;">
+                                <i class="fas fa-check-circle"></i> Verified Mentor
                             </span>
                         </div>
 
                         <!-- Card Body -->
                         <div style="padding:1.25rem; flex:1; display:flex; flex-direction:column; position:relative; margin-top:-38px;">
                             <div style="display:flex; align-items:flex-end; gap:12px; margin-bottom:10px;">
-                                <img src="${avatar}" style="width:58px; height:58px; border-radius:50%; object-fit:cover; border:2.5px solid ${badgeColor}; background:#070a12; flex-shrink:0; box-shadow:0 0 15px rgba(0,0,0,0.6);" onerror="this.src='/images/bpf-logo.png'" />
+                                <img src="${avatar}" style="width:58px; height:58px; border-radius:50%; object-fit:cover; border:2.5px solid var(--accent-green); background:#070a12; flex-shrink:0; box-shadow:0 0 15px rgba(0,0,0,0.6);" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'" />
                                 <div style="min-width:0; flex:1;">
                                     <h4 style="margin:0; font-size:1.05rem; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         ${escapeHtml(m.mentorName)}
                                     </h4>
-                                    <div style="font-size:0.75rem; color:${badgeColor}; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    <div style="font-size:0.75rem; color:var(--accent-green); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         ${escapeHtml(m.mentorTagline || 'Trading Specialist')}
                                     </div>
                                 </div>
@@ -12605,17 +12578,12 @@
             if (nameEl) nameEl.innerText = mentor.mentorName;
             if (tagEl) tagEl.innerText = mentor.mentorTagline || '';
             if (bioEl) bioEl.innerText = mentor.mentorBio || '';
-            if (avEl) avEl.src = mentor.avatarUrl || '/images/bpf-logo.png';
+            if (avEl) avEl.src = mentor.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
             if (bnEl) bnEl.style.background = `url('${mentor.bannerUrl || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80'}') center/cover no-repeat`;
 
             if (badgeEl) {
-                if (mentor.isOfficial) {
-                    badgeEl.innerHTML = '<i class="fas fa-shield-alt"></i> Official Academy';
-                    badgeEl.style.color = 'var(--yellow)';
-                } else {
-                    badgeEl.innerHTML = '<i class="fas fa-check-circle"></i> Verified Community Mentor';
-                    badgeEl.style.color = 'var(--accent-green)';
-                }
+                badgeEl.innerHTML = '<i class="fas fa-check-circle"></i> Verified Community Mentor';
+                badgeEl.style.color = 'var(--accent-green)';
             }
 
             // Social links
@@ -12793,7 +12761,7 @@
             if (!container) return;
 
             if (courses.length === 0) {
-                container.innerHTML = '<li style="text-align:center; padding:2rem; color:var(--text-secondary); font-size:0.9rem;">কোনো কোর্স পাওয়া যায়নি।</li>';
+                container.innerHTML = '<li style="text-align:center; padding:2rem; color:var(--text-secondary); font-size:0.9rem;">কোনো লেসন পাওয়া যায়নি।</li>';
                 return;
             }
 
@@ -12801,9 +12769,9 @@
                 const thumb = getDashLessonThumbnail(c);
                 const thumbHtml = thumb 
                     ? `<div class="lesson-thumb-box">
-                         <img src="${thumb}" alt="${c.title}" onerror="this.src='https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=200&auto=format&fit=crop&q=60'">
+                         <img src="${thumb}" alt="${escapeHtml(c.title || '')}" onerror="this.src='https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=200&auto=format&fit=crop&q=60'">
                          <div class="lesson-thumb-overlay"><i class="fas fa-play"></i></div>
-                         <span class="lesson-duration-badge">${c.duration || 'Video'}</span>
+                         <span class="lesson-duration-badge">${escapeHtml(c.duration || 'Video')}</span>
                        </div>`
                     : `<div class="lesson-icon-circle"><i class="fas fa-play"></i></div>`;
 
@@ -12812,11 +12780,11 @@
                         ${thumbHtml}
                         <div style="flex:1; min-width:0;">
                             <div style="font-weight:700; font-size:0.88rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                ${c.serial ? `#${c.serial} ` : ''}${c.title}
+                                ${c.serial ? `#${escapeHtml(c.serial)} ` : ''}${escapeHtml(c.title || '')}
                             </div>
                             <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:3px; display:flex; gap:8px;">
-                                <span style="color:var(--yellow);">${c.category || 'General'}</span>
-                                <span>• ${c.duration || 'Full Video'}</span>
+                                <span style="color:var(--yellow);">${escapeHtml(c.category || 'General')}</span>
+                                <span>• ${escapeHtml(c.duration || 'Full Video')}</span>
                             </div>
                         </div>
                     </li>
