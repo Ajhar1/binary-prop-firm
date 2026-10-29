@@ -10235,7 +10235,7 @@ app.post('/api/admin/partners', authenticateAdminToken, (req, res) => {
 app.put('/api/admin/partners/:id', authenticateAdminToken, (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phone, promoCode, commissionRate, traderDiscount, payoutMethod, payoutDetails, status, notes } = req.body;
+    const { name, email, phone, country, telegram, promoCode, commissionRate, traderDiscount, payoutMethod, payoutDetails, status, notes, useCustomRate } = req.body;
 
     const partners = getPartners();
     const idx = partners.findIndex(p => p.id === id);
@@ -10253,8 +10253,11 @@ app.put('/api/admin/partners/:id', authenticateAdminToken, (req, res) => {
       name: name ? name.trim() : partners[idx].name,
       email: email ? email.trim().toLowerCase() : partners[idx].email,
       phone: phone !== undefined ? phone.trim() : partners[idx].phone,
+      country: country !== undefined ? country.trim() : (partners[idx].country || ''),
+      telegram: telegram !== undefined ? telegram.trim() : (partners[idx].telegram || ''),
       promoCode: cleanPromo,
       commissionRate: commissionRate !== undefined ? parseFloat(commissionRate) : partners[idx].commissionRate,
+      useCustomRate: useCustomRate !== undefined ? Boolean(useCustomRate) : Boolean(partners[idx].useCustomRate),
       traderDiscount: traderDiscount !== undefined ? parseFloat(traderDiscount) : partners[idx].traderDiscount,
       payoutMethod: payoutMethod || partners[idx].payoutMethod,
       payoutDetails: payoutDetails !== undefined ? payoutDetails.trim() : partners[idx].payoutDetails,
@@ -10774,6 +10777,42 @@ app.post('/api/partner/auth/login', async (req, res) => {
   }
 });
 
+function getPartnerWeeklyEarnings(challenges, partner) {
+  const weeks = [];
+  const now = new Date();
+  for (let i = 11; i >= 0; i--) {
+    const endOfWeek = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+    const startOfWeek = new Date(endOfWeek.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const label = `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+
+    const weekChallenges = Array.isArray(challenges) ? challenges.filter(c => {
+      const dt = new Date(c.createdAt || Date.now());
+      return dt >= startOfWeek && dt < endOfWeek;
+    }) : [];
+
+    let settled = 0;
+    let pending = 0;
+    weekChallenges.forEach(c => {
+      const rate = c.partnerCommissionRate || partner.commissionRate || 10;
+      const comm = c.partnerCommission || Math.round(((c.fee || 0) * (rate / 100)) * 100) / 100;
+      if (c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled') {
+        settled += comm;
+      } else if (c.status === 'pending_approval') {
+        pending += comm;
+      }
+    });
+
+    weeks.push({
+      weekIndex: 11 - i,
+      label,
+      settled: Math.round(settled * 100) / 100,
+      pending: Math.round(pending * 100) / 100,
+      total: Math.round((settled + pending) * 100) / 100
+    });
+  }
+  return weeks;
+}
+
 // Partner Profile & Live Dashboard Stats
 app.get('/api/partner/me', authenticatePartnerToken, (req, res) => {
   try {
@@ -10822,14 +10861,16 @@ app.get('/api/partner/me', authenticatePartnerToken, (req, res) => {
     const pendingPayoutRequests = myPayouts.filter(p => p.status === 'pending');
     const pendingPayoutRequestsAmount = pendingPayoutRequests.reduce((sum, p) => sum + (p.amount || 0), 0);
 
-    // Gross pending commission (Earned - Paid)
-    const grossPendingCommission = Math.max(0, Math.round((totalCommissionEarned - totalCommissionPaid) * 100) / 100);
+    const adjustment = partner.balanceAdjustment || 0;
+    // Gross pending commission (Earned + Adjustment - Paid)
+    const grossPendingCommission = Math.max(0, Math.round((totalCommissionEarned + adjustment - totalCommissionPaid) * 100) / 100);
 
     // Net withdrawable commission (Gross - In-review Payout Requests)
     const withdrawableCommission = Math.max(0, Math.round((grossPendingCommission - pendingPayoutRequestsAmount) * 100) / 100);
 
     const salesCount = approvedReferred.length;
     const tierInfo = getPartnerTierInfo(salesCount);
+    const weeklyEarnings = getPartnerWeeklyEarnings(referredChallenges, partner);
 
     const safePartner = { ...partner };
     delete safePartner.password;
@@ -10838,22 +10879,29 @@ app.get('/api/partner/me', authenticatePartnerToken, (req, res) => {
       success: true,
       partner: {
         ...safePartner,
+        country: safePartner.country || '',
+        telegram: safePartner.telegram || '',
+        telegramData: safePartner.telegramData || null,
+        wallets: Array.isArray(safePartner.wallets) ? safePartner.wallets : [],
         totalReferred: approvedReferred.length,
         totalSales: Math.round(totalSalesVolume * 100) / 100,
-        totalCommissionEarned: Math.round(totalCommissionEarned * 100) / 100,
+        totalCommissionEarned: Math.round((totalCommissionEarned + adjustment) * 100) / 100,
         totalCommissionPaid: Math.round(totalCommissionPaid * 100) / 100,
         pendingCommission: grossPendingCommission,
         withdrawableCommission,
+        balanceAdjustment: adjustment,
         pendingPayoutRequestsAmount
       },
       tierInfo,
+      weeklyEarnings,
       stats: {
         salesCount,
         totalSalesVolume: Math.round(totalSalesVolume * 100) / 100,
-        totalCommissionEarned: Math.round(totalCommissionEarned * 100) / 100,
+        totalCommissionEarned: Math.round((totalCommissionEarned + adjustment) * 100) / 100,
         totalCommissionPaid: Math.round(totalCommissionPaid * 100) / 100,
         grossPendingCommission,
         withdrawableCommission,
+        balanceAdjustment: adjustment,
         pendingPayoutRequestsAmount,
         pendingRequestsCount: pendingPayoutRequests.length,
         pendingPromoRequestsCount: promoRequests.filter(r => r.partnerId === partner.id && r.status === 'pending').length
@@ -11316,7 +11364,8 @@ app.post('/api/partner/payouts/request', authenticatePartnerToken, (req, res) =>
     const totalPaid = partnerPayouts.filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount || 0), 0);
     const pendingRequestsSum = partnerPayouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount || 0), 0);
 
-    const withdrawable = Math.max(0, Math.round((totalEarned - totalPaid - pendingRequestsSum) * 100) / 100);
+    const adjustment = partner.balanceAdjustment || 0;
+    const withdrawable = Math.max(0, Math.round((totalEarned + adjustment - totalPaid - pendingRequestsSum) * 100) / 100);
 
     if (numAmount > withdrawable) {
       return res.status(400).json({
@@ -11359,6 +11408,456 @@ app.post('/api/partner/payouts/request', authenticatePartnerToken, (req, res) =>
     });
   } catch (err) {
     console.error('[Partner Payout Request Error]', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner Wallets Management (Get, Add, Delete)
+app.get('/api/partner/wallets', authenticatePartnerToken, (req, res) => {
+  try {
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
+    res.json({ success: true, wallets: Array.isArray(partner.wallets) ? partner.wallets : [] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/partner/wallets', authenticatePartnerToken, (req, res) => {
+  try {
+    const { currency, network, address, label } = req.body;
+    if (!currency || !network || !address || !address.trim()) {
+      return res.status(400).json({ success: false, message: 'Currency, network, and wallet address are required.' });
+    }
+
+    const partners = getPartners();
+    const idx = partners.findIndex(p => p.id === req.partner.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    if (!Array.isArray(partners[idx].wallets)) {
+      partners[idx].wallets = [];
+    }
+
+    if (partners[idx].wallets.length >= 10) {
+      return res.status(400).json({ success: false, message: 'Maximum 10 wallets allowed.' });
+    }
+
+    const cleanAddress = address.trim();
+    if (partners[idx].wallets.some(w => w.address.toLowerCase() === cleanAddress.toLowerCase() && w.network === network)) {
+      return res.status(400).json({ success: false, message: 'This wallet address is already added.' });
+    }
+
+    const newWallet = {
+      id: `w_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      currency: currency.trim(),
+      network: network.trim(),
+      address: cleanAddress,
+      label: (label || `${currency} (${network})`).trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    partners[idx].wallets.unshift(newWallet);
+    partners[idx].updatedAt = new Date().toISOString();
+    savePartners(partners, partners[idx]);
+
+    res.status(201).json({ success: true, message: 'Wallet added successfully!', wallet: newWallet, wallets: partners[idx].wallets });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/partner/wallets/:id', authenticatePartnerToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const partners = getPartners();
+    const idx = partners.findIndex(p => p.id === req.partner.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    if (!Array.isArray(partners[idx].wallets)) partners[idx].wallets = [];
+    partners[idx].wallets = partners[idx].wallets.filter(w => w.id !== id);
+    partners[idx].updatedAt = new Date().toISOString();
+    savePartners(partners, partners[idx]);
+
+    res.json({ success: true, message: 'Wallet removed successfully!', wallets: partners[idx].wallets });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner Telegram Integration
+app.get('/api/partner/telegram', authenticatePartnerToken, (req, res) => {
+  try {
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
+    res.json({
+      success: true,
+      telegram: partner.telegram || '',
+      telegramData: partner.telegramData || null
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/partner/telegram', authenticatePartnerToken, (req, res) => {
+  try {
+    const { username } = req.body;
+    if (!username || !username.trim()) {
+      return res.status(400).json({ success: false, message: 'Telegram username is required.' });
+    }
+
+    let clean = username.trim();
+    if (!clean.startsWith('@')) clean = `@${clean}`;
+
+    const partners = getPartners();
+    const idx = partners.findIndex(p => p.id === req.partner.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    partners[idx].telegram = clean;
+    partners[idx].telegramData = {
+      username: clean,
+      status: 'connected',
+      linkedAt: new Date().toISOString()
+    };
+    partners[idx].updatedAt = new Date().toISOString();
+    savePartners(partners, partners[idx]);
+
+    res.json({
+      success: true,
+      message: 'Telegram account connected successfully!',
+      telegram: clean,
+      telegramData: partners[idx].telegramData
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/partner/telegram', authenticatePartnerToken, (req, res) => {
+  try {
+    const partners = getPartners();
+    const idx = partners.findIndex(p => p.id === req.partner.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    partners[idx].telegram = '';
+    partners[idx].telegramData = null;
+    partners[idx].updatedAt = new Date().toISOString();
+    savePartners(partners, partners[idx]);
+
+    res.json({ success: true, message: 'Telegram disconnected.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner My Network (Referred Traders & Performance)
+app.get('/api/partner/network', authenticatePartnerToken, (req, res) => {
+  try {
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === req.partner.id);
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    const allUsers = readJson(USERS_FILE, []);
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const code = (partner.promoCode || '').toUpperCase();
+    const customCodes = Array.isArray(partner.customLinks) ? partner.customLinks.map(l => (l.code || '').toUpperCase()).filter(Boolean) : [];
+
+    const isMatchingChallenge = (c) => {
+      const pCode = (c.promoCode || '').toUpperCase();
+      const ppCode = (c.partnerPromoCode || '').toUpperCase();
+      return (c.partnerId && c.partnerId === partner.id) ||
+             (pCode && pCode === code) ||
+             (ppCode && ppCode === code) ||
+             (pCode && customCodes.includes(pCode)) ||
+             (ppCode && customCodes.includes(ppCode)) ||
+             (pCode && (pCode.startsWith(`${code}-`) || pCode.startsWith(`${code}_`))) ||
+             (ppCode && (ppCode.startsWith(`${code}-`) || ppCode.startsWith(`${code}_`)));
+    };
+
+    const partnerChallenges = challenges.filter(isMatchingChallenge);
+    const referredUserIds = new Set();
+    const referredUserEmails = new Set();
+
+    partnerChallenges.forEach(c => {
+      if (c.userId) referredUserIds.add(c.userId);
+      if (c.userEmail) referredUserEmails.add(c.userEmail.toLowerCase());
+    });
+
+    allUsers.forEach(u => {
+      const uRef = (u.referredBy || u.promoCode || '').toUpperCase();
+      if (uRef && (uRef === code || customCodes.includes(uRef))) {
+        referredUserIds.add(u.id);
+        if (u.email) referredUserEmails.add(u.email.toLowerCase());
+      }
+    });
+
+    const network = [];
+    const processedIds = new Set();
+
+    allUsers.filter(u => referredUserIds.has(u.id) || (u.email && referredUserEmails.has(u.email.toLowerCase()))).forEach(u => {
+      processedIds.add(u.id);
+      const userChallenges = partnerChallenges.filter(c => c.userId === u.id || (c.userEmail && c.userEmail.toLowerCase() === (u.email || '').toLowerCase()));
+      const totalVolume = userChallenges.reduce((sum, c) => sum + (c.fee || 0), 0);
+      const commission = userChallenges.reduce((sum, c) => {
+        if (c.partnerCommission) return sum + c.partnerCommission;
+        const rate = c.partnerCommissionRate || partner.commissionRate || 10;
+        return sum + Math.round(((c.fee || 0) * (rate / 100)) * 100) / 100;
+      }, 0);
+
+      const maskedId = u.traderId || `BP-${(u.id || '').substring(0, 6).toUpperCase()}`;
+      const maskedEmail = u.email ? u.email.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => a + '*'.repeat(Math.max(2, b.length)) + c) : 'trader@***.com';
+
+      network.push({
+        userId: maskedId,
+        traderName: u.name || 'Trader',
+        email: maskedEmail,
+        country: u.country || 'Global',
+        commissionModel: 'Challenge RevShare',
+        joinedAt: u.createdAt || new Date().toISOString(),
+        challengesCount: userChallenges.length,
+        totalVolume: Math.round(totalVolume * 100) / 100,
+        myCommission: Math.round(commission * 100) / 100,
+        status: userChallenges.length > 0 ? (userChallenges.some(c => c.status === 'passed') ? 'Passed' : 'Active') : 'Registered'
+      });
+    });
+
+    // Also include guest / direct challenge purchasers
+    partnerChallenges.forEach(c => {
+      if (!c.userId || !processedIds.has(c.userId)) {
+        if (c.userEmail && !referredUserEmails.has(c.userEmail.toLowerCase())) {
+          referredUserEmails.add(c.userEmail.toLowerCase());
+          const rate = c.partnerCommissionRate || partner.commissionRate || 10;
+          const comm = c.partnerCommission || Math.round(((c.fee || 0) * (rate / 100)) * 100) / 100;
+          const maskedEmail = c.userEmail ? c.userEmail.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => a + '*'.repeat(Math.max(2, b.length)) + c) : 'trader@***.com';
+          network.push({
+            userId: `BP-${(c.userId || c.id || '').substring(0, 6).toUpperCase()}`,
+            traderName: c.userName || 'Trader',
+            email: maskedEmail,
+            country: 'Global',
+            commissionModel: 'Challenge RevShare',
+            joinedAt: c.createdAt || new Date().toISOString(),
+            challengesCount: 1,
+            totalVolume: c.fee || 0,
+            myCommission: comm,
+            status: c.status || 'Active'
+          });
+        }
+      }
+    });
+
+    res.json({ success: true, network, totalUsers: network.length });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Admin: Get Detailed Partner Data for Command Center
+app.get('/api/admin/partners/:id/details', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const partners = getPartners();
+    const partner = partners.find(p => p.id === id);
+    if (!partner) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    const allUsers = readJson(USERS_FILE, []);
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const payouts = getPartnerPayouts();
+    const promoRequests = getPartnerPromoRequests();
+
+    const code = (partner.promoCode || '').toUpperCase();
+    const customCodes = Array.isArray(partner.customLinks) ? partner.customLinks.map(l => (l.code || '').toUpperCase()).filter(Boolean) : [];
+    const isMatchingChallenge = (c) => {
+      const pCode = (c.promoCode || '').toUpperCase();
+      const ppCode = (c.partnerPromoCode || '').toUpperCase();
+      return (c.partnerId && c.partnerId === partner.id) ||
+             (pCode && pCode === code) ||
+             (ppCode && ppCode === code) ||
+             (pCode && customCodes.includes(pCode)) ||
+             (ppCode && customCodes.includes(ppCode)) ||
+             (pCode && (pCode.startsWith(`${code}-`) || pCode.startsWith(`${code}_`))) ||
+             (ppCode && (ppCode.startsWith(`${code}-`) || ppCode.startsWith(`${code}_`)));
+    };
+
+    const partnerChallenges = challenges.filter(isMatchingChallenge);
+    const approvedChallenges = partnerChallenges.filter(c =>
+      c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled'
+    );
+
+    const totalSalesVolume = approvedChallenges.reduce((sum, c) => sum + (c.fee || 0), 0);
+    const totalCommissionEarned = approvedChallenges.reduce((sum, c) => {
+      if (c.partnerCommission) return sum + c.partnerCommission;
+      const rate = partner.commissionRate || 10;
+      return sum + Math.round(((c.fee || 0) * (rate / 100)) * 100) / 100;
+    }, 0);
+
+    const partnerPayouts = payouts.filter(p => p.partnerId === partner.id);
+    const totalPaid = partnerPayouts.filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount || 0), 0);
+    const pendingPayouts = partnerPayouts.filter(p => p.status === 'pending');
+    const pendingAmount = pendingPayouts.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    const adjustment = partner.balanceAdjustment || 0;
+    const withdrawableCommission = Math.max(0, Math.round((totalCommissionEarned + adjustment - totalPaid - pendingAmount) * 100) / 100);
+    const tierInfo = getPartnerTierInfo(approvedChallenges.length);
+
+    // Identify referred users
+    const userIds = new Set();
+    const userEmails = new Set();
+    partnerChallenges.forEach(c => {
+      if (c.userId) userIds.add(c.userId);
+      if (c.userEmail) userEmails.add(c.userEmail.toLowerCase());
+    });
+    allUsers.forEach(u => {
+      const uRef = (u.referredBy || u.promoCode || '').toUpperCase();
+      if (uRef && (uRef === code || customCodes.includes(uRef))) {
+        userIds.add(u.id);
+        if (u.email) userEmails.add(u.email.toLowerCase());
+      }
+    });
+
+    const referredUsers = allUsers.filter(u => userIds.has(u.id) || (u.email && userEmails.has(u.email.toLowerCase()))).map(u => {
+      const uChalls = partnerChallenges.filter(c => c.userId === u.id || (c.userEmail && c.userEmail.toLowerCase() === (u.email || '').toLowerCase()));
+      const uVol = uChalls.reduce((s, c) => s + (c.fee || 0), 0);
+      const uComm = uChalls.reduce((s, c) => s + (c.partnerCommission || Math.round((c.fee || 0) * ((c.partnerCommissionRate || partner.commissionRate || 10) / 100) * 100) / 100), 0);
+      return {
+        id: u.id,
+        traderId: u.traderId || `BP-${(u.id || '').substring(0, 6).toUpperCase()}`,
+        name: u.name,
+        email: u.email,
+        phone: u.phone || '',
+        country: u.country || 'Global',
+        joinedAt: u.createdAt,
+        challengesCount: uChalls.length,
+        totalVolume: Math.round(uVol * 100) / 100,
+        commissionEarned: Math.round(uComm * 100) / 100,
+        status: uChalls.length > 0 ? 'Active Trader' : 'Registered'
+      };
+    });
+
+    res.json({
+      success: true,
+      partner: {
+        ...partner,
+        totalSalesVolume: Math.round(totalSalesVolume * 100) / 100,
+        totalCommissionEarned: Math.round((totalCommissionEarned + adjustment) * 100) / 100,
+        totalCommissionPaid: Math.round(totalPaid * 100) / 100,
+        pendingCommission: Math.round((totalCommissionEarned + adjustment - totalPaid) * 100) / 100,
+        withdrawableCommission,
+        balanceAdjustment: adjustment,
+        wallets: Array.isArray(partner.wallets) ? partner.wallets : []
+      },
+      tierInfo,
+      referredUsers,
+      sales: partnerChallenges.map(c => ({
+        id: c.id,
+        createdAt: c.createdAt,
+        userName: c.userName || 'Trader',
+        userEmail: c.userEmail || '',
+        packageName: c.packageName || 'Challenge',
+        fee: c.fee || 0,
+        commissionRate: c.partnerCommissionRate || partner.commissionRate || 10,
+        commissionAmount: c.partnerCommission || Math.round(((c.fee || 0) * ((c.partnerCommissionRate || partner.commissionRate || 10) / 100)) * 100) / 100,
+        status: c.status
+      })),
+      payouts: partnerPayouts,
+      promoRequests: promoRequests.filter(r => r.partnerId === partner.id)
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Admin: Adjust Partner Withdrawable Commission (+ Credit / - Debit)
+app.post('/api/admin/partners/:id/adjust-balance', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount, type, reason } = req.body;
+    const numAmount = parseFloat(amount);
+    if (!numAmount || isNaN(numAmount) || numAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid adjustment amount.' });
+    }
+
+    const partners = getPartners();
+    const idx = partners.findIndex(p => p.id === id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    const delta = (type === 'credit') ? numAmount : -numAmount;
+    partners[idx].balanceAdjustment = Math.round(((partners[idx].balanceAdjustment || 0) + delta) * 100) / 100;
+
+    if (!Array.isArray(partners[idx].adjustmentLogs)) {
+      partners[idx].adjustmentLogs = [];
+    }
+    partners[idx].adjustmentLogs.unshift({
+      id: `adj_${Date.now()}`,
+      amount: delta,
+      type: type || 'credit',
+      reason: (reason || 'Admin balance adjustment').trim(),
+      adminId: req.user?.id || 'admin',
+      date: new Date().toISOString()
+    });
+
+    partners[idx].updatedAt = new Date().toISOString();
+    savePartners(partners, partners[idx]);
+
+    res.json({
+      success: true,
+      message: `Balance successfully ${type === 'credit' ? 'credited' : 'debited'} with $${numAmount}.`,
+      partner: partners[idx]
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Admin: Manage Partner Wallets
+app.post('/api/admin/partners/:id/wallets', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { currency, network, address, label } = req.body;
+    if (!currency || !network || !address || !address.trim()) {
+      return res.status(400).json({ success: false, message: 'Currency, network, and address are required.' });
+    }
+
+    const partners = getPartners();
+    const idx = partners.findIndex(p => p.id === id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    if (!Array.isArray(partners[idx].wallets)) partners[idx].wallets = [];
+
+    const newWallet = {
+      id: `w_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      currency: currency.trim(),
+      network: network.trim(),
+      address: address.trim(),
+      label: (label || `${currency} (${network})`).trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    partners[idx].wallets.unshift(newWallet);
+    partners[idx].updatedAt = new Date().toISOString();
+    savePartners(partners, partners[idx]);
+
+    res.status(201).json({ success: true, message: 'Wallet added for partner.', wallet: newWallet, wallets: partners[idx].wallets });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/admin/partners/:id/wallets/:walletId', authenticateAdminToken, (req, res) => {
+  try {
+    const { id, walletId } = req.params;
+    const partners = getPartners();
+    const idx = partners.findIndex(p => p.id === id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Partner not found.' });
+
+    if (!Array.isArray(partners[idx].wallets)) partners[idx].wallets = [];
+    partners[idx].wallets = partners[idx].wallets.filter(w => w.id !== walletId);
+    partners[idx].updatedAt = new Date().toISOString();
+    savePartners(partners, partners[idx]);
+
+    res.json({ success: true, message: 'Wallet removed.', wallets: partners[idx].wallets });
+  } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });

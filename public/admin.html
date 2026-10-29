@@ -2568,9 +2568,17 @@
                                 পার্টনারদের প্রোমো কোড, রেফারেল লিঙ্ক, কমিশন হার ও অর্জিত ডলার ম্যানেজ করুন।
                             </p>
                         </div>
-                        <div style="position:relative; min-width:260px;">
-                            <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-secondary); font-size:0.85rem;"></i>
-                            <input type="text" id="partnerSearchInput" class="form-control" placeholder="নাম, ইমেইল, প্রোমো কোড..." style="padding-left:36px; width:100%; border-radius:10px; height:38px; font-size:0.85rem;" oninput="renderAdminPartnersTable()" />
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <div style="position:relative; min-width:240px;">
+                                <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-secondary); font-size:0.85rem;"></i>
+                                <input type="text" id="partnerSearchInput" class="form-control" placeholder="নাম, ইমেইল, কোড, ফোন..." style="padding-left:36px; width:100%; border-radius:10px; height:38px; font-size:0.85rem;" oninput="renderAdminPartnersTable()" />
+                            </div>
+                            <select id="partnerStatusFilter" class="form-control" onchange="renderAdminPartnersTable()" style="height:38px; font-size:0.85rem; border-radius:10px; min-width:140px; padding:6px 12px;">
+                                <option value="all">সকল স্ট্যাটাস (All)</option>
+                                <option value="active">সক্রিয় (Active)</option>
+                                <option value="suspended">সাসপেন্ডেড (Suspended)</option>
+                                <option value="banned">ব্যানড (Banned)</option>
+                            </select>
                         </div>
                     </div>
 
@@ -2833,6 +2841,394 @@
     </nav>
 
     <!-- ==================== MODALS ==================== -->
+
+        <!-- ======================================================= -->
+    <!-- 2.1 ADVANCED PARTNER COMMAND CENTER MODAL (USER CONTROLLER GRADE) -->
+    <!-- ======================================================= -->
+    <div class="modal-overlay" id="adminPartnerCommandModal">
+        <div class="modal-box" style="max-width:980px; width:95%; max-height:92vh; overflow-y:auto; padding:1.75rem;">
+            <button class="modal-close" onclick="closeModal('adminPartnerCommandModal')">&times;</button>
+
+            <!-- Modal Header (Partner Profile, Rank, Status, Actions) -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:1.25rem; padding-bottom:1.25rem; border-bottom:1px solid rgba(255,255,255,0.08);">
+                <div style="display:flex; align-items:center; gap:14px;">
+                    <div id="cmdPartnerAvatar" style="width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg, #00e676, #00b0ff); color:#000; font-weight:900; font-size:1.35rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 0 14px rgba(0,230,118,0.3);">
+                        P
+                    </div>
+                    <div>
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <h2 style="font-size:1.25rem; font-weight:800; margin:0; color:#fff;" id="cmdPartnerName">Partner Name</h2>
+                            <span class="badge" id="cmdPartnerRankBadge" style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); font-size:0.72rem;">
+                                ★ BRONZE
+                            </span>
+                            <span class="badge" id="cmdPartnerStatusBadge" style="font-size:0.72rem;">
+                                ACTIVE
+                            </span>
+                        </div>
+                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:3px; display:flex; gap:10px; flex-wrap:wrap;">
+                            <span id="cmdPartnerEmail">email@domain.com</span>
+                            <span id="cmdPartnerPhone" style="color:#60a5fa;"></span>
+                            <span id="cmdPartnerCountry" style="color:#cbd5e1;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <!-- Promo Code Chip -->
+                    <div style="font-family:monospace; font-weight:900; color:var(--gold); background:rgba(245,176,65,0.12); padding:5px 12px; border-radius:8px; border:1px solid rgba(245,176,65,0.3); font-size:0.88rem; display:flex; align-items:center; gap:6px;">
+                        <span id="cmdPartnerPromoCode">CODE</span>
+                        <button type="button" class="btn-outline" onclick="copyCmdPartnerCode()" style="padding:2px 6px; font-size:0.7rem; border-radius:4px;" title="Copy Code">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+
+                    <!-- Status Quick Switcher -->
+                    <select id="cmdPartnerQuickStatusSelect" onchange="handleAdminQuickStatusChange(this.value)" class="form-control" style="height:34px; font-size:0.82rem; padding:4px 8px; border-radius:8px; width:125px;">
+                        <option value="active">Active</option>
+                        <option value="suspended">Suspended</option>
+                        <option value="banned">Banned</option>
+                    </select>
+
+                    <!-- Fast Login as Partner / Preview Portal -->
+                    <button type="button" class="btn-outline" onclick="openCmdPartnerPortalPreview()" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; color:var(--cyan); border-color:rgba(0,240,255,0.3);" title="Open Partner Portal View">
+                        <i class="fas fa-external-link-alt"></i> Portal
+                    </button>
+                </div>
+            </div>
+
+            <!-- Financial Metrics Grid (4 Cards) -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:1.4rem;">
+                <div class="glass" style="padding:12px 14px; border-radius:12px; border:1px solid rgba(0,230,118,0.25);">
+                    <div style="font-size:0.72rem; text-transform:uppercase; color:var(--text-secondary); font-weight:700;">Withdrawable Commission</div>
+                    <div style="font-size:1.4rem; font-weight:900; color:#00e676; margin-top:2px;" id="cmdStatWithdrawable">$0.00</div>
+                    <div style="font-size:0.68rem; color:#94a3b8;" id="cmdStatAdjustmentNote">Includes $0 adjustments</div>
+                </div>
+
+                <div class="glass" style="padding:12px 14px; border-radius:12px; border:1px solid rgba(96,165,250,0.25);">
+                    <div style="font-size:0.72rem; text-transform:uppercase; color:var(--text-secondary); font-weight:700;">Sales Volume Generated</div>
+                    <div style="font-size:1.4rem; font-weight:900; color:#60a5fa; margin-top:2px;" id="cmdStatSalesVolume">$0.00</div>
+                    <div style="font-size:0.68rem; color:#94a3b8;"><span id="cmdStatReferredTradersCount">0</span> traders referred</div>
+                </div>
+
+                <div class="glass" style="padding:12px 14px; border-radius:12px; border:1px solid rgba(192,132,252,0.25);">
+                    <div style="font-size:0.72rem; text-transform:uppercase; color:var(--text-secondary); font-weight:700;">Total Earned Commission</div>
+                    <div style="font-size:1.4rem; font-weight:900; color:#c084fc; margin-top:2px;" id="cmdStatEarned">$0.00</div>
+                    <div style="font-size:0.68rem; color:#94a3b8;">All-time commissions</div>
+                </div>
+
+                <div class="glass" style="padding:12px 14px; border-radius:12px; border:1px solid rgba(16,185,129,0.25);">
+                    <div style="font-size:0.72rem; text-transform:uppercase; color:var(--text-secondary); font-weight:700;">Total Paid Out</div>
+                    <div style="font-size:1.4rem; font-weight:900; color:#10b981; margin-top:2px;" id="cmdStatPaid">$0.00</div>
+                    <div style="font-size:0.68rem; color:#94a3b8;">Processed payments</div>
+                </div>
+            </div>
+
+            <!-- Command Modal Tabs Navigation -->
+            <div style="display:flex; gap:6px; flex-wrap:wrap; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:8px; margin-bottom:1.25rem;">
+                <button type="button" class="btn-outline cmd-tab-btn active" id="btnCmdTab-balance" onclick="switchCmdSubtab('balance')" style="padding:7px 14px; font-size:0.82rem; font-weight:700; border-radius:8px;">
+                    <i class="fas fa-sliders-h" style="color:#00e676;"></i> ১. ব্যালেন্স ও কমিশন
+                </button>
+                <button type="button" class="btn-outline cmd-tab-btn" id="btnCmdTab-profile" onclick="switchCmdSubtab('profile')" style="padding:7px 14px; font-size:0.82rem; font-weight:700; border-radius:8px;">
+                    <i class="fas fa-user-edit" style="color:#60a5fa;"></i> ২. প্রোফাইল ও সেটিংস
+                </button>
+                <button type="button" class="btn-outline cmd-tab-btn" id="btnCmdTab-wallets" onclick="switchCmdSubtab('wallets')" style="padding:7px 14px; font-size:0.82rem; font-weight:700; border-radius:8px;">
+                    <i class="fas fa-coins" style="color:#c084fc;"></i> ৩. উইথড্রয়াল ওয়ালেট
+                </button>
+                <button type="button" class="btn-outline cmd-tab-btn" id="btnCmdTab-network" onclick="switchCmdSubtab('network')" style="padding:7px 14px; font-size:0.82rem; font-weight:700; border-radius:8px;">
+                    <i class="fas fa-users" style="color:var(--gold);"></i> ৪. রেফার্ড ট্রেডার্স
+                </button>
+                <button type="button" class="btn-outline cmd-tab-btn" id="btnCmdTab-orders" onclick="switchCmdSubtab('orders')" style="padding:7px 14px; font-size:0.82rem; font-weight:700; border-radius:8px;">
+                    <i class="fas fa-shopping-cart" style="color:#38bdf8;"></i> ৫. সেলস অর্ডার লগ
+                </button>
+                <button type="button" class="btn-outline cmd-tab-btn" id="btnCmdTab-payouts" onclick="switchCmdSubtab('payouts')" style="padding:7px 14px; font-size:0.82rem; font-weight:700; border-radius:8px;">
+                    <i class="fas fa-receipt" style="color:#10b981;"></i> ৬. পে-আউট হিস্ট্রি
+                </button>
+            </div>
+
+            <!-- SUBVIEW 1: Balance Adjustment & Commission Controls -->
+            <div id="cmdPane-balance" class="cmd-subpane">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem;">
+                    
+                    <!-- Balance Adjustment Form -->
+                    <div class="glass" style="padding:1.25rem; border-radius:14px; border:1px solid rgba(0,230,118,0.25);">
+                        <h4 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#00e676; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-plus-minus"></i> ব্যালেন্স অ্যাডজাস্টমেন্ট (Credit / Debit)
+                        </h4>
+                        <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:12px;">
+                            পার্টনারের উইথড্রযোগ্য ব্যালেন্সে বোনাস বা পেন্ডেলটি অ্যাড বা কর্তন করুন। সরাসরি MySQL ও JSON স্টোরে সেভ হবে।
+                        </p>
+
+                        <form id="cmdBalanceAdjustForm" onsubmit="handleCmdBalanceAdjust(event)">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">অ্যামাউন্ট ($ USD) *</label>
+                                    <input type="number" step="0.01" min="0.01" id="cmdAdjustAmount" class="form-control" placeholder="যেমন: 50.00" required style="font-size:0.95rem; font-weight:800; color:#00e676;" />
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">অ্যাকশন টাইপ *</label>
+                                    <select id="cmdAdjustType" class="form-control" style="font-size:0.85rem; font-weight:700;">
+                                        <option value="credit">➕ Credit (ব্যালেন্স যোগ করুন)</option>
+                                        <option value="debit">➖ Debit (ব্যালেন্স কেটে নিন)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:12px;">
+                                <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">কারণ / অ্যাডমিন নোট *</label>
+                                <input type="text" id="cmdAdjustReason" class="form-control" placeholder="যেমন: Special performance bonus / referral contest reward" required style="font-size:0.85rem;" />
+                            </div>
+
+                            <button type="submit" class="btn-gold" id="btnCmdApplyAdjust" style="width:100%; padding:10px; font-size:0.88rem; font-weight:800;">
+                                <i class="fas fa-check-circle"></i> ব্যালেন্স অ্যাডজাস্টমেন্ট প্রয়োগ করুন
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Commission Rates Override -->
+                    <div class="glass" style="padding:1.25rem; border-radius:14px; border:1px solid rgba(245,176,65,0.25);">
+                        <h4 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:var(--gold); display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-percentage"></i> কমিশন হার ও ডিসকাউন্ট কন্ট্রোল
+                        </h4>
+                        <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:12px;">
+                            ডিফল্ট বা ডাইনামিক টিয়ার রেটের বদলে পার্টনারের জন্য কাস্টম কমিশন হার নির্ধারণ করুন।
+                        </p>
+
+                        <form id="cmdRatesForm" onsubmit="handleCmdRatesSave(event)">
+                            <div style="background:rgba(0,0,0,0.25); padding:8px 12px; border-radius:8px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;">
+                                <div>
+                                    <div style="font-weight:700; font-size:0.82rem; color:#fff;">কাস্টম রেট ওভাররাইড মোড</div>
+                                    <div style="font-size:0.7rem; color:var(--text-secondary);">চালু থাকলে টিয়ার ল্যাডার বাইপাস হয়ে নির্ধারিত ফিক্সড রেট পাবে</div>
+                                </div>
+                                <input type="checkbox" id="cmdUseCustomRateToggle" style="width:18px; height:18px; accent-color:#00e676; cursor:pointer;" />
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">কমিশন রেট (% শতাংশ) *</label>
+                                    <input type="number" id="cmdCommissionRateInput" class="form-control" min="1" max="60" step="0.5" required style="font-size:0.95rem; font-weight:800; color:#00e676;" />
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">ট্রেডার ডিসকাউন্ট (% শতাংশ) *</label>
+                                    <input type="number" id="cmdTraderDiscountInput" class="form-control" min="0" max="30" step="0.5" required style="font-size:0.95rem; font-weight:800; color:#60a5fa;" />
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-outline" id="btnCmdSaveRates" style="width:100%; padding:10px; font-size:0.88rem; font-weight:800; border-color:rgba(245,176,65,0.4); color:var(--gold);">
+                                <i class="fas fa-save"></i> কমিশন সেটিংস সেভ করুন
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- Fast Direct Commission Payout Box -->
+                <div class="glass" style="padding:1.25rem; border-radius:14px; border:1px solid rgba(16,185,129,0.25); margin-top:1.25rem;">
+                    <h4 style="margin:0 0 6px 0; font-size:0.95rem; font-weight:800; color:#10b981; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-paper-plane"></i> সরাসরি কমিশন পে-আউট প্রদান করুন (Direct Payout)
+                    </h4>
+                    <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:12px;">
+                        রিকোয়েস্ট ছাড়াই পার্টনারের ওয়ালেটে সরাসরি কমিশন পেমেন্ট রেকর্ড করুন।
+                    </p>
+
+                    <form id="cmdDirectPayoutForm" onsubmit="handleCmdDirectPayout(event)" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; align-items:flex-end;">
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">পেইড অ্যামাউন্ট ($ USD) *</label>
+                            <input type="number" step="0.01" min="1" id="cmdDirectPayoutAmount" class="form-control" placeholder="যেমন: 100.00" required style="font-size:0.9rem; font-weight:800; color:#10b981;" />
+                        </div>
+
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">পেমেন্ট মেথড *</label>
+                            <input type="text" id="cmdDirectPayoutMethod" class="form-control" placeholder="USDT (TRC-20) / Binance Pay" required style="font-size:0.85rem;" />
+                        </div>
+
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">রিসিভিং অ্যাড্রেস / Pay ID *</label>
+                            <input type="text" id="cmdDirectPayoutAddress" class="form-control" placeholder="Wallet address or UID" required style="font-size:0.85rem;" />
+                        </div>
+
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">TX Hash / Trx ID *</label>
+                            <input type="text" id="cmdDirectPayoutTxId" class="form-control" placeholder="TXID..." required style="font-size:0.85rem;" />
+                        </div>
+
+                        <button type="submit" class="btn-emerald" id="btnCmdSubmitDirectPayout" style="height:38px; padding:0 20px; font-size:0.85rem; font-weight:800; white-space:nowrap;">
+                            <i class="fas fa-check"></i> পে রেকর্ড সম্পন্ন করুন
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SUBVIEW 2: Partner Profile & Credentials -->
+            <div id="cmdPane-profile" class="cmd-subpane" style="display:none;">
+                <div class="glass" style="padding:1.5rem; border-radius:14px;">
+                    <form id="cmdProfileEditForm" onsubmit="handleCmdProfileSave(event)">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:12px;">
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">পার্টনারের নাম *</label>
+                                <input type="text" id="cmdFormName" class="form-control" required style="font-size:0.88rem;" />
+                            </div>
+
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">ইমেইল অ্যাড্রেস *</label>
+                                <input type="email" id="cmdFormEmail" class="form-control" required style="font-size:0.88rem;" />
+                            </div>
+
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">ফোন / WhatsApp</label>
+                                <input type="text" id="cmdFormPhone" class="form-control" style="font-size:0.88rem;" />
+                            </div>
+
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">দেশ (Country)</label>
+                                <input type="text" id="cmdFormCountry" class="form-control" placeholder="Bangladesh, etc." style="font-size:0.88rem;" />
+                            </div>
+
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">টেলিগ্রাম ইউজারনেম</label>
+                                <input type="text" id="cmdFormTelegram" class="form-control" placeholder="@username" style="font-size:0.88rem; color:#229ED9; font-weight:700;" />
+                            </div>
+
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">রেফারেল / প্রোমো কোড *</label>
+                                <input type="text" id="cmdFormPromoCode" class="form-control" required style="font-size:0.9rem; font-weight:800; color:var(--gold); text-transform:uppercase;" />
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom:14px;">
+                            <label style="font-size:0.75rem; font-weight:700; color:#cbd5e1; display:block; margin-bottom:4px;">অ্যাডমিন নোট / বিশেষ মন্তব্য</label>
+                            <textarea id="cmdFormNotes" class="form-control" rows="2" style="font-size:0.85rem;" placeholder="Internal admin note"></textarea>
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end; gap:10px;">
+                            <button type="submit" class="btn-gold" id="btnCmdSaveProfile" style="padding:10px 24px; font-size:0.88rem; font-weight:800;">
+                                <i class="fas fa-save"></i> প্রোফাইল তথ্য সেভ করুন
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SUBVIEW 3: Withdrawal Wallets -->
+            <div id="cmdPane-wallets" class="cmd-subpane" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h4 style="margin:0; font-size:0.95rem; font-weight:800; color:#c084fc;">
+                        পার্টনারের সেভ করা উইথড্রয়াল ওয়ালেট তালিকা
+                    </h4>
+                </div>
+
+                <div id="cmdWalletsContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:10px; margin-bottom:1.25rem;">
+                    <!-- Dynamically populated -->
+                </div>
+
+                <!-- Add Wallet on Behalf of Partner -->
+                <div class="glass" style="padding:1rem; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+                    <h5 style="margin:0 0 8px 0; font-size:0.85rem; font-weight:700; color:#fff;">
+                        + পার্টনারের জন্য নতুন ওয়ালেট যুক্ত করুন
+                    </h5>
+                    <form id="cmdAddWalletForm" onsubmit="handleCmdAddWallet(event)" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)) auto; gap:8px; align-items:flex-end;">
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:2px; display:block;">কারেন্সি</label>
+                            <select id="cmdWalletCurrency" class="form-control" style="font-size:0.82rem; height:36px;">
+                                <option value="USDT">USDT</option>
+                                <option value="TRX">TRX</option>
+                                <option value="BTC">BTC</option>
+                                <option value="Binance Pay">Binance Pay</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:2px; display:block;">নেটওয়ার্ক</label>
+                            <select id="cmdWalletNetwork" class="form-control" style="font-size:0.82rem; height:36px;">
+                                <option value="TRC-20">TRC-20</option>
+                                <option value="BEP-20">BEP-20</option>
+                                <option value="ERC-20">ERC-20</option>
+                                <option value="Binance Pay ID">Binance Pay ID</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:2px; display:block;">অ্যাড্রেস / Pay ID *</label>
+                            <input type="text" id="cmdWalletAddress" class="form-control" placeholder="Txxxxxxxxxxx" required style="font-size:0.82rem; height:36px; font-family:monospace;" />
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:2px; display:block;">লেবেল</label>
+                            <input type="text" id="cmdWalletLabel" class="form-control" placeholder="Admin Added" style="font-size:0.82rem; height:36px;" />
+                        </div>
+                        <button type="submit" class="btn-emerald" style="height:36px; font-size:0.8rem; padding:0 16px; font-weight:700;">
+                            যুক্ত করুন
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SUBVIEW 4: Referred Traders & Network -->
+            <div id="cmdPane-network" class="cmd-subpane" style="display:none;">
+                <div style="overflow-x:auto; border-radius:12px; border:1px solid rgba(255,255,255,0.07); background:rgba(10,16,28,0.7);">
+                    <table class="data-table" style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr style="font-size:0.74rem; text-transform:uppercase; color:var(--text-secondary); border-bottom:1px solid rgba(255,255,255,0.08);">
+                                <th style="padding:10px; text-align:left;">Trader ID / Name</th>
+                                <th style="padding:10px; text-align:left;">Email</th>
+                                <th style="padding:10px; text-align:left;">Country</th>
+                                <th style="padding:10px; text-align:left;">Joined</th>
+                                <th style="padding:10px; text-align:center;">Challenges</th>
+                                <th style="padding:10px; text-align:left;">Volume ($)</th>
+                                <th style="padding:10px; text-align:left;">Commission ($)</th>
+                                <th style="padding:10px; text-align:center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cmdNetworkTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SUBVIEW 5: Sales Order Log -->
+            <div id="cmdPane-orders" class="cmd-subpane" style="display:none;">
+                <div style="overflow-x:auto; border-radius:12px; border:1px solid rgba(255,255,255,0.07); background:rgba(10,16,28,0.7);">
+                    <table class="data-table" style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr style="font-size:0.74rem; text-transform:uppercase; color:var(--text-secondary); border-bottom:1px solid rgba(255,255,255,0.08);">
+                                <th style="padding:10px; text-align:left;">Date &amp; Order ID</th>
+                                <th style="padding:10px; text-align:left;">Trader</th>
+                                <th style="padding:10px; text-align:left;">Package</th>
+                                <th style="padding:10px; text-align:left;">Price ($)</th>
+                                <th style="padding:10px; text-align:center;">Rate</th>
+                                <th style="padding:10px; text-align:left;">Earned ($)</th>
+                                <th style="padding:10px; text-align:center;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cmdOrdersTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SUBVIEW 6: Payout History & Requests -->
+            <div id="cmdPane-payouts" class="cmd-subpane" style="display:none;">
+                <div style="overflow-x:auto; border-radius:12px; border:1px solid rgba(255,255,255,0.07); background:rgba(10,16,28,0.7);">
+                    <table class="data-table" style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr style="font-size:0.74rem; text-transform:uppercase; color:var(--text-secondary); border-bottom:1px solid rgba(255,255,255,0.08);">
+                                <th style="padding:10px; text-align:left;">Date</th>
+                                <th style="padding:10px; text-align:left;">Amount ($)</th>
+                                <th style="padding:10px; text-align:left;">Method</th>
+                                <th style="padding:10px; text-align:left;">Wallet / ID</th>
+                                <th style="padding:10px; text-align:left;">TX Hash / Proof</th>
+                                <th style="padding:10px; text-align:center;">Status</th>
+                                <th style="padding:10px; text-align:center;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cmdPayoutsTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 
     <!-- PARTNER MODAL: ADD / EDIT PARTNER -->
     <div class="modal-overlay" id="adminPartnerModal">
@@ -11012,17 +11408,35 @@
             });
         }
 
+        // ================= GLOBAL CURRENT PARTNER COMMAND STATE =================
+        let currentCmdPartnerId = null;
+        let currentCmdPartnerData = null;
+
         function renderAdminPartnersTable() {
             const tbody = document.getElementById('adminPartnersTableBody');
             if (!tbody) return;
 
             const q = (document.getElementById('partnerSearchInput')?.value || '').trim().toLowerCase();
+            const statusFilter = document.getElementById('partnerStatusFilter')?.value || 'all';
+
             const filtered = adminPartnersList.filter(p => {
-                if (!q) return true;
-                return (p.name || '').toLowerCase().includes(q) ||
-                       (p.email || '').toLowerCase().includes(q) ||
-                       (p.promoCode || '').toLowerCase().includes(q) ||
-                       (p.phone || '').toLowerCase().includes(q);
+                if (q) {
+                    const matchName = (p.name || '').toLowerCase().includes(q);
+                    const matchEmail = (p.email || '').toLowerCase().includes(q);
+                    const matchCode = (p.promoCode || '').toLowerCase().includes(q);
+                    const matchPhone = (p.phone || '').toLowerCase().includes(q);
+                    const matchCountry = (p.country || '').toLowerCase().includes(q);
+                    if (!matchName && !matchEmail && !matchCode && !matchPhone && !matchCountry) return false;
+                }
+
+                if (statusFilter !== 'all') {
+                    const pStatus = (p.status || 'active').toLowerCase();
+                    if (statusFilter === 'active' && pStatus !== 'active') return false;
+                    if (statusFilter === 'suspended' && pStatus !== 'suspended' && pStatus !== 'inactive') return false;
+                    if (statusFilter === 'banned' && pStatus !== 'banned') return false;
+                }
+
+                return true;
             });
 
             if (filtered.length === 0) {
@@ -11030,7 +11444,7 @@
                     <tr>
                         <td colspan="9" style="text-align:center; padding:2.5rem; color:var(--text-secondary);">
                             <i class="fas fa-handshake" style="font-size:2rem; color:var(--gold); display:block; margin-bottom:8px; opacity:0.6;"></i>
-                            ${q ? 'অনুসন্ধানের সাথে মিল পাওয়া যায়নি।' : 'এখনও কোনো পার্টনার যুক্ত করা হয়নি। "+ নতুন পার্টনার যুক্ত করুন" বাটনে ক্লিক করে প্রথম পার্টনার যুক্ত করুন।'}
+                            ${q ? 'অনুসন্ধানের সাথে মিল পাওয়া যায়নি।' : 'কোনো পার্টনার পাওয়া যায়নি। "+ নতুন পার্টনার যুক্ত করুন" বাটনে ক্লিক করে যুক্ত করুন।'}
                         </td>
                     </tr>
                 `;
@@ -11039,35 +11453,46 @@
 
             tbody.innerHTML = filtered.map(p => {
                 const isActive = (p.status === 'active');
+                const isBanned = (p.status === 'banned');
+                const rankName = (p.tierInfo && p.tierInfo.levelBadge) ? p.tierInfo.levelBadge : 'STARTER';
+
                 return `
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition:background 0.2s;">
                         <td style="padding:12px;">
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <span style="font-weight:800; color:#fff; font-size:0.9rem;">${escapeHtml(p.name)}</span>
-                                <span class="badge" style="font-size:0.65rem; padding:2px 6px; font-weight:800; border-radius:4px; ${p.tierInfo && p.tierInfo.level >= 5 ? 'background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid rgba(255,215,0,0.3);' : 'background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3);'}">
-                                    ${p.tierInfo ? p.tierInfo.levelBadge : 'BRONZE'}
-                                </span>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, #00e676, #00b0ff); color:#000; font-weight:900; font-size:0.88rem; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    ${(p.name || 'P').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <span style="font-weight:800; color:#fff; font-size:0.9rem;">${escapeHtml(p.name)}</span>
+                                        <span class="badge" style="font-size:0.65rem; padding:2px 6px; font-weight:800; border-radius:4px; ${p.tierInfo && p.tierInfo.level >= 4 ? 'background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid rgba(255,215,0,0.3);' : 'background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3);'}">
+                                            ★ ${rankName}
+                                        </span>
+                                    </div>
+                                    <div style="font-size:0.75rem; color:var(--text-secondary);">${escapeHtml(p.email)}</div>
+                                    ${p.phone ? `<div style="font-size:0.72rem; color:#60a5fa;"><i class="fab fa-whatsapp"></i> ${escapeHtml(p.phone)}</div>` : ''}
+                                </div>
                             </div>
-                            <div style="font-size:0.75rem; color:var(--text-secondary);">${escapeHtml(p.email)}</div>
-                            ${p.phone ? `<div style="font-size:0.72rem; color:#60a5fa;"><i class="fab fa-whatsapp"></i> ${escapeHtml(p.phone)}</div>` : ''}
                         </td>
                         <td style="padding:12px;">
                             <div style="display:flex; align-items:center; gap:6px;">
                                 <span style="font-family:monospace; font-weight:900; color:#ffb800; background:rgba(255,184,0,0.12); padding:3px 8px; border-radius:6px; border:1px solid rgba(255,184,0,0.3); font-size:0.85rem;">
                                     ${escapeHtml(p.promoCode)}
                                 </span>
-                                <button type="button" class="btn-sm btn-outline" onclick="copyPartnerLink('${escapeHtml(p.promoCode)}')" style="padding:3px 7px; font-size:0.7rem; border-radius:5px; cursor:pointer;" title="কপি রেফারেল লিংক">
+                                <button type="button" class="btn-sm btn-outline" onclick="copyPartnerLink('${escapeHtml(p.promoCode)}')" style="padding:3px 7px; font-size:0.7rem; border-radius:5px; cursor:pointer;" title="লিংক কপি করুন">
                                     <i class="fas fa-copy"></i>
                                 </button>
                             </div>
                             <div style="font-size:0.72rem; color:#94a3b8; margin-top:3px;">
-                                ট্রেডার ছাড়: <strong style="color:#60a5fa;">${p.traderDiscount || 5}%</strong>
+                                ডিসকাউন্ট: <strong style="color:#60a5fa;">${p.traderDiscount || 5}%</strong>
                             </div>
                         </td>
                         <td style="padding:12px; text-align:center;">
                             <span style="font-weight:900; color:#00e676; font-size:0.95rem; background:rgba(0,230,118,0.1); padding:3px 8px; border-radius:6px; border:1px solid rgba(0,230,118,0.25);">
                                 ${p.dynamicRate || p.commissionRate || 10}%
                             </span>
+                            ${p.useCustomRate ? '<div style="font-size:0.65rem; color:var(--gold); margin-top:2px;">(Custom)</div>' : ''}
                         </td>
                         <td style="padding:12px; text-align:center;">
                             <span style="font-weight:800; color:#fff; font-size:0.9rem;">${p.totalReferred || 0}</span>
@@ -11085,22 +11510,533 @@
                             ${(p.totalCommissionPaid || 0) > 0 ? `<div style="font-size:0.7rem; color:#94a3b8;">পেইড: $${p.totalCommissionPaid}</div>` : ''}
                         </td>
                         <td style="padding:12px; text-align:center;">
-                            <span style="font-size:0.72rem; padding:3px 8px; border-radius:6px; font-weight:700; ${isActive ? 'background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3);' : 'background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3);'}">
-                                ${isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'}
+                            <span style="font-size:0.72rem; padding:3px 8px; border-radius:6px; font-weight:700; ${isActive ? 'background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3);' : (isBanned ? 'background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4);' : 'background:rgba(245,176,65,0.15); color:var(--gold); border:1px solid rgba(245,176,65,0.3);')}">
+                                ${isActive ? 'সক্রিয়' : (isBanned ? 'ব্যানড' : 'সাসপেন্ড')}
                             </span>
                         </td>
                         <td style="padding:12px; text-align:center;">
                             <div style="display:inline-flex; gap:6px; align-items:center;">
-                                <button type="button" class="btn-sm btn-gold" onclick="openPayPartnerModal('${p.id}')" style="padding:4px 9px; font-size:0.74rem; border-radius:6px; cursor:pointer;" title="কমিশন পেমেন্ট দিন">
-                                    <i class="fas fa-coins"></i> পে
+                                <button type="button" class="btn-sm btn-gold" onclick="openAdminPartnerCommandModal('${p.id}')" style="padding:4px 9px; font-size:0.75rem; border-radius:6px; cursor:pointer;" title="কন্ট্রোল সেন্টার">
+                                    <i class="fas fa-sliders-h"></i> কন্ট্রোল
                                 </button>
-                                <button type="button" class="btn-sm btn-outline" onclick="openEditPartnerModal('${p.id}')" style="padding:4px 8px; font-size:0.74rem; border-radius:6px; cursor:pointer;" title="এডিট">
-                                    <i class="fas fa-edit"></i>
+                                <button type="button" class="btn-sm btn-outline" onclick="openPayPartnerModal('${p.id}')" style="padding:4px 8px; font-size:0.74rem; border-radius:6px; cursor:pointer;" title="পে করুন">
+                                    <i class="fas fa-coins"></i> পে
                                 </button>
                                 <button type="button" class="btn-sm btn-outline" onclick="handleDeletePartner('${p.id}')" style="padding:4px 8px; font-size:0.74rem; border-radius:6px; color:#f87171; border-color:rgba(239,68,68,0.3); cursor:pointer;" title="মুছে ফেলুন">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ================= ADVANCED PARTNER COMMAND CENTER =================
+        async function openAdminPartnerCommandModal(partnerId) {
+            currentCmdPartnerId = partnerId;
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            if (!token) return;
+
+            try {
+                const res = await fetch(`/api/admin/partners/${partnerId}/details`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (!data.success || !data.partner) {
+                    showToast(data.message || 'পার্টনার তথ্য লোড করা যায়নি', 'error');
+                    return;
+                }
+
+                currentCmdPartnerData = data;
+                const p = data.partner;
+                const tier = data.tierInfo || {};
+
+                // Header Profile Details
+                const avatar = document.getElementById('cmdPartnerAvatar');
+                if (avatar) avatar.innerText = (p.name || 'P').charAt(0).toUpperCase();
+
+                const nameEl = document.getElementById('cmdPartnerName');
+                if (nameEl) nameEl.innerText = p.name || 'Partner';
+
+                const rankEl = document.getElementById('cmdPartnerRankBadge');
+                if (rankEl) {
+                    rankEl.innerText = `★ ${tier.levelBadge || 'STARTER'}`;
+                    rankEl.style.background = tier.level >= 4 ? 'rgba(255,215,0,0.15)' : 'rgba(0,230,118,0.15)';
+                    rankEl.style.color = tier.level >= 4 ? '#ffd700' : '#00e676';
+                }
+
+                const statusEl = document.getElementById('cmdPartnerStatusBadge');
+                const isAct = (p.status === 'active');
+                if (statusEl) {
+                    statusEl.innerText = (p.status || 'ACTIVE').toUpperCase();
+                    statusEl.style.background = isAct ? 'rgba(0,230,118,0.15)' : 'rgba(239,68,68,0.15)';
+                    statusEl.style.color = isAct ? '#00e676' : '#f87171';
+                }
+
+                const quickStatus = document.getElementById('cmdPartnerQuickStatusSelect');
+                if (quickStatus) quickStatus.value = p.status || 'active';
+
+                const emailEl = document.getElementById('cmdPartnerEmail');
+                if (emailEl) emailEl.innerText = p.email || '';
+
+                const phoneEl = document.getElementById('cmdPartnerPhone');
+                if (phoneEl) phoneEl.innerHTML = p.phone ? `<i class="fab fa-whatsapp"></i> ${escapeHtml(p.phone)}` : '';
+
+                const countryEl = document.getElementById('cmdPartnerCountry');
+                if (countryEl) countryEl.innerHTML = p.country ? `<i class="fas fa-globe"></i> ${escapeHtml(p.country)}` : '';
+
+                const codeEl = document.getElementById('cmdPartnerPromoCode');
+                if (codeEl) codeEl.innerText = p.promoCode || 'CODE';
+
+                // Financial KPI Metrics
+                const withEl = document.getElementById('cmdStatWithdrawable');
+                if (withEl) withEl.innerText = `$${(p.withdrawableCommission || 0).toFixed(2)}`;
+
+                const adjNote = document.getElementById('cmdStatAdjustmentNote');
+                if (adjNote) adjNote.innerText = `Includes $${(p.balanceAdjustment || 0).toFixed(2)} manual adjustments`;
+
+                const volEl = document.getElementById('cmdStatSalesVolume');
+                if (volEl) volEl.innerText = `$${(p.totalSalesVolume || p.totalSales || 0).toFixed(2)}`;
+
+                const refCountEl = document.getElementById('cmdStatReferredTradersCount');
+                if (refCountEl) refCountEl.innerText = (data.referredUsers || []).length;
+
+                const earnEl = document.getElementById('cmdStatEarned');
+                if (earnEl) earnEl.innerText = `$${(p.totalCommissionEarned || 0).toFixed(2)}`;
+
+                const paidEl = document.getElementById('cmdStatPaid');
+                if (paidEl) paidEl.innerText = `$${(p.totalCommissionPaid || 0).toFixed(2)}`;
+
+                // Initialize Forms
+                // Tab 1: Rates
+                const customToggle = document.getElementById('cmdUseCustomRateToggle');
+                if (customToggle) customToggle.checked = Boolean(p.useCustomRate);
+
+                const commRateInput = document.getElementById('cmdCommissionRateInput');
+                if (commRateInput) commRateInput.value = p.commissionRate || 10;
+
+                const discountInput = document.getElementById('cmdTraderDiscountInput');
+                if (discountInput) discountInput.value = p.traderDiscount || 5;
+
+                // Direct Payout Defaults
+                const dirAddress = document.getElementById('cmdDirectPayoutAddress');
+                if (dirAddress) {
+                    const firstWallet = (p.wallets && p.wallets.length > 0) ? p.wallets[0].address : (p.payoutDetails || '');
+                    dirAddress.value = firstWallet;
+                }
+                const dirMethod = document.getElementById('cmdDirectPayoutMethod');
+                if (dirMethod) {
+                    const firstWalletMethod = (p.wallets && p.wallets.length > 0) ? `${p.wallets[0].currency} (${p.wallets[0].network})` : (p.payoutMethod || 'Binance Pay');
+                    dirMethod.value = firstWalletMethod;
+                }
+
+                // Tab 2: Profile Inputs
+                document.getElementById('cmdFormName').value = p.name || '';
+                document.getElementById('cmdFormEmail').value = p.email || '';
+                document.getElementById('cmdFormPhone').value = p.phone || '';
+                document.getElementById('cmdFormCountry').value = p.country || '';
+                document.getElementById('cmdFormTelegram').value = p.telegram || '';
+                document.getElementById('cmdFormPromoCode').value = p.promoCode || '';
+                document.getElementById('cmdFormNotes').value = p.notes || '';
+
+                // Tab 3: Wallets render
+                renderCmdWallets(p.wallets || []);
+
+                // Tab 4: Network render
+                renderCmdNetwork(data.referredUsers || []);
+
+                // Tab 5: Orders render
+                renderCmdOrders(data.sales || []);
+
+                // Tab 6: Payouts render
+                renderCmdPayouts(data.payouts || []);
+
+                // Default to balance subtab
+                switchCmdSubtab('balance');
+
+                openModal('adminPartnerCommandModal');
+            } catch (err) {
+                showToast('ত্রুটি: ' + err.message, 'error');
+            }
+        }
+
+        function switchCmdSubtab(tabKey) {
+            document.querySelectorAll('.cmd-tab-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`btnCmdTab-${tabKey}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            document.querySelectorAll('.cmd-subpane').forEach(p => p.style.display = 'none');
+            const targetPane = document.getElementById(`cmdPane-${tabKey}`);
+            if (targetPane) targetPane.style.display = 'block';
+        }
+
+        function copyCmdPartnerCode() {
+            if (!currentCmdPartnerData || !currentCmdPartnerData.partner) return;
+            const code = currentCmdPartnerData.partner.promoCode;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast(`প্রোমো কোড "${code}" কপি হয়েছে!`, 'success');
+            });
+        }
+
+        function openCmdPartnerPortalPreview() {
+            if (!currentCmdPartnerId) return;
+            window.open(`/partner?impersonate=${currentCmdPartnerId}&tab=overview`, '_blank');
+        }
+
+        async function handleAdminQuickStatusChange(newStatus) {
+            if (!currentCmdPartnerId) return;
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            try {
+                const res = await fetch(`/api/admin/partners/${currentCmdPartnerId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`পার্টনার স্ট্যাটাস "${newStatus}" এ পরিবর্তিত হয়েছে!`, 'success');
+                    openAdminPartnerCommandModal(currentCmdPartnerId);
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (e) {
+                showToast('ত্রুটি: ' + e.message, 'error');
+            }
+        }
+
+        async function handleCmdBalanceAdjust(e) {
+            e.preventDefault();
+            if (!currentCmdPartnerId) return;
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+            const amount = parseFloat(document.getElementById('cmdAdjustAmount').value);
+            const type = document.getElementById('cmdAdjustType').value;
+            const reason = document.getElementById('cmdAdjustReason').value.trim();
+
+            if (!amount || amount <= 0) {
+                showToast('অনুগ্রহ করে সঠিক অ্যামাউন্ট দিন', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btnCmdApplyAdjust');
+            if (btn) btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/admin/partners/${currentCmdPartnerId}/adjust-balance`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ amount, type, reason })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'ব্যালেন্স সফলভাবে অ্যাডজাস্ট করা হয়েছে!', 'success');
+                    document.getElementById('cmdBalanceAdjustForm').reset();
+                    openAdminPartnerCommandModal(currentCmdPartnerId);
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('ত্রুটি: ' + err.message, 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function handleCmdRatesSave(e) {
+            e.preventDefault();
+            if (!currentCmdPartnerId) return;
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+
+            const useCustomRate = document.getElementById('cmdUseCustomRateToggle').checked;
+            const commissionRate = parseFloat(document.getElementById('cmdCommissionRateInput').value);
+            const traderDiscount = parseFloat(document.getElementById('cmdTraderDiscountInput').value);
+
+            const btn = document.getElementById('btnCmdSaveRates');
+            if (btn) btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/admin/partners/${currentCmdPartnerId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ useCustomRate, commissionRate, traderDiscount })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('কমিশন হার সফলভাবে সেভ হয়েছে!', 'success');
+                    openAdminPartnerCommandModal(currentCmdPartnerId);
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('ত্রুটি: ' + err.message, 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function handleCmdDirectPayout(e) {
+            e.preventDefault();
+            if (!currentCmdPartnerId) return;
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+
+            const amount = parseFloat(document.getElementById('cmdDirectPayoutAmount').value);
+            const paymentMethod = document.getElementById('cmdDirectPayoutMethod').value.trim();
+            const payoutAddress = document.getElementById('cmdDirectPayoutAddress').value.trim();
+            const txId = document.getElementById('cmdDirectPayoutTxId').value.trim();
+
+            const btn = document.getElementById('btnCmdSubmitDirectPayout');
+            if (btn) btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/admin/partners/${currentCmdPartnerId}/payout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ amount, paymentMethod, payoutAddress, txId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'পে-আউট সফলভাবে রেকর্ড করা হয়েছে!', 'success');
+                    document.getElementById('cmdDirectPayoutForm').reset();
+                    openAdminPartnerCommandModal(currentCmdPartnerId);
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('ত্রুটি: ' + err.message, 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function handleCmdProfileSave(e) {
+            e.preventDefault();
+            if (!currentCmdPartnerId) return;
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+
+            const name = document.getElementById('cmdFormName').value.trim();
+            const email = document.getElementById('cmdFormEmail').value.trim();
+            const phone = document.getElementById('cmdFormPhone').value.trim();
+            const country = document.getElementById('cmdFormCountry').value.trim();
+            const telegram = document.getElementById('cmdFormTelegram').value.trim();
+            const promoCode = document.getElementById('cmdFormPromoCode').value.trim();
+            const notes = document.getElementById('cmdFormNotes').value.trim();
+
+            const btn = document.getElementById('btnCmdSaveProfile');
+            if (btn) btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/admin/partners/${currentCmdPartnerId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name, email, phone, country, telegram, promoCode, notes })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('প্রোফাইল তথ্য সফলভাবে সেভ হয়েছে!', 'success');
+                    openAdminPartnerCommandModal(currentCmdPartnerId);
+                    fetchAdminPartners();
+                } else {
+                    showToast(data.message || 'আপডেট করতে ব্যর্থ', 'error');
+                }
+            } catch (err) {
+                showToast('ত্রুটি: ' + err.message, 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        function renderCmdWallets(wallets) {
+            const container = document.getElementById('cmdWalletsContainer');
+            if (!container) return;
+
+            if (!Array.isArray(wallets) || wallets.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column:1/-1; padding:1.5rem; text-align:center; color:var(--text-secondary); background:rgba(0,0,0,0.25); border-radius:10px;">
+                        পার্টনারের কোনো সেভ করা উইথড্রয়াল ওয়ালেট নেই।
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = wallets.map(w => `
+                <div class="glass" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span class="badge" style="background:rgba(0,230,118,0.15); color:#00e676; font-size:0.68rem;">${escapeHtml(w.currency)} (${escapeHtml(w.network)})</span>
+                        <button type="button" onclick="handleCmdDeleteWallet('${w.id}')" style="background:transparent; border:none; color:#f87171; cursor:pointer;" title="মুছে ফেলুন">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                    <div style="font-weight:700; color:#fff; font-size:0.8rem;">${escapeHtml(w.label || '')}</div>
+                    <code style="font-size:0.75rem; color:#60a5fa; word-break:break-all; display:block; margin-top:2px;">${escapeHtml(w.address)}</code>
+                </div>
+            `).join('');
+        }
+
+        async function handleCmdAddWallet(e) {
+            e.preventDefault();
+            if (!currentCmdPartnerId) return;
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+
+            const currency = document.getElementById('cmdWalletCurrency').value;
+            const network = document.getElementById('cmdWalletNetwork').value;
+            const address = document.getElementById('cmdWalletAddress').value.trim();
+            const label = document.getElementById('cmdWalletLabel').value.trim();
+
+            try {
+                const res = await fetch(`/api/admin/partners/${currentCmdPartnerId}/wallets`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ currency, network, address, label })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('ওয়ালেট যুক্ত করা হয়েছে!', 'success');
+                    document.getElementById('cmdAddWalletForm').reset();
+                    openAdminPartnerCommandModal(currentCmdPartnerId);
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('ত্রুটি: ' + err.message, 'error');
+            }
+        }
+
+        async function handleCmdDeleteWallet(walletId) {
+            if (!confirm('এই ওয়ালেটটি মুছে ফেলতে চান?')) return;
+            if (!currentCmdPartnerId) return;
+            const token = adminToken || localStorage.getItem('aj_admin_token') || '';
+
+            try {
+                const res = await fetch(`/api/admin/partners/${currentCmdPartnerId}/wallets/${walletId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('ওয়ালেট মুছে ফেলা হয়েছে!', 'info');
+                    openAdminPartnerCommandModal(currentCmdPartnerId);
+                } else {
+                    showToast(data.message || 'ব্যর্থ হয়েছে', 'error');
+                }
+            } catch (err) {
+                showToast('ত্রুটি: ' + err.message, 'error');
+            }
+        }
+
+        function renderCmdNetwork(users) {
+            const tbody = document.getElementById('cmdNetworkTableBody');
+            if (!tbody) return;
+
+            if (!Array.isArray(users) || users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:1.5rem; color:var(--text-secondary);">এখনও কোনো রেফার্ড ট্রেডার রেকর্ড পাওয়া যায়নি।</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = users.map(u => `
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <td style="padding:10px;">
+                        <strong style="color:#fff; font-size:0.84rem;">${escapeHtml(u.traderId || u.id)}</strong>
+                        <div style="font-size:0.72rem; color:var(--text-secondary);">${escapeHtml(u.name || '')}</div>
+                    </td>
+                    <td style="padding:10px; font-size:0.8rem; color:#cbd5e1;">${escapeHtml(u.email || '')}</td>
+                    <td style="padding:10px; font-size:0.8rem; color:#94a3b8;">${escapeHtml(u.country || 'Global')}</td>
+                    <td style="padding:10px; font-size:0.75rem; color:var(--text-secondary);">${u.joinedAt ? new Date(u.joinedAt).toLocaleDateString() : '--'}</td>
+                    <td style="padding:10px; text-align:center; font-weight:800; color:#fff;">${u.challengesCount || 0}</td>
+                    <td style="padding:10px; font-weight:800; color:var(--gold);">$${(u.totalVolume || 0).toLocaleString()}</td>
+                    <td style="padding:10px; font-weight:900; color:#00e676;">+$${(u.commissionEarned || 0).toFixed(2)}</td>
+                    <td style="padding:10px; text-align:center;">
+                        <span class="badge" style="font-size:0.68rem; ${u.challengesCount > 0 ? 'background:rgba(0,230,118,0.15); color:#00e676;' : 'background:rgba(255,255,255,0.06); color:#94a3b8;'}">
+                            ${escapeHtml(u.status || 'Active')}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderCmdOrders(orders) {
+            const tbody = document.getElementById('cmdOrdersTableBody');
+            if (!tbody) return;
+
+            if (!Array.isArray(orders) || orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:1.5rem; color:var(--text-secondary);">এখনও কোনো সেলস অর্ডার নেই।</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = orders.map(o => `
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <td style="padding:10px;">
+                        <div style="font-weight:700; color:#fff; font-size:0.82rem;">${escapeHtml(o.id)}</div>
+                        <div style="font-size:0.72rem; color:var(--text-secondary);">${o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '--'}</div>
+                    </td>
+                    <td style="padding:10px;">
+                        <div style="font-weight:700; color:#fff; font-size:0.82rem;">${escapeHtml(o.userName || 'Trader')}</div>
+                        <div style="font-size:0.72rem; color:var(--text-secondary);">${escapeHtml(o.userEmail || '')}</div>
+                    </td>
+                    <td style="padding:10px; font-size:0.82rem; color:#60a5fa; font-weight:700;">${escapeHtml(o.packageName || 'Challenge')}</td>
+                    <td style="padding:10px; font-weight:800; color:var(--gold);">$${(o.fee || 0).toLocaleString()}</td>
+                    <td style="padding:10px; text-align:center;">
+                        <span class="badge" style="background:rgba(0,230,118,0.12); color:#00e676; font-size:0.7rem;">${o.commissionRate || 10}%</span>
+                    </td>
+                    <td style="padding:10px; font-weight:900; color:#c084fc;">+$${(o.commissionAmount || 0).toFixed(2)}</td>
+                    <td style="padding:10px; text-align:center;">
+                        <span class="badge" style="font-size:0.68rem; background:rgba(0,230,118,0.15); color:#00e676;">${escapeHtml(o.status || 'Active')}</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderCmdPayouts(payouts) {
+            const tbody = document.getElementById('cmdPayoutsTableBody');
+            if (!tbody) return;
+
+            if (!Array.isArray(payouts) || payouts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:1.5rem; color:var(--text-secondary);">এখনও কোনো পে-আউট হিস্ট্রি বা রিকোয়েস্ট নেই।</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = payouts.map(p => {
+                const isPaid = (p.status === 'completed');
+                const isPend = (p.status === 'pending');
+                return `
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <td style="padding:10px; font-size:0.78rem; color:var(--text-secondary);">${p.requestedAt || p.paidAt ? new Date(p.requestedAt || p.paidAt).toLocaleDateString() : '--'}</td>
+                        <td style="padding:10px; font-weight:900; color:#00e676; font-size:0.95rem;">$${(p.amount || 0).toFixed(2)}</td>
+                        <td style="padding:10px; font-weight:700; color:#fff; font-size:0.82rem;">${escapeHtml(p.paymentMethod || 'Crypto Wallet')}</td>
+                        <td style="padding:10px;"><code style="font-size:0.75rem; color:#60a5fa;">${escapeHtml(p.payoutAddress || '')}</code></td>
+                        <td style="padding:10px; font-family:monospace; font-size:0.75rem; color:var(--gold);">${escapeHtml(p.txId || '-')}</td>
+                        <td style="padding:10px; text-align:center;">
+                            <span class="badge" style="font-size:0.68rem; ${isPaid ? 'background:rgba(16,185,129,0.15); color:#10b981;' : (isPend ? 'background:rgba(245,176,65,0.15); color:var(--gold);' : 'background:rgba(239,68,68,0.15); color:#f87171;')}">
+                                ${isPaid ? 'সম্পন্ন' : (isPend ? 'পেন্ডিং' : 'বাতিল')}
+                            </span>
+                        </td>
+                        <td style="padding:10px; text-align:center;">
+                            ${isPend ? `
+                                <button type="button" class="btn-sm btn-gold" onclick="handleAdminApprovePayoutRequest('${p.id}', ${p.amount})" style="padding:3px 8px; font-size:0.72rem; border-radius:5px; cursor:pointer;">
+                                    অ্যাপ্রুভ ও পে
+                                </button>
+                            ` : `<span style="font-size:0.72rem; color:var(--text-secondary);">--</span>`}
                         </td>
                     </tr>
                 `;

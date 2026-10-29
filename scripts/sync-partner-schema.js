@@ -151,6 +151,11 @@ async function runPartnerSchemaSync() {
   console.log('\n[2/4] Ensuring Safe Non-Destructive Column Updates...');
   const alterColumns = [
     "ALTER TABLE partners ADD COLUMN customLinks JSON DEFAULT NULL",
+    "ALTER TABLE partners ADD COLUMN wallets JSON DEFAULT NULL",
+    "ALTER TABLE partners ADD COLUMN telegram VARCHAR(100) DEFAULT ''",
+    "ALTER TABLE partners ADD COLUMN telegramData JSON DEFAULT NULL",
+    "ALTER TABLE partners ADD COLUMN country VARCHAR(100) DEFAULT ''",
+    "ALTER TABLE partners ADD COLUMN balanceAdjustment DECIMAL(12,2) DEFAULT 0",
     "ALTER TABLE partners ADD COLUMN rawPartnerData LONGTEXT DEFAULT NULL",
     "ALTER TABLE partner_payouts ADD COLUMN rawPayoutData LONGTEXT DEFAULT NULL",
     "ALTER TABLE partner_promo_requests ADD COLUMN rawRequestData LONGTEXT DEFAULT NULL",

@@ -54,3 +54,6 @@ payout_settings.json
 **/payouts*.json
 data/payouts.json
 data/payout_settings.json
+
+# Temporary scratch files
+scratch/

@@ -407,6 +407,11 @@ async function initSchema() {
       "ALTER TABLE challenges ADD COLUMN partnerCommissionStatus VARCHAR(50) DEFAULT NULL",
       "ALTER TABLE challenges ADD COLUMN promoCode VARCHAR(100) DEFAULT NULL",
       "ALTER TABLE partners ADD COLUMN customLinks JSON DEFAULT NULL",
+      "ALTER TABLE partners ADD COLUMN wallets JSON DEFAULT NULL",
+      "ALTER TABLE partners ADD COLUMN telegram VARCHAR(100) DEFAULT ''",
+      "ALTER TABLE partners ADD COLUMN telegramData JSON DEFAULT NULL",
+      "ALTER TABLE partners ADD COLUMN country VARCHAR(100) DEFAULT ''",
+      "ALTER TABLE partners ADD COLUMN balanceAdjustment DECIMAL(12,2) DEFAULT 0",
       "ALTER TABLE partners ADD COLUMN rawPartnerData LONGTEXT DEFAULT NULL",
       "ALTER TABLE partner_payouts ADD COLUMN rawPayoutData LONGTEXT DEFAULT NULL",
       "ALTER TABLE partner_promo_requests ADD COLUMN rawRequestData LONGTEXT DEFAULT NULL"
@@ -1013,6 +1018,11 @@ function formatPartner(row) {
     notes: row.notes !== undefined ? row.notes : (parsed.notes || ''),
     useCustomRate: Boolean(row.useCustomRate !== undefined ? row.useCustomRate : parsed.useCustomRate),
     customLinks: Array.isArray(cLinks) ? cLinks : [],
+    wallets: Array.isArray(row.wallets) ? row.wallets : (Array.isArray(parsed.wallets) ? parsed.wallets : []),
+    telegram: row.telegram || parsed.telegram || '',
+    telegramData: parsed.telegramData || null,
+    country: row.country || parsed.country || '',
+    balanceAdjustment: Number(row.balanceAdjustment !== undefined ? row.balanceAdjustment : (parsed.balanceAdjustment || 0)),
     createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : (parsed.createdAt || new Date().toISOString()),
     updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : (parsed.updatedAt || new Date().toISOString())
   };
