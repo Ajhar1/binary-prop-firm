@@ -15,7 +15,486 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- QRCode.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
+        // ==================== ACADEMY PROFILE (MENTOR CLASSROOM BUILDER) ====================
+        let currentAcademyProfile = null;
+        let currentAcademyFilter = 'all';
+
+        async function fetchPartnerAcademyProfile() {
+            try {
+                const res = await fetch('/api/partner/academy', {
+                    headers: { 'Authorization': `Bearer ${partnerToken}` }
+                });
+                const data = await res.json();
+                if (data.success && data.profile) {
+                    currentAcademyProfile = data.profile;
+                    return data.profile;
+                }
+            } catch (err) {
+                console.error('[ACADEMY PROFILE FETCH ERROR]:', err);
+            }
+            return null;
+        }
+
+        async function loadPartnerAcademyProfile() {
+            const profile = await fetchPartnerAcademyProfile();
+            if (profile) {
+                renderPartnerAcademyProfile(profile);
+            }
+        }
+
+        async function checkAcademyStatusBadge() {
+            const profile = await fetchPartnerAcademyProfile();
+            const badge = document.getElementById('navBadgeAcademyStatus');
+            if (!badge || !profile) return;
+
+            badge.style.display = 'inline-block';
+            if (profile.status === 'approved') {
+                badge.innerText = 'Live';
+                badge.style.background = 'rgba(16, 185, 129, 0.2)';
+                badge.style.color = '#10b981';
+            } else if (profile.status === 'pending') {
+                badge.innerText = 'Pending';
+                badge.style.background = 'rgba(245, 158, 11, 0.2)';
+                badge.style.color = '#f59e0b';
+            } else if (profile.status === 'rejected') {
+                badge.innerText = 'Rejected';
+                badge.style.background = 'rgba(244, 63, 94, 0.2)';
+                badge.style.color = '#f43f5e';
+            } else {
+                badge.innerText = 'Draft';
+                badge.style.background = 'rgba(148, 163, 184, 0.2)';
+                badge.style.color = '#94a3b8';
+            }
+        }
+
+        function renderPartnerAcademyProfile(profile) {
+            if (!profile) return;
+
+            // 1. Status banner
+            const badge = document.getElementById('academyStatusBadge');
+            const desc = document.getElementById('academyStatusDesc');
+            const iconBox = document.getElementById('academyStatusIconBox');
+            const rejAlert = document.getElementById('academyRejectionAlert');
+            const navBadge = document.getElementById('navBadgeAcademyStatus');
+
+            const status = profile.status || 'draft';
+
+            if (status === 'approved') {
+                if (badge) { badge.innerText = 'APPROVED & LIVE'; badge.style.background = 'rgba(16,185,129,0.2)'; badge.style.color = '#10b981'; }
+                if (iconBox) { iconBox.style.background = 'rgba(16,185,129,0.15)'; iconBox.style.color = '#10b981'; }
+                if (desc) desc.innerText = 'Your Academy Profile is APPROVED & LIVE! Traders can now find your academy in the Trading Academy directory.';
+                if (rejAlert) rejAlert.style.display = 'none';
+                if (navBadge) { navBadge.style.display = 'inline-block'; navBadge.innerText = 'Live'; navBadge.style.background = 'rgba(16,185,129,0.2)'; navBadge.style.color = '#10b981'; }
+            } else if (status === 'pending') {
+                if (badge) { badge.innerText = 'UNDER REVIEW'; badge.style.background = 'rgba(245,158,11,0.2)'; badge.style.color = '#f59e0b'; }
+                if (iconBox) { iconBox.style.background = 'rgba(245,158,11,0.15)'; iconBox.style.color = '#f59e0b'; }
+                if (desc) desc.innerText = 'Your Academy Profile was submitted to Super Admin and is currently under review. You will receive immediate feedback once reviewed.';
+                if (rejAlert) rejAlert.style.display = 'none';
+                if (navBadge) { navBadge.style.display = 'inline-block'; navBadge.innerText = 'Pending'; navBadge.style.background = 'rgba(245,158,11,0.2)'; navBadge.style.color = '#f59e0b'; }
+            } else if (status === 'rejected') {
+                if (badge) { badge.innerText = 'CHANGES REQUESTED'; badge.style.background = 'rgba(244,63,94,0.2)'; badge.style.color = '#f43f5e'; }
+                if (iconBox) { iconBox.style.background = 'rgba(244,63,94,0.15)'; iconBox.style.color = '#f43f5e'; }
+                if (desc) desc.innerText = 'Super Admin requested adjustments to your academy profile. Review the feedback below, make changes, and re-submit.';
+                if (rejAlert) {
+                    rejAlert.style.display = 'block';
+                    const rejText = document.getElementById('academyRejectionReasonText');
+                    if (rejText) rejText.innerText = profile.rejectionReason || 'Please review curriculum quality, video links, or course descriptions.';
+                }
+                if (navBadge) { navBadge.style.display = 'inline-block'; navBadge.innerText = 'Rejected'; navBadge.style.background = 'rgba(244,63,94,0.2)'; navBadge.style.color = '#f43f5e'; }
+            } else {
+                if (badge) { badge.innerText = 'DRAFT'; badge.style.background = 'rgba(148,163,184,0.2)'; badge.style.color = '#94a3b8'; }
+                if (iconBox) { iconBox.style.background = 'rgba(245,158,11,0.15)'; iconBox.style.color = '#f59e0b'; }
+                if (desc) desc.innerText = 'Create your custom mentor profile, add your YouTube classes, Google Drive resources, and paid courses. Submit when ready for Super Admin review!';
+                if (rejAlert) rejAlert.style.display = 'none';
+                if (navBadge) { navBadge.style.display = 'inline-block'; navBadge.innerText = 'Draft'; navBadge.style.background = 'rgba(148,163,184,0.2)'; navBadge.style.color = '#94a3b8'; }
+            }
+
+            // 2. Profile inputs
+            const nameInp = document.getElementById('acadMentorName');
+            const tagInp = document.getElementById('acadMentorTagline');
+            const bioInp = document.getElementById('acadMentorBio');
+            const avInp = document.getElementById('acadAvatarUrl');
+            const bnInp = document.getElementById('acadBannerUrl');
+            const tgInp = document.getElementById('acadTelegramChannel');
+            const ytInp = document.getElementById('acadYoutubeChannel');
+
+            if (nameInp) nameInp.value = profile.mentorName || (partnerData ? partnerData.name : '') || '';
+            if (tagInp) tagInp.value = profile.mentorTagline || '';
+            if (bioInp) bioInp.value = profile.mentorBio || '';
+            if (avInp) {
+                avInp.value = profile.avatarUrl || '';
+                updateAvatarPreview(profile.avatarUrl);
+            }
+            if (bnInp) {
+                bnInp.value = profile.bannerUrl || '';
+                updateBannerPreview(profile.bannerUrl);
+            }
+            if (tgInp) tgInp.value = profile.telegramChannel || '';
+            if (ytInp) ytInp.value = profile.youtubeChannel || '';
+
+            // 3. Curriculum Items
+            renderAcademyItemsList(profile.items || []);
+        }
+
+        function updateAvatarPreview(url) {
+            const img = document.getElementById('acadAvatarPreview');
+            if (!img) return;
+            img.src = (url && url.trim()) ? url.trim() : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';
+        }
+
+        function updateBannerPreview(url) {
+            const box = document.getElementById('acadBannerPreview');
+            if (!box) return;
+            const targetUrl = (url && url.trim()) ? url.trim() : 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80';
+            box.style.background = `url('${targetUrl}') center/cover no-repeat`;
+        }
+
+        function filterAcademyItems(type, btn) {
+            currentAcademyFilter = type;
+            document.querySelectorAll('.acad-filter-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            if (currentAcademyProfile) {
+                renderAcademyItemsList(currentAcademyProfile.items || []);
+            }
+        }
+
+        function renderAcademyItemsList(items) {
+            const container = document.getElementById('academyItemsContainer');
+            if (!container) return;
+
+            const allCount = items.length;
+            const ytCount = items.filter(it => it.type === 'youtube').length;
+            const drvCount = items.filter(it => it.type === 'drive' || it.type === 'free').length;
+            const paidCount = items.filter(it => it.type === 'paid').length;
+
+            const elAll = document.getElementById('countAllItems');
+            const elYt = document.getElementById('countYoutubeItems');
+            const elDrv = document.getElementById('countDriveItems');
+            const elPaid = document.getElementById('countPaidItems');
+
+            if (elAll) elAll.innerText = allCount;
+            if (elYt) elYt.innerText = ytCount;
+            if (elDrv) elDrv.innerText = drvCount;
+            if (elPaid) elPaid.innerText = paidCount;
+
+            let filtered = items;
+            if (currentAcademyFilter === 'youtube') filtered = items.filter(it => it.type === 'youtube');
+            if (currentAcademyFilter === 'drive') filtered = items.filter(it => it.type === 'drive' || it.type === 'free');
+            if (currentAcademyFilter === 'paid') filtered = items.filter(it => it.type === 'paid');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);">
+                        <i class="fas fa-graduation-cap" style="font-size:2.4rem; opacity:0.3; margin-bottom:10px; display:block;"></i>
+                        <h4 style="font-size:0.95rem; margin:0 0 6px 0; color:#fff;">No content items found</h4>
+                        <p style="font-size:0.8rem; margin:0 0 14px 0;">Add your YouTube videos, Google Drive classes, or paid courses to build your academy.</p>
+                        <button type="button" class="btn-emerald" onclick="openAddAcademyItemModal()" style="padding:6px 16px; font-size:0.8rem;">
+                            <i class="fas fa-plus"></i> Add First Item
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map((item, idx) => {
+                let iconHtml = '<i class="fab fa-youtube" style="color:#ef4444; font-size:1.4rem;"></i>';
+                let typeBadge = '<span style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:12px;">YouTube Video</span>';
+                let extraDetail = item.duration ? `<span style="font-size:0.75rem; color:var(--text-muted);"><i class="far fa-clock"></i> ${escapeHtml(item.duration)}</span>` : '';
+
+                if (item.type === 'drive' || item.type === 'free') {
+                    iconHtml = '<i class="fab fa-google-drive" style="color:#3b82f6; font-size:1.4rem;"></i>';
+                    typeBadge = '<span style="background:rgba(59,130,246,0.15); color:#60a5fa; font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:12px;">Free Drive Resource</span>';
+                    extraDetail = `<span style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-file-alt"></i> ${escapeHtml(item.resourceType || 'Resource')}</span>`;
+                } else if (item.type === 'paid') {
+                    iconHtml = '<i class="fas fa-gem" style="color:var(--gold); font-size:1.4rem;"></i>';
+                    typeBadge = '<span style="background:rgba(245,176,65,0.15); color:var(--gold); font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:12px;">VIP Paid Course</span>';
+                    extraDetail = `<span style="font-size:0.8rem; font-weight:800; color:var(--emerald);">${item.currency === 'BDT' ? '৳' : '$'}${item.price || 0}</span>`;
+                }
+
+                return `
+                    <div class="academy-item-card">
+                        <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
+                            <div style="width:38px; height:38px; border-radius:10px; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                ${iconHtml}
+                            </div>
+                            <div style="min-width:0; flex:1;">
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px; flex-wrap:wrap;">
+                                    ${typeBadge}
+                                    ${extraDetail}
+                                </div>
+                                <h4 style="margin:0; font-size:0.88rem; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    ${escapeHtml(item.title)}
+                                </h4>
+                                <p style="margin:2px 0 0 0; font-size:0.75rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    ${escapeHtml(item.description || item.category || 'No extra notes')}
+                                </p>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                            <button type="button" class="btn-action" onclick="openEditAcademyItem('${item.id}')" title="Edit Item" style="background:rgba(255,255,255,0.06); border:none; color:#fff; width:30px; height:30px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-edit" style="font-size:0.75rem;"></i>
+                            </button>
+                            <button type="button" class="btn-action" onclick="deleteAcademyItem('${item.id}')" title="Delete Item" style="background:rgba(244,63,94,0.12); border:none; color:var(--rose); width:30px; height:30px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-trash-alt" style="font-size:0.75rem;"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectAcademyModalType(type) {
+            document.getElementById('modalItemType').value = type;
+            document.querySelectorAll('.acad-type-select-btn').forEach(b => b.classList.remove('active'));
+            if (type === 'youtube') {
+                const b = document.getElementById('btnTypeYoutube'); if (b) b.classList.add('active');
+                document.getElementById('fieldsYoutubeSection').style.display = 'block';
+                document.getElementById('fieldsDriveSection').style.display = 'none';
+                document.getElementById('fieldsPaidSection').style.display = 'none';
+            } else if (type === 'drive') {
+                const b = document.getElementById('btnTypeDrive'); if (b) b.classList.add('active');
+                document.getElementById('fieldsYoutubeSection').style.display = 'none';
+                document.getElementById('fieldsDriveSection').style.display = 'block';
+                document.getElementById('fieldsPaidSection').style.display = 'none';
+            } else if (type === 'paid') {
+                const b = document.getElementById('btnTypePaid'); if (b) b.classList.add('active');
+                document.getElementById('fieldsYoutubeSection').style.display = 'none';
+                document.getElementById('fieldsDriveSection').style.display = 'none';
+                document.getElementById('fieldsPaidSection').style.display = 'block';
+            }
+        }
+
+        function openAddAcademyItemModal() {
+            document.getElementById('academyModalTitle').innerText = 'Add Academy Content';
+            document.getElementById('modalItemId').value = '';
+            document.getElementById('modalItemTitle').value = '';
+            document.getElementById('modalItemDesc').value = '';
+            document.getElementById('modalYoutubeUrl').value = '';
+            document.getElementById('modalYoutubeCategory').value = 'Price Action';
+            document.getElementById('modalYoutubeDuration').value = '20:00';
+            document.getElementById('modalDriveUrl').value = '';
+            document.getElementById('modalResourceType').value = 'PDF Trading Guide & Cheatsheet';
+            document.getElementById('modalPaidPrice').value = '';
+            document.getElementById('modalPaidCurrency').value = 'USD';
+            document.getElementById('modalCourseFormat').value = 'Live Mentorship + VIP Signals';
+            document.getElementById('modalPaidBuyUrl').value = '';
+
+            selectAcademyModalType('youtube');
+            openModal('academyItemModal');
+        }
+
+        function openEditAcademyItem(id) {
+            if (!currentAcademyProfile || !Array.isArray(currentAcademyProfile.items)) return;
+            const item = currentAcademyProfile.items.find(it => it.id === id);
+            if (!item) return;
+
+            document.getElementById('academyModalTitle').innerText = 'Edit Academy Content';
+            document.getElementById('modalItemId').value = item.id;
+            document.getElementById('modalItemTitle').value = item.title || '';
+            document.getElementById('modalItemDesc').value = item.description || '';
+            document.getElementById('modalYoutubeUrl').value = item.videoUrl || '';
+            document.getElementById('modalYoutubeCategory').value = item.category || 'Price Action';
+            document.getElementById('modalYoutubeDuration').value = item.duration || '20:00';
+            document.getElementById('modalDriveUrl').value = item.driveUrl || '';
+            document.getElementById('modalResourceType').value = item.resourceType || 'PDF Trading Guide & Cheatsheet';
+            document.getElementById('modalPaidPrice').value = item.price !== undefined ? item.price : '';
+            document.getElementById('modalPaidCurrency').value = item.currency || 'USD';
+            document.getElementById('modalCourseFormat').value = item.courseFormat || 'Live Mentorship + VIP Signals';
+            document.getElementById('modalPaidBuyUrl').value = item.buyUrl || '';
+
+            selectAcademyModalType(item.type || 'youtube');
+            openModal('academyItemModal');
+        }
+
+        function handleSaveAcademyItem(event) {
+            event.preventDefault();
+            const id = document.getElementById('modalItemId').value;
+            const type = document.getElementById('modalItemType').value;
+            const title = document.getElementById('modalItemTitle').value.trim();
+            const desc = document.getElementById('modalItemDesc').value.trim();
+
+            if (!title) {
+                showToast('Please enter a lesson / content title.', 'warning');
+                return;
+            }
+
+            if (!currentAcademyProfile) {
+                currentAcademyProfile = { items: [] };
+            }
+            if (!Array.isArray(currentAcademyProfile.items)) {
+                currentAcademyProfile.items = [];
+            }
+
+            const itemObj = {
+                id: id || `item_${Date.now()}`,
+                type: type,
+                title: title,
+                description: desc,
+                createdAt: new Date().toISOString()
+            };
+
+            if (type === 'youtube') {
+                const yUrl = document.getElementById('modalYoutubeUrl').value.trim();
+                if (!yUrl) {
+                    showToast('Please provide a YouTube video URL.', 'warning');
+                    return;
+                }
+                itemObj.videoUrl = yUrl;
+                itemObj.category = document.getElementById('modalYoutubeCategory').value.trim() || 'Strategy';
+                itemObj.duration = document.getElementById('modalYoutubeDuration').value.trim() || '15:00';
+            } else if (type === 'drive') {
+                const dUrl = document.getElementById('modalDriveUrl').value.trim();
+                if (!dUrl) {
+                    showToast('Please provide a Google Drive or resource link.', 'warning');
+                    return;
+                }
+                itemObj.driveUrl = dUrl;
+                itemObj.resourceType = document.getElementById('modalResourceType').value;
+            } else if (type === 'paid') {
+                const price = parseFloat(document.getElementById('modalPaidPrice').value) || 0;
+                const buyUrl = document.getElementById('modalPaidBuyUrl').value.trim();
+                if (!buyUrl) {
+                    showToast('Please provide an enrollment link or Telegram contact link.', 'warning');
+                    return;
+                }
+                itemObj.price = price;
+                itemObj.currency = document.getElementById('modalPaidCurrency').value;
+                itemObj.courseFormat = document.getElementById('modalCourseFormat').value.trim() || 'VIP Mentorship';
+                itemObj.buyUrl = buyUrl;
+            }
+
+            if (id) {
+                const existingIdx = currentAcademyProfile.items.findIndex(it => it.id === id);
+                if (existingIdx !== -1) {
+                    currentAcademyProfile.items[existingIdx] = { ...currentAcademyProfile.items[existingIdx], ...itemObj };
+                }
+            } else {
+                currentAcademyProfile.items.push(itemObj);
+            }
+
+            closeModal('academyItemModal');
+            renderAcademyItemsList(currentAcademyProfile.items);
+            showToast('Content added to curriculum! Remember to click "Save Profile Draft" or "Submit for Review".', 'success');
+        }
+
+        function deleteAcademyItem(id) {
+            if (!currentAcademyProfile || !Array.isArray(currentAcademyProfile.items)) return;
+            if (!confirm('Are you sure you want to remove this item from your academy?')) return;
+
+            currentAcademyProfile.items = currentAcademyProfile.items.filter(it => it.id !== id);
+            renderAcademyItemsList(currentAcademyProfile.items);
+            showToast('Item removed from curriculum.', 'info');
+        }
+
+        async function savePartnerAcademy(action = 'draft') {
+            const mentorName = document.getElementById('acadMentorName') ? document.getElementById('acadMentorName').value.trim() : '';
+            if (!mentorName) {
+                showToast('Mentor / Instructor Name is required.', 'warning');
+                return;
+            }
+
+            const items = currentAcademyProfile ? (currentAcademyProfile.items || []) : [];
+            if (action === 'submit' && items.length === 0) {
+                showToast('Please add at least one YouTube video, Drive resource, or course before submitting.', 'warning');
+                return;
+            }
+
+            const payload = {
+                mentorName: mentorName,
+                mentorTagline: document.getElementById('acadMentorTagline') ? document.getElementById('acadMentorTagline').value.trim() : '',
+                mentorBio: document.getElementById('acadMentorBio') ? document.getElementById('acadMentorBio').value.trim() : '',
+                avatarUrl: document.getElementById('acadAvatarUrl') ? document.getElementById('acadAvatarUrl').value.trim() : '',
+                bannerUrl: document.getElementById('acadBannerUrl') ? document.getElementById('acadBannerUrl').value.trim() : '',
+                telegramChannel: document.getElementById('acadTelegramChannel') ? document.getElementById('acadTelegramChannel').value.trim() : '',
+                youtubeChannel: document.getElementById('acadYoutubeChannel') ? document.getElementById('acadYoutubeChannel').value.trim() : '',
+                socialLinks: currentAcademyProfile ? (currentAcademyProfile.socialLinks || {}) : {},
+                items: items,
+                action: action
+            };
+
+            try {
+                const res = await fetch('/api/partner/academy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${partnerToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success && data.profile) {
+                    currentAcademyProfile = data.profile;
+                    renderPartnerAcademyProfile(data.profile);
+                    showToast(data.message || 'Academy Profile updated successfully!', 'success');
+                } else {
+                    showToast(data.message || 'Failed to save academy profile.', 'error');
+                }
+            } catch (err) {
+                console.error('[SAVE ACADEMY ERROR]:', err);
+                showToast('Network error while saving academy profile.', 'error');
+            }
+        }
+
+        function previewPartnerAcademy() {
+            const mentorName = document.getElementById('acadMentorName') ? document.getElementById('acadMentorName').value.trim() : 'Mentor Name';
+            const tagline = document.getElementById('acadMentorTagline') ? document.getElementById('acadMentorTagline').value.trim() : 'Professional Trader & Mentor';
+            const bio = document.getElementById('acadMentorBio') ? document.getElementById('acadMentorBio').value.trim() : 'No biography provided yet.';
+            const avatar = document.getElementById('acadAvatarUrl') ? document.getElementById('acadAvatarUrl').value.trim() : '';
+            const banner = document.getElementById('acadBannerUrl') ? document.getElementById('acadBannerUrl').value.trim() : '';
+            const tg = document.getElementById('acadTelegramChannel') ? document.getElementById('acadTelegramChannel').value.trim() : '';
+            const yt = document.getElementById('acadYoutubeChannel') ? document.getElementById('acadYoutubeChannel').value.trim() : '';
+
+            const elName = document.getElementById('previewMentorName'); if (elName) elName.innerText = mentorName;
+            const elTag = document.getElementById('previewMentorTagline'); if (elTag) elTag.innerText = tagline;
+            const elBio = document.getElementById('previewMentorBio'); if (elBio) elBio.innerText = bio;
+            const elAv = document.getElementById('previewAvatarImg'); if (elAv) elAv.src = avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+            const elBn = document.getElementById('previewBannerBox'); if (elBn) elBn.style.background = `url('${banner || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80'}') center/cover no-repeat`;
+
+            const socBox = document.getElementById('previewSocialLinksBox');
+            if (socBox) {
+                let sHtml = '';
+                if (tg) sHtml += `<a href="${escapeHtml(tg)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#229ED9; color:#229ED9;"><i class="fab fa-telegram-plane"></i> Telegram</a>`;
+                if (yt) sHtml += `<a href="${escapeHtml(yt)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#ef4444; color:#ef4444;"><i class="fab fa-youtube"></i> YouTube</a>`;
+                socBox.innerHTML = sHtml;
+            }
+
+            const items = currentAcademyProfile ? (currentAcademyProfile.items || []) : [];
+            const countEl = document.getElementById('previewItemsCount'); if (countEl) countEl.innerText = items.length;
+            const listEl = document.getElementById('previewItemsList');
+            if (listEl) {
+                if (items.length === 0) {
+                    listEl.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:1.5rem; color:var(--text-muted);">No curriculum items yet.</div>';
+                } else {
+                    listEl.innerHTML = items.map(it => {
+                        let badge = '<span style="background:rgba(239,68,68,0.2); color:#ef4444; font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:10px;">Video</span>';
+                        let extra = it.duration ? `<span style="font-size:0.7rem; color:var(--text-muted);">${escapeHtml(it.duration)}</span>` : '';
+                        if (it.type === 'drive' || it.type === 'free') {
+                            badge = '<span style="background:rgba(59,130,246,0.2); color:#60a5fa; font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:10px;">Drive</span>';
+                            extra = `<span style="font-size:0.7rem; color:var(--text-muted);">${escapeHtml(it.resourceType || 'Free Resource')}</span>`;
+                        } else if (it.type === 'paid') {
+                            badge = '<span style="background:rgba(245,176,65,0.2); color:var(--gold); font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:10px;">VIP</span>';
+                            extra = `<span style="font-size:0.75rem; font-weight:800; color:var(--emerald);">${it.currency === 'BDT' ? '৳' : '$'}${it.price || 0}</span>`;
+                        }
+
+                        return `
+                            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                    ${badge}
+                                    ${extra}
+                                </div>
+                                <h5 style="margin:0 0 4px 0; font-size:0.85rem; font-weight:800; color:#fff;">${escapeHtml(it.title)}</h5>
+                                <p style="margin:0; font-size:0.72rem; color:var(--text-muted); line-height:1.4;">${escapeHtml(it.description || '')}</p>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            openModal('academyPreviewModal');
+        }
+
+    </script>
 
     <style>
         :root {
@@ -2349,6 +2828,63 @@
             .milestone-ladder-strip { padding-bottom: 8px; }
         }
 
+    
+        /* Academy Profile Styles */
+        .acad-filter-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .acad-filter-btn.active, .acad-filter-btn:hover {
+            background: rgba(245, 176, 65, 0.15);
+            border-color: rgba(245, 176, 65, 0.4);
+            color: var(--gold);
+        }
+        .acad-type-select-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .acad-type-select-btn.active, .acad-type-select-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--gold);
+            color: #fff;
+        }
+        .academy-item-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+        .academy-item-card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+        }
     </style>
 </head>
 <body>
@@ -3211,6 +3747,11 @@
                     <span>My Network</span>
                     <span class="nav-badge" id="navBadgeNetworkCount" style="background:rgba(96,165,250,0.18); color:#60a5fa; font-size:0.7rem; padding:1px 6px; border-radius:10px; margin-left:auto;">0</span>
                 </div>
+                <div class="nav-link" onclick="switchPartnerTab('academy', this)">
+                    <i class="fas fa-graduation-cap" style="color:#f59e0b;"></i>
+                    <span>Academy Profile</span>
+                    <span class="nav-badge" id="navBadgeAcademyStatus" style="display:none; margin-left:auto; font-size:0.68rem; padding:1px 6px; border-radius:10px; background:rgba(245,158,11,0.18); color:#f59e0b;">Draft</span>
+                </div>
                 <div class="nav-link" onclick="switchPartnerTab('challenge', this)">
                     <i class="fas fa-trophy" style="color:var(--gold);"></i>
                     <span>Challenge</span>
@@ -3718,6 +4259,151 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB: ACADEMY PROFILE (Mentor Classroom Builder) ================= -->
+                <div class="tab-panel" id="pane-academy">
+                    
+                    <!-- Academy Status & Review Alert Banner -->
+                    <div id="academyStatusBanner" class="glass" style="border-radius:18px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; border:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                        <div style="display:flex; align-items:center; gap:14px;">
+                            <div id="academyStatusIconBox" style="width:44px; height:44px; border-radius:12px; background:rgba(245,158,11,0.15); display:flex; align-items:center; justify-content:center; color:#f59e0b; font-size:1.3rem;">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <h4 style="margin:0; font-size:1.05rem; font-weight:800; color:#fff;">Academy Profile Status:</h4>
+                                    <span class="badge-status" id="academyStatusBadge" style="background:rgba(245,158,11,0.2); color:#f59e0b; font-weight:800; font-size:0.75rem; padding:3px 10px; border-radius:20px;">Draft</span>
+                                </div>
+                                <p id="academyStatusDesc" style="margin:4px 0 0 0; font-size:0.83rem; color:var(--text-muted); line-height:1.4;">
+                                    Create your custom mentor profile, add your YouTube classes, Google Drive resources, and paid courses. Submit when ready for Super Admin review!
+                                </p>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <button type="button" class="btn-outline" onclick="previewPartnerAcademy()" style="padding:7px 14px; font-size:0.82rem; border-radius:10px;">
+                                <i class="fas fa-eye"></i> Preview Profile
+                            </button>
+                            <button type="button" class="btn-gold" id="btnSubmitForReview" onclick="savePartnerAcademy('submit')" style="padding:7px 18px; font-size:0.82rem; border-radius:10px;">
+                                <i class="fas fa-paper-plane"></i> Submit for Review
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Rejection Alert Box (Shown only if rejected) -->
+                    <div id="academyRejectionAlert" class="glass" style="display:none; border-radius:16px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; border:1px solid rgba(244,63,94,0.4); background:rgba(244,63,94,0.08);">
+                        <div style="display:flex; align-items:flex-start; gap:12px;">
+                            <i class="fas fa-exclamation-triangle" style="color:var(--rose); font-size:1.4rem; margin-top:2px;"></i>
+                            <div>
+                                <h4 style="margin:0 0 4px 0; font-size:0.95rem; font-weight:800; color:var(--rose);">Review Feedback from Super Admin:</h4>
+                                <p id="academyRejectionReasonText" style="margin:0 0 8px 0; font-size:0.88rem; color:#fff; line-height:1.5; font-weight:500;">
+                                    Your academy profile needs adjustments before it can be published live.
+                                </p>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">
+                                    <i class="fas fa-info-circle"></i> Please make the requested updates to your profile or lessons below, then click "Submit for Review" again.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1.6fr; gap:1.5rem; margin-bottom:1.5rem;">
+                        
+                        <!-- LEFT COLUMN: MENTOR PROFILE SETTINGS -->
+                        <div class="glass" style="border-radius:18px; padding:1.5rem; border:1px solid rgba(255,255,255,0.08);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
+                                <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-id-card" style="color:var(--cyan);"></i> Mentor Profile
+                                </h3>
+                                <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-lock"></i> Visible to Traders</span>
+                            </div>
+
+                            <form id="partnerAcademyProfileForm" onsubmit="event.preventDefault(); savePartnerAcademy('draft');">
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Mentor / Instructor Name *</label>
+                                    <input type="text" class="form-control" id="acadMentorName" placeholder="e.g. Master Trader Shakhawat" required style="font-size:0.88rem;" />
+                                </div>
+
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Professional Tagline / Subtitle</label>
+                                    <input type="text" class="form-control" id="acadMentorTagline" placeholder="e.g. Price Action & Institutional SMC Specialist" style="font-size:0.88rem;" />
+                                </div>
+
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Biography & Mentorship Vision</label>
+                                    <textarea class="form-control" id="acadMentorBio" rows="3" placeholder="Introduce your trading background, strategies you trade, and what students will learn..." style="font-size:0.85rem; line-height:1.5;"></textarea>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Profile Avatar / Photo URL</label>
+                                    <div style="display:flex; gap:10px; align-items:center;">
+                                        <img id="acadAvatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" style="width:42px; height:42px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); flex-shrink:0;" />
+                                        <input type="url" class="form-control" id="acadAvatarUrl" placeholder="https://... photo url" oninput="updateAvatarPreview(this.value)" style="font-size:0.82rem;" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Cover Banner URL</label>
+                                    <input type="url" class="form-control" id="acadBannerUrl" placeholder="https://... cover image url" oninput="updateBannerPreview(this.value)" style="font-size:0.82rem;" />
+                                    <div id="acadBannerPreview" style="margin-top:6px; height:60px; border-radius:8px; background:url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80') center/cover no-repeat; border:1px solid rgba(255,255,255,0.1);"></div>
+                                </div>
+
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+                                    <div class="form-group">
+                                        <label style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Telegram Channel / Group</label>
+                                        <div style="position:relative;">
+                                            <i class="fab fa-telegram-plane" style="position:absolute; left:10px; top:11px; color:#229ED9; font-size:0.85rem;"></i>
+                                            <input type="text" class="form-control" id="acadTelegramChannel" placeholder="https://t.me/..." style="padding-left:30px; font-size:0.8rem;" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">YouTube Channel Link</label>
+                                        <div style="position:relative;">
+                                            <i class="fab fa-youtube" style="position:absolute; left:10px; top:11px; color:#ff0000; font-size:0.85rem;"></i>
+                                            <input type="text" class="form-control" id="acadYoutubeChannel" placeholder="https://youtube.com/@..." style="padding-left:30px; font-size:0.8rem;" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                                    <button type="submit" class="btn-outline" style="padding:8px 16px; font-size:0.82rem; border-radius:10px;">
+                                        <i class="fas fa-save"></i> Save Profile Draft
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- RIGHT COLUMN: CURRICULUM, LESSONS & COURSES MANAGER -->
+                        <div class="glass" style="border-radius:18px; padding:1.5rem; border:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1.2rem;">
+                                <div>
+                                    <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                                        <i class="fas fa-book-open" style="color:var(--emerald);"></i> Academy Curriculum
+                                    </h3>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Manage your YouTube lessons, Drive resources, and paid courses</span>
+                                </div>
+                                <button type="button" class="btn-emerald" onclick="openAddAcademyItemModal()" style="padding:8px 16px; font-size:0.82rem; border-radius:10px;">
+                                    <i class="fas fa-plus"></i> Add Class / Content
+                                </button>
+                            </div>
+
+                            <!-- Filter Pills & Summary -->
+                            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px solid rgba(255,255,255,0.06);">
+                                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                    <button type="button" class="acad-filter-btn active" onclick="filterAcademyItems('all', this)">All (<span id="countAllItems">0</span>)</button>
+                                    <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('youtube', this)"><i class="fab fa-youtube" style="color:#ef4444;"></i> Videos (<span id="countYoutubeItems">0</span>)</button>
+                                    <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('drive', this)"><i class="fab fa-google-drive" style="color:#3b82f6;"></i> Free Drive (<span id="countDriveItems">0</span>)</button>
+                                    <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('paid', this)"><i class="fas fa-gem" style="color:var(--gold);"></i> Paid Courses (<span id="countPaidItems">0</span>)</button>
+                                </div>
+                            </div>
+
+                            <!-- Items Container -->
+                            <div id="academyItemsContainer" style="flex:1; max-height:480px; overflow-y:auto; padding-right:4px;">
+                                <!-- Items injected via JS -->
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
@@ -4480,7 +5166,166 @@
 
 
     <!-- ========================================== -->
-    <!-- 4. JAVASCRIPT LOGIC                        -->
+        <!-- ACADEMY ADD/EDIT ITEM MODAL -->
+    <div class="modal-overlay" id="academyItemModal">
+        <div class="modal-box glass" style="max-width:550px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                <h3 style="font-size:1.15rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-graduation-cap" style="color:var(--gold);"></i> <span id="academyModalTitle">Add Academy Content</span>
+                </h3>
+                <button type="button" onclick="closeModal('academyItemModal')" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Content Type Selector -->
+            <div style="margin-bottom:1.25rem;">
+                <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:6px;">Select Content Type *</label>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                    <button type="button" class="acad-type-select-btn active" id="btnTypeYoutube" onclick="selectAcademyModalType('youtube')">
+                        <i class="fab fa-youtube" style="color:#ef4444; font-size:1.2rem;"></i>
+                        <span>YouTube Video</span>
+                    </button>
+                    <button type="button" class="acad-type-select-btn" id="btnTypeDrive" onclick="selectAcademyModalType('drive')">
+                        <i class="fab fa-google-drive" style="color:#3b82f6; font-size:1.2rem;"></i>
+                        <span>Free Drive Class</span>
+                    </button>
+                    <button type="button" class="acad-type-select-btn" id="btnTypePaid" onclick="selectAcademyModalType('paid')">
+                        <i class="fas fa-gem" style="color:var(--gold); font-size:1.2rem;"></i>
+                        <span>Paid Course</span>
+                    </button>
+                </div>
+            </div>
+
+            <form id="academyItemForm" onsubmit="handleSaveAcademyItem(event)">
+                <input type="hidden" id="modalItemId" value="" />
+                <input type="hidden" id="modalItemType" value="youtube" />
+
+                <!-- Common Field: Title -->
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Title / Lesson Heading *</label>
+                    <input type="text" class="form-control" id="modalItemTitle" required placeholder="e.g. Master Candlestick Reversals & Volume Flow" style="font-size:0.88rem;" />
+                </div>
+
+                <!-- TYPE 1: YOUTUBE VIDEO FIELDS -->
+                <div id="fieldsYoutubeSection">
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">YouTube Video Link or Embed URL *</label>
+                        <input type="url" class="form-control" id="modalYoutubeUrl" placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." style="font-size:0.85rem;" />
+                        <span style="font-size:0.72rem; color:var(--text-muted); margin-top:3px; display:block;">Paste normal YouTube link. We automatically convert it to secure embedded video format.</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                        <div class="form-group">
+                            <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Category / Topic</label>
+                            <input type="text" class="form-control" id="modalYoutubeCategory" placeholder="e.g. Price Action / Strategy" style="font-size:0.85rem;" />
+                        </div>
+                        <div class="form-group">
+                            <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Duration (mm:ss)</label>
+                            <input type="text" class="form-control" id="modalYoutubeDuration" placeholder="e.g. 24:15" style="font-size:0.85rem;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TYPE 2: FREE DRIVE RESOURCE FIELDS -->
+                <div id="fieldsDriveSection" style="display:none;">
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Google Drive / File URL *</label>
+                        <input type="url" class="form-control" id="modalDriveUrl" placeholder="https://drive.google.com/file/d/... or link" style="font-size:0.85rem;" />
+                        <span style="font-size:0.72rem; color:var(--text-muted); margin-top:3px; display:block;">Make sure Google Drive sharing link permissions are set to "Anyone with the link can view".</span>
+                    </div>
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Resource Type / File Format</label>
+                        <select class="form-control" id="modalResourceType" style="font-size:0.85rem;">
+                            <option value="PDF Trading Guide & Cheatsheet">PDF Trading Guide & Cheatsheet</option>
+                            <option value="Google Drive Recorded Masterclass">Google Drive Recorded Masterclass</option>
+                            <option value="Custom Trading Indicator / Template">Custom Trading Indicator / Template</option>
+                            <option value="Money Management Excel Sheet">Money Management Excel Sheet</option>
+                            <option value="Trading Journal & Strategy Rules">Trading Journal & Strategy Rules</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TYPE 3: PAID COURSE FIELDS -->
+                <div id="fieldsPaidSection" style="display:none;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                        <div class="form-group">
+                            <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Course Fee / Price *</label>
+                            <div style="display:flex; gap:6px;">
+                                <input type="number" step="0.01" min="0" class="form-control" id="modalPaidPrice" placeholder="50" style="font-size:0.85rem;" />
+                                <select class="form-control" id="modalPaidCurrency" style="width:90px; font-size:0.85rem;">
+                                    <option value="USD">USD ($)</option>
+                                    <option value="BDT">BDT (৳)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Course Format / Duration</label>
+                            <input type="text" class="form-control" id="modalCourseFormat" placeholder="e.g. 30 Days Live Mentorship" style="font-size:0.85rem;" />
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Enrollment / Buy Link or Telegram Contact *</label>
+                        <input type="text" class="form-control" id="modalPaidBuyUrl" placeholder="https://t.me/yourusername or checkout url" style="font-size:0.85rem;" />
+                        <span style="font-size:0.72rem; color:var(--text-muted); margin-top:3px; display:block;">Traders will click this link to enroll or contact you to purchase your course.</span>
+                    </div>
+                </div>
+
+                <!-- Common Field: Description / Notes -->
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Description / Curriculum Highlights</label>
+                    <textarea class="form-control" id="modalItemDesc" rows="3" placeholder="Explain what traders will learn, prerequisites, or key strategy points..." style="font-size:0.85rem; line-height:1.5;"></textarea>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn-outline" onclick="closeModal('academyItemModal')" style="padding:9px 18px; font-size:0.85rem; border-radius:10px;">Cancel</button>
+                    <button type="submit" class="btn-gold" style="padding:9px 22px; font-size:0.85rem; border-radius:10px;">
+                        <i class="fas fa-check"></i> Save to Curriculum
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ACADEMY LIVE PREVIEW MODAL -->
+    <div class="modal-overlay" id="academyPreviewModal">
+        <div class="modal-box glass" style="max-width:850px; max-height:90vh; overflow-y:auto; padding:0;">
+            <div style="position:relative; height:140px; background:#1e293b;" id="previewBannerBox">
+                <button type="button" onclick="closeModal('academyPreviewModal')" style="position:absolute; right:14px; top:14px; background:rgba(0,0,0,0.6); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="padding:1.5rem; position:relative; margin-top:-50px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:14px; margin-bottom:1rem;">
+                    <div style="display:flex; align-items:flex-end; gap:14px;">
+                        <img id="previewAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80" style="width:76px; height:76px; border-radius:50%; object-fit:cover; border:3px solid var(--gold); background:#0f172a;" />
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <h3 id="previewMentorName" style="margin:0; font-size:1.3rem; font-weight:900; color:#fff;">Mentor Name</h3>
+                                <span style="background:rgba(16,185,129,0.2); color:#10b981; font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:20px; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fas fa-check-circle"></i> Verified Mentor
+                                </span>
+                            </div>
+                            <p id="previewMentorTagline" style="margin:4px 0 0 0; color:var(--text-muted); font-size:0.85rem;">Tagline here</p>
+                        </div>
+                    </div>
+                    <div id="previewSocialLinksBox" style="display:flex; gap:8px;">
+                        <!-- Social buttons -->
+                    </div>
+                </div>
+
+                <p id="previewMentorBio" style="color:var(--text-muted); font-size:0.88rem; line-height:1.6; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.08);"></p>
+
+                <h4 style="font-size:1.05rem; font-weight:800; color:#fff; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-layer-group" style="color:var(--gold);"></i> Curriculum Preview (<span id="previewItemsCount">0</span> items)
+                </h4>
+                <div id="previewItemsList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px;">
+                    <!-- Items -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- 4. JAVASCRIPT LOGIC                        -->
     <!-- ========================================== -->
     <script>
         // State variables
@@ -4548,10 +5393,11 @@
             showPreviewReturnBar(false);
             renderDashboardData();
             fetchPartnerWallets();
+            checkAcademyStatusBadge();
 
             const params = new URLSearchParams(window.location.search);
             const targetTab = params.get('tab');
-            if (targetTab && ['overview', 'links', 'network', 'challenge', 'payouts', 'withdraw', 'wallets', 'telegram', 'account'].includes(targetTab.toLowerCase())) {
+            if (targetTab && ['overview', 'links', 'network', 'academy', 'challenge', 'payouts', 'withdraw', 'wallets', 'telegram', 'account'].includes(targetTab.toLowerCase())) {
                 switchPartnerTab(targetTab.toLowerCase());
             } else {
                 switchPartnerTab('overview');
@@ -5346,6 +6192,7 @@
                 'overview': 'Overview',
                 'links': 'My Links',
                 'network': 'My Network',
+                'academy': 'Academy Profile',
                 'challenge': 'Challenge Commissions',
                 'payouts': 'Payouts History',
                 'withdraw': 'Withdraw Funds',
@@ -5363,6 +6210,7 @@
             // Trigger data load
             if (actualKey === 'links') fetchPartnerCustomLinks();
             if (actualKey === 'network') fetchPartnerNetwork();
+            if (actualKey === 'academy') loadPartnerAcademyProfile();
             if (actualKey === 'challenge') fetchPartnerSalesLog();
             if (actualKey === 'payouts') fetchPartnerPayoutsHistory();
             if (actualKey === 'withdraw') initWithdrawTab();

@@ -389,6 +389,34 @@ async function initSchema() {
       id VARCHAR(60) PRIMARY KEY DEFAULT 'default',
       presetsData JSON DEFAULT NULL,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS academy_profiles (
+      id VARCHAR(120) PRIMARY KEY,
+      partnerId VARCHAR(120) NOT NULL,
+      partnerEmail VARCHAR(255) NOT NULL,
+      partnerName VARCHAR(255) DEFAULT '',
+      partnerCode VARCHAR(60) DEFAULT '',
+      mentorName VARCHAR(255) NOT NULL,
+      mentorTagline VARCHAR(255) DEFAULT '',
+      mentorBio TEXT DEFAULT NULL,
+      avatarUrl LONGTEXT DEFAULT NULL,
+      bannerUrl LONGTEXT DEFAULT NULL,
+      telegramChannel VARCHAR(255) DEFAULT '',
+      youtubeChannel VARCHAR(255) DEFAULT '',
+      socialLinks JSON DEFAULT NULL,
+      items JSON DEFAULT NULL,
+      status VARCHAR(50) DEFAULT 'draft',
+      rejectionReason TEXT DEFAULT NULL,
+      submittedAt DATETIME DEFAULT NULL,
+      reviewedAt DATETIME DEFAULT NULL,
+      reviewedBy VARCHAR(120) DEFAULT NULL,
+      totalItems INT DEFAULT 0,
+      rawProfileData LONGTEXT DEFAULT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_acad_partner (partnerId),
+      INDEX idx_acad_status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
   ];
 
@@ -821,6 +849,56 @@ async function autoMigrateFromJson() {
           if (existing.length === 0) {
             await savePromoPresets(prs);
           }
+        }
+      } catch (e) {}
+    }
+
+    // 14. Academy Profiles Initial Migration
+    const apFile = path.join(dataDir, 'academy_profiles.json');
+    if (fs.existsSync(apFile)) {
+      try {
+        const profiles = JSON.parse(fs.readFileSync(apFile, 'utf8') || '[]');
+        let count = 0;
+        for (const p of profiles) {
+          if (!p || !p.id) continue;
+          const [existing] = await pool.query('SELECT id FROM academy_profiles WHERE id = ? LIMIT 1', [p.id]);
+          if (existing.length === 0) {
+            await pool.query(`INSERT INTO academy_profiles (
+              id, partnerId, partnerEmail, partnerName, partnerCode, mentorName,
+              mentorTagline, mentorBio, avatarUrl, bannerUrl, telegramChannel,
+              youtubeChannel, socialLinks, items, status, rejectionReason,
+              submittedAt, reviewedAt, reviewedBy, totalItems, rawProfileData,
+              createdAt, updatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+              p.id,
+              p.partnerId || '',
+              p.partnerEmail || '',
+              p.partnerName || '',
+              p.partnerCode || '',
+              p.mentorName || p.partnerName || 'Mentor',
+              p.mentorTagline || '',
+              p.mentorBio || '',
+              p.avatarUrl || null,
+              p.bannerUrl || null,
+              p.telegramChannel || '',
+              p.youtubeChannel || '',
+              p.socialLinks ? JSON.stringify(p.socialLinks) : null,
+              p.items ? JSON.stringify(p.items) : '[]',
+              p.status || 'draft',
+              p.rejectionReason || null,
+              toMySqlDateTime(p.submittedAt),
+              toMySqlDateTime(p.reviewedAt),
+              p.reviewedBy || null,
+              Array.isArray(p.items) ? p.items.length : 0,
+              JSON.stringify(p),
+              toMySqlDateTime(p.createdAt) || new Date(),
+              toMySqlDateTime(p.updatedAt) || new Date()
+            ]);
+            count++;
+          }
+        }
+        if (count > 0) {
+          console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} academy profiles into MySQL.`);
         }
       } catch (e) {}
     }
@@ -2118,6 +2196,177 @@ async function savePromoPresets(presets) {
   }
 }
 
+// ==================== ACADEMY PROFILES CRUD ====================
+
+function parseAcademyProfile(row) {
+  if (!row) return null;
+  let profile = {};
+  if (row.rawProfileData) {
+    try {
+      profile = typeof row.rawProfileData === 'string' ? JSON.parse(row.rawProfileData) : row.rawProfileData;
+    } catch (e) {
+      profile = {};
+    }
+  }
+  return {
+    ...profile,
+    id: row.id,
+    partnerId: row.partnerId,
+    partnerEmail: row.partnerEmail,
+    partnerName: row.partnerName,
+    partnerCode: row.partnerCode,
+    mentorName: row.mentorName,
+    mentorTagline: row.mentorTagline,
+    mentorBio: row.mentorBio,
+    avatarUrl: row.avatarUrl,
+    bannerUrl: row.bannerUrl,
+    telegramChannel: row.telegramChannel,
+    youtubeChannel: row.youtubeChannel,
+    socialLinks: (row.socialLinks && typeof row.socialLinks === 'string') ? JSON.parse(row.socialLinks) : (row.socialLinks || profile.socialLinks || {}),
+    items: (row.items && typeof row.items === 'string') ? JSON.parse(row.items) : (row.items || profile.items || []),
+    status: row.status || 'draft',
+    rejectionReason: row.rejectionReason,
+    submittedAt: row.submittedAt,
+    reviewedAt: row.reviewedAt,
+    reviewedBy: row.reviewedBy,
+    totalItems: row.totalItems || (Array.isArray(profile.items) ? profile.items.length : 0),
+    createdAt: row.createdAt || profile.createdAt,
+    updatedAt: row.updatedAt || profile.updatedAt
+  };
+}
+
+async function getAllAcademyProfiles() {
+  if (!isMySqlActive()) return null;
+  try {
+    const [rows] = await pool.query('SELECT * FROM academy_profiles ORDER BY updatedAt DESC');
+    return rows.map(parseAcademyProfile);
+  } catch (err) {
+    console.error('[DATABASE GET ALL ACADEMY PROFILES ERROR]:', err.message);
+    return null;
+  }
+}
+
+async function getAcademyProfileById(id) {
+  if (!isMySqlActive() || !id) return null;
+  try {
+    const [rows] = await pool.query('SELECT * FROM academy_profiles WHERE id = ? LIMIT 1', [id]);
+    return rows.length > 0 ? parseAcademyProfile(rows[0]) : null;
+  } catch (err) {
+    console.error('[DATABASE GET ACADEMY PROFILE BY ID ERROR]:', err.message);
+    return null;
+  }
+}
+
+async function getAcademyProfileByPartnerId(partnerId) {
+  if (!isMySqlActive() || !partnerId) return null;
+  try {
+    const [rows] = await pool.query('SELECT * FROM academy_profiles WHERE partnerId = ? LIMIT 1', [partnerId]);
+    return rows.length > 0 ? parseAcademyProfile(rows[0]) : null;
+  } catch (err) {
+    console.error('[DATABASE GET ACADEMY PROFILE BY PARTNER ID ERROR]:', err.message);
+    return null;
+  }
+}
+
+async function saveAcademyProfile(profile) {
+  if (!isMySqlActive() || !profile || !profile.id) return false;
+  try {
+    const [existing] = await pool.query('SELECT id FROM academy_profiles WHERE id = ? OR partnerId = ? LIMIT 1', [profile.id, profile.partnerId]);
+    const itemsCount = Array.isArray(profile.items) ? profile.items.length : 0;
+    const rawData = JSON.stringify(profile);
+
+    if (existing.length === 0) {
+      await pool.query(`INSERT INTO academy_profiles (
+        id, partnerId, partnerEmail, partnerName, partnerCode,
+        mentorName, mentorTagline, mentorBio, avatarUrl, bannerUrl,
+        telegramChannel, youtubeChannel, socialLinks, items,
+        status, rejectionReason, submittedAt, reviewedAt, reviewedBy,
+        totalItems, rawProfileData, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+        profile.id,
+        profile.partnerId || '',
+        profile.partnerEmail || '',
+        profile.partnerName || '',
+        profile.partnerCode || '',
+        profile.mentorName || profile.partnerName || 'Mentor',
+        profile.mentorTagline || '',
+        profile.mentorBio || '',
+        profile.avatarUrl || null,
+        profile.bannerUrl || null,
+        profile.telegramChannel || '',
+        profile.youtubeChannel || '',
+        profile.socialLinks ? JSON.stringify(profile.socialLinks) : null,
+        profile.items ? JSON.stringify(profile.items) : '[]',
+        profile.status || 'draft',
+        profile.rejectionReason || null,
+        toMySqlDateTime(profile.submittedAt),
+        toMySqlDateTime(profile.reviewedAt),
+        profile.reviewedBy || null,
+        itemsCount,
+        rawData,
+        toMySqlDateTime(profile.createdAt) || new Date(),
+        toMySqlDateTime(profile.updatedAt) || new Date()
+      ]);
+    } else {
+      const primaryId = existing[0].id;
+      await pool.query(`UPDATE academy_profiles SET
+        mentorName = ?, mentorTagline = ?, mentorBio = ?,
+        avatarUrl = ?, bannerUrl = ?, telegramChannel = ?, youtubeChannel = ?,
+        socialLinks = ?, items = ?, status = ?, rejectionReason = ?,
+        submittedAt = ?, reviewedAt = ?, reviewedBy = ?, totalItems = ?,
+        rawProfileData = ?, updatedAt = ?
+        WHERE id = ?`, [
+        profile.mentorName || 'Mentor',
+        profile.mentorTagline || '',
+        profile.mentorBio || '',
+        profile.avatarUrl || null,
+        profile.bannerUrl || null,
+        profile.telegramChannel || '',
+        profile.youtubeChannel || '',
+        profile.socialLinks ? JSON.stringify(profile.socialLinks) : null,
+        profile.items ? JSON.stringify(profile.items) : '[]',
+        profile.status || 'draft',
+        profile.rejectionReason || null,
+        toMySqlDateTime(profile.submittedAt),
+        toMySqlDateTime(profile.reviewedAt),
+        profile.reviewedBy || null,
+        itemsCount,
+        rawData,
+        toMySqlDateTime(profile.updatedAt) || new Date(),
+        primaryId
+      ]);
+    }
+    return true;
+  } catch (err) {
+    console.error('[DATABASE SAVE ACADEMY PROFILE ERROR]:', err.message);
+    return false;
+  }
+}
+
+async function updateAcademyProfileStatus(id, status, rejectionReason = null, reviewedBy = 'Admin') {
+  if (!isMySqlActive() || !id) return false;
+  try {
+    await pool.query(`UPDATE academy_profiles SET
+      status = ?, rejectionReason = ?, reviewedAt = NOW(), reviewedBy = ?, updatedAt = NOW()
+      WHERE id = ?`, [status, rejectionReason, reviewedBy, id]);
+    return true;
+  } catch (err) {
+    console.error('[DATABASE UPDATE ACADEMY PROFILE STATUS ERROR]:', err.message);
+    return false;
+  }
+}
+
+async function deleteAcademyProfile(id) {
+  if (!isMySqlActive() || !id) return false;
+  try {
+    await pool.query('DELETE FROM academy_profiles WHERE id = ?', [id]);
+    return true;
+  } catch (err) {
+    console.error('[DATABASE DELETE ACADEMY PROFILE ERROR]:', err.message);
+    return false;
+  }
+}
+
 async function hydrateFromMySql(dataDir) {
   if (!isMySqlActive()) return false;
   try {
@@ -2280,6 +2529,21 @@ async function hydrateFromMySql(dataDir) {
       fs.writeFileSync(prsFile, JSON.stringify(ppresets, null, 2), 'utf8');
     }
 
+    // 14. Academy Profiles Hydration
+    const academyProfiles = await getAllAcademyProfiles();
+    if (academyProfiles && academyProfiles.length > 0) {
+      const apFile = path.join(dataDir, 'academy_profiles.json');
+      const permApFile = path.join(dataDir, 'academy_profiles_permanent_store.json');
+      let existing = [];
+      try { if (fs.existsSync(apFile)) existing = JSON.parse(fs.readFileSync(apFile, 'utf8') || '[]'); } catch (e) {}
+      const apMap = new Map();
+      existing.forEach(p => { if (p && p.id) apMap.set(p.id, p); });
+      academyProfiles.forEach(p => { if (p && p.id) apMap.set(p.id, p); });
+      const merged = Array.from(apMap.values());
+      fs.writeFileSync(apFile, JSON.stringify(merged, null, 2), 'utf8');
+      fs.writeFileSync(permApFile, JSON.stringify(merged, null, 2), 'utf8');
+    }
+
     console.log('[DATABASE] ✅ Local safe cache hydrated with live MySQL data.');
     return true;
   } catch (err) {
@@ -2338,5 +2602,12 @@ module.exports = {
   deletePayout,
   getPayoutSettings,
   savePayoutSettings,
+  // Academy Profiles
+  getAllAcademyProfiles,
+  getAcademyProfileById,
+  getAcademyProfileByPartnerId,
+  saveAcademyProfile,
+  updateAcademyProfileStatus,
+  deleteAcademyProfile,
   getPool: () => pool
 };

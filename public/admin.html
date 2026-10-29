@@ -1184,6 +1184,26 @@
                 border-radius: 20px !important;
             }
         }
+    
+        .btn-subtab {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-subtab.active, .btn-subtab:hover {
+            background: rgba(245, 176, 65, 0.15);
+            border-color: rgba(245, 176, 65, 0.4);
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -1378,8 +1398,9 @@
                     <li class="nav-sub-item" id="subnav-payment-methods" onclick="switchAdminTab('payment-methods', this)">
                         <i class="fas fa-credit-card" style="color:#34d399;"></i> 8. Payment Methods
                     </li>
-                    <li class="nav-sub-item" id="subnav-courses" onclick="switchAdminTab('courses', this)">
-                        <i class="fas fa-graduation-cap" style="color:#a78bfa;"></i> 9. Trading Courses
+                    <li class="nav-sub-item" id="subnav-courses" onclick="switchAdminTab('courses', this)" style="display:flex; align-items:center;">
+                        <i class="fas fa-graduation-cap" style="color:#a78bfa;"></i> <span>9. Academy Control</span>
+                        <span class="badge-pending" id="badgeAcademyPending" style="display:none; margin-left:auto; background:#ef4444; color:#fff; font-size:10px; font-weight:800; padding:2px 7px; border-radius:10px;">0</span>
                     </li>
                 </ul>
             </li>
@@ -1887,32 +1908,115 @@
             </div>
         </div>
 
-        <!-- ==================== TAB 6: TRADING COURSE MANAGER ==================== -->
+        <!-- ==================== TAB 6: ACADEMY CONTROL (MENTORS & LESSONS) ==================== -->
         <div class="tab-content" id="pane-courses">
-            <div class="table-card glass">
-                <div class="table-card-header">
-                    <div class="table-title"><i class="fas fa-graduation-cap" style="color:var(--gold);"></i> Trading Courses</div>
-                    <button class="btn-gold" onclick="openAddCourseModal()">
-                        <i class="fas fa-plus"></i> Add Lesson
-                    </button>
+            
+            <!-- KPI Summary Row -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:1.5rem;">
+                <div class="glass" style="border-radius:16px; padding:1.25rem; border:1px solid rgba(245,158,11,0.25); background:rgba(245,158,11,0.06); display:flex; align-items:center; gap:14px;">
+                    <div style="width:48px; height:48px; border-radius:12px; background:rgba(245,158,11,0.2); display:flex; align-items:center; justify-content:center; color:#f59e0b; font-size:1.4rem;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Pending Reviews</div>
+                        <div style="font-size:1.6rem; font-weight:900; color:#f59e0b;" id="adminAcadKpiPending">0</div>
+                    </div>
                 </div>
 
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Order</th>
-                            <th>Thumbnail</th>
-                            <th>Category</th>
-                            <th>Lesson Title</th>
-                            <th>Duration</th>
-                            <th>Video Link</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="coursesTableBody">
-                        <!-- Injected -->
-                    </tbody>
-                </table>
+                <div class="glass" style="border-radius:16px; padding:1.25rem; border:1px solid rgba(16,185,129,0.25); background:rgba(16,185,129,0.06); display:flex; align-items:center; gap:14px;">
+                    <div style="width:48px; height:48px; border-radius:12px; background:rgba(16,185,129,0.2); display:flex; align-items:center; justify-content:center; color:#10b981; font-size:1.4rem;">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Approved Mentors</div>
+                        <div style="font-size:1.6rem; font-weight:900; color:#10b981;" id="adminAcadKpiApproved">0</div>
+                    </div>
+                </div>
+
+                <div class="glass" style="border-radius:16px; padding:1.25rem; border:1px solid rgba(59,130,246,0.25); background:rgba(59,130,246,0.06); display:flex; align-items:center; gap:14px;">
+                    <div style="width:48px; height:48px; border-radius:12px; background:rgba(59,130,246,0.2); display:flex; align-items:center; justify-content:center; color:#60a5fa; font-size:1.4rem;">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Community Content</div>
+                        <div style="font-size:1.6rem; font-weight:900; color:#60a5fa;" id="adminAcadKpiItems">0</div>
+                    </div>
+                </div>
+
+                <div class="glass" style="border-radius:16px; padding:1.25rem; border:1px solid rgba(245,176,65,0.25); background:rgba(245,176,65,0.06); display:flex; align-items:center; gap:14px;">
+                    <div style="width:48px; height:48px; border-radius:12px; background:rgba(245,176,65,0.2); display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:1.4rem;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px;">Official Lessons</div>
+                        <div style="font-size:1.6rem; font-weight:900; color:var(--gold);" id="adminAcadKpiOfficial">12</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subtabs & Controls Bar -->
+            <div class="table-card glass" style="margin-bottom:1.5rem;">
+                <div class="table-card-header" style="flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <button type="button" class="btn-subtab active" id="btnAcadSubPending" onclick="switchAcademySubTab('pending')">
+                            <i class="fas fa-clock" style="color:#f59e0b;"></i> Pending Reviews (<span id="acadSubCountPending">0</span>)
+                        </button>
+                        <button type="button" class="btn-subtab" id="btnAcadSubApproved" onclick="switchAcademySubTab('approved')">
+                            <i class="fas fa-check-circle" style="color:#10b981;"></i> Approved Mentors (<span id="acadSubCountApproved">0</span>)
+                        </button>
+                        <button type="button" class="btn-subtab" id="btnAcadSubAll" onclick="switchAcademySubTab('all')">
+                            <i class="fas fa-users" style="color:#60a5fa;"></i> All Profiles (<span id="acadSubCountAll">0</span>)
+                        </button>
+                        <button type="button" class="btn-subtab" id="btnAcadSubOfficial" onclick="switchAcademySubTab('official')">
+                            <i class="fas fa-shield-alt" style="color:var(--gold);"></i> Official Lessons
+                        </button>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button class="btn-gold" id="btnAdminAddOfficialLesson" onclick="openAddCourseModal()" style="display:none;">
+                            <i class="fas fa-plus"></i> Add Official Lesson
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SUBVIEW 1: MENTORS TABLE -->
+                <div id="academyMentorsTableView">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Mentor & Partner</th>
+                                <th>Tagline & Specialization</th>
+                                <th>Curriculum Breakdown</th>
+                                <th>Submitted / Updated</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="academyMentorsTableBody">
+                            <!-- Injected -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- SUBVIEW 2: OFFICIAL LESSONS TABLE (Preserved!) -->
+                <div id="academyOfficialLessonsTableView" style="display:none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Thumbnail</th>
+                                <th>Category</th>
+                                <th>Lesson Title</th>
+                                <th>Duration</th>
+                                <th>Video Link</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coursesTableBody">
+                            <!-- Injected -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -3684,7 +3788,94 @@
         </div>
     </div>
 
-    <!-- 6. PROOF VIEWER MODAL (IMAGES & VIDEOS) -->
+        <!-- ADMIN ACADEMY REVIEW & PREVIEW MODAL -->
+    <div class="modal-overlay" id="adminReviewAcademyModal">
+        <div class="modal-box glass" style="max-width:850px; max-height:90vh; overflow-y:auto; padding:0;">
+            <div style="position:relative; height:130px; background:#1e293b;" id="adminReviewBannerBox">
+                <button type="button" onclick="closeModal('adminReviewAcademyModal')" style="position:absolute; right:14px; top:14px; background:rgba(0,0,0,0.6); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="padding:1.5rem; position:relative; margin-top:-45px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:14px; margin-bottom:1rem;">
+                    <div style="display:flex; align-items:flex-end; gap:14px;">
+                        <img id="adminReviewAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80" style="width:72px; height:72px; border-radius:50%; object-fit:cover; border:3px solid var(--gold); background:#0f172a;" />
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <h3 id="adminReviewMentorName" style="margin:0; font-size:1.3rem; font-weight:900; color:#fff;">Mentor Name</h3>
+                                <span class="badge-status" id="adminReviewStatusBadge" style="font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:20px;">Pending Review</span>
+                            </div>
+                            <p id="adminReviewMentorTagline" style="margin:4px 0 0 0; color:var(--text-secondary); font-size:0.85rem;">Tagline here</p>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:4px;">Partner Info:</div>
+                        <div style="font-size:0.85rem; font-weight:800; color:#fff;" id="adminReviewPartnerText">partner@email.com</div>
+                    </div>
+                </div>
+
+                <!-- Channels / Links -->
+                <div style="display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap;" id="adminReviewSocialBox"></div>
+
+                <!-- Bio -->
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 14px; margin-bottom:1.5rem;">
+                    <div style="font-size:0.75rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">Mentor Bio & Strategy Overview</div>
+                    <p id="adminReviewMentorBio" style="margin:0; font-size:0.85rem; color:#fff; line-height:1.6;"></p>
+                </div>
+
+                <!-- Curriculum Items List -->
+                <h4 style="font-size:1.05rem; font-weight:800; color:#fff; margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-layer-group" style="color:var(--gold);"></i> Submitted Curriculum (<span id="adminReviewItemsCount">0</span> items)
+                </h4>
+                <div id="adminReviewItemsList" style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem;"></div>
+
+                <!-- Action Footer -->
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1.2rem; border-top:1px solid rgba(255,255,255,0.08); flex-wrap:wrap; gap:10px;">
+                    <div style="font-size:0.8rem; color:var(--text-secondary);" id="adminReviewFooterDate">Submitted: --</div>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" class="btn-outline" onclick="closeModal('adminReviewAcademyModal')" style="padding:8px 16px; font-size:0.85rem; border-radius:10px;">Close</button>
+                        <button type="button" class="btn-outline" id="btnAdminRejectReview" style="padding:8px 18px; font-size:0.85rem; border-radius:10px; border-color:var(--rose); color:var(--rose);">
+                            <i class="fas fa-times"></i> Reject / Request Changes
+                        </button>
+                        <button type="button" class="btn-gold" id="btnAdminApproveReview" style="padding:8px 22px; font-size:0.85rem; border-radius:10px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff;">
+                            <i class="fas fa-check-circle"></i> Approve & Publish Live
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN ACADEMY REJECT REASON MODAL -->
+    <div class="modal-overlay" id="adminRejectAcademyModal">
+        <div class="modal-box glass" style="max-width:500px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                <h3 style="font-size:1.15rem; font-weight:900; color:var(--rose); display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-exclamation-triangle"></i> Reject Academy Profile
+                </h3>
+                <button type="button" onclick="closeModal('adminRejectAcademyModal')" style="background:none; border:none; color:var(--text-secondary); font-size:1.2rem; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleAdminSubmitRejection(event)">
+                <input type="hidden" id="adminRejectProfileId" value="" />
+                <div style="margin-bottom:14px;">
+                    <label style="display:block; font-size:0.8rem; font-weight:700; color:var(--text-secondary); margin-bottom:6px;">Rejection Feedback Reason *</label>
+                    <textarea class="form-control" id="adminRejectionReasonInput" rows="4" required placeholder="Explain why this profile cannot be approved (e.g., video links are broken, price formatting issue, missing Google Drive sharing permission). The partner will see this reason in their portal to make adjustments..." style="font-size:0.85rem; line-height:1.5;"></textarea>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn-outline" onclick="closeModal('adminRejectAcademyModal')" style="padding:8px 16px; font-size:0.85rem; border-radius:10px;">Cancel</button>
+                    <button type="submit" class="btn-gold" style="padding:8px 20px; font-size:0.85rem; border-radius:10px; background:linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); color:#fff;">
+                        <i class="fas fa-paper-plane"></i> Send Rejection to Partner
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<!-- 6. PROOF VIEWER MODAL (IMAGES & VIDEOS) -->
     <div class="modal-overlay" id="screenshotModal">
         <div class="modal-box" style="max-width:920px; text-align:center; padding:1.25rem;">
             <button class="modal-close" onclick="closeModal('screenshotModal')">&times;</button>
@@ -4875,7 +5066,7 @@
                 'package-manage': ['Challenge Manage', 'Plan Packages, Pricing & Rules'],
                 'users': ['Users & History', 'Trader Database & Full Profile History'],
                 'submissions': ['Daily Trade Proofs', 'Verification of Daily Trader Session Proofs'],
-                'courses': ['Trading Courses', 'Trader Academy Video & Lesson Pool'],
+                'courses': ['Academy Control', 'Mentor Profiles, Pending Reviews & Academy Lessons'],
                 'payment-methods': ['Payment Methods', 'Deposit Accounts & Gateways'],
                 'partner-controller': ['Partner Controller', 'Affiliate Partners, Referral Tracking, Commissions & Payouts'],
                 'email-settings': ['Email & SMTP', 'System Automated Email & SMTP Server Config'],
@@ -5268,13 +5459,14 @@
                     populateApproveMmDropdown();
                 }
 
-                // 6. Courses
+                // 6. Courses & Academy Control
                 const cRes = await fetch('/api/admin/courses', { headers });
                 const cData = await cRes.json();
                 if (cData.success) {
                     adminCourses = cData.courses;
                     renderCoursesTable();
                 }
+                await fetchAdminAcademyProfiles();
 
                 // 7. Payment Methods
                 const pmRes = await fetch('/api/admin/payment-methods', { headers });
@@ -8173,6 +8365,383 @@
                 }
             } catch (err) {
                 console.error(err);
+            }
+        }
+
+        
+        // ==================== ACADEMY CONTROL (MENTORS & LESSONS) ====================
+        let adminAcademyProfiles = [];
+        let adminAcademySummary = { total: 0, pending: 0, approved: 0, rejected: 0, draft: 0 };
+        let adminAcademySubTab = 'pending';
+        let adminSelectedAcademyProfile = null;
+
+        async function fetchAdminAcademyProfiles() {
+            try {
+                const token = getAdminToken();
+                if (!token) return;
+                const headers = { 'Authorization': `Bearer ${token}` };
+                const res = await fetch('/api/admin/academy/profiles', { headers });
+                const data = await res.json();
+                if (data.success) {
+                    adminAcademyProfiles = data.profiles || [];
+                    adminAcademySummary = data.summary || {};
+
+                    // Update KPI cards
+                    const kpiPending = document.getElementById('adminAcadKpiPending');
+                    const kpiApproved = document.getElementById('adminAcadKpiApproved');
+                    const kpiItems = document.getElementById('adminAcadKpiItems');
+                    const kpiOfficial = document.getElementById('adminAcadKpiOfficial');
+
+                    if (kpiPending) kpiPending.innerText = adminAcademySummary.pending || 0;
+                    if (kpiApproved) kpiApproved.innerText = adminAcademySummary.approved || 0;
+                    if (kpiOfficial) kpiOfficial.innerText = (adminCourses ? adminCourses.length : 12);
+
+                    let totalItems = 0;
+                    adminAcademyProfiles.forEach(p => {
+                        totalItems += (Array.isArray(p.items) ? p.items.length : (p.totalItems || 0));
+                    });
+                    if (kpiItems) kpiItems.innerText = totalItems;
+
+                    // Update subtab counts
+                    const subPen = document.getElementById('acadSubCountPending');
+                    const subApp = document.getElementById('acadSubCountApproved');
+                    const subAll = document.getElementById('acadSubCountAll');
+                    if (subPen) subPen.innerText = adminAcademySummary.pending || 0;
+                    if (subApp) subApp.innerText = adminAcademySummary.approved || 0;
+                    if (subAll) subAll.innerText = adminAcademySummary.total || 0;
+
+                    // Update sidebar pending badge
+                    const badge = document.getElementById('badgeAcademyPending');
+                    if (badge) {
+                        if (adminAcademySummary.pending > 0) {
+                            badge.innerText = adminAcademySummary.pending;
+                            badge.style.display = 'inline-block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+
+                    renderAdminAcademyMentorsTable();
+                }
+            } catch (err) {
+                console.error('[ADMIN ACADEMY FETCH ERROR]:', err);
+            }
+        }
+
+        function switchAcademySubTab(subTab) {
+            adminAcademySubTab = subTab;
+            document.querySelectorAll('.btn-subtab').forEach(b => b.classList.remove('active'));
+
+            const tabBtnMap = {
+                'pending': 'btnAcadSubPending',
+                'approved': 'btnAcadSubApproved',
+                'all': 'btnAcadSubAll',
+                'official': 'btnAcadSubOfficial'
+            };
+            const activeBtn = document.getElementById(tabBtnMap[subTab]);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const mentorsView = document.getElementById('academyMentorsTableView');
+            const officialView = document.getElementById('academyOfficialLessonsTableView');
+            const addOfficialBtn = document.getElementById('btnAdminAddOfficialLesson');
+
+            if (subTab === 'official') {
+                if (mentorsView) mentorsView.style.display = 'none';
+                if (officialView) officialView.style.display = 'block';
+                if (addOfficialBtn) addOfficialBtn.style.display = 'inline-flex';
+                renderCoursesTable();
+            } else {
+                if (mentorsView) mentorsView.style.display = 'block';
+                if (officialView) officialView.style.display = 'none';
+                if (addOfficialBtn) addOfficialBtn.style.display = 'none';
+                renderAdminAcademyMentorsTable();
+            }
+        }
+
+        function renderAdminAcademyMentorsTable() {
+            const tbody = document.getElementById('academyMentorsTableBody');
+            if (!tbody) return;
+
+            let filtered = adminAcademyProfiles;
+            if (adminAcademySubTab === 'pending') {
+                filtered = adminAcademyProfiles.filter(p => p.status === 'pending');
+            } else if (adminAcademySubTab === 'approved') {
+                filtered = adminAcademyProfiles.filter(p => p.status === 'approved');
+            }
+
+            if (filtered.length === 0) {
+                const emptyMsg = adminAcademySubTab === 'pending'
+                    ? 'No academy profiles waiting for review right now.'
+                    : (adminAcademySubTab === 'approved' ? 'No approved mentors live yet.' : 'No mentor profiles found.');
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2.5rem; color:var(--text-secondary);">${emptyMsg}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(p => {
+                const items = Array.isArray(p.items) ? p.items : [];
+                const ytCount = items.filter(it => it.type === 'youtube').length;
+                const drvCount = items.filter(it => it.type === 'drive' || it.type === 'free').length;
+                const paidCount = items.filter(it => it.type === 'paid').length;
+
+                let statusBadge = '<span class="badge-status" style="background:rgba(245,158,11,0.2); color:#f59e0b;"><i class="fas fa-clock"></i> Pending Review</span>';
+                if (p.status === 'approved') {
+                    statusBadge = '<span class="badge-status" style="background:rgba(16,185,129,0.2); color:#10b981;"><i class="fas fa-check-circle"></i> Approved & Live</span>';
+                } else if (p.status === 'rejected') {
+                    statusBadge = '<span class="badge-status" style="background:rgba(244,63,94,0.2); color:#f43f5e;"><i class="fas fa-times-circle"></i> Rejected / Feedback</span>';
+                } else if (p.status === 'suspended') {
+                    statusBadge = '<span class="badge-status" style="background:rgba(148,163,184,0.2); color:#94a3b8;"><i class="fas fa-pause-circle"></i> Suspended</span>';
+                } else if (p.status === 'draft') {
+                    statusBadge = '<span class="badge-status" style="background:rgba(255,255,255,0.08); color:var(--text-secondary);"><i class="fas fa-pencil-alt"></i> Draft</span>';
+                }
+
+                const submittedDate = p.submittedAt ? new Date(p.submittedAt).toLocaleDateString() : (p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : '--');
+                const avatar = p.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80';
+
+                return `
+                    <tr>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <img src="${avatar}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border:2px solid var(--gold);" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80'" />
+                                <div>
+                                    <div style="font-weight:800; color:#fff; font-size:0.92rem;">${escapeHtml(p.mentorName || p.partnerName || 'Mentor')}</div>
+                                    <div style="font-size:0.75rem; color:var(--text-secondary);">${escapeHtml(p.partnerEmail || '')} ${p.partnerCode ? `&bull; <strong style="color:var(--gold);">${escapeHtml(p.partnerCode)}</strong>` : ''}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size:0.85rem; font-weight:700; color:#fff;">${escapeHtml(p.mentorTagline || 'Community Trading Mentor')}</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary); max-width:280px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(p.mentorBio || 'No bio')}</div>
+                        </td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:8px; font-size:0.78rem;">
+                                <span style="background:rgba(239,68,68,0.15); color:#ef4444; padding:2px 7px; border-radius:6px; font-weight:700;">
+                                    <i class="fab fa-youtube"></i> ${ytCount} Videos
+                                </span>
+                                <span style="background:rgba(59,130,246,0.15); color:#60a5fa; padding:2px 7px; border-radius:6px; font-weight:700;">
+                                    <i class="fab fa-google-drive"></i> ${drvCount} Drive
+                                </span>
+                                <span style="background:rgba(245,176,65,0.15); color:var(--gold); padding:2px 7px; border-radius:6px; font-weight:700;">
+                                    <i class="fas fa-gem"></i> ${paidCount} Paid
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size:0.82rem; font-weight:700; color:#fff;">${submittedDate}</div>
+                            <div style="font-size:0.72rem; color:var(--text-secondary);">${p.submittedAt ? 'Submitted' : 'Updated'}</div>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td style="text-align:right;">
+                            <div style="display:inline-flex; align-items:center; gap:6px;">
+                                <button type="button" class="btn-action" onclick="openReviewAcademyModal('${p.id}')" title="Inspect & Review Profile" style="background:rgba(59,130,246,0.15); color:#60a5fa; border:none; width:32px; height:32px; border-radius:8px; cursor:pointer;">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                ${p.status !== 'approved' ? `
+                                    <button type="button" class="btn-action" onclick="approveAcademyProfile('${p.id}')" title="Approve & Publish Live" style="background:rgba(16,185,129,0.15); color:#10b981; border:none; width:32px; height:32px; border-radius:8px; cursor:pointer;">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                ` : ''}
+                                ${p.status !== 'rejected' ? `
+                                    <button type="button" class="btn-action" onclick="openRejectAcademyModal('${p.id}')" title="Reject with Feedback" style="background:rgba(244,63,94,0.15); color:var(--rose); border:none; width:32px; height:32px; border-radius:8px; cursor:pointer;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                ` : ''}
+                                <button type="button" class="btn-action" onclick="deleteAdminAcademyProfile('${p.id}')" title="Delete Profile" style="background:rgba(255,255,255,0.06); color:var(--text-secondary); border:none; width:32px; height:32px; border-radius:8px; cursor:pointer;">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openReviewAcademyModal(profileId) {
+            const profile = adminAcademyProfiles.find(p => p.id === profileId);
+            if (!profile) return;
+            adminSelectedAcademyProfile = profile;
+
+            const nameEl = document.getElementById('adminReviewMentorName');
+            const tagEl = document.getElementById('adminReviewMentorTagline');
+            const bioEl = document.getElementById('adminReviewMentorBio');
+            const avEl = document.getElementById('adminReviewAvatarImg');
+            const bnEl = document.getElementById('adminReviewBannerBox');
+            const partnerEl = document.getElementById('adminReviewPartnerText');
+            const statusEl = document.getElementById('adminReviewStatusBadge');
+            const dateEl = document.getElementById('adminReviewFooterDate');
+            const socEl = document.getElementById('adminReviewSocialBox');
+
+            if (nameEl) nameEl.innerText = profile.mentorName || profile.partnerName || 'Mentor';
+            if (tagEl) tagEl.innerText = profile.mentorTagline || 'Community Trading Mentor';
+            if (bioEl) bioEl.innerText = profile.mentorBio || 'No bio written.';
+            if (avEl) avEl.src = profile.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+            if (bnEl) bnEl.style.background = `url('${profile.bannerUrl || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80'}') center/cover no-repeat`;
+            if (partnerEl) partnerEl.innerText = `${profile.partnerName || 'Partner'} (${profile.partnerEmail || ''}) [Code: ${profile.partnerCode || 'None'}]`;
+            if (dateEl) dateEl.innerText = `Submitted: ${profile.submittedAt ? new Date(profile.submittedAt).toLocaleString() : 'Draft'}`;
+
+            if (statusEl) {
+                statusEl.innerText = (profile.status || 'draft').toUpperCase();
+                if (profile.status === 'approved') {
+                    statusEl.style.background = 'rgba(16,185,129,0.2)'; statusEl.style.color = '#10b981';
+                } else if (profile.status === 'pending') {
+                    statusEl.style.background = 'rgba(245,158,11,0.2)'; statusEl.style.color = '#f59e0b';
+                } else if (profile.status === 'rejected') {
+                    statusEl.style.background = 'rgba(244,63,94,0.2)'; statusEl.style.color = '#f43f5e';
+                } else {
+                    statusEl.style.background = 'rgba(255,255,255,0.08)'; statusEl.style.color = '#94a3b8';
+                }
+            }
+
+            if (socEl) {
+                let sHtml = '';
+                if (profile.telegramChannel) {
+                    sHtml += `<a href="${escapeHtml(profile.telegramChannel)}" target="_blank" class="btn-outline" style="padding:4px 10px; font-size:0.75rem; border-color:#229ED9; color:#229ED9;"><i class="fab fa-telegram-plane"></i> Telegram</a>`;
+                }
+                if (profile.youtubeChannel) {
+                    sHtml += `<a href="${escapeHtml(profile.youtubeChannel)}" target="_blank" class="btn-outline" style="padding:4px 10px; font-size:0.75rem; border-color:#ef4444; color:#ef4444;"><i class="fab fa-youtube"></i> YouTube</a>`;
+                }
+                socEl.innerHTML = sHtml;
+            }
+
+            // Items list
+            const items = Array.isArray(profile.items) ? profile.items : [];
+            const countEl = document.getElementById('adminReviewItemsCount');
+            if (countEl) countEl.innerText = items.length;
+
+            const itemsBox = document.getElementById('adminReviewItemsList');
+            if (itemsBox) {
+                if (items.length === 0) {
+                    itemsBox.innerHTML = '<div style="text-align:center; padding:1.5rem; color:var(--text-secondary);">No curriculum items submitted.</div>';
+                } else {
+                    itemsBox.innerHTML = items.map((it, idx) => {
+                        let icon = '<i class="fab fa-youtube" style="color:#ef4444; font-size:1.3rem;"></i>';
+                        let badge = '<span style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:0.7rem; font-weight:800; padding:2px 7px; border-radius:10px;">YouTube Video</span>';
+                        let linkHtml = it.videoUrl ? `<a href="${escapeHtml(it.videoUrl)}" target="_blank" style="color:#60a5fa; font-size:0.78rem; text-decoration:none;"><i class="fas fa-external-link-alt"></i> Watch Video</a>` : '';
+
+                        if (it.type === 'drive' || it.type === 'free') {
+                            icon = '<i class="fab fa-google-drive" style="color:#3b82f6; font-size:1.3rem;"></i>';
+                            badge = `<span style="background:rgba(59,130,246,0.15); color:#60a5fa; font-size:0.7rem; font-weight:800; padding:2px 7px; border-radius:10px;">Drive: ${escapeHtml(it.resourceType || 'Free Resource')}</span>`;
+                            linkHtml = it.driveUrl ? `<a href="${escapeHtml(it.driveUrl)}" target="_blank" style="color:#10b981; font-size:0.78rem; text-decoration:none;"><i class="fas fa-download"></i> View Drive Link</a>` : '';
+                        } else if (it.type === 'paid') {
+                            icon = '<i class="fas fa-gem" style="color:var(--gold); font-size:1.3rem;"></i>';
+                            badge = `<span style="background:rgba(245,176,65,0.15); color:var(--gold); font-size:0.7rem; font-weight:800; padding:2px 7px; border-radius:10px;">Paid Course (${it.currency === 'BDT' ? '৳' : '$'}${it.price || 0})</span>`;
+                            linkHtml = it.buyUrl ? `<a href="${escapeHtml(it.buyUrl)}" target="_blank" style="color:var(--gold); font-size:0.78rem; text-decoration:none;"><i class="fas fa-shopping-cart"></i> Buy / Enroll Link</a>` : '';
+                        }
+
+                        return `
+                            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                                <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
+                                    <div style="width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                        ${icon}
+                                    </div>
+                                    <div style="min-width:0; flex:1;">
+                                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+                                            ${badge}
+                                            ${it.duration ? `<span style="font-size:0.72rem; color:var(--text-secondary);"><i class="far fa-clock"></i> ${escapeHtml(it.duration)}</span>` : ''}
+                                        </div>
+                                        <div style="font-weight:800; font-size:0.88rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(it.title)}</div>
+                                        <div style="font-size:0.75rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(it.description || '')}</div>
+                                    </div>
+                                </div>
+                                <div style="flex-shrink:0;">
+                                    ${linkHtml}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Wire action buttons inside review modal
+            const btnApprove = document.getElementById('btnAdminApproveReview');
+            const btnReject = document.getElementById('btnAdminRejectReview');
+            if (btnApprove) btnApprove.onclick = () => approveAcademyProfile(profile.id);
+            if (btnReject) btnReject.onclick = () => { closeModal('adminReviewAcademyModal'); openRejectAcademyModal(profile.id); };
+
+            openModal('adminReviewAcademyModal');
+        }
+
+        async function approveAcademyProfile(profileId) {
+            if (!confirm('Are you sure you want to APPROVE this mentor academy profile? It will be published immediately to all traders in Trading Academy.')) return;
+            try {
+                const token = getAdminToken();
+                const res = await fetch(`/api/admin/academy/profiles/${profileId}/approve`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    closeModal('adminReviewAcademyModal');
+                    await fetchAdminAcademyProfiles();
+                } else {
+                    showToast(data.message || 'Failed to approve profile.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error approving profile.', 'error');
+            }
+        }
+
+        function openRejectAcademyModal(profileId) {
+            document.getElementById('adminRejectProfileId').value = profileId;
+            const profile = adminAcademyProfiles.find(p => p.id === profileId);
+            const input = document.getElementById('adminRejectionReasonInput');
+            if (input) input.value = profile ? (profile.rejectionReason || '') : '';
+            openModal('adminRejectAcademyModal');
+        }
+
+        async function handleAdminSubmitRejection(event) {
+            event.preventDefault();
+            const profileId = document.getElementById('adminRejectProfileId').value;
+            const rejectionReason = document.getElementById('adminRejectionReasonInput').value.trim();
+
+            if (!rejectionReason) {
+                showToast('Please provide a rejection feedback reason for the partner.', 'warning');
+                return;
+            }
+
+            try {
+                const token = getAdminToken();
+                const res = await fetch(`/api/admin/academy/profiles/${profileId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ rejectionReason })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'info');
+                    closeModal('adminRejectAcademyModal');
+                    await fetchAdminAcademyProfiles();
+                } else {
+                    showToast(data.message || 'Failed to reject profile.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error rejecting profile.', 'error');
+            }
+        }
+
+        async function deleteAdminAcademyProfile(profileId) {
+            if (!confirm('Are you sure you want to PERMANENTLY DELETE this mentor academy profile?')) return;
+            try {
+                const token = getAdminToken();
+                const res = await fetch(`/api/admin/academy/profiles/${profileId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    await fetchAdminAcademyProfiles();
+                } else {
+                    showToast(data.message || 'Failed to delete profile.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error deleting profile.', 'error');
             }
         }
 

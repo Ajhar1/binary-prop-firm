@@ -60,6 +60,8 @@ const PARTNERS_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'partners_permanent_st
 const PARTNER_PAYOUTS_FILE = path.join(DATA_DIR, 'partner_payouts.json');
 const PARTNER_SETTINGS_FILE = path.join(DATA_DIR, 'partner_settings.json');
 const PARTNER_PROMO_REQUESTS_FILE = path.join(DATA_DIR, 'partner_promo_requests.json');
+const ACADEMY_PROFILES_FILE = path.join(DATA_DIR, 'academy_profiles.json');
+const ACADEMY_PROFILES_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'academy_profiles_permanent_store.json');
 const DEFAULT_PARTNER_SETTINGS = {
   defaultCommissionRate: 10,
   traderDiscountRate: 5,
@@ -109,6 +111,9 @@ const CRITICAL_DATA_FILES = [
   // Payout stores
   PAYOUTS_FILE,
   PAYOUT_SETTINGS_FILE,
+  // Academy Profiles
+  ACADEMY_PROFILES_FILE,
+  ACADEMY_PROFILES_PERMANENT_STORE_FILE,
   // Lifelong vault
   TRADERS_VAULT_FILE
 ];
@@ -585,6 +590,71 @@ function savePartnerPromoRequests(requests, singleRequest = null) {
     } else if (Array.isArray(requests)) {
       requests.forEach(r => {
         if (r && r.id) db.savePartnerPromoRequest(r).catch(e => {});
+      });
+    }
+  }
+}
+
+// ==================== ACADEMY PROFILES HELPERS ====================
+
+function getAcademyProfiles() {
+  let profiles = readJson(ACADEMY_PROFILES_FILE, null);
+  if (!Array.isArray(profiles) || profiles.length === 0) {
+    const perm = readJson(ACADEMY_PROFILES_PERMANENT_STORE_FILE, null);
+    if (Array.isArray(perm) && perm.length > 0) {
+      profiles = perm;
+      writeJson(ACADEMY_PROFILES_FILE, profiles);
+    } else {
+      const restored = restoreSingleFileFromExternal(ACADEMY_PROFILES_FILE, true);
+      if (Array.isArray(restored) && restored.length > 0) {
+        profiles = restored;
+        writeJson(ACADEMY_PROFILES_PERMANENT_STORE_FILE, profiles);
+      } else {
+        profiles = [];
+      }
+    }
+  } else {
+    backupToExternalSafeDir(ACADEMY_PROFILES_FILE, profiles);
+    const perm = readJson(ACADEMY_PROFILES_PERMANENT_STORE_FILE, null);
+    if (!Array.isArray(perm) || perm.length === 0) {
+      writeJson(ACADEMY_PROFILES_PERMANENT_STORE_FILE, profiles);
+    }
+  }
+
+  // Live MySQL sync check in background
+  if (db && db.isMySqlActive()) {
+    db.getAllAcademyProfiles().then(sqlProfiles => {
+      if (Array.isArray(sqlProfiles) && sqlProfiles.length > 0) {
+        const pMap = new Map();
+        profiles.forEach(p => { if (p && p.id) pMap.set(p.id, p); });
+        sqlProfiles.forEach(p => { if (p && p.id) pMap.set(p.id, p); });
+        const merged = Array.from(pMap.values());
+        if (merged.length !== profiles.length) {
+          writeJson(ACADEMY_PROFILES_FILE, merged);
+          writeJson(ACADEMY_PROFILES_PERMANENT_STORE_FILE, merged);
+        }
+      }
+    }).catch(err => {});
+  }
+
+  return profiles;
+}
+
+function saveAcademyProfiles(profiles, singleProfile = null) {
+  writeJson(ACADEMY_PROFILES_FILE, profiles, singleProfile);
+  if (Array.isArray(profiles) && profiles.length > 0) {
+    writeJson(ACADEMY_PROFILES_PERMANENT_STORE_FILE, profiles, singleProfile);
+    backupToExternalSafeDir(ACADEMY_PROFILES_FILE, profiles);
+    backupToExternalSafeDir(ACADEMY_PROFILES_PERMANENT_STORE_FILE, profiles);
+  }
+
+  // Direct MySQL save when active (Double Safety Mirroring)
+  if (db && db.isMySqlActive()) {
+    if (singleProfile && singleProfile.id) {
+      db.saveAcademyProfile(singleProfile).catch(e => console.error('[DIRECT MYSQL ACADEMY PROFILE SAVE ERROR]:', e.message));
+    } else if (Array.isArray(profiles)) {
+      profiles.forEach(p => {
+        if (p && p.id) db.saveAcademyProfile(p).catch(e => {});
       });
     }
   }
@@ -7224,6 +7294,143 @@ app.get('/api/courses', (req, res) => {
   });
 });
 
+// Helper: Official Academy Mentor representation
+function getOfficialAcademyMentor() {
+  const officialCourses = readJson(COURSES_FILE, COURSE_LESSONS);
+  officialCourses.sort((a, b) => (parseInt(a.serial) || 0) - (parseInt(b.serial) || 0));
+  const enrichedLessons = officialCourses.map(c => ({
+    id: c.id,
+    type: 'youtube',
+    title: c.title,
+    category: c.category || 'Platform Strategy',
+    duration: c.duration || '20:00',
+    summary: c.summary || '',
+    videoEmbed: convertToEmbedUrl(c.videoEmbed),
+    videoUrl: c.videoEmbed,
+    thumbnailUrl: c.thumbnailUrl || extractVideoThumbnail(c.videoEmbed) || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&auto=format&fit=crop&q=60',
+    serial: c.serial || 1
+  }));
+
+  return {
+    id: 'official-bpf-academy',
+    isOfficial: true,
+    partnerId: 'admin',
+    mentorName: 'Binary Prop Firm Official Academy',
+    mentorTagline: 'Master Binary Options, Risk & Strategy Roadmap',
+    mentorBio: 'The official certified curriculum of Binary Prop Firm. Master binary options price action, institutional psychology, risk mitigation, and disciplined execution.',
+    avatarUrl: '/images/bpf-logo.png',
+    bannerUrl: 'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=1200&auto=format&fit=crop&q=80',
+    telegramChannel: 'https://t.me/binarypropfirm',
+    youtubeChannel: 'https://youtube.com',
+    status: 'approved',
+    totalItems: enrichedLessons.length,
+    stats: {
+      videosCount: enrichedLessons.length,
+      freeDriveCount: 0,
+      paidCoursesCount: 0
+    },
+    items: enrichedLessons
+  };
+}
+
+// Public API: List all approved mentors + official academy
+app.get('/api/academy/mentors', (req, res) => {
+  try {
+    const profiles = getAcademyProfiles();
+    const approvedMentors = profiles
+      .filter(p => p && p.status === 'approved')
+      .map(p => {
+        const items = Array.isArray(p.items) ? p.items : [];
+        const videosCount = items.filter(it => it.type === 'youtube').length;
+        const freeDriveCount = items.filter(it => it.type === 'drive' || it.type === 'free').length;
+        const paidCoursesCount = items.filter(it => it.type === 'paid').length;
+
+        return {
+          id: p.id,
+          isOfficial: false,
+          partnerId: p.partnerId,
+          partnerCode: p.partnerCode || '',
+          mentorName: p.mentorName || p.partnerName || 'Community Mentor',
+          mentorTagline: p.mentorTagline || 'Professional Trader & Mentor',
+          mentorBio: p.mentorBio || '',
+          avatarUrl: p.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+          bannerUrl: p.bannerUrl || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&auto=format&fit=crop&q=80',
+          telegramChannel: p.telegramChannel || '',
+          youtubeChannel: p.youtubeChannel || '',
+          socialLinks: p.socialLinks || {},
+          status: p.status,
+          totalItems: items.length,
+          stats: {
+            videosCount,
+            freeDriveCount,
+            paidCoursesCount
+          },
+          updatedAt: p.updatedAt || p.createdAt
+        };
+      });
+
+    const official = getOfficialAcademyMentor();
+    // Official academy always first, followed by mentors
+    res.json({
+      success: true,
+      mentors: [official, ...approvedMentors]
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Public API: Get single mentor details with items
+app.get('/api/academy/mentors/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    if (id === 'official-bpf-academy' || id === 'official') {
+      return res.json({ success: true, mentor: getOfficialAcademyMentor() });
+    }
+
+    const profiles = getAcademyProfiles();
+    const profile = profiles.find(p => p && (p.id === id || p.partnerId === id));
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Mentor profile not found.' });
+    }
+
+    // Only approved profiles are visible to general public/traders
+    if (profile.status !== 'approved') {
+      return res.status(403).json({ success: false, message: 'This mentor profile is currently pending review or not active.' });
+    }
+
+    const items = (Array.isArray(profile.items) ? profile.items : []).map(it => {
+      if (it.type === 'youtube' && it.videoUrl) {
+        return {
+          ...it,
+          videoEmbed: convertToEmbedUrl(it.videoUrl),
+          thumbnailUrl: it.thumbnailUrl || extractVideoThumbnail(it.videoUrl)
+        };
+      }
+      return it;
+    });
+
+    const videosCount = items.filter(it => it.type === 'youtube').length;
+    const freeDriveCount = items.filter(it => it.type === 'drive' || it.type === 'free').length;
+    const paidCoursesCount = items.filter(it => it.type === 'paid').length;
+
+    res.json({
+      success: true,
+      mentor: {
+        ...profile,
+        items,
+        stats: {
+          videosCount,
+          freeDriveCount,
+          paidCoursesCount
+        }
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // ----------------- PAYMENT METHODS APIS -----------------
 app.get('/api/payment-methods', (req, res) => {
   const methods = readJson(PAYMENT_METHODS_FILE);
@@ -8736,6 +8943,133 @@ app.delete('/api/admin/courses/:id', authenticateAdminToken, (req, res) => {
   courses = courses.filter(c => c.id !== req.params.id);
   writeJson(COURSES_FILE, courses);
   res.json({ success: true, message: 'Course lesson removed successfully.' });
+});
+
+// ==================== ADMIN ACADEMY CONTROL APIS ====================
+
+app.get('/api/admin/academy/profiles', authenticateAdminToken, (req, res) => {
+  try {
+    const profiles = getAcademyProfiles();
+    const summary = {
+      total: profiles.length,
+      pending: profiles.filter(p => p.status === 'pending').length,
+      approved: profiles.filter(p => p.status === 'approved').length,
+      rejected: profiles.filter(p => p.status === 'rejected').length,
+      draft: profiles.filter(p => p.status === 'draft' || !p.status).length
+    };
+    res.json({ success: true, summary, profiles });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/admin/academy/profiles/:id/approve', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const profiles = getAcademyProfiles();
+    const idx = profiles.findIndex(p => p && (p.id === id || p.partnerId === id));
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Academy profile not found.' });
+    }
+
+    profiles[idx].status = 'approved';
+    profiles[idx].rejectionReason = null;
+    profiles[idx].reviewedAt = new Date().toISOString();
+    profiles[idx].reviewedBy = (req.admin && req.admin.email) ? req.admin.email : 'Super Admin';
+    profiles[idx].updatedAt = new Date().toISOString();
+
+    saveAcademyProfiles(profiles, profiles[idx]);
+
+    res.json({
+      success: true,
+      message: `Academy profile for "${profiles[idx].mentorName || profiles[idx].partnerName}" has been APPROVED and is now live in Trading Academy!`,
+      profile: profiles[idx]
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/admin/academy/profiles/:id/reject', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rejectionReason } = req.body;
+    if (!rejectionReason || !rejectionReason.trim()) {
+      return res.status(400).json({ success: false, message: 'Please provide a reason or feedback for rejecting this profile.' });
+    }
+
+    const profiles = getAcademyProfiles();
+    const idx = profiles.findIndex(p => p && (p.id === id || p.partnerId === id));
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Academy profile not found.' });
+    }
+
+    profiles[idx].status = 'rejected';
+    profiles[idx].rejectionReason = rejectionReason.trim();
+    profiles[idx].reviewedAt = new Date().toISOString();
+    profiles[idx].reviewedBy = (req.admin && req.admin.email) ? req.admin.email : 'Super Admin';
+    profiles[idx].updatedAt = new Date().toISOString();
+
+    saveAcademyProfiles(profiles, profiles[idx]);
+
+    res.json({
+      success: true,
+      message: `Academy profile rejected with feedback. Partner will see this notification in their portal.`,
+      profile: profiles[idx]
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/admin/academy/profiles/:id/status', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    if (!['approved', 'rejected', 'draft', 'pending', 'suspended'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status value.' });
+    }
+
+    const profiles = getAcademyProfiles();
+    const idx = profiles.findIndex(p => p && (p.id === id || p.partnerId === id));
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Academy profile not found.' });
+    }
+
+    profiles[idx].status = status;
+    profiles[idx].updatedAt = new Date().toISOString();
+    saveAcademyProfiles(profiles, profiles[idx]);
+
+    res.json({
+      success: true,
+      message: `Profile status updated to "${status}".`,
+      profile: profiles[idx]
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/admin/academy/profiles/:id', authenticateAdminToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    let profiles = getAcademyProfiles();
+    const target = profiles.find(p => p && (p.id === id || p.partnerId === id));
+    if (!target) {
+      return res.status(404).json({ success: false, message: 'Academy profile not found.' });
+    }
+
+    profiles = profiles.filter(p => p && p.id !== target.id && p.partnerId !== target.partnerId);
+    saveAcademyProfiles(profiles);
+
+    if (db && db.isMySqlActive()) {
+      db.deleteAcademyProfile(target.id).catch(e => {});
+    }
+
+    res.json({ success: true, message: 'Academy profile deleted successfully.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 });
 
 // 14. Payment Methods Control (Admin)
@@ -11973,6 +12307,157 @@ app.post('/api/admin/partner-promo-requests/:id/action', authenticateAdminToken,
     } else {
       return res.status(400).json({ success: false, message: 'Invalid action (must be "approve" or "reject").' });
     }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ==================== PARTNER ACADEMY PROFILE APIS ====================
+
+app.get('/api/partner/academy', authenticatePartnerToken, (req, res) => {
+  try {
+    const partnerId = req.partner.id;
+    const profiles = getAcademyProfiles();
+    let profile = profiles.find(p => p && (p.partnerId === partnerId || p.partnerEmail === req.partner.email));
+
+    if (!profile) {
+      // Return a blank template
+      profile = {
+        id: `acad_${partnerId}`,
+        partnerId: partnerId,
+        partnerEmail: req.partner.email,
+        partnerName: req.partner.name || 'Mentor',
+        partnerCode: req.partner.promoCode || '',
+        mentorName: req.partner.name || '',
+        mentorTagline: '',
+        mentorBio: '',
+        avatarUrl: '',
+        bannerUrl: '',
+        telegramChannel: '',
+        youtubeChannel: '',
+        socialLinks: {},
+        items: [],
+        status: 'draft',
+        rejectionReason: null,
+        submittedAt: null,
+        reviewedAt: null,
+        totalItems: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    res.json({ success: true, profile });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/api/partner/academy', authenticatePartnerToken, (req, res) => {
+  try {
+    const partnerId = req.partner.id;
+    const {
+      mentorName,
+      mentorTagline,
+      mentorBio,
+      avatarUrl,
+      bannerUrl,
+      telegramChannel,
+      youtubeChannel,
+      socialLinks,
+      items,
+      action // 'draft' or 'submit'
+    } = req.body;
+
+    if (!mentorName || !mentorName.trim()) {
+      return res.status(400).json({ success: false, message: 'Mentor / Instructor Name is required.' });
+    }
+
+    const profiles = getAcademyProfiles();
+    let idx = profiles.findIndex(p => p && (p.partnerId === partnerId || p.partnerEmail === req.partner.email));
+
+    const cleanItems = Array.isArray(items) ? items.map((it, i) => {
+      return {
+        id: it.id || `item_${Date.now()}_${i}`,
+        type: it.type || 'youtube', // 'youtube' | 'drive' | 'paid'
+        title: (it.title || '').trim(),
+        category: (it.category || 'Trading Strategy').trim(),
+        duration: (it.duration || '').trim(),
+        description: (it.description || '').trim(),
+        // Video specific
+        videoUrl: (it.videoUrl || '').trim(),
+        videoEmbed: it.videoUrl ? convertToEmbedUrl(it.videoUrl) : '',
+        thumbnailUrl: it.thumbnailUrl || (it.videoUrl ? extractVideoThumbnail(it.videoUrl) : ''),
+        // Drive / Resource specific
+        driveUrl: (it.driveUrl || '').trim(),
+        resourceType: (it.resourceType || 'PDF / E-Book / Indicator').trim(),
+        // Paid Course specific
+        price: it.price !== undefined ? it.price : 0,
+        currency: (it.currency || 'USD').trim(),
+        buyUrl: (it.buyUrl || '').trim(), // Telegram contact or checkout link
+        courseFormat: (it.courseFormat || 'Live Mentorship + VIP Group').trim(),
+        createdAt: it.createdAt || new Date().toISOString()
+      };
+    }) : [];
+
+    const isSubmitting = action === 'submit';
+    const nowIso = new Date().toISOString();
+
+    let existingProfile = idx !== -1 ? profiles[idx] : null;
+    let targetStatus = 'draft';
+
+    if (isSubmitting) {
+      if (cleanItems.length === 0) {
+        return res.status(400).json({ success: false, message: 'Please add at least one video, free class, or course to submit your academy profile.' });
+      }
+      targetStatus = 'pending';
+    } else {
+      // If saving draft, keep current status unless it was rejected (clear rejection on draft edit)
+      targetStatus = (existingProfile && existingProfile.status === 'approved') ? 'approved' : 'draft';
+    }
+
+    const profileData = {
+      id: existingProfile ? existingProfile.id : `acad_${partnerId}`,
+      partnerId: partnerId,
+      partnerEmail: req.partner.email,
+      partnerName: req.partner.name || '',
+      partnerCode: req.partner.promoCode || '',
+      mentorName: mentorName.trim(),
+      mentorTagline: (mentorTagline || '').trim(),
+      mentorBio: (mentorBio || '').trim(),
+      avatarUrl: (avatarUrl || '').trim(),
+      bannerUrl: (bannerUrl || '').trim(),
+      telegramChannel: (telegramChannel || '').trim(),
+      youtubeChannel: (youtubeChannel || '').trim(),
+      socialLinks: socialLinks || {},
+      items: cleanItems,
+      status: targetStatus,
+      rejectionReason: isSubmitting ? null : (existingProfile ? existingProfile.rejectionReason : null),
+      submittedAt: isSubmitting ? nowIso : (existingProfile ? existingProfile.submittedAt : null),
+      reviewedAt: existingProfile ? existingProfile.reviewedAt : null,
+      reviewedBy: existingProfile ? existingProfile.reviewedBy : null,
+      totalItems: cleanItems.length,
+      createdAt: existingProfile ? existingProfile.createdAt : nowIso,
+      updatedAt: nowIso
+    };
+
+    if (idx !== -1) {
+      profiles[idx] = profileData;
+    } else {
+      profiles.unshift(profileData);
+    }
+
+    saveAcademyProfiles(profiles, profileData);
+
+    const message = isSubmitting 
+      ? 'Your Academy Profile has been submitted for Super Admin review! You will be notified once reviewed.'
+      : 'Academy Profile draft saved successfully.';
+
+    res.json({
+      success: true,
+      message,
+      profile: profileData
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

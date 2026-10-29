@@ -55,5 +55,11 @@ payout_settings.json
 data/payouts.json
 data/payout_settings.json
 
+# Academy Profiles Database Files
+academy_profiles.json
+**/academy_profiles*.json
+data/academy_profiles.json
+data/academy_profiles_permanent_store.json
+
 # Temporary scratch files
 scratch/
