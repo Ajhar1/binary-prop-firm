@@ -62,6 +62,8 @@ const PARTNER_SETTINGS_FILE = path.join(DATA_DIR, 'partner_settings.json');
 const PARTNER_PROMO_REQUESTS_FILE = path.join(DATA_DIR, 'partner_promo_requests.json');
 const ACADEMY_PROFILES_FILE = path.join(DATA_DIR, 'academy_profiles.json');
 const ACADEMY_PROFILES_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'academy_profiles_permanent_store.json');
+const ACADEMY_ENROLLMENTS_FILE = path.join(DATA_DIR, 'academy_enrollments.json');
+const ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'academy_enrollments_permanent_store.json');
 const DEFAULT_PARTNER_SETTINGS = {
   defaultCommissionRate: 10,
   traderDiscountRate: 5,
@@ -111,9 +113,11 @@ const CRITICAL_DATA_FILES = [
   // Payout stores
   PAYOUTS_FILE,
   PAYOUT_SETTINGS_FILE,
-  // Academy Profiles
+  // Academy Profiles & Enrollments
   ACADEMY_PROFILES_FILE,
   ACADEMY_PROFILES_PERMANENT_STORE_FILE,
+  ACADEMY_ENROLLMENTS_FILE,
+  ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE,
   // Lifelong vault
   TRADERS_VAULT_FILE
 ];
@@ -655,6 +659,71 @@ function saveAcademyProfiles(profiles, singleProfile = null) {
     } else if (Array.isArray(profiles)) {
       profiles.forEach(p => {
         if (p && p.id) db.saveAcademyProfile(p).catch(e => {});
+      });
+    }
+  }
+}
+
+// ==================== ACADEMY ENROLLMENTS HELPERS ====================
+
+function getAcademyEnrollments() {
+  let enrollments = readJson(ACADEMY_ENROLLMENTS_FILE, null);
+  if (!Array.isArray(enrollments) || enrollments.length === 0) {
+    const perm = readJson(ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE, null);
+    if (Array.isArray(perm) && perm.length > 0) {
+      enrollments = perm;
+      writeJson(ACADEMY_ENROLLMENTS_FILE, enrollments);
+    } else {
+      const restored = restoreSingleFileFromExternal(ACADEMY_ENROLLMENTS_FILE, true);
+      if (Array.isArray(restored) && restored.length > 0) {
+        enrollments = restored;
+        writeJson(ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE, enrollments);
+      } else {
+        enrollments = [];
+      }
+    }
+  } else {
+    backupToExternalSafeDir(ACADEMY_ENROLLMENTS_FILE, enrollments);
+    const perm = readJson(ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE, null);
+    if (!Array.isArray(perm) || perm.length === 0) {
+      writeJson(ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE, enrollments);
+    }
+  }
+
+  // Live MySQL sync check in background
+  if (db && db.isMySqlActive()) {
+    db.getAllAcademyEnrollments().then(sqlEnrollments => {
+      if (Array.isArray(sqlEnrollments) && sqlEnrollments.length > 0) {
+        const eMap = new Map();
+        enrollments.forEach(e => { if (e && e.id) eMap.set(e.id, e); });
+        sqlEnrollments.forEach(e => { if (e && e.id) eMap.set(e.id, e); });
+        const merged = Array.from(eMap.values());
+        if (merged.length !== enrollments.length) {
+          writeJson(ACADEMY_ENROLLMENTS_FILE, merged);
+          writeJson(ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE, merged);
+        }
+      }
+    }).catch(err => {});
+  }
+
+  return enrollments;
+}
+
+function saveAcademyEnrollments(enrollments, singleEnrollment = null) {
+  writeJson(ACADEMY_ENROLLMENTS_FILE, enrollments, singleEnrollment);
+  if (Array.isArray(enrollments) && enrollments.length > 0) {
+    writeJson(ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE, enrollments, singleEnrollment);
+    backupToExternalSafeDir(ACADEMY_ENROLLMENTS_FILE, enrollments);
+    backupToExternalSafeDir(ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE, enrollments);
+  }
+
+  // Direct MySQL save when active (Double Safety Mirroring)
+  if (db && db.isMySqlActive()) {
+    if (singleEnrollment && singleEnrollment.id) {
+      db.saveAcademyEnrollment(singleEnrollment).catch(e => console.error('[DIRECT MYSQL ACADEMY ENROLLMENT SAVE ERROR]:', e.message));
+    } else if (Array.isArray(enrollments)) {
+      enrollments.forEach(e => {
+        if (e && e.id) db.saveAcademyEnrollment(e).catch(err => {});
       });
     }
   }
@@ -3475,6 +3544,48 @@ const uploadPayoutQr = multer({
     }
   }
 });
+
+// Multer storage for Academy Profile media (Avatar, Banner, Thumbnails, Payment Proofs - strictly max 1MB)
+const academyMediaStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (!fs.existsSync(UPLOADS_DIR)) {
+      try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch (e) {}
+    }
+    cb(null, UPLOADS_DIR);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase() || '.png';
+    const rand = Math.random().toString(36).substring(2, 8);
+    cb(null, `acad_${Date.now()}_${rand}${ext}`);
+  }
+});
+const uploadAcademyMedia = multer({
+  storage: academyMediaStorage,
+  limits: { fileSize: 1 * 1024 * 1024 }, // Strictly 1MB limit
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const validExts = ['.png', '.jpg', '.jpeg', '.webp', '.gif'];
+    if (file.mimetype.startsWith('image/') || validExts.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files (JPG, PNG, WebP, GIF) are allowed.'));
+    }
+  }
+});
+
+const uploadAcademyMediaMiddleware = (fieldName) => {
+  return (req, res, next) => {
+    uploadAcademyMedia.single(fieldName)(req, res, (err) => {
+      if (err) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ success: false, message: 'ফাইল সাইজ ১ মেগাবাইট (1 MB) এর বেশি হতে পারবে না। অনুগ্রহ করে ১ এমবি এর কম সাইজের ইমেজ আপলোড করুন।' });
+        }
+        return res.status(400).json({ success: false, message: err.message || 'ইমেজ আপলোড করতে ত্রুটি হয়েছে।' });
+      }
+      next();
+    });
+  };
+};
 
 // ==============================================
 // CLOUD PROOF HOSTING & ZERO-DISK STORAGE ENGINE
@@ -7344,14 +7455,15 @@ app.get('/api/academy/mentors', (req, res) => {
 app.get('/api/academy/mentors/:id', (req, res) => {
   try {
     const { id } = req.params;
+    const isPreview = req.query.preview === 'true';
     const profiles = getAcademyProfiles();
     const profile = profiles.find(p => p && (p.id === id || p.partnerId === id));
     if (!profile) {
       return res.status(404).json({ success: false, message: 'Mentor profile not found.' });
     }
 
-    // Only approved profiles are visible to general public/traders
-    if (profile.status !== 'approved') {
+    // Only approved profiles are visible to general public/traders unless in preview mode
+    if (profile.status !== 'approved' && !isPreview) {
       return res.status(403).json({ success: false, message: 'This mentor profile is currently pending review or not active.' });
     }
 
@@ -7382,6 +7494,173 @@ app.get('/api/academy/mentors/:id', (req, res) => {
         }
       }
     });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Upload Payment Receipt Screenshot (Max 1MB) for Paid Course Enrollments
+app.post('/api/academy/upload-proof', uploadAcademyMediaMiddleware('proof'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'অনুগ্রহ করে পেমেন্ট রসিদ বা স্ক্রিনশট নির্বাচন করুন।' });
+    }
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({
+      success: true,
+      message: 'পেমেন্ট স্ক্রিনশট আপলোড হয়েছে!',
+      url: fileUrl,
+      filename: req.file.filename
+    });
+  } catch (err) {
+    console.error('[ACADEMY PROOF UPLOAD ERROR]:', err);
+    res.status(500).json({ success: false, message: err.message || 'স্ক্রিনশট আপলোড করতে সমস্যা হয়েছে।' });
+  }
+});
+
+// Trader / Student Course Enrollment / Purchase Submission
+app.post('/api/academy/course/enroll', (req, res) => {
+  try {
+    const {
+      partnerId,
+      courseId,
+      userName,
+      userEmail,
+      userContact,
+      paymentMethod,
+      transactionId,
+      proofScreenshot,
+      notes
+    } = req.body;
+
+    if (!partnerId || !courseId || !userEmail || !transactionId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Partner ID, Course ID, Email, and Transaction ID are required.'
+      });
+    }
+
+    const profiles = getAcademyProfiles();
+    const profile = profiles.find(p => p && (p.partnerId === partnerId || p.id === partnerId));
+    if (!profile) {
+      return res.status(404).json({ success: false, message: 'Mentor profile not found.' });
+    }
+
+    const items = Array.isArray(profile.items) ? profile.items : [];
+    const course = items.find(it => it.id === courseId && it.type === 'paid');
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Paid course not found in this mentor academy.' });
+    }
+
+    const enrollments = getAcademyEnrollments();
+    const cleanEmail = userEmail.trim().toLowerCase();
+
+    // Check if duplicate pending or approved exists for same user and course
+    const existing = enrollments.find(e => 
+      e && e.partnerId === profile.partnerId && e.courseId === courseId && 
+      e.userEmail && e.userEmail.toLowerCase() === cleanEmail && 
+      (e.status === 'pending' || e.status === 'approved')
+    );
+
+    if (existing) {
+      if (existing.status === 'approved') {
+        return res.json({
+          success: true,
+          message: 'আপনি ইতিমধ্যে এই কোর্সে অ্যাক্সেস পেয়েছেন!',
+          enrollment: existing
+        });
+      }
+      return res.json({
+        success: true,
+        message: 'আপনার পেমেন্ট ভেরিফিকেশন ইতিমধ্যে মেন্টরের অনুমোদনের অপেক্ষায় রয়েছে। অনুগ্রহ করে অপেক্ষা করুন।',
+        enrollment: existing
+      });
+    }
+
+    const enrollmentId = `enr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const nowIso = new Date().toISOString();
+
+    const newEnrollment = {
+      id: enrollmentId,
+      partnerId: profile.partnerId,
+      partnerEmail: profile.partnerEmail || '',
+      courseId: course.id,
+      courseTitle: course.title,
+      userId: req.user ? req.user.id : null,
+      userEmail: cleanEmail,
+      userName: (userName || (req.user ? req.user.name : '') || 'Trader').trim(),
+      userContact: (userContact || '').trim(),
+      paymentMethod: (paymentMethod || 'Manual').trim(),
+      transactionId: transactionId.trim(),
+      amount: parseFloat(course.price) || 0,
+      currency: course.currency || 'USD',
+      proofScreenshot: proofScreenshot || null,
+      notes: (notes || '').trim(),
+      status: 'pending',
+      partnerNotes: null,
+      reviewedAt: null,
+      createdAt: nowIso,
+      updatedAt: nowIso
+    };
+
+    enrollments.unshift(newEnrollment);
+    saveAcademyEnrollments(enrollments, newEnrollment);
+
+    res.json({
+      success: true,
+      message: 'পেমেন্ট ভেরিফিকেশন রিকোয়েস্ট মেন্টরের কাছে পাঠানো হয়েছে! মেন্টর যাচাই করে অনুমোদন দেওয়ার পর এই কোর্সের সকল লিঙ্ক আনলক হয়ে যাবে।',
+      enrollment: newEnrollment
+    });
+  } catch (err) {
+    console.error('[ACADEMY COURSE ENROLL ERROR]:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Student's Enrolled Courses and Unlocked Links
+app.get('/api/academy/my-enrollments', (req, res) => {
+  try {
+    let email = (req.query.email || '').trim().toLowerCase();
+    
+    // Also try token auth if present in header
+    if (!email && req.headers.authorization) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        if (token) {
+          const decoded = jwt.verify(token, JWT_SECRET);
+          if (decoded && decoded.email) email = decoded.email.toLowerCase();
+        }
+      } catch (e) {}
+    }
+
+    if (!email) {
+      return res.json({ success: true, enrollments: [] });
+    }
+
+    const enrollments = getAcademyEnrollments();
+    const userEnrollments = enrollments.filter(e => e && e.userEmail && e.userEmail.toLowerCase() === email);
+
+    // If approved, enrich with course secret accessLink or materials
+    const profiles = getAcademyProfiles();
+    const enriched = userEnrollments.map(enr => {
+      if (enr.status === 'approved') {
+        const prof = profiles.find(p => p && p.partnerId === enr.partnerId);
+        if (prof && Array.isArray(prof.items)) {
+          const course = prof.items.find(it => it.id === enr.courseId);
+          if (course) {
+            return {
+              ...enr,
+              accessLink: course.accessLink || course.driveUrl || course.buyUrl || '',
+              courseFormat: course.courseFormat || '',
+              description: course.description || ''
+            };
+          }
+        }
+      }
+      return enr;
+    });
+
+    res.json({ success: true, enrollments: enriched });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -12343,15 +12622,17 @@ app.post('/api/partner/academy', authenticatePartnerToken, (req, res) => {
         // Video specific
         videoUrl: (it.videoUrl || '').trim(),
         videoEmbed: it.videoUrl ? convertToEmbedUrl(it.videoUrl) : '',
-        thumbnailUrl: it.thumbnailUrl || (it.videoUrl ? extractVideoThumbnail(it.videoUrl) : ''),
+        thumbnailUrl: (it.thumbnailUrl || (it.videoUrl ? extractVideoThumbnail(it.videoUrl) : '')).trim(),
         // Drive / Resource specific
         driveUrl: (it.driveUrl || '').trim(),
         resourceType: (it.resourceType || 'PDF / E-Book / Indicator').trim(),
         // Paid Course specific
-        price: it.price !== undefined ? it.price : 0,
+        price: it.price !== undefined ? parseFloat(it.price) || 0 : 0,
         currency: (it.currency || 'USD').trim(),
         buyUrl: (it.buyUrl || '').trim(), // Telegram contact or checkout link
         courseFormat: (it.courseFormat || 'Live Mentorship + VIP Group').trim(),
+        paymentInstructions: (it.paymentInstructions || '').trim(),
+        accessLink: (it.accessLink || '').trim(),
         createdAt: it.createdAt || new Date().toISOString()
       };
     }) : [];
@@ -12417,6 +12698,102 @@ app.post('/api/partner/academy', authenticatePartnerToken, (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+});
+
+// Partner API: Upload Academy Media (Avatar, Banner, Item Thumbnail - Strictly Max 1MB)
+app.post('/api/partner/academy/upload', authenticatePartnerToken, uploadAcademyMediaMiddleware('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'অনুগ্রহ করে একটি ছবি নির্বাচন করুন।' });
+    }
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({
+      success: true,
+      message: 'ইমেজ সফলভাবে আপলোড হয়েছে!',
+      url: fileUrl,
+      filename: req.file.filename
+    });
+  } catch (err) {
+    console.error('[PARTNER ACADEMY UPLOAD ERROR]:', err);
+    res.status(500).json({ success: false, message: err.message || 'ইমেজ আপলোড করতে ত্রুটি হয়েছে।' });
+  }
+});
+
+// Partner API: Get all course enrollments for this partner
+app.get('/api/partner/academy/enrollments', authenticatePartnerToken, (req, res) => {
+  try {
+    const partnerId = req.partner.id;
+    const enrollments = getAcademyEnrollments();
+    const partnerEnrollments = enrollments.filter(e => e && (e.partnerId === partnerId || e.partnerEmail === req.partner.email));
+    res.json({ success: true, enrollments: partnerEnrollments });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner API: Approve student course payment and grant access
+app.post('/api/partner/academy/enrollments/:id/approve', authenticatePartnerToken, (req, res) => {
+  try {
+    const partnerId = req.partner.id;
+    const { id } = req.params;
+    const enrollments = getAcademyEnrollments();
+    const idx = enrollments.findIndex(e => e && e.id === id && (e.partnerId === partnerId || e.partnerEmail === req.partner.email));
+
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Enrollment record not found.' });
+    }
+
+    const nowIso = new Date().toISOString();
+    enrollments[idx].status = 'approved';
+    enrollments[idx].reviewedAt = nowIso;
+    enrollments[idx].updatedAt = nowIso;
+    enrollments[idx].partnerNotes = req.body.notes || 'Payment verified and access approved.';
+
+    saveAcademyEnrollments(enrollments, enrollments[idx]);
+
+    res.json({
+      success: true,
+      message: 'স্টুডেন্টের পেমেন্ট সফলভাবে অনুমোদিত হয়েছে এবং কোর্স লিঙ্ক অ্যাক্সেস সক্রিয় হয়েছে!',
+      enrollment: enrollments[idx]
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Partner API: Reject student course payment
+app.post('/api/partner/academy/enrollments/:id/reject', authenticatePartnerToken, (req, res) => {
+  try {
+    const partnerId = req.partner.id;
+    const { id } = req.params;
+    const enrollments = getAcademyEnrollments();
+    const idx = enrollments.findIndex(e => e && e.id === id && (e.partnerId === partnerId || e.partnerEmail === req.partner.email));
+
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: 'Enrollment record not found.' });
+    }
+
+    const nowIso = new Date().toISOString();
+    enrollments[idx].status = 'rejected';
+    enrollments[idx].reviewedAt = nowIso;
+    enrollments[idx].updatedAt = nowIso;
+    enrollments[idx].partnerNotes = (req.body.reason || 'Payment details could not be verified.').trim();
+
+    saveAcademyEnrollments(enrollments, enrollments[idx]);
+
+    res.json({
+      success: true,
+      message: 'পেমেন্ট রিকোয়েস্ট রিজেক্ট করা হয়েছে।',
+      enrollment: enrollments[idx]
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Public Shareable Mentor Profile Routing
+app.get(['/mentor/:id', '/academy/mentor/:id', '/mentor'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'mentor.html'));
 });
 
 // Partner & Affiliate Portal Routing (both URLs work seamlessly)

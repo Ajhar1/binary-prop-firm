@@ -417,6 +417,33 @@ async function initSchema() {
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       INDEX idx_acad_partner (partnerId),
       INDEX idx_acad_status (status)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS academy_enrollments (
+      id VARCHAR(120) PRIMARY KEY,
+      partnerId VARCHAR(120) NOT NULL,
+      courseId VARCHAR(120) NOT NULL,
+      courseTitle VARCHAR(255) DEFAULT '',
+      userId VARCHAR(120) DEFAULT NULL,
+      userEmail VARCHAR(255) NOT NULL,
+      userName VARCHAR(255) DEFAULT '',
+      userContact VARCHAR(255) DEFAULT '',
+      paymentMethod VARCHAR(100) DEFAULT '',
+      transactionId VARCHAR(255) DEFAULT '',
+      amount DECIMAL(10,2) DEFAULT 0.00,
+      currency VARCHAR(20) DEFAULT 'USD',
+      proofScreenshot LONGTEXT DEFAULT NULL,
+      notes TEXT DEFAULT NULL,
+      status VARCHAR(50) DEFAULT 'pending',
+      partnerNotes TEXT DEFAULT NULL,
+      rawEnrollmentData LONGTEXT DEFAULT NULL,
+      reviewedAt DATETIME DEFAULT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_acad_enr_partner (partnerId),
+      INDEX idx_acad_enr_course (courseId),
+      INDEX idx_acad_enr_user (userEmail),
+      INDEX idx_acad_enr_status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
   ];
 
@@ -899,6 +926,52 @@ async function autoMigrateFromJson() {
         }
         if (count > 0) {
           console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} academy profiles into MySQL.`);
+        }
+      } catch (e) {}
+    }
+
+    // 15. Academy Enrollments Initial Migration
+    const aeFile = path.join(dataDir, 'academy_enrollments.json');
+    if (fs.existsSync(aeFile)) {
+      try {
+        const enrollments = JSON.parse(fs.readFileSync(aeFile, 'utf8') || '[]');
+        let count = 0;
+        for (const enr of enrollments) {
+          if (!enr || !enr.id) continue;
+          const [existing] = await pool.query('SELECT id FROM academy_enrollments WHERE id = ? LIMIT 1', [enr.id]);
+          if (existing.length === 0) {
+            await pool.query(`INSERT INTO academy_enrollments (
+              id, partnerId, courseId, courseTitle, userId, userEmail, userName,
+              userContact, paymentMethod, transactionId, amount, currency,
+              proofScreenshot, notes, status, partnerNotes, rawEnrollmentData,
+              reviewedAt, createdAt, updatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+              enr.id,
+              enr.partnerId || '',
+              enr.courseId || '',
+              enr.courseTitle || '',
+              enr.userId || null,
+              enr.userEmail || '',
+              enr.userName || '',
+              enr.userContact || '',
+              enr.paymentMethod || '',
+              enr.transactionId || '',
+              parseFloat(enr.amount) || 0,
+              enr.currency || 'USD',
+              enr.proofScreenshot || null,
+              enr.notes || '',
+              enr.status || 'pending',
+              enr.partnerNotes || null,
+              JSON.stringify(enr),
+              toMySqlDateTime(enr.reviewedAt),
+              toMySqlDateTime(enr.createdAt) || new Date(),
+              toMySqlDateTime(enr.updatedAt) || new Date()
+            ]);
+            count++;
+          }
+        }
+        if (count > 0) {
+          console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} academy enrollments into MySQL.`);
         }
       } catch (e) {}
     }
@@ -2367,6 +2440,187 @@ async function deleteAcademyProfile(id) {
   }
 }
 
+// ==================== ACADEMY ENROLLMENTS CRUD ====================
+
+function parseAcademyEnrollment(row) {
+  if (!row) return null;
+  let enr = {};
+  if (row.rawEnrollmentData) {
+    try {
+      enr = typeof row.rawEnrollmentData === 'string' ? JSON.parse(row.rawEnrollmentData) : row.rawEnrollmentData;
+    } catch (e) {
+      enr = {};
+    }
+  }
+  return {
+    ...enr,
+    id: row.id,
+    partnerId: row.partnerId,
+    courseId: row.courseId,
+    courseTitle: row.courseTitle,
+    userId: row.userId,
+    userEmail: row.userEmail,
+    userName: row.userName,
+    userContact: row.userContact,
+    paymentMethod: row.paymentMethod,
+    transactionId: row.transactionId,
+    amount: parseFloat(row.amount) || 0,
+    currency: row.currency || 'USD',
+    proofScreenshot: row.proofScreenshot,
+    notes: row.notes,
+    status: row.status || 'pending',
+    partnerNotes: row.partnerNotes,
+    reviewedAt: row.reviewedAt,
+    createdAt: row.createdAt || enr.createdAt,
+    updatedAt: row.updatedAt || enr.updatedAt
+  };
+}
+
+async function getAllAcademyEnrollments() {
+  if (!isMySqlActive()) return null;
+  try {
+    const [rows] = await pool.query('SELECT * FROM academy_enrollments ORDER BY createdAt DESC');
+    return rows.map(parseAcademyEnrollment);
+  } catch (err) {
+    console.error('[DATABASE GET ALL ACADEMY ENROLLMENTS ERROR]:', err.message);
+    return null;
+  }
+}
+
+async function getAcademyEnrollmentsByPartner(partnerId) {
+  if (!isMySqlActive() || !partnerId) return null;
+  try {
+    const [rows] = await pool.query('SELECT * FROM academy_enrollments WHERE partnerId = ? ORDER BY createdAt DESC', [partnerId]);
+    return rows.map(parseAcademyEnrollment);
+  } catch (err) {
+    console.error('[DATABASE GET ACADEMY ENROLLMENTS BY PARTNER ERROR]:', err.message);
+    return null;
+  }
+}
+
+async function getAcademyEnrollmentsByUser(userEmail) {
+  if (!isMySqlActive() || !userEmail) return null;
+  try {
+    const [rows] = await pool.query('SELECT * FROM academy_enrollments WHERE LOWER(userEmail) = LOWER(?) ORDER BY createdAt DESC', [userEmail]);
+    return rows.map(parseAcademyEnrollment);
+  } catch (err) {
+    console.error('[DATABASE GET ACADEMY ENROLLMENTS BY USER ERROR]:', err.message);
+    return null;
+  }
+}
+
+async function getAcademyEnrollmentById(id) {
+  if (!isMySqlActive() || !id) return null;
+  try {
+    const [rows] = await pool.query('SELECT * FROM academy_enrollments WHERE id = ? LIMIT 1', [id]);
+    return rows.length > 0 ? parseAcademyEnrollment(rows[0]) : null;
+  } catch (err) {
+    console.error('[DATABASE GET ACADEMY ENROLLMENT BY ID ERROR]:', err.message);
+    return null;
+  }
+}
+
+async function saveAcademyEnrollment(enrollment) {
+  if (!isMySqlActive() || !enrollment || !enrollment.id) return false;
+  try {
+    const [existing] = await pool.query('SELECT id FROM academy_enrollments WHERE id = ? LIMIT 1', [enrollment.id]);
+    const rawData = JSON.stringify(enrollment);
+    const now = new Date();
+
+    if (existing.length === 0) {
+      await pool.query(`INSERT INTO academy_enrollments (
+        id, partnerId, courseId, courseTitle, userId, userEmail, userName,
+        userContact, paymentMethod, transactionId, amount, currency,
+        proofScreenshot, notes, status, partnerNotes, rawEnrollmentData,
+        reviewedAt, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+        enrollment.id,
+        enrollment.partnerId || '',
+        enrollment.courseId || '',
+        enrollment.courseTitle || '',
+        enrollment.userId || null,
+        enrollment.userEmail || '',
+        enrollment.userName || '',
+        enrollment.userContact || '',
+        enrollment.paymentMethod || '',
+        enrollment.transactionId || '',
+        parseFloat(enrollment.amount) || 0,
+        enrollment.currency || 'USD',
+        enrollment.proofScreenshot || null,
+        enrollment.notes || '',
+        enrollment.status || 'pending',
+        enrollment.partnerNotes || null,
+        rawData,
+        toMySqlDateTime(enrollment.reviewedAt),
+        toMySqlDateTime(enrollment.createdAt) || now,
+        toMySqlDateTime(enrollment.updatedAt) || now
+      ]);
+    } else {
+      await pool.query(`UPDATE academy_enrollments SET
+        partnerId = ?,
+        courseId = ?,
+        courseTitle = ?,
+        userId = ?,
+        userEmail = ?,
+        userName = ?,
+        userContact = ?,
+        paymentMethod = ?,
+        transactionId = ?,
+        amount = ?,
+        currency = ?,
+        proofScreenshot = ?,
+        notes = ?,
+        status = ?,
+        partnerNotes = ?,
+        rawEnrollmentData = ?,
+        reviewedAt = ?,
+        updatedAt = ?
+        WHERE id = ?`, [
+        enrollment.partnerId || '',
+        enrollment.courseId || '',
+        enrollment.courseTitle || '',
+        enrollment.userId || null,
+        enrollment.userEmail || '',
+        enrollment.userName || '',
+        enrollment.userContact || '',
+        enrollment.paymentMethod || '',
+        enrollment.transactionId || '',
+        parseFloat(enrollment.amount) || 0,
+        enrollment.currency || 'USD',
+        enrollment.proofScreenshot || null,
+        enrollment.notes || '',
+        enrollment.status || 'pending',
+        enrollment.partnerNotes || null,
+        rawData,
+        toMySqlDateTime(enrollment.reviewedAt),
+        toMySqlDateTime(enrollment.updatedAt) || now,
+        enrollment.id
+      ]);
+    }
+    return true;
+  } catch (err) {
+    console.error('[DATABASE SAVE ACADEMY ENROLLMENT ERROR]:', err.message);
+    return false;
+  }
+}
+
+async function updateAcademyEnrollmentStatus(id, status, partnerNotes = null) {
+  if (!isMySqlActive() || !id) return false;
+  try {
+    const now = new Date();
+    await pool.query(`UPDATE academy_enrollments SET
+      status = ?,
+      partnerNotes = COALESCE(?, partnerNotes),
+      reviewedAt = ?,
+      updatedAt = ?
+      WHERE id = ?`, [status, partnerNotes, now, now, id]);
+    return true;
+  } catch (err) {
+    console.error('[DATABASE UPDATE ACADEMY ENROLLMENT STATUS ERROR]:', err.message);
+    return false;
+  }
+}
+
 async function hydrateFromMySql(dataDir) {
   if (!isMySqlActive()) return false;
   try {
@@ -2544,6 +2798,21 @@ async function hydrateFromMySql(dataDir) {
       fs.writeFileSync(permApFile, JSON.stringify(merged, null, 2), 'utf8');
     }
 
+    // 15. Academy Enrollments Hydration
+    const academyEnrollments = await getAllAcademyEnrollments();
+    if (academyEnrollments && academyEnrollments.length > 0) {
+      const aeFile = path.join(dataDir, 'academy_enrollments.json');
+      const permAeFile = path.join(dataDir, 'academy_enrollments_permanent_store.json');
+      let existing = [];
+      try { if (fs.existsSync(aeFile)) existing = JSON.parse(fs.readFileSync(aeFile, 'utf8') || '[]'); } catch (e) {}
+      const aeMap = new Map();
+      existing.forEach(e => { if (e && e.id) aeMap.set(e.id, e); });
+      academyEnrollments.forEach(e => { if (e && e.id) aeMap.set(e.id, e); });
+      const merged = Array.from(aeMap.values());
+      fs.writeFileSync(aeFile, JSON.stringify(merged, null, 2), 'utf8');
+      fs.writeFileSync(permAeFile, JSON.stringify(merged, null, 2), 'utf8');
+    }
+
     console.log('[DATABASE] ✅ Local safe cache hydrated with live MySQL data.');
     return true;
   } catch (err) {
@@ -2609,5 +2878,12 @@ module.exports = {
   saveAcademyProfile,
   updateAcademyProfileStatus,
   deleteAcademyProfile,
+  // Academy Enrollments
+  getAllAcademyEnrollments,
+  getAcademyEnrollmentsByPartner,
+  getAcademyEnrollmentsByUser,
+  getAcademyEnrollmentById,
+  saveAcademyEnrollment,
+  updateAcademyEnrollmentStatus,
   getPool: () => pool
 };

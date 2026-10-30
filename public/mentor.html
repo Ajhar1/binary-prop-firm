@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor Academy Profile | Binary Prop Firm</title>
+    <link rel="icon" type="image/png" href="/images/bpf-logo.png">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-body: #070a12;
+            --bg-surface: #0e1322;
+            --bg-card: rgba(18, 24, 38, 0.85);
+            --gold: #f5b041;
+            --emerald: #10b981;
+            --cyan: #06b6d4;
+            --rose: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --font-main: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-main);
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .glass {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+        }
+
+        /* Top Navbar */
+        .top-navbar {
+            height: 70px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(7, 10, 18, 0.9);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-box img {
+            height: 38px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--gold);
+        }
+
+        /* Hero Banner */
+        .mentor-hero-wrapper {
+            position: relative;
+            background: #0b0f19;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mentor-cover-banner {
+            height: 240px;
+            width: 100%;
+            background-position: center;
+            background-size: cover;
+            position: relative;
+        }
+
+        .mentor-cover-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(7,10,18,0.2) 0%, rgba(7,10,18,0.95) 100%);
+        }
+
+        .mentor-profile-header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem 1.75rem 1.5rem;
+            position: relative;
+            margin-top: -65px;
+            z-index: 2;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .mentor-avatar-box {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 4px solid var(--gold);
+            object-fit: cover;
+            background: #070a12;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            flex-shrink: 0;
+        }
+
+        .mentor-info {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .mentor-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+
+        .mentor-name {
+            font-size: 1.85rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .mentor-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .mentor-tagline {
+            font-size: 0.95rem;
+            color: var(--gold);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .mentor-bio {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            max-width: 800px;
+        }
+
+        /* Social Icons */
+        .mentor-socials {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .social-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: #fff;
+        }
+
+        .social-pill:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.2);
+        }
+
+        .social-tg { border-color: rgba(34, 158, 217, 0.4); color: #229ED9; }
+        .social-yt { border-color: rgba(239, 68, 68, 0.4); color: #ef4444; }
+        .social-fb { border-color: rgba(24, 119, 242, 0.4); color: #1877F2; }
+        .social-ig { border-color: rgba(228, 64, 95, 0.4); color: #E4405F; }
+        .social-wa { border-color: rgba(37, 211, 102, 0.4); color: #25D366; }
+        .social-tw { border-color: rgba(255, 255, 255, 0.3); color: #fff; }
+        .social-dc { border-color: rgba(88, 101, 242, 0.4); color: #5865F2; }
+        .social-ws { border-color: rgba(16, 185, 129, 0.4); color: #10b981; }
+
+        /* Main Container */
+        .content-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 1.5rem auto 3rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        /* Tabs */
+        .curriculum-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            font-weight: 700;
+            padding: 10px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-btn.active {
+            color: #fff;
+            background: rgba(245, 176, 65, 0.12);
+            border: 1px solid rgba(245, 176, 65, 0.3);
+            color: var(--gold);
+        }
+
+        /* Video Section Layout */
+        .video-layout {
+            display: grid;
+            grid-template-columns: 2.2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .video-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .video-player-box {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            background: #000;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .video-player-box iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-details-card {
+            margin-top: 1rem;
+            padding: 1.25rem;
+            border-radius: 16px;
+        }
+
+        /* Playlist */
+        .playlist-card {
+            border-radius: 18px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            max-height: 580px;
+        }
+
+        .playlist-items {
+            overflow-y: auto;
+            flex: 1;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+        }
+
+        .playlist-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .playlist-item.active {
+            background: rgba(245, 176, 65, 0.1);
+            border-color: rgba(245, 176, 65, 0.3);
+        }
+
+        .playlist-thumb {
+            width: 72px;
+            height: 48px;
+            border-radius: 6px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        /* Cards Grid for Drive & Paid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .course-card {
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .course-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(245, 176, 65, 0.3);
+        }
+
+        .course-card-thumb {
+            width: 100%;
+            height: 160px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 12px;
+            background: #000;
+        }
+
+        /* Buttons */
+        .btn-gold {
+            background: linear-gradient(135deg, #f5b041 0%, #d49024 100%);
+            color: #000;
+            font-weight: 800;
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 176, 65, 0.3);
+        }
+
+        .btn-emerald {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            font-weight: 800;
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #fff;
+            font-weight: 700;
+            padding: 9px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-box {
+            width: 100%;
+            max-width: 540px;
+            border-radius: 20px;
+            padding: 1.75rem;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-size: 0.88rem;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--gold);
+        }
+
+        /* Toast */
+        .toast-box {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #182235;
+            color: #fff;
+            border: 1px solid var(--gold);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 9999;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header class="top-navbar">
+        <a href="/" class="logo-box">
+            <img src="/images/bpf-logo.png" alt="Binary Prop Firm" onerror="this.src='/images/logo.png'">
+            <div class="logo-text">BINARY PROP <span>FIRM</span></div>
+        </a>
+
+        <div style="display:flex; align-items:center; gap:10px;">
+            <a id="btnNavRegisterReferral" href="/?dest=register" class="btn-gold" style="font-size:0.82rem; padding:8px 16px;">
+                <i class="fas fa-user-plus"></i> Join with Mentor
+            </a>
+            <a href="/dashboard" class="btn-outline" style="font-size:0.82rem; padding:8px 16px;">
+                <i class="fas fa-th-large"></i> Trader Dashboard
+            </a>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="mentor-hero-wrapper">
+        <div id="mentorCoverBanner" class="mentor-cover-banner" style="background-image: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&auto=format&fit=crop&q=80');"></div>
+        
+        <div class="mentor-profile-header">
+            <img id="mentorAvatarImg" class="mentor-avatar-box" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80" alt="Mentor" />
+
+            <div class="mentor-info">
+                <div class="mentor-title-row">
+                    <h1 class="mentor-name" id="mentorNameHeading">Loading Mentor...</h1>
+                    <span class="mentor-badge"><i class="fas fa-check-circle"></i> Verified Academy Mentor</span>
+                </div>
+                <div class="mentor-tagline" id="mentorTaglineHeading">Professional Trader & Mentor</div>
+                <p class="mentor-bio" id="mentorBioText">Connecting to Binary Prop Firm Academy network...</p>
+
+                <!-- Social Media Platforms -->
+                <div class="mentor-socials" id="mentorSocialLinksContainer">
+                    <!-- Injected dynamically -->
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="button" class="btn-gold" onclick="copyShareUrl()" style="white-space:nowrap;">
+                    <i class="fas fa-share-alt"></i> Share Profile
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTENT TABS & VIEWS -->
+    <main class="content-container">
+        
+        <div class="curriculum-tabs">
+            <button type="button" class="tab-btn active" id="tabBtnVideos" onclick="switchTab('videos')">
+                <i class="fab fa-youtube" style="color:#ef4444;"></i> Video Classes (<span id="countVideos">0</span>)
+            </button>
+            <button type="button" class="tab-btn" id="tabBtnDrive" onclick="switchTab('drive')">
+                <i class="fab fa-google-drive" style="color:#3b82f6;"></i> Free Drive Resources (<span id="countDrive">0</span>)
+            </button>
+            <button type="button" class="tab-btn" id="tabBtnPaid" onclick="switchTab('paid')">
+                <i class="fas fa-gem" style="color:var(--gold);"></i> Paid Courses & VIP Mentorship (<span id="countPaid">0</span>)
+            </button>
+        </div>
+
+        <!-- 1. VIDEO CLASSES VIEW -->
+        <div id="sectionVideos" class="video-layout">
+            <div>
+                <div class="video-player-box" id="videoPlayerBox">
+                    <iframe id="videoIframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-picture" allowfullscreen></iframe>
+                </div>
+                
+                <div class="glass video-details-card">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                        <div>
+                            <span id="activeVideoCategory" style="background:rgba(245,176,65,0.15); color:var(--gold); font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px;">Lesson</span>
+                            <h2 id="activeVideoTitle" style="font-size:1.25rem; font-weight:900; color:#fff; margin:8px 0 6px 0;">Select a class to watch</h2>
+                        </div>
+                        <span id="activeVideoDuration" style="font-size:0.82rem; color:var(--text-muted); font-weight:700;"><i class="far fa-clock"></i> --:--</span>
+                    </div>
+                    <p id="activeVideoDesc" style="font-size:0.85rem; color:var(--text-muted); line-height:1.6; margin-top:8px;">
+                        ট্রেডিং স্ট্র্যাটেজি ও সঠিক রিস্ক ম্যানেজমেন্ট আয়ত্ত করতে প্রতিটি ভিডিও মনোযোগ দিয়ে সম্পন্ন করুন।
+                    </p>
+                </div>
+            </div>
+
+            <!-- Playlist -->
+            <div class="glass playlist-card">
+                <h3 style="font-size:1.05rem; font-weight:900; color:#fff; display:flex; align-items:center; justify-content:space-between;">
+                    <span>Curriculum Playlist</span>
+                    <span id="playlistCountBadge" style="font-size:0.75rem; color:var(--gold);">0 Videos</span>
+                </h3>
+                <div class="playlist-items" id="playlistItemsBox">
+                    <!-- Injected dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. FREE DRIVE RESOURCES VIEW -->
+        <div id="sectionDrive" class="cards-grid" style="display:none;">
+            <!-- Injected dynamically -->
+        </div>
+
+        <!-- 3. PAID COURSES VIEW -->
+        <div id="sectionPaid" class="cards-grid" style="display:none;">
+            <!-- Injected dynamically -->
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer style="margin-top:auto; padding:2rem; border-top:1px solid var(--border); text-align:center; font-size:0.8rem; color:var(--text-muted);">
+        &copy; 2026 Binary Prop Firm — Verified Mentor Academy Network. All rights reserved.
+    </footer>
+
+    <!-- COURSE ENROLLMENT / PAYMENT MODAL -->
+    <div class="modal-overlay" id="enrollModal">
+        <div class="modal-box glass">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
+                <h3 style="font-size:1.2rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-shopping-cart" style="color:var(--gold);"></i> Course Enrollment
+                </h3>
+                <button type="button" onclick="closeModal('enrollModal')" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px; margin-bottom:14px;">
+                <div style="font-size:0.75rem; font-weight:800; color:var(--gold); text-transform:uppercase;">Selected Course</div>
+                <h4 id="enrollCourseTitle" style="font-size:1.05rem; font-weight:900; color:#fff; margin:2px 0;">--</h4>
+                <div style="font-size:1.2rem; font-weight:900; color:var(--emerald);" id="enrollCoursePrice">--</div>
+            </div>
+
+            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:14px;">
+                <div style="font-size:0.75rem; font-weight:800; color:var(--cyan); margin-bottom:4px;">
+                    <i class="fas fa-info-circle"></i> Mentor Payment Instructions:
+                </div>
+                <div id="enrollPaymentInstructions" style="font-size:0.82rem; color:#fff; line-height:1.5; white-space:pre-wrap;">
+                    পেমেন্ট সম্পন্ন করে নিচের বক্সে আপনার ট্রানজেকশন আইডি (TxID) এবং রসিদ সাবমিট করুন।
+                </div>
+            </div>
+
+            <form id="enrollPaymentForm" onsubmit="submitCourseEnrollment(event)">
+                <input type="hidden" id="enrollCourseId" value="" />
+                <input type="hidden" id="enrollProofUrl" value="" />
+
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;">Your Name *</label>
+                    <input type="text" class="form-control" id="enrollStudentName" required placeholder="Trader Name" />
+                </div>
+
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;">Your Email *</label>
+                    <input type="email" class="form-control" id="enrollStudentEmail" required placeholder="trader@email.com" />
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div class="form-group">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;">Contact / Telegram</label>
+                        <input type="text" class="form-control" id="enrollStudentContact" placeholder="@username or WhatsApp" />
+                    </div>
+                    <div class="form-group">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;">Payment Method</label>
+                        <select class="form-control" id="enrollPaymentMethod">
+                            <option value="Binance Pay">Binance Pay (USDT)</option>
+                            <option value="Crypto USDT (TRC20)">Crypto USDT (TRC20)</option>
+                            <option value="bKash Personal">bKash Personal</option>
+                            <option value="Nagad Personal">Nagad Personal</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--gold); margin-bottom:3px;">Transaction ID / TrxID *</label>
+                    <input type="text" class="form-control" id="enrollTxId" required placeholder="e.g. 29384729183" style="font-family:monospace; font-weight:700;" />
+                </div>
+
+                <!-- Proof Screenshot Upload (Max 1MB) -->
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;">
+                        Payment Screenshot / Receipt (Max 1MB)
+                    </label>
+                    <input type="file" id="enrollProofFileInput" accept="image/*" style="display:none;" onchange="handleProofUpload(this)" />
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button type="button" class="btn-outline" onclick="document.getElementById('enrollProofFileInput').click()" style="padding:7px 14px; font-size:0.78rem;">
+                            <i class="fas fa-camera"></i> রসিদ আপলোড করুন (Max 1MB)
+                        </button>
+                        <span id="enrollProofStatus" style="font-size:0.75rem; color:var(--text-muted);">No file chosen</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;">Additional Note (Optional)</label>
+                    <textarea class="form-control" id="enrollStudentNote" rows="2" placeholder="Any message for your mentor..."></textarea>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn-outline" onclick="closeModal('enrollModal')">Cancel</button>
+                    <button type="submit" class="btn-gold">
+                        <i class="fas fa-paper-plane"></i> Submit Payment for Verification
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- UNLOCKED COURSE MODAL -->
+    <div class="modal-overlay" id="unlockedModal">
+        <div class="modal-box glass">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
+                <h3 style="font-size:1.2rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-unlock" style="color:var(--emerald);"></i> Course Content Unlocked
+                </h3>
+                <button type="button" onclick="closeModal('unlockedModal')" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="text-align:center; padding:1.5rem 0;">
+                <div style="width:60px; height:60px; border-radius:50%; background:rgba(16,185,129,0.2); display:flex; align-items:center; justify-content:center; color:var(--emerald); font-size:1.8rem; margin:0 auto 12px auto;">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h3 id="unlockedCourseTitle" style="font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:6px;">--</h3>
+                <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.5;">
+                    মেন্টর আপনার পেমেন্ট অনুমোদন করেছেন! ক্লাসরুম, ড্রাইভ বা ভিআইপি গ্রুপে প্রবেশ করতে নিচের বাটনে চাপ দিন।
+                </p>
+                <div style="margin-top:20px;">
+                    <a id="unlockedAccessBtn" href="#" target="_blank" class="btn-emerald" style="padding:12px 28px; font-size:0.95rem;">
+                        <i class="fas fa-external-link-alt"></i> কোর্স অ্যাক্সেস করুন (Enter Classroom)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastBox" class="toast-box">
+        <i class="fas fa-info-circle" style="color:var(--gold);"></i>
+        <span id="toastMsg">Notification message</span>
+    </div>
+
+    <script>
+        let currentMentor = null;
+        let mentorId = '';
+        let myEnrollments = [];
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m];
+            });
+        }
+
+        function showToast(msg, type = 'info') {
+            const box = document.getElementById('toastBox');
+            const msgEl = document.getElementById('toastMsg');
+            if (!box || !msgEl) return;
+            msgEl.innerText = msg;
+            box.style.display = 'flex';
+            setTimeout(() => { box.style.display = 'none'; }, 4000);
+        }
+
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        }
+
+        function copyShareUrl() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showToast('প্রোফাইল লিঙ্ক কপি করা হয়েছে!', 'success');
+            }).catch(() => {
+                showToast('লিঙ্ক কপি করা হয়েছে!', 'success');
+            });
+        }
+
+        // Extract mentor ID from pathname or query param: /mentor/:id or ?id=:id or ?mentor=:id
+        function getMentorIdFromUrl() {
+            const pathParts = window.location.pathname.split('/').filter(Boolean);
+            if (pathParts.length >= 2 && (pathParts[0] === 'mentor' || pathParts[0] === 'academy')) {
+                return pathParts[pathParts.length - 1];
+            }
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id') || params.get('mentor') || '';
+        }
+
+        async function loadMentorProfile() {
+            mentorId = getMentorIdFromUrl();
+            if (!mentorId) {
+                document.getElementById('mentorNameHeading').innerText = 'Mentor Not Found';
+                document.getElementById('mentorBioText').innerText = 'Please check the mentor URL.';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/academy/mentors/${mentorId}`);
+                const data = await res.json();
+                if (data.success && data.mentor) {
+                    currentMentor = data.mentor;
+                    renderMentorShowcase(data.mentor);
+                    loadMyEnrollments();
+                } else {
+                    document.getElementById('mentorNameHeading').innerText = 'Mentor Profile Pending or Inactive';
+                    document.getElementById('mentorBioText').innerText = data.message || 'This mentor profile is currently not active.';
+                }
+            } catch (e) {
+                console.error('[LOAD MENTOR ERROR]:', e);
+            }
+        }
+
+        function renderMentorShowcase(mentor) {
+            document.title = `${mentor.mentorName} | Trading Academy`;
+            
+            const nameEl = document.getElementById('mentorNameHeading'); if (nameEl) nameEl.innerText = mentor.mentorName;
+            const tagEl = document.getElementById('mentorTaglineHeading'); if (tagEl) tagEl.innerText = mentor.mentorTagline || 'Professional Trader & Mentor';
+            const bioEl = document.getElementById('mentorBioText'); if (bioEl) bioEl.innerText = mentor.mentorBio || '';
+            const avEl = document.getElementById('mentorAvatarImg'); if (avEl) avEl.src = mentor.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
+            const bnEl = document.getElementById('mentorCoverBanner'); if (bnEl && mentor.bannerUrl) bnEl.style.backgroundImage = `url('${mentor.bannerUrl}')`;
+
+            // Referral button
+            const refBtn = document.getElementById('btnNavRegisterReferral');
+            if (refBtn && mentor.partnerCode) {
+                refBtn.href = `/?dest=register&ref=${encodeURIComponent(mentor.partnerCode)}`;
+            }
+
+            // Social Media Links
+            renderSocialPills(mentor);
+
+            // Curriculum items
+            const items = Array.isArray(mentor.items) ? mentor.items : [];
+            const videoItems = items.filter(it => it.type === 'youtube');
+            const driveItems = items.filter(it => it.type === 'drive' || it.type === 'free');
+            const paidItems = items.filter(it => it.type === 'paid');
+
+            document.getElementById('countVideos').innerText = videoItems.length;
+            document.getElementById('countDrive').innerText = driveItems.length;
+            document.getElementById('countPaid').innerText = paidItems.length;
+
+            renderVideosSection(videoItems);
+            renderDriveSection(driveItems);
+            renderPaidSection(paidItems);
+        }
+
+        function renderSocialPills(mentor) {
+            const container = document.getElementById('mentorSocialLinksContainer');
+            if (!container) return;
+
+            const soc = mentor.socialLinks || {};
+            const tg = mentor.telegramChannel || soc.telegram;
+            const yt = mentor.youtubeChannel || soc.youtube;
+            const fb = soc.facebook;
+            const ig = soc.instagram;
+            const wa = soc.whatsapp;
+            const tw = soc.twitter;
+            const dc = soc.discord;
+            const ws = soc.website;
+
+            let html = '';
+            if (tg) html += `<a href="${escapeHtml(tg)}" target="_blank" class="social-pill social-tg"><i class="fab fa-telegram-plane"></i> Telegram</a>`;
+            if (yt) html += `<a href="${escapeHtml(yt)}" target="_blank" class="social-pill social-yt"><i class="fab fa-youtube"></i> YouTube</a>`;
+            if (fb) html += `<a href="${escapeHtml(fb)}" target="_blank" class="social-pill social-fb"><i class="fab fa-facebook"></i> Facebook</a>`;
+            if (ig) html += `<a href="${escapeHtml(ig)}" target="_blank" class="social-pill social-ig"><i class="fab fa-instagram"></i> Instagram</a>`;
+            if (wa) {
+                const waUrl = wa.startsWith('http') ? wa : `https://wa.me/${wa.replace(/[^0-9]/g, '')}`;
+                html += `<a href="${escapeHtml(waUrl)}" target="_blank" class="social-pill social-wa"><i class="fab fa-whatsapp"></i> WhatsApp</a>`;
+            }
+            if (tw) html += `<a href="${escapeHtml(tw)}" target="_blank" class="social-pill social-tw"><i class="fab fa-twitter"></i> Twitter</a>`;
+            if (dc) html += `<a href="${escapeHtml(dc)}" target="_blank" class="social-pill social-dc"><i class="fab fa-discord"></i> Discord</a>`;
+            if (ws) html += `<a href="${escapeHtml(ws)}" target="_blank" class="social-pill social-ws"><i class="fas fa-globe"></i> Website</a>`;
+
+            container.innerHTML = html;
+        }
+
+        let currentVideoList = [];
+        function renderVideosSection(videos) {
+            currentVideoList = videos;
+            const playlistBox = document.getElementById('playlistItemsBox');
+            const countBadge = document.getElementById('playlistCountBadge');
+            if (countBadge) countBadge.innerText = `${videos.length} Videos`;
+
+            if (videos.length === 0) {
+                if (playlistBox) playlistBox.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-muted);">কোনো ভিডিও ক্লাস নেই।</div>';
+                return;
+            }
+
+            if (playlistBox) {
+                playlistBox.innerHTML = videos.map((v, idx) => {
+                    const thumb = v.thumbnailUrl || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=200&auto=format&fit=crop&q=60';
+                    return `
+                        <div class="playlist-item ${idx === 0 ? 'active' : ''}" id="playItem_${idx}" onclick="selectVideoLesson(${idx})">
+                            <img src="${thumb}" class="playlist-thumb" alt="${escapeHtml(v.title)}" />
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:0.84rem; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    ${v.serial ? `#${v.serial} ` : ''}${escapeHtml(v.title)}
+                                </div>
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">
+                                    <span>${escapeHtml(v.category || 'Trading')}</span> • <span>${escapeHtml(v.duration || 'Video')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            selectVideoLesson(0);
+        }
+
+        function selectVideoLesson(idx) {
+            if (!currentVideoList || !currentVideoList[idx]) return;
+            const v = currentVideoList[idx];
+
+            document.querySelectorAll('.playlist-item').forEach(i => i.classList.remove('active'));
+            const activeEl = document.getElementById(`playItem_${idx}`);
+            if (activeEl) activeEl.classList.add('active');
+
+            const iframe = document.getElementById('videoIframe');
+            if (iframe) iframe.src = v.videoEmbed || '';
+
+            const titleEl = document.getElementById('activeVideoTitle'); if (titleEl) titleEl.innerText = `${v.serial ? `#${v.serial} - ` : ''}${v.title}`;
+            const catEl = document.getElementById('activeVideoCategory'); if (catEl) catEl.innerText = v.category || 'Lesson';
+            const durEl = document.getElementById('activeVideoDuration'); if (durEl) durEl.innerHTML = `<i class="far fa-clock"></i> ${v.duration || '--:--'}`;
+            const descEl = document.getElementById('activeVideoDesc'); if (descEl) descEl.innerText = v.description || 'ট্রেডিং স্ট্র্যাটেজি ও সঠিক রিস্ক ম্যানেজমেন্ট আয়ত্ত করতে প্রতিটি ভিডিও মনোযোগ দিয়ে সম্পন্ন করুন।';
+        }
+
+        function renderDriveSection(items) {
+            const container = document.getElementById('sectionDrive');
+            if (!container) return;
+
+            if (items.length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-muted);">কোনো ফ্রি ড্রাইভ রিসোর্স পাওয়া যায়নি।</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(it => {
+                const thumb = it.thumbnailUrl ? `<img src="${escapeHtml(it.thumbnailUrl)}" class="course-card-thumb" alt="${escapeHtml(it.title)}" />` : '';
+                return `
+                    <div class="glass course-card">
+                        ${thumb}
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                            <span style="background:rgba(59,130,246,0.15); color:#60a5fa; font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:10px;">
+                                <i class="fab fa-google-drive"></i> ${escapeHtml(it.resourceType || 'Free Resource')}
+                            </span>
+                        </div>
+                        <h3 style="font-size:1.05rem; font-weight:800; color:#fff; margin-bottom:6px;">${escapeHtml(it.title)}</h3>
+                        <p style="font-size:0.82rem; color:var(--text-muted); line-height:1.5; flex:1; margin-bottom:14px;">
+                            ${escapeHtml(it.description || 'গুগল ড্রাইভ থেকে সরাসরি ফাইলটি ডাউনলোড বা ভিউ করতে নিচের বাটনে চাপ দিন।')}
+                        </p>
+                        <a href="${escapeHtml(it.driveUrl || '#')}" target="_blank" class="btn-outline" style="justify-content:center; border-color:#3b82f6; color:#60a5fa;">
+                            <i class="fas fa-external-link-alt"></i> ড্রাইভ ফাইল দেখুন (Open Drive)
+                        </a>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPaidSection(items) {
+            const container = document.getElementById('sectionPaid');
+            if (!container) return;
+
+            if (items.length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-muted);">বর্তমানে কোনো পেইড কোর্স সক্রিয় নেই।</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(it => {
+                const priceSign = it.currency === 'BDT' ? '৳' : '$';
+                const thumb = it.thumbnailUrl ? `<img src="${escapeHtml(it.thumbnailUrl)}" class="course-card-thumb" alt="${escapeHtml(it.title)}" />` : '';
+
+                // Check my enrollment state
+                const myEnr = myEnrollments.find(e => e.courseId === it.id);
+                let actionBtn = `
+                    <button type="button" class="btn-gold" style="justify-content:center;" onclick="openEnrollmentModal('${it.id}')">
+                        <i class="fas fa-shopping-cart"></i> এনরোল করুন (${priceSign}${it.price})
+                    </button>
+                `;
+
+                let statusBadge = `<span style="background:rgba(245,176,65,0.15); color:var(--gold); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:10px;"><i class="fas fa-gem"></i> ${escapeHtml(it.courseFormat || 'VIP Mentorship')}</span>`;
+
+                if (myEnr) {
+                    if (myEnr.status === 'approved') {
+                        statusBadge = `<span style="background:rgba(16,185,129,0.2); color:#10b981; font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:10px;"><i class="fas fa-check-circle"></i> Enrolled & Unlocked</span>`;
+                        actionBtn = `
+                            <button type="button" class="btn-emerald" style="justify-content:center;" onclick="showUnlockedModal('${it.id}', '${escapeHtml(myEnr.accessLink || it.buyUrl || '#')}')">
+                                <i class="fas fa-play-circle"></i> ক্লাসরুমে প্রবেশ করুন (Open Course)
+                            </button>
+                        `;
+                    } else if (myEnr.status === 'pending') {
+                        statusBadge = `<span style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:10px;"><i class="fas fa-clock"></i> Verification Pending</span>`;
+                        actionBtn = `
+                            <button type="button" class="btn-outline" style="justify-content:center; border-color:#f59e0b; color:#f59e0b;" disabled>
+                                <i class="fas fa-hourglass-half"></i> মেন্টরের অনুমোদনের অপেক্ষায়
+                            </button>
+                        `;
+                    }
+                }
+
+                return `
+                    <div class="glass course-card" style="border:1px solid rgba(245,176,65,0.25);">
+                        ${thumb}
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            ${statusBadge}
+                            <div style="font-size:1.35rem; font-weight:900; color:var(--emerald);">${priceSign}${it.price}</div>
+                        </div>
+                        <h3 style="font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:6px;">${escapeHtml(it.title)}</h3>
+                        <p style="font-size:0.84rem; color:var(--text-muted); line-height:1.6; flex:1; margin-bottom:14px;">
+                            ${escapeHtml(it.description || 'এই পেইড কোর্সে এনরোল করে সরাসরি মেন্টরের ভিআইপি ক্লাস, ড্রাইভ ও লাইভ মেন্টরশিপ সাপোর্ট উপভোগ করুন।')}
+                        </p>
+                        ${actionBtn}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadMyEnrollments() {
+            try {
+                // Try to get email from localStorage or auth token
+                let email = '';
+                const userRaw = localStorage.getItem('user');
+                if (userRaw) {
+                    try { email = JSON.parse(userRaw).email || ''; } catch (e) {}
+                }
+                const res = await fetch(`/api/academy/my-enrollments?email=${encodeURIComponent(email)}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` }
+                });
+                const data = await res.json();
+                if (data.success && Array.isArray(data.enrollments)) {
+                    myEnrollments = data.enrollments;
+                    if (currentMentor && currentMentor.items) {
+                        const paidItems = currentMentor.items.filter(it => it.type === 'paid');
+                        renderPaidSection(paidItems);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const secVid = document.getElementById('sectionVideos');
+            const secDrv = document.getElementById('sectionDrive');
+            const secPaid = document.getElementById('sectionPaid');
+
+            if (tab === 'videos') {
+                document.getElementById('tabBtnVideos').classList.add('active');
+                if (secVid) secVid.style.display = 'grid';
+                if (secDrv) secDrv.style.display = 'none';
+                if (secPaid) secPaid.style.display = 'none';
+            } else if (tab === 'drive') {
+                document.getElementById('tabBtnDrive').classList.add('active');
+                if (secVid) secVid.style.display = 'none';
+                if (secDrv) secDrv.style.display = 'grid';
+                if (secPaid) secPaid.style.display = 'none';
+            } else if (tab === 'paid') {
+                document.getElementById('tabBtnPaid').classList.add('active');
+                if (secVid) secVid.style.display = 'none';
+                if (secDrv) secDrv.style.display = 'none';
+                if (secPaid) secPaid.style.display = 'grid';
+            }
+        }
+
+        function openEnrollmentModal(courseId) {
+            if (!currentMentor || !Array.isArray(currentMentor.items)) return;
+            const course = currentMentor.items.find(it => it.id === courseId);
+            if (!course) return;
+
+            document.getElementById('enrollCourseId').value = course.id;
+            document.getElementById('enrollCourseTitle').innerText = course.title;
+            const priceSign = course.currency === 'BDT' ? '৳' : '$';
+            document.getElementById('enrollCoursePrice').innerText = `${priceSign}${course.price}`;
+
+            const instEl = document.getElementById('enrollPaymentInstructions');
+            if (instEl) {
+                instEl.innerText = course.paymentInstructions || 'মেন্টরের প্রদত্ত পেমেন্ট মেথডে ফি পরিশোধ করে নিচের বক্সে আপনার Transaction ID ও পেমেন্টের স্ক্রিনশট সাবমিট করুন।';
+            }
+
+            // Autofill user details if logged in
+            const userRaw = localStorage.getItem('user');
+            if (userRaw) {
+                try {
+                    const u = JSON.parse(userRaw);
+                    if (u.name) document.getElementById('enrollStudentName').value = u.name;
+                    if (u.email) document.getElementById('enrollStudentEmail').value = u.email;
+                } catch (e) {}
+            }
+
+            openModal('enrollModal');
+        }
+
+        async function handleProofUpload(input) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            if (file.size > 1 * 1024 * 1024) {
+                showToast('পেমেন্ট রসিদ ১ মেগাবাইট (1 MB) এর বেশি হতে পারবে না। অনুগ্রহ করে ছোট সাইজের ছবি নির্বাচন করুন।', 'warning');
+                input.value = '';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('proof', file);
+
+            document.getElementById('enrollProofStatus').innerText = 'Uploading...';
+            try {
+                const res = await fetch('/api/academy/upload-proof', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success && data.url) {
+                    document.getElementById('enrollProofUrl').value = data.url;
+                    document.getElementById('enrollProofStatus').innerHTML = '<span style="color:#10b981;"><i class="fas fa-check"></i> Uploaded!</span>';
+                    showToast('স্ক্রিনশট সফলভাবে আপলোড হয়েছে!', 'success');
+                } else {
+                    document.getElementById('enrollProofStatus').innerText = 'Failed';
+                    showToast(data.message || 'আপলোড ব্যর্থ হয়েছে।', 'error');
+                }
+            } catch (e) {
+                document.getElementById('enrollProofStatus').innerText = 'Error';
+                showToast('আপলোডে নেটওয়ার্ক সমস্যা হয়েছে।', 'error');
+            }
+        }
+
+        async function submitCourseEnrollment(e) {
+            e.preventDefault();
+            const courseId = document.getElementById('enrollCourseId').value;
+            const userName = document.getElementById('enrollStudentName').value.trim();
+            const userEmail = document.getElementById('enrollStudentEmail').value.trim();
+            const userContact = document.getElementById('enrollStudentContact').value.trim();
+            const paymentMethod = document.getElementById('enrollPaymentMethod').value;
+            const transactionId = document.getElementById('enrollTxId').value.trim();
+            const proofScreenshot = document.getElementById('enrollProofUrl').value;
+            const notes = document.getElementById('enrollStudentNote').value.trim();
+
+            if (!transactionId) {
+                showToast('অনুগ্রহ করে Transaction ID প্রদান করুন।', 'warning');
+                return;
+            }
+
+            const payload = {
+                partnerId: currentMentor.partnerId,
+                courseId,
+                userName,
+                userEmail,
+                userContact,
+                paymentMethod,
+                transactionId,
+                proofScreenshot,
+                notes
+            };
+
+            try {
+                const res = await fetch('/api/academy/course/enroll', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeModal('enrollModal');
+                    showToast(data.message || 'পেমেন্ট রিকোয়েস্ট সাবমিট হয়েছে!', 'success');
+                    loadMyEnrollments();
+                } else {
+                    showToast(data.message || 'এনরোলমেন্ট ব্যর্থ হয়েছে।', 'error');
+                }
+            } catch (e) {
+                showToast('সাবমিট করতে নেটওয়ার্ক সমস্যা হয়েছে।', 'error');
+            }
+        }
+
+        function showUnlockedModal(courseId, accessLink) {
+            const course = currentMentor.items.find(it => it.id === courseId);
+            if (course) {
+                document.getElementById('unlockedCourseTitle').innerText = course.title;
+            }
+            const btn = document.getElementById('unlockedAccessBtn');
+            if (btn) btn.href = accessLink || '#';
+            openModal('unlockedModal');
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMentorProfile();
+        });
+    </script>
+</body>
+</html>

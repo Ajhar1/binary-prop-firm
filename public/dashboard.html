@@ -5292,6 +5292,121 @@
         </section>
     </main>
 
+    <!-- DASHBOARD COURSE ENROLLMENT / PAYMENT MODAL -->
+    <div class="modal-overlay" id="dashCourseEnrollModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
+        <div class="modal-box glass" style="max-width:540px; border-radius:20px; padding:1.75rem; background:#131722; border:1px solid rgba(255,255,255,0.1); max-height:90vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
+                <h3 style="font-size:1.2rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-shopping-cart" style="color:var(--yellow);"></i> Course Enrollment
+                </h3>
+                <button type="button" onclick="closeDashCourseEnrollModal()" style="background:none; border:none; color:var(--text-secondary); font-size:1.2rem; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px; margin-bottom:14px;">
+                <div style="font-size:0.75rem; font-weight:800; color:var(--yellow); text-transform:uppercase;">Selected Course</div>
+                <h4 id="dashEnrollCourseTitle" style="font-size:1.05rem; font-weight:900; color:#fff; margin:2px 0;">--</h4>
+                <div style="font-size:1.2rem; font-weight:900; color:var(--accent-green);" id="dashEnrollCoursePrice">--</div>
+            </div>
+
+            <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px; margin-bottom:14px;">
+                <div style="font-size:0.75rem; font-weight:800; color:var(--cyan); margin-bottom:4px;">
+                    <i class="fas fa-info-circle"></i> Mentor Payment Instructions:
+                </div>
+                <div id="dashEnrollPaymentInstructions" style="font-size:0.82rem; color:#fff; line-height:1.5; white-space:pre-wrap;">
+                    পেমেন্ট সম্পন্ন করে নিচের বক্সে আপনার ট্রানজেকশন আইডি (TxID) এবং রসিদ সাবমিট করুন।
+                </div>
+            </div>
+
+            <form id="dashEnrollForm" onsubmit="submitDashCourseEnrollment(event)">
+                <input type="hidden" id="dashEnrollPartnerId" value="" />
+                <input type="hidden" id="dashEnrollCourseId" value="" />
+                <input type="hidden" id="dashEnrollProofUrl" value="" />
+
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:3px;">Your Name *</label>
+                    <input type="text" class="form-control" id="dashEnrollStudentName" required placeholder="Trader Name" style="background:#0b0e17; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:9px 12px; border-radius:8px; width:100%;" />
+                </div>
+
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:3px;">Your Email *</label>
+                    <input type="email" class="form-control" id="dashEnrollStudentEmail" required placeholder="trader@email.com" style="background:#0b0e17; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:9px 12px; border-radius:8px; width:100%;" />
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div class="form-group">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:3px;">Contact / Telegram</label>
+                        <input type="text" class="form-control" id="dashEnrollStudentContact" placeholder="@username or WhatsApp" style="background:#0b0e17; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:9px 12px; border-radius:8px; width:100%;" />
+                    </div>
+                    <div class="form-group">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:3px;">Payment Method</label>
+                        <select class="form-control" id="dashEnrollPaymentMethod" style="background:#0b0e17; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:9px 12px; border-radius:8px; width:100%;">
+                            <option value="Binance Pay">Binance Pay (USDT)</option>
+                            <option value="Crypto USDT (TRC20)">Crypto USDT (TRC20)</option>
+                            <option value="bKash Personal">bKash Personal</option>
+                            <option value="Nagad Personal">Nagad Personal</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--yellow); margin-bottom:3px;">Transaction ID / TrxID *</label>
+                    <input type="text" class="form-control" id="dashEnrollTxId" required placeholder="e.g. 29384729183" style="font-family:monospace; font-weight:700; background:#0b0e17; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:9px 12px; border-radius:8px; width:100%;" />
+                </div>
+
+                <!-- Proof Screenshot Upload (Max 1MB) -->
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:3px;">
+                        Payment Screenshot / Receipt (Max 1MB)
+                    </label>
+                    <input type="file" id="dashEnrollProofFileInput" accept="image/*" style="display:none;" onchange="handleDashProofUpload(this)" />
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button type="button" class="btn-outline" onclick="document.getElementById('dashEnrollProofFileInput').click()" style="padding:7px 14px; font-size:0.78rem;">
+                            <i class="fas fa-camera"></i> রসিদ আপলোড করুন (Max 1MB)
+                        </button>
+                        <span id="dashEnrollProofStatus" style="font-size:0.75rem; color:var(--text-secondary);">No file chosen</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:3px;">Additional Note (Optional)</label>
+                    <textarea class="form-control" id="dashEnrollStudentNote" rows="2" placeholder="Any note for mentor..." style="background:#0b0e17; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:9px 12px; border-radius:8px; width:100%;"></textarea>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn-outline" onclick="closeDashCourseEnrollModal()">Cancel</button>
+                    <button type="submit" class="btn-gold">
+                        <i class="fas fa-paper-plane"></i> Submit Payment for Verification
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD UNLOCKED COURSE MODAL -->
+    <div class="modal-overlay" id="dashUnlockedCourseModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; padding:1rem;">
+        <div class="modal-box glass" style="max-width:500px; border-radius:20px; padding:1.75rem; background:#131722; border:1px solid rgba(255,255,255,0.1); text-align:center;">
+            <div style="display:flex; justify-content:flex-end;">
+                <button type="button" onclick="closeDashUnlockedCourseModal()" style="background:none; border:none; color:var(--text-secondary); font-size:1.2rem; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="width:60px; height:60px; border-radius:50%; background:rgba(0,230,118,0.15); display:flex; align-items:center; justify-content:center; color:var(--accent-green); font-size:1.8rem; margin:0 auto 12px auto;">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3 id="dashUnlockedTitle" style="font-size:1.2rem; font-weight:900; color:#fff; margin-bottom:6px;">--</h3>
+            <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5; margin-bottom:20px;">
+                মেন্টর আপনার পেমেন্ট অনুমোদন করেছেন! ক্লাসরুম বা রিসোর্সে প্রবেশ করতে নিচের বাটনে চাপ দিন।
+            </p>
+            <a id="dashUnlockedLinkBtn" href="#" target="_blank" class="btn-emerald" style="padding:12px 28px; font-size:0.95rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                <i class="fas fa-external-link-alt"></i> কোর্স অ্যাক্সেস করুন (Enter Classroom)
+            </a>
+        </div>
+    </div>
+
     <!-- Setup Video Modal (Computer, Android, iPhone) -->
     <div class="modal-overlay" id="setupVideoModal" onclick="if(event.target === this) closeSetupVideoModal();">
         <div class="modal-box" style="max-width: 560px; padding: 2rem 1.6rem; border-radius: 20px; background: #131722; border: 1px solid rgba(255, 184, 0, 0.35); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);">
@@ -12546,8 +12661,30 @@
             }).join('');
         }
 
+        let myDashEnrollments = [];
+
+        async function fetchMyDashEnrollments() {
+            try {
+                let email = '';
+                if (window.currentUser && window.currentUser.email) {
+                    email = window.currentUser.email;
+                } else {
+                    const localU = localStorage.getItem('user');
+                    if (localU) { try { email = JSON.parse(localU).email || ''; } catch (e) {} }
+                }
+                const token = window.userToken || localStorage.getItem('token') || '';
+                const res = await fetch(`/api/academy/my-enrollments?email=${encodeURIComponent(email)}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success && Array.isArray(data.enrollments)) {
+                    myDashEnrollments = data.enrollments;
+                }
+            } catch (e) {}
+        }
+
         async function openMentorClassroom(mentorId) {
-            let mentor = allDashMentors.find(m => m.id === mentorId);
+            let mentor = allDashMentors.find(m => m.id === mentorId || m.partnerId === mentorId);
             
             // If items not populated or need full details, fetch single endpoint
             if (!mentor || !mentor.items || mentor.items.length === 0) {
@@ -12566,6 +12703,7 @@
             }
 
             activeMentorClassroom = mentor;
+            await fetchMyDashEnrollments();
 
             // Populate Hero
             const nameEl = document.getElementById('classroomMentorName');
@@ -12586,16 +12724,36 @@
                 badgeEl.style.color = 'var(--accent-green)';
             }
 
-            // Social links
+            // Social links (All platforms)
             const socBox = document.getElementById('classroomSocialLinksBox');
             if (socBox) {
                 let sHtml = '';
-                if (mentor.telegramChannel) {
-                    sHtml += `<a href="${escapeHtml(mentor.telegramChannel)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#229ED9; color:#229ED9;"><i class="fab fa-telegram-plane"></i> Telegram Channel</a>`;
+                const soc = mentor.socialLinks || {};
+                const tg = mentor.telegramChannel || soc.telegram;
+                const yt = mentor.youtubeChannel || soc.youtube;
+                const fb = soc.facebook;
+                const ig = soc.instagram;
+                const wa = soc.whatsapp;
+                const tw = soc.twitter;
+                const dc = soc.discord;
+                const ws = soc.website;
+
+                if (tg) sHtml += `<a href="${escapeHtml(tg)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#229ED9; color:#229ED9;"><i class="fab fa-telegram-plane"></i> Telegram</a>`;
+                if (yt) sHtml += `<a href="${escapeHtml(yt)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#ef4444; color:#ef4444;"><i class="fab fa-youtube"></i> YouTube</a>`;
+                if (fb) sHtml += `<a href="${escapeHtml(fb)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#1877F2; color:#1877F2;"><i class="fab fa-facebook"></i> Facebook</a>`;
+                if (ig) sHtml += `<a href="${escapeHtml(ig)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#E4405F; color:#E4405F;"><i class="fab fa-instagram"></i> Instagram</a>`;
+                if (wa) {
+                    const waUrl = wa.startsWith('http') ? wa : `https://wa.me/${wa.replace(/[^0-9]/g, '')}`;
+                    sHtml += `<a href="${escapeHtml(waUrl)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#25D366; color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp</a>`;
                 }
-                if (mentor.youtubeChannel) {
-                    sHtml += `<a href="${escapeHtml(mentor.youtubeChannel)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#ef4444; color:#ef4444;"><i class="fab fa-youtube"></i> YouTube Channel</a>`;
-                }
+                if (tw) sHtml += `<a href="${escapeHtml(tw)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#fff; color:#fff;"><i class="fab fa-twitter"></i> Twitter</a>`;
+                if (dc) sHtml += `<a href="${escapeHtml(dc)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#5865F2; color:#5865F2;"><i class="fab fa-discord"></i> Discord</a>`;
+                if (ws) sHtml += `<a href="${escapeHtml(ws)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:var(--accent-green); color:var(--accent-green);"><i class="fas fa-globe"></i> Website</a>`;
+                
+                // Share public URL button
+                const shareUrl = `${window.location.origin}/mentor/${mentor.partnerId || mentor.id}`;
+                sHtml += `<button type="button" class="btn-outline" onclick="navigator.clipboard.writeText('${shareUrl}').then(() => showDashToast('প্রোফাইল লিঙ্ক কপি হয়েছে!', 'success'))" style="padding:6px 14px; font-size:0.8rem; border-color:var(--yellow); color:var(--yellow);"><i class="fas fa-share-alt"></i> Share Profile</button>`;
+
                 socBox.innerHTML = sHtml;
             }
 
@@ -12637,10 +12795,12 @@
                     `;
                 } else {
                     driveBox.innerHTML = driveItems.map(it => {
+                        const thumbImg = it.thumbnailUrl ? `<img src="${escapeHtml(it.thumbnailUrl)}" style="width:100%; height:130px; object-fit:cover; border-radius:10px; margin-bottom:10px;" alt="${escapeHtml(it.title)}" />` : '';
                         return `
                             <div class="glass-card" style="padding:1.25rem; border-radius:14px; display:flex; flex-direction:column;">
+                                ${thumbImg}
                                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-                                    <div style="width:42px; height:42px; border-radius:10px; background:rgba(59,130,246,0.15); display:flex; align-items:center; justify-content:center; color:#3b82f6; font-size:1.4rem; flex-shrink:0;">
+                                    <div style="width:38px; height:38px; border-radius:10px; background:rgba(59,130,246,0.15); display:flex; align-items:center; justify-content:center; color:#3b82f6; font-size:1.3rem; flex-shrink:0;">
                                         <i class="fab fa-google-drive"></i>
                                     </div>
                                     <div style="min-width:0; flex:1;">
@@ -12662,7 +12822,7 @@
                 }
             }
 
-            // 3. Populate Paid Courses
+            // 3. Populate Paid Courses with Permission & Enrollment Verification
             const paidBox = document.getElementById('classroomPaidList');
             if (paidBox) {
                 if (paidItems.length === 0) {
@@ -12675,12 +12835,53 @@
                 } else {
                     paidBox.innerHTML = paidItems.map(it => {
                         const priceSign = it.currency === 'BDT' ? '৳' : '$';
+                        const thumbImg = it.thumbnailUrl ? `<img src="${escapeHtml(it.thumbnailUrl)}" style="width:100%; height:140px; object-fit:cover; border-radius:10px; margin-bottom:12px;" alt="${escapeHtml(it.title)}" />` : '';
+
+                        // Check if current user has an active enrollment
+                        const myEnr = myDashEnrollments.find(e => e.courseId === it.id);
+                        let actionBtn = `
+                            <button type="button" class="btn-gold" onclick="openDashCourseEnrollModal('${mentor.partnerId}', '${it.id}')" style="width:100%; justify-content:center; padding:10px 16px; font-size:0.88rem; border-radius:10px;">
+                                <i class="fas fa-shopping-cart" style="margin-right:6px;"></i> এনরোল করুন (${priceSign}${it.price || 0})
+                            </button>
+                        `;
+
+                        let badgeHtml = `
+                            <span style="background:rgba(245,176,65,0.18); color:var(--yellow); font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
+                                <i class="fas fa-gem"></i> ${escapeHtml(it.courseFormat || 'VIP Mentorship')}
+                            </span>
+                        `;
+
+                        if (myEnr) {
+                            if (myEnr.status === 'approved') {
+                                badgeHtml = `
+                                    <span style="background:rgba(0,230,118,0.2); color:var(--accent-green); font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
+                                        <i class="fas fa-check-circle"></i> Enrolled & Unlocked
+                                    </span>
+                                `;
+                                actionBtn = `
+                                    <button type="button" class="btn-emerald" onclick="openDashUnlockedCourse('${it.id}', '${escapeHtml(myEnr.accessLink || it.buyUrl || '#')}')" style="width:100%; justify-content:center; padding:10px 16px; font-size:0.88rem; border-radius:10px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:none; cursor:pointer; font-weight:800;">
+                                        <i class="fas fa-play-circle" style="margin-right:6px;"></i> ক্লাসরুমে প্রবেশ করুন (Open Course)
+                                    </button>
+                                `;
+                            } else if (myEnr.status === 'pending') {
+                                badgeHtml = `
+                                    <span style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
+                                        <i class="fas fa-clock"></i> Verification Pending
+                                    </span>
+                                `;
+                                actionBtn = `
+                                    <button type="button" class="btn-outline" style="width:100%; justify-content:center; padding:10px 16px; font-size:0.85rem; border-radius:10px; border-color:#f59e0b; color:#f59e0b; cursor:not-allowed;" disabled>
+                                        <i class="fas fa-hourglass-half" style="margin-right:6px;"></i> মেন্টরের অনুমোদনের অপেক্ষায়
+                                    </button>
+                                `;
+                            }
+                        }
+
                         return `
                             <div class="glass-card" style="padding:1.5rem; border-radius:16px; border:1px solid rgba(245,176,65,0.25); background:linear-gradient(135deg, rgba(245,176,65,0.06) 0%, rgba(7,10,18,0.5) 100%); display:flex; flex-direction:column;">
+                                ${thumbImg}
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap:10px;">
-                                    <span style="background:rgba(245,176,65,0.18); color:var(--yellow); font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
-                                        <i class="fas fa-gem"></i> ${escapeHtml(it.courseFormat || 'VIP Mentorship')}
-                                    </span>
+                                    ${badgeHtml}
                                     <div style="font-size:1.4rem; font-weight:900; color:var(--accent-green);">
                                         ${priceSign}${it.price || 0}
                                     </div>
@@ -12694,9 +12895,7 @@
                                     ${escapeHtml(it.description || 'এই পেইড কোর্সে এনরোল করে সরাসরি মেন্টরের ভিআইপি ক্লাস ও সাপোর্ট উপভোগ করুন।')}
                                 </p>
 
-                                <a href="${escapeHtml(it.buyUrl || '#')}" target="_blank" class="btn-gold" style="width:100%; justify-content:center; padding:10px 16px; font-size:0.88rem; border-radius:10px; text-decoration:none;">
-                                    <i class="fas fa-shopping-cart" style="margin-right:6px;"></i> এনরোল করুন / কোর্স কিনুন (Buy Course)
-                                </a>
+                                ${actionBtn}
                             </div>
                         `;
                     }).join('');
@@ -12720,6 +12919,136 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function openDashCourseEnrollModal(partnerId, courseId) {
+            if (!activeMentorClassroom || !Array.isArray(activeMentorClassroom.items)) return;
+            const course = activeMentorClassroom.items.find(it => it.id === courseId);
+            if (!course) return;
+
+            document.getElementById('dashEnrollPartnerId').value = activeMentorClassroom.partnerId;
+            document.getElementById('dashEnrollCourseId').value = course.id;
+            document.getElementById('dashEnrollCourseTitle').innerText = course.title;
+            const priceSign = course.currency === 'BDT' ? '৳' : '$';
+            document.getElementById('dashEnrollCoursePrice').innerText = `${priceSign}${course.price || 0}`;
+
+            const instEl = document.getElementById('dashEnrollPaymentInstructions');
+            if (instEl) {
+                instEl.innerText = course.paymentInstructions || 'মেন্টরের প্রদত্ত পেমেন্ট মেথডে ফি পরিশোধ করে নিচের বক্সে আপনার Transaction ID ও পেমেন্টের স্ক্রিনশট সাবমিট করুন।';
+            }
+
+            // Autofill trader info if available
+            if (window.currentUser) {
+                if (window.currentUser.name) document.getElementById('dashEnrollStudentName').value = window.currentUser.name;
+                if (window.currentUser.email) document.getElementById('dashEnrollStudentEmail').value = window.currentUser.email;
+            }
+
+            const modal = document.getElementById('dashCourseEnrollModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeDashCourseEnrollModal() {
+            const modal = document.getElementById('dashCourseEnrollModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function handleDashProofUpload(input) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            if (file.size > 1 * 1024 * 1024) {
+                showDashToast('পেমেন্ট রসিদ ১ মেগাবাইট (1 MB) এর বেশি হতে পারবে না। অনুগ্রহ করে ছোট সাইজের ছবি নির্বাচন করুন।', 'warning');
+                input.value = '';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('proof', file);
+
+            const statusEl = document.getElementById('dashEnrollProofStatus');
+            if (statusEl) statusEl.innerText = 'Uploading...';
+            try {
+                const res = await fetch('/api/academy/upload-proof', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success && data.url) {
+                    document.getElementById('dashEnrollProofUrl').value = data.url;
+                    if (statusEl) statusEl.innerHTML = '<span style="color:var(--accent-green);"><i class="fas fa-check"></i> Uploaded!</span>';
+                    showDashToast('স্ক্রিনশট সফলভাবে আপলোড হয়েছে!', 'success');
+                } else {
+                    if (statusEl) statusEl.innerText = 'Failed';
+                    showDashToast(data.message || 'আপলোড ব্যর্থ হয়েছে।', 'error');
+                }
+            } catch (e) {
+                if (statusEl) statusEl.innerText = 'Error';
+                showDashToast('আপলোডে নেটওয়ার্ক সমস্যা হয়েছে।', 'error');
+            }
+        }
+
+        async function submitDashCourseEnrollment(e) {
+            e.preventDefault();
+            const partnerId = document.getElementById('dashEnrollPartnerId').value;
+            const courseId = document.getElementById('dashEnrollCourseId').value;
+            const userName = document.getElementById('dashEnrollStudentName').value.trim();
+            const userEmail = document.getElementById('dashEnrollStudentEmail').value.trim();
+            const userContact = document.getElementById('dashEnrollStudentContact').value.trim();
+            const paymentMethod = document.getElementById('dashEnrollPaymentMethod').value;
+            const transactionId = document.getElementById('dashEnrollTxId').value.trim();
+            const proofScreenshot = document.getElementById('dashEnrollProofUrl').value;
+            const notes = document.getElementById('dashEnrollStudentNote').value.trim();
+
+            if (!transactionId) {
+                showDashToast('অনুগ্রহ করে Transaction ID প্রদান করুন।', 'warning');
+                return;
+            }
+
+            const payload = {
+                partnerId,
+                courseId,
+                userName,
+                userEmail,
+                userContact,
+                paymentMethod,
+                transactionId,
+                proofScreenshot,
+                notes
+            };
+
+            try {
+                const res = await fetch('/api/academy/course/enroll', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeDashCourseEnrollModal();
+                    showDashToast(data.message || 'পেমেন্ট রিকোয়েস্ট সাবমিট হয়েছে!', 'success');
+                    if (activeMentorClassroom) {
+                        openMentorClassroom(activeMentorClassroom.partnerId || activeMentorClassroom.id);
+                    }
+                } else {
+                    showDashToast(data.message || 'এনরোলমেন্ট ব্যর্থ হয়েছে।', 'error');
+                }
+            } catch (e) {
+                showDashToast('সাবমিট করতে নেটওয়ার্ক সমস্যা হয়েছে।', 'error');
+            }
+        }
+
+        function openDashUnlockedCourse(courseId, accessLink) {
+            if (activeMentorClassroom && activeMentorClassroom.items) {
+                const c = activeMentorClassroom.items.find(it => it.id === courseId);
+                if (c) document.getElementById('dashUnlockedTitle').innerText = c.title;
+            }
+            const linkBtn = document.getElementById('dashUnlockedLinkBtn');
+            if (linkBtn) linkBtn.href = accessLink || '#';
+            const modal = document.getElementById('dashUnlockedCourseModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeDashUnlockedCourseModal() {
+            const modal = document.getElementById('dashUnlockedCourseModal');
+            if (modal) modal.style.display = 'none';
+        }
         function exitMentorClassroom() {
             activeMentorClassroom = null;
             document.getElementById('academyClassroomView').style.display = 'none';
@@ -14952,6 +15281,15 @@
             fetchSubmissions();
             fetchPackages();
             fetchCourses();
+            
+            // Auto open mentor classroom from URL parameter if provided
+            const urlMentorParam = new URLSearchParams(window.location.search).get('mentor');
+            if (urlMentorParam) {
+                switchTab('course');
+                setTimeout(() => {
+                    openMentorClassroom(urlMentorParam);
+                }, 600);
+            }
             fetchDashPaymentMethods();
             fetchUserSupportTickets();
             fetchUserSyncedTrades();

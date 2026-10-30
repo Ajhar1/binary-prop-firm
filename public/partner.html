@@ -68,6 +68,267 @@
             }
         }
 
+        let partnerCourseEnrollments = [];
+        let currentPartnerAcademySubtab = 'curriculum';
+
+        async function uploadAcademyImageFile(file) {
+            if (!file) return null;
+            if (file.size > 1 * 1024 * 1024) {
+                showToast('ইমেজ সাইজ ১ মেগাবাইট (1 MB) এর বেশি হতে পারবে না। অনুগ্রহ করে ১ এমবি এর কম সাইজের ইমেজ নির্বাচন করুন।', 'warning');
+                return null;
+            }
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                showToast('ছবি আপলোড হচ্ছে...', 'info');
+                const res = await fetch('/api/partner/academy/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${partnerToken}`
+                    },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success && data.url) {
+                    showToast(data.message || 'ইমেজ সফলভাবে আপলোড হয়েছে!', 'success');
+                    return data.url;
+                } else {
+                    showToast(data.message || 'ইমেজ আপলোড ব্যর্থ হয়েছে।', 'error');
+                    return null;
+                }
+            } catch (e) {
+                console.error('[IMAGE UPLOAD ERROR]:', e);
+                showToast('ইমেজ আপলোড করতে নেটওয়ার্ক সমস্যা হয়েছে।', 'error');
+                return null;
+            }
+        }
+
+        async function handleAvatarFileSelect(input) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            const url = await uploadAcademyImageFile(file);
+            if (url) {
+                const avInp = document.getElementById('acadAvatarUrl');
+                if (avInp) avInp.value = url;
+                updateAvatarPreview(url);
+                showToast('প্রোফাইল পিকচার সিলেক্ট হয়েছে! ড্রাফট বা সাবমিট করতে সেভ বাটনে চাপ দিন।', 'success');
+            }
+            input.value = '';
+        }
+
+        async function handleBannerFileSelect(input) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            const url = await uploadAcademyImageFile(file);
+            if (url) {
+                const bnInp = document.getElementById('acadBannerUrl');
+                if (bnInp) bnInp.value = url;
+                updateBannerPreview(url);
+                showToast('কভার ব্যানার সফলভাবে আপলোড হয়েছে!', 'success');
+            }
+            input.value = '';
+        }
+
+        async function handleItemThumbUpload(input, type) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            const url = await uploadAcademyImageFile(file);
+            if (url) {
+                if (type === 'drive') {
+                    const drvThumb = document.getElementById('modalDriveThumbUrl');
+                    if (drvThumb) drvThumb.value = url;
+                    const drvPrev = document.getElementById('modalDriveThumbPreview');
+                    if (drvPrev) { drvPrev.src = url; drvPrev.style.display = 'block'; }
+                } else if (type === 'paid') {
+                    const paidThumb = document.getElementById('modalPaidThumbUrl');
+                    if (paidThumb) paidThumb.value = url;
+                    const paidPrev = document.getElementById('modalPaidThumbPreview');
+                    if (paidPrev) { paidPrev.src = url; paidPrev.style.display = 'block'; }
+                }
+                showToast('থাম্বনেইল সফলভাবে আপলোড হয়েছে!', 'success');
+            }
+            input.value = '';
+        }
+
+        function copyMentorShareLink() {
+            const inp = document.getElementById('acadShareProfileUrl');
+            if (!inp || !inp.value) return;
+            navigator.clipboard.writeText(inp.value).then(() => {
+                showToast('প্রোফাইল লিঙ্ক কপি করা হয়েছে! এখন যে কারো সাথে শেয়ার করতে পারেন।', 'success');
+            }).catch(() => {
+                inp.select();
+                document.execCommand('copy');
+                showToast('প্রোফাইল লিঙ্ক কপি করা হয়েছে!', 'success');
+            });
+        }
+
+        function switchPartnerAcademySubtab(subtab) {
+            currentPartnerAcademySubtab = subtab;
+            const btnCur = document.getElementById('btnSubtabCurriculum');
+            const btnOrd = document.getElementById('btnSubtabOrders');
+            const secCur = document.getElementById('partnerSubtabCurriculumSection');
+            const secOrd = document.getElementById('partnerSubtabOrdersSection');
+            const btnAdd = document.getElementById('btnOpenAddContentModal');
+
+            if (subtab === 'orders') {
+                if (btnCur) btnCur.classList.remove('active');
+                if (btnOrd) btnOrd.classList.add('active');
+                if (secCur) secCur.style.display = 'none';
+                if (secOrd) secOrd.style.display = 'flex';
+                if (btnAdd) btnAdd.style.display = 'none';
+                loadPartnerEnrollments();
+            } else {
+                if (btnCur) btnCur.classList.add('active');
+                if (btnOrd) btnOrd.classList.remove('active');
+                if (secCur) secCur.style.display = 'flex';
+                if (secOrd) secOrd.style.display = 'none';
+                if (btnAdd) btnAdd.style.display = 'inline-flex';
+            }
+        }
+
+        async function loadPartnerEnrollments() {
+            try {
+                const res = await fetch('/api/partner/academy/enrollments', {
+                    headers: { 'Authorization': `Bearer ${partnerToken}` }
+                });
+                const data = await res.json();
+                if (data.success && Array.isArray(data.enrollments)) {
+                    partnerCourseEnrollments = data.enrollments;
+                    renderPartnerEnrollmentsList();
+                }
+            } catch (e) {
+                console.error('[LOAD ENROLLMENTS ERROR]:', e);
+            }
+        }
+
+        function renderPartnerEnrollmentsList() {
+            const countEl = document.getElementById('partnerEnrollmentsCount');
+            if (countEl) countEl.innerText = partnerCourseEnrollments.length;
+
+            const container = document.getElementById('partnerEnrollmentsContainer');
+            if (!container) return;
+
+            if (partnerCourseEnrollments.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:3rem 1rem; color:var(--text-muted);">
+                        <i class="fas fa-receipt" style="font-size:2.5rem; opacity:0.3; margin-bottom:10px; display:block;"></i>
+                        <h4 style="font-size:0.95rem; margin:0 0 6px 0; color:#fff;">কোনো পেইড কোর্স পারচেজ রিকোয়েস্ট পাওয়া যায়নি</h4>
+                        <p style="font-size:0.8rem; margin:0;">ইউজাররা আপনার পেইড কোর্সে পেমেন্ট সাবমিট করলে তা এখানে শো হবে এবং আপনি যাচাই করে অনুমোদন দিতে পারবেন।</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = partnerCourseEnrollments.map(enr => {
+                const isPending = enr.status === 'pending';
+                const isApproved = enr.status === 'approved';
+                const statusBadge = isApproved 
+                    ? '<span class="badge" style="background:rgba(16,185,129,0.2); color:#10b981; font-weight:800; font-size:0.72rem; padding:3px 10px; border-radius:20px;"><i class="fas fa-check-circle"></i> Approved & Granted</span>'
+                    : (isPending 
+                        ? '<span class="badge" style="background:rgba(245,158,11,0.2); color:#f59e0b; font-weight:800; font-size:0.72rem; padding:3px 10px; border-radius:20px;"><i class="fas fa-clock"></i> Pending Review</span>'
+                        : '<span class="badge" style="background:rgba(244,63,94,0.2); color:#f43f5e; font-weight:800; font-size:0.72rem; padding:3px 10px; border-radius:20px;"><i class="fas fa-times-circle"></i> Rejected</span>');
+
+                const screenshotBtn = enr.proofScreenshot 
+                    ? `<a href="${escapeHtml(enr.proofScreenshot)}" target="_blank" class="btn-outline" style="padding:4px 10px; font-size:0.72rem; border-color:var(--cyan); color:var(--cyan); border-radius:8px;"><i class="fas fa-image"></i> View Receipt</a>`
+                    : '<span style="font-size:0.72rem; color:var(--text-muted);">No Receipt Attached</span>';
+
+                const actionButtons = isPending ? `
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" class="btn-emerald" onclick="approveStudentEnrollment('${enr.id}')" style="padding:5px 14px; font-size:0.75rem; border-radius:8px;">
+                            <i class="fas fa-check"></i> অনুমোদন দিন (Approve)
+                        </button>
+                        <button type="button" class="btn-rose" onclick="rejectStudentEnrollment('${enr.id}')" style="padding:5px 14px; font-size:0.75rem; border-radius:8px; background:rgba(244,63,94,0.15); color:#f43f5e; border:1px solid rgba(244,63,94,0.3); cursor:pointer;">
+                            <i class="fas fa-times"></i> রিজেক্ট করুন (Reject)
+                        </button>
+                    </div>
+                ` : (isApproved ? '<span style="font-size:0.78rem; color:#10b981; font-weight:700;"><i class="fas fa-unlock"></i> কোর্স অ্যাক্সেস অনুমোদিত (Unlocked)</span>' : '<span style="font-size:0.78rem; color:#f43f5e;">অ্যাক্সেস বাতিল (Rejected)</span>');
+
+                const dateStr = enr.createdAt ? new Date(enr.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
+                return `
+                    <div class="glass" style="border-radius:14px; padding:1.15rem; margin-bottom:12px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02);">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                            <div>
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:2px;">${dateStr}</div>
+                                <h4 style="margin:0; font-size:0.95rem; font-weight:800; color:#fff;">
+                                    ${escapeHtml(enr.courseTitle)} 
+                                    <span style="color:var(--gold); font-size:0.85rem; font-weight:800; margin-left:6px;">(${enr.currency === 'BDT' ? '৳' : '$'}${enr.amount})</span>
+                                </h4>
+                            </div>
+                            <div>${statusBadge}</div>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.78rem; margin-bottom:10px; background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);">
+                            <div>
+                                <div style="color:var(--text-muted);">Student Name: <strong style="color:#fff;">${escapeHtml(enr.userName)}</strong></div>
+                                <div style="color:var(--text-muted); margin-top:2px;">Email: <span style="color:var(--cyan);">${escapeHtml(enr.userEmail)}</span></div>
+                                ${enr.userContact ? `<div style="color:var(--text-muted); margin-top:2px;">Contact: <span style="color:#fff;">${escapeHtml(enr.userContact)}</span></div>` : ''}
+                            </div>
+                            <div>
+                                <div style="color:var(--text-muted);">Payment Method: <strong style="color:var(--yellow);">${escapeHtml(enr.paymentMethod || 'Manual')}</strong></div>
+                                <div style="color:var(--text-muted); margin-top:2px;">TxID / Ref: <strong style="color:#fff; font-family:monospace;">${escapeHtml(enr.transactionId)}</strong></div>
+                                <div style="margin-top:5px;">${screenshotBtn}</div>
+                            </div>
+                        </div>
+
+                        ${enr.notes ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;"><strong>Student Note:</strong> ${escapeHtml(enr.notes)}</div>` : ''}
+                        ${enr.partnerNotes ? `<div style="font-size:0.75rem; color:var(--gold); margin-bottom:10px;"><strong>Your Feedback:</strong> ${escapeHtml(enr.partnerNotes)}</div>` : ''}
+
+                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.05);">
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function approveStudentEnrollment(id) {
+            if (!confirm('আপনি কি এই স্টুডেন্টের পেমেন্ট যাচাই করে কোর্স অ্যাক্সেস দিতে সম্মত আছেন?')) return;
+            try {
+                const res = await fetch(`/api/partner/academy/enrollments/${id}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${partnerToken}`
+                    },
+                    body: JSON.stringify({ notes: 'Payment confirmed and access granted.' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'Student access approved!', 'success');
+                    loadPartnerEnrollments();
+                } else {
+                    showToast(data.message || 'Failed to approve enrollment.', 'error');
+                }
+            } catch (e) {
+                showToast('Network error while approving enrollment.', 'error');
+            }
+        }
+
+        async function rejectStudentEnrollment(id) {
+            const reason = prompt('পেমেন্ট রিজেক্ট করার কারণ লিখুন (Optional reason for student):', 'পেমেন্ট ভেরিফাই করা সম্ভব হয়নি অথবা ভুল ট্রানজেকশন আইডি দেওয়া হয়েছে।');
+            if (reason === null) return;
+            try {
+                const res = await fetch(`/api/partner/academy/enrollments/${id}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${partnerToken}`
+                    },
+                    body: JSON.stringify({ reason })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'Enrollment rejected.', 'info');
+                    loadPartnerEnrollments();
+                } else {
+                    showToast(data.message || 'Failed to reject enrollment.', 'error');
+                }
+            } catch (e) {
+                showToast('Network error while rejecting enrollment.', 'error');
+            }
+        }
+
         function renderPartnerAcademyProfile(profile) {
             if (!profile) return;
 
@@ -110,7 +371,15 @@
                 if (navBadge) { navBadge.style.display = 'inline-block'; navBadge.innerText = 'Draft'; navBadge.style.background = 'rgba(148,163,184,0.2)'; navBadge.style.color = '#94a3b8'; }
             }
 
-            // 2. Profile inputs
+            // Share link
+            const shareId = profile.partnerId || (partnerData ? partnerData.id : '');
+            const shareUrl = `${window.location.origin}/mentor/${shareId}`;
+            const shareInp = document.getElementById('acadShareProfileUrl');
+            if (shareInp) shareInp.value = shareUrl;
+            const liveBtn = document.getElementById('btnLivePublicProfile');
+            if (liveBtn) liveBtn.href = `/mentor/${shareId}`;
+
+            // Profile inputs
             const nameInp = document.getElementById('acadMentorName');
             const tagInp = document.getElementById('acadMentorTagline');
             const bioInp = document.getElementById('acadMentorBio');
@@ -133,8 +402,20 @@
             if (tgInp) tgInp.value = profile.telegramChannel || '';
             if (ytInp) ytInp.value = profile.youtubeChannel || '';
 
-            // 3. Curriculum Items
+            // Extended Social Links
+            const soc = profile.socialLinks || {};
+            const fbInp = document.getElementById('acadFacebookUrl'); if (fbInp) fbInp.value = soc.facebook || '';
+            const igInp = document.getElementById('acadInstagramUrl'); if (igInp) igInp.value = soc.instagram || '';
+            const waInp = document.getElementById('acadWhatsappUrl'); if (waInp) waInp.value = soc.whatsapp || '';
+            const twInp = document.getElementById('acadTwitterUrl'); if (twInp) twInp.value = soc.twitter || '';
+            const dcInp = document.getElementById('acadDiscordUrl'); if (dcInp) dcInp.value = soc.discord || '';
+            const wsInp = document.getElementById('acadWebsiteUrl'); if (wsInp) wsInp.value = soc.website || '';
+
+            // Curriculum Items
             renderAcademyItemsList(profile.items || []);
+
+            // Also load partner enrollments in background
+            loadPartnerEnrollments();
         }
 
         function updateAvatarPreview(url) {
@@ -172,11 +453,13 @@
             const elYt = document.getElementById('countYoutubeItems');
             const elDrv = document.getElementById('countDriveItems');
             const elPaid = document.getElementById('countPaidItems');
+            const elCurTab = document.getElementById('countSubtabCurriculum');
 
             if (elAll) elAll.innerText = allCount;
             if (elYt) elYt.innerText = ytCount;
             if (elDrv) elDrv.innerText = drvCount;
             if (elPaid) elPaid.innerText = paidCount;
+            if (elCurTab) elCurTab.innerText = allCount;
 
             let filtered = items;
             if (currentAcademyFilter === 'youtube') filtered = items.filter(it => it.type === 'youtube');
@@ -273,12 +556,22 @@
             document.getElementById('modalYoutubeUrl').value = '';
             document.getElementById('modalYoutubeCategory').value = 'Price Action';
             document.getElementById('modalYoutubeDuration').value = '20:00';
+            
+            // Drive
             document.getElementById('modalDriveUrl').value = '';
             document.getElementById('modalResourceType').value = 'PDF Trading Guide & Cheatsheet';
+            document.getElementById('modalDriveThumbUrl').value = '';
+            const drvP = document.getElementById('modalDriveThumbPreview'); if (drvP) { drvP.style.display = 'none'; drvP.src = ''; }
+
+            // Paid
             document.getElementById('modalPaidPrice').value = '';
             document.getElementById('modalPaidCurrency').value = 'USD';
             document.getElementById('modalCourseFormat').value = 'Live Mentorship + VIP Signals';
             document.getElementById('modalPaidBuyUrl').value = '';
+            document.getElementById('modalPaidPaymentInstructions').value = '';
+            document.getElementById('modalPaidAccessLink').value = '';
+            document.getElementById('modalPaidThumbUrl').value = '';
+            const paidP = document.getElementById('modalPaidThumbPreview'); if (paidP) { paidP.style.display = 'none'; paidP.src = ''; }
 
             selectAcademyModalType('youtube');
             openModal('academyItemModal');
@@ -296,12 +589,30 @@
             document.getElementById('modalYoutubeUrl').value = item.videoUrl || '';
             document.getElementById('modalYoutubeCategory').value = item.category || 'Price Action';
             document.getElementById('modalYoutubeDuration').value = item.duration || '20:00';
+            
+            // Drive
             document.getElementById('modalDriveUrl').value = item.driveUrl || '';
             document.getElementById('modalResourceType').value = item.resourceType || 'PDF Trading Guide & Cheatsheet';
+            document.getElementById('modalDriveThumbUrl').value = item.thumbnailUrl || '';
+            const drvP = document.getElementById('modalDriveThumbPreview');
+            if (drvP) {
+                if (item.thumbnailUrl) { drvP.src = item.thumbnailUrl; drvP.style.display = 'block'; }
+                else { drvP.style.display = 'none'; drvP.src = ''; }
+            }
+
+            // Paid
             document.getElementById('modalPaidPrice').value = item.price !== undefined ? item.price : '';
             document.getElementById('modalPaidCurrency').value = item.currency || 'USD';
             document.getElementById('modalCourseFormat').value = item.courseFormat || 'Live Mentorship + VIP Signals';
             document.getElementById('modalPaidBuyUrl').value = item.buyUrl || '';
+            document.getElementById('modalPaidPaymentInstructions').value = item.paymentInstructions || '';
+            document.getElementById('modalPaidAccessLink').value = item.accessLink || '';
+            document.getElementById('modalPaidThumbUrl').value = item.thumbnailUrl || '';
+            const paidP = document.getElementById('modalPaidThumbPreview');
+            if (paidP) {
+                if (item.thumbnailUrl) { paidP.src = item.thumbnailUrl; paidP.style.display = 'block'; }
+                else { paidP.style.display = 'none'; paidP.src = ''; }
+            }
 
             selectAcademyModalType(item.type || 'youtube');
             openModal('academyItemModal');
@@ -351,17 +662,16 @@
                 }
                 itemObj.driveUrl = dUrl;
                 itemObj.resourceType = document.getElementById('modalResourceType').value;
+                itemObj.thumbnailUrl = document.getElementById('modalDriveThumbUrl').value.trim();
             } else if (type === 'paid') {
                 const price = parseFloat(document.getElementById('modalPaidPrice').value) || 0;
-                const buyUrl = document.getElementById('modalPaidBuyUrl').value.trim();
-                if (!buyUrl) {
-                    showToast('Please provide an enrollment link or Telegram contact link.', 'warning');
-                    return;
-                }
                 itemObj.price = price;
                 itemObj.currency = document.getElementById('modalPaidCurrency').value;
                 itemObj.courseFormat = document.getElementById('modalCourseFormat').value.trim() || 'VIP Mentorship';
-                itemObj.buyUrl = buyUrl;
+                itemObj.buyUrl = document.getElementById('modalPaidBuyUrl').value.trim();
+                itemObj.paymentInstructions = document.getElementById('modalPaidPaymentInstructions').value.trim();
+                itemObj.accessLink = document.getElementById('modalPaidAccessLink').value.trim();
+                itemObj.thumbnailUrl = document.getElementById('modalPaidThumbUrl').value.trim();
             }
 
             if (id) {
@@ -400,15 +710,27 @@
                 return;
             }
 
+            // Collect all social media links
+            const socialLinks = {
+                telegram: document.getElementById('acadTelegramChannel') ? document.getElementById('acadTelegramChannel').value.trim() : '',
+                youtube: document.getElementById('acadYoutubeChannel') ? document.getElementById('acadYoutubeChannel').value.trim() : '',
+                facebook: document.getElementById('acadFacebookUrl') ? document.getElementById('acadFacebookUrl').value.trim() : '',
+                instagram: document.getElementById('acadInstagramUrl') ? document.getElementById('acadInstagramUrl').value.trim() : '',
+                whatsapp: document.getElementById('acadWhatsappUrl') ? document.getElementById('acadWhatsappUrl').value.trim() : '',
+                twitter: document.getElementById('acadTwitterUrl') ? document.getElementById('acadTwitterUrl').value.trim() : '',
+                discord: document.getElementById('acadDiscordUrl') ? document.getElementById('acadDiscordUrl').value.trim() : '',
+                website: document.getElementById('acadWebsiteUrl') ? document.getElementById('acadWebsiteUrl').value.trim() : ''
+            };
+
             const payload = {
                 mentorName: mentorName,
                 mentorTagline: document.getElementById('acadMentorTagline') ? document.getElementById('acadMentorTagline').value.trim() : '',
                 mentorBio: document.getElementById('acadMentorBio') ? document.getElementById('acadMentorBio').value.trim() : '',
                 avatarUrl: document.getElementById('acadAvatarUrl') ? document.getElementById('acadAvatarUrl').value.trim() : '',
                 bannerUrl: document.getElementById('acadBannerUrl') ? document.getElementById('acadBannerUrl').value.trim() : '',
-                telegramChannel: document.getElementById('acadTelegramChannel') ? document.getElementById('acadTelegramChannel').value.trim() : '',
-                youtubeChannel: document.getElementById('acadYoutubeChannel') ? document.getElementById('acadYoutubeChannel').value.trim() : '',
-                socialLinks: currentAcademyProfile ? (currentAcademyProfile.socialLinks || {}) : {},
+                telegramChannel: socialLinks.telegram,
+                youtubeChannel: socialLinks.youtube,
+                socialLinks: socialLinks,
                 items: items,
                 action: action
             };
@@ -442,8 +764,15 @@
             const bio = document.getElementById('acadMentorBio') ? document.getElementById('acadMentorBio').value.trim() : 'No biography provided yet.';
             const avatar = document.getElementById('acadAvatarUrl') ? document.getElementById('acadAvatarUrl').value.trim() : '';
             const banner = document.getElementById('acadBannerUrl') ? document.getElementById('acadBannerUrl').value.trim() : '';
+            
             const tg = document.getElementById('acadTelegramChannel') ? document.getElementById('acadTelegramChannel').value.trim() : '';
             const yt = document.getElementById('acadYoutubeChannel') ? document.getElementById('acadYoutubeChannel').value.trim() : '';
+            const fb = document.getElementById('acadFacebookUrl') ? document.getElementById('acadFacebookUrl').value.trim() : '';
+            const ig = document.getElementById('acadInstagramUrl') ? document.getElementById('acadInstagramUrl').value.trim() : '';
+            const wa = document.getElementById('acadWhatsappUrl') ? document.getElementById('acadWhatsappUrl').value.trim() : '';
+            const tw = document.getElementById('acadTwitterUrl') ? document.getElementById('acadTwitterUrl').value.trim() : '';
+            const dc = document.getElementById('acadDiscordUrl') ? document.getElementById('acadDiscordUrl').value.trim() : '';
+            const ws = document.getElementById('acadWebsiteUrl') ? document.getElementById('acadWebsiteUrl').value.trim() : '';
 
             const elName = document.getElementById('previewMentorName'); if (elName) elName.innerText = mentorName;
             const elTag = document.getElementById('previewMentorTagline'); if (elTag) elTag.innerText = tagline;
@@ -456,6 +785,12 @@
                 let sHtml = '';
                 if (tg) sHtml += `<a href="${escapeHtml(tg)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#229ED9; color:#229ED9;"><i class="fab fa-telegram-plane"></i> Telegram</a>`;
                 if (yt) sHtml += `<a href="${escapeHtml(yt)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#ef4444; color:#ef4444;"><i class="fab fa-youtube"></i> YouTube</a>`;
+                if (fb) sHtml += `<a href="${escapeHtml(fb)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#1877F2; color:#1877F2;"><i class="fab fa-facebook"></i> Facebook</a>`;
+                if (ig) sHtml += `<a href="${escapeHtml(ig)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#E4405F; color:#E4405F;"><i class="fab fa-instagram"></i> Instagram</a>`;
+                if (wa) sHtml += `<a href="${escapeHtml(wa)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#25D366; color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp</a>`;
+                if (tw) sHtml += `<a href="${escapeHtml(tw)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#fff; color:#fff;"><i class="fab fa-twitter"></i> Twitter</a>`;
+                if (dc) sHtml += `<a href="${escapeHtml(dc)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#5865F2; color:#5865F2;"><i class="fab fa-discord"></i> Discord</a>`;
+                if (ws) sHtml += `<a href="${escapeHtml(ws)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:var(--emerald); color:var(--emerald);"><i class="fas fa-link"></i> Website</a>`;
                 socBox.innerHTML = sHtml;
             }
 
@@ -471,20 +806,24 @@
                         let extra = it.duration ? `<span style="font-size:0.7rem; color:var(--text-muted);">${escapeHtml(it.duration)}</span>` : '';
                         if (it.type === 'drive' || it.type === 'free') {
                             badge = '<span style="background:rgba(59,130,246,0.2); color:#60a5fa; font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:10px;">Drive</span>';
-                            extra = `<span style="font-size:0.7rem; color:var(--text-muted);">${escapeHtml(it.resourceType || 'Free Resource')}</span>`;
+                            extra = `<span style="font-size:0.7rem; color:var(--text-muted);">${escapeHtml(it.resourceType || 'Resource')}</span>`;
                         } else if (it.type === 'paid') {
-                            badge = '<span style="background:rgba(245,176,65,0.2); color:var(--gold); font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:10px;">VIP</span>';
-                            extra = `<span style="font-size:0.75rem; font-weight:800; color:var(--emerald);">${it.currency === 'BDT' ? '৳' : '$'}${it.price || 0}</span>`;
+                            badge = '<span style="background:rgba(245,176,65,0.2); color:var(--gold); font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:10px;">Paid</span>';
+                            extra = `<span style="font-size:0.75rem; font-weight:800; color:var(--emerald);">${it.currency === 'BDT' ? '৳' : '$'}${it.price}</span>`;
                         }
 
                         return `
-                            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px;">
+                            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                                     ${badge}
                                     ${extra}
                                 </div>
-                                <h5 style="margin:0 0 4px 0; font-size:0.85rem; font-weight:800; color:#fff;">${escapeHtml(it.title)}</h5>
-                                <p style="margin:0; font-size:0.72rem; color:var(--text-muted); line-height:1.4;">${escapeHtml(it.description || '')}</p>
+                                <div style="font-size:0.85rem; font-weight:700; color:#fff; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    ${escapeHtml(it.title)}
+                                </div>
+                                <div style="font-size:0.72rem; color:var(--text-muted); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                                    ${escapeHtml(it.description || 'No description.')}
+                                </div>
                             </div>
                         `;
                     }).join('');
@@ -4308,6 +4647,31 @@
                         </div>
                     </div>
 
+                    <!-- Share Profile Box -->
+                    <div class="glass" style="border-radius:18px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; border:1px solid rgba(245,176,65,0.25); background:linear-gradient(135deg, rgba(245,176,65,0.08) 0%, rgba(7,10,18,0.6) 100%); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                        <div style="display:flex; align-items:center; gap:14px; min-width:0; flex:1;">
+                            <div style="width:44px; height:44px; border-radius:12px; background:rgba(245,176,65,0.2); display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:1.3rem; flex-shrink:0;">
+                                <i class="fas fa-share-alt"></i>
+                            </div>
+                            <div style="min-width:0; flex:1;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <h4 style="margin:0; font-size:0.98rem; font-weight:800; color:#fff;">Your Shareable Academy Profile Link</h4>
+                                    <span style="background:rgba(16,185,129,0.18); color:#10b981; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:12px;">Public URL</span>
+                                </div>
+                                <p style="margin:3px 0 8px 0; font-size:0.78rem; color:var(--text-muted);">এই লিঙ্কটি সরাসরি যে কারো সাথে শেয়ার করুন। লিংকে চাপ দিলে সরাসরি আপনার একাডেমি ও কোর্স প্রোফাইল দেখতে পাবে।</p>
+                                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                    <input type="text" id="acadShareProfileUrl" readonly style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:7px 12px; color:var(--gold); font-size:0.82rem; width:100%; max-width:420px; font-family:monospace; font-weight:700;" value="" />
+                                    <button type="button" class="btn-gold" onclick="copyMentorShareLink()" style="padding:7px 16px; font-size:0.8rem; border-radius:8px; white-space:nowrap;">
+                                        <i class="fas fa-copy"></i> Copy Link
+                                    </button>
+                                    <a id="btnLivePublicProfile" href="/mentor" target="_blank" class="btn-outline" style="padding:7px 14px; font-size:0.8rem; border-radius:8px; white-space:nowrap; text-decoration:none;">
+                                        <i class="fas fa-external-link-alt"></i> View Public Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="display:grid; grid-template-columns: 1fr 1.6fr; gap:1.5rem; margin-bottom:1.5rem;">
                         
                         <!-- LEFT COLUMN: MENTOR PROFILE SETTINGS -->
@@ -4335,33 +4699,74 @@
                                     <textarea class="form-control" id="acadMentorBio" rows="3" placeholder="Introduce your trading background, strategies you trade, and what students will learn..." style="font-size:0.85rem; line-height:1.5;"></textarea>
                                 </div>
 
-                                <div class="form-group" style="margin-bottom:12px;">
-                                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Profile Avatar / Photo URL</label>
-                                    <div style="display:flex; gap:10px; align-items:center;">
-                                        <img id="acadAvatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" style="width:42px; height:42px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); flex-shrink:0;" />
-                                        <input type="url" class="form-control" id="acadAvatarUrl" placeholder="https://... photo url" oninput="updateAvatarPreview(this.value)" style="font-size:0.82rem;" />
-                                    </div>
-                                </div>
-
-                                <div class="form-group" style="margin-bottom:12px;">
-                                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Cover Banner URL</label>
-                                    <input type="url" class="form-control" id="acadBannerUrl" placeholder="https://... cover image url" oninput="updateBannerPreview(this.value)" style="font-size:0.82rem;" />
-                                    <div id="acadBannerPreview" style="margin-top:6px; height:60px; border-radius:8px; background:url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80') center/cover no-repeat; border:1px solid rgba(255,255,255,0.1);"></div>
-                                </div>
-
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
-                                    <div class="form-group">
-                                        <label style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Telegram Channel / Group</label>
-                                        <div style="position:relative;">
-                                            <i class="fab fa-telegram-plane" style="position:absolute; left:10px; top:11px; color:#229ED9; font-size:0.85rem;"></i>
-                                            <input type="text" class="form-control" id="acadTelegramChannel" placeholder="https://t.me/..." style="padding-left:30px; font-size:0.8rem;" />
+                                <!-- PROFILE AVATAR DIRECT UPLOAD (MAX 1MB) -->
+                                <div class="form-group" style="margin-bottom:14px;">
+                                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">
+                                        Profile Avatar (গ্যালারি থেকে ফটো আপলোড করুন - Max 1MB) *
+                                    </label>
+                                    <input type="file" id="acadAvatarFileInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="handleAvatarFileSelect(this)" />
+                                    <input type="hidden" id="acadAvatarUrl" value="" />
+                                    <div style="display:flex; gap:12px; align-items:center;">
+                                        <img id="acadAvatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" style="width:48px; height:48px; border-radius:50%; object-fit:cover; border:2.5px solid var(--gold); flex-shrink:0; background:#070a12;" />
+                                        <div style="display:flex; flex-direction:column; gap:4px;">
+                                            <button type="button" class="btn-outline" onclick="document.getElementById('acadAvatarFileInput').click()" style="padding:6px 14px; font-size:0.78rem; border-radius:8px;">
+                                                <i class="fas fa-camera"></i> গ্যালারি থেকে ছবি আপলোড (Max 1MB)
+                                            </button>
+                                            <span style="font-size:0.7rem; color:var(--text-muted);">সরাসরি আপনার ডিভাইস থেকে ১ মেগাবাইট (1 MB) এর নিচে ছবি আপলোড করুন</span>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">YouTube Channel Link</label>
-                                        <div style="position:relative;">
-                                            <i class="fab fa-youtube" style="position:absolute; left:10px; top:11px; color:#ff0000; font-size:0.85rem;"></i>
-                                            <input type="text" class="form-control" id="acadYoutubeChannel" placeholder="https://youtube.com/@..." style="padding-left:30px; font-size:0.8rem;" />
+                                </div>
+
+                                <!-- COVER BANNER DIRECT UPLOAD (MAX 1MB) -->
+                                <div class="form-group" style="margin-bottom:14px;">
+                                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">
+                                        Cover Banner (গ্যালারি থেকে ব্যানার আপলোড করুন - Max 1MB)
+                                    </label>
+                                    <input type="file" id="acadBannerFileInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="handleBannerFileSelect(this)" />
+                                    <input type="hidden" id="acadBannerUrl" value="" />
+                                    <div id="acadBannerPreview" style="margin-bottom:8px; height:75px; border-radius:10px; background:url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80') center/cover no-repeat; border:1px solid rgba(255,255,255,0.15); box-shadow:0 2px 10px rgba(0,0,0,0.4);"></div>
+                                    <button type="button" class="btn-outline" onclick="document.getElementById('acadBannerFileInput').click()" style="padding:6px 14px; font-size:0.78rem; border-radius:8px;">
+                                        <i class="fas fa-image"></i> গ্যালারি থেকে ব্যানার আপলোড (Max 1MB)
+                                    </button>
+                                </div>
+
+                                <!-- ALL SOCIAL MEDIA LINKS SECTION -->
+                                <div style="margin-bottom:14px; border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px; background:rgba(0,0,0,0.2);">
+                                    <div style="font-size:0.8rem; font-weight:800; color:#fff; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-globe" style="color:var(--cyan);"></i> সকল সোশ্যাল মিডিয়া প্ল্যাটফর্ম লিঙ্ক (Social Links)
+                                    </div>
+                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                                        <div class="form-group">
+                                            <label style="display:block; font-size:0.7rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;"><i class="fab fa-telegram-plane" style="color:#229ED9;"></i> Telegram</label>
+                                            <input type="text" class="form-control" id="acadTelegramChannel" placeholder="https://t.me/..." style="font-size:0.78rem; padding:6px 10px;" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="display:block; font-size:0.7rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;"><i class="fab fa-youtube" style="color:#ef4444;"></i> YouTube</label>
+                                            <input type="text" class="form-control" id="acadYoutubeChannel" placeholder="https://youtube.com/@..." style="font-size:0.78rem; padding:6px 10px;" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="display:block; font-size:0.7rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;"><i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook</label>
+                                            <input type="text" class="form-control" id="acadFacebookUrl" placeholder="https://facebook.com/..." style="font-size:0.78rem; padding:6px 10px;" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="display:block; font-size:0.7rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;"><i class="fab fa-instagram" style="color:#E4405F;"></i> Instagram</label>
+                                            <input type="text" class="form-control" id="acadInstagramUrl" placeholder="https://instagram.com/..." style="font-size:0.78rem; padding:6px 10px;" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="display:block; font-size:0.7rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;"><i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp</label>
+                                            <input type="text" class="form-control" id="acadWhatsappUrl" placeholder="https://wa.me/... or Number" style="font-size:0.78rem; padding:6px 10px;" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="display:block; font-size:0.7rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;"><i class="fab fa-twitter" style="color:#fff;"></i> Twitter / X</label>
+                                            <input type="text" class="form-control" id="acadTwitterUrl" placeholder="https://x.com/..." style="font-size:0.78rem; padding:6px 10px;" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="display:block; font-size:0.7rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;"><i class="fab fa-discord" style="color:#5865F2;"></i> Discord</label>
+                                            <input type="text" class="form-control" id="acadDiscordUrl" placeholder="https://discord.gg/..." style="font-size:0.78rem; padding:6px 10px;" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="display:block; font-size:0.7rem; font-weight:700; color:var(--text-muted); margin-bottom:3px;"><i class="fas fa-link" style="color:var(--emerald);"></i> Website</label>
+                                            <input type="text" class="form-control" id="acadWebsiteUrl" placeholder="https://..." style="font-size:0.78rem; padding:6px 10px;" />
                                         </div>
                                     </div>
                                 </div>
@@ -4374,34 +4779,58 @@
                             </form>
                         </div>
 
-                        <!-- RIGHT COLUMN: CURRICULUM, LESSONS & COURSES MANAGER -->
+                        <!-- RIGHT COLUMN: CURRICULUM & ENROLLMENTS MANAGER -->
                         <div class="glass" style="border-radius:18px; padding:1.5rem; border:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1.2rem;">
-                                <div>
-                                    <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
-                                        <i class="fas fa-book-open" style="color:var(--emerald);"></i> Academy Curriculum
-                                    </h3>
-                                    <span style="font-size:0.75rem; color:var(--text-muted);">Manage your YouTube lessons, Drive resources, and paid courses</span>
+                            
+                            <!-- Tab Switcher (Curriculum vs Student Orders) -->
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1.2rem; padding-bottom:0.75rem; border-bottom:1px solid rgba(255,255,255,0.08);">
+                                <div style="display:flex; gap:8px;">
+                                    <button type="button" class="btn-subtab active" id="btnSubtabCurriculum" onclick="switchPartnerAcademySubtab('curriculum')" style="padding:7px 14px; font-size:0.82rem; border-radius:10px;">
+                                        <i class="fas fa-book-open"></i> Academy Curriculum (<span id="countSubtabCurriculum">0</span>)
+                                    </button>
+                                    <button type="button" class="btn-subtab" id="btnSubtabOrders" onclick="switchPartnerAcademySubtab('orders')" style="padding:7px 14px; font-size:0.82rem; border-radius:10px;">
+                                        <i class="fas fa-receipt" style="color:var(--gold);"></i> Student Orders & Access (<span id="partnerEnrollmentsCount">0</span>)
+                                    </button>
                                 </div>
-                                <button type="button" class="btn-emerald" onclick="openAddAcademyItemModal()" style="padding:8px 16px; font-size:0.82rem; border-radius:10px;">
+                                <button type="button" class="btn-emerald" id="btnOpenAddContentModal" onclick="openAddAcademyItemModal()" style="padding:8px 16px; font-size:0.82rem; border-radius:10px;">
                                     <i class="fas fa-plus"></i> Add Class / Content
                                 </button>
                             </div>
 
-                            <!-- Filter Pills & Summary -->
-                            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px solid rgba(255,255,255,0.06);">
-                                <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                    <button type="button" class="acad-filter-btn active" onclick="filterAcademyItems('all', this)">All (<span id="countAllItems">0</span>)</button>
-                                    <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('youtube', this)"><i class="fab fa-youtube" style="color:#ef4444;"></i> Videos (<span id="countYoutubeItems">0</span>)</button>
-                                    <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('drive', this)"><i class="fab fa-google-drive" style="color:#3b82f6;"></i> Free Drive (<span id="countDriveItems">0</span>)</button>
-                                    <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('paid', this)"><i class="fas fa-gem" style="color:var(--gold);"></i> Paid Courses (<span id="countPaidItems">0</span>)</button>
+                            <!-- SUBTAB 1: CURRICULUM MANAGER -->
+                            <div id="partnerSubtabCurriculumSection" style="display:flex; flex-direction:column; flex:1;">
+                                <!-- Filter Pills & Summary -->
+                                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px solid rgba(255,255,255,0.06);">
+                                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                        <button type="button" class="acad-filter-btn active" onclick="filterAcademyItems('all', this)">All (<span id="countAllItems">0</span>)</button>
+                                        <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('youtube', this)"><i class="fab fa-youtube" style="color:#ef4444;"></i> Videos (<span id="countYoutubeItems">0</span>)</button>
+                                        <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('drive', this)"><i class="fab fa-google-drive" style="color:#3b82f6;"></i> Free Drive (<span id="countDriveItems">0</span>)</button>
+                                        <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('paid', this)"><i class="fas fa-gem" style="color:var(--gold);"></i> Paid Courses (<span id="countPaidItems">0</span>)</button>
+                                    </div>
+                                </div>
+
+                                <!-- Items Container -->
+                                <div id="academyItemsContainer" style="flex:1; max-height:520px; overflow-y:auto; padding-right:4px;">
+                                    <!-- Items injected via JS -->
                                 </div>
                             </div>
 
-                            <!-- Items Container -->
-                            <div id="academyItemsContainer" style="flex:1; max-height:480px; overflow-y:auto; padding-right:4px;">
-                                <!-- Items injected via JS -->
+                            <!-- SUBTAB 2: STUDENT ORDERS & ENROLLMENTS MANAGER -->
+                            <div id="partnerSubtabOrdersSection" style="display:none; flex-direction:column; flex:1;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <div>
+                                        <h4 style="margin:0; font-size:0.95rem; font-weight:800; color:#fff;">পেইড কোর্স পারচেজ রিকোয়েস্ট ও পারমিশন</h4>
+                                        <span style="font-size:0.75rem; color:var(--text-muted);">স্টুডেন্টদের পেমেন্ট যাচাই করে অনুমোদন (Approve) দিন যাতে তারা কোর্স লিঙ্ক দেখতে পারে</span>
+                                    </div>
+                                    <button type="button" class="btn-outline" onclick="loadPartnerEnrollments()" style="padding:5px 12px; font-size:0.75rem; border-radius:8px;">
+                                        <i class="fas fa-sync-alt"></i> Refresh Orders
+                                    </button>
+                                </div>
+                                <div id="partnerEnrollmentsContainer" style="flex:1; max-height:520px; overflow-y:auto; padding-right:4px;">
+                                    <!-- Enrollments injected via JS -->
+                                </div>
                             </div>
+
                         </div>
 
                     </div>
@@ -5168,7 +5597,7 @@
     <!-- ========================================== -->
         <!-- ACADEMY ADD/EDIT ITEM MODAL -->
     <div class="modal-overlay" id="academyItemModal">
-        <div class="modal-box glass" style="max-width:550px;">
+        <div class="modal-box glass" style="max-width:560px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
                 <h3 style="font-size:1.15rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
                     <i class="fas fa-graduation-cap" style="color:var(--gold);"></i> <span id="academyModalTitle">Add Academy Content</span>
@@ -5236,12 +5665,24 @@
                     <div class="form-group" style="margin-bottom:12px;">
                         <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Resource Type / File Format</label>
                         <select class="form-control" id="modalResourceType" style="font-size:0.85rem;">
-                            <option value="PDF Trading Guide & Cheatsheet">PDF Trading Guide & Cheatsheet</option>
                             <option value="Google Drive Recorded Masterclass">Google Drive Recorded Masterclass</option>
+                            <option value="PDF Trading Guide & Cheatsheet">PDF Trading Guide & Cheatsheet</option>
                             <option value="Custom Trading Indicator / Template">Custom Trading Indicator / Template</option>
                             <option value="Money Management Excel Sheet">Money Management Excel Sheet</option>
                             <option value="Trading Journal & Strategy Rules">Trading Journal & Strategy Rules</option>
                         </select>
+                    </div>
+                    <!-- DRIVE CLASS CUSTOM THUMBNAIL (MAX 1MB) -->
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">
+                            Class Thumbnail (গ্যালারি থেকে ক্লাসের থাম্বনেইল আপলোড করুন - Max 1MB)
+                        </label>
+                        <input type="file" id="modalDriveThumbInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="handleItemThumbUpload(this, 'drive')" />
+                        <input type="hidden" id="modalDriveThumbUrl" value="" />
+                        <img id="modalDriveThumbPreview" style="display:none; width:100%; height:90px; object-fit:cover; border-radius:8px; margin-bottom:6px; border:1px solid rgba(255,255,255,0.15);" />
+                        <button type="button" class="btn-outline" onclick="document.getElementById('modalDriveThumbInput').click()" style="padding:6px 14px; font-size:0.78rem; border-radius:8px;">
+                            <i class="fas fa-upload"></i> থাম্বনেইল ছবি আপলোড (Max 1MB)
+                        </button>
                     </div>
                 </div>
 
@@ -5263,10 +5704,40 @@
                             <input type="text" class="form-control" id="modalCourseFormat" placeholder="e.g. 30 Days Live Mentorship" style="font-size:0.85rem;" />
                         </div>
                     </div>
+
+                    <!-- PAID COURSE CUSTOM THUMBNAIL (MAX 1MB) -->
                     <div class="form-group" style="margin-bottom:12px;">
-                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Enrollment / Buy Link or Telegram Contact *</label>
-                        <input type="text" class="form-control" id="modalPaidBuyUrl" placeholder="https://t.me/yourusername or checkout url" style="font-size:0.85rem;" />
-                        <span style="font-size:0.72rem; color:var(--text-muted); margin-top:3px; display:block;">Traders will click this link to enroll or contact you to purchase your course.</span>
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">
+                            Course Banner / Thumbnail (কোর্স থাম্বনেইল আপলোড করুন - Max 1MB)
+                        </label>
+                        <input type="file" id="modalPaidThumbInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="handleItemThumbUpload(this, 'paid')" />
+                        <input type="hidden" id="modalPaidThumbUrl" value="" />
+                        <img id="modalPaidThumbPreview" style="display:none; width:100%; height:90px; object-fit:cover; border-radius:8px; margin-bottom:6px; border:1px solid rgba(255,255,255,0.15);" />
+                        <button type="button" class="btn-outline" onclick="document.getElementById('modalPaidThumbInput').click()" style="padding:6px 14px; font-size:0.78rem; border-radius:8px;">
+                            <i class="fas fa-upload"></i> কোর্স থাম্বনেইল ছবি আপলোড (Max 1MB)
+                        </button>
+                    </div>
+
+                    <!-- PAYMENT INSTRUCTIONS -->
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">
+                            Payment Instructions / পেমেন্ট নির্দেশিকা (Traders will see this before paying) *
+                        </label>
+                        <textarea class="form-control" id="modalPaidPaymentInstructions" rows="3" placeholder="e.g. Binance Pay ID: 12345678 (USDT) অথবা bKash Personal: 017xxxxxxxx. পেমেন্ট সম্পন্ন করার পর আপনার Transaction ID নিচে সাবমিট করুন।" style="font-size:0.82rem; line-height:1.5;"></textarea>
+                    </div>
+
+                    <!-- SECRET COURSE ACCESS LINK -->
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--gold); margin-bottom:4px;">
+                            <i class="fas fa-lock"></i> Secret Course Access Link (শুধুমাত্র অনুমোদিত ইউজারদের দেওয়া হবে) *
+                        </label>
+                        <input type="url" class="form-control" id="modalPaidAccessLink" placeholder="https://drive.google.com/... or https://t.me/+private_vip_link" style="font-size:0.85rem;" />
+                        <span style="font-size:0.7rem; color:var(--text-muted); margin-top:3px; display:block;">আপনি স্টুডেন্টের পেমেন্ট অ্যাপ্রুভ করার সাথে সাথে স্টুডেন্টের ড্যাশবোর্ডে এই ড্রাইভ বা ভিআইপি গ্রুপ লিঙ্কটি আনলক হয়ে যাবে।</span>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Direct Buy / Telegram Contact Link (Optional)</label>
+                        <input type="text" class="form-control" id="modalPaidBuyUrl" placeholder="https://t.me/yourusername" style="font-size:0.85rem;" />
                     </div>
                 </div>
 

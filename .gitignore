@@ -55,11 +55,19 @@ payout_settings.json
 data/payouts.json
 data/payout_settings.json
 
-# Academy Profiles Database Files
+# Academy Profiles & Enrollments Database Files
 academy_profiles.json
 **/academy_profiles*.json
 data/academy_profiles.json
 data/academy_profiles_permanent_store.json
+academy_enrollments.json
+**/academy_enrollments*.json
+data/academy_enrollments.json
+data/academy_enrollments_permanent_store.json
+
+# User and Partner Uploads
+public/uploads/*
+!public/uploads/.gitkeep
 
 # Temporary scratch files
 scratch/
