@@ -74,13 +74,13 @@
         async function uploadAcademyImageFile(file) {
             if (!file) return null;
             if (file.size > 1 * 1024 * 1024) {
-                showToast('ইমেজ সাইজ ১ মেগাবাইট (1 MB) এর বেশি হতে পারবে না। অনুগ্রহ করে ১ এমবি এর কম সাইজের ইমেজ নির্বাচন করুন।', 'warning');
+                showToast('Image size must be 1MB or less.', 'warning');
                 return null;
             }
             const formData = new FormData();
             formData.append('file', file);
             try {
-                showToast('ছবি আপলোড হচ্ছে...', 'info');
+                showToast('Uploading image...', 'info');
                 const res = await fetch('/api/partner/academy/upload', {
                     method: 'POST',
                     headers: {
@@ -90,15 +90,15 @@
                 });
                 const data = await res.json();
                 if (data.success && data.url) {
-                    showToast(data.message || 'ইমেজ সফলভাবে আপলোড হয়েছে!', 'success');
+                    showToast(data.message || 'Image uploaded successfully!', 'success');
                     return data.url;
                 } else {
-                    showToast(data.message || 'ইমেজ আপলোড ব্যর্থ হয়েছে।', 'error');
+                    showToast(data.message || 'Image upload failed.', 'error');
                     return null;
                 }
             } catch (e) {
                 console.error('[IMAGE UPLOAD ERROR]:', e);
-                showToast('ইমেজ আপলোড করতে নেটওয়ার্ক সমস্যা হয়েছে।', 'error');
+                showToast('Network error while uploading.', 'error');
                 return null;
             }
         }
@@ -111,7 +111,7 @@
                 const avInp = document.getElementById('acadAvatarUrl');
                 if (avInp) avInp.value = url;
                 updateAvatarPreview(url);
-                showToast('প্রোফাইল পিকচার সিলেক্ট হয়েছে! ড্রাফট বা সাবমিট করতে সেভ বাটনে চাপ দিন।', 'success');
+                showToast('Avatar uploaded successfully.', 'success');
             }
             input.value = '';
         }
@@ -124,7 +124,7 @@
                 const bnInp = document.getElementById('acadBannerUrl');
                 if (bnInp) bnInp.value = url;
                 updateBannerPreview(url);
-                showToast('কভার ব্যানার সফলভাবে আপলোড হয়েছে!', 'success');
+                showToast('Banner uploaded successfully.', 'success');
             }
             input.value = '';
         }
@@ -145,7 +145,7 @@
                     const paidPrev = document.getElementById('modalPaidThumbPreview');
                     if (paidPrev) { paidPrev.src = url; paidPrev.style.display = 'block'; }
                 }
-                showToast('থাম্বনেইল সফলভাবে আপলোড হয়েছে!', 'success');
+                showToast('Thumbnail uploaded successfully.', 'success');
             }
             input.value = '';
         }
@@ -154,11 +154,11 @@
             const inp = document.getElementById('acadShareProfileUrl');
             if (!inp || !inp.value) return;
             navigator.clipboard.writeText(inp.value).then(() => {
-                showToast('প্রোফাইল লিঙ্ক কপি করা হয়েছে! এখন যে কারো সাথে শেয়ার করতে পারেন।', 'success');
+                showToast('Profile link copied to clipboard.', 'success');
             }).catch(() => {
                 inp.select();
                 document.execCommand('copy');
-                showToast('প্রোফাইল লিঙ্ক কপি করা হয়েছে!', 'success');
+                showToast('Profile link copied to clipboard.', 'success');
             });
         }
 
@@ -212,8 +212,8 @@
                 container.innerHTML = `
                     <div style="text-align:center; padding:3rem 1rem; color:var(--text-muted);">
                         <i class="fas fa-receipt" style="font-size:2.5rem; opacity:0.3; margin-bottom:10px; display:block;"></i>
-                        <h4 style="font-size:0.95rem; margin:0 0 6px 0; color:#fff;">কোনো পেইড কোর্স পারচেজ রিকোয়েস্ট পাওয়া যায়নি</h4>
-                        <p style="font-size:0.8rem; margin:0;">ইউজাররা আপনার পেইড কোর্সে পেমেন্ট সাবমিট করলে তা এখানে শো হবে এবং আপনি যাচাই করে অনুমোদন দিতে পারবেন।</p>
+                        <h4 style="font-size:0.95rem; margin:0 0 6px 0; color:#fff;">No course orders found</h4>
+                        <p style="font-size:0.8rem; margin:0;">Student course purchase submissions will appear here for your review.</p>
                     </div>
                 `;
                 return;
@@ -235,13 +235,13 @@
                 const actionButtons = isPending ? `
                     <div style="display:flex; gap:6px;">
                         <button type="button" class="btn-emerald" onclick="approveStudentEnrollment('${enr.id}')" style="padding:5px 14px; font-size:0.75rem; border-radius:8px;">
-                            <i class="fas fa-check"></i> অনুমোদন দিন (Approve)
+                            <i class="fas fa-check"></i> Approve Access
                         </button>
                         <button type="button" class="btn-rose" onclick="rejectStudentEnrollment('${enr.id}')" style="padding:5px 14px; font-size:0.75rem; border-radius:8px; background:rgba(244,63,94,0.15); color:#f43f5e; border:1px solid rgba(244,63,94,0.3); cursor:pointer;">
-                            <i class="fas fa-times"></i> রিজেক্ট করুন (Reject)
+                            <i class="fas fa-times"></i> Reject
                         </button>
                     </div>
-                ` : (isApproved ? '<span style="font-size:0.78rem; color:#10b981; font-weight:700;"><i class="fas fa-unlock"></i> কোর্স অ্যাক্সেস অনুমোদিত (Unlocked)</span>' : '<span style="font-size:0.78rem; color:#f43f5e;">অ্যাক্সেস বাতিল (Rejected)</span>');
+                ` : (isApproved ? '<span style="font-size:0.78rem; color:#10b981; font-weight:700;"><i class="fas fa-unlock"></i> Access Granted</span>' : '<span style="font-size:0.78rem; color:#f43f5e;">Access Rejected</span>');
 
                 const dateStr = enr.createdAt ? new Date(enr.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
 
@@ -252,7 +252,7 @@
                                 <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:2px;">${dateStr}</div>
                                 <h4 style="margin:0; font-size:0.95rem; font-weight:800; color:#fff;">
                                     ${escapeHtml(enr.courseTitle)} 
-                                    <span style="color:var(--gold); font-size:0.85rem; font-weight:800; margin-left:6px;">(${enr.currency === 'BDT' ? '৳' : '$'}${enr.amount})</span>
+                                    <span style="color:var(--gold); font-size:0.85rem; font-weight:800; margin-left:6px;">(${enr.currency === 'BDT' ? 'BDT ' : '$'}${enr.amount})</span>
                                 </h4>
                             </div>
                             <div>${statusBadge}</div>
@@ -283,7 +283,7 @@
         }
 
         async function approveStudentEnrollment(id) {
-            if (!confirm('আপনি কি এই স্টুডেন্টের পেমেন্ট যাচাই করে কোর্স অ্যাক্সেস দিতে সম্মত আছেন?')) return;
+            if (!confirm('Approve this student payment and grant course access?')) return;
             try {
                 const res = await fetch(`/api/partner/academy/enrollments/${id}/approve`, {
                     method: 'POST',
@@ -306,7 +306,7 @@
         }
 
         async function rejectStudentEnrollment(id) {
-            const reason = prompt('পেমেন্ট রিজেক্ট করার কারণ লিখুন (Optional reason for student):', 'পেমেন্ট ভেরিফাই করা সম্ভব হয়নি অথবা ভুল ট্রানজেকশন আইডি দেওয়া হয়েছে।');
+            const reason = prompt('Reason for rejecting enrollment (optional):', 'Payment verification failed.');
             if (reason === null) return;
             try {
                 const res = await fetch(`/api/partner/academy/enrollments/${id}/reject`, {
@@ -492,7 +492,7 @@
                 } else if (item.type === 'paid') {
                     iconHtml = '<i class="fas fa-gem" style="color:var(--gold); font-size:1.4rem;"></i>';
                     typeBadge = '<span style="background:rgba(245,176,65,0.15); color:var(--gold); font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:12px;">VIP Paid Course</span>';
-                    extraDetail = `<span style="font-size:0.8rem; font-weight:800; color:var(--emerald);">${item.currency === 'BDT' ? '৳' : '$'}${item.price || 0}</span>`;
+                    extraDetail = `<span style="font-size:0.8rem; font-weight:800; color:var(--emerald);">${item.currency === 'BDT' ? 'BDT ' : '$'}${item.price || 0}</span>`;
                 }
 
                 return `
@@ -809,7 +809,7 @@
                             extra = `<span style="font-size:0.7rem; color:var(--text-muted);">${escapeHtml(it.resourceType || 'Resource')}</span>`;
                         } else if (it.type === 'paid') {
                             badge = '<span style="background:rgba(245,176,65,0.2); color:var(--gold); font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:10px;">Paid</span>';
-                            extra = `<span style="font-size:0.75rem; font-weight:800; color:var(--emerald);">${it.currency === 'BDT' ? '৳' : '$'}${it.price}</span>`;
+                            extra = `<span style="font-size:0.75rem; font-weight:800; color:var(--emerald);">${it.currency === 'BDT' ? 'BDT ' : '$'}${it.price}</span>`;
                         }
 
                         return `
@@ -3601,14 +3601,14 @@
                             <div class="calc-result-main">
                                 <div class="res-label">Estimated Monthly Earnings</div>
                                 <div class="res-amount-usd text-emerald" id="calcMonthlyUsd">$225.00</div>
-                                <div class="res-amount-bdt" id="calcMonthlyBdt">≈ ৳27,450 BDT / Mo</div>
+                                <div class="res-amount-bdt" id="calcMonthlyBdt">≈ BDT 27,450 / Mo</div>
                             </div>
 
                             <div class="calc-result-sub-grid">
                                 <div class="sub-cell">
                                     <div class="sub-lbl">Estimated Annual Earnings</div>
                                     <div class="sub-val text-gold" id="calcAnnualUsd">$2,700.00</div>
-                                    <div class="sub-bdt" id="calcAnnualBdt">≈ ৳3,29,400 BDT / Year</div>
+                                    <div class="sub-bdt" id="calcAnnualBdt">≈ BDT 3,29,400 / Year</div>
                                 </div>
                                 <div class="sub-cell">
                                     <div class="sub-lbl">Monthly Sales Volume</div>
@@ -4658,7 +4658,7 @@
                                     <h4 style="margin:0; font-size:0.98rem; font-weight:800; color:#fff;">Your Shareable Academy Profile Link</h4>
                                     <span style="background:rgba(16,185,129,0.18); color:#10b981; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:12px;">Public URL</span>
                                 </div>
-                                <p style="margin:3px 0 8px 0; font-size:0.78rem; color:var(--text-muted);">এই লিঙ্কটি সরাসরি যে কারো সাথে শেয়ার করুন। লিংকে চাপ দিলে সরাসরি আপনার একাডেমি ও কোর্স প্রোফাইল দেখতে পাবে।</p>
+                                <p style="margin:3px 0 8px 0; font-size:0.78rem; color:var(--text-muted);">Share this link to showcase your verified academy, video lessons, and courses.</p>
                                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                     <input type="text" id="acadShareProfileUrl" readonly style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:7px 12px; color:var(--gold); font-size:0.82rem; width:100%; max-width:420px; font-family:monospace; font-weight:700;" value="" />
                                     <button type="button" class="btn-gold" onclick="copyMentorShareLink()" style="padding:7px 16px; font-size:0.8rem; border-radius:8px; white-space:nowrap;">
@@ -4702,7 +4702,7 @@
                                 <!-- PROFILE AVATAR DIRECT UPLOAD (MAX 1MB) -->
                                 <div class="form-group" style="margin-bottom:14px;">
                                     <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">
-                                        Profile Avatar (গ্যালারি থেকে ফটো আপলোড করুন - Max 1MB) *
+                                        Profile Avatar (Max 1MB) *
                                     </label>
                                     <input type="file" id="acadAvatarFileInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="handleAvatarFileSelect(this)" />
                                     <input type="hidden" id="acadAvatarUrl" value="" />
@@ -4710,9 +4710,9 @@
                                         <img id="acadAvatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" style="width:48px; height:48px; border-radius:50%; object-fit:cover; border:2.5px solid var(--gold); flex-shrink:0; background:#070a12;" />
                                         <div style="display:flex; flex-direction:column; gap:4px;">
                                             <button type="button" class="btn-outline" onclick="document.getElementById('acadAvatarFileInput').click()" style="padding:6px 14px; font-size:0.78rem; border-radius:8px;">
-                                                <i class="fas fa-camera"></i> গ্যালারি থেকে ছবি আপলোড (Max 1MB)
+                                                <i class="fas fa-camera"></i> Upload Photo (Max 1MB)
                                             </button>
-                                            <span style="font-size:0.7rem; color:var(--text-muted);">সরাসরি আপনার ডিভাইস থেকে ১ মেগাবাইট (1 MB) এর নিচে ছবি আপলোড করুন</span>
+                                            <span style="font-size:0.7rem; color:var(--text-muted);">Upload JPG or PNG image, 1MB max</span>
                                         </div>
                                     </div>
                                 </div>
@@ -4720,20 +4720,20 @@
                                 <!-- COVER BANNER DIRECT UPLOAD (MAX 1MB) -->
                                 <div class="form-group" style="margin-bottom:14px;">
                                     <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">
-                                        Cover Banner (গ্যালারি থেকে ব্যানার আপলোড করুন - Max 1MB)
+                                        Cover Banner (Max 1MB)
                                     </label>
                                     <input type="file" id="acadBannerFileInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="handleBannerFileSelect(this)" />
                                     <input type="hidden" id="acadBannerUrl" value="" />
                                     <div id="acadBannerPreview" style="margin-bottom:8px; height:75px; border-radius:10px; background:url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80') center/cover no-repeat; border:1px solid rgba(255,255,255,0.15); box-shadow:0 2px 10px rgba(0,0,0,0.4);"></div>
                                     <button type="button" class="btn-outline" onclick="document.getElementById('acadBannerFileInput').click()" style="padding:6px 14px; font-size:0.78rem; border-radius:8px;">
-                                        <i class="fas fa-image"></i> গ্যালারি থেকে ব্যানার আপলোড (Max 1MB)
+                                        <i class="fas fa-image"></i> Upload Banner (Max 1MB)
                                     </button>
                                 </div>
 
                                 <!-- ALL SOCIAL MEDIA LINKS SECTION -->
                                 <div style="margin-bottom:14px; border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px; background:rgba(0,0,0,0.2);">
                                     <div style="font-size:0.8rem; font-weight:800; color:#fff; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-                                        <i class="fas fa-globe" style="color:var(--cyan);"></i> সকল সোশ্যাল মিডিয়া প্ল্যাটফর্ম লিঙ্ক (Social Links)
+                                        <i class="fas fa-globe" style="color:var(--cyan);"></i> Social Media & Community Links
                                     </div>
                                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                                         <div class="form-group">
@@ -4819,8 +4819,8 @@
                             <div id="partnerSubtabOrdersSection" style="display:none; flex-direction:column; flex:1;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                                     <div>
-                                        <h4 style="margin:0; font-size:0.95rem; font-weight:800; color:#fff;">পেইড কোর্স পারচেজ রিকোয়েস্ট ও পারমিশন</h4>
-                                        <span style="font-size:0.75rem; color:var(--text-muted);">স্টুডেন্টদের পেমেন্ট যাচাই করে অনুমোদন (Approve) দিন যাতে তারা কোর্স লিঙ্ক দেখতে পারে</span>
+                                        <h4 style="margin:0; font-size:0.95rem; font-weight:800; color:#fff;">Course Orders & Access Requests</h4>
+                                        <span style="font-size:0.75rem; color:var(--text-muted);">Review student payments and grant access to your courses.</span>
                                     </div>
                                     <button type="button" class="btn-outline" onclick="loadPartnerEnrollments()" style="padding:5px 12px; font-size:0.75rem; border-radius:8px;">
                                         <i class="fas fa-sync-alt"></i> Refresh Orders
@@ -5675,13 +5675,13 @@
                     <!-- DRIVE CLASS CUSTOM THUMBNAIL (MAX 1MB) -->
                     <div class="form-group" style="margin-bottom:12px;">
                         <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">
-                            Class Thumbnail (গ্যালারি থেকে ক্লাসের থাম্বনেইল আপলোড করুন - Max 1MB)
+                            Class Thumbnail (Max 1MB)
                         </label>
                         <input type="file" id="modalDriveThumbInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="handleItemThumbUpload(this, 'drive')" />
                         <input type="hidden" id="modalDriveThumbUrl" value="" />
                         <img id="modalDriveThumbPreview" style="display:none; width:100%; height:90px; object-fit:cover; border-radius:8px; margin-bottom:6px; border:1px solid rgba(255,255,255,0.15);" />
                         <button type="button" class="btn-outline" onclick="document.getElementById('modalDriveThumbInput').click()" style="padding:6px 14px; font-size:0.78rem; border-radius:8px;">
-                            <i class="fas fa-upload"></i> থাম্বনেইল ছবি আপলোড (Max 1MB)
+                            <i class="fas fa-upload"></i> Upload Thumbnail (Max 1MB)
                         </button>
                     </div>
                 </div>
@@ -5695,7 +5695,7 @@
                                 <input type="number" step="0.01" min="0" class="form-control" id="modalPaidPrice" placeholder="50" style="font-size:0.85rem;" />
                                 <select class="form-control" id="modalPaidCurrency" style="width:90px; font-size:0.85rem;">
                                     <option value="USD">USD ($)</option>
-                                    <option value="BDT">BDT (৳)</option>
+                                    <option value="BDT">BDT</option>
                                 </select>
                             </div>
                         </div>
@@ -5708,31 +5708,31 @@
                     <!-- PAID COURSE CUSTOM THUMBNAIL (MAX 1MB) -->
                     <div class="form-group" style="margin-bottom:12px;">
                         <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">
-                            Course Banner / Thumbnail (কোর্স থাম্বনেইল আপলোড করুন - Max 1MB)
+                            Course Thumbnail (Max 1MB)
                         </label>
                         <input type="file" id="modalPaidThumbInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" onchange="handleItemThumbUpload(this, 'paid')" />
                         <input type="hidden" id="modalPaidThumbUrl" value="" />
                         <img id="modalPaidThumbPreview" style="display:none; width:100%; height:90px; object-fit:cover; border-radius:8px; margin-bottom:6px; border:1px solid rgba(255,255,255,0.15);" />
                         <button type="button" class="btn-outline" onclick="document.getElementById('modalPaidThumbInput').click()" style="padding:6px 14px; font-size:0.78rem; border-radius:8px;">
-                            <i class="fas fa-upload"></i> কোর্স থাম্বনেইল ছবি আপলোড (Max 1MB)
+                            <i class="fas fa-upload"></i> Upload Thumbnail (Max 1MB)
                         </button>
                     </div>
 
                     <!-- PAYMENT INSTRUCTIONS -->
                     <div class="form-group" style="margin-bottom:12px;">
                         <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">
-                            Payment Instructions / পেমেন্ট নির্দেশিকা (Traders will see this before paying) *
+                            Payment Instructions (Shown to students before purchase) *
                         </label>
-                        <textarea class="form-control" id="modalPaidPaymentInstructions" rows="3" placeholder="e.g. Binance Pay ID: 12345678 (USDT) অথবা bKash Personal: 017xxxxxxxx. পেমেন্ট সম্পন্ন করার পর আপনার Transaction ID নিচে সাবমিট করুন।" style="font-size:0.82rem; line-height:1.5;"></textarea>
+                        <textarea class="form-control" id="modalPaidPaymentInstructions" rows="3" placeholder="e.g. Pay via Binance Pay ID: 12345678 (USDT) or bKash / Crypto. Submit TxID below after paying." style="font-size:0.82rem; line-height:1.5;"></textarea>
                     </div>
 
                     <!-- SECRET COURSE ACCESS LINK -->
                     <div class="form-group" style="margin-bottom:12px;">
                         <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--gold); margin-bottom:4px;">
-                            <i class="fas fa-lock"></i> Secret Course Access Link (শুধুমাত্র অনুমোদিত ইউজারদের দেওয়া হবে) *
+                            <i class="fas fa-lock"></i> Secret Course Access Link (Unlocked upon approval) *
                         </label>
                         <input type="url" class="form-control" id="modalPaidAccessLink" placeholder="https://drive.google.com/... or https://t.me/+private_vip_link" style="font-size:0.85rem;" />
-                        <span style="font-size:0.7rem; color:var(--text-muted); margin-top:3px; display:block;">আপনি স্টুডেন্টের পেমেন্ট অ্যাপ্রুভ করার সাথে সাথে স্টুডেন্টের ড্যাশবোর্ডে এই ড্রাইভ বা ভিআইপি গ্রুপ লিঙ্কটি আনলক হয়ে যাবে।</span>
+                        <span style="font-size:0.7rem; color:var(--text-muted); margin-top:3px; display:block;">Drive folder or private Telegram link, revealed automatically once you approve the student's order.</span>
                     </div>
 
                     <div class="form-group" style="margin-bottom:12px;">
@@ -5956,13 +5956,13 @@
             if (monthlyUsdEl) monthlyUsdEl.innerText = `$${monthlyCommission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
             const monthlyBdtEl = document.getElementById('calcMonthlyBdt');
-            if (monthlyBdtEl) monthlyBdtEl.innerText = `≈ ৳${Math.round(monthlyCommission * bdtRate).toLocaleString('en-US')} BDT / Mo`;
+            if (monthlyBdtEl) monthlyBdtEl.innerText = `≈ BDT ${Math.round(monthlyCommission * bdtRate).toLocaleString('en-US')} / Mo`;
 
             const annualUsdEl = document.getElementById('calcAnnualUsd');
             if (annualUsdEl) annualUsdEl.innerText = `$${annualCommission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
             const annualBdtEl = document.getElementById('calcAnnualBdt');
-            if (annualBdtEl) annualBdtEl.innerText = `≈ ৳${Math.round(annualCommission * bdtRate).toLocaleString('en-US')} BDT / Year`;
+            if (annualBdtEl) annualBdtEl.innerText = `≈ BDT ${Math.round(annualCommission * bdtRate).toLocaleString('en-US')} / Year`;
 
             const volUsdEl = document.getElementById('calcVolumeUsd');
             if (volUsdEl) volUsdEl.innerText = `$${monthlySalesVolume.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;

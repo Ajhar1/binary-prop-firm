@@ -575,7 +575,7 @@
                         <span id="activeVideoDuration" style="font-size:0.82rem; color:var(--text-muted); font-weight:700;"><i class="far fa-clock"></i> --:--</span>
                     </div>
                     <p id="activeVideoDesc" style="font-size:0.85rem; color:var(--text-muted); line-height:1.6; margin-top:8px;">
-                        ট্রেডিং স্ট্র্যাটেজি ও সঠিক রিস্ক ম্যানেজমেন্ট আয়ত্ত করতে প্রতিটি ভিডিও মনোযোগ দিয়ে সম্পন্ন করুন।
+                        Watch each video to master trading strategies and risk management.
                     </p>
                 </div>
             </div>
@@ -632,7 +632,7 @@
                     <i class="fas fa-info-circle"></i> Mentor Payment Instructions:
                 </div>
                 <div id="enrollPaymentInstructions" style="font-size:0.82rem; color:#fff; line-height:1.5; white-space:pre-wrap;">
-                    পেমেন্ট সম্পন্ন করে নিচের বক্সে আপনার ট্রানজেকশন আইডি (TxID) এবং রসিদ সাবমিট করুন।
+                    Complete payment and submit your Transaction ID (TxID) and receipt below.
                 </div>
             </div>
 
@@ -681,7 +681,7 @@
                     <input type="file" id="enrollProofFileInput" accept="image/*" style="display:none;" onchange="handleProofUpload(this)" />
                     <div style="display:flex; align-items:center; gap:10px;">
                         <button type="button" class="btn-outline" onclick="document.getElementById('enrollProofFileInput').click()" style="padding:7px 14px; font-size:0.78rem;">
-                            <i class="fas fa-camera"></i> রসিদ আপলোড করুন (Max 1MB)
+                            <i class="fas fa-camera"></i> Upload Receipt (Max 1MB)
                         </button>
                         <span id="enrollProofStatus" style="font-size:0.75rem; color:var(--text-muted);">No file chosen</span>
                     </div>
@@ -720,11 +720,11 @@
                 </div>
                 <h3 id="unlockedCourseTitle" style="font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:6px;">--</h3>
                 <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.5;">
-                    মেন্টর আপনার পেমেন্ট অনুমোদন করেছেন! ক্লাসরুম, ড্রাইভ বা ভিআইপি গ্রুপে প্রবেশ করতে নিচের বাটনে চাপ দিন।
+                    Your payment has been approved! Access your course resources below.
                 </p>
                 <div style="margin-top:20px;">
                     <a id="unlockedAccessBtn" href="#" target="_blank" class="btn-emerald" style="padding:12px 28px; font-size:0.95rem;">
-                        <i class="fas fa-external-link-alt"></i> কোর্স অ্যাক্সেস করুন (Enter Classroom)
+                        <i class="fas fa-external-link-alt"></i> Enter Classroom
                     </a>
                 </div>
             </div>
@@ -770,9 +770,9 @@
 
         function copyShareUrl() {
             navigator.clipboard.writeText(window.location.href).then(() => {
-                showToast('প্রোফাইল লিঙ্ক কপি করা হয়েছে!', 'success');
+                showToast('Profile link copied!', 'success');
             }).catch(() => {
-                showToast('লিঙ্ক কপি করা হয়েছে!', 'success');
+                showToast('Link copied!', 'success');
             });
         }
 
@@ -881,7 +881,7 @@
             if (countBadge) countBadge.innerText = `${videos.length} Videos`;
 
             if (videos.length === 0) {
-                if (playlistBox) playlistBox.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-muted);">কোনো ভিডিও ক্লাস নেই।</div>';
+                if (playlistBox) playlistBox.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-muted);">No video lessons available.</div>';
                 return;
             }
 
@@ -921,7 +921,7 @@
             const titleEl = document.getElementById('activeVideoTitle'); if (titleEl) titleEl.innerText = `${v.serial ? `#${v.serial} - ` : ''}${v.title}`;
             const catEl = document.getElementById('activeVideoCategory'); if (catEl) catEl.innerText = v.category || 'Lesson';
             const durEl = document.getElementById('activeVideoDuration'); if (durEl) durEl.innerHTML = `<i class="far fa-clock"></i> ${v.duration || '--:--'}`;
-            const descEl = document.getElementById('activeVideoDesc'); if (descEl) descEl.innerText = v.description || 'ট্রেডিং স্ট্র্যাটেজি ও সঠিক রিস্ক ম্যানেজমেন্ট আয়ত্ত করতে প্রতিটি ভিডিও মনোযোগ দিয়ে সম্পন্ন করুন।';
+            const descEl = document.getElementById('activeVideoDesc'); if (descEl) descEl.innerText = v.description || 'Watch each video to master trading strategies and risk management.';
         }
 
         function renderDriveSection(items) {
@@ -929,7 +929,7 @@
             if (!container) return;
 
             if (items.length === 0) {
-                container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-muted);">কোনো ফ্রি ড্রাইভ রিসোর্স পাওয়া যায়নি।</div>';
+                container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-muted);">No free Drive resources available.</div>';
                 return;
             }
 
@@ -945,10 +945,10 @@
                         </div>
                         <h3 style="font-size:1.05rem; font-weight:800; color:#fff; margin-bottom:6px;">${escapeHtml(it.title)}</h3>
                         <p style="font-size:0.82rem; color:var(--text-muted); line-height:1.5; flex:1; margin-bottom:14px;">
-                            ${escapeHtml(it.description || 'গুগল ড্রাইভ থেকে সরাসরি ফাইলটি ডাউনলোড বা ভিউ করতে নিচের বাটনে চাপ দিন।')}
+                            ${escapeHtml(it.description || 'Click below to view or download resource files from Google Drive.')}
                         </p>
                         <a href="${escapeHtml(it.driveUrl || '#')}" target="_blank" class="btn-outline" style="justify-content:center; border-color:#3b82f6; color:#60a5fa;">
-                            <i class="fas fa-external-link-alt"></i> ড্রাইভ ফাইল দেখুন (Open Drive)
+                            <i class="fas fa-external-link-alt"></i> Open Drive Resource
                         </a>
                     </div>
                 `;
@@ -960,19 +960,19 @@
             if (!container) return;
 
             if (items.length === 0) {
-                container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-muted);">বর্তমানে কোনো পেইড কোর্স সক্রিয় নেই।</div>';
+                container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-muted);">No paid courses available.</div>';
                 return;
             }
 
             container.innerHTML = items.map(it => {
-                const priceSign = it.currency === 'BDT' ? '৳' : '$';
+                const priceSign = it.currency === 'BDT' ? 'BDT ' : '$';
                 const thumb = it.thumbnailUrl ? `<img src="${escapeHtml(it.thumbnailUrl)}" class="course-card-thumb" alt="${escapeHtml(it.title)}" />` : '';
 
                 // Check my enrollment state
                 const myEnr = myEnrollments.find(e => e.courseId === it.id);
                 let actionBtn = `
                     <button type="button" class="btn-gold" style="justify-content:center;" onclick="openEnrollmentModal('${it.id}')">
-                        <i class="fas fa-shopping-cart"></i> এনরোল করুন (${priceSign}${it.price})
+                        <i class="fas fa-shopping-cart"></i> Enroll Now (${priceSign}${it.price})
                     </button>
                 `;
 
@@ -983,14 +983,14 @@
                         statusBadge = `<span style="background:rgba(16,185,129,0.2); color:#10b981; font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:10px;"><i class="fas fa-check-circle"></i> Enrolled & Unlocked</span>`;
                         actionBtn = `
                             <button type="button" class="btn-emerald" style="justify-content:center;" onclick="showUnlockedModal('${it.id}', '${escapeHtml(myEnr.accessLink || it.buyUrl || '#')}')">
-                                <i class="fas fa-play-circle"></i> ক্লাসরুমে প্রবেশ করুন (Open Course)
+                                <i class="fas fa-play-circle"></i> Open Course
                             </button>
                         `;
                     } else if (myEnr.status === 'pending') {
                         statusBadge = `<span style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:10px;"><i class="fas fa-clock"></i> Verification Pending</span>`;
                         actionBtn = `
                             <button type="button" class="btn-outline" style="justify-content:center; border-color:#f59e0b; color:#f59e0b;" disabled>
-                                <i class="fas fa-hourglass-half"></i> মেন্টরের অনুমোদনের অপেক্ষায়
+                                <i class="fas fa-hourglass-half"></i> Pending Mentor Approval
                             </button>
                         `;
                     }
@@ -1005,7 +1005,7 @@
                         </div>
                         <h3 style="font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:6px;">${escapeHtml(it.title)}</h3>
                         <p style="font-size:0.84rem; color:var(--text-muted); line-height:1.6; flex:1; margin-bottom:14px;">
-                            ${escapeHtml(it.description || 'এই পেইড কোর্সে এনরোল করে সরাসরি মেন্টরের ভিআইপি ক্লাস, ড্রাইভ ও লাইভ মেন্টরশিপ সাপোর্ট উপভোগ করুন।')}
+                            ${escapeHtml(it.description || 'Enroll to access VIP classes, drive resources, and direct mentorship.')}
                         </p>
                         ${actionBtn}
                     </div>
@@ -1066,12 +1066,12 @@
 
             document.getElementById('enrollCourseId').value = course.id;
             document.getElementById('enrollCourseTitle').innerText = course.title;
-            const priceSign = course.currency === 'BDT' ? '৳' : '$';
+            const priceSign = course.currency === 'BDT' ? 'BDT ' : '$';
             document.getElementById('enrollCoursePrice').innerText = `${priceSign}${course.price}`;
 
             const instEl = document.getElementById('enrollPaymentInstructions');
             if (instEl) {
-                instEl.innerText = course.paymentInstructions || 'মেন্টরের প্রদত্ত পেমেন্ট মেথডে ফি পরিশোধ করে নিচের বক্সে আপনার Transaction ID ও পেমেন্টের স্ক্রিনশট সাবমিট করুন।';
+                instEl.innerText = course.paymentInstructions || 'Pay the course fee using the instructions above, then submit your Transaction ID and screenshot below.';
             }
 
             // Autofill user details if logged in
@@ -1091,7 +1091,7 @@
             if (!input.files || input.files.length === 0) return;
             const file = input.files[0];
             if (file.size > 1 * 1024 * 1024) {
-                showToast('পেমেন্ট রসিদ ১ মেগাবাইট (1 MB) এর বেশি হতে পারবে না। অনুগ্রহ করে ছোট সাইজের ছবি নির্বাচন করুন।', 'warning');
+                showToast('Receipt image must be 1MB or less.', 'warning');
                 input.value = '';
                 return;
             }
@@ -1109,14 +1109,14 @@
                 if (data.success && data.url) {
                     document.getElementById('enrollProofUrl').value = data.url;
                     document.getElementById('enrollProofStatus').innerHTML = '<span style="color:#10b981;"><i class="fas fa-check"></i> Uploaded!</span>';
-                    showToast('স্ক্রিনশট সফলভাবে আপলোড হয়েছে!', 'success');
+                    showToast('Screenshot uploaded successfully.', 'success');
                 } else {
                     document.getElementById('enrollProofStatus').innerText = 'Failed';
-                    showToast(data.message || 'আপলোড ব্যর্থ হয়েছে।', 'error');
+                    showToast(data.message || 'Upload failed.', 'error');
                 }
             } catch (e) {
                 document.getElementById('enrollProofStatus').innerText = 'Error';
-                showToast('আপলোডে নেটওয়ার্ক সমস্যা হয়েছে।', 'error');
+                showToast('Network error during upload.', 'error');
             }
         }
 
@@ -1132,7 +1132,7 @@
             const notes = document.getElementById('enrollStudentNote').value.trim();
 
             if (!transactionId) {
-                showToast('অনুগ্রহ করে Transaction ID প্রদান করুন।', 'warning');
+                showToast('Please provide your Transaction ID.', 'warning');
                 return;
             }
 
@@ -1157,13 +1157,13 @@
                 const data = await res.json();
                 if (data.success) {
                     closeModal('enrollModal');
-                    showToast(data.message || 'পেমেন্ট রিকোয়েস্ট সাবমিট হয়েছে!', 'success');
+                    showToast(data.message || 'Payment request submitted successfully.', 'success');
                     loadMyEnrollments();
                 } else {
-                    showToast(data.message || 'এনরোলমেন্ট ব্যর্থ হয়েছে।', 'error');
+                    showToast(data.message || 'Enrollment failed.', 'error');
                 }
             } catch (e) {
-                showToast('সাবমিট করতে নেটওয়ার্ক সমস্যা হয়েছে।', 'error');
+                showToast('Network error during submission.', 'error');
             }
         }
 
