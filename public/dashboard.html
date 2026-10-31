@@ -4000,122 +4000,231 @@
 
             <!-- VIEW 1: ACADEMY DIRECTORY (MENTOR HUB) -->
             <div id="academyDirectoryView">
+                <!-- Mentor Search & Live Filter Bar -->
+                <div style="background:rgba(18,24,38,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px 18px; margin-bottom:1.5rem; display:flex; gap:12px; align-items:center; flex-wrap:wrap; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                    <div style="flex:1; min-width:260px; position:relative;">
+                        <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-secondary); font-size:0.95rem;"></i>
+                        <input type="text" id="dashMentorSearchInput" oninput="filterAcademyMentorsDirectory()" placeholder="Search mentor by name, email, or trading style..." style="width:100%; padding:11px 16px 11px 42px; background:rgba(10,15,26,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:#fff; font-size:0.9rem; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='var(--accent-green)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'" />
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:0.82rem; color:var(--text-secondary); background:rgba(255,255,255,0.04); padding:8px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.08); display:inline-flex; align-items:center; gap:6px;">
+                            <i class="fas fa-users" style="color:var(--accent-green);"></i> Showing <strong id="dashMentorFilteredCount" style="color:#fff;">0</strong> Mentors
+                        </span>
+                    </div>
+                </div>
+
                 <div id="academyMentorsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:1.25rem;">
                     <!-- Mentor Cards Injected Here -->
                 </div>
             </div>
 
-            <!-- VIEW 2: DEDICATED MENTOR CLASSROOM VIEW (Initially Hidden) -->
+            <!-- VIEW 2: DEDICATED MENTOR CLASSROOM VIEW (YOUTUBE PROFILE STYLE) -->
             <div id="academyClassroomView" style="display:none;">
-                
-                <!-- Back Button & Classroom Title Bar -->
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:10px;">
-                    <button type="button" class="btn-outline" onclick="exitMentorClassroom()" style="padding:7px 16px; font-size:0.85rem; border-radius:10px; display:inline-flex; align-items:center; gap:8px;">
-                        <i class="fas fa-arrow-left"></i> সকল একাডেমিতে ফিরে যান (Back to Academies)
-                    </button>
-                    <div style="display:flex; gap:8px;" id="classroomSocialLinksBox">
-                        <!-- Telegram / YouTube Links -->
+
+                <!-- YouTube-Style Channel Cover Banner Box -->
+                <div style="border-radius:20px; overflow:hidden; border:1px solid rgba(255,255,255,0.09); background:#0c111d; margin-bottom:1.5rem; box-shadow:0 10px 35px rgba(0,0,0,0.5);">
+                    <!-- Top Cover Banner -->
+                    <div id="classroomBannerBox" style="min-height:220px; position:relative; background:linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(7,10,18,0.95) 100%), url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&auto=format&fit=crop&q=80') center/cover no-repeat;">
+                        <!-- Floating Top Navigation Bar on Banner -->
+                        <div style="position:absolute; top:16px; left:16px; right:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; z-index:3;">
+                            <button type="button" class="btn-outline" onclick="exitMentorClassroom()" style="background:rgba(7,10,18,0.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.18); padding:8px 18px; font-size:0.85rem; border-radius:10px; font-weight:700; color:#fff;">
+                                <i class="fas fa-arrow-left"></i> Back to All Mentors
+                            </button>
+                            <div style="display:flex; gap:8px;" id="classroomSocialLinksBox">
+                                <!-- Social & Share Buttons -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Channel Identity Bar Below / Overlapping Banner -->
+                    <div style="padding:1.25rem 1.8rem 1.5rem 1.8rem; background:rgba(18,24,38,0.95); position:relative;">
+                        <div style="display:flex; align-items:flex-end; gap:22px; margin-top:-60px; flex-wrap:wrap;">
+                            <!-- Large Channel Avatar -->
+                            <img id="classroomAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:4px solid var(--accent-green); box-shadow:0 8px 30px rgba(0,0,0,0.8); background:#1e293b; z-index:2; flex-shrink:0;" />
+
+                            <div style="flex:1; min-width:240px; margin-top:12px;">
+                                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                    <h2 id="classroomMentorName" style="margin:0; font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:-0.5px;">Mentor Name</h2>
+                                    <span class="badge-status badge-verified" id="classroomVerifiedBadge" style="font-size:0.75rem; padding:4px 10px; border-radius:8px;">
+                                        <i class="fas fa-check-circle" style="color:var(--accent-green);"></i> Verified Community Mentor
+                                    </span>
+                                </div>
+                                <div id="classroomMentorTagline" style="margin:4px 0 0 0; color:var(--accent-green); font-size:0.92rem; font-weight:700;">Price Action Specialist</div>
+                                
+                                <!-- Channel Stats Bar -->
+                                <div style="display:flex; gap:16px; margin-top:8px; font-size:0.82rem; color:var(--text-secondary); flex-wrap:wrap;">
+                                    <span><i class="fas fa-list-ul" style="color:#00f0ff; margin-right:5px;"></i> <strong id="dashStatPlaylists" style="color:#fff;">0</strong> Playlists</span>
+                                    <span><i class="fab fa-youtube" style="color:#ef4444; margin-right:5px;"></i> <strong id="dashStatVideos" style="color:#fff;">0</strong> Videos</span>
+                                    <span><i class="fab fa-google-drive" style="color:#3b82f6; margin-right:5px;"></i> <strong id="dashStatDrive" style="color:#fff;">0</strong> Resources</span>
+                                    <span><i class="fas fa-gem" style="color:var(--yellow); margin-right:5px;"></i> <strong id="dashStatPaid" style="color:#fff;">0</strong> VIP Courses</span>
+                                </div>
+
+                                <p id="classroomMentorBio" style="margin:10px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.6; max-width:850px;"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- YouTube-Style Channel Navigation Tabs -->
+                    <div style="display:flex; gap:8px; padding:0 1.5rem; background:rgba(12,17,29,0.98); border-top:1px solid rgba(255,255,255,0.06); overflow-x:auto;">
+                        <button type="button" class="dash-class-tab-btn active" id="btnClassTabPlaylists" onclick="switchClassroomSubtab('playlists')" style="padding:12px 18px; font-size:0.88rem; font-weight:700; white-space:nowrap; border-radius:0; border-bottom:3px solid transparent;">
+                            <i class="fas fa-list-ul" style="color:#00f0ff; margin-right:6px;"></i> Playlists (<span id="classCountPlaylists">0</span>)
+                        </button>
+                        <button type="button" class="dash-class-tab-btn" id="btnClassTabVideos" onclick="switchClassroomSubtab('videos')" style="padding:12px 18px; font-size:0.88rem; font-weight:700; white-space:nowrap; border-radius:0; border-bottom:3px solid transparent;">
+                            <i class="fab fa-youtube" style="color:#ef4444; margin-right:6px;"></i> All Videos (<span id="classCountVideos">0</span>)
+                        </button>
+                        <button type="button" class="dash-class-tab-btn" id="btnClassTabDrive" onclick="switchClassroomSubtab('drive')" style="padding:12px 18px; font-size:0.88rem; font-weight:700; white-space:nowrap; border-radius:0; border-bottom:3px solid transparent;">
+                            <i class="fab fa-google-drive" style="color:#3b82f6; margin-right:6px;"></i> Free Resources (<span id="classCountDrive">0</span>)
+                        </button>
+                        <button type="button" class="dash-class-tab-btn" id="btnClassTabPaid" onclick="switchClassroomSubtab('paid')" style="padding:12px 18px; font-size:0.88rem; font-weight:700; white-space:nowrap; border-radius:0; border-bottom:3px solid transparent;">
+                            <i class="fas fa-gem" style="color:var(--yellow); margin-right:6px;"></i> VIP Courses (<span id="classCountPaid">0</span>)
+                        </button>
+                        <button type="button" class="dash-class-tab-btn" id="btnClassTabAbout" onclick="switchClassroomSubtab('about')" style="padding:12px 18px; font-size:0.88rem; font-weight:700; white-space:nowrap; border-radius:0; border-bottom:3px solid transparent;">
+                            <i class="fas fa-info-circle" style="color:var(--text-secondary); margin-right:6px;"></i> About Mentor
+                        </button>
                     </div>
                 </div>
 
-                <!-- Classroom Mentor Hero Banner Card -->
-                <div class="glass-card" style="padding:0; overflow:hidden; border-radius:18px; margin-bottom:1.5rem;">
-                    <div id="classroomBannerBox" style="height:120px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); position:relative;"></div>
-                    <div style="padding:1.25rem 1.5rem; position:relative; margin-top:-45px;">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px;">
-                            <div style="display:flex; align-items:flex-end; gap:14px;">
-                                <img id="classroomAvatarImg" src="/images/bpf-logo.png" style="width:72px; height:72px; border-radius:50%; object-fit:cover; border:3px solid var(--yellow); background:#070a12; flex-shrink:0;" />
-                                <div>
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <h3 id="classroomMentorName" style="margin:0; font-size:1.3rem; font-weight:900; color:#fff;">Mentor Name</h3>
-                                        <span class="badge-status badge-verified" id="classroomVerifiedBadge">
-                                            <i class="fas fa-check-circle"></i> Verified
-                                        </span>
+                <!-- SUBSECTION 1: PLAYLISTS VIEW (YouTube Style) -->
+                <div id="classroomSectionPlaylists">
+                    <!-- Playlist Browser Mode -->
+                    <div id="classroomPlaylistsBrowser">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                            <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-layer-group" style="color:#00f0ff;"></i> Mentor Playlists
+                            </h3>
+                            <span style="font-size:0.8rem; color:var(--text-secondary);">Watch courses sequentially in structured chapters</span>
+                        </div>
+                        <div id="classroomPlaylistsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1.25rem;">
+                            <!-- Playlists Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- YouTube Playlist Theater / Player Mode (Shown when a playlist is active) -->
+                    <div id="classroomPlaylistPlayerMode" style="display:none;">
+                        <!-- Playlist Header & Back to Playlists Button -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:10px; background:rgba(18,24,38,0.7); padding:10px 16px; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+                            <div>
+                                <span style="font-size:0.75rem; color:#00f0ff; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">
+                                    <i class="fas fa-list-ul"></i> Now Playing Playlist
+                                </span>
+                                <h3 id="activePlaylistHeaderTitle" style="margin:2px 0 0 0; font-size:1.1rem; font-weight:800; color:#fff;">Playlist Title</h3>
+                            </div>
+                            <button type="button" class="btn-outline" onclick="exitPlaylistPlayerMode()" style="padding:6px 14px; font-size:0.8rem; border-radius:8px;">
+                                <i class="fas fa-th-large"></i> Back to All Playlists
+                            </button>
+                        </div>
+
+                        <div class="course-layout">
+                            <!-- Left: Video Player & Details -->
+                            <div>
+                                <div class="video-player-container" id="videoContainer">
+                                    <div style="text-align:center; padding:2rem;">
+                                        <i class="fas fa-spinner fa-spin" style="font-size:3rem; color:var(--yellow);"></i>
+                                        <h3 style="margin-top:1rem; font-size:1.2rem; color:#fff;">Loading video lesson...</h3>
                                     </div>
-                                    <p id="classroomMentorTagline" style="margin:3px 0 0 0; color:var(--text-secondary); font-size:0.85rem;">Tagline here</p>
                                 </div>
-                            </div>
-                        </div>
-                        <p id="classroomMentorBio" style="margin:12px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.6;"></p>
-                    </div>
-                </div>
 
-                <!-- Classroom Sub-Navigation Tabs (Videos, Free Drive, Paid Courses) -->
-                <div style="display:flex; gap:10px; margin-bottom:1.25rem; flex-wrap:wrap;">
-                    <button type="button" class="dash-class-tab-btn active" id="btnClassTabVideos" onclick="switchClassroomSubtab('videos')">
-                        <i class="fab fa-youtube" style="color:#ef4444;"></i> ভিডিও ক্লাস (Video Lessons) (<span id="classCountVideos">0</span>)
-                    </button>
-                    <button type="button" class="dash-class-tab-btn" id="btnClassTabDrive" onclick="switchClassroomSubtab('drive')">
-                        <i class="fab fa-google-drive" style="color:#3b82f6;"></i> ফ্রি ড্রাইভ রিসোর্স (Free Drive Links) (<span id="classCountDrive">0</span>)
-                    </button>
-                    <button type="button" class="dash-class-tab-btn" id="btnClassTabPaid" onclick="switchClassroomSubtab('paid')">
-                        <i class="fas fa-gem" style="color:var(--yellow);"></i> পেইড কোর্স ও মেন্টরশিপ (VIP Courses) (<span id="classCountPaid">0</span>)
-                    </button>
-                </div>
-
-                <!-- SUBSECTION A: VIDEO LESSONS (PLAYER + PLAYLIST) -->
-                <div id="classroomSectionVideos">
-                    <div class="course-layout">
-                        <!-- Video / Player Container -->
-                        <div>
-                            <div class="video-player-container" id="videoContainer">
-                                <div style="text-align:center; padding:2rem;">
-                                    <i class="fas fa-spinner fa-spin" style="font-size:3rem; color:var(--yellow);"></i>
-                                    <h3 style="margin-top:1rem; font-size:1.2rem; color:#fff;">ভিডিও লোড হচ্ছে...</h3>
-                                </div>
-                            </div>
-
-                            <!-- Lesson Details -->
-                            <div class="glass-card" style="margin-top:1.5rem;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:0.8rem;">
-                                    <div style="display:flex; align-items:center; gap:10px;">
-                                        <span class="badge-status badge-verified" id="lessonCategoryBadge">ROAD MAP</span>
-                                        <span style="font-size:0.82rem; color:var(--text-secondary); display:flex; align-items:center; gap:5px;" id="lessonDurationInfo">
-                                            <i class="far fa-clock"></i> <span id="lessonDurationText">--:--</span>
-                                        </span>
+                                <!-- Lesson Details & Next/Prev Controls -->
+                                <div class="glass-card" style="margin-top:1.2rem;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:0.8rem;">
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <span class="badge-status badge-verified" id="lessonCategoryBadge">TRADING LESSON</span>
+                                            <span style="font-size:0.82rem; color:var(--text-secondary); display:flex; align-items:center; gap:5px;" id="lessonDurationInfo">
+                                                <i class="far fa-clock"></i> <span id="lessonDurationText">--:--</span>
+                                            </span>
+                                        </div>
+                                        <div style="display:flex; gap:8px;">
+                                            <button type="button" class="btn-outline" id="btnPrevLesson" onclick="prevPlaylistVideo()" style="padding:6px 12px; font-size:0.78rem; border-radius:8px;">
+                                                <i class="fas fa-step-backward"></i> Previous
+                                            </button>
+                                            <button type="button" class="btn-emerald" id="btnNextLesson" onclick="nextPlaylistVideo()" style="padding:6px 14px; font-size:0.78rem; border-radius:8px; font-weight:700;">
+                                                Next Video <i class="fas fa-step-forward"></i>
+                                            </button>
+                                            <a id="btnExternalWatch" href="#" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.78rem; border-radius:8px; display:none; align-items:center; gap:5px; border-color:rgba(239,68,68,0.4); color:#ef4444;">
+                                                <i class="fab fa-youtube"></i> YouTube
+                                            </a>
+                                        </div>
                                     </div>
-                                    <a id="btnExternalWatch" href="#" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.82rem; display:none; align-items:center; gap:6px;">
-                                        <i class="fab fa-youtube" style="color:#ff0000; font-size:1rem;"></i> <span>YouTube-এ দেখুন</span>
-                                    </a>
+                                    <h2 id="activeLessonHeading" style="font-size:1.25rem; font-weight:800; margin-bottom:0.6rem; color:#fff;">Lesson Overview</h2>
+                                    <p id="activeLessonDesc" style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6; margin:0;"></p>
                                 </div>
-                                <h2 id="activeLessonHeading" style="font-size:1.35rem; font-weight:800; margin-bottom:0.6rem; color:#fff;">Lesson Overview</h2>
-                                <p id="activeLessonDesc" style="color:var(--text-secondary); font-size:0.95rem; line-height:1.7;">
-                                    ট্রেডিংয়ের নিয়ম, মানসিকতা এবং মার্কেট অ্যানালাইসিস আয়ত্ত করতে সম্পূর্ণ ক্লাসটি মনোযোগ দিয়ে সম্পন্ন করুন।
-                                </p>
                             </div>
-                        </div>
 
-                        <!-- Course Curriculum Sidebar -->
-                        <div class="glass-card">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                                <h3 style="font-size:1.15rem; font-weight:800;">
-                                    <i class="fas fa-book-open" style="color:var(--yellow); margin-right:6px;"></i> ক্লাসের তালিকা (Curriculum)
-                                </h3>
-                                <span id="courseCountBadge" style="font-size:0.75rem; background:rgba(245,176,65,0.15); color:var(--yellow); border:1px solid rgba(245,176,65,0.3); padding:3px 10px; border-radius:12px; font-weight:700;">0 Lessons</span>
+                            <!-- Right: Playlist Queue Sidebar (YouTube Queue Style) -->
+                            <div class="glass-card" style="display:flex; flex-direction:column; max-height:680px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                                    <div>
+                                        <div style="font-size:0.75rem; color:#00f0ff; font-weight:800; text-transform:uppercase;">Playlist Queue</div>
+                                        <h4 id="playlistQueueIndicator" style="margin:2px 0 0 0; font-size:0.88rem; font-weight:800; color:#fff;">1 of 5 Videos</h4>
+                                    </div>
+                                    <span id="courseCountBadge" style="font-size:0.72rem; background:rgba(0,240,255,0.15); color:#00f0ff; border:1px solid rgba(0,240,255,0.3); padding:2px 8px; border-radius:8px; font-weight:700;">Playlist</span>
+                                </div>
+                                <ul class="lesson-list" id="lessonListContainer" style="flex:1; overflow-y:auto; padding-right:4px;">
+                                    <!-- Injected dynamically -->
+                                </ul>
                             </div>
-                            <ul class="lesson-list" id="lessonListContainer">
-                                <!-- Populated dynamically -->
-                            </ul>
                         </div>
                     </div>
                 </div>
 
-                <!-- SUBSECTION B: FREE GOOGLE DRIVE RESOURCES -->
+                <!-- SUBSECTION 2: ALL VIDEOS VIEW (GRID OF ALL LESSONS) -->
+                <div id="classroomSectionVideos" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <i class="fab fa-youtube" style="color:#ef4444;"></i> All Videos & Classes
+                        </h3>
+                        <span style="font-size:0.8rem; color:var(--text-secondary);">Browse all lessons uploaded by this mentor</span>
+                    </div>
+                    <div id="classroomAllVideosGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1.25rem;">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- SUBSECTION 3: FREE GOOGLE DRIVE RESOURCES -->
                 <div id="classroomSectionDrive" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <i class="fab fa-google-drive" style="color:#3b82f6;"></i> Free Drive Resources & Cheatsheets
+                        </h3>
+                    </div>
                     <div id="classroomDriveList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:1.25rem;">
-                        <!-- Injected -->
+                        <!-- Injected via JS -->
                     </div>
                 </div>
 
-                <!-- SUBSECTION C: PAID COURSES & VIP MENTORSHIP -->
+                <!-- SUBSECTION 4: PAID COURSES & VIP MENTORSHIP -->
                 <div id="classroomSectionPaid" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-gem" style="color:var(--yellow);"></i> VIP Mentorship & Paid Courses
+                        </h3>
+                    </div>
                     <div id="classroomPaidList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:1.25rem;">
-                        <!-- Injected -->
+                        <!-- Injected via JS -->
                     </div>
                 </div>
 
-            </div>
-        </section>
+                <!-- SUBSECTION 5: ABOUT MENTOR -->
+                <div id="classroomSectionAbout" style="display:none;">
+                    <div class="glass-card" style="padding:2rem; max-width:850px; border-radius:18px;">
+                        <h3 style="font-size:1.3rem; font-weight:900; color:#fff; margin-bottom:1rem; display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-user-circle" style="color:var(--accent-green);"></i> About <span id="aboutMentorHeadingName">Mentor</span>
+                        </h3>
+                        <p id="aboutMentorFullBio" style="font-size:0.95rem; line-height:1.7; color:var(--text-secondary); margin-bottom:1.5rem;"></p>
+                        <div style="padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.08); display:flex; flex-wrap:wrap; gap:20px;">
+                            <div>
+                                <span style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase;">Specialization</span>
+                                <div id="aboutMentorTaglineText" style="font-weight:700; color:#fff; margin-top:2px;">Price Action</div>
+                            </div>
+                            <div>
+                                <span style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase;">Verified Mentor Code</span>
+                                <div id="aboutMentorPartnerCode" style="font-weight:700; color:var(--accent-green); margin-top:2px;">BPF-MENTOR</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div></section>
 
         <!-- ==============================================
              TAB 5: BUY CHALLENGE
@@ -12579,6 +12688,14 @@
             }
         }
 
+        let activePlaylistQueue = [];
+        let activePlaylistIndex = 0;
+        let activePlaylistTitle = '';
+
+        function filterAcademyMentorsDirectory() {
+            renderAcademyDirectory();
+        }
+
         function renderAcademyDirectory() {
             const grid = document.getElementById('academyMentorsGrid');
             if (!grid) return;
@@ -12586,107 +12703,108 @@
             const elAll = document.getElementById('dashAcadCountAll');
             if (elAll) elAll.innerText = allDashMentors.length;
 
-            if (allDashMentors.length === 0) {
+            const query = (document.getElementById('dashMentorSearchInput')?.value || '').trim().toLowerCase();
+            let filtered = allDashMentors;
+            if (query) {
+                filtered = allDashMentors.filter(m => {
+                    const name = (m.mentorName || '').toLowerCase();
+                    const email = (m.partnerEmail || '').toLowerCase();
+                    const tag = (m.mentorTagline || '').toLowerCase();
+                    const bio = (m.mentorBio || '').toLowerCase();
+                    return name.includes(query) || email.includes(query) || tag.includes(query) || bio.includes(query);
+                });
+            }
+
+            const countEl = document.getElementById('dashMentorFilteredCount');
+            if (countEl) countEl.innerText = filtered.length;
+
+            if (filtered.length === 0) {
                 grid.innerHTML = `
                     <div style="grid-column:1/-1; text-align:center; padding:3.5rem 1.5rem; color:var(--text-secondary); background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.1); border-radius:18px;">
                         <div style="width:64px; height:64px; border-radius:50%; background:rgba(245,176,65,0.1); display:inline-flex; align-items:center; justify-content:center; color:var(--yellow); font-size:1.8rem; margin-bottom:14px;">
-                            <i class="fas fa-graduation-cap"></i>
+                            <i class="fas fa-search"></i>
                         </div>
-                        <h3 style="color:#fff; font-size:1.2rem; font-weight:800; margin:0 0 8px 0;">কোনো পার্টনার মেন্টর একাডেমি এখনো লাইভ নেই</h3>
+                        <h3 style="color:#fff; font-size:1.2rem; font-weight:800; margin:0 0 8px 0;">No Mentors Found</h3>
                         <p style="font-size:0.9rem; margin:0 auto; max-width:480px; line-height:1.6; color:var(--text-secondary);">
-                            আমাদের ভেরিফাইড অ্যাফিলিয়েট পার্টনাররা তাদের একাডেমি প্রোফাইল ও কনটেন্ট প্রস্তুত করছেন। এডমিন প্যানেল থেকে অনুমোদনের সাথে সাথে তা এখানে প্রদর্শিত হবে।
+                            No verified mentors match "${escapeHtml(query)}". Try searching by name, trading specialty, or email.
                         </p>
                     </div>
                 `;
                 return;
             }
 
-            grid.innerHTML = allDashMentors.map(m => {
-                const stats = m.stats || { videosCount: 0, freeDriveCount: 0, paidCoursesCount: 0 };
-                const banner = m.bannerUrl || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80';
-                const avatar = m.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
+            grid.innerHTML = filtered.map(m => {
+                const stats = m.stats || { videosCount: 0, freeDriveCount: 0, paidCoursesCount: 0, playlistsCount: 0 };
+                const banner = (m.bannerUrl && m.bannerUrl.trim()) ? m.bannerUrl.trim() : 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80';
+                const avatar = (m.avatarUrl && m.avatarUrl.trim()) ? m.avatarUrl.trim() : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
+                const plCount = stats.playlistsCount || (Array.isArray(m.playlists) ? m.playlists.length : 0);
 
                 return `
                     <div class="dash-mentor-card">
                         <!-- Banner -->
-                        <div style="height:110px; background:url('${banner}') center/cover no-repeat; position:relative;">
-                            <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(7,10,18,0.2) 0%, rgba(7,10,18,0.85) 100%);"></div>
-                            <span style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); color:var(--accent-green); font-size:0.7rem; font-weight:800; padding:3px 9px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); display:inline-flex; align-items:center; gap:5px;">
+                        <div style="height:120px; background:linear-gradient(to bottom, rgba(7,10,18,0.2) 0%, rgba(7,10,18,0.9) 100%), url('${escapeHtml(banner)}') center/cover no-repeat; position:relative;">
+                            <span style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); color:var(--accent-green); font-size:0.7rem; font-weight:800; padding:3px 9px; border-radius:12px; border:1px solid rgba(0,230,118,0.3); display:inline-flex; align-items:center; gap:5px;">
                                 <i class="fas fa-check-circle"></i> Verified Mentor
                             </span>
                         </div>
 
                         <!-- Card Body -->
-                        <div style="padding:1.25rem; flex:1; display:flex; flex-direction:column; position:relative; margin-top:-38px;">
+                        <div style="padding:1.25rem; flex:1; display:flex; flex-direction:column; position:relative; margin-top:-40px;">
                             <div style="display:flex; align-items:flex-end; gap:12px; margin-bottom:10px;">
-                                <img src="${avatar}" style="width:58px; height:58px; border-radius:50%; object-fit:cover; border:2.5px solid var(--accent-green); background:#070a12; flex-shrink:0; box-shadow:0 0 15px rgba(0,0,0,0.6);" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'" />
+                                <img src="${escapeHtml(avatar)}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';" style="width:64px; height:64px; border-radius:50%; object-fit:cover; border:3px solid var(--accent-green); background:#1e293b; box-shadow:0 6px 18px rgba(0,0,0,0.6); flex-shrink:0;" />
                                 <div style="min-width:0; flex:1;">
-                                    <h4 style="margin:0; font-size:1.05rem; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    <h4 style="margin:0; font-size:1.1rem; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         ${escapeHtml(m.mentorName)}
                                     </h4>
-                                    <div style="font-size:0.75rem; color:var(--accent-green); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                    <div style="font-size:0.78rem; color:var(--accent-green); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         ${escapeHtml(m.mentorTagline || 'Trading Specialist')}
                                     </div>
                                 </div>
                             </div>
 
-                            <p style="margin:0 0 14px 0; font-size:0.8rem; color:var(--text-secondary); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:2.4rem;">
-                                ${escapeHtml(m.mentorBio || 'ট্রেডিংয়ের নিয়ম, স্ট্র্যাটেজি এবং মার্কেট অ্যানালাইসিস শিখতে এই একাডেমিতে যুক্ত হোন।')}
+                            <p style="margin:0 0 14px 0; font-size:0.82rem; color:var(--text-secondary); line-height:1.5; flex:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                                ${escapeHtml(m.mentorBio || 'Professional community mentor sharing price action, ICT strategies, and risk management classes.')}
                             </p>
 
                             <!-- Breakdown Pills -->
                             <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;">
-                                <span style="background:rgba(239,68,68,0.12); color:#ef4444; font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:8px;">
+                                <span style="background:rgba(0,240,255,0.12); color:#00f0ff; font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fas fa-list-ul"></i> ${plCount} Playlists
+                                </span>
+                                <span style="background:rgba(239,68,68,0.12); color:#ef4444; font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
                                     <i class="fab fa-youtube"></i> ${stats.videosCount || 0} Videos
                                 </span>
-                                <span style="background:rgba(59,130,246,0.12); color:#60a5fa; font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:8px;">
-                                    <i class="fab fa-google-drive"></i> ${stats.freeDriveCount || 0} Free Drive
+                                <span style="background:rgba(59,130,246,0.12); color:#60a5fa; font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fab fa-google-drive"></i> ${stats.freeDriveCount || 0} Resources
                                 </span>
-                                ${stats.paidCoursesCount > 0 ? `
-                                    <span style="background:rgba(245,176,65,0.12); color:var(--yellow); font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:8px;">
-                                        <i class="fas fa-gem"></i> ${stats.paidCoursesCount} VIP Courses
-                                    </span>
-                                ` : ''}
+                                <span style="background:rgba(245,176,65,0.12); color:var(--yellow); font-size:0.7rem; font-weight:700; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fas fa-gem"></i> ${stats.paidCoursesCount || 0} VIP Courses
+                                </span>
                             </div>
 
-                            <!-- Action Button -->
-                            <div style="margin-top:auto;">
-                                <button type="button" class="btn-gold" onclick="openMentorClassroom('${m.id}')" style="width:100%; justify-content:center; padding:9px 16px; font-size:0.85rem; border-radius:10px;">
-                                    <span>ভিউ ক্লাস / ক্লাসে প্রবেশ করুন</span> <i class="fas fa-arrow-right" style="margin-left:6px;"></i>
-                                </button>
-                            </div>
+                            <button type="button" class="btn-emerald" onclick="openMentorClassroom('${m.id}')" style="width:100%; justify-content:center; padding:10px; font-size:0.85rem; border-radius:10px;">
+                                <i class="fas fa-play" style="font-size:0.75rem;"></i> View Academy & Classes <i class="fas fa-arrow-right" style="font-size:0.75rem; margin-left:4px;"></i>
+                            </button>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        let myDashEnrollments = [];
-
-        async function fetchMyDashEnrollments() {
-            try {
-                let email = '';
-                if (window.currentUser && window.currentUser.email) {
-                    email = window.currentUser.email;
-                } else {
-                    const localU = localStorage.getItem('user');
-                    if (localU) { try { email = JSON.parse(localU).email || ''; } catch (e) {} }
-                }
-                const token = window.userToken || localStorage.getItem('token') || '';
-                const res = await fetch(`/api/academy/my-enrollments?email=${encodeURIComponent(email)}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (data.success && Array.isArray(data.enrollments)) {
-                    myDashEnrollments = data.enrollments;
-                }
-            } catch (e) {}
+        function exitMentorClassroom() {
+            activeMentorClassroom = null;
+            document.getElementById('academyClassroomView').style.display = 'none';
+            document.getElementById('academyDirectoryView').style.display = 'block';
+            if (document.getElementById('academyDirectoryFilters')) {
+                document.getElementById('academyDirectoryFilters').style.display = 'flex';
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         async function openMentorClassroom(mentorId) {
             let mentor = allDashMentors.find(m => m.id === mentorId || m.partnerId === mentorId);
-            
-            // If items not populated or need full details, fetch single endpoint
+
+            // Fetch full details if not loaded
             if (!mentor || !mentor.items || mentor.items.length === 0) {
                 try {
                     const res = await fetch(`/api/academy/mentors/${mentorId}`);
@@ -12703,28 +12821,44 @@
             }
 
             activeMentorClassroom = mentor;
+            if (!Array.isArray(activeMentorClassroom.items)) activeMentorClassroom.items = [];
+            if (!Array.isArray(activeMentorClassroom.playlists)) activeMentorClassroom.playlists = [];
+
             await fetchMyDashEnrollments();
 
-            // Populate Hero
+            // Populate YouTube-Style Channel Header
             const nameEl = document.getElementById('classroomMentorName');
             const tagEl = document.getElementById('classroomMentorTagline');
             const bioEl = document.getElementById('classroomMentorBio');
             const avEl = document.getElementById('classroomAvatarImg');
             const bnEl = document.getElementById('classroomBannerBox');
-            const badgeEl = document.getElementById('classroomVerifiedBadge');
+
+            const validAvatar = (mentor.avatarUrl && mentor.avatarUrl.trim()) ? mentor.avatarUrl.trim() : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
+            const validBanner = (mentor.bannerUrl && mentor.bannerUrl.trim()) ? mentor.bannerUrl.trim() : 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&auto=format&fit=crop&q=80';
 
             if (nameEl) nameEl.innerText = mentor.mentorName;
-            if (tagEl) tagEl.innerText = mentor.mentorTagline || '';
+            if (tagEl) tagEl.innerText = mentor.mentorTagline || 'Professional Trader & Mentor';
             if (bioEl) bioEl.innerText = mentor.mentorBio || '';
-            if (avEl) avEl.src = mentor.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
-            if (bnEl) bnEl.style.background = `url('${mentor.bannerUrl || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80'}') center/cover no-repeat`;
 
-            if (badgeEl) {
-                badgeEl.innerHTML = '<i class="fas fa-check-circle"></i> Verified Community Mentor';
-                badgeEl.style.color = 'var(--accent-green)';
+            if (avEl) {
+                avEl.src = validAvatar;
+                avEl.onerror = function() {
+                    this.onerror = null;
+                    this.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
+                };
             }
 
-            // Social links (All platforms)
+            if (bnEl) {
+                bnEl.style.background = `linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(7,10,18,0.95) 100%), url('${validBanner}') center/cover no-repeat`;
+            }
+
+            // About section
+            const abName = document.getElementById('aboutMentorHeadingName'); if (abName) abName.innerText = mentor.mentorName;
+            const abBio = document.getElementById('aboutMentorFullBio'); if (abBio) abBio.innerText = mentor.mentorBio || 'No additional bio provided.';
+            const abTag = document.getElementById('aboutMentorTaglineText'); if (abTag) abTag.innerText = mentor.mentorTagline || 'Price Action';
+            const abCode = document.getElementById('aboutMentorPartnerCode'); if (abCode) abCode.innerText = mentor.partnerCode || mentor.partnerId || 'VERIFIED';
+
+            // Social links
             const socBox = document.getElementById('classroomSocialLinksBox');
             if (socBox) {
                 let sHtml = '';
@@ -12735,188 +12869,483 @@
                 const ig = soc.instagram;
                 const wa = soc.whatsapp;
                 const tw = soc.twitter;
-                const dc = soc.discord;
-                const ws = soc.website;
 
-                if (tg) sHtml += `<a href="${escapeHtml(tg)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#229ED9; color:#229ED9;"><i class="fab fa-telegram-plane"></i> Telegram</a>`;
-                if (yt) sHtml += `<a href="${escapeHtml(yt)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#ef4444; color:#ef4444;"><i class="fab fa-youtube"></i> YouTube</a>`;
-                if (fb) sHtml += `<a href="${escapeHtml(fb)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#1877F2; color:#1877F2;"><i class="fab fa-facebook"></i> Facebook</a>`;
-                if (ig) sHtml += `<a href="${escapeHtml(ig)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#E4405F; color:#E4405F;"><i class="fab fa-instagram"></i> Instagram</a>`;
+                if (tg) sHtml += `<a href="${escapeHtml(tg)}" target="_blank" class="btn-outline" style="background:rgba(7,10,18,0.8); padding:6px 14px; font-size:0.75rem; border-color:#229ED9; color:#229ED9;"><i class="fab fa-telegram-plane"></i> Telegram</a>`;
+                if (yt) sHtml += `<a href="${escapeHtml(yt)}" target="_blank" class="btn-outline" style="background:rgba(7,10,18,0.8); padding:6px 14px; font-size:0.75rem; border-color:#ef4444; color:#ef4444;"><i class="fab fa-youtube"></i> YouTube</a>`;
                 if (wa) {
                     const waUrl = wa.startsWith('http') ? wa : `https://wa.me/${wa.replace(/[^0-9]/g, '')}`;
-                    sHtml += `<a href="${escapeHtml(waUrl)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#25D366; color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp</a>`;
+                    sHtml += `<a href="${escapeHtml(waUrl)}" target="_blank" class="btn-outline" style="background:rgba(7,10,18,0.8); padding:6px 14px; font-size:0.75rem; border-color:#25D366; color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp</a>`;
                 }
-                if (tw) sHtml += `<a href="${escapeHtml(tw)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#fff; color:#fff;"><i class="fab fa-twitter"></i> Twitter</a>`;
-                if (dc) sHtml += `<a href="${escapeHtml(dc)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:#5865F2; color:#5865F2;"><i class="fab fa-discord"></i> Discord</a>`;
-                if (ws) sHtml += `<a href="${escapeHtml(ws)}" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.8rem; border-color:var(--accent-green); color:var(--accent-green);"><i class="fas fa-globe"></i> Website</a>`;
-                
-                // Share public URL button
+                if (fb) sHtml += `<a href="${escapeHtml(fb)}" target="_blank" class="btn-outline" style="background:rgba(7,10,18,0.8); padding:6px 14px; font-size:0.75rem; border-color:#1877F2; color:#1877F2;"><i class="fab fa-facebook"></i></a>`;
+                if (ig) sHtml += `<a href="${escapeHtml(ig)}" target="_blank" class="btn-outline" style="background:rgba(7,10,18,0.8); padding:6px 14px; font-size:0.75rem; border-color:#E4405F; color:#E4405F;"><i class="fab fa-instagram"></i></a>`;
+                if (tw) sHtml += `<a href="${escapeHtml(tw)}" target="_blank" class="btn-outline" style="background:rgba(7,10,18,0.8); padding:6px 14px; font-size:0.75rem; border-color:#fff; color:#fff;"><i class="fab fa-twitter"></i></a>`;
+
                 const shareUrl = `${window.location.origin}/mentor/${mentor.partnerId || mentor.id}`;
-                sHtml += `<button type="button" class="btn-outline" onclick="navigator.clipboard.writeText('${shareUrl}').then(() => showDashToast('প্রোফাইল লিঙ্ক কপি হয়েছে!', 'success'))" style="padding:6px 14px; font-size:0.8rem; border-color:var(--yellow); color:var(--yellow);"><i class="fas fa-share-alt"></i> Share Profile</button>`;
+                sHtml += `<button type="button" class="btn-outline" onclick="navigator.clipboard.writeText('${shareUrl}').then(() => showDashToast('Channel link copied to clipboard!', 'success'))" style="background:rgba(7,10,18,0.8); padding:6px 14px; font-size:0.75rem; border-color:var(--accent-green); color:var(--accent-green);"><i class="fas fa-share-alt"></i> Share</button>`;
 
                 socBox.innerHTML = sHtml;
             }
 
-            // Subtab counts
-            const items = Array.isArray(mentor.items) ? mentor.items : [];
+            // Stats & Subtab counts
+            const items = mentor.items || [];
+            const playlists = mentor.playlists || [];
             const videoItems = items.filter(it => it.type === 'youtube');
             const driveItems = items.filter(it => it.type === 'drive' || it.type === 'free');
             const paidItems = items.filter(it => it.type === 'paid');
 
+            // Header stats
+            const sPl = document.getElementById('dashStatPlaylists'); if (sPl) sPl.innerText = playlists.length;
+            const sVid = document.getElementById('dashStatVideos'); if (sVid) sVid.innerText = videoItems.length;
+            const sDrv = document.getElementById('dashStatDrive'); if (sDrv) sDrv.innerText = driveItems.length;
+            const sPaid = document.getElementById('dashStatPaid'); if (sPaid) sPaid.innerText = paidItems.length;
+
+            // Tab counts
+            const cPl = document.getElementById('classCountPlaylists'); if (cPl) cPl.innerText = playlists.length;
             const cVid = document.getElementById('classCountVideos'); if (cVid) cVid.innerText = videoItems.length;
             const cDrv = document.getElementById('classCountDrive'); if (cDrv) cDrv.innerText = driveItems.length;
             const cPaid = document.getElementById('classCountPaid'); if (cPaid) cPaid.innerText = paidItems.length;
 
-            // 1. Populate Videos into existing player playlist
-            allCourses = videoItems.map((v, i) => ({
-                id: v.id,
-                serial: v.serial || (i + 1),
-                title: v.title,
-                category: v.category || 'Trading Class',
-                duration: v.duration || '20:00',
-                summary: v.description || v.summary || '',
-                videoEmbed: v.videoEmbed || convertToEmbedUrl(v.videoUrl),
-                thumbnailUrl: v.thumbnailUrl
-            }));
-            renderCoursesList(allCourses);
-            if (allCourses.length > 0) {
-                selectCourseLesson(0);
-            }
-
-            // 2. Populate Drive Resources
-            const driveBox = document.getElementById('classroomDriveList');
-            if (driveBox) {
-                if (driveItems.length === 0) {
-                    driveBox.innerHTML = `
-                        <div style="grid-column:1/-1; text-align:center; padding:2.5rem; color:var(--text-secondary);">
-                            <i class="fab fa-google-drive" style="font-size:2.5rem; opacity:0.3; margin-bottom:10px; display:block;"></i>
-                            কোনো ফ্রি ড্রাইভ রিসোর্স যুক্ত করা হয়নি।
-                        </div>
-                    `;
-                } else {
-                    driveBox.innerHTML = driveItems.map(it => {
-                        const thumbImg = it.thumbnailUrl ? `<img src="${escapeHtml(it.thumbnailUrl)}" style="width:100%; height:130px; object-fit:cover; border-radius:10px; margin-bottom:10px;" alt="${escapeHtml(it.title)}" />` : '';
-                        return `
-                            <div class="glass-card" style="padding:1.25rem; border-radius:14px; display:flex; flex-direction:column;">
-                                ${thumbImg}
-                                <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-                                    <div style="width:38px; height:38px; border-radius:10px; background:rgba(59,130,246,0.15); display:flex; align-items:center; justify-content:center; color:#3b82f6; font-size:1.3rem; flex-shrink:0;">
-                                        <i class="fab fa-google-drive"></i>
-                                    </div>
-                                    <div style="min-width:0; flex:1;">
-                                        <span style="background:rgba(59,130,246,0.15); color:#60a5fa; font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:10px;">
-                                            ${escapeHtml(it.resourceType || 'Free Resource')}
-                                        </span>
-                                        <h4 style="margin:4px 0 0 0; font-size:0.95rem; font-weight:800; color:#fff;">${escapeHtml(it.title)}</h4>
-                                    </div>
-                                </div>
-                                <p style="margin:0 0 14px 0; font-size:0.8rem; color:var(--text-secondary); line-height:1.5; flex:1;">
-                                    ${escapeHtml(it.description || 'গুগল ড্রাইভ থেকে সরাসরি ফাইলটি ডাউনলোড বা ভিউ করতে নিচের বাটনে চাপ দিন।')}
-                                </p>
-                                <a href="${escapeHtml(it.driveUrl || '#')}" target="_blank" class="btn-outline" style="justify-content:center; padding:8px 14px; font-size:0.82rem; border-color:#3b82f6; color:#60a5fa; border-radius:8px; text-decoration:none;">
-                                    <i class="fas fa-external-link-alt"></i> ড্রাইভ ফাইল দেখুন (Open Drive)
-                                </a>
-                            </div>
-                        `;
-                    }).join('');
-                }
-            }
-
-            // 3. Populate Paid Courses with Permission & Enrollment Verification
-            const paidBox = document.getElementById('classroomPaidList');
-            if (paidBox) {
-                if (paidItems.length === 0) {
-                    paidBox.innerHTML = `
-                        <div style="grid-column:1/-1; text-align:center; padding:2.5rem; color:var(--text-secondary);">
-                            <i class="fas fa-gem" style="font-size:2.5rem; opacity:0.3; margin-bottom:10px; display:block;"></i>
-                            বর্তমানে কোনো পেইড কোর্স সক্রিয় নেই।
-                        </div>
-                    `;
-                } else {
-                    paidBox.innerHTML = paidItems.map(it => {
-                        const priceSign = it.currency === 'BDT' ? '৳' : '$';
-                        const thumbImg = it.thumbnailUrl ? `<img src="${escapeHtml(it.thumbnailUrl)}" style="width:100%; height:140px; object-fit:cover; border-radius:10px; margin-bottom:12px;" alt="${escapeHtml(it.title)}" />` : '';
-
-                        // Check if current user has an active enrollment
-                        const myEnr = myDashEnrollments.find(e => e.courseId === it.id);
-                        let actionBtn = `
-                            <button type="button" class="btn-gold" onclick="openDashCourseEnrollModal('${mentor.partnerId}', '${it.id}')" style="width:100%; justify-content:center; padding:10px 16px; font-size:0.88rem; border-radius:10px;">
-                                <i class="fas fa-shopping-cart" style="margin-right:6px;"></i> এনরোল করুন (${priceSign}${it.price || 0})
-                            </button>
-                        `;
-
-                        let badgeHtml = `
-                            <span style="background:rgba(245,176,65,0.18); color:var(--yellow); font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
-                                <i class="fas fa-gem"></i> ${escapeHtml(it.courseFormat || 'VIP Mentorship')}
-                            </span>
-                        `;
-
-                        if (myEnr) {
-                            if (myEnr.status === 'approved') {
-                                badgeHtml = `
-                                    <span style="background:rgba(0,230,118,0.2); color:var(--accent-green); font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
-                                        <i class="fas fa-check-circle"></i> Enrolled & Unlocked
-                                    </span>
-                                `;
-                                actionBtn = `
-                                    <button type="button" class="btn-emerald" onclick="openDashUnlockedCourse('${it.id}', '${escapeHtml(myEnr.accessLink || it.buyUrl || '#')}')" style="width:100%; justify-content:center; padding:10px 16px; font-size:0.88rem; border-radius:10px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:none; cursor:pointer; font-weight:800;">
-                                        <i class="fas fa-play-circle" style="margin-right:6px;"></i> ক্লাসরুমে প্রবেশ করুন (Open Course)
-                                    </button>
-                                `;
-                            } else if (myEnr.status === 'pending') {
-                                badgeHtml = `
-                                    <span style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
-                                        <i class="fas fa-clock"></i> Verification Pending
-                                    </span>
-                                `;
-                                actionBtn = `
-                                    <button type="button" class="btn-outline" style="width:100%; justify-content:center; padding:10px 16px; font-size:0.85rem; border-radius:10px; border-color:#f59e0b; color:#f59e0b; cursor:not-allowed;" disabled>
-                                        <i class="fas fa-hourglass-half" style="margin-right:6px;"></i> মেন্টরের অনুমোদনের অপেক্ষায়
-                                    </button>
-                                `;
-                            }
-                        }
-
-                        return `
-                            <div class="glass-card" style="padding:1.5rem; border-radius:16px; border:1px solid rgba(245,176,65,0.25); background:linear-gradient(135deg, rgba(245,176,65,0.06) 0%, rgba(7,10,18,0.5) 100%); display:flex; flex-direction:column;">
-                                ${thumbImg}
-                                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap:10px;">
-                                    ${badgeHtml}
-                                    <div style="font-size:1.4rem; font-weight:900; color:var(--accent-green);">
-                                        ${priceSign}${it.price || 0}
-                                    </div>
-                                </div>
-
-                                <h3 style="margin:0 0 8px 0; font-size:1.1rem; font-weight:900; color:#fff;">
-                                    ${escapeHtml(it.title)}
-                                </h3>
-
-                                <p style="margin:0 0 16px 0; font-size:0.83rem; color:var(--text-secondary); line-height:1.6; flex:1;">
-                                    ${escapeHtml(it.description || 'এই পেইড কোর্সে এনরোল করে সরাসরি মেন্টরের ভিআইপি ক্লাস ও সাপোর্ট উপভোগ করুন।')}
-                                </p>
-
-                                ${actionBtn}
-                            </div>
-                        `;
-                    }).join('');
-                }
-            }
+            // Populate all views
+            renderClassroomPlaylists(playlists, items);
+            renderClassroomAllVideos(videoItems);
+            renderClassroomDrive(driveItems);
+            renderClassroomPaid(paidItems, mentor);
 
             // Switch view
             document.getElementById('academyDirectoryView').style.display = 'none';
-            document.getElementById('academyDirectoryFilters').style.display = 'none';
+            if (document.getElementById('academyDirectoryFilters')) {
+                document.getElementById('academyDirectoryFilters').style.display = 'none';
+            }
             document.getElementById('academyClassroomView').style.display = 'block';
 
-            // Default to videos tab or drive if no videos
-            if (videoItems.length === 0 && driveItems.length > 0) {
+            // Default subtab: if playlists exist, default to playlists; else videos
+            if (playlists.length > 0) {
+                switchClassroomSubtab('playlists');
+            } else if (videoItems.length > 0) {
+                switchClassroomSubtab('videos');
+            } else if (driveItems.length > 0) {
                 switchClassroomSubtab('drive');
-            } else if (videoItems.length === 0 && paidItems.length > 0) {
+            } else if (paidItems.length > 0) {
                 switchClassroomSubtab('paid');
             } else {
-                switchClassroomSubtab('videos');
+                switchClassroomSubtab('about');
             }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function switchClassroomSubtab(tabName) {
+            currentClassroomSubtab = tabName;
+            const tabs = ['playlists', 'videos', 'drive', 'paid', 'about'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`btnClassTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const sec = document.getElementById(`classroomSection${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (btn) {
+                    if (t === tabName) {
+                        btn.classList.add('active');
+                        btn.style.borderColor = 'var(--accent-green)';
+                        btn.style.color = '#fff';
+                    } else {
+                        btn.classList.remove('active');
+                        btn.style.borderColor = 'transparent';
+                        btn.style.color = 'var(--text-secondary)';
+                    }
+                }
+                if (sec) {
+                    sec.style.display = (t === tabName) ? 'block' : 'none';
+                }
+            });
+
+            // If switching to playlists tab and not playing, show browser mode
+            if (tabName === 'playlists' && activePlaylistQueue.length === 0) {
+                exitPlaylistPlayerMode();
+            }
+        }
+
+        function renderClassroomPlaylists(playlists, items) {
+            const grid = document.getElementById('classroomPlaylistsGrid');
+            if (!grid) return;
+
+            if (playlists.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:3rem 1.5rem; background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.1); border-radius:18px;">
+                        <i class="fas fa-list-ul" style="font-size:2.5rem; color:#00f0ff; opacity:0.3; margin-bottom:12px; display:block;"></i>
+                        <h4 style="font-size:1.1rem; color:#fff; margin:0 0 6px 0;">No Playlists Available</h4>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">This mentor has not grouped videos into playlists yet. Check out the "All Videos" tab to watch individual classes!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = playlists.map(pl => {
+                const plItems = items.filter(it => Array.isArray(pl.itemIds) && pl.itemIds.includes(it.id));
+                const firstVideo = plItems[0];
+                const thumb = pl.thumbnailUrl || (firstVideo ? (firstVideo.thumbnailUrl || extractDashYouTubeId(firstVideo.videoEmbed) ? `https://img.youtube.com/vi/${extractDashYouTubeId(firstVideo.videoEmbed)}/hqdefault.jpg` : 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80') : 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80');
+
+                return `
+                    <div class="glass-card" style="padding:0; overflow:hidden; border-radius:16px; border:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; cursor:pointer; transition:transform 0.2s, box-shadow 0.2s;" onclick="playPlaylist('${pl.id}')" onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform='none'">
+                        <!-- Thumbnail Box (YouTube Playlist Cover) -->
+                        <div style="height:160px; position:relative; background:url('${escapeHtml(thumb)}') center/cover no-repeat;">
+                            <!-- Dark Overlay Bar on the Right (Classic YouTube Playlist Badge) -->
+                            <div style="position:absolute; top:0; right:0; bottom:0; width:45%; background:rgba(7,10,18,0.85); backdrop-filter:blur(4px); display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; border-left:1px solid rgba(255,255,255,0.1);">
+                                <i class="fas fa-list-ul" style="font-size:1.5rem; color:#00f0ff; margin-bottom:6px;"></i>
+                                <span style="font-size:0.88rem; font-weight:900;">${plItems.length}</span>
+                                <span style="font-size:0.7rem; color:var(--text-secondary); text-transform:uppercase;">Videos</span>
+                            </div>
+                            <span style="position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); color:#fff; font-size:0.72rem; font-weight:700; padding:3px 8px; border-radius:6px;">
+                                <i class="fas fa-play" style="color:var(--accent-green); font-size:0.65rem; margin-right:4px;"></i> Play All
+                            </span>
+                        </div>
+
+                        <!-- Body -->
+                        <div style="padding:1.2rem; flex:1; display:flex; flex-direction:column;">
+                            <h4 style="margin:0 0 6px 0; font-size:1rem; font-weight:800; color:#fff; line-height:1.4;">
+                                ${escapeHtml(pl.title)}
+                            </h4>
+                            <p style="margin:0 0 14px 0; font-size:0.8rem; color:var(--text-secondary); line-height:1.5; flex:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                                ${escapeHtml(pl.description || 'Watch complete trading series sequentially.')}
+                            </p>
+                            <button type="button" class="btn-outline" style="width:100%; justify-content:center; padding:8px; font-size:0.82rem; border-radius:8px; border-color:rgba(0,240,255,0.3); color:#00f0ff; font-weight:700;">
+                                <i class="fas fa-play-circle" style="margin-right:6px;"></i> Start Playlist
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function playPlaylist(playlistId, startIndex = 0) {
+            if (!activeMentorClassroom) return;
+            const playlists = activeMentorClassroom.playlists || [];
+            const items = activeMentorClassroom.items || [];
+            const pl = playlists.find(p => p.id === playlistId);
+
+            let queue = [];
+            if (pl && Array.isArray(pl.itemIds)) {
+                queue = items.filter(it => pl.itemIds.includes(it.id));
+                activePlaylistTitle = pl.title;
+            }
+
+            if (queue.length === 0) {
+                // If playlist is empty, fallback to all videos
+                queue = items.filter(it => it.type === 'youtube');
+                activePlaylistTitle = pl ? pl.title : 'All Videos';
+            }
+
+            if (queue.length === 0) {
+                showDashToast('No video lessons in this playlist yet.', 'warning');
+                return;
+            }
+
+            activePlaylistQueue = queue;
+            activePlaylistIndex = Math.max(0, Math.min(startIndex, queue.length - 1));
+
+            // Show Player Mode, Hide Browser
+            document.getElementById('classroomPlaylistsBrowser').style.display = 'none';
+            document.getElementById('classroomPlaylistPlayerMode').style.display = 'block';
+
+            const headerTitle = document.getElementById('activePlaylistHeaderTitle');
+            if (headerTitle) headerTitle.innerText = activePlaylistTitle;
+
+            renderPlaylistQueueSidebar();
+            selectPlaylistQueueLesson(activePlaylistIndex);
+        }
+
+        function exitPlaylistPlayerMode() {
+            activePlaylistQueue = [];
+            activePlaylistIndex = 0;
+            document.getElementById('classroomPlaylistPlayerMode').style.display = 'none';
+            document.getElementById('classroomPlaylistsBrowser').style.display = 'block';
+        }
+
+        function renderPlaylistQueueSidebar() {
+            const listEl = document.getElementById('lessonListContainer');
+            if (!listEl) return;
+
+            listEl.innerHTML = activePlaylistQueue.map((item, idx) => {
+                const isActive = (idx === activePlaylistIndex);
+                const thumb = item.thumbnailUrl || (extractDashYouTubeId(item.videoUrl || item.videoEmbed) ? `https://img.youtube.com/vi/${extractDashYouTubeId(item.videoUrl || item.videoEmbed)}/hqdefault.jpg` : '');
+
+                return `
+                    <li class="lesson-item ${isActive ? 'active' : ''}" onclick="selectPlaylistQueueLesson(${idx})" style="padding:10px; border-radius:10px; margin-bottom:8px; display:flex; align-items:center; gap:12px; cursor:pointer; background:${isActive ? 'rgba(0,230,118,0.1)' : 'rgba(255,255,255,0.02)'}; border:1px solid ${isActive ? 'var(--accent-green)' : 'rgba(255,255,255,0.06)'}; transition:all 0.2s;">
+                        <span style="font-size:0.8rem; font-weight:800; color:${isActive ? 'var(--accent-green)' : 'var(--text-secondary)'}; width:20px; text-align:center;">
+                            ${idx + 1}
+                        </span>
+                        ${thumb ? `<img src="${escapeHtml(thumb)}" style="width:68px; height:42px; object-fit:cover; border-radius:6px; flex-shrink:0;" />` : ''}
+                        <div style="min-width:0; flex:1;">
+                            <h5 style="margin:0 0 3px 0; font-size:0.85rem; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${escapeHtml(item.title)}
+                            </h5>
+                            <span style="font-size:0.72rem; color:var(--text-secondary);"><i class="far fa-clock"></i> ${escapeHtml(item.duration || 'Video')}</span>
+                        </div>
+                        ${isActive ? '<i class="fas fa-play" style="color:var(--accent-green); font-size:0.75rem; margin-right:4px;"></i>' : ''}
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function selectPlaylistQueueLesson(index) {
+            if (!activePlaylistQueue || activePlaylistQueue.length === 0) return;
+            activePlaylistIndex = Math.max(0, Math.min(index, activePlaylistQueue.length - 1));
+            const lesson = activePlaylistQueue[activePlaylistIndex];
+            if (!lesson) return;
+
+            // Update Indicator
+            const indEl = document.getElementById('playlistQueueIndicator');
+            if (indEl) indEl.innerText = `Video ${activePlaylistIndex + 1} of ${activePlaylistQueue.length}`;
+
+            // Update Lesson Details
+            const headEl = document.getElementById('activeLessonHeading'); if (headEl) headEl.innerText = lesson.title;
+            const descEl = document.getElementById('activeLessonDesc'); if (descEl) descEl.innerText = lesson.description || 'Enjoy this sequential video tutorial.';
+            const durEl = document.getElementById('lessonDurationText'); if (durEl) durEl.innerText = lesson.duration || '--:--';
+            const catEl = document.getElementById('lessonCategoryBadge'); if (catEl) catEl.innerText = (lesson.category || 'Trading Strategy').toUpperCase();
+
+            // Next / Prev button states
+            const btnPrev = document.getElementById('btnPrevLesson');
+            const btnNext = document.getElementById('btnNextLesson');
+            if (btnPrev) btnPrev.disabled = (activePlaylistIndex === 0);
+            if (btnNext) btnNext.disabled = (activePlaylistIndex === activePlaylistQueue.length - 1);
+
+            // External Watch
+            const extBtn = document.getElementById('btnExternalWatch');
+            if (extBtn) {
+                if (lesson.videoUrl && lesson.videoUrl.includes('youtube.com')) {
+                    extBtn.href = lesson.videoUrl;
+                    extBtn.style.display = 'inline-flex';
+                } else {
+                    extBtn.style.display = 'none';
+                }
+            }
+
+            // Embed player
+            const container = document.getElementById('videoContainer');
+            if (container) {
+                const embedUrl = lesson.videoEmbed || convertToEmbedUrl(lesson.videoUrl);
+                if (embedUrl) {
+                    container.innerHTML = `
+                        <iframe 
+                            src="${embedUrl}?autoplay=1&rel=0&modestbranding=1" 
+                            title="${escapeHtml(lesson.title)}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen 
+                            style="width:100%; height:100%; border:none; display:block;">
+                        </iframe>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:3rem; color:var(--text-secondary);">
+                            <i class="fas fa-exclamation-triangle" style="font-size:2.5rem; color:var(--yellow); margin-bottom:12px;"></i>
+                            <h4 style="color:#fff;">Unable to load video</h4>
+                            <p style="font-size:0.85rem;">The video embed URL is missing or restricted.</p>
+                        </div>
+                    `;
+                }
+            }
+
+            renderPlaylistQueueSidebar();
+        }
+
+        function nextPlaylistVideo() {
+            if (activePlaylistIndex < activePlaylistQueue.length - 1) {
+                selectPlaylistQueueLesson(activePlaylistIndex + 1);
+            }
+        }
+
+        function prevPlaylistVideo() {
+            if (activePlaylistIndex > 0) {
+                selectPlaylistQueueLesson(activePlaylistIndex - 1);
+            }
+        }
+
+        function renderClassroomAllVideos(videos) {
+            const grid = document.getElementById('classroomAllVideosGrid');
+            if (!grid) return;
+
+            if (videos.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:3rem 1.5rem; background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.1); border-radius:18px;">
+                        <i class="fab fa-youtube" style="font-size:2.5rem; color:#ef4444; opacity:0.3; margin-bottom:12px; display:block;"></i>
+                        <h4 style="font-size:1.1rem; color:#fff; margin:0 0 6px 0;">No Videos Uploaded</h4>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">This mentor has not uploaded any video classes yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = videos.map(v => {
+                const thumb = v.thumbnailUrl || (extractDashYouTubeId(v.videoUrl || v.videoEmbed) ? `https://img.youtube.com/vi/${extractDashYouTubeId(v.videoUrl || v.videoEmbed)}/hqdefault.jpg` : 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80');
+
+                return `
+                    <div class="glass-card" style="padding:0; overflow:hidden; border-radius:16px; border:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; cursor:pointer; transition:transform 0.2s;" onclick="playDirectVideo('${v.id}')" onmouseenter="this.style.transform='translateY(-4px)'" onmouseleave="this.style.transform='none'">
+                        <!-- Thumbnail -->
+                        <div style="height:150px; position:relative; background:url('${escapeHtml(thumb)}') center/cover no-repeat;">
+                            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(7,10,18,0.85) 0%, rgba(7,10,18,0.1) 60%);"></div>
+                            ${v.duration ? `<span style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.85); backdrop-filter:blur(4px); color:#fff; font-size:0.72rem; font-weight:700; padding:2px 7px; border-radius:4px;"><i class="far fa-clock"></i> ${escapeHtml(v.duration)}</span>` : ''}
+                            <span style="position:absolute; top:8px; left:8px; background:rgba(239,68,68,0.85); color:#fff; font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:4px;">
+                                <i class="fab fa-youtube"></i> ${escapeHtml(v.category || 'Video')}
+                            </span>
+                        </div>
+                        <!-- Info -->
+                        <div style="padding:1rem; flex:1; display:flex; flex-direction:column;">
+                            <h4 style="margin:0 0 6px 0; font-size:0.92rem; font-weight:800; color:#fff; line-height:1.4;">
+                                ${escapeHtml(v.title)}
+                            </h4>
+                            <p style="margin:0 0 12px 0; font-size:0.75rem; color:var(--text-secondary); line-height:1.4; flex:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                                ${escapeHtml(v.description || 'Watch full masterclass video.')}
+                            </p>
+                            <button type="button" class="btn-outline" style="width:100%; justify-content:center; padding:7px; font-size:0.8rem; border-radius:8px; color:var(--accent-green); border-color:rgba(0,230,118,0.3); font-weight:700;">
+                                <i class="fas fa-play" style="font-size:0.7rem; margin-right:6px;"></i> Watch Lesson
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function playDirectVideo(videoId) {
+            if (!activeMentorClassroom) return;
+            const items = (activeMentorClassroom.items || []).filter(it => it.type === 'youtube');
+            const targetIdx = items.findIndex(it => it.id === videoId);
+
+            activePlaylistQueue = items;
+            activePlaylistTitle = 'All Videos';
+            activePlaylistIndex = targetIdx !== -1 ? targetIdx : 0;
+
+            switchClassroomSubtab('playlists');
+            document.getElementById('classroomPlaylistsBrowser').style.display = 'none';
+            document.getElementById('classroomPlaylistPlayerMode').style.display = 'block';
+
+            const headerTitle = document.getElementById('activePlaylistHeaderTitle');
+            if (headerTitle) headerTitle.innerText = activePlaylistTitle;
+
+            renderPlaylistQueueSidebar();
+            selectPlaylistQueueLesson(activePlaylistIndex);
+        }
+
+        function renderClassroomDrive(driveItems) {
+            const driveBox = document.getElementById('classroomDriveList');
+            if (!driveBox) return;
+
+            if (driveItems.length === 0) {
+                driveBox.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:3rem 1.5rem; color:var(--text-secondary); background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.1); border-radius:18px;">
+                        <i class="fab fa-google-drive" style="font-size:2.5rem; opacity:0.3; margin-bottom:10px; display:block; color:#3b82f6;"></i>
+                        <h4 style="font-size:1.1rem; color:#fff; margin:0 0 6px 0;">No Free Drive Resources</h4>
+                        <p style="font-size:0.85rem; margin:0;">This mentor has not attached any Google Drive files or PDFs yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            driveBox.innerHTML = driveItems.map(it => {
+                const thumbImg = it.thumbnailUrl ? `<img src="${escapeHtml(it.thumbnailUrl)}" style="width:100%; height:130px; object-fit:cover; border-radius:10px; margin-bottom:12px;" />` : '';
+                return `
+                    <div class="glass-card" style="padding:1.25rem; border-radius:14px; display:flex; flex-direction:column;">
+                        ${thumbImg}
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+                            <div style="width:40px; height:40px; border-radius:10px; background:rgba(59,130,246,0.15); display:flex; align-items:center; justify-content:center; color:#60a5fa; font-size:1.3rem; flex-shrink:0;">
+                                <i class="fab fa-google-drive"></i>
+                            </div>
+                            <div style="min-width:0; flex:1;">
+                                <span style="background:rgba(59,130,246,0.15); color:#60a5fa; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:10px;">
+                                    ${escapeHtml(it.resourceType || 'Free Resource')}
+                                </span>
+                                <h4 style="margin:4px 0 0 0; font-size:0.95rem; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(it.title)}</h4>
+                            </div>
+                        </div>
+                        <p style="margin:0 0 14px 0; font-size:0.8rem; color:var(--text-secondary); line-height:1.5; flex:1;">
+                            ${escapeHtml(it.description || 'Downloadable trading guide, indicator or course resource.')}
+                        </p>
+                        <a href="${escapeHtml(it.driveUrl || '#')}" target="_blank" class="btn-outline" style="justify-content:center; padding:8px 14px; font-size:0.82rem; border-radius:8px; border-color:rgba(59,130,246,0.3); color:#60a5fa;">
+                            <i class="fas fa-external-link-alt"></i> Open Drive Resource
+                        </a>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderClassroomPaid(paidItems, mentor) {
+            const paidBox = document.getElementById('classroomPaidList');
+            if (!paidBox) return;
+
+            if (paidItems.length === 0) {
+                paidBox.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:3rem 1.5rem; color:var(--text-secondary); background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.1); border-radius:18px;">
+                        <i class="fas fa-gem" style="font-size:2.5rem; opacity:0.3; margin-bottom:10px; display:block; color:var(--yellow);"></i>
+                        <h4 style="font-size:1.1rem; color:#fff; margin:0 0 6px 0;">No Paid Courses Listed</h4>
+                        <p style="font-size:0.85rem; margin:0;">This mentor currently offers free trading education only.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            paidBox.innerHTML = paidItems.map(it => {
+                const priceSign = it.currency === 'BDT' ? '৳' : '$';
+                const thumbImg = it.thumbnailUrl ? `<img src="${escapeHtml(it.thumbnailUrl)}" style="width:100%; height:140px; object-fit:cover; border-radius:10px; margin-bottom:12px;" />` : '';
+
+                // Check enrollment
+                const myEnr = (myDashEnrollments || []).find(e => e.courseId === it.id);
+                let actionBtn = `
+                    <button type="button" class="btn-gold" onclick="openDashCourseEnrollModal('${mentor.partnerId || mentor.id}', '${it.id}')" style="width:100%; justify-content:center; padding:10px; font-size:0.85rem; border-radius:10px;">
+                        <i class="fas fa-shopping-cart" style="margin-right:6px;"></i> Enroll Now (${priceSign}${it.price || 0})
+                    </button>
+                `;
+
+                let badgeHtml = `
+                    <span style="background:rgba(245,176,65,0.18); color:var(--yellow); font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px;">
+                        <i class="fas fa-gem"></i> ${escapeHtml(it.courseFormat || 'VIP Mentorship')}
+                    </span>
+                `;
+
+                if (myEnr) {
+                    if (myEnr.status === 'approved') {
+                        badgeHtml = `
+                            <span style="background:rgba(0,230,118,0.2); color:var(--accent-green); font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px;">
+                                <i class="fas fa-check-circle"></i> Enrolled & Unlocked
+                            </span>
+                        `;
+                        actionBtn = `
+                            <button type="button" class="btn-emerald" onclick="openDashUnlockedCourse('${it.id}')" style="width:100%; justify-content:center; padding:10px; font-size:0.85rem; border-radius:10px;">
+                                <i class="fas fa-play-circle" style="margin-right:6px;"></i> Access Course Materials
+                            </button>
+                        `;
+                    } else if (myEnr.status === 'pending') {
+                        badgeHtml = `
+                            <span style="background:rgba(245,158,11,0.2); color:#f59e0b; font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px;">
+                                <i class="fas fa-clock"></i> Verification Pending
+                            </span>
+                        `;
+                        actionBtn = `
+                            <button type="button" class="btn-outline" style="width:100%; justify-content:center; padding:10px; font-size:0.85rem; border-radius:10px; border-color:#f59e0b; color:#f59e0b; cursor:default;">
+                                <i class="fas fa-hourglass-half" style="margin-right:6px;"></i> Verification Underway
+                            </button>
+                        `;
+                    }
+                }
+
+                return `
+                    <div class="glass-card" style="padding:1.5rem; border-radius:16px; border:1px solid rgba(245,176,65,0.2); display:flex; flex-direction:column;">
+                        ${thumbImg}
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                            ${badgeHtml}
+                            <div style="font-size:1.4rem; font-weight:900; color:var(--accent-green);">
+                                ${priceSign}${it.price || 0}
+                            </div>
+                        </div>
+
+                        <h3 style="margin:0 0 8px 0; font-size:1.1rem; font-weight:900; color:#fff;">
+                            ${escapeHtml(it.title)}
+                        </h3>
+
+                        <p style="margin:0 0 16px 0; font-size:0.83rem; color:var(--text-secondary); line-height:1.6; flex:1;">
+                            ${escapeHtml(it.description || 'VIP trading course and private group mentorship with guaranteed direct instructor access.')}
+                        </p>
+
+                        ${actionBtn}
+                    </div>
+                `;
+            }).join('');
         }
 
         function openDashCourseEnrollModal(partnerId, courseId) {

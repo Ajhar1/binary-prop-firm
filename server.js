@@ -7452,10 +7452,13 @@ app.get('/api/academy/mentors', async (req, res) => {
           socialLinks: p.socialLinks || {},
           status: p.status,
           totalItems: items.length,
+          playlistsCount: playlists.length,
+          playlists: playlists,
           stats: {
             videosCount,
             freeDriveCount,
-            paidCoursesCount
+            paidCoursesCount,
+            playlistsCount: playlists.length
           },
           updatedAt: p.updatedAt || p.createdAt
         };
@@ -7502,15 +7505,21 @@ app.get('/api/academy/mentors/:id', async (req, res) => {
     const freeDriveCount = items.filter(it => it.type === 'drive' || it.type === 'free').length;
     const paidCoursesCount = items.filter(it => it.type === 'paid').length;
 
+    const playlists = Array.isArray(profile.playlists) ? profile.playlists : [];
     res.json({
       success: true,
       mentor: {
         ...profile,
+        partnerEmail: profile.partnerEmail || '',
+        avatarUrl: profile.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+        bannerUrl: profile.bannerUrl || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&auto=format&fit=crop&q=80',
         items,
+        playlists,
         stats: {
           videosCount,
           freeDriveCount,
-          paidCoursesCount
+          paidCoursesCount,
+          playlistsCount: playlists.length
         }
       }
     });
@@ -12592,6 +12601,7 @@ app.get('/api/partner/academy', authenticatePartnerToken, async (req, res) => {
         youtubeChannel: '',
         socialLinks: {},
         items: [],
+        playlists: [],
         status: 'draft',
         rejectionReason: null,
         submittedAt: null,
@@ -12602,6 +12612,10 @@ app.get('/api/partner/academy', authenticatePartnerToken, async (req, res) => {
       };
     }
 
+    if (profile) {
+      if (!Array.isArray(profile.playlists)) profile.playlists = [];
+      if (!Array.isArray(profile.items)) profile.items = [];
+    }
     res.json({ success: true, profile });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -12621,6 +12635,7 @@ app.post('/api/partner/academy', authenticatePartnerToken, async (req, res) => {
       youtubeChannel,
       socialLinks,
       items,
+      playlists,
       action // 'draft' or 'submit'
     } = req.body;
 
@@ -12643,6 +12658,7 @@ app.post('/api/partner/academy', authenticatePartnerToken, async (req, res) => {
         videoUrl: (it.videoUrl || '').trim(),
         videoEmbed: it.videoUrl ? convertToEmbedUrl(it.videoUrl) : '',
         thumbnailUrl: (it.thumbnailUrl || (it.videoUrl ? extractVideoThumbnail(it.videoUrl) : '')).trim(),
+        playlistId: (it.playlistId || '').trim(),
         // Drive / Resource specific
         driveUrl: (it.driveUrl || '').trim(),
         resourceType: (it.resourceType || 'PDF / E-Book / Indicator').trim(),
@@ -12673,6 +12689,18 @@ app.post('/api/partner/academy', authenticatePartnerToken, async (req, res) => {
       targetStatus = (existingProfile && existingProfile.status === 'approved') ? 'approved' : 'draft';
     }
 
+    const cleanPlaylists = Array.isArray(playlists) ? playlists.map((pl, i) => {
+      return {
+        id: pl.id || `pl_${Date.now()}_${i}`,
+        title: (pl.title || 'Untitled Playlist').trim(),
+        description: (pl.description || '').trim(),
+        thumbnailUrl: (pl.thumbnailUrl || '').trim(),
+        itemIds: Array.isArray(pl.itemIds) ? pl.itemIds.filter(Boolean) : [],
+        createdAt: pl.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }) : (existingProfile && Array.isArray(existingProfile.playlists) ? existingProfile.playlists : []);
+
     const profileData = {
       id: existingProfile ? existingProfile.id : `acad_${partnerId}`,
       partnerId: partnerId,
@@ -12688,6 +12716,7 @@ app.post('/api/partner/academy', authenticatePartnerToken, async (req, res) => {
       youtubeChannel: (youtubeChannel || '').trim(),
       socialLinks: socialLinks || {},
       items: cleanItems,
+      playlists: cleanPlaylists,
       status: targetStatus,
       rejectionReason: isSubmitting ? null : (existingProfile ? existingProfile.rejectionReason : null),
       submittedAt: isSubmitting ? nowIso : (existingProfile ? existingProfile.submittedAt : null),

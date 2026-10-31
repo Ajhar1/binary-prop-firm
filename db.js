@@ -2297,6 +2297,7 @@ function parseAcademyProfile(row) {
     youtubeChannel: row.youtubeChannel,
     socialLinks: (row.socialLinks && typeof row.socialLinks === 'string') ? JSON.parse(row.socialLinks) : (row.socialLinks || profile.socialLinks || {}),
     items: (row.items && typeof row.items === 'string') ? JSON.parse(row.items) : (row.items || profile.items || []),
+    playlists: (Array.isArray(profile.playlists) ? profile.playlists : (row.playlists && typeof row.playlists === 'string' ? JSON.parse(row.playlists) : [])),
     status: row.status || 'draft',
     rejectionReason: row.rejectionReason,
     submittedAt: row.submittedAt,

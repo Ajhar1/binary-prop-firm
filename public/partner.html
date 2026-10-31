@@ -3963,41 +3963,117 @@
 
                         <!-- RIGHT COLUMN: CURRICULUM & ENROLLMENTS MANAGER -->
                         <div class="glass" style="border-radius:18px; padding:1.5rem; border:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column;">
-                            
-                            <!-- Tab Switcher (Curriculum vs Student Orders) -->
-                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1.2rem; padding-bottom:0.75rem; border-bottom:1px solid rgba(255,255,255,0.08);">
-                                <div style="display:flex; gap:8px;">
-                                    <button type="button" class="btn-subtab active" id="btnSubtabCurriculum" onclick="switchPartnerAcademySubtab('curriculum')" style="padding:7px 14px; font-size:0.82rem; border-radius:10px;">
-                                        <i class="fas fa-book-open"></i> Academy Curriculum (<span id="countSubtabCurriculum">0</span>)
+
+                            <!-- TOP ACTION TOOLBAR (UNMISSABLE & ALWAYS VISIBLE) -->
+                            <div style="background:linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(0,230,118,0.05) 100%); border:1px solid rgba(255,255,255,0.09); border-radius:14px; padding:12px 16px; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                                <div>
+                                    <div style="font-size:0.95rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                                        <i class="fas fa-layer-group" style="color:var(--emerald);"></i> Academy Curriculum & Playlists
+                                    </div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+                                        Organize your YouTube & Drive classes into playlists, and publish paid VIP courses.
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:8px; flex-wrap:wrap;" id="partnerCurriculumActionButtons">
+                                    <button type="button" class="btn-emerald" onclick="openAddAcademyItemModal('youtube')" style="padding:8px 15px; font-size:0.82rem; border-radius:10px; font-weight:700;">
+                                        <i class="fab fa-youtube"></i> + Add Video
                                     </button>
-                                    <button type="button" class="btn-subtab" id="btnSubtabOrders" onclick="switchPartnerAcademySubtab('orders')" style="padding:7px 14px; font-size:0.82rem; border-radius:10px;">
-                                        <i class="fas fa-receipt" style="color:var(--gold);"></i> Student Orders & Access (<span id="partnerEnrollmentsCount">0</span>)
+                                    <button type="button" class="btn-outline" onclick="openCreatePlaylistModal()" style="padding:8px 15px; font-size:0.82rem; border-radius:10px; font-weight:700; background:rgba(0,240,255,0.12); border:1px solid rgba(0,240,255,0.3); color:#00f0ff;">
+                                        <i class="fas fa-folder-plus"></i> + New Playlist
+                                    </button>
+                                    <button type="button" class="btn-outline" onclick="openAddAcademyItemModal('drive')" style="padding:8px 14px; font-size:0.82rem; border-radius:10px; font-weight:700;">
+                                        <i class="fab fa-google-drive" style="color:#3b82f6;"></i> + Drive
+                                    </button>
+                                    <button type="button" class="btn-gold" onclick="openAddAcademyItemModal('paid')" style="padding:8px 14px; font-size:0.82rem; border-radius:10px; font-weight:700;">
+                                        <i class="fas fa-gem"></i> + Paid Course
                                     </button>
                                 </div>
-                                <button type="button" class="btn-emerald" id="btnOpenAddContentModal" onclick="openAddAcademyItemModal()" style="padding:8px 16px; font-size:0.82rem; border-radius:10px;">
-                                    <i class="fas fa-plus"></i> Add Class / Content
+                            </div>
+
+                            <!-- SUBTAB NAVIGATION BAR (YouTube Studio Style) -->
+                            <div style="display:flex; align-items:center; gap:8px; overflow-x:auto; padding-bottom:10px; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.08);">
+                                <button type="button" class="btn-subtab active" id="btnSubtabPlaylists" onclick="switchPartnerAcademySubtab('playlists')" style="padding:7px 14px; font-size:0.82rem; border-radius:10px; white-space:nowrap;">
+                                    <i class="fas fa-list-ul" style="color:#00f0ff;"></i> Playlists (<span id="countSubtabPlaylists">0</span>)
+                                </button>
+                                <button type="button" class="btn-subtab" id="btnSubtabVideos" onclick="switchPartnerAcademySubtab('videos')" style="padding:7px 14px; font-size:0.82rem; border-radius:10px; white-space:nowrap;">
+                                    <i class="fab fa-youtube" style="color:#ef4444;"></i> All Videos (<span id="countSubtabVideos">0</span>)
+                                </button>
+                                <button type="button" class="btn-subtab" id="btnSubtabDrive" onclick="switchPartnerAcademySubtab('drive')" style="padding:7px 14px; font-size:0.82rem; border-radius:10px; white-space:nowrap;">
+                                    <i class="fab fa-google-drive" style="color:#3b82f6;"></i> Free Resources (<span id="countSubtabDrive">0</span>)
+                                </button>
+                                <button type="button" class="btn-subtab" id="btnSubtabPaid" onclick="switchPartnerAcademySubtab('paid')" style="padding:7px 14px; font-size:0.82rem; border-radius:10px; white-space:nowrap;">
+                                    <i class="fas fa-gem" style="color:var(--gold);"></i> Paid Courses (<span id="countSubtabPaid">0</span>)
+                                </button>
+                                <button type="button" class="btn-subtab" id="btnSubtabOrders" onclick="switchPartnerAcademySubtab('orders')" style="padding:7px 14px; font-size:0.82rem; border-radius:10px; white-space:nowrap;">
+                                    <i class="fas fa-receipt" style="color:var(--gold);"></i> Student Orders (<span id="partnerEnrollmentsCount">0</span>)
                                 </button>
                             </div>
 
-                            <!-- SUBTAB 1: CURRICULUM MANAGER -->
-                            <div id="partnerSubtabCurriculumSection" style="display:flex; flex-direction:column; flex:1;">
-                                <!-- Filter Pills & Summary -->
-                                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px solid rgba(255,255,255,0.06);">
-                                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                                        <button type="button" class="acad-filter-btn active" onclick="filterAcademyItems('all', this)">All (<span id="countAllItems">0</span>)</button>
-                                        <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('youtube', this)"><i class="fab fa-youtube" style="color:#ef4444;"></i> Videos (<span id="countYoutubeItems">0</span>)</button>
-                                        <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('drive', this)"><i class="fab fa-google-drive" style="color:#3b82f6;"></i> Free Drive (<span id="countDriveItems">0</span>)</button>
-                                        <button type="button" class="acad-filter-btn" onclick="filterAcademyItems('paid', this)"><i class="fas fa-gem" style="color:var(--gold);"></i> Paid Courses (<span id="countPaidItems">0</span>)</button>
+                            <!-- SUBSECTION 1: PLAYLISTS MANAGER -->
+                            <div id="partnerSubtabPlaylistsSection" style="display:flex; flex-direction:column; flex:1;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <div>
+                                        <h4 style="margin:0; font-size:0.92rem; font-weight:800; color:#fff;">Course Playlists</h4>
+                                        <span style="font-size:0.75rem; color:var(--text-muted);">Organize your classes sequentially for students, exactly like YouTube playlists.</span>
                                     </div>
+                                    <button type="button" class="btn-outline" onclick="openCreatePlaylistModal()" style="padding:5px 12px; font-size:0.75rem; border-radius:8px; border-color:rgba(0,240,255,0.4); color:#00f0ff;">
+                                        <i class="fas fa-plus"></i> New Playlist
+                                    </button>
                                 </div>
-
-                                <!-- Items Container -->
-                                <div id="academyItemsContainer" style="flex:1; max-height:520px; overflow-y:auto; padding-right:4px;">
-                                    <!-- Items injected via JS -->
+                                <div id="partnerPlaylistsContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px; max-height:520px; overflow-y:auto; padding-right:4px;">
+                                    <!-- Injected via JS -->
                                 </div>
                             </div>
 
-                            <!-- SUBTAB 2: STUDENT ORDERS & ENROLLMENTS MANAGER -->
+                            <!-- SUBSECTION 2: ALL VIDEOS (YOUTUBE & DRIVE VIDEOS) -->
+                            <div id="partnerSubtabVideosSection" style="display:none; flex-direction:column; flex:1;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <div>
+                                        <h4 style="margin:0; font-size:0.92rem; font-weight:800; color:#fff;">All Video Lessons</h4>
+                                        <span style="font-size:0.75rem; color:var(--text-muted);">Every individual YouTube video and video class in your academy.</span>
+                                    </div>
+                                    <button type="button" class="btn-emerald" onclick="openAddAcademyItemModal('youtube')" style="padding:5px 12px; font-size:0.75rem; border-radius:8px;">
+                                        <i class="fas fa-plus"></i> Add Video
+                                    </button>
+                                </div>
+                                <div id="partnerVideosContainer" style="flex:1; max-height:520px; overflow-y:auto; padding-right:4px;">
+                                    <!-- Injected via JS -->
+                                </div>
+                            </div>
+
+                            <!-- SUBSECTION 3: FREE DRIVE RESOURCES -->
+                            <div id="partnerSubtabDriveSection" style="display:none; flex-direction:column; flex:1;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <div>
+                                        <h4 style="margin:0; font-size:0.92rem; font-weight:800; color:#fff;">Free Drive Resources & Guides</h4>
+                                        <span style="font-size:0.75rem; color:var(--text-muted);">PDF trading guides, spreadsheets, templates, and Google Drive links.</span>
+                                    </div>
+                                    <button type="button" class="btn-outline" onclick="openAddAcademyItemModal('drive')" style="padding:5px 12px; font-size:0.75rem; border-radius:8px;">
+                                        <i class="fas fa-plus"></i> Add Resource
+                                    </button>
+                                </div>
+                                <div id="partnerDriveContainer" style="flex:1; max-height:520px; overflow-y:auto; padding-right:4px;">
+                                    <!-- Injected via JS -->
+                                </div>
+                            </div>
+
+                            <!-- SUBSECTION 4: PAID COURSES & VIP MENTORSHIP -->
+                            <div id="partnerSubtabPaidSection" style="display:none; flex-direction:column; flex:1;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <div>
+                                        <h4 style="margin:0; font-size:0.92rem; font-weight:800; color:#fff;">Paid Courses & Mentorship Products</h4>
+                                        <span style="font-size:0.75rem; color:var(--text-muted);">Sell premium courses and VIP signals with verified student checkout.</span>
+                                    </div>
+                                    <button type="button" class="btn-gold" onclick="openAddAcademyItemModal('paid')" style="padding:5px 12px; font-size:0.75rem; border-radius:8px;">
+                                        <i class="fas fa-plus"></i> Add Course
+                                    </button>
+                                </div>
+                                <div id="partnerPaidContainer" style="flex:1; max-height:520px; overflow-y:auto; padding-right:4px;">
+                                    <!-- Injected via JS -->
+                                </div>
+                            </div>
+
+                            <!-- SUBSECTION 5: STUDENT ORDERS & ENROLLMENTS MANAGER -->
                             <div id="partnerSubtabOrdersSection" style="display:none; flex-direction:column; flex:1;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                                     <div>
@@ -4012,6 +4088,8 @@
                                     <!-- Enrollments injected via JS -->
                                 </div>
                             </div>
+
+                        </div>
 
                         </div>
 
@@ -4818,6 +4896,17 @@
                     <input type="text" class="form-control" id="modalItemTitle" required placeholder="e.g. Master Candlestick Reversals & Volume Flow" style="font-size:0.88rem;" />
                 </div>
 
+                <!-- PLAYLIST ASSIGNMENT DROPDOWN -->
+                <div class="form-group" id="modalItemPlaylistGroup" style="margin-bottom:12px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#00f0ff; margin-bottom:4px;">
+                        <i class="fas fa-list-ul"></i> Assign to Playlist (Optional - YouTube Style)
+                    </label>
+                    <select class="form-control" id="modalItemPlaylist" style="font-size:0.85rem;">
+                        <option value="">-- No Playlist (Independent Video) --</option>
+                    </select>
+                    <span style="font-size:0.7rem; color:var(--text-muted); margin-top:3px; display:block;">You can assign this video to an existing playlist or create a playlist later.</span>
+                </div>
+
                 <!-- TYPE 1: YOUTUBE VIDEO FIELDS -->
                 <div id="fieldsYoutubeSection">
                     <div class="form-group" style="margin-bottom:12px;">
@@ -4933,6 +5022,66 @@
                     <button type="button" class="btn-outline" onclick="closeModal('academyItemModal')" style="padding:9px 18px; font-size:0.85rem; border-radius:10px;">Cancel</button>
                     <button type="submit" class="btn-gold" style="padding:9px 22px; font-size:0.85rem; border-radius:10px;">
                         <i class="fas fa-check"></i> Save to Curriculum
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== ACADEMY PLAYLIST CREATOR / EDITOR MODAL ==================== -->
+    <div class="modal-overlay" id="academyPlaylistModal">
+        <div class="modal-box glass" style="max-width:540px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                <h3 style="font-size:1.15rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-list-ul" style="color:#00f0ff;"></i> <span id="playlistModalTitle">Create YouTube-Style Playlist</span>
+                </h3>
+                <button type="button" onclick="closeModal('academyPlaylistModal')" style="background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="academyPlaylistForm" onsubmit="handleSaveAcademyPlaylist(event)">
+                <input type="hidden" id="modalPlaylistId" value="" />
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Playlist Title *</label>
+                    <input type="text" class="form-control" id="modalPlaylistTitle" required placeholder="e.g. Complete Price Action Masterclass" style="font-size:0.85rem;" />
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Playlist Description</label>
+                    <textarea class="form-control" id="modalPlaylistDesc" rows="2" placeholder="Briefly explain what students will learn throughout this playlist series..." style="font-size:0.82rem;"></textarea>
+                </div>
+
+                <!-- Custom Thumbnail Upload or First Video -->
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Playlist Cover Thumbnail (Optional - Max 1MB)</label>
+                    <input type="file" id="modalPlaylistThumbInput" accept="image/*" style="display:none;" onchange="handlePlaylistThumbUpload(this)" />
+                    <input type="hidden" id="modalPlaylistThumbUrl" value="" />
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <img id="modalPlaylistThumbPreview" style="display:none; width:80px; height:48px; object-fit:cover; border-radius:6px; border:1px solid rgba(255,255,255,0.15);" />
+                        <button type="button" class="btn-outline" onclick="document.getElementById('modalPlaylistThumbInput').click()" style="padding:6px 14px; font-size:0.78rem; border-radius:8px;">
+                            <i class="fas fa-upload"></i> Upload Thumbnail (Max 1MB)
+                        </button>
+                        <span style="font-size:0.7rem; color:var(--text-muted);">Leave empty to auto-use first video thumbnail.</span>
+                    </div>
+                </div>
+
+                <!-- Video Selector Checklist -->
+                <div class="form-group" style="margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="font-size:0.75rem; font-weight:700; color:#fff;">Select Videos for this Playlist:</label>
+                        <span style="font-size:0.7rem; color:var(--text-muted);" id="modalPlaylistSelectedCount">0 selected</span>
+                    </div>
+                    <div id="modalPlaylistVideosList" style="max-height:220px; overflow-y:auto; background:rgba(10,15,26,0.6); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:8px;">
+                        <!-- Checkboxes injected via JS -->
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn-outline" onclick="closeModal('academyPlaylistModal')" style="padding:9px 18px; font-size:0.85rem; border-radius:10px;">Cancel</button>
+                    <button type="submit" class="btn-cyan" style="padding:9px 22px; font-size:0.85rem; border-radius:10px; font-weight:800; background:rgba(0,240,255,0.2); border:1px solid rgba(0,240,255,0.4); color:#00f0ff; cursor:pointer;">
+                        <i class="fas fa-check"></i> Save Playlist
                     </button>
                 </div>
             </form>
@@ -5151,25 +5300,23 @@
 
         function switchPartnerAcademySubtab(subtab) {
             currentPartnerAcademySubtab = subtab;
-            const btnCur = document.getElementById('btnSubtabCurriculum');
-            const btnOrd = document.getElementById('btnSubtabOrders');
-            const secCur = document.getElementById('partnerSubtabCurriculumSection');
-            const secOrd = document.getElementById('partnerSubtabOrdersSection');
-            const btnAdd = document.getElementById('btnOpenAddContentModal');
+            const tabs = ['playlists', 'videos', 'drive', 'paid', 'orders'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`btnSubtab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const sec = document.getElementById(`partnerSubtab${t.charAt(0).toUpperCase() + t.slice(1)}Section`);
+                if (btn) {
+                    if (t === subtab) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                }
+                if (sec) {
+                    sec.style.display = (t === subtab) ? 'flex' : 'none';
+                }
+            });
 
             if (subtab === 'orders') {
-                if (btnCur) btnCur.classList.remove('active');
-                if (btnOrd) btnOrd.classList.add('active');
-                if (secCur) secCur.style.display = 'none';
-                if (secOrd) secOrd.style.display = 'flex';
-                if (btnAdd) btnAdd.style.display = 'none';
                 loadPartnerEnrollments();
             } else {
-                if (btnCur) btnCur.classList.add('active');
-                if (btnOrd) btnOrd.classList.remove('active');
-                if (secCur) secCur.style.display = 'flex';
-                if (secOrd) secOrd.style.display = 'none';
-                if (btnAdd) btnAdd.style.display = 'inline-flex';
+                renderAllCurriculumSubtabs();
             }
         }
 
@@ -5399,7 +5546,9 @@
             const wsInp = document.getElementById('acadWebsiteUrl'); if (wsInp) wsInp.value = soc.website || '';
 
             // Curriculum Items
-            renderAcademyItemsList(profile.items || []);
+            if (!Array.isArray(profile.playlists)) profile.playlists = [];
+            if (!Array.isArray(profile.items)) profile.items = [];
+            renderAllCurriculumSubtabs();
 
             // Also load partner enrollments in background
             loadPartnerEnrollments();
@@ -5427,85 +5576,145 @@
             }
         }
 
-        function renderAcademyItemsList(items) {
-            const container = document.getElementById('academyItemsContainer');
+        function renderAllCurriculumSubtabs() {
+            if (!currentAcademyProfile) {
+                currentAcademyProfile = { items: [], playlists: [] };
+            }
+            if (!Array.isArray(currentAcademyProfile.items)) currentAcademyProfile.items = [];
+            if (!Array.isArray(currentAcademyProfile.playlists)) currentAcademyProfile.playlists = [];
+
+            const items = currentAcademyProfile.items;
+            const playlists = currentAcademyProfile.playlists;
+
+            const videoItems = items.filter(it => it.type === 'youtube');
+            const driveItems = items.filter(it => it.type === 'drive' || it.type === 'free');
+            const paidItems = items.filter(it => it.type === 'paid');
+
+            // Update Counts
+            const elPl = document.getElementById('countSubtabPlaylists'); if (elPl) elPl.innerText = playlists.length;
+            const elVid = document.getElementById('countSubtabVideos'); if (elVid) elVid.innerText = videoItems.length;
+            const elDrv = document.getElementById('countSubtabDrive'); if (elDrv) elDrv.innerText = driveItems.length;
+            const elPaid = document.getElementById('countSubtabPaid'); if (elPaid) elPaid.innerText = paidItems.length;
+
+            renderPartnerPlaylistsList();
+            renderPartnerVideosList();
+            renderPartnerDriveList();
+            renderPartnerPaidList();
+        }
+
+        function renderPartnerPlaylistsList() {
+            const container = document.getElementById('partnerPlaylistsContainer');
             if (!container) return;
+            const playlists = currentAcademyProfile?.playlists || [];
+            const items = currentAcademyProfile?.items || [];
 
-            const allCount = items.length;
-            const ytCount = items.filter(it => it.type === 'youtube').length;
-            const drvCount = items.filter(it => it.type === 'drive' || it.type === 'free').length;
-            const paidCount = items.filter(it => it.type === 'paid').length;
-
-            const elAll = document.getElementById('countAllItems');
-            const elYt = document.getElementById('countYoutubeItems');
-            const elDrv = document.getElementById('countDriveItems');
-            const elPaid = document.getElementById('countPaidItems');
-            const elCurTab = document.getElementById('countSubtabCurriculum');
-
-            if (elAll) elAll.innerText = allCount;
-            if (elYt) elYt.innerText = ytCount;
-            if (elDrv) elDrv.innerText = drvCount;
-            if (elPaid) elPaid.innerText = paidCount;
-            if (elCurTab) elCurTab.innerText = allCount;
-
-            let filtered = items;
-            if (currentAcademyFilter === 'youtube') filtered = items.filter(it => it.type === 'youtube');
-            if (currentAcademyFilter === 'drive') filtered = items.filter(it => it.type === 'drive' || it.type === 'free');
-            if (currentAcademyFilter === 'paid') filtered = items.filter(it => it.type === 'paid');
-
-            if (filtered.length === 0) {
+            if (playlists.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);">
-                        <i class="fas fa-graduation-cap" style="font-size:2.4rem; opacity:0.3; margin-bottom:10px; display:block;"></i>
-                        <h4 style="font-size:0.95rem; margin:0 0 6px 0; color:#fff;">No content items found</h4>
-                        <p style="font-size:0.8rem; margin:0 0 14px 0;">Add your YouTube videos, Google Drive classes, or paid courses to build your academy.</p>
-                        <button type="button" class="btn-emerald" onclick="openAddAcademyItemModal()" style="padding:6px 16px; font-size:0.8rem;">
-                            <i class="fas fa-plus"></i> Add First Item
+                    <div style="grid-column:1/-1; text-align:center; padding:3rem 1.5rem; background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.12); border-radius:14px;">
+                        <i class="fas fa-list-ul" style="font-size:2.4rem; color:#00f0ff; opacity:0.4; margin-bottom:12px; display:block;"></i>
+                        <h4 style="font-size:1rem; margin:0 0 6px 0; color:#fff;">No Playlists Created Yet</h4>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin:0 auto 16px auto; max-width:420px; line-height:1.5;">
+                            Create custom YouTube-style playlists to organize your trading lessons into complete courses, beginner-to-pro series, or strategy roadmaps.
+                        </p>
+                        <button type="button" class="btn-outline" onclick="openCreatePlaylistModal()" style="border-color:#00f0ff; color:#00f0ff; padding:7px 18px; font-size:0.82rem; border-radius:10px; font-weight:700;">
+                            <i class="fas fa-plus"></i> Create First Playlist
                         </button>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = filtered.map((item, idx) => {
-                let iconHtml = '<i class="fab fa-youtube" style="color:#ef4444; font-size:1.4rem;"></i>';
-                let typeBadge = '<span style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:12px;">YouTube Video</span>';
-                let extraDetail = item.duration ? `<span style="font-size:0.75rem; color:var(--text-muted);"><i class="far fa-clock"></i> ${escapeHtml(item.duration)}</span>` : '';
-
-                if (item.type === 'drive' || item.type === 'free') {
-                    iconHtml = '<i class="fab fa-google-drive" style="color:#3b82f6; font-size:1.4rem;"></i>';
-                    typeBadge = '<span style="background:rgba(59,130,246,0.15); color:#60a5fa; font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:12px;">Free Drive Resource</span>';
-                    extraDetail = `<span style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-file-alt"></i> ${escapeHtml(item.resourceType || 'Resource')}</span>`;
-                } else if (item.type === 'paid') {
-                    iconHtml = '<i class="fas fa-gem" style="color:var(--gold); font-size:1.4rem;"></i>';
-                    typeBadge = '<span style="background:rgba(245,176,65,0.15); color:var(--gold); font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:12px;">VIP Paid Course</span>';
-                    extraDetail = `<span style="font-size:0.8rem; font-weight:800; color:var(--emerald);">${item.currency === 'BDT' ? 'BDT ' : '$'}${item.price || 0}</span>`;
-                }
+            container.innerHTML = playlists.map(pl => {
+                const plItems = items.filter(it => Array.isArray(pl.itemIds) && pl.itemIds.includes(it.id));
+                const firstVideo = plItems[0];
+                const thumb = pl.thumbnailUrl || (firstVideo ? (firstVideo.thumbnailUrl || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=500&auto=format&fit=crop&q=80') : 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=500&auto=format&fit=crop&q=80');
 
                 return `
-                    <div class="academy-item-card">
+                    <div style="background:rgba(18,24,38,0.7); border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; transition:transform 0.2s;">
+                        <!-- Playlist Thumbnail Box -->
+                        <div style="height:120px; position:relative; background:url('${escapeHtml(thumb)}') center/cover no-repeat;">
+                            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(7,10,18,0.85) 0%, rgba(7,10,18,0.2) 60%);"></div>
+                            <span style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.8); backdrop-filter:blur(6px); color:#00f0ff; font-size:0.72rem; font-weight:800; padding:3px 8px; border-radius:6px; border:1px solid rgba(0,240,255,0.3);">
+                                <i class="fas fa-list-ul"></i> ${plItems.length} Videos
+                            </span>
+                        </div>
+                        <!-- Info -->
+                        <div style="padding:1rem; flex:1; display:flex; flex-direction:column;">
+                            <h4 style="margin:0 0 6px 0; font-size:0.92rem; font-weight:800; color:#fff; line-height:1.3;">
+                                ${escapeHtml(pl.title)}
+                            </h4>
+                            <p style="margin:0 0 12px 0; font-size:0.75rem; color:var(--text-muted); line-height:1.4; flex:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                                ${escapeHtml(pl.description || 'No description provided.')}
+                            </p>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+                                <span style="font-size:0.7rem; color:var(--text-muted);">
+                                    ${plItems.length} classes attached
+                                </span>
+                                <div style="display:flex; gap:6px;">
+                                    <button type="button" class="btn-action" onclick="openEditPlaylistModal('${pl.id}')" title="Edit Playlist" style="width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,0.05); color:#00f0ff; border:1px solid rgba(0,240,255,0.3);">
+                                        <i class="fas fa-edit" style="font-size:0.75rem;"></i>
+                                    </button>
+                                    <button type="button" class="btn-action" onclick="deleteAcademyPlaylist('${pl.id}')" title="Delete Playlist" style="width:30px; height:30px; border-radius:8px; background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.3);">
+                                        <i class="fas fa-trash-alt" style="font-size:0.75rem;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPartnerVideosList() {
+            const container = document.getElementById('partnerVideosContainer');
+            if (!container) return;
+            const items = currentAcademyProfile?.items || [];
+            const playlists = currentAcademyProfile?.playlists || [];
+            const videos = items.filter(it => it.type === 'youtube');
+
+            if (videos.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);">
+                        <i class="fab fa-youtube" style="font-size:2.4rem; opacity:0.3; margin-bottom:10px; display:block; color:#ef4444;"></i>
+                        <h4 style="font-size:0.95rem; margin:0 0 6px 0; color:#fff;">No YouTube Videos Added</h4>
+                        <p style="font-size:0.8rem; margin:0 0 14px 0;">Add your first trading tutorial or strategy video lesson.</p>
+                        <button type="button" class="btn-emerald" onclick="openAddAcademyItemModal('youtube')" style="padding:6px 16px; font-size:0.8rem;">
+                            <i class="fas fa-plus"></i> Add Video
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = videos.map(item => {
+                const parentPl = playlists.find(pl => Array.isArray(pl.itemIds) && pl.itemIds.includes(item.id)) || (item.playlistId ? playlists.find(pl => pl.id === item.playlistId) : null);
+                const plBadge = parentPl ? `<span style="background:rgba(0,240,255,0.15); color:#00f0ff; font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:8px;"><i class="fas fa-list-ul"></i> ${escapeHtml(parentPl.title)}</span>` : '<span style="background:rgba(255,255,255,0.06); color:var(--text-muted); font-size:0.68rem; padding:2px 7px; border-radius:8px;">No Playlist</span>';
+
+                return `
+                    <div class="academy-item-card" style="margin-bottom:8px;">
                         <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
-                            <div style="width:38px; height:38px; border-radius:10px; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                ${iconHtml}
+                            <div style="width:42px; height:42px; border-radius:10px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="fab fa-youtube" style="color:#ef4444; font-size:1.4rem;"></i>
                             </div>
                             <div style="min-width:0; flex:1;">
                                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px; flex-wrap:wrap;">
-                                    ${typeBadge}
-                                    ${extraDetail}
+                                    <span style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:12px;">YouTube</span>
+                                    ${plBadge}
+                                    ${item.duration ? `<span style="font-size:0.75rem; color:var(--text-muted);"><i class="far fa-clock"></i> ${escapeHtml(item.duration)}</span>` : ''}
                                 </div>
                                 <h4 style="margin:0; font-size:0.88rem; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                     ${escapeHtml(item.title)}
                                 </h4>
                                 <p style="margin:2px 0 0 0; font-size:0.75rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                    ${escapeHtml(item.description || item.category || 'No extra notes')}
+                                    ${escapeHtml(item.description || item.category || 'Price Action Strategy')}
                                 </p>
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                            <button type="button" class="btn-action" onclick="openEditAcademyItem('${item.id}')" title="Edit Item" style="background:rgba(255,255,255,0.06); border:none; color:#fff; width:30px; height:30px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                            <button type="button" class="btn-action" onclick="openEditAcademyItem('${item.id}')" title="Edit">
                                 <i class="fas fa-edit" style="font-size:0.75rem;"></i>
                             </button>
-                            <button type="button" class="btn-action" onclick="deleteAcademyItem('${item.id}')" title="Delete Item" style="background:rgba(244,63,94,0.12); border:none; color:var(--rose); width:30px; height:30px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                            <button type="button" class="btn-action" onclick="deleteAcademyItem('${item.id}')" title="Delete">
                                 <i class="fas fa-trash-alt" style="font-size:0.75rem;"></i>
                             </button>
                         </div>
@@ -5514,28 +5723,296 @@
             }).join('');
         }
 
+        function renderPartnerDriveList() {
+            const container = document.getElementById('partnerDriveContainer');
+            if (!container) return;
+            const items = currentAcademyProfile?.items || [];
+            const driveItems = items.filter(it => it.type === 'drive' || it.type === 'free');
+
+            if (driveItems.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);">
+                        <i class="fab fa-google-drive" style="font-size:2.4rem; opacity:0.3; margin-bottom:10px; display:block; color:#3b82f6;"></i>
+                        <h4 style="font-size:0.95rem; margin:0 0 6px 0; color:#fff;">No Free Drive Resources</h4>
+                        <p style="font-size:0.8rem; margin:0 0 14px 0;">Add free PDF cheatsheets, spreadsheets, or indicator drive links for your students.</p>
+                        <button type="button" class="btn-outline" onclick="openAddAcademyItemModal('drive')" style="padding:6px 16px; font-size:0.8rem;">
+                            <i class="fas fa-plus"></i> Add Free Resource
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = driveItems.map(item => `
+                <div class="academy-item-card" style="margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
+                        <div style="width:42px; height:42px; border-radius:10px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <i class="fab fa-google-drive" style="color:#3b82f6; font-size:1.4rem;"></i>
+                        </div>
+                        <div style="min-width:0; flex:1;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+                                <span style="background:rgba(59,130,246,0.15); color:#60a5fa; font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:12px;">Drive Resource</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(item.resourceType || 'Free PDF')}</span>
+                            </div>
+                            <h4 style="margin:0; font-size:0.88rem; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${escapeHtml(item.title)}
+                            </h4>
+                            <p style="margin:2px 0 0 0; font-size:0.75rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${escapeHtml(item.description || 'Downloadable trading material')}
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                        <button type="button" class="btn-action" onclick="openEditAcademyItem('${item.id}')" title="Edit">
+                            <i class="fas fa-edit" style="font-size:0.75rem;"></i>
+                        </button>
+                        <button type="button" class="btn-action" onclick="deleteAcademyItem('${item.id}')" title="Delete">
+                            <i class="fas fa-trash-alt" style="font-size:0.75rem;"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPartnerPaidList() {
+            const container = document.getElementById('partnerPaidContainer');
+            if (!container) return;
+            const items = currentAcademyProfile?.items || [];
+            const paidItems = items.filter(it => it.type === 'paid');
+
+            if (paidItems.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);">
+                        <i class="fas fa-gem" style="font-size:2.4rem; opacity:0.3; margin-bottom:10px; display:block; color:var(--gold);"></i>
+                        <h4 style="font-size:0.95rem; margin:0 0 6px 0; color:#fff;">No Paid Courses Listed</h4>
+                        <p style="font-size:0.8rem; margin:0 0 14px 0;">Offer premium VIP mentorships, private indicator suites, or masterclass packages.</p>
+                        <button type="button" class="btn-gold" onclick="openAddAcademyItemModal('paid')" style="padding:6px 16px; font-size:0.8rem;">
+                            <i class="fas fa-plus"></i> Add Paid Course
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = paidItems.map(item => `
+                <div class="academy-item-card" style="margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1;">
+                        <div style="width:42px; height:42px; border-radius:10px; background:rgba(245,176,65,0.1); border:1px solid rgba(245,176,65,0.25); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <i class="fas fa-gem" style="color:var(--gold); font-size:1.4rem;"></i>
+                        </div>
+                        <div style="min-width:0; flex:1;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px;">
+                                <span style="background:rgba(245,176,65,0.15); color:var(--gold); font-size:0.68rem; font-weight:800; padding:2px 7px; border-radius:12px;">VIP Course</span>
+                                <span style="font-size:0.8rem; font-weight:800; color:var(--emerald);">${item.currency === 'BDT' ? '৳' : '$'}${item.price || 0}</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(item.courseFormat || 'Mentorship')}</span>
+                            </div>
+                            <h4 style="margin:0; font-size:0.88rem; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${escapeHtml(item.title)}
+                            </h4>
+                            <p style="margin:2px 0 0 0; font-size:0.75rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${escapeHtml(item.description || 'Premium mentorship program')}
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                        <button type="button" class="btn-action" onclick="openEditAcademyItem('${item.id}')" title="Edit">
+                            <i class="fas fa-edit" style="font-size:0.75rem;"></i>
+                        </button>
+                        <button type="button" class="btn-action" onclick="deleteAcademyItem('${item.id}')" title="Delete">
+                            <i class="fas fa-trash-alt" style="font-size:0.75rem;"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== PLAYLIST MODAL LOGIC ====================
+        function populatePlaylistDropdown(selectedPlaylistId = '') {
+            const selectEl = document.getElementById('modalItemPlaylist');
+            if (!selectEl) return;
+            const playlists = currentAcademyProfile?.playlists || [];
+
+            let html = '<option value="">-- No Playlist (Independent Video) --</option>';
+            playlists.forEach(pl => {
+                const isSel = (pl.id === selectedPlaylistId) ? 'selected' : '';
+                html += `<option value="${pl.id}" ${isSel}>📁 ${escapeHtml(pl.title)} (${(pl.itemIds || []).length} videos)</option>`;
+            });
+            selectEl.innerHTML = html;
+        }
+
+        function openCreatePlaylistModal() {
+            document.getElementById('playlistModalTitle').innerText = 'Create YouTube-Style Playlist';
+            document.getElementById('modalPlaylistId').value = '';
+            document.getElementById('modalPlaylistTitle').value = '';
+            document.getElementById('modalPlaylistDesc').value = '';
+            document.getElementById('modalPlaylistThumbUrl').value = '';
+
+            const pPreview = document.getElementById('modalPlaylistThumbPreview');
+            if (pPreview) { pPreview.style.display = 'none'; pPreview.src = ''; }
+
+            populatePlaylistVideoChecklist([]);
+            openModal('academyPlaylistModal');
+        }
+
+        function openEditPlaylistModal(playlistId) {
+            const playlists = currentAcademyProfile?.playlists || [];
+            const pl = playlists.find(p => p.id === playlistId);
+            if (!pl) return;
+
+            document.getElementById('playlistModalTitle').innerText = 'Edit Playlist';
+            document.getElementById('modalPlaylistId').value = pl.id;
+            document.getElementById('modalPlaylistTitle').value = pl.title || '';
+            document.getElementById('modalPlaylistDesc').value = pl.description || '';
+            document.getElementById('modalPlaylistThumbUrl').value = pl.thumbnailUrl || '';
+
+            const pPreview = document.getElementById('modalPlaylistThumbPreview');
+            if (pPreview && pl.thumbnailUrl) {
+                pPreview.style.display = 'block';
+                pPreview.src = pl.thumbnailUrl;
+            } else if (pPreview) {
+                pPreview.style.display = 'none';
+            }
+
+            populatePlaylistVideoChecklist(pl.itemIds || []);
+            openModal('academyPlaylistModal');
+        }
+
+        function populatePlaylistVideoChecklist(selectedItemIds = []) {
+            const listEl = document.getElementById('modalPlaylistVideosList');
+            const countEl = document.getElementById('modalPlaylistSelectedCount');
+            if (!listEl) return;
+
+            const items = (currentAcademyProfile?.items || []).filter(it => it.type === 'youtube');
+            if (items.length === 0) {
+                listEl.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); padding:8px; text-align:center;">No videos in your library yet. Add videos first, then group them into playlists!</div>';
+                if (countEl) countEl.innerText = '0 selected';
+                return;
+            }
+
+            listEl.innerHTML = items.map((it, idx) => {
+                const isChecked = selectedItemIds.includes(it.id) ? 'checked' : '';
+                return `
+                    <label style="display:flex; align-items:center; gap:8px; padding:6px 8px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;">
+                        <input type="checkbox" class="pl-video-check" value="${it.id}" ${isChecked} onchange="updatePlaylistSelectedCount()" />
+                        <span style="font-size:0.78rem; color:#fff; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            ${escapeHtml(it.title)}
+                        </span>
+                        <span style="font-size:0.7rem; color:var(--text-muted);">${escapeHtml(it.duration || '')}</span>
+                    </label>
+                `;
+            }).join('');
+
+            updatePlaylistSelectedCount();
+        }
+
+        function updatePlaylistSelectedCount() {
+            const checks = document.querySelectorAll('.pl-video-check:checked');
+            const countEl = document.getElementById('modalPlaylistSelectedCount');
+            if (countEl) countEl.innerText = `${checks.length} selected`;
+        }
+
+        async function handlePlaylistThumbUpload(input) {
+            if (!input.files || !input.files[0]) return;
+            const url = await uploadAcademyImageFile(input.files[0]);
+            if (url) {
+                document.getElementById('modalPlaylistThumbUrl').value = url;
+                const prev = document.getElementById('modalPlaylistThumbPreview');
+                if (prev) { prev.src = url; prev.style.display = 'block'; }
+            }
+        }
+
+        function handleSaveAcademyPlaylist(event) {
+            event.preventDefault();
+            const id = document.getElementById('modalPlaylistId').value;
+            const title = document.getElementById('modalPlaylistTitle').value.trim();
+            const desc = document.getElementById('modalPlaylistDesc').value.trim();
+            const thumbUrl = document.getElementById('modalPlaylistThumbUrl').value.trim();
+
+            if (!title) {
+                showToast('Playlist title is required.', 'warning');
+                return;
+            }
+
+            const checkedBoxes = Array.from(document.querySelectorAll('.pl-video-check:checked'));
+            const selectedItemIds = checkedBoxes.map(b => b.value);
+
+            if (!currentAcademyProfile) currentAcademyProfile = { items: [], playlists: [] };
+            if (!Array.isArray(currentAcademyProfile.playlists)) currentAcademyProfile.playlists = [];
+
+            const plObj = {
+                id: id || `pl_${Date.now()}`,
+                title: title,
+                description: desc,
+                thumbnailUrl: thumbUrl,
+                itemIds: selectedItemIds,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            if (id) {
+                const idx = currentAcademyProfile.playlists.findIndex(p => p.id === id);
+                if (idx !== -1) currentAcademyProfile.playlists[idx] = { ...currentAcademyProfile.playlists[idx], ...plObj };
+                else currentAcademyProfile.playlists.push(plObj);
+            } else {
+                currentAcademyProfile.playlists.push(plObj);
+            }
+
+            // Sync item.playlistId on attached items
+            (currentAcademyProfile.items || []).forEach(it => {
+                if (selectedItemIds.includes(it.id)) {
+                    it.playlistId = plObj.id;
+                } else if (it.playlistId === plObj.id) {
+                    it.playlistId = '';
+                }
+            });
+
+            closeModal('academyPlaylistModal');
+            renderAllCurriculumSubtabs();
+            showToast('Playlist saved! Click "Save Profile Draft" or "Submit for Review" to save your updates.', 'success');
+        }
+
+        function deleteAcademyPlaylist(playlistId) {
+            if (!currentAcademyProfile || !Array.isArray(currentAcademyProfile.playlists)) return;
+            if (!confirm('Are you sure you want to delete this playlist? (Individual videos will remain in your library)')) return;
+
+            currentAcademyProfile.playlists = currentAcademyProfile.playlists.filter(p => p.id !== playlistId);
+            // Clear playlistId references on items
+            (currentAcademyProfile.items || []).forEach(it => {
+                if (it.playlistId === playlistId) it.playlistId = '';
+            });
+
+            renderAllCurriculumSubtabs();
+            showToast('Playlist deleted.', 'info');
+        }
+
+        // ==================== CONTENT ITEM MODAL & CRUD ====================
         function selectAcademyModalType(type) {
             document.getElementById('modalItemType').value = type;
             document.querySelectorAll('.acad-type-select-btn').forEach(b => b.classList.remove('active'));
+
+            const plGroup = document.getElementById('modalItemPlaylistGroup');
             if (type === 'youtube') {
                 const b = document.getElementById('btnTypeYoutube'); if (b) b.classList.add('active');
                 document.getElementById('fieldsYoutubeSection').style.display = 'block';
                 document.getElementById('fieldsDriveSection').style.display = 'none';
                 document.getElementById('fieldsPaidSection').style.display = 'none';
+                if (plGroup) plGroup.style.display = 'block';
             } else if (type === 'drive') {
                 const b = document.getElementById('btnTypeDrive'); if (b) b.classList.add('active');
                 document.getElementById('fieldsYoutubeSection').style.display = 'none';
                 document.getElementById('fieldsDriveSection').style.display = 'block';
                 document.getElementById('fieldsPaidSection').style.display = 'none';
+                if (plGroup) plGroup.style.display = 'none';
             } else if (type === 'paid') {
                 const b = document.getElementById('btnTypePaid'); if (b) b.classList.add('active');
                 document.getElementById('fieldsYoutubeSection').style.display = 'none';
                 document.getElementById('fieldsDriveSection').style.display = 'none';
                 document.getElementById('fieldsPaidSection').style.display = 'block';
+                if (plGroup) plGroup.style.display = 'none';
             }
         }
 
-        function openAddAcademyItemModal() {
+        function openAddAcademyItemModal(preselectedType = 'youtube') {
             document.getElementById('academyModalTitle').innerText = 'Add Academy Content';
             document.getElementById('modalItemId').value = '';
             document.getElementById('modalItemTitle').value = '';
@@ -5543,7 +6020,7 @@
             document.getElementById('modalYoutubeUrl').value = '';
             document.getElementById('modalYoutubeCategory').value = 'Price Action';
             document.getElementById('modalYoutubeDuration').value = '20:00';
-            
+
             // Drive
             document.getElementById('modalDriveUrl').value = '';
             document.getElementById('modalResourceType').value = 'PDF Trading Guide & Cheatsheet';
@@ -5560,7 +6037,8 @@
             document.getElementById('modalPaidThumbUrl').value = '';
             const paidP = document.getElementById('modalPaidThumbPreview'); if (paidP) { paidP.style.display = 'none'; paidP.src = ''; }
 
-            selectAcademyModalType('youtube');
+            populatePlaylistDropdown('');
+            selectAcademyModalType(preselectedType);
             openModal('academyItemModal');
         }
 
@@ -5576,19 +6054,19 @@
             document.getElementById('modalYoutubeUrl').value = item.videoUrl || '';
             document.getElementById('modalYoutubeCategory').value = item.category || 'Price Action';
             document.getElementById('modalYoutubeDuration').value = item.duration || '20:00';
-            
+
             // Drive
             document.getElementById('modalDriveUrl').value = item.driveUrl || '';
             document.getElementById('modalResourceType').value = item.resourceType || 'PDF Trading Guide & Cheatsheet';
             document.getElementById('modalDriveThumbUrl').value = item.thumbnailUrl || '';
             const drvP = document.getElementById('modalDriveThumbPreview');
-            if (drvP) {
-                if (item.thumbnailUrl) { drvP.src = item.thumbnailUrl; drvP.style.display = 'block'; }
-                else { drvP.style.display = 'none'; drvP.src = ''; }
-            }
+            if (drvP && item.thumbnailUrl && item.type === 'drive') {
+                drvP.src = item.thumbnailUrl;
+                drvP.style.display = 'block';
+            } else if (drvP) { drvP.style.display = 'none'; }
 
             // Paid
-            document.getElementById('modalPaidPrice').value = item.price !== undefined ? item.price : '';
+            document.getElementById('modalPaidPrice').value = item.price || '';
             document.getElementById('modalPaidCurrency').value = item.currency || 'USD';
             document.getElementById('modalCourseFormat').value = item.courseFormat || 'Live Mentorship + VIP Signals';
             document.getElementById('modalPaidBuyUrl').value = item.buyUrl || '';
@@ -5596,11 +6074,12 @@
             document.getElementById('modalPaidAccessLink').value = item.accessLink || '';
             document.getElementById('modalPaidThumbUrl').value = item.thumbnailUrl || '';
             const paidP = document.getElementById('modalPaidThumbPreview');
-            if (paidP) {
-                if (item.thumbnailUrl) { paidP.src = item.thumbnailUrl; paidP.style.display = 'block'; }
-                else { paidP.style.display = 'none'; paidP.src = ''; }
-            }
+            if (paidP && item.thumbnailUrl && item.type === 'paid') {
+                paidP.src = item.thumbnailUrl;
+                paidP.style.display = 'block';
+            } else if (paidP) { paidP.style.display = 'none'; }
 
+            populatePlaylistDropdown(item.playlistId || '');
             selectAcademyModalType(item.type || 'youtube');
             openModal('academyItemModal');
         }
@@ -5611,24 +6090,22 @@
             const type = document.getElementById('modalItemType').value;
             const title = document.getElementById('modalItemTitle').value.trim();
             const desc = document.getElementById('modalItemDesc').value.trim();
+            const playlistId = document.getElementById('modalItemPlaylist') ? document.getElementById('modalItemPlaylist').value : '';
 
             if (!title) {
                 showToast('Please enter a lesson / content title.', 'warning');
                 return;
             }
 
-            if (!currentAcademyProfile) {
-                currentAcademyProfile = { items: [] };
-            }
-            if (!Array.isArray(currentAcademyProfile.items)) {
-                currentAcademyProfile.items = [];
-            }
+            if (!currentAcademyProfile) currentAcademyProfile = { items: [], playlists: [] };
+            if (!Array.isArray(currentAcademyProfile.items)) currentAcademyProfile.items = [];
 
             const itemObj = {
                 id: id || `item_${Date.now()}`,
                 type: type,
                 title: title,
                 description: desc,
+                playlistId: playlistId,
                 createdAt: new Date().toISOString()
             };
 
@@ -5663,15 +6140,25 @@
 
             if (id) {
                 const existingIdx = currentAcademyProfile.items.findIndex(it => it.id === id);
-                if (existingIdx !== -1) {
-                    currentAcademyProfile.items[existingIdx] = { ...currentAcademyProfile.items[existingIdx], ...itemObj };
-                }
+                if (existingIdx !== -1) currentAcademyProfile.items[existingIdx] = { ...currentAcademyProfile.items[existingIdx], ...itemObj };
             } else {
                 currentAcademyProfile.items.push(itemObj);
             }
 
+            // Sync with playlist.itemIds
+            if (Array.isArray(currentAcademyProfile.playlists)) {
+                currentAcademyProfile.playlists.forEach(pl => {
+                    if (!Array.isArray(pl.itemIds)) pl.itemIds = [];
+                    if (pl.id === playlistId && !pl.itemIds.includes(itemObj.id)) {
+                        pl.itemIds.push(itemObj.id);
+                    } else if (pl.id !== playlistId && pl.itemIds.includes(itemObj.id)) {
+                        pl.itemIds = pl.itemIds.filter(x => x !== itemObj.id);
+                    }
+                });
+            }
+
             closeModal('academyItemModal');
-            renderAcademyItemsList(currentAcademyProfile.items);
+            renderAllCurriculumSubtabs();
             showToast('Content added to curriculum! Remember to click "Save Profile Draft" or "Submit for Review".', 'success');
         }
 
@@ -5680,24 +6167,34 @@
             if (!confirm('Are you sure you want to remove this item from your academy?')) return;
 
             currentAcademyProfile.items = currentAcademyProfile.items.filter(it => it.id !== id);
-            renderAcademyItemsList(currentAcademyProfile.items);
+            // Remove from any playlist
+            if (Array.isArray(currentAcademyProfile.playlists)) {
+                currentAcademyProfile.playlists.forEach(pl => {
+                    if (Array.isArray(pl.itemIds)) pl.itemIds = pl.itemIds.filter(x => x !== id);
+                });
+            }
+
+            renderAllCurriculumSubtabs();
             showToast('Item removed from curriculum.', 'info');
         }
 
+        // ==================== SAVE PROFILE & SUBMIT FOR REVIEW ====================
         async function savePartnerAcademy(action = 'draft') {
             const mentorName = document.getElementById('acadMentorName') ? document.getElementById('acadMentorName').value.trim() : '';
             if (!mentorName) {
-                showToast('Mentor / Instructor Name is required.', 'warning');
+                showToast('Please enter your Mentor / Instructor Name.', 'warning');
+                if (document.getElementById('acadMentorName')) document.getElementById('acadMentorName').focus();
                 return;
             }
 
             const items = currentAcademyProfile ? (currentAcademyProfile.items || []) : [];
+            const playlists = currentAcademyProfile ? (currentAcademyProfile.playlists || []) : [];
+
             if (action === 'submit' && items.length === 0) {
-                showToast('Please add at least one YouTube video, Drive resource, or course before submitting.', 'warning');
+                showToast('Please add at least one YouTube video, Drive class, or paid course before submitting.', 'warning');
                 return;
             }
 
-            // Collect all social media links
             const socialLinks = {
                 telegram: document.getElementById('acadTelegramChannel') ? document.getElementById('acadTelegramChannel').value.trim() : '',
                 youtube: document.getElementById('acadYoutubeChannel') ? document.getElementById('acadYoutubeChannel').value.trim() : '',
@@ -5719,10 +6216,12 @@
                 youtubeChannel: socialLinks.youtube,
                 socialLinks: socialLinks,
                 items: items,
+                playlists: playlists,
                 action: action
             };
 
             try {
+                showToast(action === 'submit' ? 'Submitting profile for Super Admin review...' : 'Saving draft...', 'info');
                 const res = await fetch('/api/partner/academy', {
                     method: 'POST',
                     headers: {
@@ -5746,12 +6245,12 @@
         }
 
         function previewPartnerAcademy() {
-            const mentorName = document.getElementById('acadMentorName') ? document.getElementById('acadMentorName').value.trim() : 'Mentor Name';
-            const tagline = document.getElementById('acadMentorTagline') ? document.getElementById('acadMentorTagline').value.trim() : 'Professional Trader & Mentor';
-            const bio = document.getElementById('acadMentorBio') ? document.getElementById('acadMentorBio').value.trim() : 'No biography provided yet.';
+            const mentorName = document.getElementById('acadMentorName') ? document.getElementById('acadMentorName').value.trim() : '';
+            const tagline = document.getElementById('acadMentorTagline') ? document.getElementById('acadMentorTagline').value.trim() : '';
+            const bio = document.getElementById('acadMentorBio') ? document.getElementById('acadMentorBio').value.trim() : '';
             const avatar = document.getElementById('acadAvatarUrl') ? document.getElementById('acadAvatarUrl').value.trim() : '';
             const banner = document.getElementById('acadBannerUrl') ? document.getElementById('acadBannerUrl').value.trim() : '';
-            
+
             const tg = document.getElementById('acadTelegramChannel') ? document.getElementById('acadTelegramChannel').value.trim() : '';
             const yt = document.getElementById('acadYoutubeChannel') ? document.getElementById('acadYoutubeChannel').value.trim() : '';
             const fb = document.getElementById('acadFacebookUrl') ? document.getElementById('acadFacebookUrl').value.trim() : '';
@@ -5764,20 +6263,20 @@
             const elName = document.getElementById('previewMentorName'); if (elName) elName.innerText = mentorName;
             const elTag = document.getElementById('previewMentorTagline'); if (elTag) elTag.innerText = tagline;
             const elBio = document.getElementById('previewMentorBio'); if (elBio) elBio.innerText = bio;
-            const elAv = document.getElementById('previewAvatarImg'); if (elAv) elAv.src = avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
-            const elBn = document.getElementById('previewBannerBox'); if (elBn) elBn.style.background = `url('${banner || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80'}') center/cover no-repeat`;
+            const elAv = document.getElementById('previewAvatarImg'); if (elAv) elAv.src = avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
+            const elBn = document.getElementById('previewBannerBox'); if (elBn) elBn.style.background = `url('${banner || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&auto=format&fit=crop&q=80'}') center/cover no-repeat`;
 
             const socBox = document.getElementById('previewSocialLinksBox');
             if (socBox) {
                 let sHtml = '';
-                if (tg) sHtml += `<a href="${escapeHtml(tg)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#229ED9; color:#229ED9;"><i class="fab fa-telegram-plane"></i> Telegram</a>`;
-                if (yt) sHtml += `<a href="${escapeHtml(yt)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#ef4444; color:#ef4444;"><i class="fab fa-youtube"></i> YouTube</a>`;
-                if (fb) sHtml += `<a href="${escapeHtml(fb)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#1877F2; color:#1877F2;"><i class="fab fa-facebook"></i> Facebook</a>`;
-                if (ig) sHtml += `<a href="${escapeHtml(ig)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#E4405F; color:#E4405F;"><i class="fab fa-instagram"></i> Instagram</a>`;
-                if (wa) sHtml += `<a href="${escapeHtml(wa)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#25D366; color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp</a>`;
-                if (tw) sHtml += `<a href="${escapeHtml(tw)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#fff; color:#fff;"><i class="fab fa-twitter"></i> Twitter</a>`;
-                if (dc) sHtml += `<a href="${escapeHtml(dc)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:#5865F2; color:#5865F2;"><i class="fab fa-discord"></i> Discord</a>`;
-                if (ws) sHtml += `<a href="${escapeHtml(ws)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem; border-color:var(--emerald); color:var(--emerald);"><i class="fas fa-link"></i> Website</a>`;
+                if (tg) sHtml += `<a href="${escapeHtml(tg)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem;"><i class="fab fa-telegram"></i> Telegram</a>`;
+                if (yt) sHtml += `<a href="${escapeHtml(yt)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem;"><i class="fab fa-youtube"></i> YouTube</a>`;
+                if (fb) sHtml += `<a href="${escapeHtml(fb)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem;"><i class="fab fa-facebook"></i> Facebook</a>`;
+                if (ig) sHtml += `<a href="${escapeHtml(ig)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem;"><i class="fab fa-instagram"></i> Instagram</a>`;
+                if (wa) sHtml += `<a href="${escapeHtml(wa)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem;"><i class="fab fa-whatsapp"></i> WhatsApp</a>`;
+                if (tw) sHtml += `<a href="${escapeHtml(tw)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem;"><i class="fab fa-twitter"></i> Twitter</a>`;
+                if (dc) sHtml += `<a href="${escapeHtml(dc)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem;"><i class="fab fa-discord"></i> Discord</a>`;
+                if (ws) sHtml += `<a href="${escapeHtml(ws)}" target="_blank" class="btn-outline" style="padding:6px 12px; font-size:0.75rem;"><i class="fas fa-globe"></i> Website</a>`;
                 socBox.innerHTML = sHtml;
             }
 
@@ -5786,31 +6285,25 @@
             const listEl = document.getElementById('previewItemsList');
             if (listEl) {
                 if (items.length === 0) {
-                    listEl.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:1.5rem; color:var(--text-muted);">No curriculum items yet.</div>';
+                    listEl.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:1.5rem; color:var(--text-muted);">No classes added yet.</div>';
                 } else {
                     listEl.innerHTML = items.map(it => {
-                        let badge = '<span style="background:rgba(239,68,68,0.2); color:#ef4444; font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:10px;">Video</span>';
+                        let badge = '<span style="background:rgba(239,68,68,0.2); color:#ef4444; font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:8px;">YouTube</span>';
                         let extra = it.duration ? `<span style="font-size:0.7rem; color:var(--text-muted);">${escapeHtml(it.duration)}</span>` : '';
                         if (it.type === 'drive' || it.type === 'free') {
-                            badge = '<span style="background:rgba(59,130,246,0.2); color:#60a5fa; font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:10px;">Drive</span>';
-                            extra = `<span style="font-size:0.7rem; color:var(--text-muted);">${escapeHtml(it.resourceType || 'Resource')}</span>`;
+                            badge = '<span style="background:rgba(59,130,246,0.2); color:#60a5fa; font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:8px;">Free Drive</span>';
+                            extra = `<span style="font-size:0.7rem; color:var(--text-muted);">${escapeHtml(it.resourceType || '')}</span>`;
                         } else if (it.type === 'paid') {
-                            badge = '<span style="background:rgba(245,176,65,0.2); color:var(--gold); font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:10px;">Paid</span>';
-                            extra = `<span style="font-size:0.75rem; font-weight:800; color:var(--emerald);">${it.currency === 'BDT' ? 'BDT ' : '$'}${it.price}</span>`;
+                            badge = '<span style="background:rgba(245,176,65,0.2); color:var(--gold); font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:8px;">VIP Course</span>';
+                            extra = `<span style="font-size:0.75rem; font-weight:800; color:var(--emerald);">${it.currency === 'BDT' ? '৳' : '$'}${it.price || 0}</span>`;
                         }
-
                         return `
-                            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                                     ${badge}
                                     ${extra}
                                 </div>
-                                <div style="font-size:0.85rem; font-weight:700; color:#fff; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                    ${escapeHtml(it.title)}
-                                </div>
-                                <div style="font-size:0.72rem; color:var(--text-muted); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
-                                    ${escapeHtml(it.description || 'No description.')}
-                                </div>
+                                <h5 style="margin:0; font-size:0.85rem; font-weight:700; color:#fff;">${escapeHtml(it.title)}</h5>
                             </div>
                         `;
                     }).join('');
@@ -5818,7 +6311,7 @@
             }
 
             openModal('academyPreviewModal');
-        }
+        }        }
 
 
         // On Page Load
