@@ -601,6 +601,22 @@ function savePartnerPromoRequests(requests, singleRequest = null) {
 
 // ==================== ACADEMY PROFILES HELPERS ====================
 
+async function getAcademyProfilesAsync() {
+  if (db && db.isMySqlActive()) {
+    try {
+      const sqlProfiles = await db.getAllAcademyProfiles();
+      if (Array.isArray(sqlProfiles) && sqlProfiles.length > 0) {
+        writeJson(ACADEMY_PROFILES_FILE, sqlProfiles);
+        writeJson(ACADEMY_PROFILES_PERMANENT_STORE_FILE, sqlProfiles);
+        return sqlProfiles;
+      }
+    } catch (e) {
+      console.error('[ASYNC MYSQL ACADEMY PROFILES ERROR]:', e.message);
+    }
+  }
+  return getAcademyProfiles();
+}
+
 function getAcademyProfiles() {
   let profiles = readJson(ACADEMY_PROFILES_FILE, null);
   if (!Array.isArray(profiles) || profiles.length === 0) {
@@ -866,6 +882,10 @@ function mirrorToMySql(file, data, singleItemToMirror = null) {
         db.savePartnerPromoRequest(singleItemToMirror).catch(e => console.error('[MYSQL PROMO REQ MIRROR ERROR]:', e.message));
       } else if (file === PAYOUTS_FILE) {
         db.savePayout(singleItemToMirror).catch(e => console.error('[MYSQL PAYOUT MIRROR ERROR]:', e.message));
+      } else if (file === ACADEMY_PROFILES_FILE || file === ACADEMY_PROFILES_PERMANENT_STORE_FILE) {
+        db.saveAcademyProfile(singleItemToMirror).catch(e => console.error('[MYSQL ACADEMY PROFILE MIRROR ERROR]:', e.message));
+      } else if (file === ACADEMY_ENROLLMENTS_FILE || file === ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE) {
+        db.saveAcademyEnrollment(singleItemToMirror).catch(e => console.error('[MYSQL ACADEMY ENROLLMENT MIRROR ERROR]:', e.message));
       }
       return;
     }
@@ -7406,9 +7426,9 @@ app.get('/api/courses', (req, res) => {
 });
 
 // Public API: List all approved mentors (Affiliate Partners Only)
-app.get('/api/academy/mentors', (req, res) => {
+app.get('/api/academy/mentors', async (req, res) => {
   try {
-    const profiles = getAcademyProfiles();
+    const profiles = await getAcademyProfilesAsync();
     const approvedMentors = profiles
       .filter(p => p && p.status === 'approved')
       .map(p => {
@@ -7452,11 +7472,11 @@ app.get('/api/academy/mentors', (req, res) => {
 });
 
 // Public API: Get single mentor details with items
-app.get('/api/academy/mentors/:id', (req, res) => {
+app.get('/api/academy/mentors/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const isPreview = req.query.preview === 'true';
-    const profiles = getAcademyProfiles();
+    const profiles = await getAcademyProfilesAsync();
     const profile = profiles.find(p => p && (p.id === id || p.partnerId === id));
     if (!profile) {
       return res.status(404).json({ success: false, message: 'Mentor profile not found.' });
@@ -7519,7 +7539,7 @@ app.post('/api/academy/upload-proof', uploadAcademyMediaMiddleware('proof'), (re
 });
 
 // Trader / Student Course Enrollment / Purchase Submission
-app.post('/api/academy/course/enroll', (req, res) => {
+app.post('/api/academy/course/enroll', async (req, res) => {
   try {
     const {
       partnerId,
@@ -7540,7 +7560,7 @@ app.post('/api/academy/course/enroll', (req, res) => {
       });
     }
 
-    const profiles = getAcademyProfiles();
+    const profiles = await getAcademyProfilesAsync();
     const profile = profiles.find(p => p && (p.partnerId === partnerId || p.id === partnerId));
     if (!profile) {
       return res.status(404).json({ success: false, message: 'Mentor profile not found.' });
@@ -7618,7 +7638,7 @@ app.post('/api/academy/course/enroll', (req, res) => {
 });
 
 // Student's Enrolled Courses and Unlocked Links
-app.get('/api/academy/my-enrollments', (req, res) => {
+app.get('/api/academy/my-enrollments', async (req, res) => {
   try {
     let email = (req.query.email || '').trim().toLowerCase();
     
@@ -7641,7 +7661,7 @@ app.get('/api/academy/my-enrollments', (req, res) => {
     const userEnrollments = enrollments.filter(e => e && e.userEmail && e.userEmail.toLowerCase() === email);
 
     // If approved, enrich with course secret accessLink or materials
-    const profiles = getAcademyProfiles();
+    const profiles = await getAcademyProfilesAsync();
     const enriched = userEnrollments.map(enr => {
       if (enr.status === 'approved') {
         const prof = profiles.find(p => p && p.partnerId === enr.partnerId);
@@ -9182,9 +9202,9 @@ app.delete('/api/admin/courses/:id', authenticateAdminToken, (req, res) => {
 
 // ==================== ADMIN ACADEMY CONTROL APIS ====================
 
-app.get('/api/admin/academy/profiles', authenticateAdminToken, (req, res) => {
+app.get('/api/admin/academy/profiles', authenticateAdminToken, async (req, res) => {
   try {
-    const profiles = getAcademyProfiles();
+    const profiles = await getAcademyProfilesAsync();
     const summary = {
       total: profiles.length,
       pending: profiles.filter(p => p.status === 'pending').length,
@@ -9198,10 +9218,10 @@ app.get('/api/admin/academy/profiles', authenticateAdminToken, (req, res) => {
   }
 });
 
-app.post('/api/admin/academy/profiles/:id/approve', authenticateAdminToken, (req, res) => {
+app.post('/api/admin/academy/profiles/:id/approve', authenticateAdminToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const profiles = getAcademyProfiles();
+    const profiles = await getAcademyProfilesAsync();
     const idx = profiles.findIndex(p => p && (p.id === id || p.partnerId === id));
     if (idx === -1) {
       return res.status(404).json({ success: false, message: 'Academy profile not found.' });
@@ -9225,7 +9245,7 @@ app.post('/api/admin/academy/profiles/:id/approve', authenticateAdminToken, (req
   }
 });
 
-app.post('/api/admin/academy/profiles/:id/reject', authenticateAdminToken, (req, res) => {
+app.post('/api/admin/academy/profiles/:id/reject', authenticateAdminToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { rejectionReason } = req.body;
@@ -9233,7 +9253,7 @@ app.post('/api/admin/academy/profiles/:id/reject', authenticateAdminToken, (req,
       return res.status(400).json({ success: false, message: 'Please provide a reason or feedback for rejecting this profile.' });
     }
 
-    const profiles = getAcademyProfiles();
+    const profiles = await getAcademyProfilesAsync();
     const idx = profiles.findIndex(p => p && (p.id === id || p.partnerId === id));
     if (idx === -1) {
       return res.status(404).json({ success: false, message: 'Academy profile not found.' });
@@ -9257,7 +9277,7 @@ app.post('/api/admin/academy/profiles/:id/reject', authenticateAdminToken, (req,
   }
 });
 
-app.post('/api/admin/academy/profiles/:id/status', authenticateAdminToken, (req, res) => {
+app.post('/api/admin/academy/profiles/:id/status', authenticateAdminToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -9265,7 +9285,7 @@ app.post('/api/admin/academy/profiles/:id/status', authenticateAdminToken, (req,
       return res.status(400).json({ success: false, message: 'Invalid status value.' });
     }
 
-    const profiles = getAcademyProfiles();
+    const profiles = await getAcademyProfilesAsync();
     const idx = profiles.findIndex(p => p && (p.id === id || p.partnerId === id));
     if (idx === -1) {
       return res.status(404).json({ success: false, message: 'Academy profile not found.' });
@@ -9285,10 +9305,10 @@ app.post('/api/admin/academy/profiles/:id/status', authenticateAdminToken, (req,
   }
 });
 
-app.delete('/api/admin/academy/profiles/:id', authenticateAdminToken, (req, res) => {
+app.delete('/api/admin/academy/profiles/:id', authenticateAdminToken, async (req, res) => {
   try {
     const { id } = req.params;
-    let profiles = getAcademyProfiles();
+    let profiles = await getAcademyProfilesAsync();
     const target = profiles.find(p => p && (p.id === id || p.partnerId === id));
     if (!target) {
       return res.status(404).json({ success: false, message: 'Academy profile not found.' });
@@ -12549,10 +12569,10 @@ app.post('/api/admin/partner-promo-requests/:id/action', authenticateAdminToken,
 
 // ==================== PARTNER ACADEMY PROFILE APIS ====================
 
-app.get('/api/partner/academy', authenticatePartnerToken, (req, res) => {
+app.get('/api/partner/academy', authenticatePartnerToken, async (req, res) => {
   try {
     const partnerId = req.partner.id;
-    const profiles = getAcademyProfiles();
+    const profiles = await getAcademyProfilesAsync();
     let profile = profiles.find(p => p && (p.partnerId === partnerId || p.partnerEmail === req.partner.email));
 
     if (!profile) {
@@ -12588,7 +12608,7 @@ app.get('/api/partner/academy', authenticatePartnerToken, (req, res) => {
   }
 });
 
-app.post('/api/partner/academy', authenticatePartnerToken, (req, res) => {
+app.post('/api/partner/academy', authenticatePartnerToken, async (req, res) => {
   try {
     const partnerId = req.partner.id;
     const {
@@ -12608,7 +12628,7 @@ app.post('/api/partner/academy', authenticatePartnerToken, (req, res) => {
       return res.status(400).json({ success: false, message: 'Mentor / Instructor Name is required.' });
     }
 
-    const profiles = getAcademyProfiles();
+    const profiles = await getAcademyProfilesAsync();
     let idx = profiles.findIndex(p => p && (p.partnerId === partnerId || p.partnerEmail === req.partner.email));
 
     const cleanItems = Array.isArray(items) ? items.map((it, i) => {

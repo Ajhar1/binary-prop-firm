@@ -4837,6 +4837,9 @@
     <!-- ==================== SCRIPT ==================== -->
     <script>
         let adminToken = localStorage.getItem('aj_admin_token') || '';
+        function getAdminToken() {
+            return adminToken || localStorage.getItem('aj_admin_token') || '';
+        }
         let adminUser = null;
         let adminStats = {};
         let adminUsers = [];
@@ -5074,6 +5077,9 @@
                 document.getElementById('tabHeaderDesc').innerText = titles[tabKey][1];
             }
 
+            if (tabKey === 'courses') {
+                fetchAdminAcademyProfiles();
+            }
             if (tabKey === 'package-manage') {
                 fetchAdminPackages();
             }
@@ -8371,7 +8377,7 @@
 
         async function fetchAdminAcademyProfiles() {
             try {
-                const token = getAdminToken();
+                const token = adminToken || localStorage.getItem('aj_admin_token') || '';
                 if (!token) return;
                 const headers = { 'Authorization': `Bearer ${token}` };
                 const res = await fetch('/api/admin/academy/profiles', { headers });
