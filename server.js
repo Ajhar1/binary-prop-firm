@@ -7433,6 +7433,7 @@ app.get('/api/academy/mentors', async (req, res) => {
       .filter(p => p && p.status === 'approved')
       .map(p => {
         const items = Array.isArray(p.items) ? p.items : [];
+        const playlists = Array.isArray(p.playlists) ? p.playlists : [];
         const videosCount = items.filter(it => it.type === 'youtube').length;
         const freeDriveCount = items.filter(it => it.type === 'drive' || it.type === 'free').length;
         const paidCoursesCount = items.filter(it => it.type === 'paid').length;
@@ -7442,6 +7443,7 @@ app.get('/api/academy/mentors', async (req, res) => {
           isOfficial: false,
           partnerId: p.partnerId,
           partnerCode: p.partnerCode || '',
+          partnerEmail: p.partnerEmail || '',
           mentorName: p.mentorName || p.partnerName || 'Community Mentor',
           mentorTagline: p.mentorTagline || 'Professional Trader & Mentor',
           mentorBio: p.mentorBio || '',
