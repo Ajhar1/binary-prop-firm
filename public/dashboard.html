@@ -12688,6 +12688,52 @@
             }
         }
 
+        let myDashEnrollments = [];
+
+        function showDashToast(msg, type = 'success') {
+            if (typeof showToast === 'function') {
+                showToast(msg, type);
+            } else {
+                alert(msg);
+            }
+        }
+
+        function convertToEmbedUrl(url) {
+            if (!url) return '';
+            url = url.trim();
+            if (url.includes('/embed/')) return url;
+            
+            const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+            if (ytMatch && ytMatch[1]) {
+                return `https://www.youtube.com/embed/${ytMatch[1]}`;
+            }
+            
+            const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (driveMatch && driveMatch[1]) {
+                return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+            }
+            
+            return url;
+        }
+
+        async function fetchMyDashEnrollments() {
+            try {
+                const token = localStorage.getItem('token') || localStorage.getItem('aj_token') || localStorage.getItem('bpf_token') || '';
+                const userEmail = (typeof currentUser !== 'undefined' && currentUser && currentUser.email) ? currentUser.email : '';
+                const res = await fetch(`/api/academy/my-enrollments?email=${encodeURIComponent(userEmail)}`, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+                const data = await res.json();
+                if (data.success && Array.isArray(data.enrollments)) {
+                    myDashEnrollments = data.enrollments;
+                } else {
+                    myDashEnrollments = [];
+                }
+            } catch (e) {
+                myDashEnrollments = [];
+            }
+        }
+
         let activePlaylistQueue = [];
         let activePlaylistIndex = 0;
         let activePlaylistTitle = '';
