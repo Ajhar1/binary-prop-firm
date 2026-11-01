@@ -5495,6 +5495,11 @@ app.post('/api/challenges/:id/start-official', authenticateToken, (req, res) => 
     c.practiceSkippedAt = now.toISOString();
     c.durationDays = c.durationDays || 15;
     c.expiresAt = new Date(now.getTime() + (c.durationDays * 24 * 60 * 60 * 1000)).toISOString();
+
+    // Explicitly reset capital to official challenge initial funded capital for evaluation phase
+    const initialCap = Number(c.fundedAmount || c.accountSize || c.capital || 1000);
+    c.currentCapital = initialCap;
+
     challenges[idx] = c;
     saveChallenges(challenges);
 
@@ -6037,8 +6042,28 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       });
     }
 
-    // Session Starting Capital
-    const sessionStartingCapital = Number(activeChallenge.currentCapital || activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
+    // Session Starting Capital (strictly isolated by phase: practice vs official evaluation)
+    const baseFundedCapital = Number(activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
+    const relevantPhaseSubs = submissions.filter(s => 
+      s.status !== 'rejected' &&
+      (s.challengeId ? s.challengeId === activeChallenge.id : s.userId === user.id) &&
+      (isPracticePhase ? (s.isPractice === true) : (s.isPractice !== true))
+    );
+    relevantPhaseSubs.sort((a, b) => new Date(a.submittedAt || a.sessionDate || 0) - new Date(b.submittedAt || b.sessionDate || 0));
+
+    let sessionStartingCapital = baseFundedCapital;
+    if (relevantPhaseSubs.length > 0) {
+      const lastSub = relevantPhaseSubs[relevantPhaseSubs.length - 1];
+      if (lastSub && lastSub.endingCapital) {
+        sessionStartingCapital = Number(lastSub.endingCapital);
+      } else {
+        let accPnl = 0;
+        relevantPhaseSubs.forEach(s => { accPnl += (parseFloat(s.profitLoss) || 0); });
+        sessionStartingCapital = Math.round((baseFundedCapital + accPnl) * 100) / 100;
+      }
+    } else {
+      sessionStartingCapital = baseFundedCapital;
+    }
     const maxLossLimit = sessionStartingCapital * 0.25;
     const drawdownFloor = sessionStartingCapital - maxLossLimit;
 
@@ -6110,6 +6135,13 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
       // Collect authorized stakes strictly according to the Money Management Sheet's plannedStake
       const validStakes = getValidStakesForPlanned(plannedStake);
+      // Extra safety: for Step 1 of the session, also accept base funded capital's step 1 stake
+      if (m === 0) {
+        const baseStep1Stake = Math.round(baseFundedCapital * 0.0333);
+        getValidStakesForPlanned(baseStep1Stake).forEach(v => {
+          if (!validStakes.includes(v)) validStakes.push(v);
+        });
+      }
       if (clientSheetStake != null && clientSheetStake > 0 && Math.abs(clientSheetStake - plannedStake) < 0.05) {
         getValidStakesForPlanned(clientSheetStake).forEach(v => {
           if (!validStakes.includes(v)) validStakes.push(v);

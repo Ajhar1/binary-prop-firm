@@ -8813,11 +8813,23 @@
                 return timeA - timeB;
             });
 
-            // Active Starting Capital
-            let sessionCapital = Number(activeChallenge ? (activeChallenge.currentCapital || activeChallenge.fundedAmount || 100) : 100);
-            if (activeGroup && activeGroup.submissions.length > 0) {
-                const lastSub = activeGroup.submissions[activeGroup.submissions.length - 1];
-                if (lastSub && lastSub.endingCapital) sessionCapital = Number(lastSub.endingCapital);
+            // Active Starting Capital (strictly isolated by phase: practice vs official evaluation)
+            const baseFundedCapital = Number(activeChallenge ? (activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000) : 1000);
+            const phaseSubmissions = (activeGroup ? activeGroup.submissions : []).filter(s => {
+                if (s.status === 'rejected') return false;
+                return isPracticePhase ? (s.isPractice === true) : (s.isPractice !== true);
+            });
+
+            let sessionCapital = baseFundedCapital;
+            if (phaseSubmissions.length > 0) {
+                const lastSub = phaseSubmissions[phaseSubmissions.length - 1];
+                if (lastSub && lastSub.endingCapital) {
+                    sessionCapital = Number(lastSub.endingCapital);
+                } else if (lastSub && lastSub.startingCapital !== undefined && lastSub.profitLoss !== undefined) {
+                    sessionCapital = Number(lastSub.startingCapital) + Number(lastSub.profitLoss);
+                }
+            } else if (typeof getActiveChallengeCurrentCapital === 'function' && activeChallenge) {
+                sessionCapital = getActiveChallengeCurrentCapital(activeChallenge);
             }
 
             const mat = (typeof buildMasanielloMatrix === 'function') 
@@ -8893,6 +8905,13 @@
                 }
 
                 const validStakes = getValidStakesForPlanned(plannedStake);
+                // Extra safety: for Step 1 of the session, also accept base funded capital's step 1 stake
+                if (currentStep === 1) {
+                    const baseStep1Stake = Math.round(baseFundedCapital * 0.0333);
+                    getValidStakesForPlanned(baseStep1Stake).forEach(v => {
+                        if (!validStakes.includes(v)) validStakes.push(v);
+                    });
+                }
                 const isStakeOk = validStakes.some(v => Math.abs(actualStake - v) < 0.05);
                 const isPayoutOk = (payoutNum >= 85);
 
