@@ -2823,6 +2823,135 @@
             color: #fff;
         }
 
+        /* Setup Video Modal Styles */
+        .setup-player-horizontal {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            height: 0;
+            background: #000;
+            border: 1px solid rgba(255, 184, 0, 0.35);
+            border-radius: 14px;
+            overflow: hidden;
+            margin: 0 auto 12px auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            transition: all 0.25s ease;
+        }
+        .setup-player-horizontal iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 12px;
+        }
+        .setup-player-vertical {
+            position: relative;
+            height: 480px;
+            max-height: 52vh;
+            width: calc(min(480px, 52vh) * 9 / 16);
+            max-width: 95%;
+            aspect-ratio: 9 / 16;
+            margin: 0 auto 12px auto;
+            background: #000;
+            border: 1px solid rgba(255, 184, 0, 0.45);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85), 0 0 15px rgba(255, 184, 0, 0.12);
+            transition: all 0.25s ease;
+        }
+        .setup-player-vertical iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 14px;
+        }
+        .setup-video-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            #setupVideoModal {
+                align-items: flex-end !important;
+                padding: 0 !important;
+            }
+            #setupVideoModal .modal-box {
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: 94vh !important;
+                border-radius: 22px 22px 0 0 !important;
+                padding: 1.2rem 1rem max(1.8rem, env(safe-area-inset-bottom, 24px)) 1rem !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch;
+                box-sizing: border-box !important;
+            }
+            #setupVideoMainHeader {
+                margin-bottom: 0.85rem !important;
+            }
+            #setupVideoMainHeader .setup-header-icon {
+                width: 42px !important;
+                height: 42px !important;
+                font-size: 1.25rem !important;
+                margin-bottom: 0.4rem !important;
+                border-radius: 12px !important;
+            }
+            #setupModalHeading {
+                font-size: 1.15rem !important;
+                margin-bottom: 2px !important;
+            }
+            #setupModalSubheading {
+                font-size: 0.76rem !important;
+            }
+            #setupVideoDeviceSelector,
+            #setupVideoLangList {
+                gap: 8px !important;
+            }
+            .setup-device-card {
+                padding: 10px 14px !important;
+                border-radius: 12px !important;
+            }
+            .setup-device-card-icon {
+                width: 38px !important;
+                height: 38px !important;
+                font-size: 1.15rem !important;
+                border-radius: 10px !important;
+            }
+            .setup-device-card-title {
+                font-size: 0.92rem !important;
+            }
+            .setup-device-card-sub {
+                font-size: 0.72rem !important;
+            }
+            .setup-device-card-action {
+                font-size: 0.78rem !important;
+            }
+            .setup-video-actions {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+                width: 100% !important;
+                margin-top: 8px !important;
+            }
+            .setup-video-actions a,
+            .setup-video-actions button {
+                width: 100% !important;
+                justify-content: center !important;
+                padding: 8px 10px !important;
+                font-size: 0.75rem !important;
+                box-sizing: border-box !important;
+            }
+            .setup-video-actions .setup-action-full {
+                grid-column: span 2 !important;
+            }
+        }
+
         /* Support Desk Styles */
         .support-desk-grid {
             display: grid;
@@ -5547,7 +5676,7 @@
             
             <!-- Modal Header (Adapts dynamically) -->
             <div id="setupVideoMainHeader" style="text-align: center; margin-bottom: 1.4rem;">
-                <div style="width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, rgba(255,184,0,0.2), rgba(255,145,0,0.3)); border: 1px solid rgba(255,184,0,0.5); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto; font-size: 1.5rem; color: #ffb800; box-shadow: 0 0 20px rgba(255,184,0,0.25);">
+                <div class="setup-header-icon" style="width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, rgba(255,184,0,0.2), rgba(255,145,0,0.3)); border: 1px solid rgba(255,184,0,0.5); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto; font-size: 1.5rem; color: #ffb800; box-shadow: 0 0 20px rgba(255,184,0,0.25);">
                     <i class="fas fa-play-circle"></i>
                 </div>
                 <h2 id="setupModalHeading" style="font-size: 1.3rem; font-weight: 800; color: #fff; margin: 0 0 4px 0;">Extension Setup Video Guide</h2>
@@ -5557,51 +5686,51 @@
             <!-- View 1: Device Selection Options (Computer, Android, iPhone) -->
             <div id="setupVideoDeviceSelector" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
                 <!-- Option 1: Computer -->
-                <div onclick="selectSetupDevice('computer')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(255,184,0,0.6)'; this.style.background='rgba(255,184,0,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
+                <div onclick="selectSetupDevice('computer')" class="setup-device-card" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(255,184,0,0.6)'; this.style.background='rgba(255,184,0,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
                     <div style="display: flex; align-items: center; gap: 14px;">
-                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.35); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.3rem; flex-shrink: 0;">
+                        <div class="setup-device-card-icon" style="width: 44px; height: 44px; border-radius: 12px; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.35); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.3rem; flex-shrink: 0;">
                             <i class="fas fa-desktop"></i>
                         </div>
                         <div>
-                            <div style="font-weight: 800; font-size: 0.98rem; color: #fff; margin-bottom: 2px;">Computer</div>
-                            <div style="font-size: 0.78rem; color: var(--text-secondary);">Windows / Mac (Chrome, Brave, Edge)</div>
+                            <div class="setup-device-card-title" style="font-weight: 800; font-size: 0.98rem; color: #fff; margin-bottom: 2px;">Computer</div>
+                            <div class="setup-device-card-sub" style="font-size: 0.78rem; color: var(--text-secondary);">Windows / Mac (Chrome, Brave, Edge)</div>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 6px; color: var(--yellow); font-size: 0.84rem; font-weight: 700;">
+                    <div class="setup-device-card-action" style="display: flex; align-items: center; gap: 6px; color: var(--yellow); font-size: 0.84rem; font-weight: 700;">
                         <span>Watch the video</span>
                         <i class="fas fa-chevron-right" style="font-size: 0.72rem;"></i>
                     </div>
                 </div>
 
                 <!-- Option 2: Android -->
-                <div onclick="selectSetupDevice('android')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(0,230,118,0.6)'; this.style.background='rgba(0,230,118,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
+                <div onclick="selectSetupDevice('android')" class="setup-device-card" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(0,230,118,0.6)'; this.style.background='rgba(0,230,118,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
                     <div style="display: flex; align-items: center; gap: 14px;">
-                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 230, 118, 0.15); border: 1px solid rgba(0, 230, 118, 0.35); display: flex; align-items: center; justify-content: center; color: #00e676; font-size: 1.4rem; flex-shrink: 0;">
+                        <div class="setup-device-card-icon" style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 230, 118, 0.15); border: 1px solid rgba(0, 230, 118, 0.35); display: flex; align-items: center; justify-content: center; color: #00e676; font-size: 1.4rem; flex-shrink: 0;">
                             <i class="fab fa-android"></i>
                         </div>
                         <div>
-                            <div style="font-weight: 800; font-size: 0.98rem; color: #fff; margin-bottom: 2px;">Android</div>
-                            <div style="font-size: 0.78rem; color: var(--text-secondary);">Mobile setup with Kiwi Browser or Chrome</div>
+                            <div class="setup-device-card-title" style="font-weight: 800; font-size: 0.98rem; color: #fff; margin-bottom: 2px;">Android</div>
+                            <div class="setup-device-card-sub" style="font-size: 0.78rem; color: var(--text-secondary);">Mobile setup with Kiwi Browser or Chrome</div>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 6px; color: #00e676; font-size: 0.84rem; font-weight: 700;">
+                    <div class="setup-device-card-action" style="display: flex; align-items: center; gap: 6px; color: #00e676; font-size: 0.84rem; font-weight: 700;">
                         <span>Watch the video</span>
                         <i class="fas fa-chevron-right" style="font-size: 0.72rem;"></i>
                     </div>
                 </div>
 
                 <!-- Option 3: iPhone -->
-                <div onclick="selectSetupDevice('iphone')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(255,255,255,0.5)'; this.style.background='rgba(255,255,255,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
+                <div onclick="selectSetupDevice('iphone')" class="setup-device-card" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(255,255,255,0.5)'; this.style.background='rgba(255,255,255,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
                     <div style="display: flex; align-items: center; gap: 14px;">
-                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.4rem; flex-shrink: 0;">
+                        <div class="setup-device-card-icon" style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.4rem; flex-shrink: 0;">
                             <i class="fab fa-apple"></i>
                         </div>
                         <div>
-                            <div style="font-weight: 800; font-size: 0.98rem; color: #fff; margin-bottom: 2px;">iPhone</div>
-                            <div style="font-size: 0.78rem; color: var(--text-secondary);">iOS / Safari and Orion Browser Setup Guide</div>
+                            <div class="setup-device-card-title" style="font-weight: 800; font-size: 0.98rem; color: #fff; margin-bottom: 2px;">iPhone</div>
+                            <div class="setup-device-card-sub" style="font-size: 0.78rem; color: var(--text-secondary);">iOS / Safari and Orion Browser Setup Guide</div>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.84rem; font-weight: 700;">
+                    <div class="setup-device-card-action" style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.84rem; font-weight: 700;">
                         <span>Watch the video</span>
                         <i class="fas fa-chevron-right" style="font-size: 0.72rem;"></i>
                     </div>
@@ -5628,6 +5757,9 @@
                         <i class="fas fa-arrow-left"></i> ব্যাক
                     </button>
                     <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" id="setupVideoOrientationBtn" onclick="toggleSetupVideoOrientation()" style="display: none; background: rgba(255,184,0,0.12); border: 1px solid rgba(255,184,0,0.35); color: #ffb800; padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; align-items: center; gap: 5px; transition: all 0.2s ease;">
+                            <i class="fas fa-desktop"></i> <span>ওয়াইড মোড</span>
+                        </button>
                         <span id="setupVideoCurrentDeviceBadge" style="font-size: 0.8rem; font-weight: 800; color: var(--yellow); background: rgba(255,184,0,0.12); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(255,184,0,0.3);"></span>
                     </div>
                 </div>
@@ -5637,9 +5769,9 @@
                     <!-- Dynamically generated pills -->
                 </div>
 
-                <!-- Video Frame Area with Embedded Google Drive Preview -->
-                <div style="position: relative; width: 100%; padding-top: 56.25%; background: #000; border: 1px solid rgba(255,184,0,0.35); border-radius: 14px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.7);">
-                    <iframe id="setupVideoIframe" src="" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="border:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:12px;"></iframe>
+                <!-- Video Frame Area with Embedded Google Drive Preview (Vertical or Horizontal) -->
+                <div id="setupVideoFrameWrapper" class="setup-player-vertical">
+                    <iframe id="setupVideoIframe" src="" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="border:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:14px;"></iframe>
                 </div>
 
                 <!-- Video Details -->
@@ -5649,14 +5781,14 @@
                 </div>
 
                 <!-- Quick actions below video: Open Drive, Download ZIP and Copy Trader ID -->
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+                <div class="setup-video-actions">
                     <a id="setupVideoDriveLink" href="#" target="_blank" class="btn-outline" style="padding: 7px 14px; font-size: 0.78rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; color: #60a5fa; border-color: rgba(96,165,250,0.4);">
                         <i class="fab fa-google-drive"></i> ড্রাইভ লিঙ্কে দেখুন
                     </a>
                     <a href="/api/extension/download" class="btn-gold" style="padding: 7px 14px; font-size: 0.78rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                         <i class="fas fa-download"></i> এক্সটেনশন (ZIP)
                     </a>
-                    <button type="button" onclick="copySyncTraderId()" class="btn-outline" style="padding: 7px 14px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    <button type="button" onclick="copySyncTraderId()" class="btn-outline setup-action-full" style="padding: 7px 14px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
                         <i class="fas fa-copy"></i> Trader ID: <span id="syncHelperTraderId">AJ-1008</span>
                     </button>
                 </div>
@@ -14087,12 +14219,41 @@
 
         let currentActiveSetupDevice = 'computer';
         let currentActiveSetupLang = 'bangla';
+        let currentSetupVideoOrientation = 'vertical'; // 'vertical' or 'horizontal'
+
+        function setSetupVideoOrientation(orientation) {
+            currentSetupVideoOrientation = orientation;
+            const wrapper = document.getElementById('setupVideoFrameWrapper');
+            const toggleBtn = document.getElementById('setupVideoOrientationBtn');
+            if (!wrapper) return;
+
+            if (orientation === 'vertical') {
+                wrapper.className = 'setup-player-vertical';
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '<i class="fas fa-desktop"></i> <span>ওয়াইডস্ক্রিন মোড</span>';
+                    toggleBtn.title = 'ওয়াইডস্ক্রিন মোডে দেখুন';
+                }
+            } else {
+                wrapper.className = 'setup-player-horizontal';
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> <span>ভার্টিক্যাল মোড</span>';
+                    toggleBtn.title = 'ভার্টিক্যাল (মোবাইল) মোডে দেখুন';
+                }
+            }
+        }
+
+        function toggleSetupVideoOrientation() {
+            const nextMode = (currentSetupVideoOrientation === 'vertical') ? 'horizontal' : 'vertical';
+            setSetupVideoOrientation(nextMode);
+        }
 
         function openSetupVideoModal() {
             const modal = document.getElementById('setupVideoModal');
             if (!modal) return;
             backToSetupDevices();
             modal.classList.add('active');
+            const box = modal.querySelector('.modal-box');
+            if (box) box.scrollTop = 0;
         }
 
         function closeSetupVideoModal() {
@@ -14110,6 +14271,7 @@
             const heading = document.getElementById('setupModalHeading');
             const subheading = document.getElementById('setupModalSubheading');
             const iframe = document.getElementById('setupVideoIframe');
+            const modal = document.getElementById('setupVideoModal');
 
             if (iframe) iframe.src = '';
             if (devSelector) devSelector.style.display = 'grid';
@@ -14118,6 +14280,10 @@
             if (mainHeader) mainHeader.style.display = 'block';
             if (heading) heading.innerText = 'Extension Setup Video Guide';
             if (subheading) subheading.innerText = 'Select the platform or device you are using:';
+            if (modal) {
+                const box = modal.querySelector('.modal-box');
+                if (box) box.scrollTop = 0;
+            }
         }
 
         function selectSetupDevice(device) {
@@ -14136,6 +14302,7 @@
             const subheading = document.getElementById('setupModalSubheading');
             const langBadge = document.getElementById('setupVideoLangDeviceBadge');
             const langList = document.getElementById('setupVideoLangList');
+            const modal = document.getElementById('setupVideoModal');
 
             if (devSelector) devSelector.style.display = 'none';
             if (playerContainer) playerContainer.style.display = 'none';
@@ -14153,15 +14320,15 @@
                 langs.forEach(langKey => {
                     const l = devData.languages[langKey];
                     html += `
-                        <div onclick="playSetupVideo('${device}', '${langKey}')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(255,184,0,0.6)'; this.style.background='rgba(255,184,0,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
+                        <div onclick="playSetupVideo('${device}', '${langKey}')" class="setup-device-card" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(255,184,0,0.6)'; this.style.background='rgba(255,184,0,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
                             <div style="display: flex; align-items: center; gap: 14px;">
-                                <div style="font-size: 1.8rem; line-height: 1; flex-shrink: 0;">${l.flag}</div>
+                                <div class="setup-device-card-icon" style="font-size: 1.8rem; line-height: 1; flex-shrink: 0; display:flex; align-items:center; justify-content:center;">${l.flag}</div>
                                 <div>
-                                    <div style="font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px;">${l.langName}</div>
-                                    <div style="font-size: 0.78rem; color: var(--text-secondary);">${l.title}</div>
+                                    <div class="setup-device-card-title" style="font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px;">${l.langName}</div>
+                                    <div class="setup-device-card-sub" style="font-size: 0.78rem; color: var(--text-secondary);">${l.title}</div>
                                 </div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 6px; color: var(--yellow); font-size: 0.85rem; font-weight: 700;">
+                            <div class="setup-device-card-action" style="display: flex; align-items: center; gap: 6px; color: var(--yellow); font-size: 0.85rem; font-weight: 700;">
                                 <span>ভিডিও দেখুন</span>
                                 <i class="fas fa-play-circle" style="font-size: 0.9rem;"></i>
                             </div>
@@ -14169,6 +14336,11 @@
                     `;
                 });
                 langList.innerHTML = html;
+            }
+
+            if (modal) {
+                const box = modal.querySelector('.modal-box');
+                if (box) box.scrollTop = 0;
             }
         }
 
@@ -14187,6 +14359,8 @@
             const driveLink = document.getElementById('setupVideoDriveLink');
             const tabsBar = document.getElementById('setupVideoLangTabsBar');
             const backBtn = document.getElementById('setupVideoBackBtn');
+            const toggleBtn = document.getElementById('setupVideoOrientationBtn');
+            const modal = document.getElementById('setupVideoModal');
 
             if (devSelector) devSelector.style.display = 'none';
             if (langSelector) langSelector.style.display = 'none';
@@ -14214,6 +14388,15 @@
                     : '<i class="fas fa-arrow-left"></i> ভাষা পরিবর্তন';
             }
 
+            // Set Initial Orientation based on device
+            if (device === 'computer') {
+                setSetupVideoOrientation('horizontal');
+                if (toggleBtn) toggleBtn.style.display = 'none';
+            } else {
+                setSetupVideoOrientation('vertical');
+                if (toggleBtn) toggleBtn.style.display = 'inline-flex';
+            }
+
             // Render Language Switcher Pills if device has multiple languages
             if (tabsBar) {
                 if (device !== 'computer' && devData && devData.languages) {
@@ -14236,6 +14419,11 @@
                     tabsBar.style.display = 'none';
                     tabsBar.innerHTML = '';
                 }
+            }
+
+            if (modal) {
+                const box = modal.querySelector('.modal-box');
+                if (box) box.scrollTop = 0;
             }
         }
 
