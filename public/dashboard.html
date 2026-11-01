@@ -5859,9 +5859,6 @@
                         <button type="button" id="setupVideoFullscreenBtn" onclick="toggleSetupVideoFullscreen()" style="background: linear-gradient(135deg, rgba(255,184,0,0.25), rgba(255,145,0,0.35)); border: 1px solid #ffb800; color: #ffb800; padding: 5px 11px; border-radius: 8px; font-size: 0.76rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s ease; box-shadow: 0 0 10px rgba(255,184,0,0.2);">
                             <i class="fas fa-expand"></i> <span>ফুলস্ক্রিন</span>
                         </button>
-                        <button type="button" id="setupVideoPlayerModeBtn" onclick="toggleSetupVideoPlayerMode()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s ease;" title="প্লেয়ার পরিবর্তন">
-                            <i class="fas fa-film"></i> <span>ক্লিয়ার প্লেয়ার</span>
-                        </button>
                         <a id="setupVideoFsDriveLink" href="#" target="_blank" style="display: none; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.5); color: #93c5fd; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; text-decoration: none; align-items: center; gap: 5px; transition: all 0.2s ease;">
                             <i class="fab fa-google-drive"></i> <span>ড্রাইভ অ্যাপ</span>
                         </a>
@@ -5882,14 +5879,26 @@
                     <i class="fas fa-expand"></i> <span>ফুলস্ক্রিনে ক্লিয়ার করে দেখুন (Full Screen Mode)</span>
                 </button>
 
-                <!-- Video Frame Area with Dual Players: Clean HTML5 Native Player + Fallback Drive Iframe -->
+                <!-- Video Frame Area with Pure HTML5 Native Player (Zero Google Drive middle overlay) -->
                 <div id="setupVideoFrameWrapper" class="setup-player-vertical" style="position:relative;">
-                    <video id="setupVideoNative" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:contain; background:#000; border-radius:14px; display:block; outline:none;"></video>
-                    <iframe id="setupVideoIframe" src="" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="border:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:14px; display:none;"></iframe>
+                    <video id="setupVideoNative" controls playsinline preload="auto" style="width:100%; height:100%; object-fit:contain; background:#000; border-radius:14px; display:block; outline:none;"></video>
                     <!-- Loading Spinner -->
                     <div id="setupVideoLoadingSpinner" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; flex-direction:column; gap:10px; z-index:5; border-radius:14px;">
                         <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--yellow);"></i>
                         <span style="font-size:0.8rem; color:#cbd5e1; font-weight:700;">ভিডিও লোড হচ্ছে...</span>
+                    </div>
+                    <!-- Error / Retry Prompt -->
+                    <div id="setupVideoErrorPrompt" style="display:none; position:absolute; inset:0; background:rgba(10,12,18,0.92); align-items:center; justify-content:center; flex-direction:column; gap:12px; z-index:6; padding:20px; text-align:center; border-radius:14px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:2rem; color:#ffb800;"></i>
+                        <div style="font-size:0.85rem; color:#fff; font-weight:700;">ভিডিও লোড হতে সময় নিচ্ছে বা ইন্টারনেট স্লো।</div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                            <button type="button" onclick="retrySetupVideo()" class="btn-gold" style="padding:6px 14px; font-size:0.78rem;">
+                                <i class="fas fa-redo"></i> পুনরায় চেষ্টা করুন
+                            </button>
+                            <a id="setupVideoErrorDriveBtn" href="#" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.78rem; color:#60a5fa; border-color:rgba(96,165,250,0.5);">
+                                <i class="fab fa-google-drive"></i> ড্রাইভ অ্যাপে দেখুন
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -14348,7 +14357,6 @@
         let currentActiveSetupDevice = 'computer';
         let currentActiveSetupLang = 'bangla';
         let currentSetupVideoOrientation = 'vertical'; // 'vertical' or 'horizontal'
-        let currentSetupPlayerMode = 'native'; // 'native' (clean HTML5) or 'iframe' (Drive preview)
 
         function setSetupVideoOrientation(orientation) {
             currentSetupVideoOrientation = orientation;
@@ -14389,8 +14397,6 @@
             closeSetupVideoFullscreen();
             const modal = document.getElementById('setupVideoModal');
             if (modal) modal.classList.remove('active');
-            const iframe = document.getElementById('setupVideoIframe');
-            if (iframe) iframe.src = '';
             const nativeVideo = document.getElementById('setupVideoNative');
             if (nativeVideo) {
                 nativeVideo.pause();
@@ -14399,6 +14405,8 @@
             }
             const spinner = document.getElementById('setupVideoLoadingSpinner');
             if (spinner) spinner.style.display = 'none';
+            const errPrompt = document.getElementById('setupVideoErrorPrompt');
+            if (errPrompt) errPrompt.style.display = 'none';
         }
 
         function backToSetupDevices() {
@@ -14409,18 +14417,18 @@
             const mainHeader = document.getElementById('setupVideoMainHeader');
             const heading = document.getElementById('setupModalHeading');
             const subheading = document.getElementById('setupModalSubheading');
-            const iframe = document.getElementById('setupVideoIframe');
             const nativeVideo = document.getElementById('setupVideoNative');
             const spinner = document.getElementById('setupVideoLoadingSpinner');
+            const errPrompt = document.getElementById('setupVideoErrorPrompt');
             const modal = document.getElementById('setupVideoModal');
 
-            if (iframe) iframe.src = '';
             if (nativeVideo) {
                 nativeVideo.pause();
                 nativeVideo.removeAttribute('src');
                 nativeVideo.load();
             }
             if (spinner) spinner.style.display = 'none';
+            if (errPrompt) errPrompt.style.display = 'none';
             if (devSelector) devSelector.style.display = 'grid';
             if (langSelector) langSelector.style.display = 'none';
             if (playerContainer) playerContainer.style.display = 'none';
@@ -14579,73 +14587,45 @@
 
         function loadSetupVideoSource(videoData) {
             const nativeVideo = document.getElementById('setupVideoNative');
-            const iframe = document.getElementById('setupVideoIframe');
-            const modeBtn = document.getElementById('setupVideoPlayerModeBtn');
             const spinner = document.getElementById('setupVideoLoadingSpinner');
+            const errPrompt = document.getElementById('setupVideoErrorPrompt');
+            const errDriveBtn = document.getElementById('setupVideoErrorDriveBtn');
 
             if (!videoData) return;
+            if (errPrompt) errPrompt.style.display = 'none';
+            if (errDriveBtn) errDriveBtn.href = videoData.viewUrl;
 
-            if (currentSetupPlayerMode === 'native' && videoData.streamUrl) {
-                if (iframe) {
-                    iframe.src = '';
-                    iframe.style.display = 'none';
-                }
-                if (nativeVideo) {
-                    nativeVideo.style.display = 'block';
+            if (nativeVideo) {
+                nativeVideo.style.display = 'block';
+                if (spinner) spinner.style.display = 'flex';
+
+                nativeVideo.src = videoData.streamUrl;
+                nativeVideo.load();
+
+                nativeVideo.oncanplay = function() {
+                    if (spinner) spinner.style.display = 'none';
+                    if (errPrompt) errPrompt.style.display = 'none';
+                };
+                nativeVideo.onwaiting = function() {
                     if (spinner) spinner.style.display = 'flex';
-
-                    nativeVideo.src = videoData.streamUrl;
-                    nativeVideo.load();
-
-                    nativeVideo.oncanplay = function() {
-                        if (spinner) spinner.style.display = 'none';
-                    };
-                    nativeVideo.onwaiting = function() {
-                        if (spinner) spinner.style.display = 'flex';
-                    };
-                    nativeVideo.onplaying = function() {
-                        if (spinner) spinner.style.display = 'none';
-                    };
-                    nativeVideo.onerror = function() {
-                        console.warn('Direct stream error, falling back to Drive embed...');
-                        if (spinner) spinner.style.display = 'none';
-                        currentSetupPlayerMode = 'iframe';
-                        loadSetupVideoSource(videoData);
-                    };
-                }
-                if (modeBtn) {
-                    modeBtn.innerHTML = '<i class="fas fa-film"></i> <span>ক্লিয়ার প্লেয়ার</span>';
-                    modeBtn.style.color = '#38bdf8';
-                    modeBtn.style.borderColor = 'rgba(56,189,248,0.4)';
-                    modeBtn.title = 'ক্লিয়ার প্লেয়ার সক্রিয় (ড্রাইভ এম্বেডে পরিবর্তন করতে চাপ দিন)';
-                }
-            } else {
-                if (spinner) spinner.style.display = 'none';
-                if (nativeVideo) {
-                    nativeVideo.pause();
-                    nativeVideo.removeAttribute('src');
-                    nativeVideo.style.display = 'none';
-                }
-                if (iframe) {
-                    iframe.src = videoData.embedUrl;
-                    iframe.style.display = 'block';
-                }
-                if (modeBtn) {
-                    modeBtn.innerHTML = '<i class="fab fa-google-drive"></i> <span>ড্রাইভ এম্বেড</span>';
-                    modeBtn.style.color = '#ffb800';
-                    modeBtn.style.borderColor = 'rgba(255,184,0,0.4)';
-                    modeBtn.title = 'ড্রাইভ এম্বেড সক্রিয় (ক্লিয়ার প্লেয়ারে পরিবর্তন করতে চাপ দিন)';
-                }
+                };
+                nativeVideo.onplaying = function() {
+                    if (spinner) spinner.style.display = 'none';
+                    if (errPrompt) errPrompt.style.display = 'none';
+                };
+                nativeVideo.onerror = function() {
+                    console.warn('Video stream error, showing retry prompt...');
+                    if (spinner) spinner.style.display = 'none';
+                    if (errPrompt) errPrompt.style.display = 'flex';
+                };
             }
         }
 
-        function toggleSetupVideoPlayerMode() {
+        function retrySetupVideo() {
             const devData = SETUP_VIDEOS[currentActiveSetupDevice];
             const videoData = (currentActiveSetupDevice === 'computer') 
                 ? (devData ? devData.default : null) 
                 : (devData && devData.languages ? devData.languages[currentActiveSetupLang] : null);
-
-            currentSetupPlayerMode = (currentSetupPlayerMode === 'native') ? 'iframe' : 'native';
             loadSetupVideoSource(videoData);
         }
 
@@ -14681,19 +14661,13 @@
             }
 
             try {
-                if (currentSetupPlayerMode === 'native' && nativeVideo && nativeVideo.style.display !== 'none') {
+                if (nativeVideo) {
                     if (nativeVideo.requestFullscreen) {
                         nativeVideo.requestFullscreen().catch(() => {});
                     } else if (nativeVideo.webkitRequestFullscreen) {
                         nativeVideo.webkitRequestFullscreen();
                     } else if (nativeVideo.webkitEnterFullscreen) {
                         nativeVideo.webkitEnterFullscreen();
-                    }
-                } else if (modal) {
-                    if (modal.requestFullscreen) {
-                        modal.requestFullscreen().catch(() => {});
-                    } else if (modal.webkitRequestFullscreen) {
-                        modal.webkitRequestFullscreen();
                     }
                 }
             } catch (e) {}

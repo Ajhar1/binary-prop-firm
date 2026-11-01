@@ -12954,7 +12954,10 @@ app.get(['/partner', '/partner.html', '/affiliate', '/affiliate.html'], (req, re
 });
 
 // Serve Single Page Apps / Fallback
-app.get('/dashboard', (req, res) => {
+app.get(['/dashboard', '/dashboard.html'], (req, res) => {
+  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
