@@ -3688,7 +3688,15 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static(path.join(__dirname, 'public'), { etag: false, maxAge: 0 }));
+app.use(express.static(path.join(__dirname, 'public'), { 
+  etag: false, 
+  maxAge: 0,
+  setHeaders: (res, filePath) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
 // JWT Auth Middleware
 function authenticateToken(req, res, next) {
