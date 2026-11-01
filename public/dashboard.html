@@ -2424,7 +2424,23 @@
             }
             #extActionBtnWrap {
                 display: flex !important;
+                flex-direction: column !important;
+                gap: 6px !important;
+                align-items: stretch !important;
                 flex-shrink: 0 !important;
+            }
+            #extActionBtnWrap a, #extActionBtnWrap button {
+                padding: 6px 10px !important;
+                font-size: 0.74rem !important;
+                white-space: nowrap !important;
+                border-radius: 6px !important;
+                font-weight: 800 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 5px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
             #extChallengeFilterInfo {
                 padding: 6px 10px !important;
@@ -3045,18 +3061,23 @@
             }
             #extActionBtnWrap {
                 display: flex !important;
+                flex-direction: column !important;
+                gap: 5px !important;
+                align-items: stretch !important;
                 flex-shrink: 0 !important;
-                align-items: center !important;
             }
-            #extActionBtnWrap a {
-                padding: 6px 10px !important;
-                font-size: 0.74rem !important;
+            #extActionBtnWrap a, #extActionBtnWrap button {
+                padding: 5px 8px !important;
+                font-size: 0.72rem !important;
                 white-space: nowrap !important;
                 border-radius: 6px !important;
                 font-weight: 800 !important;
                 display: inline-flex !important;
                 align-items: center !important;
-                gap: 5px !important;
+                justify-content: center !important;
+                gap: 4px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
             #extChallengeFilterInfo {
                 padding: 8px 12px !important;
@@ -4662,9 +4683,12 @@
                     </div>
                 </div>
                 <div id="extActionBtnWrap" style="display:flex; gap:8px;">
-                    <a href="/api/extension/download" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                    <a href="/api/extension/download" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
                         <i class="fas fa-download"></i> এক্সটেনশন (ZIP)
                     </a>
+                    <button type="button" onclick="openSetupVideoModal()" style="background:linear-gradient(135deg, rgba(0,230,118,0.2), rgba(0,200,83,0.3)); border:1px solid #00e676; color:#00e676; padding:6px 12px; font-size:0.78rem; border-radius:8px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 0 10px rgba(0,230,118,0.15); transition:all 0.25s ease;">
+                        <i class="fas fa-play-circle" style="font-size:0.85rem;"></i> SETUP VIDEO
+                    </button>
                 </div>
             </div>
 
@@ -5518,16 +5542,16 @@
 
     <!-- Setup Video Modal (Computer, Android, iPhone) -->
     <div class="modal-overlay" id="setupVideoModal" onclick="if(event.target === this) closeSetupVideoModal();">
-        <div class="modal-box" style="max-width: 560px; padding: 2rem 1.6rem; border-radius: 20px; background: #131722; border: 1px solid rgba(255, 184, 0, 0.35); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);">
-            <button class="modal-close" onclick="closeSetupVideoModal()">&times;</button>
+        <div class="modal-box" style="max-width: 620px; width: 95%; padding: 1.8rem 1.4rem; border-radius: 20px; background: #131722; border: 1px solid rgba(255, 184, 0, 0.35); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85); position: relative;">
+            <button class="modal-close" onclick="closeSetupVideoModal()" style="top: 14px; right: 16px; font-size: 1.6rem; z-index: 10;">&times;</button>
             
-            <!-- Modal Header -->
-            <div style="text-align: center; margin-bottom: 1.5rem;">
-                <div style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, rgba(255,184,0,0.2), rgba(255,145,0,0.3)); border: 1px solid rgba(255,184,0,0.5); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.8rem auto; font-size: 1.6rem; color: #ffb800; box-shadow: 0 0 20px rgba(255,184,0,0.25);">
+            <!-- Modal Header (Adapts dynamically) -->
+            <div id="setupVideoMainHeader" style="text-align: center; margin-bottom: 1.4rem;">
+                <div style="width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, rgba(255,184,0,0.2), rgba(255,145,0,0.3)); border: 1px solid rgba(255,184,0,0.5); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto; font-size: 1.5rem; color: #ffb800; box-shadow: 0 0 20px rgba(255,184,0,0.25);">
                     <i class="fas fa-play-circle"></i>
                 </div>
-                <h2 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin: 0 0 6px 0;">এক্সটেনশন সেটআপ ভিডিও গাইড</h2>
-                <p style="font-size: 0.84rem; color: var(--text-secondary); margin: 0;">আপনার ব্যবহারের প্ল্যাটফর্ম বা ডিভাইসটি নির্বাচন করুন:</p>
+                <h2 id="setupModalHeading" style="font-size: 1.3rem; font-weight: 800; color: #fff; margin: 0 0 4px 0;">Extension Setup Video Guide</h2>
+                <p id="setupModalSubheading" style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">Select the platform or device you are using:</p>
             </div>
 
             <!-- View 1: Device Selection Options (Computer, Android, iPhone) -->
@@ -5539,13 +5563,13 @@
                             <i class="fas fa-desktop"></i>
                         </div>
                         <div>
-                            <div style="font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px;">Computer</div>
+                            <div style="font-weight: 800; font-size: 0.98rem; color: #fff; margin-bottom: 2px;">Computer</div>
                             <div style="font-size: 0.78rem; color: var(--text-secondary);">Windows / Mac (Chrome, Brave, Edge)</div>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 6px; color: var(--yellow); font-size: 0.85rem; font-weight: 700;">
-                        <span>ভিডিও দেখুন</span>
-                        <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i>
+                    <div style="display: flex; align-items: center; gap: 6px; color: var(--yellow); font-size: 0.84rem; font-weight: 700;">
+                        <span>Watch the video</span>
+                        <i class="fas fa-chevron-right" style="font-size: 0.72rem;"></i>
                     </div>
                 </div>
 
@@ -5556,13 +5580,13 @@
                             <i class="fab fa-android"></i>
                         </div>
                         <div>
-                            <div style="font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px;">Android</div>
-                            <div style="font-size: 0.78rem; color: var(--text-secondary);">Kiwi Browser বা Chrome দিয়ে মোবাইল সেটআপ</div>
+                            <div style="font-weight: 800; font-size: 0.98rem; color: #fff; margin-bottom: 2px;">Android</div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary);">Mobile setup with Kiwi Browser or Chrome</div>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 6px; color: #00e676; font-size: 0.85rem; font-weight: 700;">
-                        <span>ভিডিও দেখুন</span>
-                        <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i>
+                    <div style="display: flex; align-items: center; gap: 6px; color: #00e676; font-size: 0.84rem; font-weight: 700;">
+                        <span>Watch the video</span>
+                        <i class="fas fa-chevron-right" style="font-size: 0.72rem;"></i>
                     </div>
                 </div>
 
@@ -5573,49 +5597,67 @@
                             <i class="fab fa-apple"></i>
                         </div>
                         <div>
-                            <div style="font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px;">iPhone</div>
-                            <div style="font-size: 0.78rem; color: var(--text-secondary);">iOS / Safari ও Orion Browser সেটআপ গাইড</div>
+                            <div style="font-weight: 800; font-size: 0.98rem; color: #fff; margin-bottom: 2px;">iPhone</div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary);">iOS / Safari and Orion Browser Setup Guide</div>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.85rem; font-weight: 700;">
-                        <span>ভিডিও দেখুন</span>
-                        <i class="fas fa-chevron-right" style="font-size: 0.75rem;"></i>
+                    <div style="display: flex; align-items: center; gap: 6px; color: #cbd5e1; font-size: 0.84rem; font-weight: 700;">
+                        <span>Watch the video</span>
+                        <i class="fas fa-chevron-right" style="font-size: 0.72rem;"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- View 2: Video Player Container (Hidden by default, shown when device selected) -->
-            <div id="setupVideoPlayerContainer" style="display: none;">
+            <!-- View 1.5: Language Selection Options (for Android & iPhone) -->
+            <div id="setupVideoLanguageSelector" style="display: none;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <button type="button" onclick="backToSetupDevices()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-arrow-left"></i> অন্য ডিভাইস নির্বাচন করুন
+                    <button type="button" onclick="backToSetupDevices()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                        <i class="fas fa-arrow-left"></i> অন্য ডিভাইস নির্বাচন
                     </button>
-                    <span id="setupVideoCurrentDeviceBadge" style="font-size: 0.8rem; font-weight: 800; color: var(--yellow); background: rgba(255,184,0,0.12); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(255,184,0,0.3);"></span>
+                    <span id="setupVideoLangDeviceBadge" style="font-size: 0.8rem; font-weight: 800; color: var(--yellow); background: rgba(255,184,0,0.12); padding: 4px 12px; border-radius: 12px; border: 1px solid rgba(255,184,0,0.3);"></span>
                 </div>
+                <div id="setupVideoLangList" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                    <!-- Dynamically populated language options -->
+                </div>
+            </div>
 
-                <!-- Video Frame Area -->
-                <div style="position: relative; width: 100%; padding-top: 56.25%; background: #0a0d14; border: 1px solid rgba(255,184,0,0.3); border-radius: 14px; overflow: hidden; margin-bottom: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                    <div id="setupVideoIframeHolder" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1.5rem;">
-                        <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(255,184,0,0.15); border: 1px solid var(--yellow); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--yellow); margin-bottom: 10px; box-shadow: 0 0 20px rgba(255,184,0,0.3);">
-                            <i class="fas fa-play"></i>
-                        </div>
-                        <h4 id="setupVideoTitle" style="color: #fff; font-size: 1.05rem; font-weight: 800; margin: 0 0 6px 0;">সেটআপ ভিডিও</h4>
-                        <p id="setupVideoDesc" style="color: var(--text-secondary); font-size: 0.82rem; max-width: 400px; margin: 0 0 10px 0;">
-                            ভিডিও টিউটোরিয়াল শীঘ্রই এখানে যুক্ত করা হবে।
-                        </p>
-                        <span style="font-size: 0.75rem; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                            <i class="fas fa-video"></i> ভিডিও লিংক শীঘ্রই যুক্ত করা হবে
-                        </span>
+            <!-- View 2: Video Player Container -->
+            <div id="setupVideoPlayerContainer" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                    <button type="button" id="setupVideoBackBtn" onclick="handleVideoPlayerBack()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                        <i class="fas fa-arrow-left"></i> ব্যাক
+                    </button>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="setupVideoCurrentDeviceBadge" style="font-size: 0.8rem; font-weight: 800; color: var(--yellow); background: rgba(255,184,0,0.12); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(255,184,0,0.3);"></span>
                     </div>
                 </div>
 
-                <!-- Quick actions below video: Download ZIP and Copy Trader ID -->
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 12px;">
-                    <a href="/api/extension/download" class="btn-gold" style="padding: 8px 16px; font-size: 0.84rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-download"></i> ডাউনলোড এক্সটেনশন (ZIP)
+                <!-- Language Switching Tabs Bar (for multi-language devices) -->
+                <div id="setupVideoLangTabsBar" style="display: none; align-items: center; gap: 8px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 4px;">
+                    <!-- Dynamically generated pills -->
+                </div>
+
+                <!-- Video Frame Area with Embedded Google Drive Preview -->
+                <div style="position: relative; width: 100%; padding-top: 56.25%; background: #000; border: 1px solid rgba(255,184,0,0.35); border-radius: 14px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.7);">
+                    <iframe id="setupVideoIframe" src="" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="border:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:12px;"></iframe>
+                </div>
+
+                <!-- Video Details -->
+                <div style="margin-bottom: 12px;">
+                    <h4 id="setupVideoTitle" style="color: #fff; font-size: 1rem; font-weight: 800; margin: 0 0 4px 0;"></h4>
+                    <p id="setupVideoDesc" style="color: var(--text-secondary); font-size: 0.8rem; line-height: 1.45; margin: 0;"></p>
+                </div>
+
+                <!-- Quick actions below video: Open Drive, Download ZIP and Copy Trader ID -->
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+                    <a id="setupVideoDriveLink" href="#" target="_blank" class="btn-outline" style="padding: 7px 14px; font-size: 0.78rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; color: #60a5fa; border-color: rgba(96,165,250,0.4);">
+                        <i class="fab fa-google-drive"></i> ড্রাইভ লিঙ্কে দেখুন
                     </a>
-                    <button type="button" onclick="copySyncTraderId()" class="btn-outline" style="padding: 8px 16px; font-size: 0.84rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-copy"></i> Trader ID কপি করুন: <span id="syncHelperTraderId">AJ-1008</span>
+                    <a href="/api/extension/download" class="btn-gold" style="padding: 7px 14px; font-size: 0.78rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-download"></i> এক্সটেনশন (ZIP)
+                    </a>
+                    <button type="button" onclick="copySyncTraderId()" class="btn-outline" style="padding: 7px 14px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-copy"></i> Trader ID: <span id="syncHelperTraderId">AJ-1008</span>
                     </button>
                 </div>
             </div>
@@ -13977,7 +14019,75 @@
             });
         }
 
-        // Setup Video Modal Functions
+        // Setup Video Guide Data & Handlers
+        const SETUP_VIDEOS = {
+            computer: {
+                name: '💻 Computer',
+                badge: 'Windows / Mac',
+                default: {
+                    title: 'Computer (Windows / Mac) এক্সটেনশন সেটআপ গাইড',
+                    desc: 'Chrome, Brave বা Edge ব্রাউজারে জিপ এক্সটেনশন আনপ্যাকড হিসেবে লোড করে Quotex লাইভ চার্ট সিঙ্ক করার সম্পূর্ণ ভিডিও গাইড।',
+                    embedUrl: 'https://drive.google.com/file/d/1r2gububU51gGT72PAJwiDGbBHMFFm6iZ/preview',
+                    viewUrl: 'https://drive.google.com/file/d/1r2gububU51gGT72PAJwiDGbBHMFFm6iZ/view?usp=sharing'
+                }
+            },
+            android: {
+                name: '🤖 Android Mobile',
+                badge: 'Kiwi Browser / Chrome',
+                languages: {
+                    bangla: {
+                        langName: 'বাংলা (Bangla)',
+                        flag: '🇧🇩',
+                        title: 'Android মোবাইল (Kiwi Browser) সেটআপ গাইড - বাংলা',
+                        desc: 'অ্যান্ড্রয়েড ফোনে Kiwi Browser দিয়ে জিপ এক্সটেনশন ইনস্টল করে খুব সহজে কোটেক্স লাইভ ট্রেড ট্র্যাক করার বাংলা টিউটোরিয়াল।',
+                        embedUrl: 'https://drive.google.com/file/d/1KiFapB8rzNI3qp_ECjYNuvkdyW9W9-Rw/preview',
+                        viewUrl: 'https://drive.google.com/file/d/1KiFapB8rzNI3qp_ECjYNuvkdyW9W9-Rw/view?usp=sharing'
+                    },
+                    hindi: {
+                        langName: 'हिंदी (Hindi)',
+                        flag: '🇮🇳',
+                        title: 'Android মোবাইল (Kiwi Browser) सेटअप गाइड - हिंदी',
+                        desc: 'एंड्रॉइड मोबाइल में Kiwi Browser द्वारा एक्सटेंशन सेटअप और कोटैक्स लाइव सिंक करने का पूरा हिंदी वीडियो गाइड।',
+                        embedUrl: 'https://drive.google.com/file/d/1XLiYwiHk062D16A3EdQj7kZnTEYKUj-C/preview',
+                        viewUrl: 'https://drive.google.com/file/d/1XLiYwiHk062D16A3EdQj7kZnTEYKUj-C/view?usp=sharing'
+                    },
+                    english: {
+                        langName: 'English',
+                        flag: '🇬🇧',
+                        title: 'Android Mobile (Kiwi Browser) Setup Guide - English',
+                        desc: 'Step-by-step tutorial on how to install and configure the Quotex trade sync extension on Android using Kiwi Browser.',
+                        embedUrl: 'https://drive.google.com/file/d/1ZKXJX5kwStDcH-KV2HKb5FJiwkI-PSwf/preview',
+                        viewUrl: 'https://drive.google.com/file/d/1ZKXJX5kwStDcH-KV2HKb5FJiwkI-PSwf/view?usp=sharing'
+                    }
+                }
+            },
+            iphone: {
+                name: '🍏 iPhone / iOS',
+                badge: 'Safari / Orion',
+                languages: {
+                    bangla: {
+                        langName: 'বাংলা (Bangla)',
+                        flag: '🇧🇩',
+                        title: 'iPhone / iOS ডিভাইস সেটআপ গাইড - বাংলা',
+                        desc: 'আইফোনে সাফারি বা ওরিয়ন ব্রাউজার দিয়ে এক্সটেনশন কনফিগার করে লাইভ ট্রেড সিঙ্ক করার বাংলা ভিডিও গাইড।',
+                        embedUrl: 'https://drive.google.com/file/d/1G3oWOy33TJ4LDeRnkklVLOrudgpSN4eL/preview',
+                        viewUrl: 'https://drive.google.com/file/d/1G3oWOy33TJ4LDeRnkklVLOrudgpSN4eL/view?usp=sharing'
+                    },
+                    hindi: {
+                        langName: 'हिंदी (Hindi)',
+                        flag: '🇮🇳',
+                        title: 'iPhone / iOS सेटअप गाइड - हिंदी',
+                        desc: 'आईफोन में सफारी या ओरियन ब्राउज़र के माध्यम से एक्सटेंशन सेटअप करके कोटैक्स ट्रेड सिंक करने का हिंदी वीडियो गाइड।',
+                        embedUrl: 'https://drive.google.com/file/d/10FnWYuMcJwjYNoEt9TkinR6SI45umb2N/preview',
+                        viewUrl: 'https://drive.google.com/file/d/10FnWYuMcJwjYNoEt9TkinR6SI45umb2N/view?usp=sharing'
+                    }
+                }
+            }
+        };
+
+        let currentActiveSetupDevice = 'computer';
+        let currentActiveSetupLang = 'bangla';
+
         function openSetupVideoModal() {
             const modal = document.getElementById('setupVideoModal');
             if (!modal) return;
@@ -13988,49 +14098,154 @@
         function closeSetupVideoModal() {
             const modal = document.getElementById('setupVideoModal');
             if (modal) modal.classList.remove('active');
-        }
-
-        function selectSetupDevice(device) {
-            const selector = document.getElementById('setupVideoDeviceSelector');
-            const playerContainer = document.getElementById('setupVideoPlayerContainer');
-            const badge = document.getElementById('setupVideoCurrentDeviceBadge');
-            const title = document.getElementById('setupVideoTitle');
-            const descEl = document.getElementById('setupVideoDesc');
-            
-            if (selector) selector.style.display = 'none';
-            if (playerContainer) playerContainer.style.display = 'block';
-
-            const deviceMap = {
-                'computer': { 
-                    name: '💻 Computer', 
-                    title: 'Computer (Windows / Mac) এক্সটেনশন সেটআপ টিউটোরিয়াল',
-                    desc: 'কম্পিউটারে Chrome, Brave বা Edge ব্রাউজারে কীভাবে আনপ্যাকড এক্সটেনশন লোড করে আপনার Trader ID দিয়ে লাইভ চার্ট সিঙ্ক করবেন।'
-                },
-                'android': { 
-                    name: '🤖 Android Mobile', 
-                    title: 'Android মোবাইল (Kiwi Browser) সেটআপ টিউটোরিয়াল',
-                    desc: 'অ্যান্ড্রয়েড ফোনে Kiwi Browser দিয়ে জিপ এক্সটেনশন ইনস্টল করে খুব সহজে কোটেক্স লাইভ ট্রেড ট্র্যাক করার পদ্ধতি।'
-                },
-                'iphone': { 
-                    name: '🍏 iPhone / iOS', 
-                    title: 'iPhone / iOS ডিভাইস সেটআপ টিউটোরিয়াল',
-                    desc: 'আইফোনে সাফারি বা ওরিয়ন ব্রাউজার দিয়ে এক্সটেনশন কনফিগার করে লাইভ ট্রেড সিঙ্ক করার গাইড।'
-                }
-            };
-
-            const selected = deviceMap[device] || deviceMap['computer'];
-            if (badge) badge.innerText = selected.name;
-            if (title) title.innerText = selected.title;
-            if (descEl) descEl.innerText = selected.desc;
+            const iframe = document.getElementById('setupVideoIframe');
+            if (iframe) iframe.src = '';
         }
 
         function backToSetupDevices() {
-            const selector = document.getElementById('setupVideoDeviceSelector');
+            const devSelector = document.getElementById('setupVideoDeviceSelector');
+            const langSelector = document.getElementById('setupVideoLanguageSelector');
             const playerContainer = document.getElementById('setupVideoPlayerContainer');
-            if (selector) selector.style.display = 'grid';
+            const mainHeader = document.getElementById('setupVideoMainHeader');
+            const heading = document.getElementById('setupModalHeading');
+            const subheading = document.getElementById('setupModalSubheading');
+            const iframe = document.getElementById('setupVideoIframe');
+
+            if (iframe) iframe.src = '';
+            if (devSelector) devSelector.style.display = 'grid';
+            if (langSelector) langSelector.style.display = 'none';
             if (playerContainer) playerContainer.style.display = 'none';
+            if (mainHeader) mainHeader.style.display = 'block';
+            if (heading) heading.innerText = 'Extension Setup Video Guide';
+            if (subheading) subheading.innerText = 'Select the platform or device you are using:';
         }
 
+        function selectSetupDevice(device) {
+            currentActiveSetupDevice = device;
+
+            if (device === 'computer') {
+                playSetupVideo('computer', 'default');
+                return;
+            }
+
+            const devSelector = document.getElementById('setupVideoDeviceSelector');
+            const langSelector = document.getElementById('setupVideoLanguageSelector');
+            const playerContainer = document.getElementById('setupVideoPlayerContainer');
+            const mainHeader = document.getElementById('setupVideoMainHeader');
+            const heading = document.getElementById('setupModalHeading');
+            const subheading = document.getElementById('setupModalSubheading');
+            const langBadge = document.getElementById('setupVideoLangDeviceBadge');
+            const langList = document.getElementById('setupVideoLangList');
+
+            if (devSelector) devSelector.style.display = 'none';
+            if (playerContainer) playerContainer.style.display = 'none';
+            if (langSelector) langSelector.style.display = 'block';
+            if (mainHeader) mainHeader.style.display = 'block';
+
+            const devData = SETUP_VIDEOS[device];
+            if (langBadge && devData) langBadge.innerText = devData.name;
+            if (heading) heading.innerText = `${devData ? devData.name : device} সেটআপ ভিডিও`;
+            if (subheading) subheading.innerText = 'কোন ভাষায় ভিডিওটি দেখতে চান তা নির্বাচন করুন:';
+
+            if (langList && devData && devData.languages) {
+                let html = '';
+                const langs = Object.keys(devData.languages);
+                langs.forEach(langKey => {
+                    const l = devData.languages[langKey];
+                    html += `
+                        <div onclick="playSetupVideo('${device}', '${langKey}')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.borderColor='rgba(255,184,0,0.6)'; this.style.background='rgba(255,184,0,0.08)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.04)';">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div style="font-size: 1.8rem; line-height: 1; flex-shrink: 0;">${l.flag}</div>
+                                <div>
+                                    <div style="font-weight: 800; font-size: 1rem; color: #fff; margin-bottom: 2px;">${l.langName}</div>
+                                    <div style="font-size: 0.78rem; color: var(--text-secondary);">${l.title}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px; color: var(--yellow); font-size: 0.85rem; font-weight: 700;">
+                                <span>ভিডিও দেখুন</span>
+                                <i class="fas fa-play-circle" style="font-size: 0.9rem;"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+                langList.innerHTML = html;
+            }
+        }
+
+        function playSetupVideo(device, lang) {
+            currentActiveSetupDevice = device;
+            currentActiveSetupLang = lang;
+
+            const devSelector = document.getElementById('setupVideoDeviceSelector');
+            const langSelector = document.getElementById('setupVideoLanguageSelector');
+            const playerContainer = document.getElementById('setupVideoPlayerContainer');
+            const mainHeader = document.getElementById('setupVideoMainHeader');
+            const iframe = document.getElementById('setupVideoIframe');
+            const badge = document.getElementById('setupVideoCurrentDeviceBadge');
+            const titleEl = document.getElementById('setupVideoTitle');
+            const descEl = document.getElementById('setupVideoDesc');
+            const driveLink = document.getElementById('setupVideoDriveLink');
+            const tabsBar = document.getElementById('setupVideoLangTabsBar');
+            const backBtn = document.getElementById('setupVideoBackBtn');
+
+            if (devSelector) devSelector.style.display = 'none';
+            if (langSelector) langSelector.style.display = 'none';
+            if (mainHeader) mainHeader.style.display = 'none';
+            if (playerContainer) playerContainer.style.display = 'block';
+
+            const devData = SETUP_VIDEOS[device];
+            const videoData = (device === 'computer') 
+                ? (devData ? devData.default : null) 
+                : (devData && devData.languages ? devData.languages[lang] : null);
+
+            if (!videoData) return;
+
+            if (iframe) iframe.src = videoData.embedUrl;
+            if (titleEl) titleEl.innerText = videoData.title;
+            if (descEl) descEl.innerText = videoData.desc;
+            if (driveLink) driveLink.href = videoData.viewUrl;
+
+            const langLabel = videoData.langName ? ` • ${videoData.langName}` : '';
+            if (badge) badge.innerText = `${devData.name}${langLabel}`;
+
+            if (backBtn) {
+                backBtn.innerHTML = (device === 'computer')
+                    ? '<i class="fas fa-arrow-left"></i> অন্য ডিভাইস নির্বাচন'
+                    : '<i class="fas fa-arrow-left"></i> ভাষা পরিবর্তন';
+            }
+
+            // Render Language Switcher Pills if device has multiple languages
+            if (tabsBar) {
+                if (device !== 'computer' && devData && devData.languages) {
+                    tabsBar.style.display = 'flex';
+                    let pillsHtml = '<span style="font-size:0.75rem; color:#94a3b8; font-weight:700; margin-right:4px;">ভাষা:</span>';
+                    Object.keys(devData.languages).forEach(lKey => {
+                        const lObj = devData.languages[lKey];
+                        const isActive = (lKey === lang);
+                        const activeStyle = isActive 
+                            ? 'background:rgba(255,184,0,0.22); color:#ffb800; border:1px solid rgba(255,184,0,0.6); font-weight:800;'
+                            : 'background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid rgba(255,255,255,0.12); font-weight:600;';
+                        pillsHtml += `
+                            <button type="button" onclick="playSetupVideo('${device}', '${lKey}')" style="padding:4px 10px; border-radius:14px; font-size:0.75rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s ease; ${activeStyle}">
+                                <span>${lObj.flag}</span> <span>${lObj.langName}</span>
+                            </button>
+                        `;
+                    });
+                    tabsBar.innerHTML = pillsHtml;
+                } else {
+                    tabsBar.style.display = 'none';
+                    tabsBar.innerHTML = '';
+                }
+            }
+        }
+
+        function handleVideoPlayerBack() {
+            if (currentActiveSetupDevice === 'computer') {
+                backToSetupDevices();
+            } else {
+                selectSetupDevice(currentActiveSetupDevice);
+            }
+        }
         let extensionPollInterval = null;
 
         let extEventSource = null;
@@ -14095,9 +14310,12 @@
 
                 if (btnWrap) {
                     btnWrap.innerHTML = `
-                        <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                        <a href="https://market-qx.info/en/demo-trade" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
                             <i class="fas fa-external-link-alt"></i> Quotex চার্ট
                         </a>
+                        <button type="button" onclick="openSetupVideoModal()" style="background:linear-gradient(135deg, rgba(0,230,118,0.2), rgba(0,200,83,0.3)); border:1px solid #00e676; color:#00e676; padding:6px 12px; font-size:0.78rem; border-radius:8px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 0 10px rgba(0,230,118,0.15); transition:all 0.25s ease;">
+                            <i class="fas fa-play-circle" style="font-size:0.85rem;"></i> SETUP VIDEO
+                        </button>
                     `;
                 }
             } else {
@@ -14113,9 +14331,12 @@
 
                 if (btnWrap) {
                     btnWrap.innerHTML = `
-                        <a href="/api/extension/download" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                        <a href="/api/extension/download" class="btn-gold" style="padding:6px 14px; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
                             <i class="fas fa-download"></i> এক্সটেনশন (ZIP)
                         </a>
+                        <button type="button" onclick="openSetupVideoModal()" style="background:linear-gradient(135deg, rgba(0,230,118,0.2), rgba(0,200,83,0.3)); border:1px solid #00e676; color:#00e676; padding:6px 12px; font-size:0.78rem; border-radius:8px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 0 10px rgba(0,230,118,0.15); transition:all 0.25s ease;">
+                            <i class="fas fa-play-circle" style="font-size:0.85rem;"></i> SETUP VIDEO
+                        </button>
                     `;
                 }
             }
