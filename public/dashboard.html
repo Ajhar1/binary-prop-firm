@@ -2849,9 +2849,9 @@
         .setup-player-vertical {
             position: relative;
             width: 100%;
-            max-width: 360px;
-            height: 480px;
-            max-height: 52vh;
+            max-width: 380px;
+            height: 500px;
+            max-height: 56vh;
             background: #000;
             border: 1px solid rgba(255, 184, 0, 0.45);
             border-radius: 16px;
@@ -2874,70 +2874,6 @@
             gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
-        }
-
-        /* Fullscreen Mode for Setup Video Modal */
-        #setupVideoModal.is-fullscreen {
-            padding: 0 !important;
-            background: #000 !important;
-            align-items: stretch !important;
-            justify-content: stretch !important;
-            z-index: 999999 !important;
-        }
-
-        #setupVideoModal.is-fullscreen .modal-box {
-            width: 100vw !important;
-            max-width: 100vw !important;
-            height: 100vh !important;
-            max-height: 100vh !important;
-            border-radius: 0 !important;
-            border: none !important;
-            padding: 10px 12px 14px 12px !important;
-            margin: 0 !important;
-            background: #000 !important;
-            box-shadow: none !important;
-            display: flex !important;
-            flex-direction: column !important;
-            overflow-y: auto !important;
-            box-sizing: border-box !important;
-        }
-
-        #setupVideoModal.is-fullscreen .modal-close {
-            display: none !important;
-        }
-
-        #setupVideoModal.is-fullscreen #setupVideoPlayerContainer {
-            display: flex !important;
-            flex-direction: column !important;
-            height: 100% !important;
-            flex: 1 !important;
-        }
-
-        #setupVideoModal.is-fullscreen #setupVideoFrameWrapper {
-            flex: 1 !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            height: calc(100vh - 150px) !important;
-            max-height: calc(100vh - 150px) !important;
-            margin: 0 0 8px 0 !important;
-            border-radius: 10px !important;
-            border-color: rgba(255, 184, 0, 0.6) !important;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9) !important;
-        }
-
-        #setupVideoModal.is-fullscreen #setupVideoFrameWrapper iframe {
-            width: 100% !important;
-            height: 100% !important;
-            border-radius: 8px !important;
-        }
-
-        #setupVideoModal.is-fullscreen #setupVideoDesc {
-            display: none !important;
-        }
-
-        #setupVideoModal.is-fullscreen #setupVideoTitle {
-            font-size: 0.88rem !important;
-            margin-bottom: 4px !important;
         }
 
         @media (max-width: 768px) {
@@ -3003,8 +2939,8 @@
             .setup-player-vertical {
                 width: 100% !important;
                 max-width: 100% !important;
-                height: 360px !important;
-                max-height: 48vh !important;
+                height: 440px !important;
+                max-height: 54vh !important;
                 border-radius: 12px !important;
                 margin: 0 auto 8px auto !important;
             }
@@ -3032,6 +2968,85 @@
             .setup-video-actions .setup-action-full {
                 grid-column: span 2 !important;
             }
+        }
+
+        /* Fullscreen Mode for Setup Video Modal - Absolute Override Priority */
+        body #setupVideoModal.is-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: #000 !important;
+            z-index: 9999999 !important;
+            display: flex !important;
+            align-items: stretch !important;
+            justify-content: stretch !important;
+        }
+
+        body #setupVideoModal.is-fullscreen .modal-box {
+            width: 100vw !important;
+            max-width: 100vw !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            border-radius: 0 !important;
+            border: none !important;
+            padding: 8px 10px 8px 10px !important;
+            margin: 0 !important;
+            background: #000 !important;
+            box-shadow: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+        }
+
+        body #setupVideoModal.is-fullscreen .modal-close {
+            display: none !important;
+        }
+
+        body #setupVideoModal.is-fullscreen #setupVideoPlayerContainer {
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            flex: 1 !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+        }
+
+        body #setupVideoModal.is-fullscreen #setupVideoFrameWrapper {
+            position: relative !important;
+            flex: 1 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 100% !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            margin: 0 !important;
+            border-radius: 8px !important;
+            border: 1px solid rgba(255, 184, 0, 0.4) !important;
+            background: #000 !important;
+        }
+
+        body #setupVideoModal.is-fullscreen #setupVideoFrameWrapper iframe {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+            border-radius: 6px !important;
+        }
+
+        body #setupVideoModal.is-fullscreen #setupVideoDesc,
+        body #setupVideoModal.is-fullscreen #setupVideoTitle,
+        body #setupVideoModal.is-fullscreen #setupVideoFullscreenBanner,
+        body #setupVideoModal.is-fullscreen .setup-video-actions {
+            display: none !important;
         }
 
         /* Support Desk Styles */
@@ -5842,6 +5857,9 @@
                         <button type="button" id="setupVideoFullscreenBtn" onclick="toggleSetupVideoFullscreen()" style="background: linear-gradient(135deg, rgba(255,184,0,0.25), rgba(255,145,0,0.35)); border: 1px solid #ffb800; color: #ffb800; padding: 5px 11px; border-radius: 8px; font-size: 0.76rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s ease; box-shadow: 0 0 10px rgba(255,184,0,0.2);">
                             <i class="fas fa-expand"></i> <span>ফুলস্ক্রিন</span>
                         </button>
+                        <a id="setupVideoFsDriveLink" href="#" target="_blank" style="display: none; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.5); color: #93c5fd; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; text-decoration: none; align-items: center; gap: 5px; transition: all 0.2s ease;">
+                            <i class="fab fa-google-drive"></i> <span>ড্রাইভ অ্যাপ</span>
+                        </a>
                         <button type="button" id="setupVideoOrientationBtn" onclick="toggleSetupVideoOrientation()" style="display: none; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; align-items: center; gap: 5px; transition: all 0.2s ease;">
                             <i class="fas fa-desktop"></i> <span>ওয়াইড মোড</span>
                         </button>
@@ -5853,6 +5871,11 @@
                 <div id="setupVideoLangTabsBar" style="display: none; align-items: center; gap: 8px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px;">
                     <!-- Dynamically generated pills -->
                 </div>
+
+                <!-- Prominent Fullscreen Banner directly above Video Player -->
+                <button type="button" id="setupVideoFullscreenBanner" onclick="toggleSetupVideoFullscreen()" style="width: 100%; margin-bottom: 8px; padding: 9px 12px; background: linear-gradient(135deg, rgba(255,184,0,0.2), rgba(255,145,0,0.32)); border: 1px solid #ffb800; border-radius: 10px; color: #ffb800; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 15px rgba(255,184,0,0.2); transition: all 0.2s ease;">
+                    <i class="fas fa-expand"></i> <span>ফুলস্ক্রিনে ক্লিয়ার করে দেখুন (Full Screen Mode)</span>
+                </button>
 
                 <!-- Video Frame Area with Embedded Google Drive Preview (Vertical or Horizontal) -->
                 <div id="setupVideoFrameWrapper" class="setup-player-vertical">
@@ -14468,6 +14491,8 @@
             if (titleEl) titleEl.innerText = videoData.title;
             if (descEl) descEl.innerText = videoData.desc;
             if (driveLink) driveLink.href = videoData.viewUrl;
+            const fsDrive = document.getElementById('setupVideoFsDriveLink');
+            if (fsDrive) fsDrive.href = videoData.viewUrl;
 
             const langLabel = videoData.langName ? ` • ${videoData.langName}` : '';
             if (badge) badge.innerText = `${devData.name}${langLabel}`;
@@ -14527,39 +14552,54 @@
         }
 
         function openSetupVideoFullscreen() {
-            const iframe = document.getElementById('setupVideoIframe');
             const modal = document.getElementById('setupVideoModal');
             const fsBtn = document.getElementById('setupVideoFullscreenBtn');
+            const fsDrive = document.getElementById('setupVideoFsDriveLink');
+            const driveLink = document.getElementById('setupVideoDriveLink');
 
             if (modal) {
                 modal.classList.add('is-fullscreen');
             }
             if (fsBtn) {
-                fsBtn.innerHTML = '<i class="fas fa-compress"></i> <span>ছোট মোড</span>';
+                fsBtn.innerHTML = '<i class="fas fa-times-circle"></i> <span>ফুলস্ক্রিন বন্ধ</span>';
+                fsBtn.style.background = 'rgba(239, 68, 68, 0.25)';
+                fsBtn.style.borderColor = '#ef4444';
+                fsBtn.style.color = '#fca5a5';
+                fsBtn.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.35)';
+            }
+            if (fsDrive && driveLink) {
+                fsDrive.href = driveLink.href;
+                fsDrive.style.display = 'inline-flex';
             }
 
-            if (iframe) {
-                try {
-                    if (iframe.requestFullscreen) {
-                        iframe.requestFullscreen().catch(() => {});
-                    } else if (iframe.webkitRequestFullscreen) {
-                        iframe.webkitRequestFullscreen();
-                    } else if (iframe.webkitEnterFullscreen) {
-                        iframe.webkitEnterFullscreen();
+            try {
+                if (modal) {
+                    if (modal.requestFullscreen) {
+                        modal.requestFullscreen().catch(() => {});
+                    } else if (modal.webkitRequestFullscreen) {
+                        modal.webkitRequestFullscreen();
                     }
-                } catch (e) {}
-            }
+                }
+            } catch (e) {}
         }
 
         function closeSetupVideoFullscreen() {
             const modal = document.getElementById('setupVideoModal');
             const fsBtn = document.getElementById('setupVideoFullscreenBtn');
+            const fsDrive = document.getElementById('setupVideoFsDriveLink');
 
             if (modal) {
                 modal.classList.remove('is-fullscreen');
             }
             if (fsBtn) {
                 fsBtn.innerHTML = '<i class="fas fa-expand"></i> <span>ফুলস্ক্রিন</span>';
+                fsBtn.style.background = 'linear-gradient(135deg, rgba(255,184,0,0.25), rgba(255,145,0,0.35))';
+                fsBtn.style.borderColor = '#ffb800';
+                fsBtn.style.color = '#ffb800';
+                fsBtn.style.boxShadow = '0 0 10px rgba(255,184,0,0.2)';
+            }
+            if (fsDrive) {
+                fsDrive.style.display = 'none';
             }
 
             try {
