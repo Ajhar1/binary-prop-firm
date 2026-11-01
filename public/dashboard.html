@@ -2848,16 +2848,15 @@
         }
         .setup-player-vertical {
             position: relative;
+            width: 100%;
+            max-width: 360px;
             height: 480px;
             max-height: 52vh;
-            width: calc(min(480px, 52vh) * 9 / 16);
-            max-width: 95%;
-            aspect-ratio: 9 / 16;
-            margin: 0 auto 12px auto;
             background: #000;
             border: 1px solid rgba(255, 184, 0, 0.45);
             border-radius: 16px;
             overflow: hidden;
+            margin: 0 auto 12px auto;
             box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85), 0 0 15px rgba(255, 184, 0, 0.12);
             transition: all 0.25s ease;
         }
@@ -2879,72 +2878,91 @@
 
         @media (max-width: 768px) {
             #setupVideoModal {
-                align-items: flex-end !important;
-                padding: 0 !important;
+                align-items: center !important;
+                justify-content: center !important;
+                padding: 10px !important;
             }
             #setupVideoModal .modal-box {
                 width: 100% !important;
-                max-width: 100% !important;
-                max-height: 94vh !important;
-                border-radius: 22px 22px 0 0 !important;
-                padding: 1.2rem 1rem max(1.8rem, env(safe-area-inset-bottom, 24px)) 1rem !important;
+                max-width: 440px !important;
+                max-height: 90vh !important;
+                border-radius: 20px !important;
+                padding: 1.1rem 0.9rem !important;
                 overflow-y: auto !important;
+                overscroll-behavior: contain;
                 -webkit-overflow-scrolling: touch;
+                touch-action: pan-y;
                 box-sizing: border-box !important;
+                margin: auto !important;
             }
             #setupVideoMainHeader {
-                margin-bottom: 0.85rem !important;
+                margin-bottom: 0.75rem !important;
             }
             #setupVideoMainHeader .setup-header-icon {
-                width: 42px !important;
-                height: 42px !important;
-                font-size: 1.25rem !important;
-                margin-bottom: 0.4rem !important;
-                border-radius: 12px !important;
-            }
-            #setupModalHeading {
-                font-size: 1.15rem !important;
-                margin-bottom: 2px !important;
-            }
-            #setupModalSubheading {
-                font-size: 0.76rem !important;
-            }
-            #setupVideoDeviceSelector,
-            #setupVideoLangList {
-                gap: 8px !important;
-            }
-            .setup-device-card {
-                padding: 10px 14px !important;
-                border-radius: 12px !important;
-            }
-            .setup-device-card-icon {
                 width: 38px !important;
                 height: 38px !important;
                 font-size: 1.15rem !important;
+                margin-bottom: 0.35rem !important;
                 border-radius: 10px !important;
             }
+            #setupModalHeading {
+                font-size: 1.05rem !important;
+                margin-bottom: 2px !important;
+            }
+            #setupModalSubheading {
+                font-size: 0.74rem !important;
+            }
+            #setupVideoDeviceSelector,
+            #setupVideoLangList {
+                gap: 7px !important;
+            }
+            .setup-device-card {
+                padding: 8px 12px !important;
+                border-radius: 11px !important;
+            }
+            .setup-device-card-icon {
+                width: 34px !important;
+                height: 34px !important;
+                font-size: 1.05rem !important;
+                border-radius: 9px !important;
+            }
             .setup-device-card-title {
-                font-size: 0.92rem !important;
+                font-size: 0.88rem !important;
             }
             .setup-device-card-sub {
-                font-size: 0.72rem !important;
+                font-size: 0.70rem !important;
             }
             .setup-device-card-action {
-                font-size: 0.78rem !important;
+                font-size: 0.76rem !important;
             }
+            /* Mobile Player Frame */
+            .setup-player-vertical {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 360px !important;
+                max-height: 48vh !important;
+                border-radius: 12px !important;
+                margin: 0 auto 8px auto !important;
+            }
+            .setup-player-horizontal {
+                width: 100% !important;
+                margin: 0 auto 8px auto !important;
+                border-radius: 12px !important;
+            }
+            /* Quick Action Buttons at the Bottom of Player */
             .setup-video-actions {
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
-                gap: 8px !important;
+                gap: 6px !important;
                 width: 100% !important;
-                margin-top: 8px !important;
+                margin-top: 6px !important;
             }
             .setup-video-actions a,
             .setup-video-actions button {
                 width: 100% !important;
                 justify-content: center !important;
-                padding: 8px 10px !important;
-                font-size: 0.75rem !important;
+                padding: 7px 8px !important;
+                font-size: 0.72rem !important;
                 box-sizing: border-box !important;
             }
             .setup-video-actions .setup-action-full {
