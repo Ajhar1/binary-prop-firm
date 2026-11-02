@@ -3057,6 +3057,10 @@
             display: none !important;
         }
 
+        body #setupVideoModal.is-fullscreen #setupVideoExitFsBtn {
+            display: inline-flex !important;
+        }
+
         /* Support Desk Styles */
         .support-desk-grid {
             display: grid;
@@ -5862,12 +5866,9 @@
                         <i class="fas fa-arrow-left"></i> ব্যাক
                     </button>
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <button type="button" id="setupVideoFullscreenBtn" onclick="toggleSetupVideoFullscreen()" style="background: linear-gradient(135deg, rgba(255,184,0,0.25), rgba(255,145,0,0.35)); border: 1px solid #ffb800; color: #ffb800; padding: 5px 11px; border-radius: 8px; font-size: 0.76rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s ease; box-shadow: 0 0 10px rgba(255,184,0,0.2);">
-                            <i class="fas fa-expand"></i> <span>ফুলস্ক্রিন</span>
+                        <button type="button" id="setupVideoExitFsBtn" onclick="closeSetupVideoFullscreen()" style="display: none; background: rgba(239, 68, 68, 0.25); border: 1px solid #ef4444; color: #fca5a5; padding: 5px 11px; border-radius: 8px; font-size: 0.76rem; font-weight: 800; cursor: pointer; align-items: center; gap: 5px; transition: all 0.2s ease;">
+                            <i class="fas fa-compress"></i> <span>ফুলস্ক্রিন বন্ধ</span>
                         </button>
-                        <a id="setupVideoFsDriveLink" href="#" target="_blank" style="display: none; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.5); color: #93c5fd; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; text-decoration: none; align-items: center; gap: 5px; transition: all 0.2s ease;">
-                            <i class="fab fa-google-drive"></i> <span>ড্রাইভ অ্যাপ</span>
-                        </a>
                         <button type="button" id="setupVideoOrientationBtn" onclick="toggleSetupVideoOrientation()" style="display: none; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; align-items: center; gap: 5px; transition: all 0.2s ease;">
                             <i class="fas fa-desktop"></i> <span>ওয়াইড মোড</span>
                         </button>
@@ -5880,10 +5881,6 @@
                     <!-- Dynamically generated pills -->
                 </div>
 
-                <button type="button" id="setupVideoFullscreenBanner" onclick="toggleSetupVideoFullscreen()" style="width: 100%; margin-bottom: 8px; padding: 9px 12px; background: linear-gradient(135deg, rgba(255,184,0,0.2), rgba(255,145,0,0.32)); border: 1px solid #ffb800; border-radius: 10px; color: #ffb800; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 15px rgba(255,184,0,0.2); transition: all 0.2s ease;">
-                    <i class="fas fa-expand"></i> <span>ফুলস্ক্রিনে বড় করে দেখুন (Full Screen Mode)</span>
-                </button>
-
                 <!-- Video Frame Area with Clean Native HTML5 Player (Zero Middle Overlay!) -->
                 <div id="setupVideoFrameWrapper" class="setup-player-vertical" style="position:relative;">
                     <video id="setupVideoNative" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:contain; background:#000; border-radius:14px; display:block; outline:none;"></video>
@@ -5895,15 +5892,12 @@
                     <p id="setupVideoDesc" style="color: var(--text-secondary); font-size: 0.76rem; line-height: 1.4; margin: 0;"></p>
                 </div>
 
-                <!-- Quick actions below video: Open Drive, Download ZIP and Copy Trader ID -->
+                <!-- Quick actions below video: Fullscreen, Extension (ZIP) and Copy Trader ID -->
                 <div class="setup-video-actions">
                     <button type="button" onclick="toggleSetupVideoFullscreen()" class="btn-gold" style="padding: 9px 12px; font-size: 0.78rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; justify-content: center; box-shadow: 0 0 12px rgba(255,184,0,0.25); cursor: pointer;">
                         <i class="fas fa-expand"></i> ফুলস্ক্রিনে বড় করে দেখুন
                     </button>
-                    <a id="setupVideoDriveLink" href="#" target="_blank" class="btn-outline" style="padding: 9px 12px; font-size: 0.76rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; justify-content: center; color: #60a5fa; border-color: rgba(96,165,250,0.5);">
-                        <i class="fab fa-google-drive"></i> ড্রাইভ অ্যাপে দেখুন
-                    </a>
-                    <a href="/api/extension/download" class="btn-outline" style="padding: 8px 12px; font-size: 0.76rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; justify-content: center; color: #00e676; border-color: rgba(0,230,118,0.5);">
+                    <a href="/api/extension/download" class="btn-outline" style="padding: 9px 12px; font-size: 0.78rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; justify-content: center; color: #00e676; border-color: rgba(0,230,118,0.5); background: rgba(0,230,118,0.08);">
                         <i class="fas fa-download"></i> এক্সটেনশন (ZIP)
                     </a>
                     <button type="button" onclick="copySyncTraderId()" class="btn-outline setup-action-full" style="padding: 8px 12px; font-size: 0.76rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; justify-content: center;">
@@ -14489,8 +14483,6 @@
             const badge = document.getElementById('setupVideoCurrentDeviceBadge');
             const titleEl = document.getElementById('setupVideoTitle');
             const descEl = document.getElementById('setupVideoDesc');
-            const driveLink = document.getElementById('setupVideoDriveLink');
-            const fsDrive = document.getElementById('setupVideoFsDriveLink');
             const tabsBar = document.getElementById('setupVideoLangTabsBar');
             const backBtn = document.getElementById('setupVideoBackBtn');
             const toggleBtn = document.getElementById('setupVideoOrientationBtn');
@@ -14510,8 +14502,6 @@
 
             if (titleEl) titleEl.innerText = videoData.title;
             if (descEl) descEl.innerText = videoData.desc;
-            if (driveLink) driveLink.href = videoData.viewUrl;
-            if (fsDrive) fsDrive.href = videoData.viewUrl;
 
             const langLabel = videoData.langName ? ` • ${videoData.langName}` : '';
             if (badge) badge.innerText = `${devData.name}${langLabel}`;
@@ -14594,23 +14584,13 @@
         function openSetupVideoFullscreen() {
             const modal = document.getElementById('setupVideoModal');
             const video = document.getElementById('setupVideoNative');
-            const fsBtn = document.getElementById('setupVideoFullscreenBtn');
-            const fsDrive = document.getElementById('setupVideoFsDriveLink');
-            const driveLink = document.getElementById('setupVideoDriveLink');
+            const exitFsBtn = document.getElementById('setupVideoExitFsBtn');
 
             if (modal) {
                 modal.classList.add('is-fullscreen');
             }
-            if (fsBtn) {
-                fsBtn.innerHTML = '<i class="fas fa-times-circle"></i> <span>ফুলস্ক্রিন বন্ধ</span>';
-                fsBtn.style.background = 'rgba(239, 68, 68, 0.25)';
-                fsBtn.style.borderColor = '#ef4444';
-                fsBtn.style.color = '#fca5a5';
-                fsBtn.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.35)';
-            }
-            if (fsDrive && driveLink) {
-                fsDrive.href = driveLink.href;
-                fsDrive.style.display = 'inline-flex';
+            if (exitFsBtn) {
+                exitFsBtn.style.display = 'inline-flex';
             }
 
             try {
@@ -14628,21 +14608,13 @@
 
         function closeSetupVideoFullscreen() {
             const modal = document.getElementById('setupVideoModal');
-            const fsBtn = document.getElementById('setupVideoFullscreenBtn');
-            const fsDrive = document.getElementById('setupVideoFsDriveLink');
+            const exitFsBtn = document.getElementById('setupVideoExitFsBtn');
 
             if (modal) {
                 modal.classList.remove('is-fullscreen');
             }
-            if (fsBtn) {
-                fsBtn.innerHTML = '<i class="fas fa-expand"></i> <span>ফুলস্ক্রিন</span>';
-                fsBtn.style.background = 'linear-gradient(135deg, rgba(255,184,0,0.25), rgba(255,145,0,0.35))';
-                fsBtn.style.borderColor = '#ffb800';
-                fsBtn.style.color = '#ffb800';
-                fsBtn.style.boxShadow = '0 0 10px rgba(255,184,0,0.2)';
-            }
-            if (fsDrive) {
-                fsDrive.style.display = 'none';
+            if (exitFsBtn) {
+                exitFsBtn.style.display = 'none';
             }
 
             try {
@@ -14670,9 +14642,9 @@
                 const modal = document.getElementById('setupVideoModal');
                 if (modal && modal.classList.contains('is-fullscreen')) {
                     modal.classList.remove('is-fullscreen');
-                    const fsBtn = document.getElementById('setupVideoFullscreenBtn');
-                    if (fsBtn) fsBtn.innerHTML = '<i class="fas fa-expand"></i> <span>ফুলস্ক্রিন</span>';
                 }
+                const exitFsBtn = document.getElementById('setupVideoExitFsBtn');
+                if (exitFsBtn) exitFsBtn.style.display = 'none';
             }
         });
         document.addEventListener('webkitfullscreenchange', () => {
@@ -14680,9 +14652,9 @@
                 const modal = document.getElementById('setupVideoModal');
                 if (modal && modal.classList.contains('is-fullscreen')) {
                     modal.classList.remove('is-fullscreen');
-                    const fsBtn = document.getElementById('setupVideoFullscreenBtn');
-                    if (fsBtn) fsBtn.innerHTML = '<i class="fas fa-expand"></i> <span>ফুলস্ক্রিন</span>';
                 }
+                const exitFsBtn = document.getElementById('setupVideoExitFsBtn');
+                if (exitFsBtn) exitFsBtn.style.display = 'none';
             }
         });
         let extensionPollInterval = null;
