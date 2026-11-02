@@ -2837,7 +2837,8 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             transition: all 0.25s ease;
         }
-        .setup-player-horizontal iframe {
+        .setup-player-horizontal iframe,
+        .setup-player-horizontal video {
             position: absolute;
             top: 0;
             left: 0;
@@ -2845,13 +2846,15 @@
             height: 100%;
             border: none;
             border-radius: 12px;
+            object-fit: contain;
+            background: #000;
         }
         .setup-player-vertical {
             position: relative;
             width: 100%;
             max-width: 380px;
-            height: 500px;
-            max-height: 56vh;
+            height: 520px;
+            max-height: 58vh;
             background: #000;
             border: 1px solid rgba(255, 184, 0, 0.45);
             border-radius: 16px;
@@ -2860,7 +2863,8 @@
             box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85), 0 0 15px rgba(255, 184, 0, 0.12);
             transition: all 0.25s ease;
         }
-        .setup-player-vertical iframe {
+        .setup-player-vertical iframe,
+        .setup-player-vertical video {
             position: absolute;
             top: 0;
             left: 0;
@@ -2868,6 +2872,8 @@
             height: 100%;
             border: none;
             border-radius: 14px;
+            object-fit: contain;
+            background: #000;
         }
         .setup-video-actions {
             display: flex;
@@ -5874,19 +5880,13 @@
                     <!-- Dynamically generated pills -->
                 </div>
 
-                <!-- Helpful Tip + Fullscreen Banner -->
-                <div style="background:rgba(255,184,0,0.08); border:1px dashed rgba(255,184,0,0.3); border-radius:10px; padding:7px 11px; margin-bottom:8px; font-size:0.75rem; color:#cbd5e1; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-info-circle" style="color:var(--yellow); font-size:0.95rem; flex-shrink:0;"></i>
-                    <span><strong>টিপস:</strong> ভিডিও প্লে করার পর কন্ট্রোল বাটনগুলো নিজে থেকেই হাইড হয়ে যাবে। সম্পূর্ণ বড় স্ক্রিনে পরিষ্কার দেখতে ওপরের <strong>'ফুলস্ক্রিন'</strong> অথবা নিচে <strong>'ড্রাইভ অ্যাপে দেখুন'</strong> চাপ দিন।</span>
-                </div>
-
                 <button type="button" id="setupVideoFullscreenBanner" onclick="toggleSetupVideoFullscreen()" style="width: 100%; margin-bottom: 8px; padding: 9px 12px; background: linear-gradient(135deg, rgba(255,184,0,0.2), rgba(255,145,0,0.32)); border: 1px solid #ffb800; border-radius: 10px; color: #ffb800; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 15px rgba(255,184,0,0.2); transition: all 0.2s ease;">
                     <i class="fas fa-expand"></i> <span>ফুলস্ক্রিনে বড় করে দেখুন (Full Screen Mode)</span>
                 </button>
 
-                <!-- Video Frame Area with Google Drive Preview Player -->
+                <!-- Video Frame Area with Clean Native HTML5 Player (Zero Middle Overlay!) -->
                 <div id="setupVideoFrameWrapper" class="setup-player-vertical" style="position:relative;">
-                    <iframe id="setupVideoIframe" src="" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="border:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:14px; background:#000;"></iframe>
+                    <video id="setupVideoNative" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:contain; background:#000; border-radius:14px; display:block; outline:none;"></video>
                 </div>
 
                 <!-- Video Details -->
@@ -14279,7 +14279,7 @@
                     desc: 'Chrome, Brave বা Edge ব্রাউজারে জিপ এক্সটেনশন আনপ্যাকড হিসেবে লোড করে Quotex লাইভ চার্ট সিঙ্ক করার সম্পূর্ণ ভিডিও গাইড।',
                     embedUrl: 'https://drive.google.com/file/d/1r2gububU51gGT72PAJwiDGbBHMFFm6iZ/preview',
                     viewUrl: 'https://drive.google.com/file/d/1r2gububU51gGT72PAJwiDGbBHMFFm6iZ/view?usp=sharing',
-                    streamUrl: '/api/setup-video/stream/1r2gububU51gGT72PAJwiDGbBHMFFm6iZ'
+                    streamUrl: '/videos/setup/computer_setup.mp4'
                 }
             },
             android: {
@@ -14293,7 +14293,7 @@
                         desc: 'অ্যান্ড্রয়েড ফোনে Kiwi Browser দিয়ে জিপ এক্সটেনশন ইনস্টল করে খুব সহজে কোটেক্স লাইভ ট্রেড ট্র্যাক করার বাংলা টিউটোরিয়াল।',
                         embedUrl: 'https://drive.google.com/file/d/1KiFapB8rzNI3qp_ECjYNuvkdyW9W9-Rw/preview',
                         viewUrl: 'https://drive.google.com/file/d/1KiFapB8rzNI3qp_ECjYNuvkdyW9W9-Rw/view?usp=sharing',
-                        streamUrl: '/api/setup-video/stream/1KiFapB8rzNI3qp_ECjYNuvkdyW9W9-Rw'
+                        streamUrl: '/videos/setup/android_bangla.mp4'
                     },
                     hindi: {
                         langName: 'हिंदी (Hindi)',
@@ -14302,7 +14302,7 @@
                         desc: 'एंड्रॉइड मोबाइल में Kiwi Browser द्वारा एक्सटेंशन सेटअप और कोटैक्स लाइव सिंक करने का पूरा हिंदी वीडियो गाइड।',
                         embedUrl: 'https://drive.google.com/file/d/1XLiYwiHk062D16A3EdQj7kZnTEYKUj-C/preview',
                         viewUrl: 'https://drive.google.com/file/d/1XLiYwiHk062D16A3EdQj7kZnTEYKUj-C/view?usp=sharing',
-                        streamUrl: '/api/setup-video/stream/1XLiYwiHk062D16A3EdQj7kZnTEYKUj-C'
+                        streamUrl: '/videos/setup/android_hindi.mp4'
                     },
                     english: {
                         langName: 'English',
@@ -14311,7 +14311,7 @@
                         desc: 'Step-by-step tutorial on how to install and configure the Quotex trade sync extension on Android using Kiwi Browser.',
                         embedUrl: 'https://drive.google.com/file/d/1ZKXJX5kwStDcH-KV2HKb5FJiwkI-PSwf/preview',
                         viewUrl: 'https://drive.google.com/file/d/1ZKXJX5kwStDcH-KV2HKb5FJiwkI-PSwf/view?usp=sharing',
-                        streamUrl: '/api/setup-video/stream/1ZKXJX5kwStDcH-KV2HKb5FJiwkI-PSwf'
+                        streamUrl: '/videos/setup/android_english.mp4'
                     }
                 }
             },
@@ -14326,7 +14326,7 @@
                         desc: 'আইফোনে সাফারি বা ওরিয়ন ব্রাউজার দিয়ে এক্সটেনশন কনফিগার করে লাইভ ট্রেড সিঙ্ক করার বাংলা ভিডিও গাইড।',
                         embedUrl: 'https://drive.google.com/file/d/1G3oWOy33TJ4LDeRnkklVLOrudgpSN4eL/preview',
                         viewUrl: 'https://drive.google.com/file/d/1G3oWOy33TJ4LDeRnkklVLOrudgpSN4eL/view?usp=sharing',
-                        streamUrl: '/api/setup-video/stream/1G3oWOy33TJ4LDeRnkklVLOrudgpSN4eL'
+                        streamUrl: '/videos/setup/iphone_bangla.mp4'
                     },
                     hindi: {
                         langName: 'हिंदी (Hindi)',
@@ -14335,7 +14335,7 @@
                         desc: 'आईफोन में सफारी या ओरियन ब्राउज़र के माध्यम से एक्सटेंशन सेटअप करके कोटैक्स ट्रेड सिंक करने का हिंदी वीडियो गाइड।',
                         embedUrl: 'https://drive.google.com/file/d/10FnWYuMcJwjYNoEt9TkinR6SI45umb2N/preview',
                         viewUrl: 'https://drive.google.com/file/d/10FnWYuMcJwjYNoEt9TkinR6SI45umb2N/view?usp=sharing',
-                        streamUrl: '/api/setup-video/stream/10FnWYuMcJwjYNoEt9TkinR6SI45umb2N'
+                        streamUrl: '/videos/setup/iphone_hindi.mp4'
                     }
                 }
             }
@@ -14384,9 +14384,11 @@
             closeSetupVideoFullscreen();
             const modal = document.getElementById('setupVideoModal');
             if (modal) modal.classList.remove('active');
-            const iframe = document.getElementById('setupVideoIframe');
-            if (iframe) {
-                iframe.src = '';
+            const video = document.getElementById('setupVideoNative');
+            if (video) {
+                video.pause();
+                video.removeAttribute('src');
+                video.load();
             }
         }
 
@@ -14398,11 +14400,13 @@
             const mainHeader = document.getElementById('setupVideoMainHeader');
             const heading = document.getElementById('setupModalHeading');
             const subheading = document.getElementById('setupModalSubheading');
-            const iframe = document.getElementById('setupVideoIframe');
+            const video = document.getElementById('setupVideoNative');
             const modal = document.getElementById('setupVideoModal');
 
-            if (iframe) {
-                iframe.src = '';
+            if (video) {
+                video.pause();
+                video.removeAttribute('src');
+                video.load();
             }
             if (devSelector) devSelector.style.display = 'grid';
             if (langSelector) langSelector.style.display = 'none';
@@ -14561,10 +14565,12 @@
         }
 
         function loadSetupVideoSource(videoData) {
-            const iframe = document.getElementById('setupVideoIframe');
-            if (!videoData || !iframe) return;
-            if (iframe.src !== videoData.embedUrl) {
-                iframe.src = videoData.embedUrl;
+            const video = document.getElementById('setupVideoNative');
+            if (!videoData || !video) return;
+            const targetSrc = videoData.streamUrl;
+            if (!video.src.endsWith(targetSrc)) {
+                video.src = targetSrc;
+                video.load();
             }
         }
 
@@ -14587,6 +14593,7 @@
 
         function openSetupVideoFullscreen() {
             const modal = document.getElementById('setupVideoModal');
+            const video = document.getElementById('setupVideoNative');
             const fsBtn = document.getElementById('setupVideoFullscreenBtn');
             const fsDrive = document.getElementById('setupVideoFsDriveLink');
             const driveLink = document.getElementById('setupVideoDriveLink');
@@ -14607,11 +14614,13 @@
             }
 
             try {
-                if (modal) {
-                    if (modal.requestFullscreen) {
-                        modal.requestFullscreen().catch(() => {});
-                    } else if (modal.webkitRequestFullscreen) {
-                        modal.webkitRequestFullscreen();
+                if (video) {
+                    if (video.requestFullscreen) {
+                        video.requestFullscreen().catch(() => {});
+                    } else if (video.webkitRequestFullscreen) {
+                        video.webkitRequestFullscreen();
+                    } else if (video.webkitEnterFullscreen) {
+                        video.webkitEnterFullscreen();
                     }
                 }
             } catch (e) {}

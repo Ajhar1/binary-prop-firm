@@ -3689,12 +3689,16 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public'), { 
-  etag: false, 
-  maxAge: 0,
+  etag: true, 
   setHeaders: (res, filePath) => {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
+    if (filePath && filePath.endsWith('.mp4')) {
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+    } else {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
   }
 }));
 
