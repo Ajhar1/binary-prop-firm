@@ -7450,74 +7450,7 @@ app.get('/api/extension/download', (req, res) => {
   }
 });
 
-// 5. Setup Video Stream Proxy (Direct Byte-Range Streaming without Google Drive overlay / attachment headers)
-const https = require('https');
 
-const SETUP_VIDEO_ALLOWED_IDS = new Set([
-  '1KiFapB8rzNI3qp_ECjYNuvkdyW9W9-Rw', // Android Bangla
-  '1XLiYwiHk062D16A3EdQj7kZnTEYKUj-C', // Android Hindi
-  '1ZKXJX5kwStDcH-KV2HKb5FJiwkI-PSwf', // Android English
-  '1G3oWOy33TJ4LDeRnkklVLOrudgpSN4eL', // iPhone Bangla
-  '10FnWYuMcJwjYNoEt9TkinR6SI45umb2N', // iPhone Hindi
-  '1r2gububU51gGT72PAJwiDGbBHMFFm6iZ'  // Computer Setup
-]);
-
-function pipeGoogleVideoStream(targetUrl, headers, res, req) {
-  const gReq = https.get(targetUrl, { headers }, (gRes) => {
-    if (gRes.statusCode >= 300 && gRes.statusCode < 400 && gRes.headers.location) {
-      return pipeGoogleVideoStream(gRes.headers.location, headers, res, req);
-    }
-
-    const responseHeaders = {
-      'Content-Type': 'video/mp4',
-      'Accept-Ranges': 'bytes',
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=86400'
-    };
-
-    if (gRes.headers['content-range']) {
-      responseHeaders['Content-Range'] = gRes.headers['content-range'];
-    }
-    if (gRes.headers['content-length']) {
-      responseHeaders['Content-Length'] = gRes.headers['content-length'];
-    }
-
-    res.writeHead(gRes.statusCode || 200, responseHeaders);
-    gRes.pipe(res);
-
-    req.on('close', () => {
-      try { gRes.destroy(); } catch (e) {}
-    });
-  });
-
-  gReq.on('error', (err) => {
-    console.error('Setup video stream proxy error:', err);
-    if (!res.headersSent) {
-      res.status(502).send('Video stream error.');
-    }
-  });
-
-  req.on('close', () => {
-    try { gReq.destroy(); } catch (e) {}
-  });
-}
-
-app.get('/api/setup-video/stream/:fileId', (req, res) => {
-  const fileId = req.params.fileId;
-  if (!SETUP_VIDEO_ALLOWED_IDS.has(fileId)) {
-    return res.status(403).send('Unauthorized video file.');
-  }
-
-  const targetUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
-  const headers = {
-    'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0'
-  };
-  if (req.headers.range) {
-    headers['Range'] = req.headers.range;
-  }
-
-  pipeGoogleVideoStream(targetUrl, headers, res, req);
-});
 
 // ----------------- COURSE APIS -----------------
 app.get('/api/courses', (req, res) => {

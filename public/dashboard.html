@@ -2939,8 +2939,8 @@
             .setup-player-vertical {
                 width: 100% !important;
                 max-width: 100% !important;
-                height: 440px !important;
-                max-height: 54vh !important;
+                height: 480px !important;
+                max-height: 58vh !important;
                 border-radius: 12px !important;
                 margin: 0 auto 8px auto !important;
             }
@@ -5874,32 +5874,19 @@
                     <!-- Dynamically generated pills -->
                 </div>
 
-                <!-- Prominent Fullscreen Banner directly above Video Player -->
+                <!-- Helpful Tip + Fullscreen Banner -->
+                <div style="background:rgba(255,184,0,0.08); border:1px dashed rgba(255,184,0,0.3); border-radius:10px; padding:7px 11px; margin-bottom:8px; font-size:0.75rem; color:#cbd5e1; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-info-circle" style="color:var(--yellow); font-size:0.95rem; flex-shrink:0;"></i>
+                    <span><strong>টিপস:</strong> ভিডিও প্লে করার পর কন্ট্রোল বাটনগুলো নিজে থেকেই হাইড হয়ে যাবে। সম্পূর্ণ বড় স্ক্রিনে পরিষ্কার দেখতে ওপরের <strong>'ফুলস্ক্রিন'</strong> অথবা নিচে <strong>'ড্রাইভ অ্যাপে দেখুন'</strong> চাপ দিন।</span>
+                </div>
+
                 <button type="button" id="setupVideoFullscreenBanner" onclick="toggleSetupVideoFullscreen()" style="width: 100%; margin-bottom: 8px; padding: 9px 12px; background: linear-gradient(135deg, rgba(255,184,0,0.2), rgba(255,145,0,0.32)); border: 1px solid #ffb800; border-radius: 10px; color: #ffb800; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 15px rgba(255,184,0,0.2); transition: all 0.2s ease;">
-                    <i class="fas fa-expand"></i> <span>ফুলস্ক্রিনে ক্লিয়ার করে দেখুন (Full Screen Mode)</span>
+                    <i class="fas fa-expand"></i> <span>ফুলস্ক্রিনে বড় করে দেখুন (Full Screen Mode)</span>
                 </button>
 
-                <!-- Video Frame Area with Pure HTML5 Native Player (Zero Google Drive middle overlay) -->
+                <!-- Video Frame Area with Google Drive Preview Player -->
                 <div id="setupVideoFrameWrapper" class="setup-player-vertical" style="position:relative;">
-                    <video id="setupVideoNative" controls playsinline preload="auto" style="width:100%; height:100%; object-fit:contain; background:#000; border-radius:14px; display:block; outline:none;"></video>
-                    <!-- Loading Spinner -->
-                    <div id="setupVideoLoadingSpinner" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; flex-direction:column; gap:10px; z-index:5; border-radius:14px;">
-                        <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--yellow);"></i>
-                        <span style="font-size:0.8rem; color:#cbd5e1; font-weight:700;">ভিডিও লোড হচ্ছে...</span>
-                    </div>
-                    <!-- Error / Retry Prompt -->
-                    <div id="setupVideoErrorPrompt" style="display:none; position:absolute; inset:0; background:rgba(10,12,18,0.92); align-items:center; justify-content:center; flex-direction:column; gap:12px; z-index:6; padding:20px; text-align:center; border-radius:14px;">
-                        <i class="fas fa-exclamation-triangle" style="font-size:2rem; color:#ffb800;"></i>
-                        <div style="font-size:0.85rem; color:#fff; font-weight:700;">ভিডিও লোড হতে সময় নিচ্ছে বা ইন্টারনেট স্লো।</div>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-                            <button type="button" onclick="retrySetupVideo()" class="btn-gold" style="padding:6px 14px; font-size:0.78rem;">
-                                <i class="fas fa-redo"></i> পুনরায় চেষ্টা করুন
-                            </button>
-                            <a id="setupVideoErrorDriveBtn" href="#" target="_blank" class="btn-outline" style="padding:6px 14px; font-size:0.78rem; color:#60a5fa; border-color:rgba(96,165,250,0.5);">
-                                <i class="fab fa-google-drive"></i> ড্রাইভ অ্যাপে দেখুন
-                            </a>
-                        </div>
-                    </div>
+                    <iframe id="setupVideoIframe" src="" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="border:none; position:absolute; top:0; left:0; width:100%; height:100%; border-radius:14px; background:#000;"></iframe>
                 </div>
 
                 <!-- Video Details -->
@@ -14397,16 +14384,10 @@
             closeSetupVideoFullscreen();
             const modal = document.getElementById('setupVideoModal');
             if (modal) modal.classList.remove('active');
-            const nativeVideo = document.getElementById('setupVideoNative');
-            if (nativeVideo) {
-                nativeVideo.pause();
-                nativeVideo.removeAttribute('src');
-                nativeVideo.load();
+            const iframe = document.getElementById('setupVideoIframe');
+            if (iframe) {
+                iframe.src = '';
             }
-            const spinner = document.getElementById('setupVideoLoadingSpinner');
-            if (spinner) spinner.style.display = 'none';
-            const errPrompt = document.getElementById('setupVideoErrorPrompt');
-            if (errPrompt) errPrompt.style.display = 'none';
         }
 
         function backToSetupDevices() {
@@ -14417,18 +14398,12 @@
             const mainHeader = document.getElementById('setupVideoMainHeader');
             const heading = document.getElementById('setupModalHeading');
             const subheading = document.getElementById('setupModalSubheading');
-            const nativeVideo = document.getElementById('setupVideoNative');
-            const spinner = document.getElementById('setupVideoLoadingSpinner');
-            const errPrompt = document.getElementById('setupVideoErrorPrompt');
+            const iframe = document.getElementById('setupVideoIframe');
             const modal = document.getElementById('setupVideoModal');
 
-            if (nativeVideo) {
-                nativeVideo.pause();
-                nativeVideo.removeAttribute('src');
-                nativeVideo.load();
+            if (iframe) {
+                iframe.src = '';
             }
-            if (spinner) spinner.style.display = 'none';
-            if (errPrompt) errPrompt.style.display = 'none';
             if (devSelector) devSelector.style.display = 'grid';
             if (langSelector) langSelector.style.display = 'none';
             if (playerContainer) playerContainer.style.display = 'none';
@@ -14586,38 +14561,10 @@
         }
 
         function loadSetupVideoSource(videoData) {
-            const nativeVideo = document.getElementById('setupVideoNative');
-            const spinner = document.getElementById('setupVideoLoadingSpinner');
-            const errPrompt = document.getElementById('setupVideoErrorPrompt');
-            const errDriveBtn = document.getElementById('setupVideoErrorDriveBtn');
-
-            if (!videoData) return;
-            if (errPrompt) errPrompt.style.display = 'none';
-            if (errDriveBtn) errDriveBtn.href = videoData.viewUrl;
-
-            if (nativeVideo) {
-                nativeVideo.style.display = 'block';
-                if (spinner) spinner.style.display = 'flex';
-
-                nativeVideo.src = videoData.streamUrl;
-                nativeVideo.load();
-
-                nativeVideo.oncanplay = function() {
-                    if (spinner) spinner.style.display = 'none';
-                    if (errPrompt) errPrompt.style.display = 'none';
-                };
-                nativeVideo.onwaiting = function() {
-                    if (spinner) spinner.style.display = 'flex';
-                };
-                nativeVideo.onplaying = function() {
-                    if (spinner) spinner.style.display = 'none';
-                    if (errPrompt) errPrompt.style.display = 'none';
-                };
-                nativeVideo.onerror = function() {
-                    console.warn('Video stream error, showing retry prompt...');
-                    if (spinner) spinner.style.display = 'none';
-                    if (errPrompt) errPrompt.style.display = 'flex';
-                };
+            const iframe = document.getElementById('setupVideoIframe');
+            if (!videoData || !iframe) return;
+            if (iframe.src !== videoData.embedUrl) {
+                iframe.src = videoData.embedUrl;
             }
         }
 
@@ -14640,7 +14587,6 @@
 
         function openSetupVideoFullscreen() {
             const modal = document.getElementById('setupVideoModal');
-            const nativeVideo = document.getElementById('setupVideoNative');
             const fsBtn = document.getElementById('setupVideoFullscreenBtn');
             const fsDrive = document.getElementById('setupVideoFsDriveLink');
             const driveLink = document.getElementById('setupVideoDriveLink');
@@ -14661,13 +14607,11 @@
             }
 
             try {
-                if (nativeVideo) {
-                    if (nativeVideo.requestFullscreen) {
-                        nativeVideo.requestFullscreen().catch(() => {});
-                    } else if (nativeVideo.webkitRequestFullscreen) {
-                        nativeVideo.webkitRequestFullscreen();
-                    } else if (nativeVideo.webkitEnterFullscreen) {
-                        nativeVideo.webkitEnterFullscreen();
+                if (modal) {
+                    if (modal.requestFullscreen) {
+                        modal.requestFullscreen().catch(() => {});
+                    } else if (modal.webkitRequestFullscreen) {
+                        modal.webkitRequestFullscreen();
                     }
                 }
             } catch (e) {}
