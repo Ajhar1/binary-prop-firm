@@ -8,7 +8,15 @@
     <meta http-equiv="Expires" content="0" />
     <title>Trader Dashboard — Binary Prop Firm</title>
     <link rel="icon" type="image/png" href="/assets/logo.png" />
-    <link rel="apple-touch-icon" href="/assets/logo.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <!-- PWA Web App Manifest & Mobile App Configuration -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#09090b" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BinaryPropFirm" />
+    <script src="/pwa-install.js" defer></script>
     
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -3434,6 +3442,11 @@
                     <i class="fas fa-handshake" style="color:var(--yellow);"></i>
                     <span style="color:var(--yellow); font-weight:700;">Partner Program</span>
                     <span style="background:var(--yellow); color:#000; font-size:0.65rem; font-weight:800; padding:1px 6px; border-radius:10px; margin-left:auto;">50%</span>
+                </li>
+                <li class="sidebar-item" id="sidebarPwaInstallItem" onclick="window.triggerBPFInstall && window.triggerBPFInstall()" style="display:none; border:1px solid rgba(0,230,118,0.35); background:rgba(0,230,118,0.06); margin-top:6px; cursor:pointer;">
+                    <i class="fas fa-mobile-alt" style="color:#00e676;"></i>
+                    <span style="color:#00e676; font-weight:700;">ইন্সটল অ্যাপ (PWA)</span>
+                    <span style="background:#00e676; color:#000; font-size:0.65rem; font-weight:800; padding:1px 6px; border-radius:10px; margin-left:auto;">App</span>
                 </li>
             </ul>
         </div>
