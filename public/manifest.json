@@ -6,7 +6,7 @@
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#09090b",
+  "background_color": "#FAC805",
   "theme_color": "#09090b",
   "orientation": "any",
   "lang": "en",

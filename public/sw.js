@@ -1,10 +1,12 @@
 // Binary Prop Firm - Progressive Web App Service Worker
-const CACHE_NAME = 'bpf-pwa-v1.0.0';
+const CACHE_NAME = 'bpf-pwa-v1.0.1';
 
 const PRECACHE_ASSETS = [
   '/',
   '/dashboard',
   '/manifest.json',
+  '/apple-touch-icon.png',
+  '/apple-touch-icon-precomposed.png',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-192.png',

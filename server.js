@@ -3694,6 +3694,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
     if (filePath && filePath.endsWith('.mp4')) {
       res.setHeader('Accept-Ranges', 'bytes');
       res.setHeader('Cache-Control', 'public, max-age=86400');
+    } else if (filePath && (filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.ico') || filePath.endsWith('.svg'))) {
+      res.setHeader('Cache-Control', 'public, max-age=604800');
     } else if (filePath && filePath.endsWith('sw.js')) {
       res.setHeader('Service-Worker-Allowed', '/');
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
