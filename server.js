@@ -2229,17 +2229,14 @@ function syncChallengesWithSubmissions() {
       const practiceSubs = allChSubs.filter(s => s.isPractice === true);
       c.practiceSessionsCompleted = practiceSubs.length;
 
-      // Auto-transition to evaluation mode if 3 practice sessions completed OR 48 hours have elapsed
+      // Auto-transition to evaluation mode ONLY if 48 hours have elapsed (traders have unlimited practice sessions within the 48-hour window)
       if (c.status === 'in_progress' && c.challengePhase === 'practice') {
         const practiceEndMs = c.practiceExpiresAt ? new Date(c.practiceExpiresAt).getTime() : 0;
         const isTimeExpired = (practiceEndMs > 0 && now.getTime() >= practiceEndMs);
-        const isPracticeDone = (practiceSubs.length >= (c.practiceMaxSessions || 3));
 
-        if (isPracticeDone || isTimeExpired) {
+        if (isTimeExpired) {
           c.challengePhase = 'evaluation';
-          const transitionTime = (isPracticeDone && practiceSubs.length > 0 && practiceSubs[practiceSubs.length - 1].submittedAt)
-            ? practiceSubs[practiceSubs.length - 1].submittedAt
-            : (isTimeExpired && c.practiceExpiresAt ? c.practiceExpiresAt : now.toISOString());
+          const transitionTime = c.practiceExpiresAt || now.toISOString();
           c.evaluationStartedAt = transitionTime;
           c.durationDays = c.durationDays || 15;
           const evalStartMs = new Date(c.evaluationStartedAt).getTime();
@@ -2254,7 +2251,7 @@ function syncChallengesWithSubmissions() {
             logUserArchive('PRACTICE_AUTO_TRANSITION_TO_EVALUATION', { id: c.userId }, {
               challengeId: c.id,
               packageName: c.packageName,
-              transitionReason: isPracticeDone ? 'All 3 practice sessions completed' : '48-hour practice period completed',
+              transitionReason: '48-hour practice period completed',
               evaluationStartedAt: c.evaluationStartedAt
             });
           } catch(e) {}
@@ -5609,18 +5606,11 @@ app.post('/api/submissions/upload', authenticateToken, upload.fields([
     // Check if active challenge is currently in practice phase
     const isPracticePhase = (activeChallenge.challengePhase === 'practice');
     
-    // Practice Mode Validation: Maximum 3 practice sessions in total
+    // Practice Mode: Unlimited practice sessions within the 48-hour window so traders can test & master all rules
     const practiceSubs = submissions.filter(s => 
       s.isPractice === true &&
       (s.challengeId ? s.challengeId === activeChallenge.id : s.userId === req.user.id)
     );
-
-    if (isPracticePhase && practiceSubs.length >= (activeChallenge.practiceMaxSessions || 3)) {
-      return res.status(400).json({
-        success: false,
-        message: '⚠️ আপনি ইতিমধ্যে সর্বোচ্চ ৩টি প্র্যাকটিস সেশন সম্পন্ন করেছেন। আপনার অনুশীলন শেষ হয়েছে। এখন আপনি মূল ১৫ দিনের চ্যালেঞ্জ শুরু করতে পারেন অথবা ৪৮ ঘণ্টার মেয়াদ শেষ হওয়া পর্যন্ত অপেক্ষা করতে পারেন।'
-      });
-    }
 
     // Evaluation Mode: Rule #4: Maximum 3 sessions per day (Challenge must be completed within 5 to 15 days)
     if (!isPracticePhase) {
@@ -5801,7 +5791,7 @@ app.post('/api/submissions/upload', authenticateToken, upload.fields([
         isPractice: !isTransitioned,
         practiceTransitioned: isTransitioned,
         message: isTransitioned
-          ? '🎉 অভিনন্দন! আপনার ৩টি প্র্যাকটিস পর্ব সমাপ্ত হয়েছে। আপনার মূল ১৫ দিনের মূল্যায়ন চ্যালেঞ্জ স্বয়ংক্রিয়ভাবে শুরু হয়ে গেছে!'
+          ? '🎉 অভিনন্দন! আপনার ৪৮ ঘণ্টার প্র্যাকটিস পর্ব সমাপ্ত হয়েছে। আপনার মূল ১৫ দিনের মূল্যায়ন চ্যালেঞ্জ স্বয়ংক্রিয়ভাবে শুরু হয়ে গেছে!'
           : `🎯 প্র্যাকটিস সেশন #${newSubmission.practiceSessionNumber} সফলভাবে আপলোড করা হয়েছে! এডমিন প্যানেল থেকে আপনার সেশন যাচাই করে কোনো ভুল থাকলে নির্দেশনা দেওয়া হবে। (প্র্যাকটিসে কোনো ভুল হলেও বাদ পড়বেন না)`,
         submission: newSubmission
       });
@@ -5961,20 +5951,8 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     const isPracticePhase = (activeChallenge.challengePhase === 'practice');
     const targetSessionDate = req.body.sessionDate || new Date().toISOString().split('T')[0];
 
-    // Practice Mode Validation: Maximum 3 practice sessions in total
-    if (isPracticePhase) {
-      const practiceSubs = submissions.filter(s => 
-        s.isPractice === true &&
-        (s.challengeId ? s.challengeId === activeChallenge.id : s.userId === user.id)
-      );
-      if (practiceSubs.length >= (activeChallenge.practiceMaxSessions || 3)) {
-        return res.status(400).json({
-          success: false,
-          passed: false,
-          message: '⚠️ আপনি ইতিমধ্যে সর্বোচ্চ ৩টি প্র্যাকটিস সেশন সম্পন্ন করেছেন। এখন আপনি মূল মূল্যায়ন শুরু করতে পারেন।'
-        });
-      }
-    } else {
+    // Practice Mode: Unlimited practice sessions within 48-hour window
+    if (!isPracticePhase) {
       // Evaluation Mode: Max 3 sessions per day
       const todayCount = submissions.filter(s => 
         s.userId === user.id && 
@@ -6434,27 +6412,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     let practiceTransitioned = false;
     if (isPracticePhase) {
       activeChallenge.practiceSessionsCompleted = (activeChallenge.practiceSessionsCompleted || 0) + 1;
-      if (activeChallenge.practiceSessionsCompleted >= (activeChallenge.practiceMaxSessions || 3)) {
-        practiceTransitioned = true;
-        activeChallenge.challengePhase = 'evaluation';
-        const nowIso = new Date().toISOString();
-        activeChallenge.evaluationStartedAt = nowIso;
-        activeChallenge.durationDays = activeChallenge.durationDays || 15;
-        activeChallenge.expiresAt = new Date(Date.now() + (activeChallenge.durationDays * 24 * 60 * 60 * 1000)).toISOString();
-        const initialCap = Number(activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
-        activeChallenge.currentCapital = initialCap;
-        try {
-          logUserArchive('PRACTICE_COMPLETED_AUTO_TRANSITION', { id: activeChallenge.userId }, {
-            challengeId: activeChallenge.id,
-            packageName: activeChallenge.packageName,
-            practiceSessionsCompleted: activeChallenge.practiceSessionsCompleted,
-            newPhase: 'evaluation',
-            evaluationStartedAt: activeChallenge.evaluationStartedAt
-          });
-        } catch(e) {}
-      } else {
-        activeChallenge.currentCapital = endingCapital; // Carried forward to next practice session!
-      }
+      activeChallenge.currentCapital = endingCapital; // Carried forward to next practice session!
     } else {
       activeChallenge.sessionsCompleted = (activeChallenge.sessionsCompleted || 0) + 1;
       activeChallenge.currentCapital = endingCapital; // Carried forward to next session!
@@ -6473,7 +6431,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
     const finalNewCapital = practiceTransitioned ? activeChallenge.currentCapital : endingCapital;
     const successMessage = practiceTransitioned
-      ? '🎉 অভিনন্দন! আপনার ৩টি প্র্যাকটিস পর্ব সফলভাবে সম্পন্ন হয়েছে। আপনার মূল ১৫ দিনের মূল্যায়ন চ্যালেঞ্জ এখন স্বয়ংক্রিয়ভাবে শুরু হয়ে গেছে! ঠান্ডা মাথায় ট্রেড করুন।'
+      ? '🎉 অভিনন্দন! আপনার ৪৮ ঘণ্টার প্র্যাকটিস পর্ব সফলভাবে সম্পন্ন হয়েছে। আপনার মূল ১৫ দিনের মূল্যায়ন চ্যালেঞ্জ এখন স্বয়ংক্রিয়ভাবে শুরু হয়েছে! ঠান্ডা মাথায় ট্রেড করুন।'
       : '🎉 আপনার আজকের ট্রেডিং সেশন সফলভাবে সম্পন্ন হয়েছে ! পরবর্তী সেশন গুলো সুন্দর হবে! অবশ্যই ঠান্ডা মাথায় ট্রেড করবেন।';
 
     res.json({
