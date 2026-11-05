@@ -1,5 +1,5 @@
 // Binary Prop Firm - Progressive Web App Service Worker
-const CACHE_NAME = 'bpf-pwa-v1.0.1';
+const CACHE_NAME = 'bpf-pwa-v1.0.3';
 
 const PRECACHE_ASSETS = [
   '/',
