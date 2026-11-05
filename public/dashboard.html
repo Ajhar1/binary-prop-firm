@@ -11635,18 +11635,24 @@
                         promoCode: dashAppliedPromoData ? dashAppliedPromoData.code : null
                     })
                 });
-                const data = await res.json();
-                if (data.success) {
-                    showToast('চ্যালেঞ্জ অর্ডার সফলভাবে জমা হয়েছে! ভেরিফিকেশনের জন্য অপেক্ষমাণ।', 'success');
+                let data = null;
+                try {
+                    data = await res.json();
+                } catch (jsonErr) {
+                    console.error('Failed to parse buy challenge response JSON:', jsonErr);
+                }
+                if (data && data.success) {
+                    showToast(data.message || '🎉 অভিনন্দন! আপনার চ্যালেঞ্জটি সফলভাবে অর্ডার হয়েছে এবং অনুমোদনের জন্য জমা দেওয়া হয়েছে।', 'success');
                     closeDashBuyModal();
                     document.getElementById('dashBuyForm').reset();
                     fetchChallenges();
                     setTimeout(() => switchTab('overview'), 800);
                 } else {
-                    showToast(data.message || 'Purchase failed', 'error');
+                    showToast((data && data.message) ? data.message : 'চ্যালেঞ্জ অর্ডারে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error');
                 }
             } catch (err) {
-                showToast('Network error while purchasing challenge', 'error');
+                console.error('Dash buy challenge error:', err);
+                showToast('নেটওয়ার্ক সমস্যা অথবা সার্ভার সংযোগে ত্রুটি হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।', 'error');
             } finally {
                 btn.disabled = false;
                 renderDashPaymentInstruction();

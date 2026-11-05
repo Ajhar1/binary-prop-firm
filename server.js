@@ -2470,6 +2470,19 @@ function saveChallenges(challenges) {
   writeJson(CHALLENGES_PERMANENT_STORE_FILE, challenges);
 }
 
+// Enterprise User Dual-Persistence Helper
+function saveUsers(users) {
+  writeJson(USERS_FILE, users);
+  writeJson(USERS_PERMANENT_STORE_FILE, users);
+  if (Array.isArray(users)) {
+    users.forEach(u => {
+      if (u && u.email) {
+        saveTraderToLifelongVault(u);
+      }
+    });
+  }
+}
+
 // Next serial MM link assigner
 function getNextMmSerialLink() {
   const mmLinks = readJson(MM_LINKS_FILE);
@@ -5236,6 +5249,7 @@ app.get('/api/challenges/packages', (req, res) => {
 
 // Buy / Enroll in a challenge
 app.post('/api/challenges/buy', authenticateToken, (req, res) => {
+  try {
   const { packageId, brokerId, brokerAccountId, paymentMethod, paymentTxId, senderNumber, currency, currencySymbol, exchangeRate, localAmount, promoCode } = req.body;
   const enrichedPackages = getEnrichedPackages();
   const pkg = enrichedPackages.find(p => p.id === packageId);
@@ -5471,6 +5485,13 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
     message: `আপনার ${pkg.name} ($${pkg.fundedAmount}) চ্যালেঞ্জ ক্রয় রিকোয়েস্ট সফলভাবে জমা হয়েছে! এডমিন পেমেন্ট ভেরিফাই করে অনুমোদন দিলে এটি রানিং হবে এবং মানি ম্যানেজমেন্ট শিট লিংক যুক্ত হয়ে যাবে।`,
     challenge: newChallenge
   });
+  } catch (err) {
+    console.error("[CHALLENGE BUY FATAL ERROR]:", err);
+    return res.status(500).json({
+      success: false,
+      message: "চ্যালেঞ্জ অর্ডারে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন বা সাপোর্টে যোগাযোগ করুন।"
+    });
+  }
 });
 
 // Get user's challenges (Robust dual-key lookup by userId, email, or traderId)

@@ -4558,16 +4558,22 @@
                         promoCode: appliedPromoData ? appliedPromoData.code : null
                     })
                 });
-                const data = await res.json();
-                if (data.success) {
-                    showToast('Challenge order submitted! Redirecting to dashboard...', 'success');
+                let data = null;
+                try {
+                    data = await res.json();
+                } catch (jsonErr) {
+                    console.error('Failed to parse buy challenge response JSON:', jsonErr);
+                }
+                if (data && data.success) {
+                    showToast(data.message || '🎉 অভিনন্দন! আপনার চ্যালেঞ্জটি সফলভাবে অর্ডার হয়েছে! ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...', 'success');
                     closeModals();
                     setTimeout(() => window.location.href = '/dashboard', 900);
                 } else {
-                    showToast(data.message || 'Failed to start challenge', 'error');
+                    showToast((data && data.message) ? data.message : 'চ্যালেঞ্জ অর্ডারে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error');
                 }
             } catch (err) {
-                showToast('Network error while purchasing challenge', 'error');
+                console.error('Buy challenge error:', err);
+                showToast('নেটওয়ার্ক সমস্যা অথবা সার্ভার সংযোগে ত্রুটি হয়েছে।', 'error');
             } finally {
                 btn.disabled = false;
                 renderPaymentMethodInstruction();
