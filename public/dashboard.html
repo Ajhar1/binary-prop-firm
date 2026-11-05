@@ -6418,37 +6418,37 @@
                     </div>
                 </div>
 
-                <!-- 15-second safety timer display -->
-                <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 14px; text-align: center; margin-bottom: 18px;">
-                    <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">
-                        ভুলবশত ক্লিক রোধে ১৫ সেকেন্ডের কাউন্টডাউন টাইমার:
+                <!-- 60-second safety timer display -->
+                <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 14px 16px; text-align: center; margin-bottom: 18px;">
+                    <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;">
+                        ভুলবশত ক্লিক রোধে ৬০ সেকেন্ডের কাউন্টডাউন টাইমার:
                     </div>
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-                        <div id="startChallengeCountdownCircle" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; font-weight: 900; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); flex-shrink: 0;">
-                            15
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 14px;">
+                        <div id="startChallengeCountdownCircle" style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; font-weight: 900; font-size: 1.35rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); flex-shrink: 0;">
+                            60
                         </div>
                         <div style="text-align: left;">
-                            <div style="color: #fff; font-weight: 750; font-size: 0.92rem;">
-                                <span id="startChallengeCountdownSecs">15</span> সেকেন্ড পর মূল চ্যালেঞ্জ শুরু হবে
+                            <div style="color: #fff; font-weight: 750; font-size: 0.95rem;">
+                                <span id="startChallengeCountdownSecs">60</span> সেকেন্ড পর স্বয়ংক্রিয়ভাবে মূল চ্যালেঞ্জ শুরু হবে
                             </div>
-                            <div style="font-size: 0.76rem; color: #cbd5e1;">
-                                না চাইলে এখনই নিচে "ক্যানসেল করুন" বাটনে চাপ দিন
+                            <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 2px;">
+                                শুরু করতে না চাইলে যেকোনো সময় নিচে "ক্যানসেল করুন" বাটনে চাপ দিন
                             </div>
                         </div>
                     </div>
-                    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 999px; height: 6px; overflow: hidden; margin-top: 10px;">
+                    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 999px; height: 7px; overflow: hidden; margin-top: 12px;">
                         <div id="startChallengeCountdownBar" style="background: linear-gradient(90deg, #fbbf24, #10b981); height: 100%; width: 100%; transition: width 0.3s linear;"></div>
+                    </div>
+                    <div id="startChallengeLoadingMsg" style="display: none; color: #fbbf24; font-weight: 750; font-size: 0.88rem; margin-top: 10px;">
+                        <i class="fas fa-spinner fa-spin"></i> ৬০ সেকেন্ড সম্পন্ন! মূল চ্যালেঞ্জ সক্রিয় হচ্ছে...
                     </div>
                 </div>
             </div>
 
-            <!-- Action Buttons: Cancel and Proceed -->
-            <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
-                <button type="button" class="btn-outline" onclick="cancelStartOfficialChallenge()" style="flex: 1; min-width: 140px; padding: 11px 16px; font-weight: 750; font-size: 0.88rem; border-color: rgba(239, 68, 68, 0.5); color: #fca5a5; background: rgba(239, 68, 68, 0.1); border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
-                    <i class="fas fa-times-circle"></i> ক্যানসেল করুন (Cancel)
-                </button>
-                <button type="button" id="startOfficialNowBtn" class="btn-gold" onclick="proceedStartOfficialChallenge()" style="flex: 1; min-width: 170px; padding: 11px 16px; font-weight: 800; font-size: 0.88rem; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
-                    <i class="fas fa-bolt"></i> এখনই শুরু করুন (<span id="startBtnSecs">15s</span>)
+            <!-- Action Button: Only Cancel Button (Yellow button removed so users MUST wait full 60 seconds) -->
+            <div style="display: flex; justify-content: center;">
+                <button type="button" class="btn-outline" onclick="cancelStartOfficialChallenge()" style="width: 100%; padding: 12px 18px; font-weight: 750; font-size: 0.92rem; border-color: rgba(239, 68, 68, 0.5); color: #fca5a5; background: rgba(239, 68, 68, 0.1); border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-times-circle"></i> ক্যানসেল করুন (Cancel - প্র্যাকটিস চালিয়ে যান)
                 </button>
             </div>
         </div>
@@ -7774,14 +7774,14 @@
             practiceTimerInterval = setInterval(update, 1000);
         }
 
-        // Trader manually skips/ends practice and starts official 15-day challenge with 15-second safety confirmation
+        // Trader manually ends practice and starts official 15-day challenge with mandatory 60-second wait
         let pendingOfficialChallengeId = null;
         let officialStartCountdownTimer = null;
-        let officialStartSecondsLeft = 15;
+        let officialStartSecondsLeft = 60;
 
         function promptStartOfficialChallenge(challengeId) {
             pendingOfficialChallengeId = challengeId;
-            officialStartSecondsLeft = 15;
+            officialStartSecondsLeft = 60;
 
             // Find challenge to compute remaining practice time
             const ch = (myChallenges || []).find(c => c.id === challengeId) || runningChallenge;
@@ -7810,18 +7810,13 @@
             // Reset countdown UI
             const circleEl = document.getElementById('startChallengeCountdownCircle');
             const secsEl = document.getElementById('startChallengeCountdownSecs');
-            const btnSecsEl = document.getElementById('startBtnSecs');
             const barEl = document.getElementById('startChallengeCountdownBar');
-            const nowBtn = document.getElementById('startOfficialNowBtn');
+            const loadMsg = document.getElementById('startChallengeLoadingMsg');
 
-            if (circleEl) circleEl.innerText = '15';
-            if (secsEl) secsEl.innerText = '15';
-            if (btnSecsEl) btnSecsEl.innerText = '15s';
+            if (circleEl) circleEl.innerText = '60';
+            if (secsEl) secsEl.innerText = '60';
             if (barEl) barEl.style.width = '100%';
-            if (nowBtn) {
-                nowBtn.disabled = false;
-                nowBtn.innerHTML = '<i class="fas fa-bolt"></i> এখনই শুরু করুন (<span id="startBtnSecs">15s</span>)';
-            }
+            if (loadMsg) loadMsg.style.display = 'none';
 
             const modal = document.getElementById('startChallengeConfirmModal');
             if (modal) {
@@ -7838,10 +7833,8 @@
 
                 if (circleEl) circleEl.innerText = Math.max(0, officialStartSecondsLeft);
                 if (secsEl) secsEl.innerText = Math.max(0, officialStartSecondsLeft);
-                const dynamicBtnSecs = document.getElementById('startBtnSecs');
-                if (dynamicBtnSecs) dynamicBtnSecs.innerText = `${Math.max(0, officialStartSecondsLeft)}s`;
                 if (barEl) {
-                    const pct = Math.max(0, (officialStartSecondsLeft / 15) * 100);
+                    const pct = Math.max(0, (officialStartSecondsLeft / 60) * 100);
                     barEl.style.width = `${pct}%`;
                 }
 
@@ -7862,11 +7855,19 @@
             if (modal) {
                 modal.classList.remove('active');
             }
+            const loadMsg = document.getElementById('startChallengeLoadingMsg');
+            if (loadMsg) loadMsg.style.display = 'none';
             pendingOfficialChallengeId = null;
             showToast('মূল চ্যালেঞ্জ শুরু বাতিল করা হয়েছে। আপনি প্র্যাকটিস চালিয়ে যেতে পারেন।', 'info');
         }
 
         async function proceedStartOfficialChallenge() {
+            // Strict enforcement: Cannot start before 60 seconds have fully elapsed
+            if (officialStartSecondsLeft > 0) {
+                showToast('অনুগ্রহ করে ৬০ সেকেন্ড অপেক্ষা করুন। টাইমার শেষ হওয়ার পূর্বে মূল চ্যালেঞ্জ শুরু হবে না।', 'warning');
+                return;
+            }
+
             if (officialStartCountdownTimer) {
                 clearInterval(officialStartCountdownTimer);
                 officialStartCountdownTimer = null;
@@ -7879,11 +7880,8 @@
                 return;
             }
 
-            const nowBtn = document.getElementById('startOfficialNowBtn');
-            if (nowBtn) {
-                nowBtn.disabled = true;
-                nowBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> মূল চ্যালেঞ্জ শুরু হচ্ছে...';
-            }
+            const loadMsg = document.getElementById('startChallengeLoadingMsg');
+            if (loadMsg) loadMsg.style.display = 'block';
 
             try {
                 const res = await fetch(`/api/challenges/${chId}/start-official`, {
@@ -7907,20 +7905,13 @@
                     checkSubmissionEligibility();
                 } else {
                     showToast(data.message || 'মূল চ্যালেঞ্জ শুরু করতে ব্যর্থ হয়েছে।', 'error');
-                    if (nowBtn) {
-                        nowBtn.disabled = false;
-                        nowBtn.innerHTML = '<i class="fas fa-bolt"></i> আবার চেষ্টা করুন';
-                    }
                 }
             } catch (err) {
                 console.error('Error starting official challenge:', err);
                 showToast('নেটওয়ার্ক সমস্যা! মূল চ্যালেঞ্জ শুরু করা যায়নি।', 'error');
-                if (nowBtn) {
-                    nowBtn.disabled = false;
-                    nowBtn.innerHTML = '<i class="fas fa-bolt"></i> আবার চেষ্টা করুন';
-                }
             } finally {
                 pendingOfficialChallengeId = null;
+                if (loadMsg) loadMsg.style.display = 'none';
             }
         }
 
