@@ -6841,9 +6841,12 @@ app.post('/api/extension/heartbeat', (req, res) => {
     res.json({
       success: true,
       active: true,
+      isDisqualified: false,
       challengeId: activeChallenge.id,
       challengeStartTime: effectiveStartTime,
       challengeStartedAt: new Date(effectiveStartTime).toISOString(),
+      isReactivated: Boolean(activeChallenge.reactivatedAt),
+      reactivatedAt: activeChallenge.reactivatedAt || null,
       registeredBrokerAccountId,
       brokerName: activeChallenge.brokerName || 'Quotex',
       timestamp: Date.now()
@@ -7178,11 +7181,16 @@ app.post('/api/extension/sync-trades', (req, res) => {
       // Parse accurate trade execution time
       const tradeTime = getTradeExecutionTime(t, clientTzOffset, brokerTzOffset);
 
-      // Check Time-Lock Filter: Must be executed on or after challenge activation time
-      // Includes 5-minute safety buffer for minor network/clock variance
-      if (effectiveStartTime && tradeTime < (effectiveStartTime - SAFETY_BUFFER_MS)) {
+      // Check Time-Lock Filter:
+      // If the challenge was reactivated, strictly count ONLY trades executed on or after reactivation time!
+      // Any trade executed before reactivatedAt (e.g. while disqualified or during prior period) must NEVER be counted!
+      // If not reactivated (initial challenge start): 5-minute variance safety buffer
+      const isReactivated = Boolean(activeChallenge.reactivatedAt);
+      const reactivatedMs = isReactivated ? new Date(activeChallenge.reactivatedAt).getTime() : 0;
+      const minAllowedTime = isReactivated ? reactivatedMs : (effectiveStartTime - SAFETY_BUFFER_MS);
+      if (effectiveStartTime && tradeTime < minAllowedTime) {
         filteredOldCount++;
-        return; // Filter out older / closed-period trades!
+        return; // Filter out older / disqualified-period trades!
       }
 
       // Check Expiry Filter: Cannot be executed after challenge expired
@@ -7275,14 +7283,19 @@ app.post('/api/extension/sync-trades', (req, res) => {
 
     const totalForActiveChallenge = allSynced.filter(t => t.userId === user.id && t.challengeId === activeChallenge.id).length;
 
+    const isReactivated = Boolean(activeChallenge.reactivatedAt);
     let responseMessage = '';
     if (newCount > 0) {
       responseMessage = `${newCount} টি নতুন চ্যালেঞ্জ ট্রেড সফলভাবে সিঙ্ক হয়েছে!`;
       if (filteredOldCount > 0) {
-        responseMessage += ` (চ্যালেঞ্জ শুরুর পূর্বের ${filteredOldCount} টি পুরনো ট্রেড স্বয়ংক্রিয়ভাবে বাদ দেওয়া হয়েছে)`;
+        responseMessage += isReactivated
+          ? ` (রিঅ্যাক্টিভেশনের পূর্বের ${filteredOldCount} টি পুরনো ট্রেড বাদ দেওয়া হয়েছে)`
+          : ` (চ্যালেঞ্জ শুরুর পূর্বের ${filteredOldCount} টি পুরনো ট্রেড স্বয়ংক্রিয়ভাবে বাদ দেওয়া হয়েছে)`;
       }
     } else if (filteredOldCount > 0 && duplicateCount === 0) {
-      responseMessage = `চ্যালেঞ্জ শুরুর পূর্বের ${filteredOldCount} টি পুরনো ট্রেড ফিল্টার করে বাদ দেওয়া হয়েছে। কোনো নতুন চ্যালেঞ্জ ট্রেড নেই।`;
+      responseMessage = isReactivated
+        ? `রিঅ্যাক্টিভেশনের পূর্বের ${filteredOldCount} টি পুরনো ট্রেড ফিল্টার করে বাদ দেওয়া হয়েছে। রিঅ্যাক্টিভেশনের পর কোনো নতুন ট্রেড নেই।`
+        : `চ্যালেঞ্জ শুরুর পূর্বের ${filteredOldCount} টি পুরনো ট্রেড ফিল্টার করে বাদ দেওয়া হয়েছে। কোনো নতুন চ্যালেঞ্জ ট্রেড নেই।`;
     } else {
       responseMessage = `সকল ${trades.length} টি ট্রেড ইতিমধ্যে সেভ রয়েছে (ডুপ্লিকেট এড়ানো হয়েছে)।`;
     }
@@ -7301,6 +7314,8 @@ app.post('/api/extension/sync-trades', (req, res) => {
       },
       challengeStartTime: effectiveStartTime,
       challengeStartedAt: new Date(effectiveStartTime).toISOString(),
+      isReactivated,
+      reactivatedAt: activeChallenge.reactivatedAt || null,
       message: responseMessage
     });
   } catch (err) {
@@ -8786,11 +8801,32 @@ app.post('/api/admin/challenges/:id/reactivate', authenticateAdminToken, (req, r
   const target = challenges[idx];
   const previousRule = target.violatedRule || target.failReason || 'Unknown';
   const previousReasonText = target.failReasonText || '';
+  const previousFailedAt = target.failedAt || null;
+  const nowIso = new Date().toISOString();
+  const reactivatedDate = new Date(nowIso);
+
+  const formattedTimeBn = reactivatedDate.toLocaleString('bn-BD', {
+    timeZone: 'Asia/Dhaka',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+  const formattedTimeEn = reactivatedDate.toLocaleString('en-US', {
+    timeZone: 'Asia/Dhaka',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+
   const customMessage = (req.body.message && req.body.message.trim())
     ? req.body.message.trim()
-    : 'সম্মানিত ট্রেডার, ভুলবশত আপনার অ্যাকাউন্টের চ্যালেঞ্জটি সাময়িকভাবে বন্ধ করা হয়েছিল। আপনার চ্যালেঞ্জটি পুনরায় সফলভাবে সক্রিয় করা হয়েছে এবং আগের সকল ডাটা অক্ষত রয়েছে। আপনি যথারীতি ট্রেডিং চালিয়ে যেতে পারেন। সাময়িক অসুবিধার জন্য আমরা আন্তরিকভাবে দুঃখিত।';
-
-  const nowIso = new Date().toISOString();
+    : `সম্মানিত ট্রেডার, আপনার ${target.packageName} ($${(target.fundedAmount || 0).toLocaleString()}) চ্যালেঞ্জটি সফলভাবে রিঅ্যাক্টিভেট (পুনরায় চালু) করা হয়েছে! আপনার পূর্বের সকল অনুমোদিত সেশন (${target.sessionsCompleted || 0}/${target.sessionsRequired || 15}) ও অগ্রগতি সম্পূর্ণ অক্ষত রাখা হয়েছে। রিঅ্যাক্টিভেট হওয়ার সময় (${formattedTimeBn} / ${formattedTimeEn}) থেকে পরবর্তী নতুন ট্রেডগুলো এক্সটেনশনের মাধ্যমে সিঙ্ক করে ট্রেডিং চালিয়ে যান।`;
 
   // 1. Restore status to in_progress & active (leaving all previous sessions and metrics 100% intact)
   target.status = 'in_progress';
@@ -8803,21 +8839,22 @@ app.post('/api/admin/challenges/:id/reactivate', authenticateAdminToken, (req, r
   delete target.failReasonText;
   delete target.failedAt;
 
-  // 3. Attach reactivation notice for trader dashboard
+  // 3. Attach reactivation notice for trader dashboard with exact timestamp
   target.reactivationNotice = {
     id: `notif_${Date.now()}`,
-    title: 'চ্যালেঞ্জ পুনরায় সচল করা হয়েছে',
+    title: 'চ্যালেঞ্জ পুনরায় সক্রিয় করা হয়েছে',
     message: customMessage,
     reactivatedAt: nowIso,
+    reactivatedAtFormatted: `${formattedTimeBn} (${formattedTimeEn})`,
     read: false
   };
   target.reactivatedAt = nowIso;
 
-  // 4. Forgive any existing rejected submissions for this challenge/user so they never re-disqualify
+  // 4. Forgive any existing rejected OR failed submissions for this challenge/user so they never re-disqualify
   let submissions = readJson(SUBMISSIONS_FILE, []);
   let subsModified = false;
   submissions.forEach(s => {
-    if ((s.challengeId === target.id || s.userId === target.userId) && s.status === 'rejected') {
+    if ((s.challengeId === target.id || s.userId === target.userId) && (s.status === 'rejected' || s.status === 'failed')) {
       s.forgivenOnReactivation = true;
       s.reactivatedAt = nowIso;
       subsModified = true;
@@ -8825,6 +8862,24 @@ app.post('/api/admin/challenges/:id/reactivate', authenticateAdminToken, (req, r
   });
   if (subsModified) {
     writeJson(SUBMISSIONS_FILE, submissions);
+  }
+
+  // 4.1 Filter out and discard any trades taken while disqualified (between failedAt and nowIso)
+  let syncedTrades = readJson(SYNCED_TRADES_FILE, []);
+  const initialTradesLen = syncedTrades.length;
+  const reactivatedMs = reactivatedDate.getTime();
+  const failedMs = previousFailedAt ? new Date(previousFailedAt).getTime() : 0;
+  syncedTrades = syncedTrades.filter(t => {
+    if (t.challengeId === target.id || t.userId === target.userId) {
+      const trdMs = getTradeExecutionTime(t);
+      if (failedMs > 0 && trdMs >= (failedMs - 1000) && trdMs < reactivatedMs) {
+        return false; // Discard trades executed during disqualified period
+      }
+    }
+    return true;
+  });
+  if (syncedTrades.length !== initialTradesLen) {
+    writeJson(SYNCED_TRADES_FILE, syncedTrades);
   }
 
   // 5. Update in CORE_PERMANENT_CHALLENGES if present
@@ -8843,8 +8898,11 @@ app.post('/api/admin/challenges/:id/reactivate', authenticateAdminToken, (req, r
     }
   }
 
-  // Save to both persistent stores
-  saveChallenges(challenges);
+  // Save to both persistent stores & MySQL
+  saveChallenges(challenges, target);
+  if (db && db.isMySqlActive()) {
+    db.saveChallenge(target).catch(e => console.error('[MYSQL REACTIVATE SAVE ERROR]:', e.message));
+  }
 
   // 6. Log archive event
   logUserArchive('CHALLENGE_REACTIVATED_BY_ADMIN',
@@ -8863,6 +8921,42 @@ app.post('/api/admin/challenges/:id/reactivate', authenticateAdminToken, (req, r
 
   const freshChallenges = readJson(CHALLENGES_FILE, []);
   const freshTarget = freshChallenges.find(c => c.id === target.id) || target;
+
+  // 7. Instant real-time broadcast to trader dashboard & extension SSE
+  try {
+    broadcastTraderStateToUser(target.userId, {
+      type: 'CHALLENGE_REACTIVATED',
+      challengeId: target.id,
+      reactivatedAt: nowIso,
+      message: customMessage
+    });
+    const users = readJson(USERS_FILE, []);
+    const userObj = users.find(u => u.id === target.userId);
+    if (userObj && userObj.traderId) {
+      const hbEntry = {
+        lastPing: Date.now(),
+        status: 'online',
+        isActiveChallenge: true,
+        challengeId: target.id
+      };
+      traderHeartbeats.set(userObj.traderId.toLowerCase(), hbEntry);
+      if (userObj.id) traderHeartbeats.set(userObj.id.toLowerCase(), hbEntry);
+      if (userObj.email) traderHeartbeats.set(userObj.email.toLowerCase(), hbEntry);
+    }
+    broadcastExtensionStatus(target.userId, {
+      connected: true,
+      active: true,
+      isDisqualified: false,
+      challengeId: target.id,
+      challengeStartTime: reactivatedMs,
+      challengeStartedAt: nowIso,
+      isReactivated: true,
+      reactivatedAt: nowIso,
+      registeredBrokerAccountId: (target.brokerAccountId || '').trim()
+    });
+  } catch (sseErr) {
+    console.error('Error broadcasting reactivation SSE:', sseErr);
+  }
 
   res.json({
     success: true,

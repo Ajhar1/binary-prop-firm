@@ -7641,7 +7641,15 @@
 
             let reactivationNoticeHtml = '';
             if (challenge && challenge.reactivationNotice && !challenge.reactivationNotice.read) {
-                const noticeTime = new Date(challenge.reactivationNotice.reactivatedAt || Date.now()).toLocaleString();
+                const reactivatedDate = new Date(challenge.reactivationNotice.reactivatedAt || Date.now());
+                const noticeTime = challenge.reactivationNotice.reactivatedAtFormatted || reactivatedDate.toLocaleString('bn-BD', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
                 reactivationNoticeHtml = `
                     <div class="glass-card unified-alert-card" id="reactivationNoticeBanner" style="padding:1.4rem 1.6rem; border:2px solid #10b981; margin-bottom:1.6rem; background:radial-gradient(ellipse at top, rgba(16,185,129,0.18), rgba(22,22,26,0.96)); box-shadow:0 0 30px rgba(16,185,129,0.18); position:relative; overflow:hidden; border-radius:16px;">
                         <div style="position:absolute; top:-15px; right:-15px; font-size:7rem; color:rgba(16,185,129,0.05); pointer-events:none;">
@@ -7658,8 +7666,8 @@
                                             <span style="background:rgba(16,185,129,0.2); color:#10b981; padding:2px 8px; border-radius:6px; font-size:0.78rem; border:1px solid rgba(16,185,129,0.4);">অফিসিয়াল নোটিফিকেশন</span>
                                             চ্যালেঞ্জ পুনরায় সফলভাবে সক্রিয় করা হয়েছে!
                                         </h3>
-                                        <span style="font-size:0.75rem; color:#94a3b8; display:inline-flex; align-items:center; gap:4px;">
-                                            <i class="far fa-clock"></i> ${noticeTime}
+                                        <span style="font-size:0.75rem; color:#94a3b8; display:inline-flex; align-items:center; gap:4px; background:rgba(0,0,0,0.35); padding:2px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
+                                            <i class="far fa-clock" style="color:#10b981;"></i> ${noticeTime}
                                         </span>
                                     </div>
                                     <div style="color:#e2e8f0; font-size:0.88rem; margin-top:8px; line-height:1.6; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); padding:10px 14px; border-radius:10px; white-space:pre-wrap;">${escapeHtml(challenge.reactivationNotice.message || '')}</div>
@@ -12023,6 +12031,9 @@
                             if ((data.version || 0) > currentLiveStateVersion) {
                                 applyTraderLiveStateFromServer(data.state, true);
                             }
+                        } else if (data.type === 'CHALLENGE_REACTIVATED') {
+                            fetchChallenges();
+                            showToast(data.message || '🎉 অভিনন্দন! আপনার চ্যালেঞ্জটি সফলভাবে রিঅ্যাক্টিভেট করা হয়েছে।', 'success');
                         }
                     } catch (err) {
                         console.error('Error parsing SSE event:', err);

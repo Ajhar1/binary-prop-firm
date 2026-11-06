@@ -1,4 +1,4 @@
-// Binary Prop Firm - Quotex Trade Synchronizer Content Script v1.0.6
+// Binary Prop Firm - Quotex Trade Synchronizer Content Script v1.1.0
 // Enhanced: 7-Layer Quotex Account ID Verification Engine, Timezone Auto-Detection, Turbo 5s Support
 (function () {
   let config = {
@@ -923,6 +923,11 @@
     makeWidgetDraggable(root);
 
     document.getElementById('bpfSyncBtn').addEventListener('click', async () => {
+      // Re-verify status with server in case admin recently reactivated challenge
+      try {
+        await fetchChallengeStatus();
+      } catch (e) {}
+
       if (isExtensionLocked) {
         showToast(lockReason || '⚠️ আপনার চ্যালেঞ্জটি বর্তমানে বন্ধ/নিষ্ক্রিয় রয়েছে। এক্সটেনশন কোনো ট্রেড সিঙ্ক করবে না।', 'error');
         return;
@@ -1035,6 +1040,8 @@
   let lockReason = '';
   let currentChallengeStartTime = 0;
   let currentChallengeStartedAtIso = '';
+  let currentIsReactivated = false;
+  let currentReactivatedAt = null;
 
   function handleServerStatusResponse(data) {
     if (!data) return;
@@ -1064,6 +1071,10 @@
       return;
     }
 
+    if (data.isReactivated !== undefined) {
+      currentIsReactivated = Boolean(data.isReactivated);
+      currentReactivatedAt = data.reactivatedAt || null;
+    }
     if (data.challengeStartTime) {
       currentChallengeStartTime = data.challengeStartTime;
     } else if (data.challengeStartedAt) {
@@ -1439,12 +1450,14 @@
     }
   }
 
-  // 10. Multi-Page Auto-Pagination Scanner (With 5-Minute Intelligent Grace Buffer)
-  async function collectAllChallengeTrades(acctType, challengeStartTime) {
+  // 10. Multi-Page Auto-Pagination Scanner (With Zero-Tolerance for Reactivated Challenges)
+  async function collectAllChallengeTrades(acctType, challengeStartTime, isReactivated = false) {
     const allCollectedTrades = [];
     const seenTicketIds = new Set();
     let pagesScanned = 0;
-    const SAFETY_GRACE_BUFFER_MS = 5 * 60 * 1000; // 5 minutes grace window
+    const SAFETY_GRACE_BUFFER_MS = 5 * 60 * 1000; // 5 minutes grace window for initial fresh challenges
+    // If reactivated, ZERO tolerance: strictly count trades executed on or after reactivation time!
+    const effectiveMinTime = isReactivated ? challengeStartTime : (challengeStartTime - SAFETY_GRACE_BUFFER_MS);
 
     // Parse Page 1 from currently rendered DOM
     const page1 = parseQuotexTradesFromDoc(document, acctType);
@@ -1454,8 +1467,8 @@
 
     for (const t of page1.trades) {
       if (!t.ticketId) continue;
-      // Filter out trades strictly older than challenge start time minus grace buffer
-      if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - SAFETY_GRACE_BUFFER_MS)) {
+      // Filter out trades strictly older than challenge start time / reactivation time
+      if (challengeStartTime && t.openTimestamp && t.openTimestamp < effectiveMinTime) {
         reachedOlderTrades = true;
         continue;
       }
@@ -1491,7 +1504,7 @@
 
         for (const t of pageResult.trades) {
           if (!t.ticketId) continue;
-          if (challengeStartTime && t.openTimestamp && t.openTimestamp < (challengeStartTime - SAFETY_GRACE_BUFFER_MS)) {
+          if (challengeStartTime && t.openTimestamp && t.openTimestamp < effectiveMinTime) {
             pageHasOlder = true;
             continue;
           }
@@ -1623,7 +1636,7 @@
       }
 
       const acctType = detectAccountType();
-      const { trades, pagesScanned } = await collectAllChallengeTrades(acctType, currentChallengeStartTime);
+      const { trades, pagesScanned } = await collectAllChallengeTrades(acctType, currentChallengeStartTime, currentIsReactivated);
 
       if (!trades || trades.length === 0) {
         showToast('ℹ️ চ্যালেঞ্জ শুরু হওয়ার পরের কোনো নতুন ট্রেড পাওয়া যায়নি। নতুন ট্রেড নেওয়ার পর পুনরায় চেষ্টা করুন।', 'info');
@@ -1760,7 +1773,7 @@
             sendResponse({ success: true, message: 'Trades অপশনে নেওয়া হচ্ছে...' });
           } else {
             const acct = detectAccountType();
-            collectAllChallengeTrades(acct, currentChallengeStartTime).then(({ trades, pagesScanned }) => {
+            collectAllChallengeTrades(acct, currentChallengeStartTime, currentIsReactivated).then(({ trades, pagesScanned }) => {
               if (!trades || trades.length === 0) {
                 sendResponse({ success: false, error: 'চ্যালেঞ্জের কোনো ট্রেড পাওয়া যায়নি।' });
                 return;
