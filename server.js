@@ -6065,6 +6065,10 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
     // Session Starting Capital (strictly isolated by phase: practice vs official evaluation)
     const baseFundedCapital = Number(activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
+    const clientCapital = (req.body.clientSessionData && typeof req.body.clientSessionData.capital === 'number' && req.body.clientSessionData.capital > 0)
+      ? Number(req.body.clientSessionData.capital)
+      : baseFundedCapital;
+
     const relevantPhaseSubs = submissions.filter(s => 
       s.status !== 'rejected' &&
       (s.challengeId ? s.challengeId === activeChallenge.id : s.userId === user.id) &&
@@ -6097,6 +6101,37 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     const violations = [];
     let sessionComplete = false;
     let completionReason = '';
+
+    function checkStakeBelowMin(mSteps, kWins) {
+      if (kWins >= 6) return false;
+      if (mSteps >= 16) return false;
+
+      // 1. If client session status already completed due to STAKE_BELOW_MIN
+      if (req.body.clientSessionData?.sessionStatus === 'STAKE_BELOW_MIN') {
+        return true;
+      }
+
+      // 2. Test planned stake across all relevant balance baselines
+      const testBals = [clientCapital, baseFundedCapital, sessionStartingCapital, theoreticalCashier, runningCashier].filter(b => typeof b === 'number' && b > 0);
+      for (const bal of testBals) {
+        const planned = computeServerPlannedStake(mat, 16, 6, 1.85, mSteps, kWins, bal);
+        if (planned < 0.50) return true;
+      }
+
+      // 3. Test raw mathematical Masaniello factor
+      const down = (mat[mSteps + 1] && mat[mSteps + 1][kWins] != null) ? mat[mSteps + 1][kWins] : 0;
+      const diag = (mat[mSteps + 1] && mat[mSteps + 1][kWins + 1] != null) ? mat[mSteps + 1][kWins + 1] : 0;
+      const denom = down + (1.85 - 1) * diag;
+      if (denom > 0) {
+        const factor = 1 - (1.85 * diag) / denom;
+        if (factor <= 0) return true;
+        for (const bal of testBals) {
+          if ((factor * bal) < 0.50) return true;
+        }
+      }
+
+      return false;
+    }
 
     for (let idx = 0; idx < candidateTrades.length; idx++) {
       const t = candidateTrades[idx];
@@ -6163,8 +6198,14 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
           if (!validStakes.includes(v)) validStakes.push(v);
         });
       }
-      if (clientSheetStake != null && clientSheetStake > 0 && Math.abs(clientSheetStake - plannedStake) < 0.05) {
+      if (clientSheetStake != null && clientSheetStake > 0) {
         getValidStakesForPlanned(clientSheetStake).forEach(v => {
+          if (!validStakes.includes(v)) validStakes.push(v);
+        });
+      }
+      const clientCapStake = computeServerPlannedStake(mat, 16, 6, 1.85, m, wins, clientCapital);
+      if (clientCapStake > 0) {
+        getValidStakesForPlanned(clientCapStake).forEach(v => {
           if (!validStakes.includes(v)) validStakes.push(v);
         });
       }
@@ -6252,9 +6293,16 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         const remainingDrawdownBuffer = Math.max(0, runningCashier - drawdownFloor);
         const maxDrawdownDollar = sessionStartingCapital * 0.25;
 
-        if (nextPlanned < 0.50) {
+        const isNextBelowMin = (nextPlanned < 0.50) || checkStakeBelowMin(m + 1, wins);
+        const isClientStakeBelowMin = (req.body.clientSessionData?.sessionStatus === 'STAKE_BELOW_MIN');
+        const isClientSessionWon = (req.body.clientSessionData?.sessionStatus === 'WON');
+
+        if (isNextBelowMin || (isClientStakeBelowMin && (m + 1 >= (clientTradeCount || candidateTrades.length)))) {
           sessionComplete = true;
           completionReason = 'STAKE_BELOW_MIN_PROFIT_SECURED';
+        } else if (isClientSessionWon && (m + 1 >= (clientTradeCount || candidateTrades.length))) {
+          sessionComplete = true;
+          completionReason = 'TARGET_6_WINS_REACHED';
         } else if ((runningCashier - nextPlanned) < (drawdownFloor - 0.001) || nextPlanned > (remainingDrawdownBuffer + 0.001) || nextPlanned > maxDrawdownDollar) {
           sessionComplete = true;
           completionReason = 'LIMIT_25_EXCEEDED';
@@ -6308,6 +6356,24 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
       if (!violations.some(v => v.includes('২৫%'))) {
         violations.unshift(drawdownExplanation);
+      }
+    } else {
+      // Check if session completed normally or via < $0.50 minimum stake or client sheet status
+      const isClientStakeBelowMin = (req.body.clientSessionData?.sessionStatus === 'STAKE_BELOW_MIN');
+      const isClientWon = (req.body.clientSessionData?.sessionStatus === 'WON');
+      const isFinalBelowMin = (wins < 6) && ((finalNextPlanned < 0.50) || checkStakeBelowMin(wins + losses, wins));
+
+      if (!sessionComplete) {
+        if (isClientStakeBelowMin || isFinalBelowMin) {
+          sessionComplete = true;
+          completionReason = 'STAKE_BELOW_MIN_PROFIT_SECURED';
+        } else if (wins >= 6 || isClientWon) {
+          sessionComplete = true;
+          completionReason = 'TARGET_6_WINS_REACHED';
+        } else if (clientTradeCount > 0 && (wins + losses) >= clientTradeCount && isClientStakeBelowMin) {
+          sessionComplete = true;
+          completionReason = 'STAKE_BELOW_MIN_PROFIT_SECURED';
+        }
       }
     }
 
@@ -6422,7 +6488,9 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       status: 'auto_verified',
       auditedTicketIds: auditedTrades.map(t => t.ticketId),
       auditReport: auditedTrades,
-      adminFeedback: '⚡ Auto-Verified by Quotex Extension (All stakes & rules compliant)',
+      adminFeedback: (completionReason === 'STAKE_BELOW_MIN_PROFIT_SECURED')
+        ? '⚡ Auto-Verified by Quotex Extension (Session Completed: Next Planned Stake < $0.50, Profit Secured)'
+        : '⚡ Auto-Verified by Quotex Extension (All stakes & rules compliant)',
       submittedAt: new Date().toISOString()
     };
 
@@ -6453,7 +6521,9 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
     const finalNewCapital = practiceTransitioned ? activeChallenge.currentCapital : endingCapital;
     const successMessage = practiceTransitioned
       ? '🎉 অভিনন্দন! আপনার ৪৮ ঘণ্টার প্র্যাকটিস পর্ব সফলভাবে সম্পন্ন হয়েছে। আপনার মূল ১৫ দিনের মূল্যায়ন চ্যালেঞ্জ এখন স্বয়ংক্রিয়ভাবে শুরু হয়েছে! ঠান্ডা মাথায় ট্রেড করুন।'
-      : '🎉 আপনার আজকের ট্রেডিং সেশন সফলভাবে সম্পন্ন হয়েছে ! পরবর্তী সেশন গুলো সুন্দর হবে! অবশ্যই ঠান্ডা মাথায় ট্রেড করবেন।';
+      : (completionReason === 'STAKE_BELOW_MIN_PROFIT_SECURED'
+          ? '🎉 সেশন সফলভাবে সম্পন্ন হয়েছে (পরবর্তী এন্ট্রি < $0.50 হওয়ায় প্রফিট সুরক্ষিত)! পরবর্তী সেশনের জন্য ঠান্ডা মাথায় প্রস্তুত হোন।'
+          : '🎉 আপনার আজকের ট্রেডিং সেশন সফলভাবে সম্পন্ন হয়েছে ! পরবর্তী সেশন গুলো সুন্দর হবে! অবশ্যই ঠান্ডা মাথায় ট্রেড করবেন।');
 
     res.json({
       success: true,
