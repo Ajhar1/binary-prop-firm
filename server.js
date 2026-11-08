@@ -110,6 +110,7 @@ const CRITICAL_DATA_FILES = [
   CHALLENGES_PERMANENT_STORE_FILE,
   SUBMISSIONS_FILE,
   ARCHIVE_FILE,
+  SYNCED_TRADES_FILE,
   // Payout stores
   PAYOUTS_FILE,
   PAYOUT_SETTINGS_FILE,
@@ -13178,41 +13179,18 @@ app.all('/api/system/reconcile-session-trades', (req, res) => {
     return res.status(404).json({ success: false, message: `Challenge for trader ${traderId} not found`, availableChallenges: userChallenges.map(c => ({ id: c.id, status: c.status, broker: c.brokerAccountId })) });
   }
 
-  const allSynced = readJson(SYNCED_TRADES_FILE, []);
-  const allUserSyncedTrades = allSynced.filter(t => 
-    t.userId === challenge.userId || 
-    (t.userEmail && t.userEmail.toLowerCase() === (challenge.userEmail || '').toLowerCase()) ||
-    (t.traderId && t.traderId.toLowerCase() === (challenge.userTraderId || '').toLowerCase()) ||
-    (t.challengeId && t.challengeId === challenge.id)
+  // 2. Locate target submission (e.g. Practice #3)
+  const userSubs = submissions.filter(s => s.challengeId === challenge.id || s.userId === challenge.userId);
+  const targetSub = userSubs.find(s => 
+    s.isPractice && 
+    (s.practiceSessionNumber === targetPracticeNum || s.sessionNumber === targetPracticeNum)
   );
 
-  return res.json({
-    success: true,
-    message: 'Synced trades inspection',
-    challenge: { id: challenge.id, traderId: challenge.userTraderId, email: challenge.userEmail, capital: challenge.currentCapital },
-    totalSyncedInDb: allSynced.length,
-    userSyncedCount: allUserSyncedTrades.length,
-    sampleUserTrades: allUserSyncedTrades.slice(-10).map(t => ({
-      ticket: t.ticketId || t.ticket || t.id,
-      amount: t.amount,
-      profit: t.profit,
-      payout: t.payout,
-      result: t.result,
-      openTime: t.openTime,
-      syncedAt: t.syncedAt,
-      traderId: t.traderId,
-      userEmail: t.userEmail,
-      userId: t.userId
-    }))
-  });
-
   if (!targetSub) {
-    const allUserSubs = submissions.filter(s => s.userId === challenge.userId || s.challengeId === challenge.id || s.profitLoss === 3.76);
     return res.json({ 
       success: false, 
-      message: `Practice #${targetPracticeNum} submission search`,
-      challengeInfo: { id: challenge.id, userId: challenge.userId, brokerAccountId: challenge.brokerAccountId, status: challenge.status, currentCapital: challenge.currentCapital, practiceSessionsCompleted: challenge.practiceSessionsCompleted },
-      matchingUserSubmissions: allUserSubs.map(s => ({ id: s.id, chId: s.challengeId, uId: s.userId, isPractice: s.isPractice, practiceNum: s.practiceSessionNumber, sNum: s.sessionNumber, trades: s.tradesCount, date: s.sessionDate, pnl: s.profitLoss, submittedAt: s.submittedAt }))
+      message: `Practice #${targetPracticeNum} submission not found for challenge ${challenge.id}. Active challenge has ${challenge.practiceSessionsCompleted || 0} completed practice sessions.`,
+      challengeInfo: { id: challenge.id, traderId: challenge.userTraderId, brokerAccountId: challenge.brokerAccountId, status: challenge.status, currentCapital: challenge.currentCapital, practiceSessionsCompleted: challenge.practiceSessionsCompleted }
     });
   }
 
