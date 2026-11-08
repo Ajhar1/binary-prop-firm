@@ -13158,30 +13158,39 @@ app.all('/api/system/reconcile-session-trades', (req, res) => {
   const action = req.body?.action || req.query?.action || 'dry_run';
   const traderId = (req.body?.traderId || req.query?.traderId || 'AJ-1012').trim();
   const targetPracticeNum = Number(req.body?.practiceSessionNumber || req.query?.practiceSessionNumber || 3);
+  const targetBrokerId = (req.body?.brokerAccountId || req.query?.brokerAccountId || '63896760').trim();
 
   let submissions = readJson(SUBMISSIONS_FILE, []);
   let challenges = readJson(CHALLENGES_FILE, []);
   let syncedTrades = readJson(SYNCED_TRADES_FILE, []);
 
-  // 1. Locate challenge
-  const challenge = challenges.find(c => 
+  // 1. Locate challenge: prefer in_progress challenge matching traderId and brokerAccountId
+  const userChallenges = challenges.filter(c => 
     c.userTraderId === traderId || 
     (c.userEmail && c.userEmail.toLowerCase().includes('ajtrading'))
   );
 
+  const challenge = userChallenges.find(c => 
+    c.status === 'in_progress' && (String(c.brokerAccountId || '').includes(targetBrokerId))
+  ) || userChallenges.find(c => c.status === 'in_progress') || userChallenges[userChallenges.length - 1];
+
   if (!challenge) {
-    return res.status(404).json({ success: false, message: `Challenge for trader ${traderId} not found` });
+    return res.status(404).json({ success: false, message: `Challenge for trader ${traderId} not found`, availableChallenges: userChallenges.map(c => ({ id: c.id, status: c.status, broker: c.brokerAccountId })) });
   }
 
   // 2. Locate target submission (e.g. Practice #3)
-  const userSubs = submissions.filter(s => s.challengeId === challenge.id || s.userId === challenge.userId);
+  const userSubs = submissions.filter(s => s.challengeId === challenge.id || (s.userId === challenge.userId && s.challengeId === challenge.id));
   const targetSub = userSubs.find(s => 
     s.isPractice && 
     (s.practiceSessionNumber === targetPracticeNum || s.sessionNumber === targetPracticeNum)
   );
 
   if (!targetSub) {
-    return res.status(404).json({ success: false, message: `Practice #${targetPracticeNum} submission not found` });
+    return res.status(404).json({ 
+      success: false, 
+      message: `Practice #${targetPracticeNum} submission not found for challenge ${challenge.id}`,
+      availableSubmissions: userSubs.map(s => ({ id: s.id, practiceNum: s.practiceSessionNumber, trades: s.tradesCount, date: s.sessionDate, pnl: s.profitLoss }))
+    });
   }
 
   // 3. Find unsubmitted trades for this challenge
@@ -13193,7 +13202,7 @@ app.all('/api/system/reconcile-session-trades', (req, res) => {
   });
 
   const unsubmittedTrades = syncedTrades.filter(t => {
-    const isUserMatch = (t.challengeId === challenge.id || t.userId === challenge.userId);
+    const isUserMatch = (t.challengeId === challenge.id || t.userId === challenge.userId || (targetBrokerId && String(t.brokerAccountId || '').includes(targetBrokerId)));
     const tick = String(t.ticketId || t.ticket || t.id || '').trim();
     return isUserMatch && tick && !auditedIds.has(tick);
   });
