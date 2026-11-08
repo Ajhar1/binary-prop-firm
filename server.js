@@ -13178,26 +13178,24 @@ app.all('/api/system/reconcile-session-trades', (req, res) => {
     return res.status(404).json({ success: false, message: `Challenge for trader ${traderId} not found`, availableChallenges: userChallenges.map(c => ({ id: c.id, status: c.status, broker: c.brokerAccountId })) });
   }
 
-  // 2. Locate target submission (e.g. Practice #3): find the most recent one!
-  const todaySubs = submissions.filter(s => {
-    const t = new Date(s.submittedAt || 0).getTime() || parseInt((s.id || '').replace(/\D/g, '').slice(0, 13)) || 0;
-    return t > 1794120000000;
-  });
+  // 2. Locate target submission: inspect all submissions for user
+  const userSubs = submissions.filter(s => s.userId === challenge.userId || s.challengeId === challenge.id);
 
   return res.json({
     success: true,
-    message: 'Inspecting recent submissions',
-    challenge: { id: challenge.id, traderId: challenge.userTraderId, email: challenge.userEmail, broker: challenge.brokerAccountId },
-    todaySubs: todaySubs.map(s => ({
+    message: 'User submissions list',
+    challenge: { id: challenge.id, traderId: challenge.userTraderId, email: challenge.userEmail, broker: challenge.brokerAccountId, currentCapital: challenge.currentCapital, practiceSessionsCompleted: challenge.practiceSessionsCompleted },
+    totalSubsInDb: submissions.length,
+    userSubs: userSubs.map(s => ({
       id: s.id,
       chId: s.challengeId,
-      userId: s.userId,
       practiceNum: s.practiceSessionNumber,
       sNum: s.sessionNumber,
       trades: s.tradesCount,
       pnl: s.profitLoss,
       submittedAt: s.submittedAt,
-      feedback: s.adminFeedback
+      feedback: s.adminFeedback,
+      tickets: s.auditedTicketIds
     }))
   });
 
