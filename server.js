@@ -6063,32 +6063,14 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       });
     }
 
-    // Session Starting Capital (strictly isolated by phase: practice vs official evaluation)
+    // Session Starting Capital: strictly follows the Money Management Sheet capital chosen by the trader
     const baseFundedCapital = Number(activeChallenge.fundedAmount || activeChallenge.accountSize || activeChallenge.capital || 1000);
     const clientCapital = (req.body.clientSessionData && typeof req.body.clientSessionData.capital === 'number' && req.body.clientSessionData.capital > 0)
       ? Number(req.body.clientSessionData.capital)
       : baseFundedCapital;
 
-    const relevantPhaseSubs = submissions.filter(s => 
-      s.status !== 'rejected' &&
-      (s.challengeId ? s.challengeId === activeChallenge.id : s.userId === user.id) &&
-      (isPracticePhase ? (s.isPractice === true) : (s.isPractice !== true))
-    );
-    relevantPhaseSubs.sort((a, b) => new Date(a.submittedAt || a.sessionDate || 0) - new Date(b.submittedAt || b.sessionDate || 0));
-
-    let sessionStartingCapital = baseFundedCapital;
-    if (relevantPhaseSubs.length > 0) {
-      const lastSub = relevantPhaseSubs[relevantPhaseSubs.length - 1];
-      if (lastSub && lastSub.endingCapital) {
-        sessionStartingCapital = Number(lastSub.endingCapital);
-      } else {
-        let accPnl = 0;
-        relevantPhaseSubs.forEach(s => { accPnl += (parseFloat(s.profitLoss) || 0); });
-        sessionStartingCapital = Math.round((baseFundedCapital + accPnl) * 100) / 100;
-      }
-    } else {
-      sessionStartingCapital = baseFundedCapital;
-    }
+    // Use trader's custom Money Management Sheet capital as sessionStartingCapital
+    const sessionStartingCapital = clientCapital;
     const maxLossLimit = sessionStartingCapital * 0.25;
     const drawdownFloor = sessionStartingCapital - maxLossLimit;
 
