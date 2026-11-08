@@ -8734,6 +8734,11 @@
                 const auditedTicketIds = new Set();
                 let officialIndex = 0;
                 let practiceIndex = 0;
+                let latestPastCutoff = 0;
+
+                // Baseline cutoff: challenge start or reactivation time
+                const chStart = new Date(c.reactivatedAt || c.evaluationStartedAt || c.practiceStartedAt || c.approvedAt || c.startedAt || c.createdAt || 0).getTime();
+                if (chStart > latestPastCutoff) latestPastCutoff = chStart;
 
                 cSubs.forEach(s => {
                     if (s.isPractice) {
@@ -8744,14 +8749,32 @@
                         s._sessionNum = s.sessionNumber || officialIndex;
                     }
                     if (Array.isArray(s.auditedTicketIds)) {
-                        s.auditedTicketIds.forEach(id => auditedTicketIds.add(String(id)));
+                        s.auditedTicketIds.forEach(id => {
+                            if (id) auditedTicketIds.add(String(id).trim());
+                        });
                     }
                     if (Array.isArray(s.auditReport)) {
                         s.auditReport.forEach(t => {
-                            if (t.ticketId) auditedTicketIds.add(String(t.ticketId));
-                            if (t.ticket) auditedTicketIds.add(String(t.ticket));
+                            if (t.ticketId) auditedTicketIds.add(String(t.ticketId).trim());
+                            if (t.ticket) auditedTicketIds.add(String(t.ticket).trim());
+                            const tTime = parseTradeTime(t.openTime) || parseTradeTime(t.closeTime) || (t.time ? new Date(t.time).getTime() : 0);
+                            if (tTime > latestPastCutoff) latestPastCutoff = tTime;
                         });
                     }
+                    if (Array.isArray(s.candidateTrades)) {
+                        s.candidateTrades.forEach(t => {
+                            const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                            if (tick) auditedTicketIds.add(tick);
+                        });
+                    }
+                    if (Array.isArray(s.syncedTrades)) {
+                        s.syncedTrades.forEach(t => {
+                            const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                            if (tick) auditedTicketIds.add(tick);
+                        });
+                    }
+                    const sTime = new Date(s.submittedAt || s.createdAt || s.sessionDate || 0).getTime();
+                    if (sTime > latestPastCutoff) latestPastCutoff = sTime;
                 });
 
                 const pendingReviews = cSubs.filter(s => s.status === 'under_review').length;
@@ -8771,6 +8794,7 @@
                     submissions: cSubs,
                     submissionsCount: cSubs.length,
                     auditedTicketIds,
+                    latestPastCutoff,
                     pendingReviews,
                     verifiedSubs,
                     totalPnl,
@@ -8785,9 +8809,18 @@
             const passedGroups = structuredList.filter(g => g.isPassed);
             const activeGroup = runningGroups[runningGroups.length - 1] || structuredList[structuredList.length - 1] || null;
 
+            // Global set of all ticket IDs ever audited across any challenge or submission
+            const allAuditedTicketIds = new Set();
+            structuredList.forEach(g => {
+                if (g.auditedTicketIds) {
+                    g.auditedTicketIds.forEach(id => allAuditedTicketIds.add(id));
+                }
+            });
+
             return {
                 activeGroup,
                 allGroups: structuredList,
+                allAuditedTicketIds,
                 runningGroups,
                 failedGroups,
                 passedGroups
@@ -9251,7 +9284,8 @@
                                 });
                             }
                         });
-                    } else if (Array.isArray(sub.auditedTicketIds)) {
+                    }
+                    if (Array.isArray(sub.auditedTicketIds)) {
                         sub.auditedTicketIds.forEach((id, aIdx) => {
                             const ticket = String(id).trim();
                             if (ticket && !tradeAuditMap.has(ticket)) {
@@ -9291,9 +9325,16 @@
             const activeChNum = activeGroup ? activeGroup.challengeNumber : 1;
 
             // Filter unsubmitted trades
+            const allAuditedIds = structured.allAuditedTicketIds || (activeGroup ? activeGroup.auditedTicketIds : new Set());
+            const latestPastCutoff = activeGroup ? (activeGroup.latestPastCutoff || 0) : 0;
+
             const unsubmitted = (Array.isArray(userSyncedTradesData) ? userSyncedTradesData : []).filter(t => {
                 const tick = String(t.ticketId || t.ticket || t.id || '').trim();
-                return tick && !tradeAuditMap.has(tick);
+                if (!tick) return false;
+                if (tradeAuditMap.has(tick) || allAuditedIds.has(tick)) return false;
+                const tTime = parseTradeTime(t.openTime) || parseTradeTime(t.closeTime) || new Date(t.syncedAt || 0).getTime();
+                if (latestPastCutoff > 0 && tTime <= (latestPastCutoff + 1000)) return false;
+                return true;
             });
 
             // Sort chronologically oldest first to simulate accurate progression (Trade #1, Trade #2...)
@@ -9494,10 +9535,15 @@
 
             if (activeSessionCard) {
                 if (activeChallenge && Array.isArray(userSyncedTradesData) && userSyncedTradesData.length > 0) {
-                    const auditedIds = activeGroup ? activeGroup.auditedTicketIds : new Set();
+                    const allAuditedIds = structured.allAuditedTicketIds || (activeGroup ? activeGroup.auditedTicketIds : new Set());
+                    const latestPastCutoff = activeGroup ? (activeGroup.latestPastCutoff || 0) : 0;
                     const unsubmittedTrades = userSyncedTradesData.filter(t => {
                         const tick = String(t.ticketId || t.ticket || t.id || '').trim();
-                        return tick && !auditedIds.has(tick);
+                        if (!tick || allAuditedIds.has(tick)) return false;
+                        if (auditMap.has(tick) && !auditMap.get(tick).isUnsubmitted) return false;
+                        const tTime = parseTradeTime(t.openTime) || parseTradeTime(t.closeTime) || new Date(t.syncedAt || 0).getTime();
+                        if (latestPastCutoff > 0 && tTime <= (latestPastCutoff + 1000)) return false;
+                        return true;
                     });
 
                     // Sort chronologically oldest first so Trade #1 is at the top, followed by Trade #2, #3, etc.
@@ -10449,10 +10495,20 @@
 
             // 2. Map previously audited ticket IDs from all submissions
             const auditedTicketIds = new Set();
+            let latestPastCutoff = 0;
             try {
                 const structured = (typeof getUserStructuredChallenges === 'function')
                     ? getUserStructuredChallenges()
                     : { allGroups: [] };
+                if (structured.allAuditedTicketIds) {
+                    structured.allAuditedTicketIds.forEach(id => auditedTicketIds.add(id));
+                }
+                const activeGroup = (structured.runningGroups && structured.runningGroups.length > 0)
+                    ? structured.runningGroups[structured.runningGroups.length - 1]
+                    : structured.activeGroup;
+                if (activeGroup && activeGroup.latestPastCutoff) {
+                    latestPastCutoff = activeGroup.latestPastCutoff;
+                }
                 (structured.allGroups || []).forEach(chGroup => {
                     (chGroup.submissions || []).forEach(sub => {
                         if (Array.isArray(sub.auditReport)) {
@@ -10460,7 +10516,8 @@
                                 const tId = String(a.ticketId || a.ticket || '').trim();
                                 if (tId) auditedTicketIds.add(tId);
                             });
-                        } else if (Array.isArray(sub.auditedTicketIds)) {
+                        }
+                        if (Array.isArray(sub.auditedTicketIds)) {
                             sub.auditedTicketIds.forEach(id => {
                                 const tId = String(id).trim();
                                 if (tId) auditedTicketIds.add(tId);
@@ -10479,7 +10536,10 @@
             const unsubmitted = (Array.isArray(userSyncedTradesData) ? userSyncedTradesData : []).filter(t => {
                 if (t.challengeId && activeChId && t.challengeId !== activeChId) return false;
                 const tick = String(t.ticketId || t.ticket || t.id || '').trim();
-                return tick && !auditedTicketIds.has(tick);
+                if (!tick || auditedTicketIds.has(tick)) return false;
+                const tTime = parseTradeTime(t.openTime) || parseTradeTime(t.closeTime) || new Date(t.syncedAt || 0).getTime();
+                if (latestPastCutoff > 0 && tTime <= (latestPastCutoff + 1000)) return false;
+                return true;
             });
 
             // Effective trades (excluding refund trades)

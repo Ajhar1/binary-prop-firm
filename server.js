@@ -6001,10 +6001,27 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
     // Collect all ticket IDs already locked into previous submissions (Zero Overlap Guard)
     const usedTicketIds = new Set();
+    let latestPastSessionCutoff = 0;
     submissions.forEach(s => {
       if (s.challengeId === activeChallenge.id || s.userId === user.id) {
         if (Array.isArray(s.auditedTicketIds)) {
-          s.auditedTicketIds.forEach(id => usedTicketIds.add(id));
+          s.auditedTicketIds.forEach(id => {
+            if (id) usedTicketIds.add(String(id).trim());
+          });
+        }
+        if (Array.isArray(s.auditReport)) {
+          s.auditReport.forEach(t => {
+            if (t.ticketId) usedTicketIds.add(String(t.ticketId).trim());
+            if (t.ticket) usedTicketIds.add(String(t.ticket).trim());
+            if (s.challengeId === activeChallenge.id) {
+              const tTime = getTradeExecutionTime(t);
+              if (tTime > latestPastSessionCutoff) latestPastSessionCutoff = tTime;
+            }
+          });
+        }
+        if (s.challengeId === activeChallenge.id) {
+          const sTime = new Date(s.submittedAt || s.createdAt || s.sessionDate || 0).getTime();
+          if (sTime > latestPastSessionCutoff) latestPastSessionCutoff = sTime;
         }
       }
     });
@@ -6024,9 +6041,13 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         (t.userEmail && t.userEmail.toLowerCase() === (user.email || '').toLowerCase()) ||
         (t.traderId && t.traderId.toLowerCase() === (user.traderId || '').toLowerCase()) ||
         (t.challengeId && t.challengeId === activeChallenge.id));
+      if (!isUserMatch) return false;
       if (t.challengeId && t.challengeId !== activeChallenge.id) return false;
-      if (usedTicketIds.has(t.ticketId) || (t.id && usedTicketIds.has(t.id))) return false;
-      if (effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 1000)) return false;
+      const tTick = String(t.ticketId || t.ticket || t.id || '').trim();
+      if (!tTick || usedTicketIds.has(tTick)) return false;
+      const tradeTime = getTradeExecutionTime(t);
+      if (latestPastSessionCutoff > 0 && tradeTime <= (latestPastSessionCutoff + 1000)) return false;
+      if (effectiveStartTime > 0 && tradeTime < (effectiveStartTime - 1000)) return false;
       return true;
     });
 
@@ -6432,7 +6453,10 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         endingCapital: runningCashier,
         fileType: 'auto_audit',
         status: isPracticePhase ? 'practice_failed' : 'failed',
-        auditedTicketIds: auditedTrades.map(t => t.ticketId),
+        auditedTicketIds: Array.from(new Set([
+          ...candidateTrades.map(t => String(t.ticketId || t.ticket || t.id || '').trim()),
+          ...auditedTrades.map(t => String(t.ticketId || t.ticket || t.id || '').trim())
+        ])).filter(Boolean),
         auditReport: auditedTrades,
         adminFeedback: `❌ Rule Violation: ${violations[0]}`,
         submittedAt: new Date().toISOString()
@@ -6511,7 +6535,10 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       endingCapital: endingCapital,
       fileType: 'auto_audit',
       status: 'auto_verified',
-      auditedTicketIds: auditedTrades.map(t => t.ticketId),
+      auditedTicketIds: Array.from(new Set([
+        ...candidateTrades.map(t => String(t.ticketId || t.ticket || t.id || '').trim()),
+        ...auditedTrades.map(t => String(t.ticketId || t.ticket || t.id || '').trim())
+      ])).filter(Boolean),
       auditReport: auditedTrades,
       adminFeedback: (completionReason === 'STAKE_BELOW_MIN_PROFIT_SECURED')
         ? '⚡ Auto-Verified by Quotex Extension (Session Completed: Next Planned Stake < $0.50, Profit Secured)'
