@@ -13178,24 +13178,26 @@ app.all('/api/system/reconcile-session-trades', (req, res) => {
     return res.status(404).json({ success: false, message: `Challenge for trader ${traderId} not found`, availableChallenges: userChallenges.map(c => ({ id: c.id, status: c.status, broker: c.brokerAccountId })) });
   }
 
-  // 2. Locate target submission: inspect all submissions for user
-  const userSubs = submissions.filter(s => s.userId === challenge.userId || s.challengeId === challenge.id);
+  // Inspect synced trades for this challenge
+  const allUserSyncedTrades = syncedTrades.filter(t => 
+    t.userId === challenge.userId || 
+    t.challengeId === challenge.id || 
+    (t.brokerAccountId && String(t.brokerAccountId).includes('63896760'))
+  );
 
   return res.json({
     success: true,
-    message: 'User submissions list',
-    challenge: { id: challenge.id, traderId: challenge.userTraderId, email: challenge.userEmail, broker: challenge.brokerAccountId, currentCapital: challenge.currentCapital, practiceSessionsCompleted: challenge.practiceSessionsCompleted },
-    totalSubsInDb: submissions.length,
-    userSubs: userSubs.map(s => ({
-      id: s.id,
-      chId: s.challengeId,
-      practiceNum: s.practiceSessionNumber,
-      sNum: s.sessionNumber,
-      trades: s.tradesCount,
-      pnl: s.profitLoss,
-      submittedAt: s.submittedAt,
-      feedback: s.adminFeedback,
-      tickets: s.auditedTicketIds
+    message: 'Synced trades inspection',
+    challenge: { id: challenge.id, traderId: challenge.userTraderId, broker: challenge.brokerAccountId, capital: challenge.currentCapital },
+    syncedTradesCount: allUserSyncedTrades.length,
+    recentSyncedTrades: allUserSyncedTrades.slice(0, 10).map(t => ({
+      ticket: t.ticketId || t.ticket || t.id,
+      amount: t.amount,
+      profit: t.profit,
+      payout: t.payout,
+      result: t.result,
+      openTime: t.openTime,
+      syncedAt: t.syncedAt
     }))
   });
 
