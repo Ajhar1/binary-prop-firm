@@ -15235,8 +15235,6 @@
                 const isLiveAcct = (t.accountType === 'live');
                 let resolvedPayout = (t.payout || '').trim();
                 if (!resolvedPayout || resolvedPayout === '90%') {
-                    const amt = parseFloat(t.amount) || 0;
-                    const prof = parseFloat(t.profit) || 0;
                     if (amt > 0 && prof > 0) {
                         if (prof > amt) {
                             const calcP = Math.round(((prof - amt) / amt) * 100);
@@ -15258,9 +15256,6 @@
                        </span>`;
 
                 // Audit and Session Mapping
-                const tick = String(t.ticketId || t.ticket || t.id || '').trim();
-                const audit = auditMap.get(tick);
-
                 let sessionBadgeHtml = '';
                 if (audit && audit.isUnsubmitted) {
                     sessionBadgeHtml = `
@@ -15403,8 +15398,6 @@
 
                     let resolvedPayout = (t.payout || '').trim();
                     if (!resolvedPayout || resolvedPayout === '90%') {
-                        const amt = parseFloat(t.amount) || 0;
-                        const prof = parseFloat(t.profit) || 0;
                         if (amt > 0 && prof > 0) {
                             if (prof > amt) {
                                 const calcP = Math.round(((prof - amt) / amt) * 100);
