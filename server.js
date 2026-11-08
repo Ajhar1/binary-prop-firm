@@ -13178,26 +13178,31 @@ app.all('/api/system/reconcile-session-trades', (req, res) => {
     return res.status(404).json({ success: false, message: `Challenge for trader ${traderId} not found`, availableChallenges: userChallenges.map(c => ({ id: c.id, status: c.status, broker: c.brokerAccountId })) });
   }
 
-  // Inspect synced trades for this challenge
-  const allUserSyncedTrades = syncedTrades.filter(t => 
+  const allSynced = readJson(SYNCED_TRADES_FILE, []);
+  const allUserSyncedTrades = allSynced.filter(t => 
     t.userId === challenge.userId || 
-    t.challengeId === challenge.id || 
-    (t.brokerAccountId && String(t.brokerAccountId).includes('63896760'))
+    (t.userEmail && t.userEmail.toLowerCase() === (challenge.userEmail || '').toLowerCase()) ||
+    (t.traderId && t.traderId.toLowerCase() === (challenge.userTraderId || '').toLowerCase()) ||
+    (t.challengeId && t.challengeId === challenge.id)
   );
 
   return res.json({
     success: true,
     message: 'Synced trades inspection',
-    challenge: { id: challenge.id, traderId: challenge.userTraderId, broker: challenge.brokerAccountId, capital: challenge.currentCapital },
-    syncedTradesCount: allUserSyncedTrades.length,
-    recentSyncedTrades: allUserSyncedTrades.slice(0, 10).map(t => ({
+    challenge: { id: challenge.id, traderId: challenge.userTraderId, email: challenge.userEmail, capital: challenge.currentCapital },
+    totalSyncedInDb: allSynced.length,
+    userSyncedCount: allUserSyncedTrades.length,
+    sampleUserTrades: allUserSyncedTrades.slice(-10).map(t => ({
       ticket: t.ticketId || t.ticket || t.id,
       amount: t.amount,
       profit: t.profit,
       payout: t.payout,
       result: t.result,
       openTime: t.openTime,
-      syncedAt: t.syncedAt
+      syncedAt: t.syncedAt,
+      traderId: t.traderId,
+      userEmail: t.userEmail,
+      userId: t.userId
     }))
   });
 
