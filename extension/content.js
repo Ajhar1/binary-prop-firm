@@ -1359,16 +1359,18 @@
           const profMatch = lastCell.innerText.match(/(\d+\.?\d*)\s*[$€₹৳]/) || lastCell.innerText.match(/[$€₹৳]\s*(\d+\.?\d*)/);
           if (profMatch) profit = parseFloat(profMatch[1]);
         }
-        if (profit > 0 || row.innerHTML.includes('green') || row.innerHTML.includes('success')) {
+        // Determine definitive Result:
+        // 1. Check Refund / Tie: In binary options, gross return == investment stake means net P&L is 0 (refund/tie)
+        const isTieOrRefund = (amount > 0 && Math.abs(profit - amount) < 0.005) ||
+                              (openQuote && closeQuote && openQuote !== '0.00' && Math.abs(parseFloat(openQuote) - parseFloat(closeQuote)) < 0.000001) ||
+                              text.toLowerCase().includes('refund') || text.toLowerCase().includes('tie') || text.toLowerCase().includes('equal');
+
+        if (isTieOrRefund) {
+          result = 'REFUND';
+        } else if (profit > amount) {
           result = 'WIN';
-        }
-        if (text.toLowerCase().includes('refund') || text.toLowerCase().includes('tie')) {
-          result = 'REFUND';
-        }
-        if (openQuote && closeQuote && openQuote !== '0.00' && parseFloat(openQuote) === parseFloat(closeQuote)) {
-          result = 'REFUND';
-        } else if (amount > 0 && Math.abs(profit - amount) < 0.01 && result !== 'WIN') {
-          result = 'REFUND';
+        } else {
+          result = 'LOSS';
         }
 
         // Calculate exact payout % from actual profit/amount if DOM percentage was not found

@@ -5924,16 +5924,23 @@ function isStakeCompliantWithRule(planned, actual) {
   return validStakes.some(v => Math.abs(actualNum - v) < 0.05);
 }
 
-// Quotex Refund Trade Detector
+// Quotex Refund / Tie Trade Detector
 function isTradeRefundServer(t) {
-  const res = String(t.result || '').toUpperCase();
-  if (res === 'REFUND' || res === 'TIE' || res === 'EQUAL') return true;
+  if (!t) return false;
+  const res = String(t.result || '').toUpperCase().trim();
+  if (res === 'REFUND' || res === 'TIE' || res === 'EQUAL' || res === 'DRAW') return true;
+
+  const amt = parseFloat(t.amount) || 0;
+  const prof = parseFloat(t.profit) || 0;
+  // In binary options / Quotex: when a trade is a tie / refund, the broker returns the exact invested amount.
+  // Profit equals amount (gross return = stake, net P&L = 0).
+  if (amt > 0 && Math.abs(prof - amt) < 0.005) return true;
+
+  // Opening and closing price equality
   const openQ = parseFloat(t.openQuote);
   const closeQ = parseFloat(t.closeQuote);
   if (openQ > 0 && closeQ > 0 && Math.abs(openQ - closeQ) < 0.000001) return true;
-  const amt = parseFloat(t.amount) || 0;
-  const prof = parseFloat(t.profit) || 0;
-  if (amt > 0 && Math.abs(prof - amt) < 0.01 && (t.payout === '0%' || res === 'LOSS')) return true;
+
   return false;
 }
 
@@ -6103,6 +6110,12 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
       // Check Refund Trade
       if (isTradeRefundServer(t)) {
+        const currentM = wins + losses;
+        const currentSheetLog = (clientTradeLogs && clientTradeLogs[currentM]) ? clientTradeLogs[currentM] : null;
+        const refundPlannedStake = (currentSheetLog && typeof currentSheetLog.stake === 'number' && currentSheetLog.stake > 0)
+          ? currentSheetLog.stake
+          : (parseFloat(t.amount) || 0);
+
         auditedTrades.push({
           tradeNum: wins + losses + 1,
           ticketId: t.ticketId,
@@ -6113,7 +6126,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
           payoutPercent: parseFloat(String(t.payout || '').replace('%', '').trim()) || 0,
           payoutCompliant: true,
           tradeTime: t.openTime || t.closeTime || t.syncedAt,
-          plannedStake: 0,
+          plannedStake: refundPlannedStake,
           actualStake: parseFloat(t.amount) || 0,
           outcome: 'REFUND',
           result: 'REFUND',
@@ -6224,7 +6237,13 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       let tradeNetPnl = 0;
       if (isWin) {
         const gross = parseFloat(t.profit) || 0;
-        tradeNetPnl = (gross > actualStake) ? (gross - actualStake) : gross;
+        if (Math.abs(gross - actualStake) < 0.005) {
+          tradeNetPnl = 0; // Tie/refund fallback: net PnL is 0
+        } else if (gross > actualStake) {
+          tradeNetPnl = gross - actualStake;
+        } else {
+          tradeNetPnl = gross;
+        }
         runningCashier = Math.round((runningCashier + tradeNetPnl) * 100) / 100;
 
         // Advance theoretical balance exactly according to Masaniello sheet formula (Q=1.85)
@@ -7338,7 +7357,9 @@ app.post('/api/extension/sync-trades', (req, res) => {
         timeframe: t.timeframe || '1m',
         amount: parseFloat(t.amount) || 0,
         profit: parseFloat(t.profit) || 0,
-        result: t.result || (parseFloat(t.profit) > 0 ? 'WIN' : 'LOSS'),
+        result: (isTradeRefundServer(t) || ((parseFloat(t.amount) || 0) > 0 && Math.abs((parseFloat(t.profit) || 0) - (parseFloat(t.amount) || 0)) < 0.005))
+          ? 'REFUND'
+          : (t.result || (parseFloat(t.profit) > (parseFloat(t.amount) || 0) ? 'WIN' : 'LOSS')),
         accountType: (t.accountType || accountType || 'demo').toLowerCase(),
         source: source || 'quotex',
         brokerTzOffset: (typeof brokerTzOffset === 'number') ? brokerTzOffset : (t.brokerTzOffset || null),

@@ -9345,9 +9345,15 @@
                 }
                 if (!payoutNum) payoutNum = 85;
 
-                const isRefund = (t.result === 'REFUND' || actualStake === 0 || (t.profit === t.amount && actualStake > 0));
+                const tradeProf = parseFloat(t.profit) || 0;
+                const isRefund = (t.result === 'REFUND' || t.result === 'TIE' || t.result === 'DRAW' || actualStake === 0 || 
+                                  (actualStake > 0 && Math.abs(tradeProf - actualStake) < 0.005));
 
                 if (isRefund) {
+                    const currentM = stepCount;
+                    const sheetLog = (sheetLogs && sheetLogs[currentM]) ? sheetLogs[currentM] : null;
+                    const refundPlanned = (sheetLog && typeof sheetLog.stake === 'number' && sheetLog.stake > 0) ? sheetLog.stake : actualStake;
+
                     tradeAuditMap.set(tick, {
                         isAudited: false,
                         isUnsubmitted: true,
@@ -9356,7 +9362,7 @@
                         sessionNum: activeSessionNum,
                         sessionLabel: activeSessionLabel,
                         stepNum: stepCount + 1,
-                        plannedStake: 0,
+                        plannedStake: refundPlanned,
                         actualStake,
                         isPassed: true,
                         isRefund: true,
@@ -10044,17 +10050,19 @@
                                 ` : report.map((a, idx) => {
                                     const stepNum = a.tradeNum || a.stepIndex || (idx + 1);
                                     const planned = (a.plannedStake != null && a.plannedStake % 1 === 0) ? String(a.plannedStake) : Number(a.plannedStake || 0).toFixed(0);
-                                    const actual = Number(a.actualStake || 0).toFixed(2);
+                                    const actualNum = Number(a.actualStake || 0);
+                                    const actual = actualNum.toFixed(2);
+                                    const pnlNum = Number(a.pnl || 0);
+                                    const isRefund = !!a.isRefund || a.outcome === 'REFUND' || a.result === 'REFUND' || (actualNum > 0 && Math.abs(pnlNum) < 0.005 && String(a.complianceStatus || a.reason || '').includes('রিফান্ড'));
+                                    const outcome = isRefund ? 'REFUND' : (a.outcome || a.result || 'N/A');
                                     const ticket = a.ticketId || a.ticket || 'N/A';
-                                    const outcome = a.outcome || a.result || 'N/A';
                                     const payout = a.payout || (a.payoutPercent ? a.payoutPercent + '%' : 'N/A');
                                     const pNum = parseFloat(String(payout).replace('%', '').trim()) || 0;
                                     const pGood = (pNum >= 85 || pNum === 0);
-                                    const isTradePassed = (a.isPassed !== undefined ? a.isPassed : (a.isCompliant !== undefined ? a.isCompliant : true));
-                                    const pnlNum = Number(a.pnl || 0);
+                                    const isTradePassed = isRefund ? true : (a.isPassed !== undefined ? a.isPassed : (a.isCompliant !== undefined ? a.isCompliant : true));
 
                                     return `
-                                        <tr style="border-bottom:1px solid rgba(255,255,255,0.04); background:${!isTradePassed && !a.isRefund ? 'rgba(239,68,68,0.08)' : 'transparent'};">
+                                        <tr style="border-bottom:1px solid rgba(255,255,255,0.04); background:${!isTradePassed && !isRefund ? 'rgba(239,68,68,0.08)' : 'transparent'};">
                                             <td style="padding:10px 12px; text-align:center; font-weight:800; color:var(--yellow);">
                                                 ধাপ #${stepNum}
                                             </td>
@@ -10082,7 +10090,7 @@
                                                 ${pnlNum >= 0 ? '+' : ''}$${pnlNum.toFixed(2)}
                                             </td>
                                             <td style="padding:10px 12px;">
-                                                ${a.isRefund ? `
+                                                ${isRefund ? `
                                                     <span style="color:#f59e0b; font-weight:700;"><i class="fas fa-rotate"></i> রিফান্ড স্কিপড</span>
                                                 ` : isTradePassed ? `
                                                     <span style="color:#00e676; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
@@ -10477,7 +10485,9 @@
             // Effective trades (excluding refund trades)
             const effectiveTrades = unsubmitted.filter(t => {
                 const actualStake = parseFloat(t.amount) || 0;
-                const isRefund = (t.result === 'REFUND' || (parseFloat(t.profit) === actualStake && actualStake > 0));
+                const tradeProf = parseFloat(t.profit) || 0;
+                const isRefund = (t.result === 'REFUND' || t.result === 'TIE' || t.result === 'DRAW' || 
+                                  (actualStake > 0 && Math.abs(tradeProf - actualStake) < 0.005));
                 return !isRefund;
             });
 
@@ -15207,13 +15217,20 @@
 
             tbody.innerHTML = trades.map((t, idx) => {
                 const serialNum = trades.length - idx;
-                const isWin = t.result === 'WIN';
+                const amt = parseFloat(t.amount) || 0;
+                const prof = parseFloat(t.profit) || 0;
+                const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                const audit = auditMap.get(tick);
+                const isRefund = (audit && audit.isRefund) || t.result === 'REFUND' || t.result === 'TIE' || t.result === 'DRAW' || (amt > 0 && Math.abs(prof - amt) < 0.005);
+                const isWin = !isRefund && (t.result === 'WIN' || prof > amt);
                 const isCall = t.direction === 'CALL';
                 const arrowIcon = isCall ? '<i class="fas fa-arrow-up" style="color:#00e676; margin-right:4px;"></i>' : '<i class="fas fa-arrow-down" style="color:#ff5252; margin-right:4px;"></i>';
-                const profitColor = isWin ? '#00e676' : 'var(--text-secondary)';
-                const resultBadge = isWin 
-                    ? `<span style="background:rgba(0,230,118,0.15); color:#00e676; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; border:1px solid rgba(0,230,118,0.3); margin-left:6px;">WIN</span>` 
-                    : `<span style="background:rgba(255,82,82,0.12); color:#ff5252; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; border:1px solid rgba(255,82,82,0.3); margin-left:6px;">LOSS</span>`;
+                const profitColor = isRefund ? '#fbbf24' : (isWin ? '#00e676' : 'var(--text-secondary)');
+                const resultBadge = isRefund
+                    ? `<span style="background:rgba(245,176,65,0.18); color:#fbbf24; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; border:1px solid rgba(245,176,65,0.35); margin-left:6px;">REFUND</span>`
+                    : (isWin 
+                        ? `<span style="background:rgba(0,230,118,0.15); color:#00e676; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; border:1px solid rgba(0,230,118,0.3); margin-left:6px;">WIN</span>` 
+                        : `<span style="background:rgba(255,82,82,0.12); color:#ff5252; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; border:1px solid rgba(255,82,82,0.3); margin-left:6px;">LOSS</span>`);
 
                 const isLiveAcct = (t.accountType === 'live');
                 let resolvedPayout = (t.payout || '').trim();
@@ -15350,10 +15367,12 @@
             if (mobileCardsContainer) {
                 mobileCardsContainer.innerHTML = trades.map((t, idx) => {
                     const serialNum = trades.length - idx;
-                    const isWin = t.result === 'WIN';
+                    const amt = parseFloat(t.amount) || 0;
+                    const prof = parseFloat(t.profit) || 0;
                     const tick = String(t.ticketId || t.ticket || t.id || '').trim();
                     const audit = auditMap.get(tick);
-                    const isRefund = (audit && audit.isRefund) || (t.result === 'REFUND');
+                    const isRefund = (audit && audit.isRefund) || t.result === 'REFUND' || t.result === 'TIE' || t.result === 'DRAW' || (amt > 0 && Math.abs(prof - amt) < 0.005);
+                    const isWin = !isRefund && (t.result === 'WIN' || prof > amt);
 
                     let tradeProfit = 0;
                     if (isWin) {
