@@ -13179,17 +13179,19 @@ app.all('/api/system/reconcile-session-trades', (req, res) => {
   }
 
   // 2. Locate target submission (e.g. Practice #3)
-  const userSubs = submissions.filter(s => s.challengeId === challenge.id || (s.userId === challenge.userId && s.challengeId === challenge.id));
+  const userSubs = submissions.filter(s => s.challengeId === challenge.id || s.userId === challenge.userId);
   const targetSub = userSubs.find(s => 
     s.isPractice && 
     (s.practiceSessionNumber === targetPracticeNum || s.sessionNumber === targetPracticeNum)
   );
 
   if (!targetSub) {
-    return res.status(404).json({ 
+    const allUserSubs = submissions.filter(s => s.userId === challenge.userId || s.challengeId === challenge.id || s.profitLoss === 3.76);
+    return res.json({ 
       success: false, 
-      message: `Practice #${targetPracticeNum} submission not found for challenge ${challenge.id}`,
-      availableSubmissions: userSubs.map(s => ({ id: s.id, practiceNum: s.practiceSessionNumber, trades: s.tradesCount, date: s.sessionDate, pnl: s.profitLoss }))
+      message: `Practice #${targetPracticeNum} submission search`,
+      challengeInfo: { id: challenge.id, userId: challenge.userId, brokerAccountId: challenge.brokerAccountId, status: challenge.status, currentCapital: challenge.currentCapital, practiceSessionsCompleted: challenge.practiceSessionsCompleted },
+      matchingUserSubmissions: allUserSubs.map(s => ({ id: s.id, chId: s.challengeId, uId: s.userId, isPractice: s.isPractice, practiceNum: s.practiceSessionNumber, sNum: s.sessionNumber, trades: s.tradesCount, date: s.sessionDate, pnl: s.profitLoss, submittedAt: s.submittedAt }))
     });
   }
 
