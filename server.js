@@ -13179,18 +13179,27 @@ app.all('/api/system/reconcile-session-trades', (req, res) => {
   }
 
   // 2. Locate target submission (e.g. Practice #3): find the most recent one!
-  const userSubs = submissions.filter(s => s.challengeId === challenge.id || s.userId === challenge.userId);
-  // Sort descending by submittedAt / timestamp
-  userSubs.sort((a, b) => {
-    const tA = new Date(a.submittedAt || 0).getTime() || parseInt((a.id || '').replace(/\D/g, '').slice(0, 13)) || 0;
-    const tB = new Date(b.submittedAt || 0).getTime() || parseInt((b.id || '').replace(/\D/g, '').slice(0, 13)) || 0;
-    return tB - tA;
+  const todaySubs = submissions.filter(s => {
+    const t = new Date(s.submittedAt || 0).getTime() || parseInt((s.id || '').replace(/\D/g, '').slice(0, 13)) || 0;
+    return t > 1794120000000;
   });
 
-  const targetSub = userSubs.find(s => 
-    s.isPractice && 
-    (s.practiceSessionNumber === targetPracticeNum || s.sessionNumber === targetPracticeNum)
-  );
+  return res.json({
+    success: true,
+    message: 'Inspecting recent submissions',
+    challenge: { id: challenge.id, traderId: challenge.userTraderId, email: challenge.userEmail, broker: challenge.brokerAccountId },
+    todaySubs: todaySubs.map(s => ({
+      id: s.id,
+      chId: s.challengeId,
+      userId: s.userId,
+      practiceNum: s.practiceSessionNumber,
+      sNum: s.sessionNumber,
+      trades: s.tradesCount,
+      pnl: s.profitLoss,
+      submittedAt: s.submittedAt,
+      feedback: s.adminFeedback
+    }))
+  });
 
   if (!targetSub) {
     const allUserSubs = submissions.filter(s => s.userId === challenge.userId || s.challengeId === challenge.id || s.profitLoss === 3.76);
