@@ -13178,8 +13178,15 @@ app.all('/api/system/reconcile-session-trades', (req, res) => {
     return res.status(404).json({ success: false, message: `Challenge for trader ${traderId} not found`, availableChallenges: userChallenges.map(c => ({ id: c.id, status: c.status, broker: c.brokerAccountId })) });
   }
 
-  // 2. Locate target submission (e.g. Practice #3)
+  // 2. Locate target submission (e.g. Practice #3): find the most recent one!
   const userSubs = submissions.filter(s => s.challengeId === challenge.id || s.userId === challenge.userId);
+  // Sort descending by submittedAt / timestamp
+  userSubs.sort((a, b) => {
+    const tA = new Date(a.submittedAt || 0).getTime() || parseInt((a.id || '').replace(/\D/g, '').slice(0, 13)) || 0;
+    const tB = new Date(b.submittedAt || 0).getTime() || parseInt((b.id || '').replace(/\D/g, '').slice(0, 13)) || 0;
+    return tB - tA;
+  });
+
   const targetSub = userSubs.find(s => 
     s.isPractice && 
     (s.practiceSessionNumber === targetPracticeNum || s.sessionNumber === targetPracticeNum)
