@@ -6138,17 +6138,17 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         break;
       }
 
-      // 1. Primary Planned Stake: strictly follows the Money Management Sheet's theoretical Masaniello progression
-      const theoreticalPlannedStake = computeServerPlannedStake(mat, 16, 6, 1.85, m, wins, theoreticalCashier);
-
-      // Also check client sheet log stake (if client sent it) and cashier-based stake (just in case)
-      const clientSheetStake = (clientTradeLogs[m] && typeof clientTradeLogs[m].stake === 'number' && clientTradeLogs[m].stake > 0)
-        ? clientTradeLogs[m].stake
+      // 1. Primary Planned Stake: strictly follows the Money Management Sheet log if available, else theoretical Masaniello progression
+      const clientSheetLog = (clientTradeLogs && clientTradeLogs[m]) ? clientTradeLogs[m] : null;
+      const clientSheetStake = (clientSheetLog && typeof clientSheetLog.stake === 'number' && clientSheetLog.stake > 0)
+        ? clientSheetLog.stake
         : null;
+
+      const theoreticalPlannedStake = computeServerPlannedStake(mat, 16, 6, 1.85, m, wins, theoreticalCashier);
       const cashierPlannedStake = computeServerPlannedStake(mat, 16, 6, 1.85, m, wins, runningCashier);
 
-      // Planned stake to display in audit report matches the theoretical sheet stake (or client sheet log)
-      const plannedStake = (clientSheetStake != null && Math.abs(clientSheetStake - theoreticalPlannedStake) < 0.05)
+      // Planned stake to display and validate against: aligns with user's running Money Management Sheet if available
+      const plannedStake = (clientSheetStake != null && clientSheetStake > 0)
         ? clientSheetStake
         : theoreticalPlannedStake;
 
@@ -6156,15 +6156,18 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
 
       // Collect authorized stakes strictly according to the Money Management Sheet's plannedStake
       const validStakes = getValidStakesForPlanned(plannedStake);
+      if (clientSheetStake != null && clientSheetStake > 0) {
+        getValidStakesForPlanned(clientSheetStake).forEach(v => {
+          if (!validStakes.includes(v)) validStakes.push(v);
+        });
+      }
+      getValidStakesForPlanned(theoreticalPlannedStake).forEach(v => {
+        if (!validStakes.includes(v)) validStakes.push(v);
+      });
       // Extra safety: for Step 1 of the session, also accept base funded capital's step 1 stake
       if (m === 0) {
         const baseStep1Stake = Math.round(baseFundedCapital * 0.0333);
         getValidStakesForPlanned(baseStep1Stake).forEach(v => {
-          if (!validStakes.includes(v)) validStakes.push(v);
-        });
-      }
-      if (clientSheetStake != null && clientSheetStake > 0) {
-        getValidStakesForPlanned(clientSheetStake).forEach(v => {
           if (!validStakes.includes(v)) validStakes.push(v);
         });
       }
@@ -6185,6 +6188,25 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         violations.push(`ট্রেড #${tradeNum}: Planned Stake ছিল ${plannedStr} (${expectedText}), কিন্তু কোটেক্সে ট্রেড ওপেন করা হয়েছে $${actualStake.toFixed(2)}।`);
       }
 
+      // 2. Check Outcome Mismatch between Quotex result and Money Management Sheet
+      const isWin = (t.result === 'WIN' || (parseFloat(t.profit) > parseFloat(t.amount)));
+      const actualOutcome = isWin ? 'WIN' : 'LOSS';
+      const sheetOutcome = clientSheetLog ? String(clientSheetLog.outcome || '').toUpperCase().trim() : null;
+
+      let isOutcomeMismatch = false;
+      let outcomeMismatchReason = '';
+      if (sheetOutcome && (sheetOutcome === 'WIN' || sheetOutcome === 'LOSS')) {
+        if (sheetOutcome !== actualOutcome) {
+          isOutcomeMismatch = true;
+          if (actualOutcome === 'WIN' && sheetOutcome === 'LOSS') {
+            outcomeMismatchReason = `ট্রেড #${tradeNum}: কোটেক্সে উইন (WIN) হয়েছিল, কিন্তু মানি ম্যানেজমেন্ট শীটে লস (LOSS) বসানো হয়েছে। ট্রেডিং রুলস অনুযায়ী ব্রোকারের আসল ফলাফলের সাথে মানি ম্যানেজমেন্ট শীটের ফলাফল মিল থাকতে হবে।`;
+          } else {
+            outcomeMismatchReason = `ট্রেড #${tradeNum}: কোটেক্সে লস (LOSS) হয়েছিল, কিন্তু মানি ম্যানেজমেন্ট শীটে উইন (WIN) বসানো হয়েছে। ট্রেডিং রুলস অনুযায়ী ব্রোকারের আসল ফলাফলের সাথে মানি ম্যানেজমেন্ট শীটের ফলাফল মিল থাকতে হবে।`;
+          }
+          violations.push(outcomeMismatchReason);
+        }
+      }
+
       // Check Quotex Payout rate (Minimum 85% required by platform rules)
       const rawPayout = String(t.payout || '').replace('%', '').trim();
       const payoutPercent = parseFloat(rawPayout) || 0;
@@ -6199,7 +6221,6 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         violations.push(`ট্রেড #${tradeNum}: চ্যালেঞ্জের নিয়ম অনুযায়ী ডেমো অ্যাকাউন্টে ট্রেড করতে হবে, কিন্তু অন্য অ্যাকাউন্ট (${t.accountType}) সনাক্ত হয়েছে।`);
       }
 
-      const isWin = (t.result === 'WIN' || (parseFloat(t.profit) > parseFloat(t.amount)));
       let tradeNetPnl = 0;
       if (isWin) {
         const gross = parseFloat(t.profit) || 0;
@@ -6224,7 +6245,21 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         violations.push(`সেশন চলাকালীন ক্যাশিয়ার ব্যালেন্স প্রারম্ভিক ক্যাপিটালের ($${sessionStartingCapital.toFixed(2)}) ২৫% ড্রডাউন লিমিট অতিক্রম করেছে (বর্তমান ব্যালেন্স: $${runningCashier.toFixed(2)})।`);
       }
 
-      const isTradePassed = isCompliant && payoutCompliant;
+      const isTradePassed = isCompliant && payoutCompliant && !isOutcomeMismatch;
+
+      let complianceStatus = '✅ Passed';
+      let tradeReason = 'সঠিক ট্রেড ও পেআউট';
+      if (isOutcomeMismatch) {
+        complianceStatus = `❌ শিটে ভুল ফলাফল (কোটেক্সে ${actualOutcome}, কিন্তু শীটে ${sheetOutcome})`;
+        tradeReason = outcomeMismatchReason;
+      } else if (!isCompliant) {
+        complianceStatus = `❌ Stake Mismatch ($${actualStake} vs ${expectedText})`;
+        tradeReason = `Stake Mismatch ($${actualStake} vs ${expectedText})`;
+      } else if (!payoutCompliant) {
+        complianceStatus = `❌ Low Payout (${t.payout || payoutPercent + '%'} < 85%)`;
+        tradeReason = `Low Payout (${t.payout || payoutPercent + '%'} < 85%)`;
+      }
+
       auditedTrades.push({
         tradeNum,
         stepIndex: tradeNum,
@@ -6242,10 +6277,10 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         pnl: tradeNetPnl,
         balanceAfter: runningCashier,
         isRefund: false,
-        complianceStatus: isTradePassed ? '✅ Passed' : (!isCompliant ? `❌ Stake Mismatch ($${actualStake} vs ${expectedText})` : `❌ Low Payout (${t.payout || payoutPercent + '%'} < 85%)`),
+        complianceStatus,
         isPassed: isTradePassed,
         isCompliant: isTradePassed,
-        reason: isTradePassed ? 'সঠিক ট্রেড ও পেআউট' : (!isCompliant ? `Stake Mismatch ($${actualStake} vs ${expectedText})` : `Low Payout (${t.payout || payoutPercent + '%'} < 85%)`),
+        reason: tradeReason,
         acceptableStakes: validStakes
       });
 

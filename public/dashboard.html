@@ -9315,6 +9315,10 @@
                 ? Number(masState.capital)
                 : baseFundedCapital;
 
+            // Extract trader's running Money Management Sheet trade logs
+            const sheetSessionData = (typeof getMasanielloSessionData === 'function') ? getMasanielloSessionData() : null;
+            const sheetLogs = (sheetSessionData && Array.isArray(sheetSessionData.tradeLogs)) ? sheetSessionData.tradeLogs : [];
+
             const mat = (typeof buildMasanielloMatrix === 'function') 
                 ? buildMasanielloMatrix(16, 6, 1.85) 
                 : [];
@@ -9364,11 +9368,35 @@
 
                 stepCount++;
                 const currentStep = stepCount;
-                const m = simWins + simLosses;
+                const m = currentStep - 1;
 
-                // Calculate expected planned stake
+                // 1. Get planned stake and outcome from the trader's running Money Management Sheet
+                const sheetLog = (sheetLogs && sheetLogs[m]) ? sheetLogs[m] : null;
+                const sheetPlannedStake = (sheetLog && typeof sheetLog.stake === 'number' && sheetLog.stake > 0)
+                    ? sheetLog.stake
+                    : null;
+                const sheetOutcome = sheetLog ? String(sheetLog.outcome || '').toUpperCase().trim() : null;
+                const actualOutcome = isWin ? 'WIN' : 'LOSS';
+
+                // Outcome mismatch detection: did trader put WIN instead of LOSS, or LOSS instead of WIN in the sheet?
+                let outcomeMismatch = false;
+                let outcomeMismatchError = '';
+                if (sheetOutcome && (sheetOutcome === 'WIN' || sheetOutcome === 'LOSS')) {
+                    if (sheetOutcome !== actualOutcome) {
+                        outcomeMismatch = true;
+                        if (actualOutcome === 'WIN' && sheetOutcome === 'LOSS') {
+                            outcomeMismatchError = `ট্রেড #${currentStep}: কোটেক্সে উইন (WIN) হয়েছিল, কিন্তু মানি ম্যানেজমেন্ট শীটে লস (LOSS) বসানো হয়েছে`;
+                        } else {
+                            outcomeMismatchError = `ট্রেড #${currentStep}: কোটেক্সে লস (LOSS) হয়েছিল, কিন্তু মানি ম্যানেজমেন্ট শীটে উইন (WIN) বসানো হয়েছে`;
+                        }
+                    }
+                }
+
+                // 2. Planned stake: strictly follow user's running Money Management Sheet if available
                 let plannedStake = 0;
-                if (mat.length > 0 && m < 16) {
+                if (sheetPlannedStake != null && sheetPlannedStake > 0) {
+                    plannedStake = sheetPlannedStake;
+                } else if (mat.length > 0 && m < 16) {
                     let stake = 0;
                     if (6 - simWins === 16 - m) {
                         stake = theoreticalCashier;
@@ -9388,6 +9416,11 @@
                 }
 
                 const validStakes = getValidStakesForPlanned(plannedStake);
+                if (sheetPlannedStake != null && sheetPlannedStake > 0) {
+                    getValidStakesForPlanned(sheetPlannedStake).forEach(v => {
+                        if (!validStakes.includes(v)) validStakes.push(v);
+                    });
+                }
                 // Extra safety: for Step 1 of the session, also accept base funded capital's step 1 stake
                 if (currentStep === 1) {
                     const baseStep1Stake = Math.round(baseFundedCapital * 0.0333);
@@ -9401,7 +9434,10 @@
                 let tradePassed = true;
                 let tradeError = '';
 
-                if (!isStakeOk) {
+                if (outcomeMismatch) {
+                    tradePassed = false;
+                    tradeError = outcomeMismatchError;
+                } else if (!isStakeOk) {
                     tradePassed = false;
                     tradeError = `ভুল স্টেক: Plan ছিল $${plannedStake}, নেওয়া হয়েছে $${actualStake.toFixed(2)}`;
                 } else if (!isPayoutOk) {
@@ -9422,6 +9458,7 @@
                     isPassed: tradePassed,
                     isRefund: false,
                     errorReason: tradeError,
+                    outcomeMismatch,
                     payout: `${payoutNum}%`
                 });
 
@@ -9455,6 +9492,13 @@
                     const unsubmittedTrades = userSyncedTradesData.filter(t => {
                         const tick = String(t.ticketId || t.ticket || t.id || '').trim();
                         return tick && !auditedIds.has(tick);
+                    });
+
+                    // Sort chronologically oldest first so Trade #1 is at the top, followed by Trade #2, #3, etc.
+                    unsubmittedTrades.sort((a, b) => {
+                        const timeA = parseTradeTime(a.openTime) || parseTradeTime(a.closeTime) || new Date(a.syncedAt || 0).getTime();
+                        const timeB = parseTradeTime(b.openTime) || parseTradeTime(b.closeTime) || new Date(b.syncedAt || 0).getTime();
+                        return timeA - timeB;
                     });
 
                     if (unsubmittedTrades.length > 0) {
@@ -9567,7 +9611,7 @@
 
                                                 return `
                                                     <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
-                                                        <td style="padding:7px 10px; text-align:center; font-weight:800; color:var(--yellow);">#${idx + 1}</td>
+                                                        <td style="padding:7px 10px; text-align:center; font-weight:800; color:var(--yellow);">#${stepNum}</td>
                                                         <td style="padding:7px 10px;">
                                                             <span style="background:linear-gradient(135deg, rgba(0,230,118,0.18), rgba(16,185,129,0.25)); color:#00e676; border:1px solid rgba(0,230,118,0.45); font-weight:800; font-size:0.72rem; padding:3px 8px; border-radius:6px; white-space:nowrap;">
                                                                 <i class="fas fa-bolt"></i> ${escapeHtml(activeSessionName)} • ট্রেড #${stepNum}
