@@ -745,6 +745,81 @@
             box-shadow: 0 6px 20px rgba(245, 176, 65, 0.35);
         }
 
+        /* ========== DUAL CHALLENGE CATEGORY SWITCHER ========== */
+        .challenge-category-nav-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 16px;
+            margin: 0 auto 2.2rem auto;
+            max-width: 900px;
+            padding: 0 1rem;
+        }
+        .btn-cat-nav-pill {
+            flex: 1 1 400px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 22px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-cat-nav-pill:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        .btn-cat-nav-pill.active-easy {
+            background: linear-gradient(135deg, rgba(0, 230, 118, 0.16), rgba(16, 185, 129, 0.24));
+            border-color: #00e676;
+            color: #fff;
+            box-shadow: 0 0 25px rgba(0, 230, 118, 0.28);
+        }
+        .btn-cat-nav-pill.active-your {
+            background: linear-gradient(135deg, rgba(245, 176, 65, 0.18), rgba(212, 175, 55, 0.26));
+            border-color: #f5b041;
+            color: #fff;
+            box-shadow: 0 0 25px rgba(245, 176, 65, 0.32);
+        }
+        .cat-pill-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .btn-cat-nav-pill.active-easy .cat-pill-dot {
+            background: #00e676;
+            box-shadow: 0 0 12px #00e676;
+        }
+        .btn-cat-nav-pill.active-your .cat-pill-dot {
+            background: #f5b041;
+            box-shadow: 0 0 12px #f5b041;
+        }
+        .cat-pill-text-wrap {
+            display: flex;
+            flex-direction: column;
+        }
+        .cat-pill-title {
+            font-size: 1.05rem;
+            font-weight: 900;
+            line-height: 1.25;
+            letter-spacing: 0.3px;
+        }
+        .cat-pill-subtitle {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.68);
+            margin-top: 3px;
+            line-height: 1.35;
+        }
+
         /* ========== INTERACTIVE CAPITAL TIER PICKER (BinaryFunded Inspired) ========== */
         .challenge-section-header {
             max-width: 1100px;
@@ -2971,6 +3046,24 @@
 
     <!-- ========== EXTERNAL CHALLENGES ========== -->
     <section id="challenges" class="challenge-section">
+        <!-- Dual Category Switcher (Easy Challenge vs Your Challenge) -->
+        <div class="challenge-category-nav-wrap">
+            <button type="button" id="btnCatEasyRules" class="btn-cat-nav-pill active-easy" onclick="switchLandingChallengeCategory('easy_rules')">
+                <span class="cat-pill-dot"></span>
+                <div class="cat-pill-text-wrap">
+                    <span class="cat-pill-title">Easy Challenge Easy Rules.</span>
+                    <span class="cat-pill-subtitle">ম্যানেজড মানি ম্যানেজমেন্ট শিট চ্যালেঞ্জ • ১৫ সেশন পূরণ</span>
+                </div>
+            </button>
+            <button type="button" id="btnCatYourRules" class="btn-cat-nav-pill" onclick="switchLandingChallengeCategory('your_rules')">
+                <span class="cat-pill-dot"></span>
+                <div class="cat-pill-text-wrap">
+                    <span class="cat-pill-title">Your Challenge Your Rules.</span>
+                    <span class="cat-pill-subtitle">টার্গেট ও ড্র-ডাউন বেসড প্রপ চ্যালেঞ্জ • নো শিট রিকোয়ার্ড</span>
+                </div>
+            </button>
+        </div>
+
         <!-- Interactive Section Header (BinaryFunded Inspired) -->
         <div class="challenge-section-header">
             <div class="challenge-title-row" style="align-items:center;">
@@ -4767,19 +4860,42 @@
         }
 
         // Fetch Packages and Rules from backend
+        let allLandingPackages = [];
+        let currentLandingCategory = 'easy_rules';
         let globalPromo = null;
         let promoCountdownTimerInterval = null;
+
+        function switchLandingChallengeCategory(cat) {
+            currentLandingCategory = cat;
+            const btnEasy = document.getElementById('btnCatEasyRules');
+            const btnYour = document.getElementById('btnCatYourRules');
+            if (btnEasy && btnYour) {
+                if (cat === 'easy_rules') {
+                    btnEasy.className = 'btn-cat-nav-pill active-easy';
+                    btnYour.className = 'btn-cat-nav-pill';
+                } else {
+                    btnEasy.className = 'btn-cat-nav-pill';
+                    btnYour.className = 'btn-cat-nav-pill active-your';
+                }
+            }
+            const filtered = (allLandingPackages || []).filter(p => {
+                if (cat === 'easy_rules') return p.category !== 'your_rules' && p.challengeModel !== 'classic_prop';
+                return p.category === 'your_rules' || p.challengeModel === 'classic_prop';
+            });
+            globalPackages = filtered;
+            renderPackages(filtered);
+            renderInteractiveCapitalTier(filtered);
+        }
 
         async function loadPackagesAndRules() {
             try {
                 const res = await fetch('/api/challenges/packages');
                 const data = await res.json();
                 if (data.success) {
-                    globalPackages = data.packages;
+                    allLandingPackages = data.packages || [];
                     globalPromo = data.launchPromo;
                     renderRules(data.tenRules);
-                    renderPackages(data.packages);
-                    renderInteractiveCapitalTier(data.packages);
+                    switchLandingChallengeCategory('easy_rules');
                     renderPromoBanner(globalPromo);
                 }
             } catch (err) {
@@ -4921,14 +5037,16 @@
             const container = document.getElementById('packagesContainer');
             if (!container) return;
 
-            container.innerHTML = packages.map(pkg => `
+            container.innerHTML = packages.map(pkg => {
+                const isClassic = pkg.category === 'your_rules' || pkg.challengeModel === 'classic_prop';
+                return `
                 <div class="card-external glass ${pkg.popular ? 'popular' : ''}">
                     ${pkg.popular ? '<div class="popular-badge">Most Popular</div>' : ''}
                     <div>
                         <div class="card-top" style="align-items:flex-start; margin-bottom:12px;">
                             <div>
                                 <span class="tier-name">${pkg.name}</span>
-                                <div class="tier-badge-sub" style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${pkg.badge}</div>
+                                <div class="tier-badge-sub" style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${pkg.badge || (isClassic ? 'Classic Prop' : '')}</div>
                             </div>
                             <div style="text-align:right;">
                                 ${pkg.hasDiscount ? `
@@ -4953,26 +5071,37 @@
                                         $${pkg.fee} <span style="font-size:0.85rem; color:var(--text-muted); font-weight:400;">fee</span>
                                     </div>
                                     <div class="card-fee-sub" style="font-size:0.7rem; color:var(--text-muted); font-weight:500; margin-top:2px;">
-                                        রেগুলার ফি (Regular)
+                                        ${isClassic ? 'One-time fee' : 'রেগুলার ফি (Regular)'}
                                     </div>
                                 `}
                             </div>
                         </div>
                         <div class="funded-amount">$${pkg.fundedAmount.toLocaleString()}</div>
                         <ul class="challenge-rules-list">
-                            <li><span class="lbl">Evaluation Sessions</span><span class="val">${pkg.sessions} Sessions</span></li>
-                            <li><span class="lbl">Max Drawdown</span><span class="val red">${pkg.maxDrawdown}</span></li>
-                            <li><span class="lbl">Trading Platform</span><span class="val">Any Binary Demo</span></li>
-                            <li><span class="lbl">Daily Loss Limit</span><span class="val" style="color:var(--text-muted);">${pkg.dailyLoss}</span></li>
-                            <li><span class="lbl">Profit Target</span><span class="val" style="color:var(--text-muted);">${pkg.profitTarget}</span></li>
-                            <li><span class="lbl">Profit Split (Funded)</span><span class="val gold">${pkg.profitSplit}</span></li>
+                            ${isClassic ? `
+                                <li><span class="lbl">Profit Target</span><span class="val" style="color:var(--neon-green); font-weight:800;">+30%</span></li>
+                                <li><span class="lbl">Daily Loss Limit</span><span class="val red">-${pkg.dailyLoss}%</span></li>
+                                <li><span class="lbl">Max Drawdown</span><span class="val red">-${pkg.maxDrawdownPercent || pkg.maxDrawdown}</span></li>
+                                <li><span class="lbl">Daily Profit Cap</span><span class="val" style="color:var(--neon-green); font-weight:700;">+${pkg.dailyProfitCap}%</span></li>
+                                <li><span class="lbl">Min Win Rate</span><span class="val">${pkg.minWinRate}%</span></li>
+                                <li><span class="lbl">Min Trading Days</span><span class="val">${pkg.minDays} Days</span></li>
+                                <li><span class="lbl">Profit Split (Funded)</span><span class="val gold">${pkg.profitSplit}</span></li>
+                            ` : `
+                                <li><span class="lbl">Evaluation Sessions</span><span class="val">${pkg.sessions} Sessions</span></li>
+                                <li><span class="lbl">Max Drawdown</span><span class="val red">${pkg.maxDrawdown}</span></li>
+                                <li><span class="lbl">Trading Platform</span><span class="val">Any Binary Demo</span></li>
+                                <li><span class="lbl">Daily Loss Limit</span><span class="val" style="color:var(--text-muted);">${pkg.dailyLoss}</span></li>
+                                <li><span class="lbl">Profit Target</span><span class="val" style="color:var(--text-muted);">${pkg.profitTarget}</span></li>
+                                <li><span class="lbl">Profit Split (Funded)</span><span class="val gold">${pkg.profitSplit}</span></li>
+                            `}
                         </ul>
                     </div>
                     <button class="btn-start-challenge" onclick="openBuyModal('${pkg.id}')">
                         Start ${pkg.name} Challenge ($${pkg.fee})
                     </button>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // ---------- INTERACTIVE CAPITAL TIER PICKER (BinaryFunded Inspired) ----------
@@ -5077,6 +5206,56 @@
             const pkg = globalPackages[idx];
             const splitMatch = (pkg.profitSplit || '80%').match(/(\d+)%/);
             const splitVal = splitMatch ? parseInt(splitMatch[1], 10) : 80;
+            const isClassic = pkg.category === 'your_rules' || pkg.challengeModel === 'classic_prop';
+
+            if (isClassic) {
+                card.innerHTML = `
+                <div class="tier-showcase-left">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;">
+                        <span class="showcase-tier-name">${pkg.name}</span>
+                        ${pkg.popular ? '<span class="showcase-badge popular">★ Most Popular</span>' : ''}
+                    </div>
+                    <div class="showcase-funded-amt">${formatCapitalShort(pkg.fundedAmount)}</div>
+                    <div class="showcase-funded-lbl">FUNDED ACCOUNT</div>
+
+                    <div class="showcase-price-box" style="margin: 18px 0 20px 0;">
+                        <span style="font-size:0.95rem; color:#94a3b8; font-weight:500;">one-time fee</span>
+                        <span class="showcase-fee-val" style="color:#fff; font-size:1.8rem; margin-left:6px;">$${pkg.fee}</span>
+                    </div>
+
+                    <button type="button" class="showcase-cta-btn" onclick="openBuyModal('${pkg.id}')">
+                        <span>Start the ${pkg.name} challenge</span>
+                        <i class="fas fa-arrow-right" style="margin-left:6px;"></i>
+                    </button>
+
+                    <div class="showcase-micro-footer" style="margin-top:18px;">
+                        <span>Pay with crypto or local payment methods • Instant activation • No subscription</span>
+                    </div>
+                </div>
+
+                <div class="tier-showcase-right">
+                    <div class="showcase-split-wrap" style="margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:0.9rem; color:#94a3b8; font-weight:600;">Profit split</span>
+                            <span style="font-size:1.15rem; font-weight:900; color:var(--yellow);">${pkg.profitSplit}</span>
+                        </div>
+                        <div class="showcase-progress-bar">
+                            <div class="showcase-progress-fill" style="width:${splitVal}%;"></div>
+                        </div>
+                    </div>
+
+                    <ul class="showcase-specs-list">
+                        <li><span class="spec-lbl">Profit target</span><span class="spec-val" style="color:var(--neon-green); font-weight:800;">+30%</span></li>
+                        <li><span class="spec-lbl">Daily loss</span><span class="spec-val red">-${pkg.dailyLoss}%</span></li>
+                        <li><span class="spec-lbl">Max drawdown</span><span class="spec-val red">-${pkg.maxDrawdownPercent || 10}%</span></li>
+                        <li><span class="spec-lbl">Daily cap</span><span class="spec-val" style="color:var(--neon-green); font-weight:700;">+${pkg.dailyProfitCap}%</span></li>
+                        <li><span class="spec-lbl">Min win rate</span><span class="spec-val" style="color:#fff; font-weight:700;">${pkg.minWinRate}%</span></li>
+                        <li><span class="spec-lbl">Min trading days</span><span class="spec-val" style="color:#fff; font-weight:700;">${pkg.minDays}</span></li>
+                    </ul>
+                </div>
+                `;
+                return;
+            }
 
             card.innerHTML = `
                 <div class="tier-showcase-left">

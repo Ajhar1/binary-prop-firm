@@ -25,7 +25,9 @@
       "Keep 75% profit upon passing"
     ],
     "createdAt": "2026-09-29T00:00:00.000Z",
-    "updatedAt": "2026-09-29T03:22:39.750Z"
+    "updatedAt": "2026-09-29T03:22:39.750Z",
+    "category": "easy_rules",
+    "challengeModel": "mm_sheet"
   },
   {
     "id": "pkg-silver",
@@ -52,7 +54,9 @@
       "Daily proof video & screenshot upload",
       "Keep 75% profit upon passing"
     ],
-    "createdAt": "2026-09-29T00:00:00.000Z"
+    "createdAt": "2026-09-29T00:00:00.000Z",
+    "category": "easy_rules",
+    "challengeModel": "mm_sheet"
   },
   {
     "id": "pkg-gold",
@@ -79,7 +83,9 @@
       "Daily proof video & screenshot upload",
       "Keep 75% profit upon passing"
     ],
-    "createdAt": "2026-09-29T00:00:00.000Z"
+    "createdAt": "2026-09-29T00:00:00.000Z",
+    "category": "easy_rules",
+    "challengeModel": "mm_sheet"
   },
   {
     "id": "pkg-platinum",
@@ -107,7 +113,9 @@
       "Keep 80% profit upon passing"
     ],
     "createdAt": "2026-09-29T00:00:00.000Z",
-    "updatedAt": "2026-09-29T03:27:28.428Z"
+    "updatedAt": "2026-09-29T03:27:28.428Z",
+    "category": "easy_rules",
+    "challengeModel": "mm_sheet"
   },
   {
     "id": "pkg-diamond",
@@ -134,7 +142,9 @@
       "Daily proof video & screenshot upload",
       "Keep 80% profit upon passing"
     ],
-    "createdAt": "2026-09-29T00:00:00.000Z"
+    "createdAt": "2026-09-29T00:00:00.000Z",
+    "category": "easy_rules",
+    "challengeModel": "mm_sheet"
   },
   {
     "id": "pkg-legendary",
@@ -161,7 +171,9 @@
       "Daily proof video & screenshot upload",
       "Keep 85% profit upon passing"
     ],
-    "createdAt": "2026-09-29T00:00:00.000Z"
+    "createdAt": "2026-09-29T00:00:00.000Z",
+    "category": "easy_rules",
+    "challengeModel": "mm_sheet"
   },
   {
     "id": "pkg-ultimate",
@@ -188,7 +200,9 @@
       "Daily proof video & screenshot upload",
       "Keep 85% profit upon passing"
     ],
-    "createdAt": "2026-09-29T00:00:00.000Z"
+    "createdAt": "2026-09-29T00:00:00.000Z",
+    "category": "easy_rules",
+    "challengeModel": "mm_sheet"
   },
   {
     "id": "pkg-titan",
@@ -215,7 +229,9 @@
       "Daily proof video & screenshot upload",
       "Keep 85% profit upon passing"
     ],
-    "createdAt": "2026-09-29T00:00:00.000Z"
+    "createdAt": "2026-09-29T00:00:00.000Z",
+    "category": "easy_rules",
+    "challengeModel": "mm_sheet"
   },
   {
     "id": "pkg-master",
@@ -242,7 +258,9 @@
       "Daily proof video & screenshot upload",
       "Keep 85% profit upon passing"
     ],
-    "createdAt": "2026-09-29T00:00:00.000Z"
+    "createdAt": "2026-09-29T00:00:00.000Z",
+    "category": "easy_rules",
+    "challengeModel": "mm_sheet"
   },
   {
     "id": "pkg_1790770550854_n6rb",
@@ -270,6 +288,280 @@
       "Keep 85% profit upon passing"
     ],
     "createdAt": "2026-09-30T12:15:50.855Z",
-    "updatedAt": "2026-09-30T12:15:50.855Z"
+    "updatedAt": "2026-09-30T12:15:50.855Z",
+    "category": "easy_rules",
+    "challengeModel": "mm_sheet"
+  },
+  {
+    "id": "prop-mini-1500",
+    "tierNumber": 1,
+    "category": "your_rules",
+    "challengeModel": "classic_prop",
+    "name": "Mini",
+    "badge": "$1.5K",
+    "originalFee": 3,
+    "discountPercent": 0,
+    "fee": 3,
+    "fundedAmount": 1500,
+    "profitSplit": "70%",
+    "profitTarget": 30,
+    "dailyLoss": 3,
+    "maxDrawdown": "5%",
+    "maxDrawdownPercent": 5,
+    "dailyProfitCap": 3,
+    "minWinRate": 75,
+    "minDays": 15,
+    "sessions": 15,
+    "popular": false,
+    "isActive": true,
+    "color": "#00E676",
+    "rules": [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -3%",
+      "Max Drawdown Limit: -5%",
+      "Daily Profit Cap: +3%",
+      "Minimum Win Rate: 75%",
+      "Minimum Trading Days: 15 Days",
+      "Profit Split: 70%"
+    ],
+    "createdAt": "2026-11-09T00:00:00.000Z"
+  },
+  {
+    "id": "prop-basic-3000",
+    "tierNumber": 2,
+    "category": "your_rules",
+    "challengeModel": "classic_prop",
+    "name": "Basic",
+    "badge": "",
+    "originalFee": 17,
+    "discountPercent": 0,
+    "fee": 17,
+    "fundedAmount": 3000,
+    "profitSplit": "80%",
+    "profitTarget": 30,
+    "dailyLoss": 4,
+    "maxDrawdown": "7%",
+    "maxDrawdownPercent": 7,
+    "dailyProfitCap": 4,
+    "minWinRate": 70,
+    "minDays": 10,
+    "sessions": 10,
+    "popular": false,
+    "isActive": true,
+    "color": "#3498DB",
+    "rules": [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -4%",
+      "Max Drawdown Limit: -7%",
+      "Daily Profit Cap: +4%",
+      "Minimum Win Rate: 70%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 80%"
+    ],
+    "createdAt": "2026-11-09T00:00:00.000Z"
+  },
+  {
+    "id": "prop-starter-5000",
+    "tierNumber": 3,
+    "category": "your_rules",
+    "challengeModel": "classic_prop",
+    "name": "Starter",
+    "badge": "",
+    "originalFee": 39,
+    "discountPercent": 0,
+    "fee": 39,
+    "fundedAmount": 5000,
+    "profitSplit": "85%",
+    "profitTarget": 30,
+    "dailyLoss": 5,
+    "maxDrawdown": "10%",
+    "maxDrawdownPercent": 10,
+    "dailyProfitCap": 4,
+    "minWinRate": 55,
+    "minDays": 10,
+    "sessions": 10,
+    "popular": true,
+    "isActive": true,
+    "color": "#F5B041",
+    "rules": [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +4%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ],
+    "createdAt": "2026-11-09T00:00:00.000Z"
+  },
+  {
+    "id": "prop-pro-10000",
+    "tierNumber": 4,
+    "category": "your_rules",
+    "challengeModel": "classic_prop",
+    "name": "Pro",
+    "badge": "",
+    "originalFee": 69,
+    "discountPercent": 0,
+    "fee": 69,
+    "fundedAmount": 10000,
+    "profitSplit": "85%",
+    "profitTarget": 30,
+    "dailyLoss": 5,
+    "maxDrawdown": "10%",
+    "maxDrawdownPercent": 10,
+    "dailyProfitCap": 4,
+    "minWinRate": 55,
+    "minDays": 10,
+    "sessions": 10,
+    "popular": false,
+    "isActive": true,
+    "color": "#E67E22",
+    "rules": [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +4%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ],
+    "createdAt": "2026-11-09T00:00:00.000Z"
+  },
+  {
+    "id": "prop-advanced-25000",
+    "tierNumber": 5,
+    "category": "your_rules",
+    "challengeModel": "classic_prop",
+    "name": "Advanced",
+    "badge": "",
+    "originalFee": 99,
+    "discountPercent": 0,
+    "fee": 99,
+    "fundedAmount": 25000,
+    "profitSplit": "85%",
+    "profitTarget": 30,
+    "dailyLoss": 5,
+    "maxDrawdown": "10%",
+    "maxDrawdownPercent": 10,
+    "dailyProfitCap": 5,
+    "minWinRate": 55,
+    "minDays": 10,
+    "sessions": 10,
+    "popular": false,
+    "isActive": true,
+    "color": "#9B59B6",
+    "rules": [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +5%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ],
+    "createdAt": "2026-11-09T00:00:00.000Z"
+  },
+  {
+    "id": "prop-elite-50000",
+    "tierNumber": 6,
+    "category": "your_rules",
+    "challengeModel": "classic_prop",
+    "name": "Elite",
+    "badge": "",
+    "originalFee": 169,
+    "discountPercent": 0,
+    "fee": 169,
+    "fundedAmount": 50000,
+    "profitSplit": "85%",
+    "profitTarget": 30,
+    "dailyLoss": 5,
+    "maxDrawdown": "10%",
+    "maxDrawdownPercent": 10,
+    "dailyProfitCap": 5,
+    "minWinRate": 55,
+    "minDays": 10,
+    "sessions": 10,
+    "popular": false,
+    "isActive": true,
+    "color": "#E74C3C",
+    "rules": [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +5%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ],
+    "createdAt": "2026-11-09T00:00:00.000Z"
+  },
+  {
+    "id": "prop-prime-75000",
+    "tierNumber": 7,
+    "category": "your_rules",
+    "challengeModel": "classic_prop",
+    "name": "Prime",
+    "badge": "",
+    "originalFee": 299,
+    "discountPercent": 0,
+    "fee": 299,
+    "fundedAmount": 75000,
+    "profitSplit": "85%",
+    "profitTarget": 30,
+    "dailyLoss": 5,
+    "maxDrawdown": "10%",
+    "maxDrawdownPercent": 10,
+    "dailyProfitCap": 5,
+    "minWinRate": 55,
+    "minDays": 10,
+    "sessions": 10,
+    "popular": false,
+    "isActive": true,
+    "color": "#1ABC9C",
+    "rules": [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +5%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ],
+    "createdAt": "2026-11-09T00:00:00.000Z"
+  },
+  {
+    "id": "prop-master-100000",
+    "tierNumber": 8,
+    "category": "your_rules",
+    "challengeModel": "classic_prop",
+    "name": "Master",
+    "badge": "",
+    "originalFee": 399,
+    "discountPercent": 0,
+    "fee": 399,
+    "fundedAmount": 100000,
+    "profitSplit": "85%",
+    "profitTarget": 30,
+    "dailyLoss": 5,
+    "maxDrawdown": "10%",
+    "maxDrawdownPercent": 10,
+    "dailyProfitCap": 5,
+    "minWinRate": 55,
+    "minDays": 10,
+    "sessions": 10,
+    "popular": false,
+    "isActive": true,
+    "color": "#F1C40F",
+    "rules": [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +5%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ],
+    "createdAt": "2026-11-09T00:00:00.000Z"
   }
 ]

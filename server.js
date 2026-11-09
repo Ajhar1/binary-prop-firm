@@ -4147,6 +4147,9 @@ function getEnrichedPackages(includeInactive = false) {
   const globalDiscountTag = (promo && promo.discountTag) ? promo.discountTag : 'লঞ্চ স্পেশাল ছাড়';
 
   return allPackages.map(pkg => {
+    const isYourRules = (pkg.category === 'your_rules' || pkg.challengeModel === 'classic_prop');
+    const category = isYourRules ? 'your_rules' : (pkg.category || 'easy_rules');
+    const challengeModel = isYourRules ? 'classic_prop' : (pkg.challengeModel || 'mm_sheet');
     const originalFee = parseFloat(pkg.originalFee !== undefined ? pkg.originalFee : (pkg.fee || 0));
     
     // Check if package has an explicit discountPercent set by admin
@@ -4154,8 +4157,8 @@ function getEnrichedPackages(includeInactive = false) {
       ? parseInt(pkg.discountPercent) 
       : 0;
 
-    // If no manual discount specified, apply launch promo defaults if active
-    if ((pkg.discountPercent === undefined || pkg.discountPercent === null) && isPromoActive) {
+    // If no manual discount specified, apply launch promo defaults if active (for easy_rules packages)
+    if (!isYourRules && (pkg.discountPercent === undefined || pkg.discountPercent === null) && isPromoActive) {
       if (pkg.tierNumber === 1) rawDiscountPercent = 0;
       else if (pkg.tierNumber === 2) rawDiscountPercent = 30;
       else if (pkg.tierNumber >= 3) rawDiscountPercent = 40;
@@ -4169,6 +4172,8 @@ function getEnrichedPackages(includeInactive = false) {
 
     return {
       ...pkg,
+      category,
+      challengeModel,
       originalFee: originalFee,
       fee: payableFee,
       discountPercent: discountPercent,
@@ -5398,6 +5403,8 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
     console.warn('[Partner Attribution Error]:', partErr.message);
   }
 
+  const isClassic = (pkg.category === 'your_rules' || pkg.challengeModel === 'classic_prop');
+
   const newChallenge = {
     id: `ch_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
     userId: req.user.id,
@@ -5408,6 +5415,22 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
     userBroker: currentUser.preferredBroker || broker.name,
     packageId: pkg.id,
     packageName: pkg.name,
+    category: isClassic ? 'your_rules' : 'easy_rules',
+    challengeModel: isClassic ? 'classic_prop' : 'mm_sheet',
+    profitTargetPercent: pkg.profitTarget !== undefined ? Number(pkg.profitTarget) : 30,
+    dailyLossPercent: pkg.dailyLoss !== undefined ? Number(pkg.dailyLoss) : 5,
+    maxDrawdownPercent: pkg.maxDrawdownPercent !== undefined ? Number(pkg.maxDrawdownPercent) : (parseFloat(pkg.maxDrawdown) || 10),
+    dailyProfitCapPercent: pkg.dailyProfitCap !== undefined ? Number(pkg.dailyProfitCap) : 4,
+    minWinRate: pkg.minWinRate !== undefined ? Number(pkg.minWinRate) : 55,
+    minTradingDays: pkg.minDays !== undefined ? Number(pkg.minDays) : 10,
+    tradingDaysCompleted: 0,
+    tradingDaysList: [],
+    dailyCapNotices: [],
+    startingCapital: pkg.fundedAmount,
+    currentCapital: pkg.fundedAmount,
+    highestWatermark: pkg.fundedAmount,
+    currentProfit: 0,
+    currentProfitPercent: 0,
     originalFee: pkg.originalFee,
     baseFee: pkg.fee,
     fee: finalFee,
@@ -5441,7 +5464,7 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
     localAmount: numLocalAmount,
     assignedMmId: null,
     assignedMmSerial: null,
-    assignedMmTitle: null,
+    assignedMmTitle: isClassic ? 'Your Challenge (No Sheet Required)' : null,
     assignedMmUrl: null,
     assignedMmNote: null,
     approvedAt: null,
@@ -7534,6 +7557,170 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
     const demoCount = userTrades.filter(t => (t.accountType || '').toLowerCase() === 'demo').length;
     const liveCount = userTrades.filter(t => (t.accountType || '').toLowerCase() === 'live').length;
 
+    // Module 2.5: Real-Time Classic Prop Rules & Metrics Engine
+    let classicMetrics = null;
+    if (activeChallenge && (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules')) {
+      const initialCapital = Number(activeChallenge.fundedAmount || activeChallenge.startingCapital || 5000);
+      const targetPercent = Number(activeChallenge.profitTargetPercent || 30);
+      const targetDollar = initialCapital * (targetPercent / 100);
+      const dailyLossPercent = Number(activeChallenge.dailyLossPercent || 5);
+      const maxDrawdownPercent = Number(activeChallenge.maxDrawdownPercent || 10);
+      const dailyProfitCapPercent = Number(activeChallenge.dailyProfitCapPercent || 4);
+      const minWinRate = Number(activeChallenge.minWinRate || 55);
+      const minTradingDays = Number(activeChallenge.minTradingDays || 10);
+
+      const dailyLossLimitDollar = initialCapital * (dailyLossPercent / 100);
+      const maxDrawdownLimitDollar = initialCapital * (maxDrawdownPercent / 100);
+      const dailyProfitCapDollar = initialCapital * (dailyProfitCapPercent / 100);
+
+      // Group trades by date (UTC/Broker date)
+      const sortedAsc = [...userTrades].sort((a, b) => getTradeExecutionTime(a) - getTradeExecutionTime(b));
+      const dayMap = {};
+      sortedAsc.forEach(t => {
+        const tTime = getTradeExecutionTime(t);
+        const dObj = new Date(tTime);
+        const dayKey = !isNaN(dObj.getTime()) ? dObj.toISOString().split('T')[0] : 'unknown';
+        if (!dayMap[dayKey]) {
+          dayMap[dayKey] = { date: dayKey, trades: [], grossPnl: 0, wins: 0, losses: 0 };
+        }
+        dayMap[dayKey].trades.push(t);
+        let tradePnl = 0;
+        if (t.result === 'WIN') {
+          tradePnl = t.profit > t.amount ? (t.profit - t.amount) : (t.profit || 0);
+          dayMap[dayKey].wins++;
+        } else if (t.result === 'LOSS') {
+          tradePnl = -(t.amount || 0);
+          dayMap[dayKey].losses++;
+        }
+        dayMap[dayKey].grossPnl += tradePnl;
+      });
+
+      const dayKeys = Object.keys(dayMap);
+      const tradingDaysCompleted = dayKeys.filter(k => k !== 'unknown').length;
+
+      let effectiveBalance = initialCapital;
+      let rawBalance = initialCapital;
+      let totalTrimmedProfit = 0;
+      let isDailyLossHit = false;
+      let isMaxDrawdownHit = false;
+      let hitDetails = null;
+
+      const dailyBreakdown = dayKeys.map(k => {
+        const dayData = dayMap[k];
+        const dayPnl = dayData.grossPnl;
+        rawBalance += dayPnl;
+        
+        let effectiveDayPnl = dayPnl;
+        let trimmedToday = 0;
+        let capApplied = false;
+
+        // Daily Profit Cap: If day's profit exceeds cap, trim surplus
+        if (dayPnl > dailyProfitCapDollar) {
+          effectiveDayPnl = dailyProfitCapDollar;
+          trimmedToday = Math.round((dayPnl - dailyProfitCapDollar) * 100) / 100;
+          totalTrimmedProfit += trimmedToday;
+          capApplied = true;
+        }
+
+        // Check Daily Loss limit
+        if (dayPnl <= -dailyLossLimitDollar) {
+          isDailyLossHit = true;
+          hitDetails = `Daily Loss Limit (-${dailyLossPercent}%) breached on ${dayData.date}: Day Loss $${Math.abs(dayPnl).toFixed(2)}`;
+        }
+
+        effectiveBalance += effectiveDayPnl;
+
+        return {
+          date: dayData.date,
+          tradesCount: dayData.trades.length,
+          wins: dayData.wins,
+          losses: dayData.losses,
+          rawPnl: parseFloat(dayPnl.toFixed(2)),
+          effectivePnl: parseFloat(effectiveDayPnl.toFixed(2)),
+          trimmedAmount: parseFloat(trimmedToday.toFixed(2)),
+          capApplied
+        };
+      });
+
+      // Check overall Max Drawdown
+      const totalDrawdownDollar = initialCapital - rawBalance;
+      if (totalDrawdownDollar >= maxDrawdownLimitDollar) {
+        isMaxDrawdownHit = true;
+        hitDetails = `Max Drawdown Limit (-${maxDrawdownPercent}%) breached: Total Drawdown $${totalDrawdownDollar.toFixed(2)}`;
+      }
+
+      const totalWinLoss = wins + losses;
+      const currentWinRateNum = totalWinLoss > 0 ? ((wins / totalWinLoss) * 100) : 0;
+      const netEffectiveProfit = effectiveBalance - initialCapital;
+      const currentProfitPercent = (netEffectiveProfit / initialCapital) * 100;
+
+      // Check Pass condition
+      const isTargetReached = (netEffectiveProfit >= targetDollar);
+      const isDaysReached = (tradingDaysCompleted >= minTradingDays);
+      const isWinRateReached = (currentWinRateNum >= minWinRate);
+      const isPassed = isTargetReached && isDaysReached && isWinRateReached && !isDailyLossHit && !isMaxDrawdownHit;
+
+      // Current Day stats (today)
+      const todayIso = new Date().toISOString().split('T')[0];
+      const todayData = dayMap[todayIso] || { grossPnl: 0, wins: 0, losses: 0, trades: [] };
+      const todayLossAmount = todayData.grossPnl < 0 ? Math.abs(todayData.grossPnl) : 0;
+      const todayRemainingLossBuffer = Math.max(0, dailyLossLimitDollar - todayLossAmount);
+      const currentDrawdownAmount = Math.max(0, initialCapital - rawBalance);
+      const remainingDrawdownBuffer = Math.max(0, maxDrawdownLimitDollar - currentDrawdownAmount);
+
+      classicMetrics = {
+        challengeModel: 'classic_prop',
+        initialCapital,
+        currentBalance: parseFloat(rawBalance.toFixed(2)),
+        effectiveBalance: parseFloat(effectiveBalance.toFixed(2)),
+        netEffectiveProfit: parseFloat(netEffectiveProfit.toFixed(2)),
+        profitPercent: parseFloat(currentProfitPercent.toFixed(2)),
+        targetPercent,
+        targetDollar,
+        dailyLossLimitPercent: dailyLossPercent,
+        dailyLossLimitDollar,
+        todayLossDollar: parseFloat(todayLossAmount.toFixed(2)),
+        todayRemainingLossBuffer: parseFloat(todayRemainingLossBuffer.toFixed(2)),
+        maxDrawdownPercent,
+        maxDrawdownLimitDollar,
+        currentDrawdownDollar: parseFloat(currentDrawdownAmount.toFixed(2)),
+        remainingDrawdownBuffer: parseFloat(remainingDrawdownBuffer.toFixed(2)),
+        dailyProfitCapPercent,
+        dailyProfitCapDollar,
+        todayGrossProfit: todayData.grossPnl > 0 ? parseFloat(todayData.grossPnl.toFixed(2)) : 0,
+        totalTrimmedProfit: parseFloat(totalTrimmedProfit.toFixed(2)),
+        tradingDaysCompleted,
+        minTradingDays,
+        winRate: parseFloat(currentWinRateNum.toFixed(1)),
+        minWinRate,
+        isTargetReached,
+        isDaysReached,
+        isWinRateReached,
+        isPassed,
+        isDailyLossHit,
+        isMaxDrawdownHit,
+        hitDetails,
+        dailyBreakdown
+      };
+
+      // Auto-fail challenge if breach detected and not already failed
+      if ((isDailyLossHit || isMaxDrawdownHit) && activeChallenge.status === 'in_progress') {
+        activeChallenge.status = 'failed';
+        activeChallenge.failReason = isDailyLossHit ? 'DAILY_LOSS_LIMIT_EXCEEDED' : 'MAX_DRAWDOWN_EXCEEDED';
+        activeChallenge.violatedRule = hitDetails;
+        activeChallenge.failReasonText = hitDetails;
+        activeChallenge.failedAt = new Date().toISOString();
+        activeChallenge.isActive = false;
+        activeChallenge.isCompleted = true;
+        saveChallenges(challenges);
+      } else if (isPassed && activeChallenge.status === 'in_progress') {
+        activeChallenge.status = 'passed';
+        activeChallenge.passedAt = new Date().toISOString();
+        activeChallenge.isCompleted = true;
+        saveChallenges(challenges);
+      }
+    }
+
     res.json({
       success: true,
       hasActiveChallenge: !!activeChallenge,
@@ -7541,10 +7728,13 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
       activeChallenge: activeChallenge ? {
         id: activeChallenge.id,
         packageName: activeChallenge.packageName,
+        category: activeChallenge.category || 'easy_rules',
+        challengeModel: activeChallenge.challengeModel || 'mm_sheet',
         startedAt: new Date(effectiveStartTime).toISOString(),
         expiresAt: activeChallenge.expiresAt,
         status: activeChallenge.status
       } : null,
+      classicMetrics,
       trades: userTrades,
       stats: {
         totalTrades,
@@ -8637,41 +8827,58 @@ app.post('/api/admin/challenges/:id/approve', authenticateAdminToken, (req, res)
   const idx = challenges.findIndex(c => c.id === req.params.id);
   if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
 
+  const isClassicProp = (challenges[idx].challengeModel === 'classic_prop' || challenges[idx].category === 'your_rules');
   const { mmLinkId } = req.body;
   let assignedLink = null;
 
-  const mmLinks = readJson(MM_LINKS_FILE);
-  if (mmLinkId) {
-    assignedLink = mmLinks.find(l => l.id === mmLinkId);
-  }
+  if (!isClassicProp) {
+    const mmLinks = readJson(MM_LINKS_FILE);
+    if (mmLinkId) {
+      assignedLink = mmLinks.find(l => l.id === mmLinkId);
+    }
 
-  if (!assignedLink) {
-    assignedLink = getNextMmSerialLink();
-  } else {
-    assignedLink.assignedCount = (assignedLink.assignedCount || 0) + 1;
-    writeJson(MM_LINKS_FILE, mmLinks);
+    if (!assignedLink) {
+      assignedLink = getNextMmSerialLink();
+    } else {
+      assignedLink.assignedCount = (assignedLink.assignedCount || 0) + 1;
+      writeJson(MM_LINKS_FILE, mmLinks);
+    }
   }
 
   const now = new Date();
   challenges[idx].status = 'in_progress';
   challenges[idx].approvedAt = now.toISOString();
-  challenges[idx].durationDays = challenges[idx].durationDays || 15;
-  challenges[idx].sessionsRequired = challenges[idx].sessionsRequired || 15;
+  challenges[idx].durationDays = challenges[idx].durationDays || (isClassicProp ? (challenges[idx].minTradingDays || 10) : 15);
+  challenges[idx].sessionsRequired = isClassicProp ? (challenges[idx].minTradingDays || 10) : (challenges[idx].sessionsRequired || 15);
 
-  // Practice Phase Settings (48 Hours, up to 3 practice sessions)
-  challenges[idx].challengePhase = 'practice';
-  challenges[idx].practiceHours = 48;
-  challenges[idx].practiceStartedAt = now.toISOString();
-  challenges[idx].practiceExpiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000)).toISOString();
-  challenges[idx].practiceMaxSessions = 3;
-  challenges[idx].practiceSessionsCompleted = 0;
-  challenges[idx].expiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000) + (challenges[idx].durationDays * 24 * 60 * 60 * 1000)).toISOString();
+  if (isClassicProp) {
+    // Classic Prop: Direct evaluation (No MM sheet needed)
+    challenges[idx].challengePhase = 'evaluation';
+    challenges[idx].evaluationStartedAt = now.toISOString();
+    challenges[idx].tradingDaysCompleted = 0;
+    challenges[idx].tradingDaysList = [];
+    challenges[idx].assignedMmId = null;
+    challenges[idx].assignedMmSerial = null;
+    challenges[idx].assignedMmTitle = 'Your Challenge (No Sheet Required)';
+    challenges[idx].assignedMmUrl = null;
+    challenges[idx].assignedMmNote = 'Trade freely using your own strategy while respecting the Target and Drawdown limits.';
+    challenges[idx].expiresAt = new Date(now.getTime() + (challenges[idx].durationDays * 24 * 60 * 60 * 1000)).toISOString();
+  } else {
+    // Practice Phase Settings (48 Hours, up to 3 practice sessions)
+    challenges[idx].challengePhase = 'practice';
+    challenges[idx].practiceHours = 48;
+    challenges[idx].practiceStartedAt = now.toISOString();
+    challenges[idx].practiceExpiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000)).toISOString();
+    challenges[idx].practiceMaxSessions = 3;
+    challenges[idx].practiceSessionsCompleted = 0;
+    challenges[idx].expiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000) + (challenges[idx].durationDays * 24 * 60 * 60 * 1000)).toISOString();
+    challenges[idx].assignedMmId = assignedLink ? assignedLink.id : null;
+    challenges[idx].assignedMmSerial = assignedLink ? assignedLink.serial : null;
+    challenges[idx].assignedMmTitle = assignedLink ? assignedLink.title : null;
+    challenges[idx].assignedMmUrl = assignedLink ? assignedLink.url : null;
+    challenges[idx].assignedMmNote = assignedLink ? assignedLink.note : null;
+  }
   challenges[idx].isActive = true;
-  challenges[idx].assignedMmId = assignedLink.id;
-  challenges[idx].assignedMmSerial = assignedLink.serial;
-  challenges[idx].assignedMmTitle = assignedLink.title;
-  challenges[idx].assignedMmUrl = assignedLink.url;
-  challenges[idx].assignedMmNote = assignedLink.note;
 
   // Partner Commission Confirmation
   if (challenges[idx].partnerId && challenges[idx].partnerCommission > 0) {
@@ -8948,14 +9155,39 @@ app.post('/api/admin/challenges/:id/reactivate', authenticateAdminToken, (req, r
     hour12: true
   });
 
+  const recoveryMode = (req.body.recoveryMode || req.body.mode || 'resume').toLowerCase();
+  const isClassicProp = (target.challengeModel === 'classic_prop' || target.category === 'your_rules');
+
+  const defaultMsgBn = (recoveryMode === 'restart')
+    ? `সম্মানিত ট্রেডার, আপনার ${target.packageName} ($${(target.fundedAmount || 0).toLocaleString()}) চ্যালেঞ্জটি রিঅ্যাক্টিভেট (প্রথম থেকে নতুন করে চালু) করা হয়েছে! আপনার অ্যাকাউন্টটি প্রাথমিক ক্যাপিটাল ও ০ দিন থেকে নতুনভাবে শুরু হলো।`
+    : `সম্মানিত ট্রেডার, আপনার ${target.packageName} ($${(target.fundedAmount || 0).toLocaleString()}) চ্যালেঞ্জটি সফলভাবে রিঅ্যাক্টিভেট (পুনরায় চালু) করা হয়েছে! আপনার পূর্বের সকল অনুমোদিত অগ্রগতি সম্পূর্ণ অক্ষত রাখা হয়েছে।`;
+
   const customMessage = (req.body.message && req.body.message.trim())
     ? req.body.message.trim()
-    : `সম্মানিত ট্রেডার, আপনার ${target.packageName} ($${(target.fundedAmount || 0).toLocaleString()}) চ্যালেঞ্জটি সফলভাবে রিঅ্যাক্টিভেট (পুনরায় চালু) করা হয়েছে! আপনার পূর্বের সকল অনুমোদিত সেশন (${target.sessionsCompleted || 0}/${target.sessionsRequired || 15}) ও অগ্রগতি সম্পূর্ণ অক্ষত রাখা হয়েছে। রিঅ্যাক্টিভেট হওয়ার সময় (${formattedTimeBn} / ${formattedTimeEn}) থেকে পরবর্তী নতুন ট্রেডগুলো এক্সটেনশনের মাধ্যমে সিঙ্ক করে ট্রেডিং চালিয়ে যান।`;
+    : `${defaultMsgBn} রিঅ্যাক্টিভেট হওয়ার সময় (${formattedTimeBn}) থেকে পরবর্তী নতুন ট্রেডগুলো এক্সটেনশনের মাধ্যমে সিঙ্ক করে ট্রেডিং চালিয়ে যান।`;
 
-  // 1. Restore status to in_progress & active (leaving all previous sessions and metrics 100% intact)
+  // 1. Restore status to in_progress & active
   target.status = 'in_progress';
   target.isActive = true;
   target.isCompleted = false;
+
+  if (recoveryMode === 'restart') {
+    target.recoveryMode = 'restart';
+    target.currentCapital = target.fundedAmount;
+    target.startingCapital = target.fundedAmount;
+    target.currentProfit = 0;
+    target.currentProfitPercent = 0;
+    target.currentDrawdown = "0%";
+    target.sessionsCompleted = 0;
+    target.practiceSessionsCompleted = 0;
+    if (isClassicProp) {
+      target.tradingDaysCompleted = 0;
+      target.tradingDaysList = [];
+      target.dailyCapNotices = [];
+    }
+  } else {
+    target.recoveryMode = 'resume';
+  }
 
   // 2. Remove failure fields
   delete target.failReason;
@@ -8966,8 +9198,9 @@ app.post('/api/admin/challenges/:id/reactivate', authenticateAdminToken, (req, r
   // 3. Attach reactivation notice for trader dashboard with exact timestamp
   target.reactivationNotice = {
     id: `notif_${Date.now()}`,
-    title: 'চ্যালেঞ্জ পুনরায় সক্রিয় করা হয়েছে',
+    title: (recoveryMode === 'restart') ? 'চ্যালেঞ্জ শুরু থেকে পুনরায় চালু করা হয়েছে' : 'চ্যালেঞ্জ পুনরায় সক্রিয় করা হয়েছে',
     message: customMessage,
+    recoveryMode: recoveryMode,
     reactivatedAt: nowIso,
     reactivatedAtFormatted: `${formattedTimeBn} (${formattedTimeEn})`,
     read: false

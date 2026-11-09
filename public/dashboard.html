@@ -846,6 +846,82 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ========== DUAL CHALLENGE CATEGORY SWITCHER ========== */
+        .challenge-category-nav-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 16px;
+            margin: 0 auto 1.8rem auto;
+            max-width: 900px;
+            padding: 0;
+            width: 100%;
+        }
+        .btn-cat-nav-pill {
+            flex: 1 1 350px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-cat-nav-pill:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        .btn-cat-nav-pill.active-easy {
+            background: linear-gradient(135deg, rgba(0, 230, 118, 0.16), rgba(16, 185, 129, 0.24));
+            border-color: #00e676;
+            color: #fff;
+            box-shadow: 0 0 25px rgba(0, 230, 118, 0.28);
+        }
+        .btn-cat-nav-pill.active-your {
+            background: linear-gradient(135deg, rgba(245, 176, 65, 0.18), rgba(212, 175, 55, 0.26));
+            border-color: #f5b041;
+            color: #fff;
+            box-shadow: 0 0 25px rgba(245, 176, 65, 0.32);
+        }
+        .cat-pill-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .btn-cat-nav-pill.active-easy .cat-pill-dot {
+            background: #00e676;
+            box-shadow: 0 0 12px #00e676;
+        }
+        .btn-cat-nav-pill.active-your .cat-pill-dot {
+            background: #f5b041;
+            box-shadow: 0 0 12px #f5b041;
+        }
+        .cat-pill-text-wrap {
+            display: flex;
+            flex-direction: column;
+        }
+        .cat-pill-title {
+            font-size: 1.05rem;
+            font-weight: 900;
+            line-height: 1.25;
+            letter-spacing: 0.3px;
+        }
+        .cat-pill-subtitle {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.68);
+            margin-top: 3px;
+            line-height: 1.35;
+        }
+
         /* ---------- OVERVIEW & CHALLENGES STATS GRID (4-IN-A-ROW) ---------- */
         .stats-grid {
             display: grid;
@@ -4533,6 +4609,24 @@
                 </div>
             </div>
 
+            <!-- Dual Challenge Category Switcher -->
+            <div class="challenge-category-nav-wrap">
+                <button type="button" id="btnDashCatEasyRules" class="btn-cat-nav-pill active-easy" onclick="switchDashboardChallengeCategory('easy_rules')">
+                    <span class="cat-pill-dot"></span>
+                    <div class="cat-pill-text-wrap">
+                        <span class="cat-pill-title">Easy Challenge Easy Rules.</span>
+                        <span class="cat-pill-subtitle">ম্যানেজড মানি ম্যানেজমেন্ট শিট চ্যালেঞ্জ • ১৫ সেশন পূরণ</span>
+                    </div>
+                </button>
+                <button type="button" id="btnDashCatYourRules" class="btn-cat-nav-pill" onclick="switchDashboardChallengeCategory('your_rules')">
+                    <span class="cat-pill-dot"></span>
+                    <div class="cat-pill-text-wrap">
+                        <span class="cat-pill-title">Your Challenge Your Rules.</span>
+                        <span class="cat-pill-subtitle">টার্গেট ও ড্র-ডাউন বেসড প্রপ চ্যালেঞ্জ • নো শিট রিকোয়ার্ড</span>
+                    </div>
+                </button>
+            </div>
+
             <div class="stats-grid" id="dashboardPackagesGrid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
                 <!-- Populated dynamically -->
             </div>
@@ -7520,20 +7614,22 @@
                 return;
             }
 
-            // Passed state (Req #4: 15 sessions successfully completed)
+            const isClassic = challenge.challengeModel === 'classic_prop' || challenge.category === 'your_rules';
+
+            // Passed state
             if (challenge.status === 'passed') {
                 container.innerHTML = getUnifiedPassedChallengeHTML(challenge, 'overview');
-                document.getElementById('statDaysCount').innerText = '15 / 15';
+                document.getElementById('statDaysCount').innerText = isClassic ? `${challenge.tradingDaysCompleted || challenge.minTradingDays || 10} / ${challenge.minTradingDays || 10} Days` : '15 / 15';
                 document.getElementById('statDrawdown').innerText = challenge.currentDrawdown || '0.0%';
                 document.getElementById('statProfitSplit').innerText = challenge.profitSplit || '85%';
                 checkMoneyManagementEligibility();
                 return;
             }
 
-            // Failed / Disqualified state (Req #1, #3)
+            // Failed / Disqualified state
             if (challenge.status === 'failed') {
                 container.innerHTML = getUnifiedFailedChallengeHTML(challenge, 'overview');
-                document.getElementById('statDaysCount').innerText = `${challenge.sessionsCompleted || 0} / 15`;
+                document.getElementById('statDaysCount').innerText = isClassic ? `${challenge.tradingDaysCompleted || 0} / ${challenge.minTradingDays || 10} Days` : `${challenge.sessionsCompleted || 0} / 15`;
                 document.getElementById('statDrawdown').innerText = challenge.currentDrawdown || '0.0%';
                 checkMoneyManagementEligibility();
                 return;
@@ -7542,17 +7638,135 @@
             // Pending approval state
             if (challenge.status === 'pending_approval') {
                 container.innerHTML = getUnifiedPendingApprovalHTML(challenge, 'overview');
+                document.getElementById('statDaysCount').innerText = isClassic ? `0 / ${challenge.minTradingDays || 10} Days` : '0 / 15';
+                document.getElementById('statDrawdown').innerText = '0.0%';
+                checkMoneyManagementEligibility();
+                return;
+            }
+
+            // Rejected state
+            if (challenge.status === 'rejected') {
+                container.innerHTML = getUnifiedChallengeAlertHTML(challenge, 'overview');
                 document.getElementById('statDaysCount').innerText = '0 / 15';
                 document.getElementById('statDrawdown').innerText = '0.0%';
                 checkMoneyManagementEligibility();
                 return;
             }
 
-            // Rejected state: Prominent Red Alert Card explaining why the challenge was rejected (Req #2)
-            if (challenge.status === 'rejected') {
-                container.innerHTML = getUnifiedChallengeAlertHTML(challenge, 'overview');
-                document.getElementById('statDaysCount').innerText = '0 / 15';
-                document.getElementById('statDrawdown').innerText = '0.0%';
+            // Classic Prop Active HUD
+            if (isClassic) {
+                const targetPct = challenge.profitTargetPercent || 30;
+                const targetAmt = Math.round((challenge.fundedAmount || 1500) * (targetPct / 100));
+                const currentProfit = challenge.totalPnL || 0;
+                const targetProgressPct = Math.min(100, Math.max(0, Math.round((currentProfit / targetAmt) * 100)));
+                const daysComp = challenge.tradingDaysCompleted || 0;
+                const minDays = challenge.minTradingDays || 10;
+                const winRate = challenge.actualWinRate || 0;
+                const minWin = challenge.minWinRate || 55;
+
+                document.getElementById('statDaysCount').innerText = `${daysComp} / ${minDays} Days`;
+                document.getElementById('statDrawdown').innerText = challenge.currentDrawdown || '0.0%';
+                document.getElementById('statSubmissions').innerText = `${winRate}% Win Rate`;
+                document.getElementById('statProfitSplit').innerText = challenge.profitSplit || '85%';
+
+                let reactivationNoticeHtml = '';
+                if (challenge && challenge.reactivationNotice && !challenge.reactivationNotice.read) {
+                    const reactivatedDate = new Date(challenge.reactivationNotice.reactivatedAt || Date.now());
+                    const noticeTime = challenge.reactivationNotice.reactivatedAtFormatted || reactivatedDate.toLocaleString('bn-BD', {
+                        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true
+                    });
+                    reactivationNoticeHtml = `
+                        <div class="glass-card unified-alert-card" id="reactivationNoticeBanner" style="padding:1.4rem 1.6rem; border:2px solid #10b981; margin-bottom:1.6rem; background:radial-gradient(ellipse at top, rgba(16,185,129,0.18), rgba(22,22,26,0.96)); box-shadow:0 0 30px rgba(16,185,129,0.18); position:relative; overflow:hidden; border-radius:16px;">
+                            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:14px; position:relative; z-index:2;">
+                                <div style="display:flex; align-items:flex-start; gap:14px; flex:1;">
+                                    <div style="width:48px; height:48px; border-radius:12px; background:rgba(16,185,129,0.25); border:1.5px solid #10b981; color:#10b981; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0;">
+                                        <i class="fas fa-bullhorn"></i>
+                                    </div>
+                                    <div style="flex:1;">
+                                        <h3 style="color:#fff; margin:0; font-size:1.05rem; font-weight:800;">
+                                            <span style="background:rgba(16,185,129,0.2); color:#10b981; padding:2px 8px; border-radius:6px; font-size:0.78rem; border:1px solid rgba(16,185,129,0.4);">অফিসিয়াল নোটিফিকেশন</span>
+                                            চ্যালেঞ্জ পুনরায় সফলভাবে সক্রিয় করা হয়েছে!
+                                        </h3>
+                                        <div style="color:#e2e8f0; font-size:0.88rem; margin-top:8px; line-height:1.6; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); padding:10px 14px; border-radius:10px;">${escapeHtml(challenge.reactivationNotice.message || '')}</div>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="dismissReactivationNotice('${challenge.id}')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; width:30px; height:30px; border-radius:8px; cursor:pointer;" title="বন্ধ করুন">&times;</button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = `
+                    ${reactivationNoticeHtml}
+                    <div class="running-challenge-box" style="border-color:rgba(245,176,65,0.4); background:radial-gradient(ellipse at top, rgba(245,176,65,0.08), rgba(18,24,38,0.95));">
+                        <div class="running-top">
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                <div class="running-broker-badge" style="border-color:rgba(245,176,65,0.4); background:rgba(245,176,65,0.12);">
+                                    <img src="${challenge.brokerIcon || '/assets/brokers/quotex.png'}" alt="${challenge.brokerName}">
+                                    <span style="font-weight:800; font-size:0.95rem; color:#f5b041;">${challenge.brokerName} Demo • Classic Prop</span>
+                                </div>
+                                <span style="background:rgba(245,176,65,0.15); color:#f5b041; border:1px solid rgba(245,176,65,0.35); padding:4px 10px; border-radius:8px; font-size:0.8rem; font-weight:750;">
+                                    <i class="fas fa-crown"></i> Your Challenge Your Rules
+                                </span>
+                            </div>
+                            <span class="running-status-tag" style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3);">
+                                <i class="fas fa-circle-notch fa-spin"></i> ACTIVE EVALUATION
+                            </span>
+                        </div>
+
+                        <div class="running-title" style="margin-top:0.8rem;">
+                            ${challenge.packageName} ($${challenge.fundedAmount.toLocaleString()}) Classic Prop Challenge
+                        </div>
+                        <div style="font-size:0.92rem; color:var(--text-secondary); margin-bottom:1.2rem;">
+                            Linked Broker ID: <strong>${challenge.brokerAccountId || 'Demo Account'}</strong> • প্রফিট টার্গেট: <strong style="color:var(--neon-green);">+${targetPct}% ($${targetAmt.toLocaleString()})</strong> • কোনো MM Sheet লাগবে না
+                        </div>
+
+                        <!-- Target Progress Bar -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.88rem; margin-bottom:6px;">
+                            <span style="color:#fff; font-weight:700;"><i class="fas fa-bullseye" style="color:#00e676; margin-right:6px;"></i> প্রফিট টার্গেট অর্জন (Profit Target: +${targetPct}%)</span>
+                            <span style="color:#00e676; font-weight:900;">${targetProgressPct}% ($${currentProfit >= 0 ? '+' : ''}${currentProfit.toFixed(2)} / $${targetAmt})</span>
+                        </div>
+                        <div class="progress-bar-bg" style="background:rgba(255,255,255,0.06); height:14px; border-radius:10px; overflow:hidden;">
+                            <div class="progress-bar-fill" style="width: ${targetProgressPct}%; background:linear-gradient(90deg, #00e676, #00c853); height:100%; border-radius:10px; transition:width 0.4s ease;"></div>
+                        </div>
+
+                        <div class="running-meta-grid" style="margin-top:1.4rem;">
+                            <div class="meta-item">
+                                <div class="meta-label">ট্রেডিং দিন অগ্রগতি</div>
+                                <div class="meta-value" style="color:#fff;">${daysComp} / ${minDays} দিন ${daysComp >= minDays ? '<span style="color:#00e676; font-size:0.75rem;">(পূর্ণ ✓)</span>' : ''}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">বর্তমান উইন রেট</div>
+                                <div class="meta-value" style="color:${winRate >= minWin ? '#00e676' : 'var(--yellow)'};">${winRate}% <span style="font-size:0.75rem; color:var(--text-secondary);">(মিনিমাম ${minWin}%)</span></div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">দৈনিক লস সীমা</div>
+                                <div class="meta-value" style="color:var(--danger-red);">-${challenge.dailyLossPercent || challenge.dailyLoss || 4}% Max</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">সর্বোচ্চ ড্র-ডাউন</div>
+                                <div class="meta-value" style="color:var(--danger-red);">-${challenge.maxDrawdownPercent || 8}% Limit</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">ডেইলি প্রফিট ক্যাপ</div>
+                                <div class="meta-value" style="color:#00e676;">+${challenge.dailyProfitCapPercent || challenge.dailyProfitCap || 4}% (Soft-Trim)</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">প্রফিট স্প্লিট (পাস হলে)</div>
+                                <div class="meta-value" style="color:var(--yellow);">${challenge.profitSplit || '85%'}</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.06); flex-wrap:wrap; gap:8px;">
+                            <span style="font-size:0.8rem; color:var(--text-secondary);">
+                                <i class="fas fa-info-circle" style="color:#f5b041; margin-right:4px;"></i> এক্সটেনশন দিয়ে ট্রেড সিঙ্ক করলেই সকল হিসাব স্বয়ংক্রিয়ভাবে আপডেট হবে।
+                            </span>
+                            <button type="button" class="btn-outline" style="padding:6px 12px; font-size:0.78rem; border-radius:6px;" onclick="switchTab('pane-history')">
+                                ট্রেড হিস্টোরি দেখুন →
+                            </button>
+                        </div>
+                    </div>
+                `;
                 checkMoneyManagementEligibility();
                 return;
             }
@@ -7994,6 +8208,40 @@
                 } else {
                     lockedCard.innerHTML = getUnifiedNoChallengeHTML('sheet');
                 }
+                return;
+            }
+
+            // Classic Prop check: no MM Sheet required
+            if (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules') {
+                lockedCard.style.display = 'block';
+                activeContainer.style.display = 'none';
+                lockedCard.innerHTML = `
+                    <div class="glass-card" style="padding:2.2rem 1.8rem; text-align:center; border:1.5px solid rgba(245,176,65,0.4); background:radial-gradient(ellipse at top, rgba(245,176,65,0.1), rgba(18,24,38,0.95)); border-radius:18px;">
+                        <div style="width:68px; height:68px; border-radius:20px; background:rgba(245,176,65,0.15); border:1.5px solid rgba(245,176,65,0.4); color:#f5b041; display:flex; align-items:center; justify-content:center; font-size:2rem; margin:0 auto 1.2rem auto;">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h2 style="font-size:1.45rem; font-weight:900; color:#fff; margin-bottom:0.6rem;">
+                            Your Challenge Your Rules (No MM Sheet Required)
+                        </h2>
+                        <p style="color:#cbd5e1; font-size:0.95rem; max-width:620px; margin:0 auto 1.4rem auto; line-height:1.6;">
+                            আপনার বর্তমান সক্রিয় চ্যালেঞ্জটি হলো <strong>${escapeHtml(activeChallenge.packageName)} ($${(activeChallenge.fundedAmount || 0).toLocaleString()}) Classic Prop</strong>। এই মডেলটিতে কোনো মানি ম্যানেজমেন্ট শিটের নির্ধারিত স্টেক ফলো করতে হয় না—আপনি আপনার নিজস্ব ট্রেডিং প্ল্যান ও ইচ্ছামতো স্টেক সাইজ ব্যবহার করতে পারেন।
+                        </p>
+                        <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:1.5rem;">
+                            <span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:6px 14px; border-radius:8px; font-weight:800; font-size:0.86rem;">
+                                টার্গেট: +${activeChallenge.profitTargetPercent || 30}%
+                            </span>
+                            <span style="background:rgba(239,68,68,0.15); color:var(--danger-red); border:1px solid rgba(239,68,68,0.3); padding:6px 14px; border-radius:8px; font-weight:800; font-size:0.86rem;">
+                                ডেইলি লস: -${activeChallenge.dailyLossPercent || activeChallenge.dailyLoss || 4}%
+                            </span>
+                            <span style="background:rgba(239,68,68,0.15); color:var(--danger-red); border:1px solid rgba(239,68,68,0.3); padding:6px 14px; border-radius:8px; font-weight:800; font-size:0.86rem;">
+                                ড্র-ডাউন: -${activeChallenge.maxDrawdownPercent || 8}%
+                            </span>
+                        </div>
+                        <button type="button" class="btn-gold" style="padding:10px 24px; font-weight:800;" onclick="switchTab('pane-history')">
+                            ট্রেড হিস্টোরি ও লাইভ স্ট্যাটাস দেখুন →
+                        </button>
+                    </div>
+                `;
                 return;
             }
 
@@ -9368,6 +9616,31 @@
             let simLosses = 0;
             let stepCount = 0;
 
+            const isClassicPropChallenge = !!(activeChallenge && (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules'));
+            if (isClassicPropChallenge) {
+                unsubmitted.forEach((t, idx) => {
+                    const tick = String(t.ticketId || t.ticket || t.id || '').trim();
+                    const actualStake = parseFloat(t.amount) || 0;
+                    const isRefund = t.result === 'REFUND' || t.result === 'TIE' || t.result === 'DRAW';
+                    tradeAuditMap.set(tick, {
+                        isAudited: false,
+                        isUnsubmitted: true,
+                        challengeNum: activeChNum,
+                        isPractice: false,
+                        sessionNum: 1,
+                        sessionLabel: 'Classic Prop Trade',
+                        stepNum: idx + 1,
+                        plannedStake: actualStake,
+                        actualStake,
+                        isPassed: true,
+                        isRefund,
+                        errorReason: '',
+                        payout: t.payout || '85%'
+                    });
+                });
+                return tradeAuditMap;
+            }
+
             unsubmitted.forEach(t => {
                 const tick = String(t.ticketId || t.ticket || t.id || '').trim();
                 const actualStake = parseFloat(t.amount) || 0;
@@ -9599,21 +9872,37 @@
                                     </button>
                                 </div>
 
-                                ${mistakeCount > 0 ? `
-                                    <div style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.45); border-radius:8px; padding:8px 12px; margin-bottom:10px; color:#fca5a5; font-size:0.78rem; display:flex; align-items:center; gap:8px;">
-                                        <i class="fas fa-exclamation-triangle" style="color:#ef4444; font-size:1.1rem; flex-shrink:0;"></i>
-                                        <div>
-                                            <strong>সতর্কতা:</strong> ${mistakeCount}টি ট্রেডে নিয়ম লঙ্ঘন বা ভুল স্টেক সনাক্ত হয়েছে! নিচে লাল চিহ্নে ভুলগুলো লক্ষ্য করুন।
+                                ${(() => {
+                                    const isClassicPropChallenge = !!(activeChallenge && (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules'));
+                                    if (isClassicPropChallenge) {
+                                        return `
+                                            <div style="background:rgba(245,176,65,0.12); border:1px solid rgba(245,176,65,0.35); border-radius:8px; padding:8px 12px; margin-bottom:10px; color:#f5b041; font-size:0.78rem; display:flex; align-items:center; gap:8px;">
+                                                <i class="fas fa-crown" style="color:var(--yellow); font-size:1.1rem; flex-shrink:0;"></i>
+                                                <div>
+                                                    <strong>Your Challenge (Classic Prop):</strong> কোনো মানি ম্যানেজমেন্ট শিট ফলো করার প্রয়োজন নেই। আপনার যেকোনো স্টেক সাইজ ও ট্রেড স্বয়ংক্রিয়ভাবে প্রফিট টার্গেট (+৩০%) ও ড্র-ডাউনে গণনা হচ্ছে।
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                    if (mistakeCount > 0) {
+                                        return `
+                                            <div style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.45); border-radius:8px; padding:8px 12px; margin-bottom:10px; color:#fca5a5; font-size:0.78rem; display:flex; align-items:center; gap:8px;">
+                                                <i class="fas fa-exclamation-triangle" style="color:#ef4444; font-size:1.1rem; flex-shrink:0;"></i>
+                                                <div>
+                                                    <strong>সতর্কতা:</strong> ${mistakeCount}টি ট্রেডে নিয়ম লঙ্ঘন বা ভুল স্টেক সনাক্ত হয়েছে! নিচে লাল চিহ্নে ভুলগুলো লক্ষ্য করুন।
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                    return `
+                                        <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.25); border-radius:8px; padding:6px 12px; margin-bottom:10px; color:#a7f3d0; font-size:0.76rem; display:flex; align-items:center; gap:8px;">
+                                            <i class="fas fa-check-circle" style="color:#00e676; font-size:0.95rem; flex-shrink:0;"></i>
+                                            <div>
+                                                সবগুলো ট্রেড মানি ম্যানেজমেন্ট নিয়ম মেনে সঠিকভাবে সম্পন্ন হচ্ছে।
+                                            </div>
                                         </div>
-                                    </div>
-                                ` : `
-                                    <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.25); border-radius:8px; padding:6px 12px; margin-bottom:10px; color:#a7f3d0; font-size:0.76rem; display:flex; align-items:center; gap:8px;">
-                                        <i class="fas fa-check-circle" style="color:#00e676; font-size:0.95rem; flex-shrink:0;"></i>
-                                        <div>
-                                            সবগুলো ট্রেড মানি ম্যানেজমেন্ট নিয়ম মেনে সঠিকভাবে সম্পন্ন হচ্ছে।
-                                        </div>
-                                    </div>
-                                `}
+                                    `;
+                                })()}
 
                                 <!-- Desktop Table View (>= 769px) -->
                                 <div class="audit-table-desktop" style="overflow-x:auto; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
@@ -11257,6 +11546,24 @@
             dashPromoTimerInterval = setInterval(update, 1000);
         }
 
+        let currentDashCategory = 'easy_rules';
+
+        function switchDashboardChallengeCategory(cat) {
+            currentDashCategory = cat;
+            const btnEasy = document.getElementById('btnDashCatEasyRules');
+            const btnYour = document.getElementById('btnDashCatYourRules');
+            if (btnEasy && btnYour) {
+                if (cat === 'easy_rules') {
+                    btnEasy.className = 'btn-cat-nav-pill active-easy';
+                    btnYour.className = 'btn-cat-nav-pill';
+                } else {
+                    btnEasy.className = 'btn-cat-nav-pill';
+                    btnYour.className = 'btn-cat-nav-pill active-your';
+                }
+            }
+            renderDashboardPackages(allPackages);
+        }
+
         function renderDashboardPackages(packages) {
             const container = document.getElementById('dashboardPackagesGrid');
             if (!container) return;
@@ -11291,13 +11598,22 @@
                 `;
             }
 
-            container.innerHTML = noticeBanner + packages.map(pkg => `
+            const filtered = (packages || []).filter(p => {
+                if (currentDashCategory === 'easy_rules') {
+                    return p.category !== 'your_rules' && p.challengeModel !== 'classic_prop';
+                }
+                return p.category === 'your_rules' || p.challengeModel === 'classic_prop';
+            });
+
+            container.innerHTML = noticeBanner + filtered.map(pkg => {
+                const isClassic = pkg.category === 'your_rules' || pkg.challengeModel === 'classic_prop';
+                return `
                 <div class="glass-card" style="display:flex; flex-direction:column; justify-content:space-between;">
                     <div>
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
                             <div>
                                 <span style="font-size:1.4rem; font-weight:800; color:#fff;">${pkg.name}</span>
-                                <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">${pkg.badge}</div>
+                                <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">${pkg.badge || (isClassic ? 'Classic Prop' : '')}</div>
                             </div>
                             <div style="text-align:right;">
                                 ${pkg.hasDiscount ? `
@@ -11321,30 +11637,55 @@
                                     <div style="font-size:1.85rem; font-weight:900; color:var(--yellow); line-height:1.1;">
                                         $${pkg.fee} <span style="font-size:0.8rem; color:var(--text-secondary); font-weight:400;">fee</span>
                                     </div>
-                                    <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:2px;">রেগুলার ফি (Regular)</div>
+                                    <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:2px;">${isClassic ? 'One-time fee' : 'রেগুলার ফি (Regular)'}</div>
                                 `}
                             </div>
                         </div>
                         <div style="font-size:2.2rem; font-weight:900; margin-bottom:1rem; color:#fff;">
                             $${pkg.fundedAmount.toLocaleString()}
                         </div>
-                        <ul style="list-style:none; font-size:0.88rem; margin-bottom:1.5rem;">
-                            <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
-                                <span style="color:var(--text-secondary);">Sessions</span><span>${pkg.sessions} Days</span>
-                            </li>
-                            <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
-                                <span style="color:var(--text-secondary);">Max Drawdown</span><span style="color:var(--danger-red); font-weight:700;">${pkg.maxDrawdown}</span>
-                            </li>
-                            <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
-                                <span style="color:var(--text-secondary);">Profit Split</span><span style="color:var(--yellow); font-weight:700;">${pkg.profitSplit}</span>
-                            </li>
+                        <ul style="list-style:none; font-size:0.88rem; margin-bottom:1.5rem; padding:0;">
+                            ${isClassic ? `
+                                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
+                                    <span style="color:var(--text-secondary);">Profit Target</span><span style="color:var(--neon-green); font-weight:800;">+30%</span>
+                                </li>
+                                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
+                                    <span style="color:var(--text-secondary);">Daily Loss Limit</span><span style="color:var(--danger-red); font-weight:700;">-${pkg.dailyLoss}%</span>
+                                </li>
+                                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
+                                    <span style="color:var(--text-secondary);">Max Drawdown</span><span style="color:var(--danger-red); font-weight:700;">-${pkg.maxDrawdownPercent || pkg.maxDrawdown}</span>
+                                </li>
+                                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
+                                    <span style="color:var(--text-secondary);">Daily Profit Cap</span><span style="color:var(--neon-green); font-weight:700;">+${pkg.dailyProfitCap}%</span>
+                                </li>
+                                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
+                                    <span style="color:var(--text-secondary);">Min Win Rate</span><span style="color:#fff; font-weight:700;">${pkg.minWinRate}%</span>
+                                </li>
+                                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
+                                    <span style="color:var(--text-secondary);">Min Trading Days</span><span style="color:#fff; font-weight:700;">${pkg.minDays} Days</span>
+                                </li>
+                                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
+                                    <span style="color:var(--text-secondary);">Profit Split</span><span style="color:var(--yellow); font-weight:700;">${pkg.profitSplit}</span>
+                                </li>
+                            ` : `
+                                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
+                                    <span style="color:var(--text-secondary);">Sessions</span><span>${pkg.sessions} Days</span>
+                                </li>
+                                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
+                                    <span style="color:var(--text-secondary);">Max Drawdown</span><span style="color:var(--danger-red); font-weight:700;">${pkg.maxDrawdown}</span>
+                                </li>
+                                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--card-border);">
+                                    <span style="color:var(--text-secondary);">Profit Split</span><span style="color:var(--yellow); font-weight:700;">${pkg.profitSplit}</span>
+                                </li>
+                            `}
                         </ul>
                     </div>
                     <button class="btn-gold" style="width:100%; justify-content:center;" onclick="openDashBuyModal('${pkg.id}')">
                         <i class="fas fa-shopping-cart"></i> Start ${pkg.name} ($${pkg.fee})
                     </button>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Buy Challenge Modal & Payment Logic

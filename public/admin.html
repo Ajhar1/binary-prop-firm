@@ -1652,6 +1652,13 @@
                                 <option value="rejected">Rejected</option>
                             </select>
                         </div>
+                        <div style="min-width:180px;">
+                            <select class="form-control" id="challengeCategoryFilter" style="width:100%; border-radius:10px; font-weight:600; height:38px; font-size:0.84rem;" onchange="renderChallengesTable()">
+                                <option value="all">All Models</option>
+                                <option value="easy_rules">Easy Challenge (MM)</option>
+                                <option value="your_rules">Your Challenge (Classic)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -3500,7 +3507,11 @@
                     <div style="font-size:0.86rem;" id="approveChallengeInfo"></div>
                 </div>
 
-                <div class="form-group">
+                <div id="approveClassicPropNotice" style="display:none; background:rgba(245,176,65,0.12); border:1.5px solid rgba(245,176,65,0.35); border-radius:10px; padding:12px 14px; margin-bottom:1rem; color:#f5b041; font-size:0.86rem; line-height:1.45;">
+                    <i class="fas fa-bolt" style="margin-right:4px;"></i> <strong>Your Challenge (Classic Prop Model):</strong> এই চ্যালেঞ্জের জন্য কোনো মানি ম্যানেজমেন্ট শিট লাগবে না। ট্রেডার তার নিজস্ব স্ট্রেটেজিতে ট্রেড করবে। সরাসরি ১-ক্লিকে অনুমোদন দিন।
+                </div>
+
+                <div class="form-group" id="approveMmGroup">
                     <label>Money Management Sheet</label>
                     <select class="form-control" id="approveMmSelect">
                         <option value="">Auto-Assign Next in Queue</option>
@@ -3627,6 +3638,32 @@
 
             <form onsubmit="submitReactivateChallenge(event)">
                 <input type="hidden" id="reactivateChallengeId" value="" />
+
+                <div class="form-group" style="margin-top:0.8rem;">
+                    <label style="font-weight:800; font-size:0.88rem; color:#fff; display:block; margin-bottom:8px;">
+                        পুনরায় সক্রিয়করণের ধরন (Recovery Mode) <span style="color:var(--neon-green);">*</span>
+                    </label>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <label style="display:flex; align-items:flex-start; gap:10px; background:rgba(255,255,255,0.03); border:1.5px solid rgba(16,185,129,0.3); border-radius:10px; padding:10px 14px; cursor:pointer;">
+                            <input type="radio" name="reactivateRecoveryMode" value="resume" checked style="margin-top:3px; accent-color:#10b981;" onchange="updateReactivateDefaultNotice('resume')" />
+                            <div>
+                                <strong style="color:#10b981; font-size:0.88rem; display:block;">২. যেখানে রয়েছে সেখান থেকেই শুরু করা (Resume State)</strong>
+                                <span style="font-size:0.78rem; color:var(--text-secondary); line-height:1.35; display:block; margin-top:2px;">
+                                    ট্রেডারের পূর্বের সকল অগ্রগতি, ব্যালেন্স এবং হিস্টোরি অপরিবর্তিত থাকবে; কেবল বাদ পড়ার কারণ ও রেস্ট্রিকশন ক্লিয়ার করা হবে।
+                                </span>
+                            </div>
+                        </label>
+                        <label style="display:flex; align-items:flex-start; gap:10px; background:rgba(255,255,255,0.03); border:1.5px solid rgba(245,176,65,0.3); border-radius:10px; padding:10px 14px; cursor:pointer;">
+                            <input type="radio" name="reactivateRecoveryMode" value="restart" style="margin-top:3px; accent-color:#f5b041;" onchange="updateReactivateDefaultNotice('restart')" />
+                            <div>
+                                <strong style="color:var(--yellow); font-size:0.88rem; display:block;">১. প্রথম থেকে শুরু করা (Fresh Restart)</strong>
+                                <span style="font-size:0.78rem; color:var(--text-secondary); line-height:1.35; display:block; margin-top:2px;">
+                                    মূল ফান্ডেড মূলধনে রিসেট হবে, ট্রেডিং দিন ০ হবে এবং প্রথম দিন থেকে নতুন সুযোগ দেওয়া হবে।
+                                </span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
 
                 <div class="form-group" style="margin-top:0.8rem;">
                     <label style="font-weight:700; font-size:0.84rem; color:#fff;">
@@ -5765,6 +5802,15 @@
 
             let list = allChallengesList;
 
+            // Apply Category / Challenge Model Filter
+            const catFilterSelect = document.getElementById('challengeCategoryFilter');
+            const catFilter = catFilterSelect ? catFilterSelect.value : 'all';
+            if (catFilter === 'easy_rules') {
+                list = list.filter(c => c.category !== 'your_rules' && c.challengeModel !== 'classic_prop');
+            } else if (catFilter === 'your_rules') {
+                list = list.filter(c => c.category === 'your_rules' || c.challengeModel === 'classic_prop');
+            }
+
             // Apply Status Filter
             if (filter === 'approved_success') {
                 list = list.filter(c => c.status !== 'pending_approval' && c.status !== 'rejected' && c.status !== 'cancelled' && (c.approvedAt || c.status === 'in_progress' || c.status === 'passed' || c.status === 'failed'));
@@ -5808,8 +5854,13 @@
                 const sl = list.length - idx;
                 const formattedDateTime = formatOrderDateTime(c.createdAt);
                 
-                // Assigned MM Sheet
-                const assignedMmHtml = c.assignedMmSerial ? `
+                // Assigned MM Sheet / Classic Prop Indicator
+                const isClassicProp = (c.category === 'your_rules' || c.challengeModel === 'classic_prop');
+                const assignedMmHtml = isClassicProp ? `
+                    <span style="display:inline-flex; align-items:center; gap:4px; color:#f5b041; font-size:0.74rem; background:rgba(245,176,65,0.12); border:1px solid rgba(245,176,65,0.3); padding:4px 8px; border-radius:6px; font-weight:700; white-space:nowrap;">
+                        <i class="fas fa-bolt"></i> No Sheet (Classic)
+                    </span>
+                ` : (c.assignedMmSerial ? `
                     <a href="${c.assignedMmUrl || '#'}" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; gap:5px; background:rgba(46,204,113,0.12); border:1px solid rgba(46,204,113,0.35); padding:5px 9px; border-radius:7px; color:#2ecc71; font-weight:800; font-size:0.78rem; white-space:nowrap;">
                         <i class="fas fa-file-excel" style="font-size:0.8rem;"></i>
                         <span>Sheet #${c.assignedMmSerial}</span>
@@ -5819,7 +5870,7 @@
                     <span style="display:inline-flex; align-items:center; gap:4px; color:#64748b; font-size:0.74rem; background:rgba(255,255,255,0.03); border:1px dashed rgba(255,255,255,0.14); padding:4px 8px; border-radius:6px; white-space:nowrap;">
                         Unassigned
                     </span>
-                `;
+                `);
 
                 // Payment Info Styling
                 const paymentMethodName = c.paymentMethod || 'Manual Payment';
@@ -5906,6 +5957,15 @@
                                     <span style="background:rgba(212,175,55,0.14); color:var(--gold); border:1px solid rgba(212,175,55,0.35); padding:1px 5px; border-radius:4px; font-size:0.7rem; font-weight:800; font-family:monospace; white-space:nowrap;">
                                         $${c.fundedAmount ? c.fundedAmount.toLocaleString() : '100'}
                                     </span>
+                                    ${isClassicProp ? `
+                                        <span style="background:rgba(245,176,65,0.18); color:#f5b041; border:1px solid rgba(245,176,65,0.4); padding:1px 5px; border-radius:4px; font-size:0.65rem; font-weight:800; white-space:nowrap;">
+                                            Your Rules
+                                        </span>
+                                    ` : `
+                                        <span style="background:rgba(16,185,129,0.18); color:#10b981; border:1px solid rgba(16,185,129,0.4); padding:1px 5px; border-radius:4px; font-size:0.65rem; font-weight:800; white-space:nowrap;">
+                                            Easy Rules
+                                        </span>
+                                    `}
                                 </div>
                                 <div style="font-size:0.76rem; color:#94a3b8;">
                                     Fee: <strong style="color:var(--gold);">$${c.fee}</strong>
@@ -6208,6 +6268,7 @@
         function openApproveChallengeModal(id) {
             const ch = adminChallenges.find(c => c.id === id);
             if (!ch) return;
+            const isClassic = ch.category === 'your_rules' || ch.challengeModel === 'classic_prop';
             const localFeeText = (ch.localAmount && ch.currency && ch.currency !== 'USD') 
                 ? `<span style="color:var(--neon-green); font-weight:800;">(${ch.currencySymbol || ''}${Math.round(ch.localAmount).toLocaleString()} ${ch.currency})</span>` 
                 : '';
@@ -6216,6 +6277,9 @@
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
                     <span style="background:rgba(212,175,55,0.2); color:var(--gold); border:1px solid var(--gold); padding:2px 8px; border-radius:5px; font-weight:900; font-family:monospace; font-size:0.82rem;">${ch.userTraderId || 'AJ-1000'}</span>
                     <strong style="color:#fff; font-size:1rem;">${ch.userName || 'Trader'}</strong>
+                    <span style="background:${isClassic ? 'rgba(245,176,65,0.2)' : 'rgba(16,185,129,0.2)'}; color:${isClassic ? '#f5b041' : '#10b981'}; border:1px solid ${isClassic ? '#f5b041' : '#10b981'}; padding:2px 8px; border-radius:5px; font-weight:800; font-size:0.74rem;">
+                        ${isClassic ? 'Your Challenge (Classic Prop)' : 'Easy Challenge (MM Sheet)'}
+                    </span>
                 </div>
                 <div style="color:#cbd5e1; font-size:0.82rem; margin-bottom:6px;">
                     ${ch.userEmail || 'N/A'}
@@ -6226,6 +6290,19 @@
                 ${ch.senderNumber ? `Sender: <strong style="color:var(--neon-green);">${ch.senderNumber}</strong> • ` : ''}
                 ${ch.paymentTxId ? `TXID: <code>${ch.paymentTxId}</code>` : ''}
             `;
+
+            const classicNotice = document.getElementById('approveClassicPropNotice');
+            const mmGroup = document.getElementById('approveMmGroup');
+            if (classicNotice && mmGroup) {
+                if (isClassic) {
+                    classicNotice.style.display = 'block';
+                    mmGroup.style.display = 'none';
+                } else {
+                    classicNotice.style.display = 'none';
+                    mmGroup.style.display = 'block';
+                }
+            }
+
             openModal('approveChallengeModal');
         }
 
@@ -6353,6 +6430,16 @@
         }
 
         // Reactivate Challenge Modal Controls
+        function updateReactivateDefaultNotice(mode) {
+            const noticeInput = document.getElementById('reactivateNoticeText');
+            if (!noticeInput) return;
+            if (mode === 'restart') {
+                noticeInput.value = `সম্মানিত ট্রেডার, আপনার চ্যালেঞ্জটি প্রথম থেকে নতুন করে সক্রিয় করা হয়েছে (Fresh Restart)। মূল ফান্ডেড মূলধন এবং ট্রেডিং দিন ০ এ রিসেট হয়েছে। অনুগ্রহ করে এবার নিয়ম মেনে ট্রেড সম্পন্ন করুন। শুভকামনা!`;
+            } else {
+                noticeInput.value = `সম্মানিত ট্রেডার, আপনার চ্যালেঞ্জটি সফলভাবে রিঅ্যাক্টিভেট (পুনরায় চালু) করা হয়েছে! আপনার পূর্বের সকল অনুমোদিত সেশন ও অগ্রগতি সম্পূর্ণ অক্ষত রয়েছে এবং যে অবস্থায় ছিল সেখান থেকেই চালু করা হয়েছে (Resume State)। রিঅ্যাক্টিভেট হওয়ার পর আপনার অ্যাকাউন্টে নেওয়া নতুন ট্রেডগুলো এক্সটেনশনের মাধ্যমে সিঙ্ক করে ট্রেডিং চালিয়ে যান।`;
+            }
+        }
+
         function openReactivateChallengeModal(challengeId) {
             const ch = (adminChallenges || []).find(c => c.id === challengeId);
             if (!ch) return;
@@ -6361,6 +6448,7 @@
             
             const summaryEl = document.getElementById('reactivateTraderSummary');
             if (summaryEl) {
+                const isClassic = (ch.category === 'your_rules' || ch.challengeModel === 'classic_prop');
                 summaryEl.innerHTML = `
                     <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:10px 14px; margin-bottom:12px; font-size:0.82rem;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -6368,15 +6456,15 @@
                             <span style="font-family:monospace; color:var(--gold); font-weight:800;">${ch.userTraderId || ''}</span>
                         </div>
                         <div style="color:var(--text-secondary); margin-top:4px;">
-                            <strong style="color:#fff;">${ch.packageName} ($${(ch.fundedAmount || 0).toLocaleString()})</strong> • ${ch.brokerName} (<code>${ch.brokerAccountId || 'Demo'}</code>) • Sessions: <strong style="color:var(--gold);">${ch.sessionsCompleted || 0}/${ch.sessionsRequired || 15}</strong>
+                            <strong style="color:#fff;">${ch.packageName} ($${(ch.fundedAmount || 0).toLocaleString()})</strong> • ${ch.brokerName} (<code>${ch.brokerAccountId || 'Demo'}</code>) • ${isClassic ? 'Model: <strong style="color:#f5b041;">Your Challenge (Classic)</strong>' : `Sessions: <strong style="color:var(--gold);">${ch.sessionsCompleted || 0}/${ch.sessionsRequired || 15}</strong>`}
                         </div>
                     </div>
                 `;
             }
 
-            const defaultNotice = `সম্মানিত ট্রেডার, আপনার চ্যালেঞ্জটি সফলভাবে রিঅ্যাক্টিভেট (পুনরায় চালু) করা হয়েছে! আপনার পূর্বের সকল অনুমোদিত সেশন ও অগ্রগতি সম্পূর্ণ অক্ষত রয়েছে এবং যে অবস্থায় ছিল সেখান থেকেই চালু করা হয়েছে। রিঅ্যাক্টিভেট হওয়ার পর আপনার অ্যাকাউন্টে নেওয়া নতুন ট্রেডগুলো এক্সটেনশনের মাধ্যমে সিঙ্ক করে ট্রেডিং চালিয়ে যান।`;
-            const noticeInput = document.getElementById('reactivateNoticeText');
-            if (noticeInput) noticeInput.value = defaultNotice;
+            const resumeRadio = document.querySelector('input[name="reactivateRecoveryMode"][value="resume"]');
+            if (resumeRadio) resumeRadio.checked = true;
+            updateReactivateDefaultNotice('resume');
 
             openModal('reactivateChallengeModal');
         }
@@ -6385,6 +6473,7 @@
             e.preventDefault();
             const id = document.getElementById('reactivateChallengeId').value;
             const message = document.getElementById('reactivateNoticeText').value.trim();
+            const recoveryMode = document.querySelector('input[name="reactivateRecoveryMode"]:checked')?.value || 'resume';
 
             if (!id) return;
 
@@ -6395,7 +6484,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${adminToken}`
                     },
-                    body: JSON.stringify({ message })
+                    body: JSON.stringify({ message, recoveryMode })
                 });
                 const data = await res.json();
                 if (data.success) {
