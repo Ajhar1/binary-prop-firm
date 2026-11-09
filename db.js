@@ -250,11 +250,15 @@ async function initSchema() {
     `CREATE TABLE IF NOT EXISTS synced_trades (
       id VARCHAR(120) PRIMARY KEY,
       userId VARCHAR(120) NOT NULL,
+      challengeId VARCHAR(120) DEFAULT '',
+      challengePackage VARCHAR(100) DEFAULT '',
+      ticketId VARCHAR(100) DEFAULT '',
       broker VARCHAR(100) DEFAULT 'quotex',
       brokerAccountId VARCHAR(100) DEFAULT '',
       tradeData JSON DEFAULT NULL,
       syncedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      INDEX idx_synced_user (userId)
+      INDEX idx_synced_user (userId),
+      INDEX idx_synced_challenge (challengeId)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
     `CREATE TABLE IF NOT EXISTS trader_states (
@@ -469,7 +473,10 @@ async function initSchema() {
       "ALTER TABLE partners ADD COLUMN balanceAdjustment DECIMAL(12,2) DEFAULT 0",
       "ALTER TABLE partners ADD COLUMN rawPartnerData LONGTEXT DEFAULT NULL",
       "ALTER TABLE partner_payouts ADD COLUMN rawPayoutData LONGTEXT DEFAULT NULL",
-      "ALTER TABLE partner_promo_requests ADD COLUMN rawRequestData LONGTEXT DEFAULT NULL"
+      "ALTER TABLE partner_promo_requests ADD COLUMN rawRequestData LONGTEXT DEFAULT NULL",
+      "ALTER TABLE synced_trades ADD COLUMN challengeId VARCHAR(120) DEFAULT ''",
+      "ALTER TABLE synced_trades ADD COLUMN challengePackage VARCHAR(100) DEFAULT ''",
+      "ALTER TABLE synced_trades ADD COLUMN ticketId VARCHAR(100) DEFAULT ''"
     ];
     for (const ac of alterColumns) {
       try {
@@ -974,6 +981,29 @@ async function autoMigrateFromJson() {
           console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} academy enrollments into MySQL.`);
         }
       } catch (e) {}
+    }
+
+    // 16. Synced Trades Initial Migration
+    const trdFile = path.join(dataDir, 'synced_trades.json');
+    const permTrdFile = path.join(dataDir, 'synced_trades_permanent_store.json');
+    let trdItems = [];
+    if (fs.existsSync(trdFile)) {
+      try { trdItems = JSON.parse(fs.readFileSync(trdFile, 'utf8') || '[]'); } catch (e) {}
+    }
+    if ((!trdItems || trdItems.length === 0) && fs.existsSync(permTrdFile)) {
+      try { trdItems = JSON.parse(fs.readFileSync(permTrdFile, 'utf8') || '[]'); } catch (e) {}
+    }
+    if (Array.isArray(trdItems) && trdItems.length > 0) {
+      let count = 0;
+      for (const t of trdItems) {
+        if (!t || !t.id) continue;
+        const [existing] = await pool.query('SELECT id FROM synced_trades WHERE id = ? LIMIT 1', [t.id]);
+        if (existing.length === 0) {
+          await saveSyncedTrade(t);
+          count++;
+        }
+      }
+      if (count > 0) console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} synced trades into MySQL.`);
     }
   } catch (err) {
     console.error('[DATABASE AUTO-MIGRATE ERROR]:', err.message);
@@ -1679,6 +1709,96 @@ async function getAllArchiveLogs() {
     isEmailVerified: Boolean(r.isEmailVerified),
     metadata: r.metadata ? (typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata) : {}
   }));
+}
+
+// ==================== SYNCED TRADES (QUOTEX EXTENSION) ====================
+
+function formatSyncedTrade(row) {
+  if (!row) return null;
+  let parsed = {};
+  if (row.tradeData) {
+    try {
+      parsed = typeof row.tradeData === 'string' ? JSON.parse(row.tradeData) : row.tradeData;
+    } catch (e) {}
+  }
+  return {
+    ...parsed,
+    id: row.id || parsed.id,
+    userId: row.userId || parsed.userId,
+    challengeId: row.challengeId || parsed.challengeId || '',
+    challengePackage: row.challengePackage || parsed.challengePackage || '',
+    ticketId: row.ticketId || parsed.ticketId || '',
+    broker: row.broker || parsed.broker || 'quotex',
+    brokerAccountId: row.brokerAccountId || parsed.brokerAccountId || '',
+    syncedAt: row.syncedAt ? new Date(row.syncedAt).toISOString() : (parsed.syncedAt || new Date().toISOString())
+  };
+}
+
+async function getAllSyncedTrades() {
+  if (!isMySqlActive()) return null;
+  try {
+    const [rows] = await pool.query('SELECT * FROM synced_trades ORDER BY syncedAt DESC');
+    return rows.map(formatSyncedTrade);
+  } catch (e) {
+    console.error('[DATABASE GET ALL SYNCED TRADES ERROR]:', e.message);
+    return null;
+  }
+}
+
+async function getSyncedTradesByChallengeId(challengeId) {
+  if (!isMySqlActive() || !challengeId) return null;
+  try {
+    const [rows] = await pool.query('SELECT * FROM synced_trades WHERE challengeId = ? ORDER BY syncedAt DESC', [challengeId]);
+    return rows.map(formatSyncedTrade);
+  } catch (e) {
+    return null;
+  }
+}
+
+async function saveSyncedTrade(t) {
+  if (!isMySqlActive() || !t || !t.id) return false;
+  try {
+    const [existing] = await pool.query('SELECT id FROM synced_trades WHERE id = ? LIMIT 1', [t.id]);
+    const tradeJson = JSON.stringify(t);
+    const now = toMySqlDateTime(t.syncedAt || new Date());
+    const chId = t.challengeId || '';
+    const pkg = t.challengePackage || '';
+    const tkt = t.ticketId || '';
+    const brk = t.source || t.broker || 'quotex';
+    const brkAcc = t.brokerAccountId || t.detectedBrokerAccountId || '';
+
+    if (existing.length === 0) {
+      try {
+        await pool.query(`INSERT INTO synced_trades (id, userId, challengeId, challengePackage, ticketId, broker, brokerAccountId, tradeData, syncedAt)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+          t.id, t.userId || '', chId, pkg, tkt, brk, brkAcc, tradeJson, now
+        ]);
+      } catch (colErr) {
+        await pool.query(`INSERT INTO synced_trades (id, userId, broker, brokerAccountId, tradeData, syncedAt)
+          VALUES (?, ?, ?, ?, ?, ?)`, [
+          t.id, t.userId || '', brk, brkAcc, tradeJson, now
+        ]);
+      }
+    } else {
+      try {
+        await pool.query(`UPDATE synced_trades SET
+          userId = ?, challengeId = ?, challengePackage = ?, ticketId = ?, broker = ?, brokerAccountId = ?, tradeData = ?, syncedAt = ?
+          WHERE id = ?`, [
+          t.userId || '', chId, pkg, tkt, brk, brkAcc, tradeJson, now, t.id
+        ]);
+      } catch (colErr) {
+        await pool.query(`UPDATE synced_trades SET
+          userId = ?, broker = ?, brokerAccountId = ?, tradeData = ?, syncedAt = ?
+          WHERE id = ?`, [
+          t.userId || '', brk, brkAcc, tradeJson, now, t.id
+        ]);
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error('[DATABASE SAVE SYNCED TRADE ERROR]:', err.message);
+    return false;
+  }
 }
 
 async function deleteUser(id, email) {
@@ -2814,6 +2934,21 @@ async function hydrateFromMySql(dataDir) {
       fs.writeFileSync(permAeFile, JSON.stringify(merged, null, 2), 'utf8');
     }
 
+    // 16. Synced Trades Hydration
+    const syncedTrades = await getAllSyncedTrades();
+    if (syncedTrades && syncedTrades.length > 0) {
+      const trdFile = path.join(dataDir, 'synced_trades.json');
+      const permTrdFile = path.join(dataDir, 'synced_trades_permanent_store.json');
+      let existingTrd = [];
+      try { if (fs.existsSync(trdFile)) existingTrd = JSON.parse(fs.readFileSync(trdFile, 'utf8') || '[]'); } catch (e) {}
+      const trdMap = new Map();
+      existingTrd.forEach(t => { if (t && (t.id || t.ticketId)) trdMap.set(t.id || t.ticketId, t); });
+      syncedTrades.forEach(t => { if (t && (t.id || t.ticketId)) trdMap.set(t.id || t.ticketId, t); });
+      const mergedTrd = Array.from(trdMap.values());
+      fs.writeFileSync(trdFile, JSON.stringify(mergedTrd, null, 2), 'utf8');
+      fs.writeFileSync(permTrdFile, JSON.stringify(mergedTrd, null, 2), 'utf8');
+    }
+
     console.log('[DATABASE] ✅ Local safe cache hydrated with live MySQL data.');
     return true;
   } catch (err) {
@@ -2843,6 +2978,10 @@ module.exports = {
   deleteSubmission,
   logArchiveEntry,
   getAllArchiveLogs,
+  // Synced Trades (Quotex Live Extension)
+  getAllSyncedTrades,
+  getSyncedTradesByChallengeId,
+  saveSyncedTrade,
   // Affiliate / Partner Program
   getAllPartners,
   getPartnerById,

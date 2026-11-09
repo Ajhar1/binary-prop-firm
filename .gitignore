@@ -14,6 +14,7 @@ data/challenges_permanent_store.json
 data/user_archive.json
 data/submissions.json
 data/synced_trades.json
+data/synced_trades_permanent_store.json
 data/trader_states.json
 data/support_tickets.json
 data/mm_links.json

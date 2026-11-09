@@ -15956,29 +15956,50 @@
             const tbody = document.getElementById('syncedTradesTableBody');
             const mobileCardsWrap = document.getElementById('syncedTradesCardsMobile');
             if (!userSyncedTradesData || userSyncedTradesData.length === 0) {
-                if (tbody) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="10" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
-                                <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
+                // Try restore from localStorage instant cache so trades are never blank on login/reload
+                try {
+                    const chId = (currentDisplayedChallenge && currentDisplayedChallenge.id) || '';
+                    const cachedRaw = localStorage.getItem(`bpf_challenge_trades_${chId}`) || localStorage.getItem('bpf_challenge_trades_latest');
+                    if (cachedRaw) {
+                        const cached = JSON.parse(cachedRaw);
+                        if (cached && Array.isArray(cached.trades) && cached.trades.length > 0) {
+                            userSyncedTradesData = cached.trades;
+                            if (cached.stats) lastSyncedTradesStats = cached.stats;
+                            if (cached.classicMetrics) lastSyncedTradesClassicMetrics = cached.classicMetrics;
+                            lastSyncedTradesFullResponse = cached;
+                            renderSyncedTrades(cached);
+                        }
+                    }
+                } catch(e) {}
+
+                if (!userSyncedTradesData || userSyncedTradesData.length === 0) {
+                    if (tbody) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="10" style="text-align:center; padding:3rem 1rem; color:var(--text-secondary);">
+                                    <i class="fas fa-spinner fa-spin" style="font-size:1.8rem; color:var(--yellow); margin-bottom:10px; display:block;"></i>
+                                    ট্রেড হিস্টোরি লোড হচ্ছে...
+                                </td>
+                            </tr>
+                        `;
+                    }
+                    if (mobileCardsWrap) {
+                        mobileCardsWrap.innerHTML = `
+                            <div style="text-align:center; padding:2rem 1rem; color:var(--text-secondary); font-size:0.84rem;">
+                                <i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--yellow); margin-bottom:8px; display:block;"></i>
                                 ট্রেড হিস্টোরি লোড হচ্ছে...
-                            </td>
-                        </tr>
-                    `;
-                }
-                if (mobileCardsWrap) {
-                    mobileCardsWrap.innerHTML = `
-                        <div style="text-align:center; padding:2rem 1rem; color:var(--text-secondary); font-size:0.84rem;">
-                            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--yellow); margin-bottom:8px; display:block;"></i>
-                            ট্রেড হিস্টোরি লোড হচ্ছে...
-                        </div>
-                    `;
+                            </div>
+                        `;
+                    }
                 }
             }
 
             try {
                 const clientTz = (Intl && Intl.DateTimeFormat) ? (Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Dhaka') : 'Asia/Dhaka';
-                const res = await fetch(`/api/user/synced-trades?tz=${encodeURIComponent(clientTz)}`, {
+                const chId = (currentDisplayedChallenge && currentDisplayedChallenge.id) || '';
+                const queryParams = new URLSearchParams({ tz: clientTz });
+                if (chId) queryParams.set('challengeId', chId);
+                const res = await fetch(`/api/user/synced-trades?${queryParams.toString()}`, {
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
                         'X-Timezone': clientTz
@@ -16000,6 +16021,13 @@
                     if (data.classicMetrics) {
                         lastSyncedTradesClassicMetrics = data.classicMetrics;
                     }
+
+                    // Save verified trades to instant local cache
+                    try {
+                        const targetId = (data.activeChallenge && data.activeChallenge.id) || chId || 'latest';
+                        localStorage.setItem(`bpf_challenge_trades_${targetId}`, JSON.stringify(data));
+                        localStorage.setItem('bpf_challenge_trades_latest', JSON.stringify(data));
+                    } catch(e) {}
                     const isClassic = (data.activeChallenge && (data.activeChallenge.challengeModel === 'classic_prop' || data.activeChallenge.category === 'your_rules')) || (data.classicMetrics != null);
 
                     const btnSess = document.getElementById('tradeHistViewBtnSessions');

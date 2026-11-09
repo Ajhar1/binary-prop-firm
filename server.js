@@ -43,6 +43,7 @@ const PROMO_CODES_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'promo_codes_perman
 const SUPPORT_FILE = path.join(DATA_DIR, 'support_tickets.json');
 const TRADER_STATES_FILE = path.join(DATA_DIR, 'trader_states.json');
 const SYNCED_TRADES_FILE = path.join(DATA_DIR, 'synced_trades.json');
+const SYNCED_TRADES_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'synced_trades_permanent_store.json');
 const PAYOUTS_FILE = path.join(DATA_DIR, 'payouts.json');
 const PAYOUT_SETTINGS_FILE = path.join(DATA_DIR, 'payout_settings.json');
 const DEFAULT_PAYOUT_SETTINGS = {
@@ -111,6 +112,7 @@ const CRITICAL_DATA_FILES = [
   SUBMISSIONS_FILE,
   ARCHIVE_FILE,
   SYNCED_TRADES_FILE,
+  SYNCED_TRADES_PERMANENT_STORE_FILE,
   // Payout stores
   PAYOUTS_FILE,
   PAYOUT_SETTINGS_FILE,
@@ -887,6 +889,8 @@ function mirrorToMySql(file, data, singleItemToMirror = null) {
         db.saveAcademyProfile(singleItemToMirror).catch(e => console.error('[MYSQL ACADEMY PROFILE MIRROR ERROR]:', e.message));
       } else if (file === ACADEMY_ENROLLMENTS_FILE || file === ACADEMY_ENROLLMENTS_PERMANENT_STORE_FILE) {
         db.saveAcademyEnrollment(singleItemToMirror).catch(e => console.error('[MYSQL ACADEMY ENROLLMENT MIRROR ERROR]:', e.message));
+      } else if (file === SYNCED_TRADES_FILE || file === SYNCED_TRADES_PERMANENT_STORE_FILE) {
+        db.saveSyncedTrade(singleItemToMirror).catch(e => console.error('[MYSQL SYNCED TRADE MIRROR ERROR]:', e.message));
       }
       return;
     }
@@ -923,6 +927,7 @@ function mirrorToMySql(file, data, singleItemToMirror = null) {
             else if (file === PARTNER_PAYOUTS_FILE) db.savePartnerPayout(item).catch(e => {});
             else if (file === PARTNER_PROMO_REQUESTS_FILE) db.savePartnerPromoRequest(item).catch(e => {});
             else if (file === PAYOUTS_FILE) db.savePayout(item).catch(e => {});
+            else if (file === SYNCED_TRADES_FILE || file === SYNCED_TRADES_PERMANENT_STORE_FILE) db.saveSyncedTrade(item).catch(e => {});
           }
         });
       }
@@ -7189,6 +7194,63 @@ app.post('/api/extension/disconnect', (req, res) => {
   }
 });
 
+// ==================== SYNCED TRADES FAIL-SAFE VAULT & REPOSITORY ====================
+
+function getSyncedTradesSafe() {
+  let trades = readJson(SYNCED_TRADES_FILE, null);
+  const perm = readJson(SYNCED_TRADES_PERMANENT_STORE_FILE, null);
+
+  if (!Array.isArray(trades) || trades.length === 0) {
+    if (Array.isArray(perm) && perm.length > 0) {
+      trades = perm;
+      writeJson(SYNCED_TRADES_FILE, trades);
+    } else {
+      trades = [];
+    }
+  } else if (Array.isArray(perm) && perm.length > trades.length) {
+    // Seamless merge if permanent store holds additional verified trades
+    const tMap = new Map();
+    trades.forEach(t => { if (t && (t.id || t.ticketId)) tMap.set(t.id || t.ticketId, t); });
+    perm.forEach(t => { if (t && (t.id || t.ticketId)) tMap.set(t.id || t.ticketId, t); });
+    trades = Array.from(tMap.values());
+    writeJson(SYNCED_TRADES_FILE, trades);
+  }
+  return trades;
+}
+
+function saveSyncedTrades(trades, singleTrade = null) {
+  if (!Array.isArray(trades)) return;
+  const perm = readJson(SYNCED_TRADES_PERMANENT_STORE_FILE, []);
+  let merged = trades;
+  if (Array.isArray(perm) && perm.length > 0) {
+    const tMap = new Map();
+    perm.forEach(t => { if (t && (t.id || t.ticketId)) tMap.set(t.id || t.ticketId, t); });
+    trades.forEach(t => { if (t && (t.id || t.ticketId)) tMap.set(t.id || t.ticketId, t); });
+    merged = Array.from(tMap.values());
+  }
+
+  // Strict sort newest-first
+  merged.sort((a, b) => getTradeExecutionTime(b) - getTradeExecutionTime(a));
+  if (merged.length > 10000) merged.length = 10000;
+
+  writeJson(SYNCED_TRADES_FILE, merged, singleTrade);
+  writeJson(SYNCED_TRADES_PERMANENT_STORE_FILE, merged, singleTrade);
+  backupToExternalSafeDir(SYNCED_TRADES_FILE, merged);
+  backupToExternalSafeDir(SYNCED_TRADES_PERMANENT_STORE_FILE, merged);
+
+  // Direct MySQL Double Safety Mirroring
+  if (db && db.isMySqlActive()) {
+    if (singleTrade && (singleTrade.id || singleTrade.ticketId)) {
+      db.saveSyncedTrade(singleTrade).catch(e => console.error('[DIRECT MYSQL TRADE SAVE ERROR]:', e.message));
+    } else if (Array.isArray(merged)) {
+      const toSync = merged.slice(0, 50);
+      toSync.forEach(t => {
+        db.saveSyncedTrade(t).catch(e => {});
+      });
+    }
+  }
+}
+
 // 1. Sync Trades from Quotex Extension (With Challenge Time-Lock Filter)
 app.post('/api/extension/sync-trades', (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -7334,8 +7396,9 @@ app.post('/api/extension/sync-trades', (req, res) => {
       return res.status(400).json({ success: false, message: 'কোনো ট্রেড পাওয়া যায়নি।' });
     }
 
-    let allSynced = readJson(SYNCED_TRADES_FILE, []);
+    let allSynced = getSyncedTradesSafe();
     let newCount = 0;
+    let didUpdateExisting = false;
     let filteredOldCount = 0;
     let filteredExpiredCount = 0;
     let duplicateCount = 0;
@@ -7401,13 +7464,15 @@ app.post('/api/extension/sync-trades', (req, res) => {
       );
       if (existingTrade) {
         if (activeChallenge) {
-          if (existingTrade.challengeId !== activeChallenge.id) existingTrade.challengeId = activeChallenge.id;
-          if (activeChallenge.userId && existingTrade.userId !== activeChallenge.userId) existingTrade.userId = activeChallenge.userId;
-          if (activeChallenge.userEmail && existingTrade.userEmail !== activeChallenge.userEmail) existingTrade.userEmail = activeChallenge.userEmail;
-          if (activeChallenge.userTraderId && existingTrade.traderId !== activeChallenge.userTraderId) existingTrade.traderId = activeChallenge.userTraderId;
+          if (existingTrade.challengeId !== activeChallenge.id) { existingTrade.challengeId = activeChallenge.id; didUpdateExisting = true; }
+          if (activeChallenge.packageName && existingTrade.challengePackage !== activeChallenge.packageName) { existingTrade.challengePackage = activeChallenge.packageName; didUpdateExisting = true; }
+          if (activeChallenge.userId && existingTrade.userId !== activeChallenge.userId) { existingTrade.userId = activeChallenge.userId; didUpdateExisting = true; }
+          if (activeChallenge.userEmail && existingTrade.userEmail !== activeChallenge.userEmail) { existingTrade.userEmail = activeChallenge.userEmail; didUpdateExisting = true; }
+          if (activeChallenge.userTraderId && existingTrade.traderId !== activeChallenge.userTraderId) { existingTrade.traderId = activeChallenge.userTraderId; didUpdateExisting = true; }
         }
         if (payout && payout !== '90%' && (!existingTrade.payout || existingTrade.payout === '90%')) {
           existingTrade.payout = payout;
+          didUpdateExisting = true;
           newCount++;
         }
         duplicateCount++;
@@ -7455,9 +7520,8 @@ app.post('/api/extension/sync-trades', (req, res) => {
     // Sort all trades strictly newest-first (latest trade on top)
     allSynced.sort((a, b) => getTradeExecutionTime(b) - getTradeExecutionTime(a));
 
-    if (newCount > 0) {
-      if (allSynced.length > 5000) allSynced.length = 5000;
-      writeJson(SYNCED_TRADES_FILE, allSynced);
+    if (newCount > 0 || didUpdateExisting) {
+      saveSyncedTrades(allSynced);
     }
 
     const totalForActiveChallenge = allSynced.filter(t => t.userId === user.id && t.challengeId === activeChallenge.id).length;
@@ -7506,15 +7570,27 @@ app.post('/api/extension/sync-trades', (req, res) => {
 // 2. Get Synced Trades for Logged-in Trader
 app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
   try {
-    const allSynced = readJson(SYNCED_TRADES_FILE, []);
+    const allSynced = getSyncedTradesSafe();
     const challenges = readJson(CHALLENGES_FILE, []);
-    const activeChallenge = challenges.find(c => 
-      c.status === 'in_progress' && 
-      c.isActive !== false &&
-      (c.userId === req.user.id || 
-       (c.userEmail && c.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()) || 
-       (c.userTraderId && c.userTraderId.toLowerCase() === (req.user.traderId || '').toLowerCase()))
-    );
+    const requestedChallengeId = (req.query.challengeId || '').trim();
+    let activeChallenge = null;
+    if (requestedChallengeId) {
+      activeChallenge = challenges.find(c =>
+        c.id === requestedChallengeId &&
+        (c.userId === req.user.id ||
+         (c.userEmail && c.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()) ||
+         (c.userTraderId && c.userTraderId.toLowerCase() === (req.user.traderId || '').toLowerCase()))
+      );
+    }
+    if (!activeChallenge) {
+      activeChallenge = challenges.find(c =>
+        c.status === 'in_progress' &&
+        c.isActive !== false &&
+        (c.userId === req.user.id ||
+         (c.userEmail && c.userEmail.toLowerCase() === (req.user.email || '').toLowerCase()) ||
+         (c.userTraderId && c.userTraderId.toLowerCase() === (req.user.traderId || '').toLowerCase()))
+      );
+    }
 
     const userChallenges = challenges.filter(c => 
       c.userId === req.user.id || 
@@ -7554,8 +7630,10 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
       if (t.challengeId && t.challengeId !== activeChallenge.id) return false;
       if (!isChallengeMatch && effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 60000)) return false;
 
-      // Auto-heal trade ownership if misaligned
-      if (isChallengeMatch && (t.userId !== activeChallenge.userId || t.userEmail !== activeChallenge.userEmail)) {
+      // Auto-heal trade ownership: PERMANENTLY BIND TO THIS CHALLENGE
+      if (!t.challengeId || t.challengeId !== activeChallenge.id || t.userId !== activeChallenge.userId || t.userEmail !== activeChallenge.userEmail) {
+        t.challengeId = activeChallenge.id;
+        t.challengePackage = activeChallenge.packageName || t.challengePackage || '';
         t.userId = activeChallenge.userId || t.userId;
         t.userEmail = activeChallenge.userEmail || t.userEmail;
         t.userName = activeChallenge.userName || t.userName;
@@ -7569,7 +7647,7 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
     }) : []);
 
     if (didRepairOwnership) {
-      writeJson(SYNCED_TRADES_FILE, allSynced);
+      saveSyncedTrades(allSynced);
     }
 
     // Strict sort newest-first (latest trade on top)
