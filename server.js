@@ -6864,6 +6864,38 @@ function getTradeExecutionTime(t, clientTzOffset, brokerTzOffset) {
          new Date(t.syncedAt || 0).getTime() || 0;
 }
 
+// Timezone helper functions for midnight rollover & calendar grouping
+function isValidTimezone(tz) {
+  if (!tz || typeof tz !== 'string') return false;
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function getTradingDayKey(dateOrMs, timeZone) {
+  const d = (dateOrMs instanceof Date) ? dateOrMs : new Date(dateOrMs);
+  if (isNaN(d.getTime())) return 'unknown';
+  const tz = isValidTimezone(timeZone) ? timeZone : 'Asia/Dhaka';
+  try {
+    // en-CA produces standard ISO 'YYYY-MM-DD' formatted in the specified timeZone
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    return formatter.format(d);
+  } catch (e) {
+    // Robust fallback: +6 hours for Asia/Dhaka
+    const offsetMs = 6 * 3600 * 1000;
+    const shifted = new Date(d.getTime() + offsetMs);
+    return shifted.toISOString().split('T')[0];
+  }
+}
+
 // 0. Extension Heartbeat Ping (Called every 30s by active extension)
 app.post('/api/extension/heartbeat', (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -7563,6 +7595,10 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
     // Module 2.5: Real-Time Classic Prop Rules & Metrics Engine
     let classicMetrics = null;
     if (activeChallenge && (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules')) {
+      const tradingTimezone = isValidTimezone(req.query.tz)
+        ? req.query.tz
+        : (isValidTimezone(req.headers['x-timezone']) ? req.headers['x-timezone'] : 'Asia/Dhaka');
+
       const initialCapital = Number(activeChallenge.fundedAmount || activeChallenge.startingCapital || 5000);
       const targetPercent = Number(activeChallenge.profitTargetPercent || 30);
       const targetDollar = initialCapital * (targetPercent / 100);
@@ -7589,8 +7625,7 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
 
       sortedAsc.forEach(t => {
         const tTime = getTradeExecutionTime(t);
-        const dObj = new Date(tTime);
-        const dayKey = !isNaN(dObj.getTime()) ? dObj.toISOString().split('T')[0] : 'unknown';
+        const dayKey = getTradingDayKey(tTime, tradingTimezone);
         if (!dayMap[dayKey]) {
           dayMap[dayKey] = { date: dayKey, trades: [], grossPnl: 0, wins: 0, losses: 0, disqualifiedWins: 0 };
         }
@@ -7751,8 +7786,8 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
       const isWinRateReached = (currentWinRateNum >= minWinRate);
       const isPassed = isTargetReached && isDaysReached && isWinRateReached && !isDailyLossHit && !isMaxDrawdownHit;
 
-      // Current Day stats (today)
-      const todayIso = new Date().toISOString().split('T')[0];
+      // Current Day stats (today) in trading timezone (Asia/Dhaka - resets at 12:00 AM midnight)
+      const todayIso = getTradingDayKey(Date.now(), tradingTimezone);
       const todayData = dayMap[todayIso] || { grossPnl: 0, wins: 0, losses: 0, disqualifiedWins: 0, trades: [] };
       const todayLossAmount = todayData.grossPnl < 0 ? Math.abs(todayData.grossPnl) : 0;
       const todayRemainingLossBuffer = Math.max(0, dailyLossLimitDollar - todayLossAmount);
@@ -7762,6 +7797,8 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
       classicMetrics = {
         challengeModel: 'classic_prop',
         initialCapital,
+        tradingTimezone,
+        todayDate: todayIso,
         currentBalance: parseFloat((rawBalance || initialCapital).toFixed(2)),
         effectiveBalance: parseFloat((effectiveBalance || initialCapital).toFixed(2)),
         netEffectiveProfit: parseFloat((netEffectiveProfit || 0).toFixed(2)),
@@ -7777,6 +7814,7 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
         todayRemainingLossBuffer: parseFloat(todayRemainingLossBuffer.toFixed(2)),
         maxDrawdownPercent,
         maxDrawdownLimitDollar,
+        currentDrawdownPercent: parseFloat(((currentDrawdownAmount / initialCapital) * 100).toFixed(1)),
         currentDrawdownDollar: parseFloat(currentDrawdownAmount.toFixed(2)),
         remainingDrawdownBuffer: parseFloat(remainingDrawdownBuffer.toFixed(2)),
         dailyProfitCapPercent,

@@ -7658,21 +7658,32 @@
 
             // Classic Prop Active HUD
             if (isClassic) {
-                const targetPct = challenge.profitTargetPercent || 30;
+                const cm = lastSyncedTradesClassicMetrics;
+                const targetPct = challenge.profitTargetPercent || (cm && cm.targetPercent) || 30;
                 const targetAmt = Math.round((challenge.fundedAmount || 1500) * (targetPct / 100));
-                const currentProfit = challenge.totalPnL || 0;
+                const currentProfit = (cm && cm.netEffectiveProfit != null) ? cm.netEffectiveProfit : (challenge.totalPnL || 0);
                 const targetProgressPct = Math.min(100, Math.max(0, Math.round((currentProfit / targetAmt) * 100)));
-                const daysComp = challenge.tradingDaysCompleted || 0;
-                const minDays = challenge.minTradingDays || 10;
-                const winRate = challenge.actualWinRate || 0;
-                const minWin = challenge.minWinRate || 55;
+                const daysComp = (cm && cm.tradingDaysCompleted != null) ? cm.tradingDaysCompleted : (challenge.tradingDaysCompleted || 0);
+                const minDays = challenge.minTradingDays || (cm && cm.minTradingDays) || 10;
+                const winRate = (cm && cm.winRate != null) ? cm.winRate : (challenge.actualWinRate || 0);
+                const minWin = challenge.minWinRate || (cm && cm.minWinRate) || 55;
+
+                // Async fetch classic metrics if not cached yet
+                if (!lastSyncedTradesClassicMetrics) {
+                    fetchClassicMetricsForChallenge(challenge).then(metrics => {
+                        if (metrics) renderRunningChallenge(challenge);
+                    });
+                }
 
                 const statDaysLbl = document.getElementById('statDaysLbl');
                 if (statDaysLbl) statDaysLbl.innerText = 'Trading Days';
                 const statDaysCount = document.getElementById('statDaysCount');
                 if (statDaysCount) statDaysCount.innerText = `${daysComp} / ${minDays} Days`;
 
-                document.getElementById('statDrawdown').innerText = challenge.currentDrawdown || '0.0%';
+                const statDrawdownEl = document.getElementById('statDrawdown');
+                if (statDrawdownEl) {
+                    statDrawdownEl.innerText = (cm && cm.currentDrawdownPercent != null) ? `${cm.currentDrawdownPercent.toFixed(1)}%` : (challenge.currentDrawdown || '0.0%');
+                }
 
                 const statSubmissionsLbl = document.getElementById('statSubmissionsLbl');
                 if (statSubmissionsLbl) statSubmissionsLbl.innerText = 'Win Rate';
@@ -8887,8 +8898,12 @@
             try {
                 const token = getAuthToken() || localStorage.getItem('aj_token') || localStorage.getItem('aj_funded_token');
                 if (token) {
-                    const res = await fetch('/api/user/synced-trades', {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                    const clientTz = (Intl && Intl.DateTimeFormat) ? (Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Dhaka') : 'Asia/Dhaka';
+                    const res = await fetch(`/api/user/synced-trades?tz=${encodeURIComponent(clientTz)}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'X-Timezone': clientTz
+                        }
                     });
                     const data = await res.json();
                     if (data.success && data.classicMetrics) {
@@ -15962,8 +15977,12 @@
             }
 
             try {
-                const res = await fetch('/api/user/synced-trades', {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
+                const clientTz = (Intl && Intl.DateTimeFormat) ? (Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Dhaka') : 'Asia/Dhaka';
+                const res = await fetch(`/api/user/synced-trades?tz=${encodeURIComponent(clientTz)}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'X-Timezone': clientTz
+                    }
                 });
                 if (!res.ok) {
                     throw new Error(`HTTP error ${res.status}`);
@@ -16020,6 +16039,18 @@
                         if (typeof updateAuditCardInfo === 'function') updateAuditCardInfo();
                     } catch (auditErr) {
                         console.warn('Error in updateAuditCardInfo:', auditErr);
+                    }
+
+                    // Synchronize top 7-Rule Classic Prop Live HUD if active
+                    if (data.classicMetrics && typeof renderClassicPropLiveStatus === 'function') {
+                        const targetCh = data.activeChallenge || (typeof myChallenges !== 'undefined' ? myChallenges.find(c => c.id === data.activeChallenge?.id) : null) || (typeof activeChallenge !== 'undefined' ? activeChallenge : null);
+                        if (targetCh) {
+                            try {
+                                renderClassicPropLiveStatus(targetCh);
+                            } catch(hudErr) {
+                                console.warn('Error refreshing classic prop HUD:', hudErr);
+                            }
+                        }
                     }
 
                     // Update Time-Lock Filter UI
