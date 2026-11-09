@@ -12330,10 +12330,11 @@
             if (!select || !box) return;
 
             const selectedName = select.value;
-            const pm = dashPaymentMethods.find(m => m.name === selectedName);
+            const pm = (dashPaymentMethods || []).find(m => m.name === selectedName);
 
-            const pkgId = document.getElementById('dashSelectedPackageId').value;
-            const pkg = allPackages.find(p => p.id === pkgId);
+            const pkgIdElem = document.getElementById('dashSelectedPackageId');
+            const pkgId = pkgIdElem ? pkgIdElem.value : '';
+            const pkg = (allPackages || []).find(p => p.id === pkgId);
             const pkgFee = pkg ? Number(pkg.fee) : 7;
             const effectiveFee = (dashAppliedPromoData && typeof dashAppliedPromoData.finalFee === 'number') ? dashAppliedPromoData.finalFee : pkgFee;
 
@@ -13074,7 +13075,6 @@
             }
 
             // 2. Broker Name (from active challenge if available)
-            const activeChallenge = (myChallenges || []).find(c => c.status === 'in_progress');
             const brokerSelect = document.getElementById('subBroker');
             if (brokerSelect && activeChallenge && activeChallenge.brokerName) {
                 const matchingOpt = Array.from(brokerSelect.options).find(o => o.value.toLowerCase() === activeChallenge.brokerName.toLowerCase());
