@@ -7520,7 +7520,7 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
       );
       if (!isChallengeMatch && !isUserMatch) return false;
       if (t.challengeId && t.challengeId !== activeChallenge.id) return false;
-      if (effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 60000)) return false;
+      if (!isChallengeMatch && effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 60000)) return false;
 
       // Auto-heal trade ownership if misaligned
       if (isChallengeMatch && (t.userId !== activeChallenge.userId || t.userEmail !== activeChallenge.userEmail)) {
@@ -7531,7 +7531,10 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
         didRepairOwnership = true;
       }
       return true;
-    }) : [];
+    }) : (userChallenges.length > 0 ? allSynced.filter(t => {
+      const latestCh = userChallenges[0];
+      return t.challengeId === latestCh.id || (t.userId === req.user.id && (!t.challengeId || t.challengeId === latestCh.id));
+    }) : []);
 
     if (didRepairOwnership) {
       writeJson(SYNCED_TRADES_FILE, allSynced);
@@ -7593,6 +7596,10 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
         }
         const dayData = dayMap[dayKey];
 
+        // Safe numeric parsing for stake and profit
+        const tradeStake = typeof t.amount === 'number' ? t.amount : (parseFloat(String(t.amount || '0').replace(/[^0-9.-]/g, '')) || 0);
+        const rawProfit = typeof t.profit === 'number' ? t.profit : (parseFloat(String(t.profit || '0').replace(/[^0-9.-]/g, '')) || 0);
+
         // Calculate allowable stake right BEFORE opening this trade
         const dayLossSoFar = dayData.grossPnl < 0 ? Math.abs(dayData.grossPnl) : 0;
         const remainingDailyLossBuffer = Math.max(0, dailyLossLimitDollar - dayLossSoFar);
@@ -7601,7 +7608,6 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
 
         // Maximum allowable stake: cannot exceed remaining daily loss buffer or max drawdown buffer
         const maxAllowedStake = Math.min(remainingDailyLossBuffer, remainingMaxDrawdownBuffer);
-        const tradeStake = Number(t.amount || 0);
         const isOverRisk = tradeStake > (maxAllowedStake + 0.01);
 
         t.maxAllowedStakeAtOpen = parseFloat(maxAllowedStake.toFixed(2));
@@ -7613,15 +7619,17 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
             // Anti-Cheating Rule: Stake exceeded stop loss buffer and won!
             // Strictly Disqualified: Profit is NOT counted anywhere!
             t.isOverRiskDisqualified = true;
+            t.isDisqualified = true;
             t.overRiskReason = 'স্টপ লসের বাহিরে গিয়ে ট্রেড করার কারণে ট্রেডটি গণ্য হয়নি';
             t.effectiveProfit = 0;
-            dayData.disqualifiedWins++;
+            dayData.disqualifiedWins = (dayData.disqualifiedWins || 0) + 1;
             disqualifiedWins++;
             dayData.trades.push(t);
             // Neither grossPnl nor runningRawBalance changes
           } else {
             // Stake exceeded stop loss buffer and lost!
             t.isOverRiskDisqualified = false;
+            t.isDisqualified = false;
             t.isOverRiskBreach = true;
             if (t.result === 'LOSS') {
               const tradeLoss = tradeStake;
@@ -7648,8 +7656,9 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
         } else {
           // Normal trade within allowable risk bounds
           t.isOverRiskDisqualified = false;
+          t.isDisqualified = false;
           if (t.result === 'WIN') {
-            const tradeProfit = t.profit > t.amount ? (t.profit - t.amount) : (t.profit || 0);
+            const tradeProfit = rawProfit > tradeStake ? (rawProfit - tradeStake) : rawProfit;
             t.effectiveProfit = tradeProfit;
             dayData.wins++;
             validWins++;
@@ -7753,10 +7762,11 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
       classicMetrics = {
         challengeModel: 'classic_prop',
         initialCapital,
-        currentBalance: parseFloat(rawBalance.toFixed(2)),
-        effectiveBalance: parseFloat(effectiveBalance.toFixed(2)),
-        netEffectiveProfit: parseFloat(netEffectiveProfit.toFixed(2)),
-        profitPercent: parseFloat(currentProfitPercent.toFixed(2)),
+        currentBalance: parseFloat((rawBalance || initialCapital).toFixed(2)),
+        effectiveBalance: parseFloat((effectiveBalance || initialCapital).toFixed(2)),
+        netEffectiveProfit: parseFloat((netEffectiveProfit || 0).toFixed(2)),
+        netProfit: parseFloat((netEffectiveProfit || 0).toFixed(2)),
+        profitPercent: parseFloat((currentProfitPercent || 0).toFixed(2)),
         targetPercent,
         targetDollar,
         targetRemainingDollar: parseFloat(Math.max(0, targetDollar - netEffectiveProfit).toFixed(2)),
