@@ -8960,32 +8960,43 @@
             const daysComp = Number(m.tradingDaysCompleted != null ? m.tradingDaysCompleted : (challenge.tradingDaysCompleted || 0));
             const daysRem = Number(m.tradingDaysRemaining != null ? m.tradingDaysRemaining : Math.max(0, minDays - daysComp));
             const daysProgressPct = Math.min(100, Math.round((daysComp / minDays) * 100));
+            const ddSafeBarPct = Math.max(0, Math.min(100, Math.round((ddRemBuffer / maxDdLimitDollar) * 100)));
+            const dailyLossBarPct = Math.max(0, Math.min(100, Math.round((dailyLossRemBuffer / dailyLossLimitDollar) * 100)));
+            const dailyCapBarPct = Math.min(100, Math.round((todayGross / dailyCapDollar) * 100));
 
             hud.innerHTML = `
-                <!-- Main Top Banner -->
-                <div class="glass-card" style="border:1px solid rgba(245,176,65,0.35); background:radial-gradient(ellipse at top, rgba(245,176,65,0.08), rgba(18,24,38,0.96)); padding:1.4rem; border-radius:16px; margin-bottom:1.25rem; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:0.9rem;">
-                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                            <div style="width:42px; height:42px; border-radius:10px; background:rgba(245,176,65,0.15); border:1px solid rgba(245,176,65,0.4); display:flex; align-items:center; justify-content:center; color:#f5b041; font-size:1.3rem;">
+                <!-- Main Classic Prop Live HUD -->
+                <div class="glass-card" style="border:1px solid rgba(245,176,65,0.3); background:linear-gradient(135deg, rgba(20,24,33,0.96), rgba(12,16,24,0.98)); padding:1.25rem 1.4rem; border-radius:18px; margin-bottom:1.5rem; box-shadow:0 12px 36px rgba(0,0,0,0.45);">
+                    <!-- Sleek Account Header Strip -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.25rem; border-bottom:1px solid rgba(255,255,255,0.07); padding-bottom:1rem;">
+                        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <div style="width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg, rgba(245,176,65,0.25), rgba(245,176,65,0.05)); border:1px solid rgba(245,176,65,0.4); display:flex; align-items:center; justify-content:center; color:#f5b041; font-size:1.35rem; box-shadow:0 0 16px rgba(245,176,65,0.2);">
                                 <i class="fas fa-crown"></i>
                             </div>
                             <div>
                                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                                    <h2 style="font-size:1.25rem; font-weight:800; color:#fff; margin:0;">
-                                        ${escapeHtml(challenge.packageName || 'Classic Prop')} ($${funded.toLocaleString()}) লাইভ স্ট্যাটাস মনিটর
+                                    <h2 style="font-size:1.3rem; font-weight:800; color:#fff; margin:0; letter-spacing:-0.3px;">
+                                        ${escapeHtml(challenge.packageName || 'Classic Prop')} ($${funded.toLocaleString()})
                                     </h2>
-                                    <span style="background:rgba(245,176,65,0.18); color:#f5b041; border:1px solid rgba(245,176,65,0.4); padding:3px 9px; border-radius:6px; font-size:0.75rem; font-weight:800;">
+                                    <span style="background:rgba(245,176,65,0.15); color:#f5b041; border:1px solid rgba(245,176,65,0.35); padding:2px 8px; border-radius:6px; font-size:0.72rem; font-weight:800; letter-spacing:0.3px;">
                                         Your Challenge Your Rules
                                     </span>
+                                    <span style="background:rgba(0,230,118,0.12); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.72rem; display:inline-flex; align-items:center; gap:5px;">
+                                        <span style="width:6px; height:6px; border-radius:50%; background:#00e676; box-shadow:0 0 8px #00e676;"></span> লাইভ সিঙ্ক অ্যাক্টিভ
+                                    </span>
                                 </div>
-                                <p style="margin:4px 0 0 0; font-size:0.82rem; color:var(--text-secondary);">
-                                    <i class="fas fa-check-circle" style="color:var(--neon-green);"></i> নো ম্যানুয়াল প্রুফ — ক্রোম এক্সটেনশনের মাধ্যমে ব্রোকার থেকে রিয়েল-টাইম ট্রেড সিঙ্ক ও অটোমেটিক রুলস ট্র্যাকিং।
-                                </p>
+                                <div style="margin-top:4px; font-size:0.8rem; color:#94a3b8; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                    <span>ব্রোকার: <strong style="color:#fff;">${escapeHtml(challenge.brokerName || 'Quotex')}</strong></span>
+                                    <span>•</span>
+                                    <span>অ্যাকাউন্ট ID: <strong style="color:#fff;">${escapeHtml(challenge.brokerAccountId || 'Demo')}</strong></span>
+                                    <span>•</span>
+                                    <span>ক্যাপিটাল: <strong style="color:var(--yellow);">$${funded.toLocaleString()}</strong></span>
+                                </div>
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <button type="button" class="btn-gold" onclick="switchTab('trade-history')" style="padding:7px 15px; font-size:0.8rem; border-radius:8px; font-weight:800;">
-                                <i class="fas fa-chart-line"></i> ট্রেডিং হিস্টোরি ও লেজার &rarr;
+                            <button type="button" class="btn-gold" onclick="switchTab('trade-history')" style="padding:7px 16px; font-size:0.8rem; border-radius:8px; font-weight:800; display:inline-flex; align-items:center; gap:6px;">
+                                <i class="fas fa-chart-line"></i> ট্রেডিং লেজার &rarr;
                             </button>
                             <button type="button" class="btn-outline" onclick="fetchClassicMetricsForChallenge(myChallenges.find(c=>c.id==='${challenge.id}')).then(()=>renderClassicPropLiveStatus(myChallenges.find(c=>c.id==='${challenge.id}')))" style="padding:7px 12px; font-size:0.8rem; border-radius:8px;" title="রিফ্রেশ">
                                 <i class="fas fa-sync-alt"></i>
@@ -8993,188 +9004,191 @@
                         </div>
                     </div>
 
-                    <!-- Notice Pill -->
-                    <div style="background:rgba(0,230,118,0.06); border:1px solid rgba(0,230,118,0.25); border-radius:10px; padding:8px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:0.82rem; margin-bottom:1.2rem;">
-                        <div style="display:flex; align-items:center; gap:8px; color:#cbd5e1;">
-                            <i class="fas fa-shield-alt" style="color:#00e676;"></i>
-                            <span>লিঙ্কড ব্রোকার: <strong style="color:#fff;">${escapeHtml(challenge.brokerName || 'Quotex')} (ID: ${escapeHtml(challenge.brokerAccountId || 'Demo')})</strong></span>
-                            <span>• ফান্ডেড ক্যাপিটাল: <strong style="color:var(--yellow);">$${funded.toLocaleString()}</strong></span>
-                        </div>
-                        <span style="background:rgba(0,230,118,0.18); color:#00e676; padding:2px 8px; border-radius:6px; font-weight:800; font-size:0.72rem;">
-                            🟢 রানিং ইভ্যালুয়েশন
-                        </span>
-                    </div>
-
-                    <!-- 7 Live Rule Monitors Grid -->
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px;">
+                    <!-- HERO TIER: 2 Primary Highlights (Profit Target & Max Drawdown) -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; margin-bottom:14px;">
                         
-                        <!-- 1. প্রফিট টার্গেট পূরণ বাকি -->
-                        <div class="glass-card" style="background:rgba(255,255,255,0.02); border:1px solid rgba(0,230,118,0.25); border-radius:12px; padding:1rem; position:relative; overflow:hidden;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <span style="font-size:0.82rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
-                                    <i class="fas fa-bullseye" style="color:#00e676;"></i> ১. প্রফিট টার্গেট পূরণ বাকি
+                        <!-- 1. প্রফিট টার্গেট (Profit Target) -->
+                        <div style="background:radial-gradient(circle at top left, rgba(0,230,118,0.1), rgba(18,24,34,0.95)); border:1px solid rgba(0,230,118,0.35); border-radius:14px; padding:1.2rem; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <span style="font-size:0.88rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:7px;">
+                                    <i class="fas fa-bullseye" style="color:#00e676; font-size:1.05rem;"></i> প্রফিট টার্গেট
                                 </span>
-                                <span style="font-size:0.75rem; background:rgba(0,230,118,0.15); color:#00e676; padding:2px 7px; border-radius:6px; font-weight:800;">
+                                <span style="font-size:0.75rem; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:3px 8px; border-radius:6px; font-weight:800;">
                                     টার্গেট: +${targetPct}% ($${targetDollar.toLocaleString()})
                                 </span>
                             </div>
-                            <div style="font-size:1.35rem; font-weight:900; color:#00e676; margin-bottom:4px;">
-                                ${targetRemDollar <= 0 ? '✓ টার্গেট সম্পন্ন!' : `+$${targetRemDollar.toLocaleString()} (+${targetRemPct.toFixed(1)}%) বাকি`}
+                            <div style="font-size:1.6rem; font-weight:900; color:#00e676; margin-bottom:6px; letter-spacing:-0.5px;">
+                                ${targetRemDollar <= 0 ? '✓ টার্গেট সম্পন্ন!' : `+$${netProfit >= 0 ? netProfit.toFixed(2) : '0.00'} <span style="font-size:0.95rem; color:#64748b; font-weight:600;">/ $${targetDollar.toLocaleString()}</span>`}
                             </div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#94a3b8; margin-bottom:6px;">
-                                <span>বর্তমান প্রফিট: <strong>$${netProfit >= 0 ? '+' : ''}${netProfit.toFixed(2)} (${profitPct.toFixed(1)}%)</strong></span>
-                                <span>${targetProgressPct}% পূর্ণ</span>
+                            <div style="background:rgba(255,255,255,0.06); height:8px; border-radius:8px; overflow:hidden; margin-bottom:8px;">
+                                <div style="width:${targetProgressPct}%; background:linear-gradient(90deg, #00e676, #10b981); height:100%; border-radius:8px; box-shadow:0 0 10px rgba(0,230,118,0.5);"></div>
                             </div>
-                            <div style="background:rgba(255,255,255,0.08); height:7px; border-radius:6px; overflow:hidden;">
-                                <div style="width:${targetProgressPct}%; background:linear-gradient(90deg, #00e676, #10b981); height:100%; border-radius:6px;"></div>
-                            </div>
-                        </div>
-
-                        <!-- 2. সর্বোচ্চ স্টপ লস (ড্র-ডাউন) বাফার বাকি -->
-                        <div class="glass-card" style="background:rgba(255,255,255,0.02); border:1px solid ${ddRemBuffer <= (maxDdLimitDollar * 0.25) ? 'rgba(239,68,68,0.5)' : 'rgba(56,189,248,0.25)'}; border-radius:12px; padding:1rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <span style="font-size:0.82rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
-                                    <i class="fas fa-shield-alt" style="color:#38bdf8;"></i> ২. সর্বোচ্চ স্টপ লস বাফার বাকি
-                                </span>
-                                <span style="font-size:0.75rem; background:rgba(239,68,68,0.15); color:#f87171; padding:2px 7px; border-radius:6px; font-weight:800;">
-                                    সর্বোচ্চ সীমা: -${maxDdLimitPct}% (-$${maxDdLimitDollar.toLocaleString()})
-                                </span>
-                            </div>
-                            <div style="font-size:1.35rem; font-weight:900; color:${ddRemBuffer <= (maxDdLimitDollar * 0.25) ? '#f87171' : '#38bdf8'}; margin-bottom:4px;">
-                                $${ddRemBuffer.toFixed(2)} <span style="font-size:0.9rem; font-weight:700; color:#cbd5e1;">(${ddSafePct}% নিরাপদ)</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#94a3b8; margin-bottom:6px;">
-                                <span>বর্তমান ড্র-ডাউন: <strong style="color:${currentDdPct > 0 ? '#f87171' : '#cbd5e1'};">-${currentDdPct.toFixed(1)}%</strong></span>
-                                <span>স্টপ লস হিট হতে আর বাকি</span>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.08); height:7px; border-radius:6px; overflow:hidden;">
-                                <div style="width:${Math.max(0, 100 - (currentDdPct / maxDdLimitPct * 100))}%; background:linear-gradient(90deg, #38bdf8, #0ea5e9); height:100%; border-radius:6px;"></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
+                                <span style="color:#94a3b8;">বাকি: <strong style="color:#fff;">+$${targetRemDollar.toLocaleString()}</strong></span>
+                                <span style="color:#00e676; font-weight:800;">${targetProgressPct}% অর্জিত</span>
                             </div>
                         </div>
 
-                        <!-- 3. দৈনিক স্টপ লস বাফার বাকি -->
-                        <div class="glass-card" style="background:rgba(255,255,255,0.02); border:1px solid ${todayLoss > (dailyLossLimitDollar * 0.7) ? 'rgba(239,68,68,0.5)' : 'rgba(245,176,65,0.25)'}; border-radius:12px; padding:1rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <span style="font-size:0.82rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
-                                    <i class="fas fa-exclamation-triangle" style="color:var(--yellow);"></i> ৩. দৈনিক স্টপ লস বাফার বাকি
+                        <!-- 2. সর্বোচ্চ ড্র-ডাউন সীমা (Max Drawdown Limit) -->
+                        <div style="background:radial-gradient(circle at top left, rgba(56,189,248,0.1), rgba(18,24,34,0.95)); border:1px solid ${ddRemBuffer <= (maxDdLimitDollar * 0.25) ? 'rgba(239,68,68,0.5)' : 'rgba(56,189,248,0.35)'}; border-radius:14px; padding:1.2rem; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <span style="font-size:0.88rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:7px;">
+                                    <i class="fas fa-shield-alt" style="color:#38bdf8; font-size:1.05rem;"></i> সর্বোচ্চ লস সীমা
                                 </span>
-                                <span style="font-size:0.75rem; background:rgba(245,176,65,0.15); color:var(--yellow); padding:2px 7px; border-radius:6px; font-weight:800;">
-                                    দৈনিক সীমা: -${dailyLossLimitPct}% (-$${dailyLossLimitDollar.toLocaleString()})
-                                </span>
-                            </div>
-                            <div style="font-size:1.35rem; font-weight:900; color:${todayLoss > 0 ? (todayLoss > (dailyLossLimitDollar * 0.7) ? '#f87171' : '#fbbf24') : '#00e676'}; margin-bottom:4px;">
-                                $${dailyLossRemBuffer.toFixed(2)} <span style="font-size:0.9rem; font-weight:700; color:#cbd5e1;">(${dailyLossSafePct}% নিরাপদ)</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#94a3b8; margin-bottom:6px;">
-                                <span>আজকের লস: <strong style="color:${todayLoss > 0 ? '#f87171' : '#cbd5e1'};">-$${todayLoss.toFixed(2)}</strong></span>
-                                <span>আজকের স্টপ লস হিট হতে বাকি</span>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.08); height:7px; border-radius:6px; overflow:hidden;">
-                                <div style="width:${Math.max(0, 100 - (todayLoss / dailyLossLimitDollar * 100))}%; background:linear-gradient(90deg, #f5b041, #eab308); height:100%; border-radius:6px;"></div>
-                            </div>
-                        </div>
-
-                        <!-- 4. দৈনিক প্রফিট ক্যাপ বাফার বাকি -->
-                        <div class="glass-card" style="background:rgba(255,255,255,0.02); border:1px solid rgba(167,139,250,0.25); border-radius:12px; padding:1rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <span style="font-size:0.82rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
-                                    <i class="fas fa-battery-half" style="color:#a78bfa;"></i> ৪. দৈনিক প্রফিট ক্যাপ বাফার বাকি
-                                </span>
-                                <span style="font-size:0.75rem; background:rgba(167,139,250,0.15); color:#c4b5fd; padding:2px 7px; border-radius:6px; font-weight:800;">
-                                    ক্যাপ: +${dailyCapPct}% (+$${dailyCapDollar.toLocaleString()})
+                                <span style="font-size:0.75rem; background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); padding:3px 8px; border-radius:6px; font-weight:800;">
+                                    সীমা: -${maxDdLimitPct}% (-$${maxDdLimitDollar.toLocaleString()})
                                 </span>
                             </div>
-                            <div style="font-size:1.35rem; font-weight:900; color:#a78bfa; margin-bottom:4px;">
-                                ${dailyCapRem <= 0 ? '✓ আজকের ক্যাপ পূর্ণ' : `+$${dailyCapRem.toFixed(2)} বাকি`}
+                            <div style="font-size:1.6rem; font-weight:900; color:${ddRemBuffer <= (maxDdLimitDollar * 0.25) ? '#f87171' : '#38bdf8'}; margin-bottom:6px; letter-spacing:-0.5px;">
+                                $${ddRemBuffer.toFixed(2)} <span style="font-size:0.92rem; color:${ddRemBuffer <= (maxDdLimitDollar * 0.25) ? '#f87171' : '#38bdf8'}; font-weight:700;">নিরাপদ বাফার</span>
                             </div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#94a3b8; margin-bottom:6px;">
-                                <span>আজকের গ্রস প্রফিট: <strong>+$${todayGross.toFixed(2)}</strong></span>
-                                <span style="color:#cbd5e1;">(ক্যাপ পার হলে সফট-ট্রিম)</span>
+                            <div style="background:rgba(255,255,255,0.06); height:8px; border-radius:8px; overflow:hidden; margin-bottom:8px;">
+                                <div style="width:${ddSafeBarPct}%; background:linear-gradient(90deg, #38bdf8, #0ea5e9); height:100%; border-radius:8px; box-shadow:0 0 10px rgba(56,189,248,0.4);"></div>
                             </div>
-                            <div style="background:rgba(255,255,255,0.08); height:7px; border-radius:6px; overflow:hidden;">
-                                <div style="width:${Math.min(100, (todayGross / dailyCapDollar * 100))}%; background:linear-gradient(90deg, #a78bfa, #8b5cf6); height:100%; border-radius:6px;"></div>
-                            </div>
-                        </div>
-
-                        <!-- 5. রানিং লাইভ উইন রেট -->
-                        <div class="glass-card" style="background:rgba(255,255,255,0.02); border:1px solid ${isWinRateQualified ? 'rgba(0,230,118,0.25)' : 'rgba(245,176,65,0.25)'}; border-radius:12px; padding:1rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <span style="font-size:0.82rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
-                                    <i class="fas fa-percentage" style="color:var(--yellow);"></i> ৫. রানিং উইন রেট
-                                </span>
-                                <span style="font-size:0.75rem; background:${isWinRateQualified ? 'rgba(0,230,118,0.15)' : 'rgba(245,176,65,0.15)'}; color:${isWinRateQualified ? '#00e676' : 'var(--yellow)'}; padding:2px 7px; border-radius:6px; font-weight:800;">
-                                    মিনিমাম রিকোয়ার্ড: ${minWinRate}%
-                                </span>
-                            </div>
-                            <div style="font-size:1.35rem; font-weight:900; color:${isWinRateQualified ? '#00e676' : 'var(--yellow)'}; margin-bottom:4px;">
-                                ${currentWinRate.toFixed(1)}% <span style="font-size:0.82rem; font-weight:700; color:${isWinRateQualified ? '#00e676' : '#cbd5e1'};">${isWinRateQualified ? '✓ কোয়ালিফাইড' : '(মিনিমাম টার্গেটের নিচে)'}</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#94a3b8; margin-bottom:6px;">
-                                <span>লাইভ এক্সিকিউটেড ট্রেডের অনুপাত</span>
-                                <span>টার্গেট: <strong>&ge; ${minWinRate}%</strong></span>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.08); height:7px; border-radius:6px; overflow:hidden;">
-                                <div style="width:${Math.min(100, (currentWinRate / minWinRate * 100))}%; background:linear-gradient(90deg, #f5b041, #00e676); height:100%; border-radius:6px;"></div>
-                            </div>
-                        </div>
-
-                        <!-- 6. টোটাল উইন ও লস ট্রেড সংখ্যা -->
-                        <div class="glass-card" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <span style="font-size:0.82rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
-                                    <i class="fas fa-list-ol" style="color:#60a5fa;"></i> ৬. মোট উইন ও লস ট্রেড
-                                </span>
-                                <span style="font-size:0.75rem; background:rgba(255,255,255,0.06); color:#cbd5e1; padding:2px 7px; border-radius:6px; font-weight:800;">
-                                    মোট ট্রেড: ${totalTrades}টি
-                                </span>
-                            </div>
-                            <div style="font-size:1.35rem; font-weight:900; color:#fff; margin-bottom:4px;">
-                                <span style="color:#00e676;">${wins} Win</span> <span style="color:var(--text-secondary); font-size:1rem; font-weight:400;">/</span> <span style="color:#ff5252;">${losses} Loss</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#94a3b8; margin-bottom:6px;">
-                                <span>উইন অনুপাত: <strong>${totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : 0}%</strong></span>
-                                <span>লস অনুপাত: <strong>${totalTrades > 0 ? ((losses / totalTrades) * 100).toFixed(1) : 0}%</strong></span>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.08); height:7px; border-radius:6px; overflow:hidden; display:flex;">
-                                <div style="width:${totalTrades > 0 ? (wins / totalTrades * 100) : 0}%; background:#00e676; height:100%;"></div>
-                                <div style="width:${totalTrades > 0 ? (losses / totalTrades * 100) : 0}%; background:#ff5252; height:100%;"></div>
-                            </div>
-                        </div>
-
-                        <!-- 7. চ্যালেঞ্জ সম্পূর্ণ হতে আর কত দিন বাকি -->
-                        <div class="glass-card" style="background:rgba(255,255,255,0.02); border:1px solid ${daysRem === 0 ? 'rgba(0,230,118,0.25)' : 'rgba(245,176,65,0.25)'}; border-radius:12px; padding:1rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <span style="font-size:0.82rem; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
-                                    <i class="fas fa-calendar-alt" style="color:var(--yellow);"></i> ৭. চ্যালেঞ্জের বাকি ট্রেডিং দিন
-                                </span>
-                                <span style="font-size:0.75rem; background:rgba(245,176,65,0.15); color:var(--yellow); padding:2px 7px; border-radius:6px; font-weight:800;">
-                                    ন্যূনতম: ${minDays} দিন
-                                </span>
-                            </div>
-                            <div style="font-size:1.35rem; font-weight:900; color:${daysRem === 0 ? '#00e676' : 'var(--yellow)'}; margin-bottom:4px;">
-                                ${daysRem === 0 ? '✓ দিন সম্পন্ন (' + minDays + '/' + minDays + ' দিন)' : `আর ${daysRem} দিন ট্রেড বাকি`}
-                            </div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#94a3b8; margin-bottom:6px;">
-                                <span>সম্পন্ন দিন: <strong>${daysComp} দিন</strong></span>
-                                <span>${daysProgressPct}% পূর্ণ</span>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.08); height:7px; border-radius:6px; overflow:hidden;">
-                                <div style="width:${daysProgressPct}%; background:linear-gradient(90deg, #f5b041, #00e676); height:100%; border-radius:6px;"></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
+                                <span style="color:#94a3b8;">বর্তমান ড্র-ডাউন: <strong style="color:${currentDdPct > 0 ? '#f87171' : '#fff'};">-${currentDdPct.toFixed(1)}%</strong></span>
+                                <span style="color:${ddSafeBarPct < 30 ? '#ef4444' : '#38bdf8'}; font-weight:800;">${ddSafeBarPct}% সুরক্ষিত</span>
                             </div>
                         </div>
 
                     </div>
 
-                    <!-- Bottom Quick Guidance & Action Card -->
-                    <div style="margin-top:1.25rem; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                        <div style="font-size:0.84rem; color:#cbd5e1;">
-                            <i class="fas fa-info-circle" style="color:var(--yellow); margin-right:6px;"></i>
-                            আপনার ব্রোকার অ্যাকাউন্টে নেওয়া প্রতিটি ট্রেড লাইভ সিঙ্ক হয়ে স্বয়ংক্রিয়ভাবে উপরের ৭টি রুলস মনিটর আপডেট করছে। কোনো ম্যানুয়াল স্ক্রিনশট বা ভিডিও প্রুফ দেওয়ার প্রয়োজন নেই।
+                    <!-- SECONDARY TIER: 5 Clean Supporting Cards -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px;">
+                        <!-- 3. দৈনিক লস সীমা -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid ${todayLoss > (dailyLossLimitDollar * 0.7) ? 'rgba(239,68,68,0.4)' : 'rgba(245,176,65,0.25)'}; border-radius:12px; padding:0.95rem; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:0.8rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-exclamation-circle" style="color:var(--yellow);"></i> দৈনিক লস সীমা
+                                    </span>
+                                    <span style="font-size:0.7rem; background:rgba(245,176,65,0.12); color:var(--yellow); padding:1px 6px; border-radius:5px; font-weight:700;">
+                                        -${dailyLossLimitPct}%
+                                    </span>
+                                </div>
+                                <div style="font-size:1.25rem; font-weight:900; color:${todayLoss > 0 ? (todayLoss > (dailyLossLimitDollar * 0.7) ? '#f87171' : '#fbbf24') : '#00e676'}; margin-bottom:4px;">
+                                    $${dailyLossRemBuffer.toFixed(2)} <span style="font-size:0.75rem; font-weight:700; color:#94a3b8;">সেফ</span>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.06); height:5px; border-radius:5px; overflow:hidden; margin-bottom:6px;">
+                                    <div style="width:${dailyLossBarPct}%; background:linear-gradient(90deg, #f5b041, #eab308); height:100%; border-radius:5px;"></div>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
+                                <span>আজকের লস: <strong style="color:${todayLoss > 0 ? '#f87171' : '#fff'};">-$${todayLoss.toFixed(2)}</strong></span>
+                                <span style="color:var(--yellow); font-weight:700;">${dailyLossBarPct}% বাকি</span>
+                            </div>
                         </div>
-                        <button type="button" class="btn-gold" onclick="switchTab('trade-history')" style="padding:8px 18px; font-size:0.82rem; font-weight:800; border-radius:8px;">
-                            <i class="fas fa-chart-line"></i> লাইভ ট্রেডিং হিস্টোরি ও লেজার দেখুন &rarr;
+
+                        <!-- 4. দৈনিক প্রফিট ক্যাপ -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(167,139,250,0.25); border-radius:12px; padding:0.95rem; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:0.8rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-bolt" style="color:#a78bfa;"></i> দৈনিক প্রফিট ক্যাপ
+                                    </span>
+                                    <span style="font-size:0.7rem; background:rgba(167,139,250,0.12); color:#c4b5fd; padding:1px 6px; border-radius:5px; font-weight:700;">
+                                        +${dailyCapPct}%
+                                    </span>
+                                </div>
+                                <div style="font-size:1.25rem; font-weight:900; color:#a78bfa; margin-bottom:4px;">
+                                    +$${todayGross.toFixed(2)} <span style="font-size:0.75rem; color:#64748b; font-weight:600;">/ $${dailyCapDollar}</span>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.06); height:5px; border-radius:5px; overflow:hidden; margin-bottom:6px;">
+                                    <div style="width:${dailyCapBarPct}%; background:linear-gradient(90deg, #a78bfa, #8b5cf6); height:100%; border-radius:5px;"></div>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
+                                <span>আজকের লাভ</span>
+                                <span style="color:#c4b5fd; font-weight:700;">+$${dailyCapRem.toFixed(2)} বাকি</span>
+                            </div>
+                        </div>
+
+                        <!-- 5. উইন রেট -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid ${isWinRateQualified ? 'rgba(0,230,118,0.25)' : 'rgba(245,176,65,0.25)'}; border-radius:12px; padding:0.95rem; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:0.8rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-award" style="color:#fbbf24;"></i> উইন রেট
+                                    </span>
+                                    <span style="font-size:0.7rem; background:rgba(245,176,65,0.12); color:var(--yellow); padding:1px 6px; border-radius:5px; font-weight:700;">
+                                        টার্গেট: ≥${minWinRate}%
+                                    </span>
+                                </div>
+                                <div style="font-size:1.25rem; font-weight:900; color:${isWinRateQualified ? '#00e676' : 'var(--yellow)'}; margin-bottom:4px;">
+                                    ${currentWinRate.toFixed(1)}%
+                                </div>
+                                <div style="background:rgba(255,255,255,0.06); height:5px; border-radius:5px; overflow:hidden; margin-bottom:6px;">
+                                    <div style="width:${Math.min(100, (currentWinRate / minWinRate * 100))}%; background:linear-gradient(90deg, #f5b041, #00e676); height:100%; border-radius:5px;"></div>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
+                                <span>ট্রেড অনুপাত</span>
+                                <span style="color:${isWinRateQualified ? '#00e676' : '#cbd5e1'}; font-weight:700;">${isWinRateQualified ? '✓ কোয়ালিফাইড' : 'টার্গেট: ' + minWinRate + '%'}</span>
+                            </div>
+                        </div>
+
+                        <!-- 6. ট্রেড রেকর্ড -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:0.95rem; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:0.8rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-chart-pie" style="color:#60a5fa;"></i> ট্রেড রেকর্ড
+                                    </span>
+                                    <span style="font-size:0.7rem; background:rgba(255,255,255,0.06); color:#cbd5e1; padding:1px 6px; border-radius:5px; font-weight:700;">
+                                        মোট: ${totalTrades}টি
+                                    </span>
+                                </div>
+                                <div style="font-size:1.25rem; font-weight:900; color:#fff; margin-bottom:4px;">
+                                    <span style="color:#00e676;">${wins}W</span> <span style="color:#64748b; font-size:0.9rem; font-weight:400;">/</span> <span style="color:#ef4444;">${losses}L</span>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.06); height:5px; border-radius:5px; overflow:hidden; display:flex; margin-bottom:6px;">
+                                    <div style="width:${totalTrades > 0 ? (wins / totalTrades * 100) : 0}%; background:#00e676; height:100%;"></div>
+                                    <div style="width:${totalTrades > 0 ? (losses / totalTrades * 100) : 0}%; background:#ef4444; height:100%;"></div>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+                                <span style="color:#00e676; font-weight:700;">উইন: ${totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(0) : 0}%</span>
+                                <span style="color:#ef4444; font-weight:700;">লস: ${totalTrades > 0 ? ((losses / totalTrades) * 100).toFixed(0) : 0}%</span>
+                            </div>
+                        </div>
+
+                        <!-- 7. ট্রেডিং দিন -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid ${daysRem === 0 ? 'rgba(0,230,118,0.25)' : 'rgba(6,182,212,0.25)'}; border-radius:12px; padding:0.95rem; display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:0.8rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                                        <i class="fas fa-calendar-check" style="color:#06b6d4;"></i> ট্রেডিং দিন
+                                    </span>
+                                    <span style="font-size:0.7rem; background:rgba(6,182,212,0.12); color:#06b6d4; padding:1px 6px; border-radius:5px; font-weight:700;">
+                                        ন্যূনতম: ${minDays} দিন
+                                    </span>
+                                </div>
+                                <div style="font-size:1.25rem; font-weight:900; color:${daysRem === 0 ? '#00e676' : '#06b6d4'}; margin-bottom:4px;">
+                                    ${daysComp} <span style="font-size:0.75rem; color:#64748b; font-weight:600;">/ ${minDays} দিন</span>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.06); height:5px; border-radius:5px; overflow:hidden; margin-bottom:6px;">
+                                    <div style="width:${daysProgressPct}%; background:linear-gradient(90deg, #06b6d4, #10b981); height:100%; border-radius:5px;"></div>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
+                                <span>সম্পন্ন: <strong style="color:#fff;">${daysComp} দিন</strong></span>
+                                <span style="color:${daysRem === 0 ? '#00e676' : '#06b6d4'}; font-weight:700;">${daysRem === 0 ? '✓ সম্পন্ন' : 'বাকি: ' + daysRem + ' দিন'}</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Minimalist Bottom Status Pill -->
+                    <div style="margin-top:1.2rem; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div style="font-size:0.83rem; color:#94a3b8; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-bolt" style="color:var(--yellow);"></i>
+                            <span><strong>সম্পূর্ণ স্বয়ংক্রিয়:</strong> এক্সটেনশন দিয়ে ট্রেড করার সাথে সাথে এই মনিটর নিজে থেকেই আপডেট হবে। কোনো ম্যানুয়াল স্ক্রিনশট বা প্রুফ দেওয়ার প্রয়োজন নেই।</span>
+                        </div>
+                        <button type="button" class="btn-gold" onclick="switchTab('trade-history')" style="padding:6px 14px; font-size:0.78rem; font-weight:800; border-radius:8px;">
+                            <i class="fas fa-chart-line"></i> ট্রেডিং হিস্টোরি &rarr;
                         </button>
                     </div>
+
                 </div>
             `;
         }
@@ -9217,7 +9231,7 @@
                 const pHead = document.getElementById('pageHeading');
                 const pSub = document.getElementById('pageSubheading');
                 if (pHead && currentActiveTab === 'submission') pHead.innerText = '👑 Your Challenge লাইভ মনিটর';
-                if (pSub && currentActiveTab === 'submission') pSub.innerText = 'লাইভ স্টপ লস, ড্র-ডাউন, প্রফিট টার্গেট ও ট্রেডিং অগ্রগতি।';
+                if (pSub && currentActiveTab === 'submission') pSub.innerText = 'রিয়েল-টাইম রুলস ট্র্যাকিং ও পারফরম্যান্স মনিটর।';
                 return;
             } else {
                 if (classicHud) classicHud.style.display = 'none';
