@@ -7454,14 +7454,46 @@ app.post('/api/extension/sync-trades', (req, res) => {
       }
       if (!payout) payout = '85%';
 
-      // Permanent duplicate guard: check ticketId or identical trade execution attributes
-      const existingTrade = allSynced.find(existing => 
-        (existing.userId === user.id || (activeChallenge && (existing.challengeId === activeChallenge.id || existing.userId === activeChallenge.userId))) && (
-          (existing.ticketId && existing.ticketId === ticketId) ||
-          (existing.id && existing.id === ticketId) ||
-          (existing.asset === t.asset && existing.openTime === t.openTime && Math.abs(existing.amount - t.amount) < 0.001)
-        )
-      );
+      // Check if ticket IDs are real broker identifiers (e.g. Quotex UUID or broker ticket number)
+      const isBrokerUuid = (val) => Boolean(val && typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val.trim()));
+      const isBrokerTicket = (val) => Boolean(val && typeof val === 'string' && val.trim().length >= 6 && !val.trim().startsWith('trd_') && !val.trim().startsWith('sync_'));
+      const incomingHasRealTicket = isBrokerUuid(ticketId) || isBrokerTicket(ticketId);
+
+      // Permanent duplicate guard:
+      // 1. If real broker ticket IDs are available, match strictly by unique ticketId.
+      // Multiple rapid trades taken on the same second with different ticket IDs are genuine separate trades!
+      // 2. Fallback to asset+openTime+amount only if real broker tickets are absent.
+      const existingTrade = allSynced.find(existing => {
+        const isUserScoped = (existing.userId === user.id || (activeChallenge && (existing.challengeId === activeChallenge.id || existing.userId === activeChallenge.userId)));
+        if (!isUserScoped) return false;
+
+        const existingTicket = (existing.ticketId || '').trim();
+        const existingId = (existing.id || '').trim();
+        const existingHasRealTicket = isBrokerUuid(existingTicket) || isBrokerTicket(existingTicket);
+
+        if (ticketId) {
+          if (existingTicket && existingTicket.toLowerCase() === ticketId.toLowerCase()) return true;
+          if (existingId && existingId.toLowerCase() === ticketId.toLowerCase()) return true;
+        }
+
+        // If both trades possess distinct broker ticket IDs, they are definitely separate trades taken by the trader
+        if (incomingHasRealTicket && existingHasRealTicket) {
+          return false;
+        }
+
+        // Fallback for legacy trades without broker ticket IDs: match execution attributes
+        if (!incomingHasRealTicket || !existingHasRealTicket) {
+          const sameAsset = existing.asset && t.asset && existing.asset.trim().toUpperCase() === t.asset.trim().toUpperCase();
+          const sameOpenTime = existing.openTime && t.openTime && existing.openTime.trim() === t.openTime.trim();
+          const sameDirection = existing.direction && t.direction && existing.direction.trim().toUpperCase() === t.direction.trim().toUpperCase();
+          const sameAmount = Math.abs((parseFloat(existing.amount) || 0) - (parseFloat(t.amount) || 0)) < 0.001;
+          if (sameAsset && sameOpenTime && sameDirection && sameAmount) {
+            return true;
+          }
+        }
+
+        return false;
+      });
       if (existingTrade) {
         if (activeChallenge) {
           if (existingTrade.challengeId !== activeChallenge.id) { existingTrade.challengeId = activeChallenge.id; didUpdateExisting = true; }
