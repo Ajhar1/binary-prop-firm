@@ -7703,17 +7703,21 @@
         // ==================== ADMIN CLASSIC PROP / YOUR RULES LIVE METRICS ====================
         const adminClassicMetricsCache = {};
 
-        async function fetchAdminClassicMetrics(challengeId) {
-            if (!challengeId) return null;
+        async function fetchAdminClassicMetrics(challengeId, userId) {
+            if (!challengeId && !userId) return null;
+            const cacheKey = challengeId || userId;
             try {
                 const token = localStorage.getItem('bpf_admin_token') || sessionStorage.getItem('bpf_admin_token');
-                const res = await fetch(`/api/admin/challenges/${encodeURIComponent(challengeId)}/metrics?tz=Asia/Dhaka`, {
+                const userParam = userId ? `&userId=${encodeURIComponent(userId)}` : '';
+                const res = await fetch(`/api/admin/challenges/${encodeURIComponent(challengeId || 'auto')}/metrics?tz=Asia/Dhaka${userParam}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!res.ok) return null;
                 const data = await res.json();
                 if (data.success) {
-                    adminClassicMetricsCache[challengeId] = data;
+                    if (challengeId) adminClassicMetricsCache[challengeId] = data;
+                    if (userId) adminClassicMetricsCache[userId] = data;
+                    if (data.challenge && data.challenge.id) adminClassicMetricsCache[data.challenge.id] = data;
                     return data;
                 }
             } catch(e) {
@@ -7740,7 +7744,7 @@
                             <i class="fas fa-list-check" style="color:var(--gold);"></i>
                             <span>লাইভ ট্রেড লেজার (Quotex Extension Synced Trades) &mdash; মোট: ${trades.length}টি ট্রেড</span>
                         </div>
-                        <button type="button" class="btn-outline" onclick="delete adminClassicMetricsCache['${challenge.id}']; fetchAdminClassicMetrics('${challenge.id}').then(() => renderTraderSerialSessions());" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; cursor:pointer;">
+                        <button type="button" class="btn-outline" onclick="delete adminClassicMetricsCache['${challenge.id}']; if('${challenge.userId || ''}') delete adminClassicMetricsCache['${challenge.userId || ''}']; fetchAdminClassicMetrics('${challenge.id}', '${challenge.userId || ''}').then(() => renderTraderSerialSessions());" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; cursor:pointer;">
                             <i class="fas fa-sync-alt"></i> রিফ্রেশ লেজার
                         </button>
                     </div>
@@ -7897,16 +7901,18 @@
             const topBadges = document.getElementById('traderDetailTopBadges');
             const sessionsContainer = document.getElementById('traderSerialSessionsContainer');
 
-            const isClassic = Boolean(ch && (ch.challengeModel === 'classic_prop' || ch.category === 'your_rules' || (ch.category && ch.category.includes('rules'))));
+            const isClassic = Boolean(ch && (ch.category === 'your_rules' || ch.challengeModel === 'classic_prop') && ch.category !== 'easy_rules');
 
             if (isClassic) {
+                const targetUid = u.id || ch.userId || '';
+                const cacheKey = ch.id || targetUid;
                 // Fetch classic metrics if not cached
-                if (!adminClassicMetricsCache[ch.id]) {
-                    fetchAdminClassicMetrics(ch.id).then(data => {
+                if (!adminClassicMetricsCache[cacheKey]) {
+                    fetchAdminClassicMetrics(ch.id, targetUid).then(data => {
                         if (data) renderTraderSerialSessions();
                     });
                 }
-                const adminData = adminClassicMetricsCache[ch.id] || {};
+                const adminData = adminClassicMetricsCache[cacheKey] || (ch.id ? adminClassicMetricsCache[ch.id] : null) || (targetUid ? adminClassicMetricsCache[targetUid] : null) || {};
                 const cm = adminData.classicMetrics || {};
                 const trades = adminData.trades || [];
 
@@ -8060,7 +8066,7 @@
                                             Reactivate
                                         </button>
                                     ` : ''}
-                                    <button class="btn-outline" onclick="delete adminClassicMetricsCache['${ch.id}']; fetchAdminClassicMetrics('${ch.id}').then(() => renderTraderSerialSessions());" style="padding:5px 10px; font-size:0.76rem; border-radius:7px; cursor:pointer;" title="রিফ্রেশ">
+                                    <button class="btn-outline" onclick="delete adminClassicMetricsCache['${ch.id}']; if('${u.id || ch.userId || ''}') delete adminClassicMetricsCache['${u.id || ch.userId || ''}']; fetchAdminClassicMetrics('${ch.id}', '${u.id || ch.userId || ''}').then(() => renderTraderSerialSessions());" style="padding:5px 10px; font-size:0.76rem; border-radius:7px; cursor:pointer;" title="রিফ্রেশ">
                                         <i class="fas fa-sync-alt"></i> Refresh
                                     </button>
                                 </div>

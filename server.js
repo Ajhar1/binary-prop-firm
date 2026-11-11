@@ -8022,6 +8022,14 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
         activeChallenge.passedAt = new Date().toISOString();
         activeChallenge.isCompleted = true;
         saveChallenges(challenges);
+      } else if (activeChallenge.status === 'in_progress') {
+        if (activeChallenge.tradingDaysCompleted !== tradingDaysCompleted || activeChallenge.totalPnL !== netEffectiveProfit) {
+          activeChallenge.tradingDaysCompleted = tradingDaysCompleted;
+          activeChallenge.totalPnL = netEffectiveProfit;
+          activeChallenge.winRate = currentWinRateNum;
+          activeChallenge.actualWinRate = currentWinRateNum;
+          saveChallenges(challenges);
+        }
       }
     }
 
@@ -9111,14 +9119,42 @@ app.put('/api/admin/users/:id', authenticateAdminToken, async (req, res) => {
 app.get('/api/admin/challenges', authenticateAdminToken, (req, res) => {
   const challenges = syncChallengesWithSubmissions();
   const users = syncUsersWithAllData();
+  const allSynced = getSyncedTradesSafe();
 
   const enriched = challenges.map(c => {
-    const user = users.find(u => u.id === c.userId);
+    const user = users.find(u => (c.userId && u.id === c.userId) || (c.userEmail && u.email && u.email.toLowerCase() === c.userEmail.toLowerCase()));
+    const traderId = (user && user.traderId) ? user.traderId : (c.userTraderId || '');
+    const userEmail = (user && user.email) ? user.email : (c.userEmail || '');
+    const userId = c.userId || (user ? user.id : '');
+
+    let tradingDays = c.tradingDaysCompleted || 0;
+    if (c.category === 'your_rules' || c.challengeModel === 'classic_prop') {
+      const chTrades = allSynced.filter(t => 
+        (t.challengeId && t.challengeId === c.id) ||
+        (userId && t.userId === userId) ||
+        (userEmail && t.userEmail && t.userEmail.toLowerCase() === userEmail.toLowerCase()) ||
+        (traderId && t.traderId && t.traderId.toLowerCase() === traderId.toLowerCase())
+      );
+      if (chTrades.length > 0) {
+        const daySet = new Set();
+        chTrades.forEach(t => {
+          if (t.result === 'WIN' || t.result === 'LOSS') {
+            const dKey = getTradingDayKey(getTradeExecutionTime(t), 'Asia/Dhaka');
+            if (dKey && dKey !== 'unknown') daySet.add(dKey);
+          }
+        });
+        if (daySet.size > tradingDays) {
+          tradingDays = daySet.size;
+        }
+      }
+    }
+
     return {
       ...c,
-      userTraderId: (user && user.traderId) ? user.traderId : (c.userTraderId || 'AJ-1000'),
+      tradingDaysCompleted: tradingDays,
+      userTraderId: traderId || 'AJ-1000',
       userName: (user && user.name) ? user.name : (c.userName || 'Trader'),
-      userEmail: (user && user.email) ? user.email : (c.userEmail || ''),
+      userEmail: userEmail,
       userTelegram: (user && user.telegram) ? user.telegram : (c.userTelegram || 'N/A'),
       userAvatar: user ? (user.profilePicture || null) : (c.userAvatar || null)
     };
@@ -9131,12 +9167,37 @@ app.get('/api/admin/challenges', authenticateAdminToken, (req, res) => {
 // 6.1. Challenge Live Metrics & Synced Trades (for Admin Daily Trade Proofs & Live Monitoring)
 app.get('/api/admin/challenges/:id/metrics', authenticateAdminToken, (req, res) => {
   try {
-    const challengeId = (req.params.id || '').trim();
-    const challenges = readJson(CHALLENGES_FILE, []);
-    const challenge = challenges.find(c => c.id === challengeId);
+    const rawChallengeId = (req.params.id || '').trim();
+    const queryUserId = (req.query.userId || '').trim();
+    const queryTraderId = (req.query.traderId || '').trim();
+
+    const challenges = syncChallengesWithSubmissions();
+    const users = syncUsersWithAllData();
+    let challenge = challenges.find(c => c.id === rawChallengeId);
+
+    if (!challenge && queryUserId) {
+      challenge = challenges.find(c => c.userId === queryUserId && c.status === 'in_progress') ||
+                  challenges.find(c => c.userId === queryUserId);
+    }
+    if (!challenge && queryTraderId) {
+      const matchedUser = users.find(u => u.traderId && u.traderId.toLowerCase() === queryTraderId.toLowerCase());
+      if (matchedUser) {
+        challenge = challenges.find(c => c.userId === matchedUser.id && c.status === 'in_progress') ||
+                    challenges.find(c => c.userId === matchedUser.id);
+      }
+    }
+    if (!challenge) {
+      challenge = challenges.find(c => (c.userTraderId && c.userTraderId.toLowerCase() === rawChallengeId.toLowerCase()) || c.userId === rawChallengeId);
+    }
+
     if (!challenge) {
       return res.status(404).json({ success: false, message: 'চ্যালেঞ্জ পাওয়া যায়নি।' });
     }
+
+    const user = users.find(u => (challenge.userId && u.id === challenge.userId) || (challenge.userEmail && u.email && u.email.toLowerCase() === challenge.userEmail.toLowerCase()));
+    const targetUserId = challenge.userId || (user ? user.id : '');
+    const targetUserEmail = (challenge.userEmail || (user ? user.email : '') || '').toLowerCase();
+    const targetTraderId = (challenge.userTraderId || (user ? user.traderId : '') || '').toLowerCase();
 
     const allSynced = getSyncedTradesSafe();
     const tradingTimezone = isValidTimezone(req.query.tz) ? req.query.tz : 'Asia/Dhaka';
@@ -9156,18 +9217,34 @@ app.get('/api/admin/challenges/:id/metrics', authenticateAdminToken, (req, res) 
       effectiveStartTime = new Date(challenge.createdAt).getTime();
     }
 
+    let didRepairOwnership = false;
     const userTrades = allSynced.filter(t => {
       const isChallengeMatch = (t.challengeId === challenge.id);
       const isUserMatch = (
-        (challenge.userId && t.userId === challenge.userId) ||
-        (challenge.userEmail && t.userEmail && t.userEmail.toLowerCase() === challenge.userEmail.toLowerCase()) ||
-        (challenge.userTraderId && t.traderId && t.traderId.toLowerCase() === challenge.userTraderId.toLowerCase())
+        (targetUserId && t.userId === targetUserId) ||
+        (targetUserEmail && t.userEmail && t.userEmail.toLowerCase() === targetUserEmail) ||
+        (targetTraderId && t.traderId && t.traderId.toLowerCase() === targetTraderId)
       );
       if (!isChallengeMatch && !isUserMatch) return false;
       if (t.challengeId && t.challengeId !== challenge.id) return false;
-      if (!isChallengeMatch && effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 60000)) return false;
+      if (!isChallengeMatch && effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 5 * 60 * 1000)) return false;
+
+      // Auto-heal trade ownership if needed
+      if (!t.challengeId || t.challengeId !== challenge.id || (targetUserId && t.userId !== targetUserId)) {
+        t.challengeId = challenge.id;
+        t.challengePackage = challenge.packageName || t.challengePackage || '';
+        if (targetUserId) t.userId = targetUserId;
+        if (targetUserEmail) t.userEmail = targetUserEmail;
+        if (challenge.userName || (user && user.name)) t.userName = challenge.userName || user.name;
+        if (targetTraderId) t.traderId = targetTraderId.toUpperCase();
+        didRepairOwnership = true;
+      }
       return true;
     });
+
+    if (didRepairOwnership) {
+      saveSyncedTrades(allSynced);
+    }
 
     userTrades.sort((a, b) => getTradeExecutionTime(b) - getTradeExecutionTime(a));
 
@@ -9461,6 +9538,16 @@ app.get('/api/admin/challenges/:id/metrics', authenticateAdminToken, (req, res) 
     };
 
     const isClassicProp = Boolean(challenge.challengeModel === 'classic_prop' || challenge.category === 'your_rules');
+
+    if (isClassicProp && classicMetrics && challenge.status === 'in_progress') {
+      if (challenge.tradingDaysCompleted !== classicMetrics.tradingDaysCompleted || challenge.totalPnL !== classicMetrics.netEffectiveProfit) {
+        challenge.tradingDaysCompleted = classicMetrics.tradingDaysCompleted;
+        challenge.totalPnL = classicMetrics.netEffectiveProfit;
+        challenge.winRate = classicMetrics.winRate;
+        challenge.actualWinRate = classicMetrics.winRate;
+        saveChallenges(challenges);
+      }
+    }
 
     res.json({
       success: true,

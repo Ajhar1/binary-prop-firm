@@ -8950,7 +8950,7 @@
                 const isPending = (c.status === 'pending_approval');
                 const isRejected = (c.status === 'rejected');
                 const isPractice = (c.challengePhase === 'practice');
-                const isClassic = Boolean(c && (c.challengeModel === 'classic_prop' || c.category === 'your_rules' || (c.category && c.category.includes('rules'))));
+                const isClassic = Boolean(c && (c.category === 'your_rules' || c.challengeModel === 'classic_prop') && c.category !== 'easy_rules');
 
                 // If running Your Challenge Your Rules, render the full 7-Monitor Live Status HUD
                 if (isClassic && isRunning) {
@@ -9392,7 +9392,7 @@
 
         function switchTradeHistoryView(viewType) {
             const activeCh = (myChallenges || []).find(c => c.status === 'in_progress');
-            const isClassic = (activeCh && (activeCh.challengeModel === 'classic_prop' || activeCh.category === 'your_rules')) || (lastSyncedTradesClassicMetrics != null);
+            const isClassic = Boolean(activeCh && (activeCh.challengeModel === 'classic_prop' || activeCh.category === 'your_rules') && activeCh.category !== 'easy_rules');
             if (isClassic) viewType = 'raw';
             currentTradeHistoryView = viewType;
             const sessView = document.getElementById('tradeHistorySessionsView');
@@ -16058,7 +16058,13 @@
                         localStorage.setItem(`bpf_challenge_trades_${targetId}`, JSON.stringify(data));
                         localStorage.setItem('bpf_challenge_trades_latest', JSON.stringify(data));
                     } catch(e) {}
-                    const isClassic = (data.activeChallenge && (data.activeChallenge.challengeModel === 'classic_prop' || data.activeChallenge.category === 'your_rules')) || (data.classicMetrics != null);
+                    const isClassic = Boolean(
+                        (data.activeChallenge && (data.activeChallenge.challengeModel === 'classic_prop' || data.activeChallenge.category === 'your_rules') && data.activeChallenge.category !== 'easy_rules') ||
+                        (currentDisplayedChallenge && (currentDisplayedChallenge.challengeModel === 'classic_prop' || currentDisplayedChallenge.category === 'your_rules') && currentDisplayedChallenge.category !== 'easy_rules')
+                    );
+                    if (!isClassic) {
+                        lastSyncedTradesClassicMetrics = null;
+                    }
 
                     const btnSess = document.getElementById('tradeHistViewBtnSessions');
                     const btnRaw = document.getElementById('tradeHistViewBtnRaw');
@@ -16185,7 +16191,13 @@
             lastSyncedTradesStats = stats;
             const cm = data.classicMetrics || lastSyncedTradesClassicMetrics || null;
             if (cm) lastSyncedTradesClassicMetrics = cm;
-            const isClassic = (data.activeChallenge && (data.activeChallenge.challengeModel === 'classic_prop' || data.activeChallenge.category === 'your_rules')) || (cm != null) || (currentDisplayedChallenge && (currentDisplayedChallenge.challengeModel === 'classic_prop' || currentDisplayedChallenge.category === 'your_rules'));
+            const isClassic = Boolean(
+                (data.activeChallenge && (data.activeChallenge.challengeModel === 'classic_prop' || data.activeChallenge.category === 'your_rules') && data.activeChallenge.category !== 'easy_rules') ||
+                (currentDisplayedChallenge && (currentDisplayedChallenge.challengeModel === 'classic_prop' || currentDisplayedChallenge.category === 'your_rules') && currentDisplayedChallenge.category !== 'easy_rules')
+            );
+            if (!isClassic) {
+                lastSyncedTradesClassicMetrics = null;
+            }
 
             // Strict sort: newest trades first (latest trade at top)
             trades.sort((a, b) => {
