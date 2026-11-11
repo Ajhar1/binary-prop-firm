@@ -7130,6 +7130,10 @@
                     fundedAmount: ch.fundedAmount || 100,
                     brokerName: ch.brokerName || 'Quotex',
                     brokerAccountId: ch.brokerAccountId || 'N/A',
+                    category: ch.category || 'easy_rules',
+                    challengeModel: ch.challengeModel || 'mm_sheet',
+                    tradingDaysCompleted: ch.tradingDaysCompleted || 0,
+                    minTradingDays: ch.minTradingDays || 10,
                     sessionsRequired: ch.sessionsRequired || 15,
                     sessionsCompleted: (ch.sessionsCompleted !== undefined && ch.sessionsCompleted !== null) ? ch.sessionsCompleted : verifiedSubs,
                     challengeStatus: ch.status,
@@ -7255,6 +7259,11 @@
                                     <span style="background:${t.isRunning ? 'rgba(46,204,113,0.14)' : 'rgba(239,68,68,0.14)'}; color:${t.isRunning ? '#2ecc71' : '#f87171'}; border:1px solid ${t.isRunning ? 'rgba(46,204,113,0.35)' : 'rgba(239,68,68,0.35)'}; font-size:0.72rem; padding:2px 7px; border-radius:5px; font-weight:800;">
                                         CH #${t.challengeNumber}
                                     </span>
+                                    ${(t.category === 'your_rules' || t.challengeModel === 'classic_prop') ? `
+                                        <span style="background:rgba(245,176,65,0.15); color:var(--gold); border:1px solid rgba(245,176,65,0.35); font-size:0.72rem; padding:2px 7px; border-radius:5px; font-weight:800;">
+                                            <i class="fas fa-crown"></i> Your Rules (Live Sync)
+                                        </span>
+                                    ` : ''}
                                     ${!t.isRunning ? `
                                         <span style="background:rgba(239,68,68,0.18); color:#fca5a5; border:1px solid rgba(239,68,68,0.35); font-size:0.72rem; padding:2px 7px; border-radius:5px; font-weight:800; display:inline-flex; align-items:center; gap:4px;">
                                             <i class="fas fa-ban"></i> ${(t.challengeStatus || 'closed').replace('_', ' ').toUpperCase()}
@@ -7273,27 +7282,47 @@
                                     ` : ''}
                                 </div>
 
-                                <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:8px 10px; margin-bottom:0.85rem; border:1px solid rgba(255,255,255,0.05);">
-                                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; margin-bottom:5px;">
-                                        <span style="color:var(--text-secondary);">Progress</span>
-                                        <strong style="color:var(--gold);">${t.sessionsCompleted} / ${t.sessionsRequired} (${progressPct}%)</strong>
+                                ${(t.category === 'your_rules' || t.challengeModel === 'classic_prop') ? `
+                                    <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:8px 10px; margin-bottom:0.85rem; border:1px solid rgba(255,255,255,0.05);">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; margin-bottom:5px;">
+                                            <span style="color:var(--text-secondary);">Trading Days</span>
+                                            <strong style="color:var(--gold);">${t.tradingDaysCompleted || 0} / ${t.minTradingDays || 10} Days (${Math.min(100, Math.round(((t.tradingDaysCompleted || 0) / (t.minTradingDays || 10)) * 100))}%)</strong>
+                                        </div>
+                                        <div style="width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
+                                            <div style="width:${Math.min(100, Math.round(((t.tradingDaysCompleted || 0) / (t.minTradingDays || 10)) * 100))}%; height:100%; background:linear-gradient(90deg, var(--gold), #2ecc71); border-radius:4px;"></div>
+                                        </div>
                                     </div>
-                                    <div style="width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
-                                        <div style="width:${progressPct}%; height:100%; background:linear-gradient(90deg, var(--gold), #2ecc71); border-radius:4px;"></div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06); font-size:0.78rem;">
+                                        <div>
+                                            <span style="color:var(--text-secondary);"><i class="fas fa-satellite-dish" style="color:#00e676;"></i> Quotex Sync</span>
+                                        </div>
+                                        <div>
+                                            <span style="color:var(--gold); font-weight:800;">লাইভ মনিটর &rarr;</span>
+                                        </div>
                                     </div>
-                                </div>
+                                ` : `
+                                    <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:8px 10px; margin-bottom:0.85rem; border:1px solid rgba(255,255,255,0.05);">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; margin-bottom:5px;">
+                                            <span style="color:var(--text-secondary);">Progress</span>
+                                            <strong style="color:var(--gold);">${t.sessionsCompleted} / ${t.sessionsRequired} (${progressPct}%)</strong>
+                                        </div>
+                                        <div style="width:100%; height:5px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
+                                            <div style="width:${progressPct}%; height:100%; background:linear-gradient(90deg, var(--gold), #2ecc71); border-radius:4px;"></div>
+                                        </div>
+                                    </div>
 
-                                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06); font-size:0.78rem;">
-                                    <div>
-                                        <span style="color:var(--text-secondary);">Sessions:</span>
-                                        <strong style="color:#fff; margin-left:4px;">${t.submissionsCount}</strong>
-                                        ${t.allSubmissionsCount > t.submissionsCount ? `<span style="color:var(--text-secondary); font-size:0.72rem; margin-left:3px;">(All: ${t.allSubmissionsCount})</span>` : ''}
+                                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06); font-size:0.78rem;">
+                                        <div>
+                                            <span style="color:var(--text-secondary);">Sessions:</span>
+                                            <strong style="color:#fff; margin-left:4px;">${t.submissionsCount}</strong>
+                                            ${t.allSubmissionsCount > t.submissionsCount ? `<span style="color:var(--text-secondary); font-size:0.72rem; margin-left:3px;">(All: ${t.allSubmissionsCount})</span>` : ''}
+                                        </div>
+                                        <div>
+                                            <span style="color:var(--text-secondary);">P&L:</span>
+                                            <strong style="color:${pnlColor}; margin-left:4px;">${pnlSign}$${t.totalPnl.toFixed(2)}</strong>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span style="color:var(--text-secondary);">P&L:</span>
-                                        <strong style="color:${pnlColor}; margin-left:4px;">${pnlSign}$${t.totalPnl.toFixed(2)}</strong>
-                                    </div>
-                                </div>
+                                `}
                             </div>
                         `;
                     }).join('')}
@@ -7671,6 +7700,191 @@
             `;
         }
 
+        // ==================== ADMIN CLASSIC PROP / YOUR RULES LIVE METRICS ====================
+        const adminClassicMetricsCache = {};
+
+        async function fetchAdminClassicMetrics(challengeId) {
+            if (!challengeId) return null;
+            try {
+                const token = localStorage.getItem('bpf_admin_token') || sessionStorage.getItem('bpf_admin_token');
+                const res = await fetch(`/api/admin/challenges/${encodeURIComponent(challengeId)}/metrics?tz=Asia/Dhaka`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return null;
+                const data = await res.json();
+                if (data.success) {
+                    adminClassicMetricsCache[challengeId] = data;
+                    return data;
+                }
+            } catch(e) {
+                console.error('Error fetching admin classic metrics:', e);
+            }
+            return null;
+        }
+
+        function renderAdminSyncedTradesTableHtml(trades, challenge) {
+            if (!trades || trades.length === 0) {
+                return `
+                    <div style="text-align:center; padding:2.5rem 1rem; background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.88rem;">
+                        <i class="fas fa-cloud-download-alt" style="font-size:2rem; color:var(--gold); margin-bottom:10px; display:inline-block;"></i>
+                        <h4 style="color:#fff; font-size:1rem; margin:0 0 6px 0;">কোনো লাইভ ট্রেড সিঙ্ক পাওয়া যায়নি</h4>
+                        <p style="margin:0; font-size:0.8rem; color:#94a3b8;">ট্রেডার কোটেক্স এক্সটেনশন দিয়ে ট্রেড করলে এখানে স্বয়ংক্রিয়ভাবে লাইভ ট্রেড লেজার দেখা যাবে।</p>
+                    </div>
+                `;
+            }
+
+            return `
+                <div style="background:rgba(22,22,26,0.9); border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow:hidden;">
+                    <div style="padding:12px 16px; background:rgba(255,255,255,0.02); border-bottom:1px solid rgba(255,255,255,0.07); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div style="font-size:0.88rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-list-check" style="color:var(--gold);"></i>
+                            <span>লাইভ ট্রেড লেজার (Quotex Extension Synced Trades) &mdash; মোট: ${trades.length}টি ট্রেড</span>
+                        </div>
+                        <button type="button" class="btn-outline" onclick="delete adminClassicMetricsCache['${challenge.id}']; fetchAdminClassicMetrics('${challenge.id}').then(() => renderTraderSerialSessions());" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; cursor:pointer;">
+                            <i class="fas fa-sync-alt"></i> রিফ্রেশ লেজার
+                        </button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; font-size:0.82rem; text-align:left;">
+                            <thead>
+                                <tr style="border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.74rem; text-transform:uppercase; letter-spacing:0.5px; background:rgba(0,0,0,0.25);">
+                                    <th style="padding:10px 12px; width:45px; text-align:center;">#</th>
+                                    <th style="padding:10px 12px; min-width:140px;">টিকিট ও সময় (Ticket)</th>
+                                    <th style="padding:10px 12px;">অ্যাসেট (Asset)</th>
+                                    <th style="padding:10px 12px;">ডিরেকশন ও স্টেক</th>
+                                    <th style="padding:10px 12px;">পে-আউট</th>
+                                    <th style="padding:10px 12px;">ওপেনিং কোট</th>
+                                    <th style="padding:10px 12px;">ক্লোজিং কোট</th>
+                                    <th style="padding:10px 12px; min-width:180px;">ফলাফল ও প্রফিট/লস</th>
+                                    <th style="padding:10px 12px;">অ্যাকাউন্ট</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${trades.map((t, idx) => {
+                                    const serialNum = trades.length - idx;
+                                    const amt = parseFloat(t.amount) || 0;
+                                    const prof = parseFloat(t.profit) || 0;
+                                    const isRefund = t.result === 'REFUND' || t.result === 'TIE' || t.result === 'DRAW' || (amt > 0 && Math.abs(prof - amt) < 0.005);
+                                    const isWin = !isRefund && (t.result === 'WIN' || prof > amt);
+                                    const isCall = t.direction === 'CALL';
+                                    const arrowIcon = isCall ? '<i class="fas fa-arrow-up" style="color:#00e676; margin-right:4px;"></i>' : '<i class="fas fa-arrow-down" style="color:#ff5252; margin-right:4px;"></i>';
+                                    const isLiveAcct = (t.accountType === 'live');
+
+                                    const isDisqualified = Boolean(t.isOverRiskDisqualified || t.isDisqualified || t.isCappedDisqualified);
+                                    const isCapDisq = Boolean(t.isCappedDisqualified || t.capDisqualifiedReason);
+                                    let profitColHtml = '';
+
+                                    const resultBadge = isRefund
+                                        ? `<span style="background:rgba(245,176,65,0.18); color:#fbbf24; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.74rem; border:1px solid rgba(245,176,65,0.35);">REFUND</span>`
+                                        : (isWin 
+                                            ? `<span style="background:rgba(0,230,118,0.15); color:#00e676; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.74rem; border:1px solid rgba(0,230,118,0.3);">WIN</span>` 
+                                            : `<span style="background:rgba(255,82,82,0.12); color:#ff5252; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.74rem; border:1px solid rgba(255,82,82,0.3);">LOSS</span>`);
+
+                                    if (isDisqualified) {
+                                        const reasonText = t.overRiskReason || t.capDisqualifiedReason || (isCapDisq ? 'দৈনিক প্রফিট ক্যাপ পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি' : 'স্টপ লসের বাহিরে গিয়ে ট্রেড করার কারণে ট্রেডটি গণ্য হয়নি');
+                                        const badgeBg = isCapDisq ? 'rgba(167,139,250,0.18)' : 'rgba(239,68,68,0.2)';
+                                        const badgeColor = isCapDisq ? '#c4b5fd' : '#f87171';
+                                        const badgeBorder = isCapDisq ? 'rgba(167,139,250,0.45)' : 'rgba(239,68,68,0.45)';
+                                        const noteBg = isCapDisq ? 'rgba(167,139,250,0.12)' : 'rgba(239,68,68,0.12)';
+                                        const noteBorder = isCapDisq ? 'rgba(167,139,250,0.3)' : 'rgba(239,68,68,0.3)';
+                                        const noteBorderLeft = isCapDisq ? '#a78bfa' : '#ef4444';
+                                        const noteIcon = isCapDisq ? 'fa-bolt' : 'fa-exclamation-triangle';
+                                        const noteIconColor = isCapDisq ? '#a78bfa' : '#ef4444';
+                                        const noteTextColor = isCapDisq ? '#ddd6fe' : '#fca5a5';
+
+                                        profitColHtml = `
+                                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                                    <span style="font-weight:700; color:#64748b; font-size:0.8rem; text-decoration:line-through;">+$${prof.toFixed(2)}</span>
+                                                    <span style="font-weight:800; color:#94a3b8; font-size:0.92rem;">+$0.00</span>
+                                                    <span style="background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeBorder}; padding:2px 8px; border-radius:6px; font-weight:800; font-size:0.72rem; display:inline-flex; align-items:center; gap:4px;">
+                                                        <i class="fas fa-ban"></i> ${isCapDisq ? 'ক্যাপ পূর্ণ (গণ্য হয়নি)' : 'গণ্য হয়নি'}
+                                                    </span>
+                                                </div>
+                                                <div style="font-size:0.72rem; color:${noteTextColor}; background:${noteBg}; border:1px solid ${noteBorder}; border-left:3px solid ${noteBorderLeft}; padding:4px 8px; border-radius:5px; font-weight:700; display:inline-flex; align-items:center; gap:5px; line-height:1.3;">
+                                                    <i class="fas ${noteIcon}" style="color:${noteIconColor}; flex-shrink:0;"></i>
+                                                    <span>${escapeHtml(reasonText)}</span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    } else if (t.trimmedProfit && t.trimmedProfit > 0.001) {
+                                        profitColHtml = `
+                                            <div style="display:flex; flex-direction:column; gap:3px;">
+                                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                                    <span style="font-weight:800; color:#00e676; font-size:0.92rem;">+$${(t.effectiveProfit || 0).toFixed(2)}</span>
+                                                    <span style="background:rgba(167,139,250,0.18); color:#c4b5fd; border:1px solid rgba(167,139,250,0.4); padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:800;">ক্যাপ ট্রিম</span>
+                                                    ${resultBadge}
+                                                </div>
+                                                <div style="font-size:0.7rem; color:#94a3b8;">+$${t.trimmedProfit.toFixed(2)} অতিরিক্ত ট্রিম হয়েছে</div>
+                                            </div>
+                                        `;
+                                    } else {
+                                        const profitColor = isRefund ? '#fbbf24' : (isWin ? '#00e676' : '#ff5252');
+                                        profitColHtml = `
+                                            <span style="font-weight:800; color:${profitColor}; font-size:0.92rem;">
+                                                ${prof >= 0 && !isRefund ? '+' : ''}$${prof.toFixed(2)}
+                                            </span>
+                                            ${resultBadge}
+                                        `;
+                                    }
+
+                                    const accountBadge = isLiveAcct
+                                        ? `<span style="background:rgba(0,230,118,0.14); color:#00e676; padding:3px 10px; border-radius:6px; font-size:0.74rem; font-weight:700; border:1px solid rgba(0,230,118,0.4); display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
+                                            <span style="width:6px; height:6px; border-radius:50%; background:#00e676;"></span> রিয়েল ব্যালেন্স (LIVE)
+                                           </span>`
+                                        : `<span style="background:rgba(255,184,0,0.14); color:#ffb800; padding:3px 10px; border-radius:6px; font-size:0.74rem; font-weight:700; border:1px solid rgba(255,184,0,0.4); display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">
+                                            <span style="width:6px; height:6px; border-radius:50%; background:#ffb800;"></span> ডেমো ব্যালেন্স (DEMO)
+                                           </span>`;
+
+                                    return `
+                                        <tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding:10px 12px; text-align:center;">
+                                                <span style="background:rgba(255,184,0,0.12); color:var(--gold); padding:2px 7px; border-radius:5px; font-weight:800; font-family:monospace; font-size:0.78rem; border:1px solid rgba(255,184,0,0.3);">#${serialNum}</span>
+                                            </td>
+                                            <td style="padding:10px 12px;">
+                                                <div style="font-family:monospace; font-weight:700; color:#cbd5e1; font-size:0.76rem;" title="${escapeHtml(t.ticketId || t.ticket || '')}">
+                                                    ${escapeHtml((t.ticketId || t.ticket || '').substring(0, 16))}...
+                                                </div>
+                                                <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:2px;">
+                                                    ${escapeHtml(t.openTime || '')}
+                                                </div>
+                                            </td>
+                                            <td style="padding:10px 12px; font-weight:700; color:#fff;">
+                                                <div style="display:flex; align-items:center; gap:8px;">
+                                                    <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${isDisqualified ? (isCapDisq ? '#a78bfa' : '#f87171') : (isWin ? '#00e676' : (isRefund ? '#fbbf24' : '#ff5252'))};"></span>
+                                                    ${escapeHtml(t.asset || 'N/A')}
+                                                    ${t.timeframe ? `<span style="font-size:0.68rem; background:rgba(255,255,255,0.08); color:#94a3b8; border:1px solid rgba(255,255,255,0.15); padding:1px 5px; border-radius:4px; font-family:monospace;">${escapeHtml(t.timeframe)}</span>` : ''}
+                                                </div>
+                                                ${isDisqualified ? `<div style="font-size:0.68rem; color:${isCapDisq ? '#a78bfa' : '#f87171'}; margin-top:3px; font-weight:700;"><i class="fas ${isCapDisq ? 'fa-bolt' : 'fa-shield-alt'}"></i> ${isCapDisq ? 'প্রফিট ক্যাপ পূর্ণ' : 'স্টপ লস লিমিট ব্রেকিং'}</div>` : ''}
+                                            </td>
+                                            <td style="padding:10px 12px; font-weight:700; color:#fff;">
+                                                ${arrowIcon} $${amt.toFixed(2)}
+                                            </td>
+                                            <td style="padding:10px 12px; color:#cbd5e1; font-weight:600;">
+                                                ${escapeHtml(t.payout || '85%')}
+                                            </td>
+                                            <td style="padding:10px 12px; font-family:monospace; color:#cbd5e1;">
+                                                ${t.openPrice != null ? t.openPrice : '0.00'}
+                                            </td>
+                                            <td style="padding:10px 12px; font-family:monospace; color:#cbd5e1;">
+                                                ${t.closePrice != null ? t.closePrice : '0.00'}
+                                            </td>
+                                            <td style="padding:10px 12px;">
+                                                ${profitColHtml}
+                                            </td>
+                                            <td style="padding:10px 12px;">
+                                                ${accountBadge}
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderTraderSerialSessions() {
             if (!activeTraderDetailId) return;
 
@@ -7682,6 +7896,384 @@
             const bannerContainer = document.getElementById('traderSessionsHeaderBanner');
             const topBadges = document.getElementById('traderDetailTopBadges');
             const sessionsContainer = document.getElementById('traderSerialSessionsContainer');
+
+            const isClassic = Boolean(ch && (ch.challengeModel === 'classic_prop' || ch.category === 'your_rules' || (ch.category && ch.category.includes('rules'))));
+
+            if (isClassic) {
+                // Fetch classic metrics if not cached
+                if (!adminClassicMetricsCache[ch.id]) {
+                    fetchAdminClassicMetrics(ch.id).then(data => {
+                        if (data) renderTraderSerialSessions();
+                    });
+                }
+                const adminData = adminClassicMetricsCache[ch.id] || {};
+                const cm = adminData.classicMetrics || {};
+                const trades = adminData.trades || [];
+
+                const allChCount = structured.allGroups.length;
+                const failedChCount = structured.failedGroups.length;
+
+                // Update filter buttons
+                const btnRunning = document.getElementById('traderSessionFilterBtn_running');
+                const btnFailed = document.getElementById('traderSessionFilterBtn_failed');
+                const btnAll = document.getElementById('traderSessionFilterBtn_all');
+
+                if (btnRunning) {
+                    const isAct = traderSessionHistoryFilter === 'running';
+                    btnRunning.style.background = isAct ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(46,204,113,0.08)';
+                    btnRunning.style.color = isAct ? '#fff' : '#2ecc71';
+                    btnRunning.style.borderColor = isAct ? '#10b981' : 'rgba(46,204,113,0.35)';
+                    btnRunning.innerHTML = `<i class="fas fa-play-circle"></i> Live Trades (${trades.length})`;
+                }
+                if (btnFailed) {
+                    const isAct = traderSessionHistoryFilter === 'failed';
+                    btnFailed.style.background = isAct ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'rgba(239,68,68,0.08)';
+                    btnFailed.style.color = isAct ? '#fff' : '#f87171';
+                    btnFailed.style.borderColor = isAct ? '#ef4444' : 'rgba(239,68,68,0.35)';
+                    btnFailed.innerHTML = `<i class="fas fa-ban"></i> Disqualified (${failedChCount})`;
+                }
+                if (btnAll) {
+                    const isAct = traderSessionHistoryFilter === 'all';
+                    btnAll.style.background = isAct ? 'linear-gradient(135deg, var(--gold), #d48817)' : 'rgba(245,176,65,0.08)';
+                    btnAll.style.color = isAct ? '#000' : 'var(--gold)';
+                    btnAll.style.borderColor = isAct ? 'var(--gold)' : 'rgba(245,176,65,0.35)';
+                    btnAll.innerHTML = `<i class="fas fa-layer-group"></i> All Challenges (${allChCount})`;
+                }
+
+                if (topBadges) {
+                    const chNumTag = activeGroup ? `CH #${activeGroup.challengeNumber} • ` : '';
+                    topBadges.innerHTML = `
+                        <span class="badge ${getStatusBadgeClass(ch?.status || 'in_progress')}">${chNumTag}${(ch?.status || 'in_progress').replace('_', ' ').toUpperCase()}</span>
+                        <span class="badge" style="background:rgba(245,176,65,0.15); color:var(--gold); border:1px solid rgba(245,176,65,0.35);">
+                            <i class="fas fa-crown"></i> Your Challenge Your Rules
+                        </span>
+                        <span class="badge" style="background:rgba(0,230,118,0.12); color:#00e676; border:1px solid rgba(0,230,118,0.3);">
+                            ● Live Sync Active
+                        </span>
+                        <span class="badge" style="background:rgba(255,255,255,0.06); color:#fff; border:1px solid rgba(255,255,255,0.12);">
+                            Challenges: ${allChCount}
+                        </span>
+                    `;
+                }
+
+                if (bannerContainer) {
+                    const funded = Number(ch?.fundedAmount || ch?.startingCapital || 5000);
+                    const targetPct = Number(ch?.profitTargetPercent || cm.targetPercent || 30);
+                    const targetDollar = Number(cm.targetDollar || Math.round(funded * (targetPct / 100)));
+                    const netProfit = Number(cm.netProfit != null ? cm.netProfit : (ch?.totalPnL || 0));
+                    const profitPct = Number(cm.profitPercent != null ? cm.profitPercent : (ch?.profitPercent || 0));
+
+                    // 1. Profit Target Remaining
+                    const targetRemDollar = Number(cm.targetRemainingDollar != null ? cm.targetRemainingDollar : Math.max(0, targetDollar - netProfit));
+                    const targetRemPct = Number(cm.targetRemainingPercent != null ? cm.targetRemainingPercent : Math.max(0, targetPct - profitPct));
+                    const targetProgressPct = Math.min(100, Math.max(0, Math.round(((targetDollar - targetRemDollar) / targetDollar) * 100)));
+
+                    // 2. Max Stop Loss (Drawdown) Buffer Remaining
+                    const maxDdLimitPct = Number(ch?.maxDrawdownPercent || cm.maxDrawdownLimitPercent || 10);
+                    const maxDdLimitDollar = Number(cm.maxDrawdownLimitDollar || Math.round(funded * (maxDdLimitPct / 100)));
+                    const currentDdPct = Number(cm.currentDrawdownPercent != null ? cm.currentDrawdownPercent : (parseFloat(ch?.currentDrawdown) || 0));
+                    const ddRemBuffer = Number(cm.remainingDrawdownBuffer != null ? cm.remainingDrawdownBuffer : (cm.drawdownRemainingBuffer != null ? cm.drawdownRemainingBuffer : Math.max(0, maxDdLimitDollar - ((currentDdPct / 100) * funded))));
+                    const ddSafePct = Math.max(0, parseFloat((maxDdLimitPct - currentDdPct).toFixed(1)));
+
+                    // 3. Daily Stop Loss Buffer Remaining
+                    const dailyLossLimitPct = Number(ch?.dailyLossPercent || cm.dailyLossLimitPercent || 5);
+                    const dailyLossLimitDollar = Number(cm.dailyLossLimitDollar || Math.round(funded * (dailyLossLimitPct / 100)));
+                    const todayLoss = Number(cm.todayLossDollar || 0);
+                    const dailyLossRemBuffer = Number(cm.todayRemainingLossBuffer != null ? cm.todayRemainingLossBuffer : Math.max(0, dailyLossLimitDollar - todayLoss));
+                    const dailyLossSafePct = Math.max(0, parseFloat((dailyLossLimitPct - ((todayLoss / funded) * 100)).toFixed(1)));
+
+                    // 4. Daily Profit Cap Buffer Remaining
+                    const dailyCapPct = Number(ch?.dailyProfitCapPercent || cm.dailyProfitCapPercent || 4);
+                    const dailyCapDollar = Number(cm.dailyProfitCapDollar || Math.round(funded * (dailyCapPct / 100)));
+                    const todayGross = Number(cm.todayGrossProfit || 0);
+                    const dailyCapRem = Number(cm.todayRemainingProfitCap != null ? cm.todayRemainingProfitCap : Math.max(0, dailyCapDollar - todayGross));
+
+                    // 5. Current Live Win Rate
+                    const currentWinRate = Number(cm.winRate != null ? cm.winRate : (parseFloat(ch?.actualWinRate) || 0));
+                    const minWinRate = Number(ch?.minWinRate || cm.minWinRate || 55);
+                    const isWinRateQualified = currentWinRate >= minWinRate;
+
+                    // 6. Total Win & Loss Trades Count
+                    const wins = Number(cm.winsCount != null ? cm.winsCount : (ch?.winTrades || 0));
+                    const losses = Number(cm.lossesCount != null ? cm.lossesCount : (ch?.lossTrades || 0));
+                    const totalTrades = Number(cm.totalTradesCount != null ? cm.totalTradesCount : (wins + losses));
+
+                    // 7. Trading Days Remaining
+                    const minDays = Number(ch?.minTradingDays || cm.minTradingDays || 10);
+                    const daysComp = Number(cm.tradingDaysCompleted != null ? cm.tradingDaysCompleted : (ch?.tradingDaysCompleted || 0));
+                    const daysRem = Number(cm.tradingDaysRemaining != null ? cm.tradingDaysRemaining : Math.max(0, minDays - daysComp));
+                    const daysProgressPct = Math.min(100, Math.round((daysComp / minDays) * 100));
+                    const ddSafeBarPct = Math.max(0, Math.min(100, Math.round((ddRemBuffer / maxDdLimitDollar) * 100)));
+                    const dailyLossBarPct = Math.max(0, Math.min(100, Math.round((dailyLossRemBuffer / dailyLossLimitDollar) * 100)));
+                    const dailyCapBarPct = Math.min(100, Math.round((todayGross / dailyCapDollar) * 100));
+
+                    bannerContainer.innerHTML = `
+                        <div style="background:linear-gradient(135deg, rgba(20,24,33,0.98), rgba(12,16,24,0.99)); border:1.5px solid rgba(245,176,65,0.4); border-radius:18px; padding:1.25rem 1.4rem; box-shadow:0 12px 36px rgba(0,0,0,0.5);">
+                            <!-- Top Profile & Action Strip -->
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:1.25rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:1rem;">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="width:48px; height:48px; border-radius:12px; background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.35); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+                                        ${(ch?.userAvatar || u.profilePicture) ? `<img src="${ch?.userAvatar || u.profilePicture}" style="width:100%; height:100%; object-fit:cover;" />` : `<i class="fas fa-user-circle" style="color:var(--gold); font-size:1.6rem;"></i>`}
+                                    </div>
+                                    <div>
+                                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                            <span style="background:rgba(212,175,55,0.2); color:var(--gold); font-family:monospace; font-weight:800; font-size:0.78rem; padding:2px 7px; border-radius:5px;">
+                                                ${ch?.userTraderId || u.traderId || 'AJ-1001'}
+                                            </span>
+                                            <h2 style="font-size:1.18rem; font-weight:900; color:#fff; margin:0;">${ch?.userName || u.name || 'Trader'}</h2>
+                                            <span style="background:rgba(245,176,65,0.15); color:var(--gold); border:1px solid rgba(245,176,65,0.35); font-size:0.72rem; font-weight:800; padding:2px 7px; border-radius:5px;">
+                                                Your Challenge Your Rules
+                                            </span>
+                                        </div>
+                                        <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">
+                                            ${ch?.userEmail || u.email || 'N/A'}
+                                            ${(ch?.userTelegram || u.telegram) ? ` • <a href="https://t.me/${encodeURIComponent((ch?.userTelegram || u.telegram).replace(/^@+/, '').trim())}" target="_blank" rel="noopener noreferrer" style="color:var(--neon-blue); text-decoration:none;"><i class="fab fa-telegram"></i> ${(ch?.userTelegram || u.telegram).startsWith('@') ? (ch?.userTelegram || u.telegram) : '@' + (ch?.userTelegram || u.telegram)}</a>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                                    <span style="background:rgba(245,176,65,0.12); color:var(--gold); border:1px solid rgba(245,176,65,0.3); padding:5px 10px; border-radius:7px; font-size:0.78rem; font-weight:700;">
+                                        ${ch?.packageName || 'Starter'} ($${funded.toLocaleString()})
+                                    </span>
+                                    <span style="background:rgba(59,130,246,0.12); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); padding:5px 10px; border-radius:7px; font-size:0.78rem; font-weight:700;">
+                                        ${ch?.brokerName || 'Quotex'} (${ch?.brokerAccountId || 'N/A'})
+                                    </span>
+                                    ${ch?.status === 'in_progress' ? `
+                                        ${ch?.challengePhase === 'practice' ? `
+                                            <button class="btn-outline" style="border-color:#3b82f6; color:#60a5fa; padding:5px 10px; font-size:0.76rem; font-weight:700; border-radius:7px; cursor:pointer;" onclick="switchChallengePhase('${ch.id}', 'evaluation')">
+                                                Start Real
+                                            </button>
+                                        ` : `
+                                            <button class="btn-outline" style="border-color:#8b5cf6; color:#a78bfa; padding:5px 10px; font-size:0.76rem; font-weight:700; border-radius:7px; cursor:pointer;" onclick="switchChallengePhase('${ch.id}', 'practice')">
+                                                To Practice
+                                            </button>
+                                        `}
+                                        <button class="btn-danger" style="background:#dc2626; border:none; padding:5px 11px; font-size:0.76rem; font-weight:700; border-radius:7px; cursor:pointer;" onclick="openDisqualifyModal('${ch.id}')">
+                                            Disqualify
+                                        </button>
+                                        <button class="btn-success" style="padding:5px 11px; font-size:0.76rem; font-weight:700; border-radius:7px; cursor:pointer;" onclick="markChallengePassed('${ch.id}')">
+                                            Pass
+                                        </button>
+                                    ` : ch?.status === 'failed' ? `
+                                        <button class="btn-success" style="background:#10b981; color:#fff; border:none; padding:5px 12px; font-size:0.76rem; font-weight:700; border-radius:7px; cursor:pointer;" onclick="reactivateChallenge('${ch.id}')">
+                                            Reactivate
+                                        </button>
+                                    ` : ''}
+                                    <button class="btn-outline" onclick="delete adminClassicMetricsCache['${ch.id}']; fetchAdminClassicMetrics('${ch.id}').then(() => renderTraderSerialSessions());" style="padding:5px 10px; font-size:0.76rem; border-radius:7px; cursor:pointer;" title="রিফ্রেশ">
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 7 LIVE STATUS MONITORS (Hero Tier: Profit Target & Max Drawdown) -->
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; margin-bottom:14px;">
+                                <!-- 1. প্রফিট টার্গেট -->
+                                <div style="background:radial-gradient(circle at top left, rgba(0,230,118,0.1), rgba(18,24,34,0.95)); border:1px solid rgba(0,230,118,0.35); border-radius:14px; padding:1.2rem; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                        <span style="font-size:0.88rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:7px;">
+                                            <i class="fas fa-bullseye" style="color:#00e676; font-size:1.05rem;"></i> প্রফিট টার্গেট (Profit Target)
+                                        </span>
+                                        <span style="font-size:0.75rem; background:rgba(0,230,118,0.15); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:3px 8px; border-radius:6px; font-weight:800;">
+                                            টার্গেট: +${targetPct}% ($${targetDollar.toLocaleString()})
+                                        </span>
+                                    </div>
+                                    <div style="font-size:1.6rem; font-weight:900; color:#00e676; margin-bottom:6px; letter-spacing:-0.5px;">
+                                        ${targetRemDollar <= 0 ? '✓ টার্গেট সম্পন্ন!' : `+$${netProfit >= 0 ? netProfit.toFixed(2) : '0.00'} <span style="font-size:0.95rem; color:#64748b; font-weight:600;">/ $${targetDollar.toLocaleString()}</span>`}
+                                    </div>
+                                    <div style="background:rgba(255,255,255,0.06); height:8px; border-radius:8px; overflow:hidden; margin-bottom:8px;">
+                                        <div style="width:${targetProgressPct}%; background:linear-gradient(90deg, #00e676, #10b981); height:100%; border-radius:8px; box-shadow:0 0 10px rgba(0,230,118,0.5);"></div>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
+                                        <span style="color:#94a3b8;">বাকি: <strong style="color:#fff;">+$${targetRemDollar.toLocaleString()}</strong></span>
+                                        <span style="color:#00e676; font-weight:800;">${targetProgressPct}% অর্জিত</span>
+                                    </div>
+                                </div>
+
+                                <!-- 2. সর্বোচ্চ লস সীমা -->
+                                <div style="background:radial-gradient(circle at top left, rgba(56,189,248,0.1), rgba(18,24,34,0.95)); border:1px solid ${ddRemBuffer <= (maxDdLimitDollar * 0.25) ? 'rgba(239,68,68,0.5)' : 'rgba(56,189,248,0.35)'}; border-radius:14px; padding:1.2rem; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                        <span style="font-size:0.88rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:7px;">
+                                            <i class="fas fa-shield-alt" style="color:#38bdf8; font-size:1.05rem;"></i> সর্বোচ্চ লস সীমা (Max Drawdown)
+                                        </span>
+                                        <span style="font-size:0.75rem; background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); padding:3px 8px; border-radius:6px; font-weight:800;">
+                                            সীমা: -${maxDdLimitPct}% (-$${maxDdLimitDollar.toLocaleString()})
+                                        </span>
+                                    </div>
+                                    <div style="font-size:1.6rem; font-weight:900; color:${ddRemBuffer <= (maxDdLimitDollar * 0.25) ? '#f87171' : '#38bdf8'}; margin-bottom:6px; letter-spacing:-0.5px;">
+                                        $${ddRemBuffer.toFixed(2)} <span style="font-size:0.92rem; color:${ddRemBuffer <= (maxDdLimitDollar * 0.25) ? '#f87171' : '#38bdf8'}; font-weight:700;">নিরাপদ বাফার</span>
+                                    </div>
+                                    <div style="background:rgba(255,255,255,0.06); height:8px; border-radius:8px; overflow:hidden; margin-bottom:8px;">
+                                        <div style="width:${ddSafeBarPct}%; background:linear-gradient(90deg, #38bdf8, #0ea5e9); height:100%; border-radius:8px; box-shadow:0 0 10px rgba(56,189,248,0.4);"></div>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem;">
+                                        <span style="color:#94a3b8;">বর্তমান ড্র-ডাউন: <strong style="color:${currentDdPct > 0 ? '#f87171' : '#fff'};">-${currentDdPct.toFixed(1)}%</strong></span>
+                                        <span style="color:${ddSafeBarPct < 30 ? '#ef4444' : '#38bdf8'}; font-weight:800;">${ddSafeBarPct}% সুরক্ষিত</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECONDARY TIER: 5 Clean Supporting Cards -->
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+                                <!-- 3. দৈনিক লস সীমা -->
+                                <div style="background:rgba(255,255,255,0.02); border:1px solid ${todayLoss > (dailyLossLimitDollar * 0.7) ? 'rgba(239,68,68,0.4)' : 'rgba(245,176,65,0.25)'}; border-radius:12px; padding:0.95rem; display:flex; flex-direction:column; justify-content:space-between;">
+                                    <div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                            <span style="font-size:0.8rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                                                <i class="fas fa-exclamation-circle" style="color:var(--gold);"></i> দৈনিক লস সীমা
+                                            </span>
+                                            <span style="font-size:0.7rem; background:rgba(245,176,65,0.12); color:var(--gold); padding:1px 6px; border-radius:5px; font-weight:700;">
+                                                -${dailyLossLimitPct}%
+                                            </span>
+                                        </div>
+                                        <div style="font-size:1.25rem; font-weight:900; color:${todayLoss > 0 ? (todayLoss > (dailyLossLimitDollar * 0.7) ? '#f87171' : '#fbbf24') : '#00e676'}; margin-bottom:4px;">
+                                            $${dailyLossRemBuffer.toFixed(2)} <span style="font-size:0.75rem; font-weight:700; color:#94a3b8;">সেফ</span>
+                                        </div>
+                                        <div style="background:rgba(255,255,255,0.06); height:5px; border-radius:5px; overflow:hidden; margin-bottom:6px;">
+                                            <div style="width:${dailyLossBarPct}%; background:linear-gradient(90deg, #f5b041, #eab308); height:100%; border-radius:5px;"></div>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
+                                        <span>আজকের লস: <strong style="color:${todayLoss > 0 ? '#f87171' : '#fff'};">-$${todayLoss.toFixed(2)}</strong></span>
+                                        <span style="color:var(--gold); font-weight:700;">${dailyLossBarPct}% বাকি</span>
+                                    </div>
+                                </div>
+
+                                <!-- 4. দৈনিক প্রফিট ক্যাপ -->
+                                <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(167,139,250,0.25); border-radius:12px; padding:0.95rem; display:flex; flex-direction:column; justify-content:space-between;">
+                                    <div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                            <span style="font-size:0.8rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                                                <i class="fas fa-bolt" style="color:#a78bfa;"></i> দৈনিক প্রফিট ক্যাপ
+                                            </span>
+                                            <span style="font-size:0.7rem; background:rgba(167,139,250,0.12); color:#c4b5fd; padding:1px 6px; border-radius:5px; font-weight:700;">
+                                                +${dailyCapPct}%
+                                            </span>
+                                        </div>
+                                        <div style="font-size:1.25rem; font-weight:900; color:#a78bfa; margin-bottom:4px;">
+                                            +$${todayGross.toFixed(2)} <span style="font-size:0.75rem; color:#64748b; font-weight:600;">/ $${dailyCapDollar}</span>
+                                        </div>
+                                        <div style="background:rgba(255,255,255,0.06); height:5px; border-radius:5px; overflow:hidden; margin-bottom:6px;">
+                                            <div style="width:${dailyCapBarPct}%; background:linear-gradient(90deg, #a78bfa, #8b5cf6); height:100%; border-radius:5px;"></div>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
+                                        <span>আজকের লাভ</span>
+                                        <span style="color:#c4b5fd; font-weight:700;">+$${dailyCapRem.toFixed(2)} বাকি</span>
+                                    </div>
+                                </div>
+
+                                <!-- 5. উইন রেট -->
+                                <div style="background:rgba(255,255,255,0.02); border:1px solid ${isWinRateQualified ? 'rgba(0,230,118,0.25)' : 'rgba(245,176,65,0.25)'}; border-radius:12px; padding:0.95rem; display:flex; flex-direction:column; justify-content:space-between;">
+                                    <div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                            <span style="font-size:0.8rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                                                <i class="fas fa-award" style="color:#fbbf24;"></i> উইন রেট
+                                            </span>
+                                            <span style="font-size:0.7rem; background:rgba(245,176,65,0.12); color:var(--gold); padding:1px 6px; border-radius:5px; font-weight:700;">
+                                                টার্গেট: ≥${minWinRate}%
+                                            </span>
+                                        </div>
+                                        <div style="font-size:1.25rem; font-weight:900; color:${isWinRateQualified ? '#00e676' : 'var(--gold)'}; margin-bottom:4px;">
+                                            ${currentWinRate.toFixed(1)}%
+                                        </div>
+                                        <div style="background:rgba(255,255,255,0.06); height:5px; border-radius:5px; overflow:hidden; margin-bottom:6px;">
+                                            <div style="width:${Math.min(100, (currentWinRate / minWinRate * 100))}%; background:linear-gradient(90deg, #f5b041, #00e676); height:100%; border-radius:5px;"></div>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
+                                        <span>ট্রেড অনুপাত</span>
+                                        <span style="color:${isWinRateQualified ? '#00e676' : '#cbd5e1'}; font-weight:700;">${isWinRateQualified ? '✓ কোয়ালিফাইড' : 'টার্গেট: ' + minWinRate + '%'}</span>
+                                    </div>
+                                </div>
+
+                                <!-- 6. ট্রেড রেকর্ড -->
+                                <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:0.95rem; display:flex; flex-direction:column; justify-content:space-between;">
+                                    <div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                            <span style="font-size:0.8rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                                                <i class="fas fa-chart-pie" style="color:#60a5fa;"></i> ট্রেড রেকর্ড
+                                            </span>
+                                            <span style="font-size:0.7rem; background:rgba(255,255,255,0.06); color:#cbd5e1; padding:1px 6px; border-radius:5px; font-weight:700;">
+                                                মোট: ${totalTrades}টি
+                                            </span>
+                                        </div>
+                                        <div style="font-size:1.25rem; font-weight:900; color:#fff; margin-bottom:4px;">
+                                            <span style="color:#00e676;">${wins}W</span> <span style="color:#64748b; font-size:0.9rem; font-weight:400;">/</span> <span style="color:#ef4444;">${losses}L</span>
+                                        </div>
+                                        <div style="background:rgba(255,255,255,0.06); height:5px; border-radius:5px; overflow:hidden; display:flex; margin-bottom:6px;">
+                                            <div style="width:${totalTrades > 0 ? (wins / totalTrades * 100) : 0}%; background:#00e676; height:100%;"></div>
+                                            <div style="width:${totalTrades > 0 ? (losses / totalTrades * 100) : 0}%; background:#ef4444; height:100%;"></div>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+                                        <span style="color:#00e676; font-weight:700;">উইন: ${totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(0) : 0}%</span>
+                                        <span style="color:#ef4444; font-weight:700;">লস: ${totalTrades > 0 ? ((losses / totalTrades) * 100).toFixed(0) : 0}%</span>
+                                    </div>
+                                </div>
+
+                                <!-- 7. ট্রেডিং দিন -->
+                                <div style="background:rgba(255,255,255,0.02); border:1px solid ${daysRem === 0 ? 'rgba(0,230,118,0.25)' : 'rgba(6,182,212,0.25)'}; border-radius:12px; padding:0.95rem; display:flex; flex-direction:column; justify-content:space-between;">
+                                    <div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                            <span style="font-size:0.8rem; font-weight:800; color:#cbd5e1; display:flex; align-items:center; gap:6px;">
+                                                <i class="fas fa-calendar-check" style="color:#06b6d4;"></i> ট্রেডিং দিন
+                                            </span>
+                                            <span style="font-size:0.7rem; background:rgba(6,182,212,0.12); color:#06b6d4; padding:1px 6px; border-radius:5px; font-weight:700;">
+                                                ন্যূনতম: ${minDays} দিন
+                                            </span>
+                                        </div>
+                                        <div style="font-size:1.25rem; font-weight:900; color:${daysRem === 0 ? '#00e676' : '#06b6d4'}; margin-bottom:4px;">
+                                            ${daysComp} <span style="font-size:0.75rem; color:#64748b; font-weight:600;">/ ${minDays} দিন</span>
+                                        </div>
+                                        <div style="background:rgba(255,255,255,0.06); height:5px; border-radius:5px; overflow:hidden; margin-bottom:6px;">
+                                            <div style="width:${daysProgressPct}%; background:linear-gradient(90deg, #06b6d4, #10b981); height:100%; border-radius:5px;"></div>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8;">
+                                        <span>সম্পন্ন: <strong style="color:#fff;">${daysComp} দিন</strong></span>
+                                        <span style="color:${daysRem === 0 ? '#00e676' : '#06b6d4'}; font-weight:700;">${daysRem === 0 ? '✓ সম্পন্ন' : 'বাকি: ' + daysRem + ' দিন'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (!sessionsContainer) return;
+
+                if (traderSessionHistoryFilter === 'running') {
+                    sessionsContainer.innerHTML = renderAdminSyncedTradesTableHtml(trades, ch);
+                    return;
+                } else if (traderSessionHistoryFilter === 'failed') {
+                    if (structured.failedGroups.length === 0) {
+                        sessionsContainer.innerHTML = `
+                            <div style="text-align:center; padding:2.2rem 1rem; background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.86rem;">
+                                No disqualified challenges found for this trader.
+                            </div>
+                        `;
+                        return;
+                    }
+                    sessionsContainer.innerHTML = structured.failedGroups.map(grp => renderChallengeGroupBlockHtml(grp)).join('');
+                    return;
+                } else {
+                    // 'all'
+                    sessionsContainer.innerHTML = `
+                        <div style="margin-bottom:1.5rem;">
+                            ${renderAdminSyncedTradesTableHtml(trades, ch)}
+                        </div>
+                        ${structured.allGroups.length > 0 ? `
+                            <div style="margin-top:1.5rem;">
+                                <h4 style="font-size:0.95rem; font-weight:800; color:#fff; margin-bottom:10px;">Previous Challenge History:</h4>
+                                ${structured.allGroups.map(grp => renderChallengeGroupBlockHtml(grp)).join('')}
+                            </div>
+                        ` : ''}
+                    `;
+                    return;
+                }
+            }
+
+            // Easy Challenge Easy Rules: continue with manual session proof rendering 100% intact
 
             const runningSessCount = structured.runningSubmissions.length;
             const failedSessCount = structured.failedSubmissions.length;
