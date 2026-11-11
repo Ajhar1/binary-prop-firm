@@ -2196,6 +2196,11 @@ function syncChallengesWithSubmissions() {
 
     // Challenges are preserved for all users
     challenges.forEach(c => {
+      // Classic Prop / Your Rules challenges are evaluated via real-time synced trades engine
+      if (c && (c.challengeModel === 'classic_prop' || c.category === 'your_rules')) {
+        return;
+      }
+
       // Ensure required evaluation metrics
       if (!c.sessionsRequired) {
         c.sessionsRequired = 15;
@@ -7251,6 +7256,492 @@ function saveSyncedTrades(trades, singleTrade = null) {
   }
 }
 
+// ==========================================
+// REAL-TIME CLASSIC PROP RULES & METRICS ENGINE
+// Strict Enforcement of Daily Loss, Max Drawdown,
+// Trading Days / Duration, and Win Rate Qualification
+// ==========================================
+function evaluateClassicPropChallenge(challenge, allSyncedTrades, options = {}) {
+  const tradingTimezone = isValidTimezone(options.timezone)
+    ? options.timezone
+    : (isValidTimezone(options.reqQueryTz) ? options.reqQueryTz : 'Asia/Dhaka');
+
+  const challengeId = challenge.id;
+  const targetUserId = challenge.userId;
+  const targetUserEmail = challenge.userEmail ? challenge.userEmail.toLowerCase() : '';
+  const targetTraderId = (challenge.userTraderId || '').toLowerCase();
+
+  let effectiveStartTime = 0;
+  if (challenge.reactivatedAt) {
+    effectiveStartTime = new Date(challenge.reactivatedAt).getTime();
+  } else if (challenge.evaluationStartedAt) {
+    effectiveStartTime = new Date(challenge.evaluationStartedAt).getTime();
+  } else if (challenge.practiceStartedAt) {
+    effectiveStartTime = new Date(challenge.practiceStartedAt).getTime();
+  } else if (challenge.approvedAt) {
+    effectiveStartTime = new Date(challenge.approvedAt).getTime();
+  } else if (challenge.startedAt) {
+    effectiveStartTime = new Date(challenge.startedAt).getTime();
+  } else {
+    effectiveStartTime = new Date(challenge.createdAt).getTime();
+  }
+
+  let didRepairOwnership = false;
+  const isReactivated = Boolean(challenge.reactivatedAt);
+  const minAllowedTime = isReactivated ? effectiveStartTime : (effectiveStartTime - (5 * 60 * 1000));
+
+  const userTrades = allSyncedTrades.filter(t => {
+    const isChallengeMatch = Boolean(challengeId && t.challengeId === challengeId);
+    const isUserMatch = Boolean(
+      (targetUserId && t.userId === targetUserId) ||
+      (targetUserEmail && t.userEmail && t.userEmail.toLowerCase() === targetUserEmail) ||
+      (targetTraderId && t.traderId && t.traderId.toLowerCase() === targetTraderId)
+    );
+    if (!isChallengeMatch && !isUserMatch) return false;
+
+    // Filter trades executed before effective start time
+    const tTime = getTradeExecutionTime(t);
+    if (effectiveStartTime && tTime < minAllowedTime) {
+      return false;
+    }
+
+    // Auto-heal trade ownership if needed
+    if (!t.challengeId || t.challengeId !== challengeId || (targetUserId && t.userId !== targetUserId)) {
+      t.challengeId = challengeId;
+      t.challengePackage = challenge.packageName || t.challengePackage || '';
+      if (targetUserId) t.userId = targetUserId;
+      if (targetUserEmail) t.userEmail = targetUserEmail;
+      if (challenge.userName) t.userName = challenge.userName;
+      if (targetTraderId) t.traderId = targetTraderId.toUpperCase();
+      didRepairOwnership = true;
+    }
+    return true;
+  });
+
+  if (didRepairOwnership && options.allowSaveTrades !== false) {
+    saveSyncedTrades(allSyncedTrades);
+  }
+
+  userTrades.sort((a, b) => getTradeExecutionTime(b) - getTradeExecutionTime(a));
+
+  const initialCapital = Number(challenge.fundedAmount || challenge.startingCapital || 5000);
+  const targetPercent = Number(challenge.profitTargetPercent || 30);
+  const targetDollar = initialCapital * (targetPercent / 100);
+  const dailyLossPercent = Number(challenge.dailyLossPercent || 5);
+  const maxDrawdownPercent = Number(challenge.maxDrawdownPercent || 10);
+  const dailyProfitCapPercent = Number(challenge.dailyProfitCapPercent || 4);
+  const minWinRate = Number(challenge.minWinRate || 55);
+  const minTradingDays = Number(challenge.minTradingDays || 10);
+
+  const dailyLossLimitDollar = initialCapital * (dailyLossPercent / 100);
+  const maxDrawdownLimitDollar = initialCapital * (maxDrawdownPercent / 100);
+  const dailyProfitCapDollar = initialCapital * (dailyProfitCapPercent / 100);
+
+  // Group and evaluate trades sequentially (Chronological trade-by-trade anti-cheating risk engine)
+  const sortedAsc = [...userTrades].sort((a, b) => getTradeExecutionTime(a) - getTradeExecutionTime(b));
+  const dayMap = {};
+  let runningRawBalance = initialCapital;
+  let runningEffectiveBalance = initialCapital;
+  let runningEffectiveProfit = 0;
+  let totalTrimmedProfit = 0;
+  let isDailyLossHit = false;
+  let isMaxDrawdownHit = false;
+  let dailyLossHitDetails = null;
+  let maxDrawdownHitDetails = null;
+  let validWins = 0;
+  let validLosses = 0;
+  let disqualifiedWins = 0;
+
+  sortedAsc.forEach(t => {
+    const tTime = getTradeExecutionTime(t);
+    const dayKey = getTradingDayKey(tTime, tradingTimezone);
+    if (!dayMap[dayKey]) {
+      dayMap[dayKey] = {
+        date: dayKey,
+        trades: [],
+        grossPnl: 0,
+        effectivePnl: 0,
+        trimmedAmount: 0,
+        wins: 0,
+        losses: 0,
+        disqualifiedWins: 0
+      };
+    }
+    const dayData = dayMap[dayKey];
+
+    const tradeStake = typeof t.amount === 'number' ? t.amount : (parseFloat(String(t.amount || '0').replace(/[^0-9.-]/g, '')) || 0);
+    const rawProfit = typeof t.profit === 'number' ? t.profit : (parseFloat(String(t.profit || '0').replace(/[^0-9.-]/g, '')) || 0);
+
+    const dayLossSoFar = dayData.effectivePnl < 0 ? Math.abs(dayData.effectivePnl) : (dayData.grossPnl < 0 ? Math.abs(dayData.grossPnl) : 0);
+    const remainingDailyLossBuffer = Math.max(0, dailyLossLimitDollar - dayLossSoFar);
+    const currentDrawdownSoFar = Math.max(0, initialCapital - runningEffectiveBalance);
+    const remainingMaxDrawdownBuffer = Math.max(0, maxDrawdownLimitDollar - currentDrawdownSoFar);
+
+    const maxAllowedStake = Math.min(remainingDailyLossBuffer, remainingMaxDrawdownBuffer);
+    const isOverRisk = tradeStake > (maxAllowedStake + 0.01);
+
+    t.maxAllowedStakeAtOpen = parseFloat(maxAllowedStake.toFixed(2));
+    t.remainingDailyLossBufferAtOpen = parseFloat(remainingDailyLossBuffer.toFixed(2));
+    t.remainingMaxDrawdownBufferAtOpen = parseFloat(remainingMaxDrawdownBuffer.toFixed(2));
+
+    if (isOverRisk) {
+      if (t.result === 'WIN') {
+        t.isOverRiskDisqualified = true;
+        t.isDisqualified = true;
+        t.overRiskReason = 'স্টপ লসের বাহিরে গিয়ে ট্রেড করার কারণে ট্রেডটি গণ্য হয়নি';
+        t.effectiveProfit = 0;
+        dayData.disqualifiedWins = (dayData.disqualifiedWins || 0) + 1;
+        disqualifiedWins++;
+        dayData.trades.push(t);
+      } else {
+        t.isOverRiskDisqualified = false;
+        t.isDisqualified = false;
+        t.isOverRiskBreach = true;
+        if (t.result === 'LOSS') {
+          const tradeLoss = tradeStake;
+          t.effectiveProfit = -tradeLoss;
+          dayData.losses++;
+          validLosses++;
+          dayData.grossPnl -= tradeLoss;
+          dayData.effectivePnl -= tradeLoss;
+          runningEffectiveProfit -= tradeLoss;
+          runningEffectiveBalance -= tradeLoss;
+          runningRawBalance -= tradeLoss;
+
+          if (dayData.effectivePnl < 0 && Math.abs(dayData.effectivePnl) >= (dailyLossLimitDollar - 0.001)) {
+            isDailyLossHit = true;
+            if (!dailyLossHitDetails) {
+              dailyLossHitDetails = `স্টপ লস বাফারের চেয়ে বেশি সাইজের ট্রেড ($${tradeStake.toFixed(2)} > অনুমোদিত $${maxAllowedStake.toFixed(2)}) নিয়ে লস করায় ডেইলি স্টপ লস লিমিট (-${dailyLossPercent}%) অতিক্রম করেছে। (${dayKey} তারিখে মোট লস: $${Math.abs(dayData.effectivePnl).toFixed(2)})`;
+            }
+          }
+          if ((initialCapital - runningEffectiveBalance) >= (maxDrawdownLimitDollar - 0.001) || (initialCapital - runningRawBalance) >= (maxDrawdownLimitDollar - 0.001)) {
+            isMaxDrawdownHit = true;
+            if (!maxDrawdownHitDetails) {
+              maxDrawdownHitDetails = `স্টপ লস বাফারের চেয়ে বেশি সাইজের ট্রেড ($${tradeStake.toFixed(2)} > অনুমোদিত $${maxAllowedStake.toFixed(2)}) নিয়ে লস করায় সর্বোচ্চ ড্র-ডাউন লিমিট (-${maxDrawdownPercent}%) অতিক্রম করেছে।`;
+            }
+          }
+        } else {
+          t.effectiveProfit = 0;
+        }
+        dayData.trades.push(t);
+      }
+    } else {
+      const remainingDailyCap = Math.max(0, dailyProfitCapDollar - (dayData.effectivePnl > 0 ? dayData.effectivePnl : 0));
+      const remainingOverallTarget = Math.max(0, targetDollar - (runningEffectiveProfit > 0 ? runningEffectiveProfit : 0));
+
+      if (t.result === 'WIN') {
+        const rawTradeProfit = rawProfit > tradeStake ? (rawProfit - tradeStake) : rawProfit;
+
+        if (remainingDailyCap <= 0.001) {
+          t.isCappedDisqualified = true;
+          t.isDisqualified = true;
+          t.overRiskReason = 'দৈনিক প্রফিট ক্যাপ পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
+          t.capDisqualifiedReason = 'দৈনিক প্রফিট ক্যাপ পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
+          t.effectiveProfit = 0;
+          dayData.disqualifiedWins = (dayData.disqualifiedWins || 0) + 1;
+          disqualifiedWins++;
+          dayData.trades.push(t);
+        } else if (remainingOverallTarget <= 0.001) {
+          t.isCappedDisqualified = true;
+          t.isDisqualified = true;
+          t.overRiskReason = 'প্রফিট টার্গেট পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
+          t.capDisqualifiedReason = 'প্রফিট টার্গেট পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
+          t.effectiveProfit = 0;
+          dayData.disqualifiedWins = (dayData.disqualifiedWins || 0) + 1;
+          disqualifiedWins++;
+          dayData.trades.push(t);
+        } else {
+          t.isOverRiskDisqualified = false;
+          t.isDisqualified = false;
+          t.isCappedDisqualified = false;
+          const maxCreditable = Math.min(remainingDailyCap, remainingOverallTarget);
+
+          if (rawTradeProfit <= (maxCreditable + 0.001)) {
+            t.effectiveProfit = rawTradeProfit;
+            dayData.wins++;
+            validWins++;
+            dayData.grossPnl += rawTradeProfit;
+            dayData.effectivePnl += rawTradeProfit;
+            runningEffectiveProfit += rawTradeProfit;
+            runningEffectiveBalance += rawTradeProfit;
+            runningRawBalance += rawTradeProfit;
+          } else {
+            const credited = Math.round(maxCreditable * 100) / 100;
+            const trimmed = Math.round((rawTradeProfit - credited) * 100) / 100;
+            t.effectiveProfit = credited;
+            t.trimmedProfit = trimmed;
+            t.capNote = 'প্রফিট ক্যাপ পূর্ণ হওয়ায় অতিরিক্ত প্রফিট ট্রিম করা হয়েছে';
+            dayData.wins++;
+            validWins++;
+            dayData.grossPnl += rawTradeProfit;
+            dayData.effectivePnl += credited;
+            dayData.trimmedAmount = (dayData.trimmedAmount || 0) + trimmed;
+            totalTrimmedProfit += trimmed;
+            runningEffectiveProfit += credited;
+            runningEffectiveBalance += credited;
+            runningRawBalance += rawTradeProfit;
+          }
+          dayData.trades.push(t);
+        }
+      } else if (t.result === 'LOSS') {
+        t.isOverRiskDisqualified = false;
+        t.isDisqualified = false;
+        t.isCappedDisqualified = false;
+        const tradeLoss = tradeStake;
+        t.effectiveProfit = -tradeLoss;
+        dayData.losses++;
+        validLosses++;
+        dayData.grossPnl -= tradeLoss;
+        dayData.effectivePnl -= tradeLoss;
+        runningEffectiveProfit -= tradeLoss;
+        runningEffectiveBalance -= tradeLoss;
+        runningRawBalance -= tradeLoss;
+
+        if (dayData.effectivePnl < 0 && Math.abs(dayData.effectivePnl) >= (dailyLossLimitDollar - 0.001)) {
+          isDailyLossHit = true;
+          if (!dailyLossHitDetails) {
+            dailyLossHitDetails = `ডেইলি স্টপ লস সীমা (-${dailyLossPercent}%) অতিক্রম করেছে: ${dayKey} তারিখে মোট লস $${Math.abs(dayData.effectivePnl).toFixed(2)} (অনুমোদিত সীমা: $${dailyLossLimitDollar.toFixed(2)})`;
+          }
+        }
+        if ((initialCapital - runningEffectiveBalance) >= (maxDrawdownLimitDollar - 0.001) || (initialCapital - runningRawBalance) >= (maxDrawdownLimitDollar - 0.001)) {
+          isMaxDrawdownHit = true;
+          if (!maxDrawdownHitDetails) {
+            maxDrawdownHitDetails = `সর্বোচ্চ ড্র-ডাউন সীমা (-${maxDrawdownPercent}%) অতিক্রম করেছে: মোট ড্র-ডাউন $${Math.max(initialCapital - runningEffectiveBalance, initialCapital - runningRawBalance).toFixed(2)} (অনুমোদিত সীমা: $${maxDrawdownLimitDollar.toFixed(2)})`;
+          }
+        }
+        dayData.trades.push(t);
+      } else {
+        t.effectiveProfit = 0;
+        dayData.trades.push(t);
+      }
+    }
+  });
+
+  const dayKeys = Object.keys(dayMap);
+  const tradingDaysCompleted = dayKeys.filter(k => {
+    if (k === 'unknown') return false;
+    const d = dayMap[k];
+    return (d.wins + d.losses) > 0;
+  }).length;
+
+  const dailyBreakdown = dayKeys.map(k => {
+    const dayData = dayMap[k];
+    return {
+      date: dayData.date,
+      tradesCount: dayData.trades.length,
+      wins: dayData.wins,
+      losses: dayData.losses,
+      disqualifiedWins: dayData.disqualifiedWins || 0,
+      rawPnl: parseFloat(dayData.grossPnl.toFixed(2)),
+      effectivePnl: parseFloat(dayData.effectivePnl.toFixed(2)),
+      trimmedAmount: parseFloat((dayData.trimmedAmount || 0).toFixed(2)),
+      capApplied: (dayData.trimmedAmount || 0) > 0 || (dayData.disqualifiedWins || 0) > 0
+    };
+  });
+
+  const currentDrawdownAmount = Math.max(0, initialCapital - runningEffectiveBalance);
+  if (currentDrawdownAmount >= (maxDrawdownLimitDollar - 0.001)) {
+    isMaxDrawdownHit = true;
+    if (!maxDrawdownHitDetails) {
+      maxDrawdownHitDetails = `সর্বোচ্চ ড্র-ডাউন সীমা (-${maxDrawdownPercent}%) অতিক্রম করেছে: মোট ড্র-ডাউন $${currentDrawdownAmount.toFixed(2)} (অনুমোদিত সীমা: $${maxDrawdownLimitDollar.toFixed(2)})`;
+    }
+  }
+
+  const totalWinLoss = validWins + validLosses;
+  const currentWinRateNum = totalWinLoss > 0 ? ((validWins / totalWinLoss) * 100) : 0;
+  const netEffectiveProfit = runningEffectiveProfit;
+  const currentProfitPercent = (netEffectiveProfit / initialCapital) * 100;
+
+  // RULE EVALUATION ENGINE:
+  const isTargetReached = (netEffectiveProfit >= (targetDollar - 0.001));
+  const isDaysReached = (tradingDaysCompleted >= minTradingDays);
+  const isWinRateReached = (currentWinRateNum >= (minWinRate - 0.001));
+
+  // Time & Days limits:
+  const maxAllowedDurationDays = Number(challenge.durationDays || challenge.minTradingDays || 10);
+  const nowTime = Date.now();
+  const isCalendarExpired = Boolean(challenge.expiresAt && nowTime > new Date(challenge.expiresAt).getTime());
+  const isDaysExceeded = Boolean(maxAllowedDurationDays > 0 && tradingDaysCompleted > maxAllowedDurationDays);
+
+  let newStatus = null;
+  let failReason = null;
+  let violatedRule = null;
+  let failReasonText = null;
+
+  // 1. RULE 1: Daily Loss Limit Breached
+  if (isDailyLossHit) {
+    newStatus = 'failed';
+    failReason = 'DAILY_LOSS_LIMIT_EXCEEDED';
+    violatedRule = `দৈনিক সর্বোচ্চ লস সীমা (-${dailyLossPercent}%) অতিক্রম`;
+    failReasonText = dailyLossHitDetails || `দৈনিক সর্বোচ্চ লস সীমা ($${dailyLossLimitDollar.toFixed(2)} / -${dailyLossPercent}%) ছুঁয়ে ফেলা বা অতিক্রম করায় চ্যালেঞ্জটি ডিসকোয়ালিফাই করা হয়েছে।`;
+  }
+  // 2. RULE 2: Max Drawdown Limit Breached
+  else if (isMaxDrawdownHit) {
+    newStatus = 'failed';
+    failReason = 'MAX_DRAWDOWN_EXCEEDED';
+    violatedRule = `সর্বোচ্চ ড্র-ডাউন সীমা (-${maxDrawdownPercent}%) অতিক্রম`;
+    failReasonText = maxDrawdownHitDetails || `সর্বোচ্চ লস সীমা/ড্র-ডাউন ($${maxDrawdownLimitDollar.toFixed(2)} / -${maxDrawdownPercent}%) ছুঁয়ে ফেলা বা অতিক্রম করায় চ্যালেঞ্জটি ডিসকোয়ালিফাই করা হয়েছে।`;
+  }
+  // 3. RULE 4: Profit Target Reached AND Minimum Trading Days Completed -> Win Rate Check!
+  else if (isTargetReached && isDaysReached) {
+    if (isWinRateReached) {
+      newStatus = 'passed';
+    } else {
+      newStatus = 'failed';
+      failReason = 'WIN_RATE_NOT_MET';
+      violatedRule = `ন্যূনতম উইন রেট (${minWinRate}%) অর্জন করতে ব্যর্থ`;
+      failReasonText = `প্রফিট টার্গেট ও ট্রেডিং দিন অর্জিত হলেও নির্ধারিত ন্যূনতম উইন রেট (${minWinRate}%) পূরণ না হওয়ায় (বর্তমান অর্জিত উইন রেট: ${currentWinRateNum.toFixed(1)}%) চ্যালেঞ্জটি ডিসকোয়ালিফাই করা হয়েছে।`;
+    }
+  }
+  // 4. RULE 3: Trading Days Exceeded or Calendar Expired without reaching profit target
+  else if ((isCalendarExpired || isDaysExceeded) && !isTargetReached) {
+    newStatus = 'failed';
+    failReason = 'TIME_LIMIT_EXCEEDED';
+    violatedRule = isDaysExceeded ? 'নির্ধারিত ট্রেডিং দিন অতিক্রান্ত' : 'নির্ধারিত সময়সীমা অতিক্রান্ত';
+    failReasonText = isDaysExceeded
+      ? `নির্ধারিত সর্বোচ্চ ট্রেডিং দিন (${maxAllowedDurationDays} দিন) অতিক্রম করার পরেও প্রফিট টার্গেট অর্জিত না হওয়ায় চ্যালেঞ্জটি ডিসকোয়ালিফাই করা হয়েছে।`
+      : 'চ্যালেঞ্জের নির্ধারিত সময়সীমা অতিক্রান্ত হয়েছে। নির্দিষ্ট মেয়াদের মধ্যে লক্ষ্য অর্জিত না হওয়ায় চ্যালেঞ্জটি স্বয়ংক্রিয়ভাবে ডিসকোয়ালিফাই ও বন্ধ করা হয়েছে।';
+  }
+
+  const isPassed = (newStatus === 'passed') || (challenge.status === 'passed');
+
+  const todayIso = getTradingDayKey(Date.now(), tradingTimezone);
+  const todayData = dayMap[todayIso] || { grossPnl: 0, effectivePnl: 0, wins: 0, losses: 0, disqualifiedWins: 0, trades: [] };
+  const todayEffectiveProfit = todayData.effectivePnl > 0 ? Math.min(dailyProfitCapDollar, todayData.effectivePnl) : 0;
+  const todayLossAmount = todayData.effectivePnl < 0 ? Math.abs(todayData.effectivePnl) : 0;
+  const todayRemainingLossBuffer = Math.max(0, dailyLossLimitDollar - todayLossAmount);
+  const remainingDrawdownBuffer = Math.max(0, maxDrawdownLimitDollar - currentDrawdownAmount);
+
+  const classicMetrics = {
+    challengeModel: 'classic_prop',
+    initialCapital,
+    tradingTimezone,
+    todayDate: todayIso,
+    currentBalance: parseFloat(runningEffectiveBalance.toFixed(2)),
+    effectiveBalance: parseFloat(runningEffectiveBalance.toFixed(2)),
+    netEffectiveProfit: parseFloat(netEffectiveProfit.toFixed(2)),
+    netProfit: parseFloat(netEffectiveProfit.toFixed(2)),
+    profitPercent: parseFloat(currentProfitPercent.toFixed(2)),
+    targetPercent,
+    targetDollar,
+    targetRemainingDollar: parseFloat(Math.max(0, targetDollar - netEffectiveProfit).toFixed(2)),
+    targetRemainingPercent: parseFloat(Math.max(0, targetPercent - currentProfitPercent).toFixed(2)),
+    dailyLossLimitPercent: dailyLossPercent,
+    dailyLossLimitDollar,
+    todayLossDollar: parseFloat(todayLossAmount.toFixed(2)),
+    todayRemainingLossBuffer: parseFloat(todayRemainingLossBuffer.toFixed(2)),
+    maxDrawdownPercent,
+    maxDrawdownLimitDollar,
+    currentDrawdownPercent: parseFloat(((currentDrawdownAmount / initialCapital) * 100).toFixed(1)),
+    currentDrawdownDollar: parseFloat(currentDrawdownAmount.toFixed(2)),
+    remainingDrawdownBuffer: parseFloat(remainingDrawdownBuffer.toFixed(2)),
+    dailyProfitCapPercent,
+    dailyProfitCapDollar,
+    todayGrossProfit: parseFloat(todayEffectiveProfit.toFixed(2)),
+    todayRemainingProfitCap: parseFloat(Math.max(0, dailyProfitCapDollar - todayEffectiveProfit).toFixed(2)),
+    totalTrimmedProfit: parseFloat(totalTrimmedProfit.toFixed(2)),
+    tradingDaysCompleted,
+    minTradingDays,
+    tradingDaysRemaining: Math.max(0, minTradingDays - tradingDaysCompleted),
+    winRate: parseFloat(currentWinRateNum.toFixed(1)),
+    minWinRate,
+    winsCount: validWins,
+    lossesCount: validLosses,
+    disqualifiedWinsCount: disqualifiedWins,
+    totalTradesCount: userTrades.length,
+    isTargetReached,
+    isDaysReached,
+    isWinRateReached,
+    isPassed,
+    isDailyLossHit,
+    isMaxDrawdownHit,
+    hitDetails: dailyLossHitDetails || maxDrawdownHitDetails,
+    dailyBreakdown
+  };
+
+  return {
+    userTrades,
+    classicMetrics,
+    newStatus,
+    failReason,
+    violatedRule,
+    failReasonText,
+    tradingDaysCompleted,
+    netEffectiveProfit,
+    currentWinRateNum
+  };
+}
+
+// Applies evaluation state changes to challenge, saves challenges, and triggers notifications
+function applyClassicChallengeEvaluation(challenge, evalResult, allChallenges) {
+  if (!challenge || !evalResult) return false;
+  let modified = false;
+  const { newStatus, failReason, violatedRule, failReasonText, tradingDaysCompleted, netEffectiveProfit, currentWinRateNum } = evalResult;
+
+  if (challenge.status === 'in_progress') {
+    if (newStatus === 'failed') {
+      challenge.status = 'failed';
+      challenge.failReason = failReason;
+      challenge.violatedRule = violatedRule;
+      challenge.failReasonText = failReasonText;
+      challenge.failedAt = new Date().toISOString();
+      challenge.isActive = false;
+      challenge.isCompleted = true;
+      modified = true;
+      try {
+        logUserArchive('CHALLENGE_FAILED_' + failReason, { id: challenge.userId, name: challenge.userName, email: challenge.userEmail }, {
+          challengeId: challenge.id,
+          packageName: challenge.packageName,
+          failReason,
+          violatedRule,
+          failReasonText
+        });
+      } catch (e) {}
+    } else if (newStatus === 'passed') {
+      challenge.status = 'passed';
+      challenge.passedAt = new Date().toISOString();
+      challenge.isActive = false;
+      challenge.isCompleted = true;
+      modified = true;
+      try {
+        logUserArchive('CHALLENGE_PASSED', { id: challenge.userId, name: challenge.userName, email: challenge.userEmail }, {
+          challengeId: challenge.id,
+          packageName: challenge.packageName,
+          fundedAmount: challenge.fundedAmount,
+          broker: challenge.brokerName,
+          totalPnL: netEffectiveProfit,
+          winRate: currentWinRateNum
+        });
+      } catch (e) {}
+    } else {
+      if (challenge.tradingDaysCompleted !== tradingDaysCompleted || challenge.totalPnL !== netEffectiveProfit || challenge.winRate !== currentWinRateNum) {
+        challenge.tradingDaysCompleted = tradingDaysCompleted;
+        challenge.totalPnL = netEffectiveProfit;
+        challenge.winRate = currentWinRateNum;
+        challenge.actualWinRate = currentWinRateNum;
+        modified = true;
+      }
+    }
+
+    if (modified && Array.isArray(allChallenges)) {
+      saveChallenges(allChallenges);
+      if (db && db.isMySqlActive()) {
+        db.saveChallenge(challenge).catch(e => console.error('[MYSQL CHALLENGE SAVE ERROR]:', e.message));
+      }
+      try {
+        const users = readJson(USERS_FILE, []);
+        const u = users.find(x => x.id === challenge.userId);
+        if (u) {
+          const liveStatus = getLiveExtensionStatus(u);
+          broadcastExtensionStatus(u.id, liveStatus);
+        }
+      } catch (e) {}
+    }
+  }
+
+  return modified;
+}
+
 // 1. Sync Trades from Quotex Extension (With Challenge Time-Lock Filter)
 app.post('/api/extension/sync-trades', (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -7556,6 +8047,14 @@ app.post('/api/extension/sync-trades', (req, res) => {
       saveSyncedTrades(allSynced);
     }
 
+    // Real-Time Classic Prop Rules Evaluation & Disqualification Engine
+    // Strictly evaluates Daily Loss, Max Drawdown, Time/Days Limit, and Win Rate Qualification
+    let evalRes = null;
+    if (activeChallenge && (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules')) {
+      evalRes = evaluateClassicPropChallenge(activeChallenge, allSynced, { timezone: 'Asia/Dhaka', allowSaveTrades: false });
+      applyClassicChallengeEvaluation(activeChallenge, evalRes, challenges);
+    }
+
     const totalForActiveChallenge = allSynced.filter(t => t.userId === user.id && t.challengeId === activeChallenge.id).length;
 
     const isReactivated = Boolean(activeChallenge.reactivatedAt);
@@ -7585,8 +8084,13 @@ app.post('/api/extension/sync-trades', (req, res) => {
       challenge: {
         id: activeChallenge.id,
         packageName: activeChallenge.packageName,
-        startedAt: new Date(effectiveStartTime).toISOString()
+        startedAt: new Date(effectiveStartTime).toISOString(),
+        status: activeChallenge.status,
+        failReason: activeChallenge.failReason || null,
+        failReasonText: activeChallenge.failReasonText || null
       },
+      isDisqualified: (activeChallenge.status === 'failed'),
+      disqualificationReason: activeChallenge.failReasonText || null,
       challengeStartTime: effectiveStartTime,
       challengeStartedAt: new Date(effectiveStartTime).toISOString(),
       isReactivated,
@@ -7702,333 +8206,16 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
 
     // Module 2.5: Real-Time Classic Prop Rules & Metrics Engine
     let classicMetrics = null;
+    let finalUserTrades = userTrades;
     if (activeChallenge && (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules')) {
       const tradingTimezone = isValidTimezone(req.query.tz)
         ? req.query.tz
         : (isValidTimezone(req.headers['x-timezone']) ? req.headers['x-timezone'] : 'Asia/Dhaka');
 
-      const initialCapital = Number(activeChallenge.fundedAmount || activeChallenge.startingCapital || 5000);
-      const targetPercent = Number(activeChallenge.profitTargetPercent || 30);
-      const targetDollar = initialCapital * (targetPercent / 100);
-      const dailyLossPercent = Number(activeChallenge.dailyLossPercent || 5);
-      const maxDrawdownPercent = Number(activeChallenge.maxDrawdownPercent || 10);
-      const dailyProfitCapPercent = Number(activeChallenge.dailyProfitCapPercent || 4);
-      const minWinRate = Number(activeChallenge.minWinRate || 55);
-      const minTradingDays = Number(activeChallenge.minTradingDays || 10);
-
-      const dailyLossLimitDollar = initialCapital * (dailyLossPercent / 100);
-      const maxDrawdownLimitDollar = initialCapital * (maxDrawdownPercent / 100);
-      const dailyProfitCapDollar = initialCapital * (dailyProfitCapPercent / 100);
-
-      // Group and evaluate trades sequentially (Chronological trade-by-trade anti-cheating risk engine)
-      const sortedAsc = [...userTrades].sort((a, b) => getTradeExecutionTime(a) - getTradeExecutionTime(b));
-      const dayMap = {};
-      let runningRawBalance = initialCapital;
-      let runningEffectiveBalance = initialCapital;
-      let runningEffectiveProfit = 0;
-      let totalTrimmedProfit = 0;
-      let isDailyLossHit = false;
-      let isMaxDrawdownHit = false;
-      let hitDetails = null;
-      let validWins = 0;
-      let validLosses = 0;
-      let disqualifiedWins = 0;
-
-      sortedAsc.forEach(t => {
-        const tTime = getTradeExecutionTime(t);
-        const dayKey = getTradingDayKey(tTime, tradingTimezone);
-        if (!dayMap[dayKey]) {
-          dayMap[dayKey] = {
-            date: dayKey,
-            trades: [],
-            grossPnl: 0,
-            effectivePnl: 0,
-            trimmedAmount: 0,
-            wins: 0,
-            losses: 0,
-            disqualifiedWins: 0
-          };
-        }
-        const dayData = dayMap[dayKey];
-
-        // Safe numeric parsing for stake and profit
-        const tradeStake = typeof t.amount === 'number' ? t.amount : (parseFloat(String(t.amount || '0').replace(/[^0-9.-]/g, '')) || 0);
-        const rawProfit = typeof t.profit === 'number' ? t.profit : (parseFloat(String(t.profit || '0').replace(/[^0-9.-]/g, '')) || 0);
-
-        // Calculate allowable stake right BEFORE opening this trade
-        const dayLossSoFar = dayData.effectivePnl < 0 ? Math.abs(dayData.effectivePnl) : (dayData.grossPnl < 0 ? Math.abs(dayData.grossPnl) : 0);
-        const remainingDailyLossBuffer = Math.max(0, dailyLossLimitDollar - dayLossSoFar);
-        const currentDrawdownSoFar = Math.max(0, initialCapital - runningEffectiveBalance);
-        const remainingMaxDrawdownBuffer = Math.max(0, maxDrawdownLimitDollar - currentDrawdownSoFar);
-
-        // Maximum allowable stake: cannot exceed remaining daily loss buffer or max drawdown buffer
-        const maxAllowedStake = Math.min(remainingDailyLossBuffer, remainingMaxDrawdownBuffer);
-        const isOverRisk = tradeStake > (maxAllowedStake + 0.01);
-
-        t.maxAllowedStakeAtOpen = parseFloat(maxAllowedStake.toFixed(2));
-        t.remainingDailyLossBufferAtOpen = parseFloat(remainingDailyLossBuffer.toFixed(2));
-        t.remainingMaxDrawdownBufferAtOpen = parseFloat(remainingMaxDrawdownBuffer.toFixed(2));
-
-        if (isOverRisk) {
-          if (t.result === 'WIN') {
-            // Anti-Cheating Rule: Stake exceeded stop loss buffer and won!
-            // Strictly Disqualified: Profit is NOT counted anywhere!
-            t.isOverRiskDisqualified = true;
-            t.isDisqualified = true;
-            t.overRiskReason = 'স্টপ লসের বাহিরে গিয়ে ট্রেড করার কারণে ট্রেডটি গণ্য হয়নি';
-            t.effectiveProfit = 0;
-            dayData.disqualifiedWins = (dayData.disqualifiedWins || 0) + 1;
-            disqualifiedWins++;
-            dayData.trades.push(t);
-            // Neither grossPnl nor runningRawBalance changes
-          } else {
-            // Stake exceeded stop loss buffer and lost!
-            t.isOverRiskDisqualified = false;
-            t.isDisqualified = false;
-            t.isOverRiskBreach = true;
-            if (t.result === 'LOSS') {
-              const tradeLoss = tradeStake;
-              t.effectiveProfit = -tradeLoss;
-              dayData.losses++;
-              validLosses++;
-              dayData.grossPnl -= tradeLoss;
-              dayData.effectivePnl -= tradeLoss;
-              runningEffectiveProfit -= tradeLoss;
-              runningEffectiveBalance -= tradeLoss;
-              runningRawBalance -= tradeLoss;
-
-              if (dayData.effectivePnl < 0 && Math.abs(dayData.effectivePnl) >= dailyLossLimitDollar) {
-                isDailyLossHit = true;
-                hitDetails = `স্টপ লস বাফারের চেয়ে বেশি সাইজের ট্রেড ($${tradeStake.toFixed(2)} > অনুমোদিত $${maxAllowedStake.toFixed(2)}) নিয়ে লস করায় ডেইলি স্টপ লস লিমিট (-${dailyLossPercent}%) অতিক্রম করেছে।`;
-              }
-              if ((initialCapital - runningEffectiveBalance) >= maxDrawdownLimitDollar || (initialCapital - runningRawBalance) >= maxDrawdownLimitDollar) {
-                isMaxDrawdownHit = true;
-                hitDetails = `স্টপ লস বাফারের চেয়ে বেশি সাইজের ট্রেড ($${tradeStake.toFixed(2)} > অনুমোদিত $${maxAllowedStake.toFixed(2)}) নিয়ে লস করায় সর্বোচ্চ ড্র-ডাউন লিমিট (-${maxDrawdownPercent}%) অতিক্রম করেছে।`;
-              }
-            } else {
-              // REFUND / TIE
-              t.effectiveProfit = 0;
-            }
-            dayData.trades.push(t);
-          }
-        } else {
-          // Normal trade within allowable risk bounds
-          // Check if Daily Profit Cap or Overall Profit Target was ALREADY reached
-          const remainingDailyCap = Math.max(0, dailyProfitCapDollar - (dayData.effectivePnl > 0 ? dayData.effectivePnl : 0));
-          const remainingOverallTarget = Math.max(0, targetDollar - (runningEffectiveProfit > 0 ? runningEffectiveProfit : 0));
-
-          if (t.result === 'WIN') {
-            const rawTradeProfit = rawProfit > tradeStake ? (rawProfit - tradeStake) : rawProfit;
-
-            if (remainingDailyCap <= 0.001) {
-              // Daily Profit Cap was ALREADY reached: Win profit is NOT counted!
-              t.isCappedDisqualified = true;
-              t.isDisqualified = true;
-              t.overRiskReason = 'দৈনিক প্রফিট ক্যাপ পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
-              t.capDisqualifiedReason = 'দৈনিক প্রফিট ক্যাপ পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
-              t.effectiveProfit = 0;
-              dayData.disqualifiedWins = (dayData.disqualifiedWins || 0) + 1;
-              disqualifiedWins++;
-              dayData.trades.push(t);
-            } else if (remainingOverallTarget <= 0.001) {
-              // Overall Profit Target was ALREADY reached: Win profit is NOT counted!
-              t.isCappedDisqualified = true;
-              t.isDisqualified = true;
-              t.overRiskReason = 'প্রফিট টার্গেট পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
-              t.capDisqualifiedReason = 'প্রফিট টার্গেট পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
-              t.effectiveProfit = 0;
-              dayData.disqualifiedWins = (dayData.disqualifiedWins || 0) + 1;
-              disqualifiedWins++;
-              dayData.trades.push(t);
-            } else {
-              // Room available: credit profit up to allowable cap/target!
-              t.isOverRiskDisqualified = false;
-              t.isDisqualified = false;
-              t.isCappedDisqualified = false;
-              const maxCreditable = Math.min(remainingDailyCap, remainingOverallTarget);
-
-              if (rawTradeProfit <= (maxCreditable + 0.001)) {
-                t.effectiveProfit = rawTradeProfit;
-                dayData.wins++;
-                validWins++;
-                dayData.grossPnl += rawTradeProfit;
-                dayData.effectivePnl += rawTradeProfit;
-                runningEffectiveProfit += rawTradeProfit;
-                runningEffectiveBalance += rawTradeProfit;
-                runningRawBalance += rawTradeProfit;
-              } else {
-                const credited = Math.round(maxCreditable * 100) / 100;
-                const trimmed = Math.round((rawTradeProfit - credited) * 100) / 100;
-                t.effectiveProfit = credited;
-                t.trimmedProfit = trimmed;
-                t.capNote = 'প্রফিট ক্যাপ পূর্ণ হওয়ায় অতিরিক্ত প্রফিট ট্রিম করা হয়েছে';
-                dayData.wins++;
-                validWins++;
-                dayData.grossPnl += rawTradeProfit;
-                dayData.effectivePnl += credited;
-                dayData.trimmedAmount = (dayData.trimmedAmount || 0) + trimmed;
-                totalTrimmedProfit += trimmed;
-                runningEffectiveProfit += credited;
-                runningEffectiveBalance += credited;
-                runningRawBalance += rawTradeProfit;
-              }
-              dayData.trades.push(t);
-            }
-          } else if (t.result === 'LOSS') {
-            // Loss is ALWAYS counted: balance decreases, daily PnL decreases, win rate decreases!
-            t.isOverRiskDisqualified = false;
-            t.isDisqualified = false;
-            t.isCappedDisqualified = false;
-            const tradeLoss = tradeStake;
-            t.effectiveProfit = -tradeLoss;
-            dayData.losses++;
-            validLosses++;
-            dayData.grossPnl -= tradeLoss;
-            dayData.effectivePnl -= tradeLoss;
-            runningEffectiveProfit -= tradeLoss;
-            runningEffectiveBalance -= tradeLoss;
-            runningRawBalance -= tradeLoss;
-
-            if (dayData.effectivePnl < 0 && Math.abs(dayData.effectivePnl) >= dailyLossLimitDollar) {
-              isDailyLossHit = true;
-              hitDetails = `ডেইলি স্টপ লস সীমা (-${dailyLossPercent}%) অতিক্রম করেছে: মোট লস $${Math.abs(dayData.effectivePnl).toFixed(2)}`;
-            }
-            if ((initialCapital - runningEffectiveBalance) >= maxDrawdownLimitDollar || (initialCapital - runningRawBalance) >= maxDrawdownLimitDollar) {
-              isMaxDrawdownHit = true;
-              hitDetails = `সর্বোচ্চ ড্র-ডাউন সীমা (-${maxDrawdownPercent}%) অতিক্রম করেছে: মোট ড্র-ডাউন $${Math.max(initialCapital - runningEffectiveBalance, initialCapital - runningRawBalance).toFixed(2)}`;
-            }
-            dayData.trades.push(t);
-          } else {
-            // REFUND / TIE
-            t.effectiveProfit = 0;
-            dayData.trades.push(t);
-          }
-        }
-      });
-
-      const dayKeys = Object.keys(dayMap);
-      // Completed trading days: only count days where at least 1 valid trade was executed
-      const tradingDaysCompleted = dayKeys.filter(k => {
-        if (k === 'unknown') return false;
-        const d = dayMap[k];
-        return (d.wins + d.losses) > 0;
-      }).length;
-
-      const dailyBreakdown = dayKeys.map(k => {
-        const dayData = dayMap[k];
-        return {
-          date: dayData.date,
-          tradesCount: dayData.trades.length,
-          wins: dayData.wins,
-          losses: dayData.losses,
-          disqualifiedWins: dayData.disqualifiedWins || 0,
-          rawPnl: parseFloat(dayData.grossPnl.toFixed(2)),
-          effectivePnl: parseFloat(dayData.effectivePnl.toFixed(2)),
-          trimmedAmount: parseFloat((dayData.trimmedAmount || 0).toFixed(2)),
-          capApplied: (dayData.trimmedAmount || 0) > 0 || (dayData.disqualifiedWins || 0) > 0
-        };
-      });
-
-      // Check overall Max Drawdown
-      const totalDrawdownDollar = Math.max(0, initialCapital - runningEffectiveBalance);
-      if (totalDrawdownDollar >= maxDrawdownLimitDollar) {
-        isMaxDrawdownHit = true;
-        if (!hitDetails) {
-          hitDetails = `সর্বোচ্চ ড্র-ডাউন সীমা (-${maxDrawdownPercent}%) অতিক্রম করেছে: মোট ড্র-ডাউন $${totalDrawdownDollar.toFixed(2)}`;
-        }
-      }
-
-      const totalWinLoss = validWins + validLosses;
-      const currentWinRateNum = totalWinLoss > 0 ? ((validWins / totalWinLoss) * 100) : 0;
-      const netEffectiveProfit = runningEffectiveProfit;
-      const currentProfitPercent = (netEffectiveProfit / initialCapital) * 100;
-
-      // Check Pass condition
-      const isTargetReached = (netEffectiveProfit >= targetDollar);
-      const isDaysReached = (tradingDaysCompleted >= minTradingDays);
-      const isWinRateReached = (currentWinRateNum >= minWinRate);
-      const isPassed = isTargetReached && isDaysReached && isWinRateReached && !isDailyLossHit && !isMaxDrawdownHit;
-
-      // Current Day stats (today) in trading timezone (Asia/Dhaka - resets at 12:00 AM midnight)
-      const todayIso = getTradingDayKey(Date.now(), tradingTimezone);
-      const todayData = dayMap[todayIso] || { grossPnl: 0, effectivePnl: 0, wins: 0, losses: 0, disqualifiedWins: 0, trades: [] };
-      const todayEffectiveProfit = todayData.effectivePnl > 0 ? Math.min(dailyProfitCapDollar, todayData.effectivePnl) : 0;
-      const todayLossAmount = todayData.effectivePnl < 0 ? Math.abs(todayData.effectivePnl) : 0;
-      const todayRemainingLossBuffer = Math.max(0, dailyLossLimitDollar - todayLossAmount);
-      const currentDrawdownAmount = Math.max(0, initialCapital - runningEffectiveBalance);
-      const remainingDrawdownBuffer = Math.max(0, maxDrawdownLimitDollar - currentDrawdownAmount);
-
-      classicMetrics = {
-        challengeModel: 'classic_prop',
-        initialCapital,
-        tradingTimezone,
-        todayDate: todayIso,
-        currentBalance: parseFloat(runningEffectiveBalance.toFixed(2)),
-        effectiveBalance: parseFloat(runningEffectiveBalance.toFixed(2)),
-        netEffectiveProfit: parseFloat(netEffectiveProfit.toFixed(2)),
-        netProfit: parseFloat(netEffectiveProfit.toFixed(2)),
-        profitPercent: parseFloat(currentProfitPercent.toFixed(2)),
-        targetPercent,
-        targetDollar,
-        targetRemainingDollar: parseFloat(Math.max(0, targetDollar - netEffectiveProfit).toFixed(2)),
-        targetRemainingPercent: parseFloat(Math.max(0, targetPercent - currentProfitPercent).toFixed(2)),
-        dailyLossLimitPercent: dailyLossPercent,
-        dailyLossLimitDollar,
-        todayLossDollar: parseFloat(todayLossAmount.toFixed(2)),
-        todayRemainingLossBuffer: parseFloat(todayRemainingLossBuffer.toFixed(2)),
-        maxDrawdownPercent,
-        maxDrawdownLimitDollar,
-        currentDrawdownPercent: parseFloat(((currentDrawdownAmount / initialCapital) * 100).toFixed(1)),
-        currentDrawdownDollar: parseFloat(currentDrawdownAmount.toFixed(2)),
-        remainingDrawdownBuffer: parseFloat(remainingDrawdownBuffer.toFixed(2)),
-        dailyProfitCapPercent,
-        dailyProfitCapDollar,
-        todayGrossProfit: parseFloat(todayEffectiveProfit.toFixed(2)),
-        todayRemainingProfitCap: parseFloat(Math.max(0, dailyProfitCapDollar - todayEffectiveProfit).toFixed(2)),
-        totalTrimmedProfit: parseFloat(totalTrimmedProfit.toFixed(2)),
-        tradingDaysCompleted,
-        minTradingDays,
-        tradingDaysRemaining: Math.max(0, minTradingDays - tradingDaysCompleted),
-        winRate: parseFloat(currentWinRateNum.toFixed(1)),
-        minWinRate,
-        winsCount: validWins,
-        lossesCount: validLosses,
-        disqualifiedWinsCount: disqualifiedWins,
-        totalTradesCount: userTrades.length,
-        isTargetReached,
-        isDaysReached,
-        isWinRateReached,
-        isPassed,
-        isDailyLossHit,
-        isMaxDrawdownHit,
-        hitDetails,
-        dailyBreakdown
-      };
-
-      // Auto-fail challenge if breach detected and not already failed
-      if ((isDailyLossHit || isMaxDrawdownHit) && activeChallenge.status === 'in_progress') {
-        activeChallenge.status = 'failed';
-        activeChallenge.failReason = isDailyLossHit ? 'DAILY_LOSS_LIMIT_EXCEEDED' : 'MAX_DRAWDOWN_EXCEEDED';
-        activeChallenge.violatedRule = hitDetails;
-        activeChallenge.failReasonText = hitDetails;
-        activeChallenge.failedAt = new Date().toISOString();
-        activeChallenge.isActive = false;
-        activeChallenge.isCompleted = true;
-        saveChallenges(challenges);
-      } else if (isPassed && activeChallenge.status === 'in_progress') {
-        activeChallenge.status = 'passed';
-        activeChallenge.passedAt = new Date().toISOString();
-        activeChallenge.isCompleted = true;
-        saveChallenges(challenges);
-      } else if (activeChallenge.status === 'in_progress') {
-        if (activeChallenge.tradingDaysCompleted !== tradingDaysCompleted || activeChallenge.totalPnL !== netEffectiveProfit) {
-          activeChallenge.tradingDaysCompleted = tradingDaysCompleted;
-          activeChallenge.totalPnL = netEffectiveProfit;
-          activeChallenge.winRate = currentWinRateNum;
-          activeChallenge.actualWinRate = currentWinRateNum;
-          saveChallenges(challenges);
-        }
-      }
+      const evalRes = evaluateClassicPropChallenge(activeChallenge, allSynced, { timezone: tradingTimezone, allowSaveTrades: true });
+      applyClassicChallengeEvaluation(activeChallenge, evalRes, challenges);
+      classicMetrics = evalRes.classicMetrics;
+      finalUserTrades = evalRes.userTrades;
     }
 
     const isClassicProp = Boolean(activeChallenge && (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules'));
@@ -8036,7 +8223,7 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
     res.json({
       success: true,
       hasActiveChallenge: !!activeChallenge,
-      isDisqualified,
+      isDisqualified: isDisqualified || (activeChallenge && (activeChallenge.status === 'failed' || activeChallenge.status === 'disqualified')),
       activeChallenge: activeChallenge ? {
         id: activeChallenge.id,
         packageName: activeChallenge.packageName,
@@ -8044,10 +8231,13 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
         challengeModel: activeChallenge.challengeModel || 'mm_sheet',
         startedAt: new Date(effectiveStartTime).toISOString(),
         expiresAt: activeChallenge.expiresAt,
-        status: activeChallenge.status
+        status: activeChallenge.status,
+        failReason: activeChallenge.failReason || null,
+        failReasonText: activeChallenge.failReasonText || null,
+        violatedRule: activeChallenge.violatedRule || null
       } : null,
       classicMetrics,
-      trades: userTrades,
+      trades: finalUserTrades,
       stats: {
         totalTrades,
         wins: (isClassicProp && classicMetrics) ? classicMetrics.winsCount : wins,
@@ -9261,288 +9451,15 @@ app.get('/api/admin/challenges/:id/metrics', authenticateAdminToken, (req, res) 
     const demoCount = userTrades.filter(t => (t.accountType || '').toLowerCase() === 'demo').length;
     const liveCount = userTrades.filter(t => (t.accountType || '').toLowerCase() === 'live').length;
 
-    // Run the classic metrics calculation
-    const initialCapital = Number(challenge.fundedAmount || challenge.startingCapital || 5000);
-    const targetPercent = Number(challenge.profitTargetPercent || 30);
-    const targetDollar = initialCapital * (targetPercent / 100);
-    const dailyLossPercent = Number(challenge.dailyLossPercent || 5);
-    const maxDrawdownPercent = Number(challenge.maxDrawdownPercent || 10);
-    const dailyProfitCapPercent = Number(challenge.dailyProfitCapPercent || 4);
-    const minWinRate = Number(challenge.minWinRate || 55);
-    const minTradingDays = Number(challenge.minTradingDays || 10);
-
-    const dailyLossLimitDollar = initialCapital * (dailyLossPercent / 100);
-    const maxDrawdownLimitDollar = initialCapital * (maxDrawdownPercent / 100);
-    const dailyProfitCapDollar = initialCapital * (dailyProfitCapPercent / 100);
-
-    const sortedAsc = [...userTrades].sort((a, b) => getTradeExecutionTime(a) - getTradeExecutionTime(b));
-    const dayMap = {};
-    let runningRawBalance = initialCapital;
-    let runningEffectiveBalance = initialCapital;
-    let runningEffectiveProfit = 0;
-    let totalTrimmedProfit = 0;
-    let isDailyLossHit = false;
-    let isMaxDrawdownHit = false;
-    let hitDetails = null;
-    let validWins = 0;
-    let validLosses = 0;
-    let disqualifiedWins = 0;
-
-    sortedAsc.forEach(t => {
-      const tTime = getTradeExecutionTime(t);
-      const dayKey = getTradingDayKey(tTime, tradingTimezone);
-      if (!dayMap[dayKey]) {
-        dayMap[dayKey] = {
-          date: dayKey,
-          trades: [],
-          grossPnl: 0,
-          effectivePnl: 0,
-          trimmedAmount: 0,
-          wins: 0,
-          losses: 0,
-          disqualifiedWins: 0
-        };
-      }
-      const dayData = dayMap[dayKey];
-
-      const tradeStake = typeof t.amount === 'number' ? t.amount : (parseFloat(String(t.amount || '0').replace(/[^0-9.-]/g, '')) || 0);
-      const rawProfit = typeof t.profit === 'number' ? t.profit : (parseFloat(String(t.profit || '0').replace(/[^0-9.-]/g, '')) || 0);
-
-      const dayLossSoFar = dayData.effectivePnl < 0 ? Math.abs(dayData.effectivePnl) : (dayData.grossPnl < 0 ? Math.abs(dayData.grossPnl) : 0);
-      const remainingDailyLossBuffer = Math.max(0, dailyLossLimitDollar - dayLossSoFar);
-      const currentDrawdownSoFar = Math.max(0, initialCapital - runningEffectiveBalance);
-      const remainingMaxDrawdownBuffer = Math.max(0, maxDrawdownLimitDollar - currentDrawdownSoFar);
-
-      const maxAllowedStake = Math.min(remainingDailyLossBuffer, remainingMaxDrawdownBuffer);
-      const isOverRisk = tradeStake > (maxAllowedStake + 0.01);
-
-      t.maxAllowedStakeAtOpen = parseFloat(maxAllowedStake.toFixed(2));
-      t.remainingDailyLossBufferAtOpen = parseFloat(remainingDailyLossBuffer.toFixed(2));
-      t.remainingMaxDrawdownBufferAtOpen = parseFloat(remainingMaxDrawdownBuffer.toFixed(2));
-
-      if (isOverRisk) {
-        if (t.result === 'WIN') {
-          t.isOverRiskDisqualified = true;
-          t.isDisqualified = true;
-          t.overRiskReason = 'স্টপ লসের বাহিরে গিয়ে ট্রেড করার কারণে ট্রেডটি গণ্য হয়নি';
-          t.effectiveProfit = 0;
-          dayData.disqualifiedWins = (dayData.disqualifiedWins || 0) + 1;
-          disqualifiedWins++;
-          dayData.trades.push(t);
-        } else {
-          t.isOverRiskDisqualified = false;
-          t.isDisqualified = false;
-          t.isOverRiskBreach = true;
-          if (t.result === 'LOSS') {
-            const tradeLoss = tradeStake;
-            t.effectiveProfit = -tradeLoss;
-            dayData.losses++;
-            validLosses++;
-            dayData.grossPnl -= tradeLoss;
-            dayData.effectivePnl -= tradeLoss;
-            runningEffectiveProfit -= tradeLoss;
-            runningEffectiveBalance -= tradeLoss;
-            runningRawBalance -= tradeLoss;
-
-            if (dayData.effectivePnl < 0 && Math.abs(dayData.effectivePnl) >= dailyLossLimitDollar) {
-              isDailyLossHit = true;
-              hitDetails = `স্টপ লস বাফারের চেয়ে বেশি সাইজের ট্রেড ($${tradeStake.toFixed(2)} > অনুমোদিত $${maxAllowedStake.toFixed(2)}) নিয়ে লস করায় ডেইলি স্টপ লস লিমিট (-${dailyLossPercent}%) অতিক্রম করেছে।`;
-            }
-            if ((initialCapital - runningEffectiveBalance) >= maxDrawdownLimitDollar || (initialCapital - runningRawBalance) >= maxDrawdownLimitDollar) {
-              isMaxDrawdownHit = true;
-              hitDetails = `স্টপ লস বাফারের চেয়ে বেশি সাইজের ট্রেড ($${tradeStake.toFixed(2)} > অনুমোদিত $${maxAllowedStake.toFixed(2)}) নিয়ে লস করায় সর্বোচ্চ ড্র-ডাউন লিমিট (-${maxDrawdownPercent}%) অতিক্রম করেছে।`;
-            }
-          } else {
-            t.effectiveProfit = 0;
-          }
-          dayData.trades.push(t);
-        }
-      } else {
-        const remainingDailyCap = Math.max(0, dailyProfitCapDollar - (dayData.effectivePnl > 0 ? dayData.effectivePnl : 0));
-        const remainingOverallTarget = Math.max(0, targetDollar - (runningEffectiveProfit > 0 ? runningEffectiveProfit : 0));
-
-        if (t.result === 'WIN') {
-          const rawTradeProfit = rawProfit > tradeStake ? (rawProfit - tradeStake) : rawProfit;
-
-          if (remainingDailyCap <= 0.001) {
-            t.isCappedDisqualified = true;
-            t.isDisqualified = true;
-            t.overRiskReason = 'দৈনিক প্রফিট ক্যাপ পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
-            t.capDisqualifiedReason = 'দৈনিক প্রফিট ক্যাপ পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
-            t.effectiveProfit = 0;
-            dayData.disqualifiedWins = (dayData.disqualifiedWins || 0) + 1;
-            disqualifiedWins++;
-            dayData.trades.push(t);
-          } else if (remainingOverallTarget <= 0.001) {
-            t.isCappedDisqualified = true;
-            t.isDisqualified = true;
-            t.overRiskReason = 'প্রফিট টার্গেট পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
-            t.capDisqualifiedReason = 'প্রফিট টার্গেট পূর্ণ হওয়ার কারণে প্রফিট গণ্য হয়নি';
-            t.effectiveProfit = 0;
-            dayData.disqualifiedWins = (dayData.disqualifiedWins || 0) + 1;
-            disqualifiedWins++;
-            dayData.trades.push(t);
-          } else {
-            t.isOverRiskDisqualified = false;
-            t.isDisqualified = false;
-            t.isCappedDisqualified = false;
-            const maxCreditable = Math.min(remainingDailyCap, remainingOverallTarget);
-
-            if (rawTradeProfit <= (maxCreditable + 0.001)) {
-              t.effectiveProfit = rawTradeProfit;
-              dayData.wins++;
-              validWins++;
-              dayData.grossPnl += rawTradeProfit;
-              dayData.effectivePnl += rawTradeProfit;
-              runningEffectiveProfit += rawTradeProfit;
-              runningEffectiveBalance += rawTradeProfit;
-              runningRawBalance += rawTradeProfit;
-            } else {
-              const credited = Math.round(maxCreditable * 100) / 100;
-              const trimmed = Math.round((rawTradeProfit - credited) * 100) / 100;
-              t.effectiveProfit = credited;
-              t.trimmedProfit = trimmed;
-              t.capNote = 'প্রফিট ক্যাপ পূর্ণ হওয়ায় অতিরিক্ত প্রফিট ট্রিম করা হয়েছে';
-              dayData.wins++;
-              validWins++;
-              dayData.grossPnl += rawTradeProfit;
-              dayData.effectivePnl += credited;
-              dayData.trimmedAmount = (dayData.trimmedAmount || 0) + trimmed;
-              totalTrimmedProfit += trimmed;
-              runningEffectiveProfit += credited;
-              runningEffectiveBalance += credited;
-              runningRawBalance += rawTradeProfit;
-            }
-            dayData.trades.push(t);
-          }
-        } else if (t.result === 'LOSS') {
-          t.isOverRiskDisqualified = false;
-          t.isDisqualified = false;
-          t.isCappedDisqualified = false;
-          const tradeLoss = tradeStake;
-          t.effectiveProfit = -tradeLoss;
-          dayData.losses++;
-          validLosses++;
-          dayData.grossPnl -= tradeLoss;
-          dayData.effectivePnl -= tradeLoss;
-          runningEffectiveProfit -= tradeLoss;
-          runningEffectiveBalance -= tradeLoss;
-          runningRawBalance -= tradeLoss;
-
-          if (dayData.effectivePnl < 0 && Math.abs(dayData.effectivePnl) >= dailyLossLimitDollar) {
-            isDailyLossHit = true;
-            hitDetails = `ডেইলি স্টপ লস সীমা (-${dailyLossPercent}%) অতিক্রম করেছে: মোট লস $${Math.abs(dayData.effectivePnl).toFixed(2)}`;
-          }
-          if ((initialCapital - runningEffectiveBalance) >= maxDrawdownLimitDollar || (initialCapital - runningRawBalance) >= maxDrawdownLimitDollar) {
-            isMaxDrawdownHit = true;
-            hitDetails = `সর্বোচ্চ ড্র-ডাউন সীমা (-${maxDrawdownPercent}%) অতিক্রম করেছে: মোট ড্র-ডাউন $${Math.max(initialCapital - runningEffectiveBalance, initialCapital - runningRawBalance).toFixed(2)}`;
-          }
-          dayData.trades.push(t);
-        } else {
-          t.effectiveProfit = 0;
-          dayData.trades.push(t);
-        }
-      }
-    });
-
-    const dayKeys = Object.keys(dayMap);
-    const tradingDaysCompleted = dayKeys.filter(k => {
-      if (k === 'unknown') return false;
-      const d = dayMap[k];
-      return (d.wins + d.losses) > 0;
-    }).length;
-
-    const dailyBreakdown = dayKeys.map(k => {
-      const dayData = dayMap[k];
-      return {
-        date: dayData.date,
-        tradesCount: dayData.trades.length,
-        wins: dayData.wins,
-        losses: dayData.losses,
-        disqualifiedWins: dayData.disqualifiedWins || 0,
-        rawPnl: parseFloat(dayData.grossPnl.toFixed(2)),
-        effectivePnl: parseFloat(dayData.effectivePnl.toFixed(2)),
-        trimmedAmount: parseFloat((dayData.trimmedAmount || 0).toFixed(2)),
-        capApplied: (dayData.trimmedAmount || 0) > 0 || (dayData.disqualifiedWins || 0) > 0
-      };
-    });
-
-    const totalDrawdownDollar = Math.max(0, initialCapital - runningEffectiveBalance);
-    const totalWinLoss = validWins + validLosses;
-    const currentWinRateNum = totalWinLoss > 0 ? ((validWins / totalWinLoss) * 100) : 0;
-    const netEffectiveProfit = runningEffectiveProfit;
-    const currentProfitPercent = (netEffectiveProfit / initialCapital) * 100;
-
-    const isTargetReached = (netEffectiveProfit >= targetDollar);
-    const isDaysReached = (tradingDaysCompleted >= minTradingDays);
-    const isWinRateReached = (currentWinRateNum >= minWinRate);
-    const isPassed = isTargetReached && isDaysReached && isWinRateReached && !isDailyLossHit && !isMaxDrawdownHit;
-
-    const todayIso = getTradingDayKey(Date.now(), tradingTimezone);
-    const todayData = dayMap[todayIso] || { grossPnl: 0, effectivePnl: 0, wins: 0, losses: 0, disqualifiedWins: 0, trades: [] };
-    const todayEffectiveProfit = todayData.effectivePnl > 0 ? Math.min(dailyProfitCapDollar, todayData.effectivePnl) : 0;
-    const todayLossAmount = todayData.effectivePnl < 0 ? Math.abs(todayData.effectivePnl) : 0;
-    const todayRemainingLossBuffer = Math.max(0, dailyLossLimitDollar - todayLossAmount);
-    const currentDrawdownAmount = Math.max(0, initialCapital - runningEffectiveBalance);
-    const remainingDrawdownBuffer = Math.max(0, maxDrawdownLimitDollar - currentDrawdownAmount);
-
-    const classicMetrics = {
-      challengeModel: 'classic_prop',
-      initialCapital,
-      tradingTimezone,
-      todayDate: todayIso,
-      currentBalance: parseFloat(runningEffectiveBalance.toFixed(2)),
-      effectiveBalance: parseFloat(runningEffectiveBalance.toFixed(2)),
-      netEffectiveProfit: parseFloat(netEffectiveProfit.toFixed(2)),
-      netProfit: parseFloat(netEffectiveProfit.toFixed(2)),
-      profitPercent: parseFloat(currentProfitPercent.toFixed(2)),
-      targetPercent,
-      targetDollar,
-      targetRemainingDollar: parseFloat(Math.max(0, targetDollar - netEffectiveProfit).toFixed(2)),
-      targetRemainingPercent: parseFloat(Math.max(0, targetPercent - currentProfitPercent).toFixed(2)),
-      dailyLossLimitPercent: dailyLossPercent,
-      dailyLossLimitDollar,
-      todayLossDollar: parseFloat(todayLossAmount.toFixed(2)),
-      todayRemainingLossBuffer: parseFloat(todayRemainingLossBuffer.toFixed(2)),
-      maxDrawdownPercent,
-      maxDrawdownLimitDollar,
-      currentDrawdownPercent: parseFloat(((currentDrawdownAmount / initialCapital) * 100).toFixed(1)),
-      currentDrawdownDollar: parseFloat(currentDrawdownAmount.toFixed(2)),
-      remainingDrawdownBuffer: parseFloat(remainingDrawdownBuffer.toFixed(2)),
-      dailyProfitCapPercent,
-      dailyProfitCapDollar,
-      todayGrossProfit: parseFloat(todayEffectiveProfit.toFixed(2)),
-      todayRemainingProfitCap: parseFloat(Math.max(0, dailyProfitCapDollar - todayEffectiveProfit).toFixed(2)),
-      totalTrimmedProfit: parseFloat(totalTrimmedProfit.toFixed(2)),
-      tradingDaysCompleted,
-      minTradingDays,
-      tradingDaysRemaining: Math.max(0, minTradingDays - tradingDaysCompleted),
-      winRate: parseFloat(currentWinRateNum.toFixed(1)),
-      minWinRate,
-      winsCount: validWins,
-      lossesCount: validLosses,
-      disqualifiedWinsCount: disqualifiedWins,
-      totalTradesCount: userTrades.length,
-      isTargetReached,
-      isDaysReached,
-      isWinRateReached,
-      isPassed,
-      isDailyLossHit,
-      isMaxDrawdownHit,
-      hitDetails,
-      dailyBreakdown
-    };
-
     const isClassicProp = Boolean(challenge.challengeModel === 'classic_prop' || challenge.category === 'your_rules');
+    let classicMetrics = null;
+    let finalUserTrades = userTrades;
 
-    if (isClassicProp && classicMetrics && challenge.status === 'in_progress') {
-      if (challenge.tradingDaysCompleted !== classicMetrics.tradingDaysCompleted || challenge.totalPnL !== classicMetrics.netEffectiveProfit) {
-        challenge.tradingDaysCompleted = classicMetrics.tradingDaysCompleted;
-        challenge.totalPnL = classicMetrics.netEffectiveProfit;
-        challenge.winRate = classicMetrics.winRate;
-        challenge.actualWinRate = classicMetrics.winRate;
-        saveChallenges(challenges);
-      }
+    if (isClassicProp) {
+      const evalRes = evaluateClassicPropChallenge(challenge, allSynced, { timezone: tradingTimezone, allowSaveTrades: true });
+      applyClassicChallengeEvaluation(challenge, evalRes, challenges);
+      classicMetrics = evalRes.classicMetrics;
+      finalUserTrades = evalRes.userTrades;
     }
 
     res.json({
@@ -9555,12 +9472,15 @@ app.get('/api/admin/challenges/:id/metrics', authenticateAdminToken, (req, res) 
         startedAt: new Date(effectiveStartTime).toISOString(),
         expiresAt: challenge.expiresAt,
         status: challenge.status,
+        failReason: challenge.failReason || null,
+        failReasonText: challenge.failReasonText || null,
+        violatedRule: challenge.violatedRule || null,
         brokerName: challenge.brokerName,
         brokerAccountId: challenge.brokerAccountId,
         fundedAmount: challenge.fundedAmount
       },
       classicMetrics,
-      trades: userTrades,
+      trades: finalUserTrades,
       stats: {
         totalTrades,
         wins: (isClassicProp && classicMetrics) ? classicMetrics.winsCount : wins,

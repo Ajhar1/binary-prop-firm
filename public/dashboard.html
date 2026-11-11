@@ -7377,10 +7377,22 @@
             let reasonText = challenge.failReasonText || 'নির্দিষ্ট নিয়ম লঙ্ঘনের কারণে চ্যালেঞ্জটি বন্ধ করা হয়েছে।';
             let ruleTag = '';
 
-            if (challenge.failReason === 'TIME_LIMIT_EXCEEDED') {
-                reasonTitle = '⏰ সময়সীমা অতিক্রম (15 Days Evaluation Expired):';
-                reasonText = challenge.failReasonText || 'চ্যালেঞ্জটির নির্ধারিত ১৫ দিন সময় অতিক্রান্ত হয়েছে কিন্তু ১৫টি ভেরিফাইড সেশন সম্পন্ন হয়নি।';
-                ruleTag = 'রুল #১০: সময়সীমা অতিক্রম';
+            if (challenge.failReason === 'DAILY_LOSS_LIMIT_EXCEEDED') {
+                reasonTitle = '📉 দৈনিক সর্বোচ্চ লস সীমা অতিক্রম (Daily Loss Limit Exceeded):';
+                ruleTag = challenge.violatedRule || 'দৈনিক সর্বোচ্চ লস সীমা লঙ্ঘন';
+                reasonText = challenge.failReasonText || 'দৈনিক সর্বোচ্চ লস সীমা ছুঁয়ে ফেলা বা অতিক্রম করায় চ্যালেঞ্জটি ডিসকোয়ালিফাই করা হয়েছে।';
+            } else if (challenge.failReason === 'MAX_DRAWDOWN_EXCEEDED') {
+                reasonTitle = '📉 সর্বোচ্চ লস সীমা/ড্র-ডাউন অতিক্রম (Max Drawdown Limit Exceeded):';
+                ruleTag = challenge.violatedRule || 'সর্বোচ্চ ড্র-ডাউন সীমা লঙ্ঘন';
+                reasonText = challenge.failReasonText || 'সর্বোচ্চ অনুমোদিত লস সীমা বা ড্র-ডাউন ছুঁয়ে ফেলা বা অতিক্রম করায় চ্যালেঞ্জটি ডিসকোয়ালিফাই করা হয়েছে।';
+            } else if (challenge.failReason === 'WIN_RATE_NOT_MET') {
+                reasonTitle = '🎯 ন্যূনতম উইন রেট পূরণ হয়নি (Minimum Win Rate Not Met):';
+                ruleTag = challenge.violatedRule || 'ন্যূনতম উইন রেট অর্জন করতে ব্যর্থ';
+                reasonText = challenge.failReasonText || 'প্রফিট টার্গেট ও ট্রেডিং দিন সম্পন্ন হলেও নির্ধারিত ন্যূনতম উইন রেট পূরণ না হওয়ায় চ্যালেঞ্জটি ডিসকোয়ালিফাই করা হয়েছে।';
+            } else if (challenge.failReason === 'TIME_LIMIT_EXCEEDED') {
+                reasonTitle = '⏰ নির্ধারিত ট্রেডিং সময়সীমা অতিক্রম (Time Limit Exceeded):';
+                reasonText = challenge.failReasonText || 'চ্যালেঞ্জটির নির্ধারিত ট্রেডিং দিন ও সময় অতিক্রান্ত হয়েছে কিন্তু নির্ধারিত লক্ষ্য সম্পন্ন হয়নি।';
+                ruleTag = challenge.violatedRule || 'সময়সীমা অতিক্রম';
             } else if (challenge.failReason === 'RULE_VIOLATION') {
                 reasonTitle = '🚨 ট্রেডিং রুল লঙ্ঘন (Rule Violation):';
                 ruleTag = challenge.violatedRule || 'অফিসিয়াল রুল লঙ্ঘন';
@@ -8677,11 +8689,21 @@
                                     <span style="background:rgba(245,176,65,0.15); color:#f5b041; border:1px solid rgba(245,176,65,0.35); padding:2px 8px; border-radius:6px; font-size:0.72rem; font-weight:800; letter-spacing:0.3px;">
                                         Your Challenge Your Rules
                                     </span>
-                                    <span style="background:rgba(0,230,118,0.12); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.72rem; display:inline-flex; align-items:center; gap:5px;">
-                                        <span style="width:6px; height:6px; border-radius:50%; background:#00e676; box-shadow:0 0 8px #00e676;"></span> লাইভ সিঙ্ক অ্যাক্টিভ
-                                    </span>
+                                    ${challenge.status === 'failed' ? `
+                                        <span style="background:rgba(239,68,68,0.18); color:#ef4444; border:1px solid rgba(239,68,68,0.45); padding:2px 8px; border-radius:6px; font-weight:800; font-size:0.72rem; display:inline-flex; align-items:center; gap:5px;">
+                                            <span style="width:6px; height:6px; border-radius:50%; background:#ef4444; box-shadow:0 0 8px #ef4444;"></span> ডিসকোয়ালিফাইড (Disqualified)
+                                        </span>
+                                    ` : (challenge.status === 'passed' ? `
+                                        <span style="background:rgba(0,230,118,0.18); color:#00e676; border:1px solid rgba(0,230,118,0.45); padding:2px 8px; border-radius:6px; font-weight:800; font-size:0.72rem; display:inline-flex; align-items:center; gap:5px;">
+                                            <span style="width:6px; height:6px; border-radius:50%; background:#00e676; box-shadow:0 0 8px #00e676;"></span> চ্যালেঞ্জ সফল (Passed)
+                                        </span>
+                                    ` : `
+                                        <span style="background:rgba(0,230,118,0.12); color:#00e676; border:1px solid rgba(0,230,118,0.3); padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.72rem; display:inline-flex; align-items:center; gap:5px;">
+                                            <span style="width:6px; height:6px; border-radius:50%; background:#00e676; box-shadow:0 0 8px #00e676;"></span> লাইভ সিঙ্ক অ্যাক্টিভ
+                                        </span>
+                                    `)}
                                     ${isMyChallenges ? `
-                                        <span style="background:rgba(46,204,113,0.2); color:var(--neon-green); font-size:0.7rem; font-weight:800; padding:2px 6px; border-radius:4px;">ACTIVE NOW</span>
+                                        <span style="background:rgba(46,204,113,0.2); color:var(--neon-green); font-size:0.7rem; font-weight:800; padding:2px 6px; border-radius:4px;">${challenge.status === 'failed' ? 'FAILED' : (challenge.status === 'passed' ? 'PASSED' : 'ACTIVE NOW')}</span>
                                     ` : ''}
                                 </div>
                                 <div style="margin-top:4px; font-size:0.8rem; color:#94a3b8; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -8707,6 +8729,15 @@
                             </button>
                         </div>
                     </div>
+
+                    ${challenge.status === 'failed' ? `
+                    <div style="background:rgba(239,68,68,0.15); border:1.5px solid rgba(239,68,68,0.4); border-radius:12px; padding:12px 16px; margin-bottom:14px; display:flex; align-items:center; gap:12px; color:#fca5a5; font-size:0.88rem;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:1.35rem; color:#ef4444; flex-shrink:0;"></i>
+                        <div>
+                            <strong style="color:#ef4444; font-weight:800;">চ্যালেঞ্জটি ডিসকোয়ালিফাই হয়েছে:</strong> ${escapeHtml(challenge.failReasonText || challenge.violatedRule || m.hitDetails || 'নিয়ম লঙ্ঘনের কারণে চ্যালেঞ্জ বাতিল করা হয়েছে।')}
+                        </div>
+                    </div>
+                    ` : ''}
 
                     <!-- HERO TIER: 2 Primary Highlights (Profit Target & Max Drawdown) -->
                     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; margin-bottom:14px;">
