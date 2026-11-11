@@ -7659,8 +7659,6 @@ app.get('/api/user/synced-trades', authenticateToken, (req, res) => {
         (activeChallenge && (t.userId === activeChallenge.userId || (t.userEmail && activeChallenge.userEmail && t.userEmail.toLowerCase() === activeChallenge.userEmail.toLowerCase())))
       );
       if (!isChallengeMatch && !isUserMatch) return false;
-      if (t.challengeId && t.challengeId !== activeChallenge.id) return false;
-      if (!isChallengeMatch && effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 60000)) return false;
 
       // Auto-heal trade ownership: PERMANENTLY BIND TO THIS CHALLENGE
       if (!t.challengeId || t.challengeId !== activeChallenge.id || t.userId !== activeChallenge.userId || t.userEmail !== activeChallenge.userEmail) {
@@ -9219,15 +9217,13 @@ app.get('/api/admin/challenges/:id/metrics', authenticateAdminToken, (req, res) 
 
     let didRepairOwnership = false;
     const userTrades = allSynced.filter(t => {
-      const isChallengeMatch = (t.challengeId === challenge.id);
-      const isUserMatch = (
+      const isChallengeMatch = Boolean(challenge.id && t.challengeId === challenge.id);
+      const isUserMatch = Boolean(
         (targetUserId && t.userId === targetUserId) ||
         (targetUserEmail && t.userEmail && t.userEmail.toLowerCase() === targetUserEmail) ||
         (targetTraderId && t.traderId && t.traderId.toLowerCase() === targetTraderId)
       );
       if (!isChallengeMatch && !isUserMatch) return false;
-      if (t.challengeId && t.challengeId !== challenge.id) return false;
-      if (!isChallengeMatch && effectiveStartTime && getTradeExecutionTime(t) < (effectiveStartTime - 5 * 60 * 1000)) return false;
 
       // Auto-heal trade ownership if needed
       if (!t.challengeId || t.challengeId !== challenge.id || (targetUserId && t.userId !== targetUserId)) {

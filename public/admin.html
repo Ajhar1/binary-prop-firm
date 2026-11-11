@@ -7707,12 +7707,15 @@
             if (!challengeId && !userId) return null;
             const cacheKey = challengeId || userId;
             try {
-                const token = localStorage.getItem('bpf_admin_token') || sessionStorage.getItem('bpf_admin_token');
+                const token = getAdminToken() || localStorage.getItem('aj_admin_token') || localStorage.getItem('bpf_admin_token') || sessionStorage.getItem('bpf_admin_token') || '';
                 const userParam = userId ? `&userId=${encodeURIComponent(userId)}` : '';
                 const res = await fetch(`/api/admin/challenges/${encodeURIComponent(challengeId || 'auto')}/metrics?tz=Asia/Dhaka${userParam}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (!res.ok) return null;
+                if (!res.ok) {
+                    console.error('fetchAdminClassicMetrics failed with status:', res.status);
+                    return null;
+                }
                 const data = await res.json();
                 if (data.success) {
                     if (challengeId) adminClassicMetricsCache[challengeId] = data;
@@ -7907,7 +7910,7 @@
                 const targetUid = u.id || ch.userId || '';
                 const cacheKey = ch.id || targetUid;
                 // Fetch classic metrics if not cached
-                if (!adminClassicMetricsCache[cacheKey]) {
+                if (!adminClassicMetricsCache[cacheKey] && !adminClassicMetricsCache[ch.id] && !adminClassicMetricsCache[targetUid]) {
                     fetchAdminClassicMetrics(ch.id, targetUid).then(data => {
                         if (data) renderTraderSerialSessions();
                     });
