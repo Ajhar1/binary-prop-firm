@@ -10403,6 +10403,9 @@
                             return a && !a.isPassed;
                         }).length;
 
+                        const isClassicPropChallenge = !!(activeChallenge && (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules'));
+                        const isSessionRunning = (!isClassicPropChallenge && (sheetSessionData?.sessionStatus === 'RUNNING' || (typeof masSessionStatus !== 'undefined' && masSessionStatus === 'RUNNING')));
+
                         activeSessionCard.style.display = 'block';
                         activeSessionCard.innerHTML = `
                             <div class="active-session-card-box" style="background:rgba(245,176,65,0.06); border:1.5px solid rgba(245,176,65,0.4); border-radius:12px; padding:12px 14px; box-shadow:0 0 16px rgba(245,176,65,0.12);">
@@ -10419,9 +10422,15 @@
                                             ${pnlSign}$${unsubmittedPnl.toFixed(2)}
                                         </span>
                                     </div>
-                                    <button type="button" class="btn-gold" onclick="runAutomatedSessionAudit()" style="padding:5px 14px; font-size:0.78rem; border-radius:6px; display:inline-flex; align-items:center; gap:6px; font-weight:800;">
-                                        <i class="fas fa-bolt"></i> সেশন অডিট ও সাবমিট করুন &rarr;
-                                    </button>
+                                    ${isSessionRunning ? `
+                                        <button type="button" class="btn-secondary" onclick="showToast('⚠️ সেশন এখনো চলমান রয়েছে! ৬টি উইন অর্জন অথবা সেশন সম্পন্ন হওয়ার পর অডিট ও সাবমিট বাটন সক্রিয় হবে।', 'info')" style="padding:5px 14px; font-size:0.78rem; border-radius:6px; display:inline-flex; align-items:center; gap:6px; font-weight:700; opacity:0.8; cursor:pointer;" title="সেশন সম্পন্ন হওয়ার পর অডিট সক্রিয় হবে">
+                                            <i class="fas fa-hourglass-half" style="color:var(--yellow);"></i> সেশন চলমান রয়েছে (${unsubmittedWins}W / ${unsubmittedLosses}L)
+                                        </button>
+                                    ` : `
+                                        <button type="button" class="btn-gold" onclick="runAutomatedSessionAudit()" style="padding:5px 14px; font-size:0.78rem; border-radius:6px; display:inline-flex; align-items:center; gap:6px; font-weight:800;">
+                                            <i class="fas fa-bolt"></i> সেশন অডিট ও সাবমিট করুন &rarr;
+                                        </button>
+                                    `}
                                 </div>
 
                                 ${(() => {
@@ -11483,6 +11492,10 @@
 
             // Update Live Trade Sync Status Banner & Submit Button Guard
             const syncComp = getTradeSyncComparison();
+            const isClassicProp = !!(activeChallenge && (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules'));
+            const sheetData = (!isClassicProp && typeof getMasanielloSessionData === 'function') ? getMasanielloSessionData() : null;
+            const isSessionRunning = (!isClassicProp && (sheetData?.sessionStatus === 'RUNNING' || (typeof masSessionStatus !== 'undefined' && masSessionStatus === 'RUNNING')));
+
             if (syncBox && syncComp) {
                 syncBox.style.display = 'block';
                 if (syncComp.sheetTradesCount > 0 && syncComp.syncedTradesCount < syncComp.sheetTradesCount) {
@@ -11500,6 +11513,23 @@
                             <button type="button" class="btn-outline" onclick="switchTab('trade-history'); fetchUserSyncedTrades();" style="padding:4px 10px; font-size:0.75rem; border-color:var(--yellow); color:var(--yellow); border-radius:6px; cursor:pointer;">
                                 <i class="fas fa-sync-alt"></i> Sync Trades
                             </button>
+                        </div>
+                    `;
+                } else if (isSessionRunning) {
+                    syncBox.style.borderColor = 'rgba(245,176,65,0.4)';
+                    syncBox.style.background = 'rgba(245,176,65,0.08)';
+                    syncBox.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-hourglass-half" style="color:var(--yellow); font-size:1.05rem;"></i>
+                                <div>
+                                    <div style="color:#fde68a; font-weight:700;">ট্রেডিং সেশন চলমান রয়েছে (${sheetData ? sheetData.wins : 0}W / ${sheetData ? sheetData.losses : 0}L)</div>
+                                    <div style="color:#cbd5e1; font-size:0.75rem;">প্ল্যাটফর্ম রুলস: সেশন সম্পন্ন হওয়ার পর (৬টি উইন অর্জন অথবা ড্র-ডাউন সীমা স্পর্শ) অডিট সক্রিয় হবে।</div>
+                                </div>
+                            </div>
+                            <span class="badge" style="background:rgba(245,176,65,0.2); color:var(--yellow); font-size:0.74rem; padding:3px 8px; border:1px solid rgba(245,176,65,0.35);">
+                                ⏳ সেশন চলমান
+                            </span>
                         </div>
                     `;
                 } else if (syncComp.sheetTradesCount > 0 && syncComp.isMatched) {
@@ -11536,10 +11566,20 @@
                 if (syncComp && syncComp.sheetTradesCount > 0 && syncComp.syncedTradesCount < syncComp.sheetTradesCount) {
                     submitBtn.style.background = 'linear-gradient(135deg, rgba(239,68,68,0.9), rgba(217,119,6,0.95))';
                     submitBtn.style.borderColor = 'rgba(239,68,68,0.6)';
+                    submitBtn.style.color = '#fff';
+                    submitBtn.style.cursor = 'pointer';
                     submitBtn.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ⚠️ ${prefix}${sNum} অডিট লক (${syncComp.missingCount}টি সেভ বাকি)`;
+                } else if (isSessionRunning) {
+                    submitBtn.style.background = 'rgba(255,255,255,0.06)';
+                    submitBtn.style.borderColor = 'rgba(255,255,255,0.15)';
+                    submitBtn.style.color = 'var(--text-secondary)';
+                    submitBtn.style.cursor = 'not-allowed';
+                    submitBtn.innerHTML = `<i class="fas fa-lock"></i> ${prefix}${sNum} চলমান রয়েছে (সেশন শেষ হলে আনলক হবে)`;
                 } else {
                     submitBtn.style.background = '';
                     submitBtn.style.borderColor = '';
+                    submitBtn.style.color = '';
+                    submitBtn.style.cursor = 'pointer';
                     submitBtn.innerHTML = isPractice 
                         ? `<i class="fas fa-graduation-cap"></i> 🎓 প্র্যাকটিস সেশন #${sNum} আপলোড ও অডিট করুন`
                         : `<i class="fas fa-bolt"></i> 🚀 সেশন #${sNum} আপলোড ও অডিট করুন`;
@@ -11566,6 +11606,19 @@
             if (syncComp.sheetTradesCount <= 0) {
                 showToast('মানি ম্যানেজমেন্ট শীটে আপনার বর্তমান সেশনের কোনো ট্রেড পাওয়া যায়নি। অনুগ্রহ করে শীটে ট্রেড এন্ট্রি সম্পন্ন করুন।', 'warning');
                 return;
+            }
+
+            // STRICT GUARD: For Easy Challenge / Easy Rules (Masaniello model), session MUST be completed before audit!
+            const isClassicProp = !!(activeChallenge && (activeChallenge.challengeModel === 'classic_prop' || activeChallenge.category === 'your_rules'));
+            if (!isClassicProp) {
+                const sheetData = (typeof getMasanielloSessionData === 'function') ? getMasanielloSessionData() : null;
+                const sStatus = sheetData?.sessionStatus || (typeof masSessionStatus !== 'undefined' ? masSessionStatus : 'RUNNING');
+                if (sStatus === 'RUNNING') {
+                    const curWins = sheetData ? sheetData.wins : 0;
+                    const curLosses = sheetData ? sheetData.losses : 0;
+                    showToast(`⚠️ সেশন এখনো চলমান রয়েছে (${curWins}W / ${curLosses}L)! প্ল্যাটফর্মের নিয়ম অনুযায়ী সেশন সম্পন্ন হওয়ার পূর্বে (৬টি উইন অর্জন অথবা ২৫% ড্র-ডাউন সীমা স্পর্শ) ট্রেডিং প্রুফ অডিট বা সাবমিট করা যাবে না। কোটেক্সে ট্রেড চালিয়ে যান।`, 'warning');
+                    return;
+                }
             }
 
             // ENFORCE GUARD: As long as syncedTradesCount < sheetTradesCount, do NOT proceed!
@@ -11625,6 +11678,15 @@
                         syncedTradesCount: data.syncedTradesCount,
                         missingCount: data.missingCount
                     });
+                    return;
+                }
+
+                if (data.sessionIncomplete) {
+                    scanningView.style.display = 'none';
+                    closeModal('masAuditProgressModal');
+                    modal.style.display = 'none';
+                    modal.classList.remove('active');
+                    showToast(data.message || '⚠️ সেশন এখনো সমাপ্ত হয়নি! ৬টি উইন অর্জন বা সেশন শেষ করে অডিট সাবমিট করুন।', 'warning');
                     return;
                 }
 

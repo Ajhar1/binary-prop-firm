@@ -6386,11 +6386,14 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         } else if ((16 - (m + 1)) < (6 - wins)) {
           sessionComplete = true;
           completionReason = 'INSUFFICIENT_TRADES_FOR_6_WINS';
+          violations.push(`অবশিষ্ট ট্রেড সংখ্যা (${16 - (m + 1)}টি) দিয়ে প্রয়োজনীয় ৬টি উইন অর্জন করা গাণিতিকভাবে অসম্ভব (বর্তমান উইন: ${wins}টি)।`);
         } else if ((m + 1) === 16) {
           if (wins >= 6) {
             sessionComplete = true;
             completionReason = '16_TRADES_COMPLETED_WITH_6_WINS';
           } else {
+            sessionComplete = true;
+            completionReason = '16_TRADES_EXHAUSTED_WITHOUT_6_WINS';
             violations.push(`১৬টি ট্রেড সম্পন্ন করার পরেও ৬টি উইন অর্জিত হয়নি (মোট উইন: ${wins}টি)। রুলস অনুযায়ী আপনি এই চ্যালেঞ্জ থেকে বাদ পড়েছেন।`);
           }
         }
@@ -6456,11 +6459,20 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
       }
     }
 
-    if (!sessionComplete && violations.length === 0) {
+    if (!sessionComplete) {
+      // STRICT SAFETY GUARD: If session is incomplete, under NO circumstances should the challenge be failed or disqualified!
+      // Return clear, actionable feedback to trader without penalizing their active challenge.
       return res.json({
         success: false,
         passed: false,
-        message: `আপনার সেশনটি এখনো সমাপ্ত হয়নি (বর্তমান রেকর্ড: ${wins}W - ${losses}L)। ৬টি উইন অর্জন বা সেশন সমাপ্ত হওয়া পর্যন্ত কোটেক্সে ট্রেড সম্পন্ন করুন।`
+        sessionIncomplete: true,
+        wins,
+        losses,
+        totalTrades: wins + losses,
+        violations: violations.length > 0 ? violations : [],
+        message: violations.length > 0
+          ? `⚠️ আপনার সেশনটি এখনো সমাপ্ত হয়নি (বর্তমান রেকর্ড: ${wins}W - ${losses}L) এবং শীট ও ব্রোকারের ট্রেডের মধ্যে অসঙ্গতি সনাক্ত হয়েছে: ${violations[0]}। প্ল্যাটফর্মের নিয়ম অনুযায়ী সেশন সম্পন্ন হওয়ার পূর্বে (৬টি উইন অর্জন অথবা ২৫% ড্রডাউন সীমা স্পর্শ) কোনো ট্রেডিং প্রুফ অডিট করা যাবে না এবং অসম্পূর্ণ সেশনের জন্য চ্যালেঞ্জ বাতিল করা যাবে না। অনুগ্রহ করে ড্যাশবোর্ডের মানি ম্যানেজমেন্ট শীটটি ব্রোকারের আসল ট্রেড ফলাফলের সাথে মিলিয়ে সংশোধন করে ট্রেড সম্পন্ন করুন।`
+          : `আপনার সেশনটি এখনো সমাপ্ত হয়নি (বর্তমান রেকর্ড: ${wins}W - ${losses}L)। ৬টি উইন অর্জন বা সেশন সমাপ্ত হওয়া পর্যন্ত কোটেক্সে ট্রেড সম্পন্ন করুন।`
       });
     }
 
