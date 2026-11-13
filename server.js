@@ -2058,12 +2058,22 @@ function syncChallengesWithSubmissions() {
             pc.isCompleted = true;
             writeJson(CHALLENGES_PERMANENT_STORE_FILE, permChallenges);
           }
-        } else if (existing.status !== pc.status && pc.status === 'in_progress' && existing.status !== 'passed' && existing.status !== 'failed') {
-          existing.status = pc.status;
-          existing.approvedAt = pc.approvedAt || existing.approvedAt;
-          existing.assignedMmUrl = pc.assignedMmUrl || existing.assignedMmUrl;
-          existing.assignedMmTitle = pc.assignedMmTitle || existing.assignedMmTitle;
-          modified = true;
+        } else if (existing.status !== pc.status) {
+          if (pc.status === 'in_progress' && existing.status === 'pending_approval') {
+            existing.status = 'in_progress';
+            existing.approvedAt = pc.approvedAt || existing.approvedAt;
+            existing.assignedMmUrl = pc.assignedMmUrl || existing.assignedMmUrl;
+            existing.assignedMmTitle = pc.assignedMmTitle || existing.assignedMmTitle;
+            existing.isActive = true;
+            modified = true;
+          } else if (existing.status === 'in_progress' && pc.status === 'pending_approval') {
+            pc.status = 'in_progress';
+            pc.approvedAt = existing.approvedAt || pc.approvedAt;
+            pc.assignedMmUrl = existing.assignedMmUrl || pc.assignedMmUrl;
+            pc.assignedMmTitle = existing.assignedMmTitle || pc.assignedMmTitle;
+            pc.isActive = true;
+            writeJson(CHALLENGES_PERMANENT_STORE_FILE, permChallenges, pc);
+          }
         }
       }
     });
@@ -2095,11 +2105,36 @@ function syncChallengesWithSubmissions() {
       if (arc.action === 'CHALLENGE_APPROVED' || arc.action === 'CHALLENGE_PURCHASED') {
         const meta = arc.metadata || {};
         const chId = meta.challengeId;
-        if (chId && !deletedChallengeIds.has(chId) && !deletedUserIds.has(arc.userId) && !challengeMap.has(chId)) {
+        if (!chId) return;
+
+        // If challenge already exists in map, ensure an approved event in archive is respected!
+        if (challengeMap.has(chId)) {
+          const existing = challengeMap.get(chId);
+          if (arc.action === 'CHALLENGE_APPROVED' && existing && existing.status === 'pending_approval') {
+            existing.status = 'in_progress';
+            existing.approvedAt = arc.timestamp || existing.approvedAt || new Date().toISOString();
+            existing.isActive = true;
+            if (meta.mmSerial) existing.assignedMmSerial = meta.mmSerial;
+            if (meta.mmTitle) existing.assignedMmTitle = meta.mmTitle;
+            modified = true;
+            console.log(`[AUTO-HEAL] Reconciled approved status from archive for challenge: ${chId}`);
+          }
+          return;
+        }
+
+        if (!deletedChallengeIds.has(chId) && !deletedUserIds.has(arc.userId)) {
           const isDisqualified = disqualifiedMap.has(chId);
           const disqInfo = isDisqualified ? disqualifiedMap.get(chId) : null;
           const disqMeta = (disqInfo && disqInfo.metadata) || {};
           const isGold = meta.fundedAmount === 525 || meta.packageName === 'Gold';
+
+          // Check if this challenge was ever approved in the archive
+          const hasApprovalInArchive = archive.some(a => 
+            a.action === 'CHALLENGE_APPROVED' && 
+            ((a.metadata && a.metadata.challengeId === chId) || a.challengeId === chId)
+          );
+          const isApproved = (arc.action === 'CHALLENGE_APPROVED' || hasApprovalInArchive);
+
           const recovered = {
             id: chId,
             userId: arc.userId,
@@ -2121,7 +2156,7 @@ function syncChallengesWithSubmissions() {
             brokerName: 'Quotex',
             brokerIcon: '/assets/brokers/quotex.png',
             brokerAccountId: 'Demo Account',
-            status: isDisqualified ? 'failed' : (arc.action === 'CHALLENGE_APPROVED' ? 'in_progress' : 'pending_approval'),
+            status: isDisqualified ? 'failed' : (isApproved ? 'in_progress' : 'pending_approval'),
             sessionsRequired: 15,
             sessionsCompleted: 0,
             currentDrawdown: '0.0%',
@@ -2475,10 +2510,15 @@ function syncChallengesWithSubmissions() {
   }
 }
 
-// Enterprise Challenge Dual-Persistence Helper
-function saveChallenges(challenges) {
-  writeJson(CHALLENGES_FILE, challenges);
-  writeJson(CHALLENGES_PERMANENT_STORE_FILE, challenges);
+// Enterprise Challenge Dual-Persistence Helper (with direct MySQL Mirroring)
+function saveChallenges(challenges, singleChallenge = null) {
+  writeJson(CHALLENGES_FILE, challenges, singleChallenge);
+  writeJson(CHALLENGES_PERMANENT_STORE_FILE, challenges, singleChallenge);
+  if (db && db.isMySqlActive()) {
+    if (singleChallenge && singleChallenge.id) {
+      db.saveChallenge(singleChallenge).catch(e => console.error('[SAVE CHALLENGE MYSQL ERROR]:', e.message));
+    }
+  }
 }
 
 // Enterprise User Dual-Persistence Helper
@@ -5482,10 +5522,7 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
   };
 
   challenges.unshift(newChallenge);
-  saveChallenges(challenges);
-  if (db && db.isMySqlActive()) {
-    db.saveChallenge(newChallenge).catch(e => console.error('[MYSQL CHALLENGE SAVE ERROR]:', e.message));
-  }
+  saveChallenges(challenges, newChallenge);
   // Auto-sync user profile brokerAccountId if valid ID was entered
   if (brokerAccountId && typeof brokerAccountId === 'string' && brokerAccountId.trim() && brokerAccountId.trim() !== 'Demo Account') {
     const cleanBrokerId = brokerAccountId.trim();
@@ -5575,7 +5612,10 @@ app.post('/api/challenges/:id/start-official', authenticateToken, (req, res) => 
     c.currentCapital = initialCap;
 
     challenges[idx] = c;
-    saveChallenges(challenges);
+    saveChallenges(challenges, challenges[idx]);
+    if (db && db.isMySqlActive()) {
+      db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE START EVAL ERROR]:', e.message));
+    }
 
     logUserArchive('CHALLENGE_OFFICIAL_EVALUATION_STARTED', { id: req.user.id }, {
       challengeId: c.id,
@@ -6518,7 +6558,7 @@ app.post('/api/user/session-audit-upload', authenticateToken, async (req, res) =
         activeChallenge.failedAt = new Date().toISOString();
         activeChallenge.isActive = false;
         activeChallenge.isCompleted = true;
-        saveChallenges(challenges);
+        saveChallenges(challenges, activeChallenge);
         try {
           logUserArchive('CHALLENGE_DISQUALIFIED_RULE_VIOLATION', { id: user.id }, {
             challengeId: activeChallenge.id,
@@ -7736,7 +7776,7 @@ function applyClassicChallengeEvaluation(challenge, evalResult, allChallenges) {
     }
 
     if (modified && Array.isArray(allChallenges)) {
-      saveChallenges(allChallenges);
+      saveChallenges(allChallenges, challenge);
       if (db && db.isMySqlActive()) {
         db.saveChallenge(challenge).catch(e => console.error('[MYSQL CHALLENGE SAVE ERROR]:', e.message));
       }
@@ -9576,12 +9616,17 @@ app.post('/api/admin/challenges/:id/approve', authenticateAdminToken, (req, res)
     challenges[idx].partnerCommissionStatus = 'approved';
   }
 
-  saveChallenges(challenges);
-  logUserArchive('CHALLENGE_APPROVED', { id: challenges[idx].userId }, {
+  saveChallenges(challenges, challenges[idx]);
+  if (db && db.isMySqlActive()) {
+    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE APPROVE ERROR]:', e.message));
+  }
+  logUserArchive('CHALLENGE_APPROVED', { id: challenges[idx].userId, email: challenges[idx].userEmail }, {
     challengeId: challenges[idx].id,
     packageName: challenges[idx].packageName,
-    mmSerial: assignedLink.serial,
-    mmTitle: assignedLink.title
+    mmSerial: assignedLink ? assignedLink.serial : null,
+    mmTitle: assignedLink ? assignedLink.title : null,
+    status: 'in_progress',
+    approvedAt: challenges[idx].approvedAt
   });
 
   syncChallengesWithSubmissions();
@@ -9617,7 +9662,10 @@ app.post('/api/admin/challenges/:id/set-phase', authenticateAdminToken, (req, re
   }
 
   challenges[idx] = c;
-  saveChallenges(challenges);
+  saveChallenges(challenges, challenges[idx]);
+  if (db && db.isMySqlActive()) {
+    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE PHASE ERROR]:', e.message));
+  }
   syncChallengesWithSubmissions();
 
   res.json({
@@ -9641,7 +9689,10 @@ app.post('/api/admin/challenges/:id/reject', authenticateAdminToken, (req, res) 
   challenges[idx].rejectedAt = new Date().toISOString();
   challenges[idx].isActive = false;
 
-  saveChallenges(challenges);
+  saveChallenges(challenges, challenges[idx]);
+  if (db && db.isMySqlActive()) {
+    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE REJECT ERROR]:', e.message));
+  }
 
   logUserArchive('CHALLENGE_REJECTED', { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, {
     challengeId: challenges[idx].id,
@@ -9678,7 +9729,10 @@ app.post('/api/admin/challenges/:id/disqualify', authenticateAdminToken, (req, r
   challenges[idx].isActive = false;
   challenges[idx].isCompleted = true;
 
-  saveChallenges(challenges);
+  saveChallenges(challenges, challenges[idx]);
+  if (db && db.isMySqlActive()) {
+    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
+  }
 
   logUserArchive('CHALLENGE_DISQUALIFIED_RULE_VIOLATION', 
     { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, 
@@ -9736,7 +9790,10 @@ app.post('/api/admin/submissions/:id/disqualify-challenge', authenticateAdminTok
     challenges[cIdx].failedAt = nowIso;
     challenges[cIdx].isActive = false;
     challenges[cIdx].isCompleted = true;
-    saveChallenges(challenges);
+    saveChallenges(challenges, challenges[cIdx]);
+    if (db && db.isMySqlActive()) {
+      db.saveChallenge(challenges[cIdx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
+    }
 
     logUserArchive('CHALLENGE_DISQUALIFIED_FROM_SESSION', 
       { id: targetSub.userId, name: targetSub.userName, email: targetSub.userEmail }, 
@@ -9794,7 +9851,10 @@ app.post('/api/admin/challenges/:id/update-status', authenticateAdminToken, (req
   if (sessionsCompleted !== undefined) challenges[idx].sessionsCompleted = parseInt(sessionsCompleted) || 0;
   if (currentDrawdown !== undefined) challenges[idx].currentDrawdown = currentDrawdown;
 
-  saveChallenges(challenges);
+  saveChallenges(challenges, challenges[idx]);
+  if (db && db.isMySqlActive()) {
+    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
+  }
 
   logUserArchive('CHALLENGE_STATUS_UPDATED', 
     { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, 
@@ -10019,7 +10079,7 @@ app.post('/api/user/challenges/:id/dismiss-notice', authenticateToken, (req, res
   const ch = challenges.find(c => c.id === req.params.id && (c.userId === req.user.id || (c.userEmail && c.userEmail.toLowerCase() === (req.user.email || '').toLowerCase())));
   if (ch && ch.reactivationNotice) {
     ch.reactivationNotice.read = true;
-    saveChallenges(challenges);
+    saveChallenges(challenges, ch);
   }
   res.json({ success: true, message: 'Notice dismissed.' });
 });
@@ -10075,7 +10135,10 @@ app.post('/api/admin/submissions/:id/review', authenticateAdminToken, (req, res)
       challenges[cIdx].failedAt = new Date().toISOString();
       challenges[cIdx].isActive = false;
       challenges[cIdx].isCompleted = true;
-      saveChallenges(challenges);
+      saveChallenges(challenges, challenges[cIdx]);
+    if (db && db.isMySqlActive()) {
+      db.saveChallenge(challenges[cIdx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
+    }
     }
   } else if (status === 'verified' && !isPractice) {
     // If verified/approved by admin, check if parent challenge was marked 'failed'.
@@ -10100,7 +10163,10 @@ app.post('/api/admin/submissions/:id/review', authenticateAdminToken, (req, res)
         delete challenges[cIdx].violatedRule;
         delete challenges[cIdx].failReasonText;
         delete challenges[cIdx].failedAt;
-        saveChallenges(challenges);
+        saveChallenges(challenges, challenges[cIdx]);
+        if (db && db.isMySqlActive()) {
+          db.saveChallenge(challenges[cIdx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
+        }
 
         logUserArchive('CHALLENGE_REACTIVATED', { id: challenges[cIdx].userId }, {
           challengeId: challenges[cIdx].id,
@@ -11430,6 +11496,7 @@ app.post('/api/admin/support/resolve-challenge', authenticateAdminToken, (req, r
     challenges[idx].status = 'in_progress';
     challenges[idx].approvedAt = new Date().toISOString();
     challenges[idx].rejectedReason = null;
+    challenges[idx].isActive = true;
   } else if (action === 'reopen_pending') {
     challenges[idx].status = 'pending_approval';
     challenges[idx].rejectedReason = null;
@@ -11437,7 +11504,10 @@ app.post('/api/admin/support/resolve-challenge', authenticateAdminToken, (req, r
     challenges[idx].rejectedReason = reason || challenges[idx].rejectedReason;
   }
 
-  saveChallenges(challenges);
+  saveChallenges(challenges, challenges[idx]);
+  if (db && db.isMySqlActive()) {
+    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE RESOLVE ERROR]:', e.message));
+  }
   res.json({ success: true, message: 'চ্যালেঞ্জের সমস্যা সফলভাবে সমাধান করা হয়েছে!', challenge: challenges[idx] });
 });
 

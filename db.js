@@ -2773,9 +2773,51 @@ async function hydrateFromMySql(dataDir) {
       try {
         if (fs.existsSync(chFile)) existingCh = JSON.parse(fs.readFileSync(chFile, 'utf8') || '[]');
       } catch (e) {}
+      if (existingCh.length === 0) {
+        try {
+          if (fs.existsSync(permChFile)) existingCh = JSON.parse(fs.readFileSync(permChFile, 'utf8') || '[]');
+        } catch (e) {}
+      }
+
       const chMap = new Map();
       existingCh.forEach(c => { if (c && c.id) chMap.set(c.id, c); });
-      challenges.forEach(c => { if (c && c.id) chMap.set(c.id, c); });
+
+      challenges.forEach(sqlCh => {
+        if (!sqlCh || !sqlCh.id) return;
+        if (!chMap.has(sqlCh.id)) {
+          chMap.set(sqlCh.id, sqlCh);
+        } else {
+          const jsonCh = chMap.get(sqlCh.id);
+          const jsonIsApproved = (jsonCh.status === 'in_progress' || jsonCh.status === 'passed' || jsonCh.status === 'failed' || Boolean(jsonCh.approvedAt));
+          const sqlIsPending = (sqlCh.status === 'pending_approval' || sqlCh.status === 'pending' || !sqlCh.status);
+
+          if (jsonIsApproved && sqlIsPending) {
+            // CRITICAL PROTECTION: The challenge was already approved in JSON/Admin Panel!
+            // Never overwrite approved state with outdated pending_approval from MySQL!
+            // Instead, retain JSON's approved status and immediately update MySQL.
+            saveChallenge(jsonCh).catch(e => console.error('[HYDRATE FIX MYSQL SYNC ERROR]:', e.message));
+          } else {
+            const merged = { ...jsonCh, ...sqlCh };
+            if (jsonIsApproved && (!sqlCh.approvedAt || sqlCh.status === 'pending_approval')) {
+              merged.status = jsonCh.status;
+              merged.approvedAt = jsonCh.approvedAt;
+              merged.assignedMmSerial = jsonCh.assignedMmSerial;
+              merged.assignedMmTitle = jsonCh.assignedMmTitle;
+              merged.assignedMmUrl = jsonCh.assignedMmUrl;
+              merged.isActive = jsonCh.isActive;
+            }
+            chMap.set(sqlCh.id, merged);
+          }
+        }
+      });
+
+      // Ensure any existing approved challenges in JSON missing in MySQL get mirrored immediately
+      existingCh.forEach(c => {
+        if (c && c.id && (c.status === 'in_progress' || c.approvedAt) && !challenges.some(sc => sc.id === c.id)) {
+          saveChallenge(c).catch(e => {});
+        }
+      });
+
       const mergedCh = Array.from(chMap.values());
       fs.writeFileSync(chFile, JSON.stringify(mergedCh, null, 2), 'utf8');
       fs.writeFileSync(permChFile, JSON.stringify(mergedCh, null, 2), 'utf8');
