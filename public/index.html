@@ -4343,6 +4343,15 @@
                         </button>
                     </div>
 
+                    <!-- Rate Difference / Reason Banner (Image 3 Note) -->
+                    <div id="localRateReasonBox" style="display:none; background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.25); border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:0.82rem; color:#cbd5e1; align-items:flex-start; gap:8px; line-height:1.4;">
+                        <i class="fas fa-info-circle" style="color:var(--yellow); font-size:0.95rem; margin-top:2px; flex-shrink:0;"></i>
+                        <div>
+                            <span style="color:var(--yellow); font-weight:700;">💡 মূল্য নির্ধারণের কারণ:</span>
+                            <span id="localRateReasonText" style="color:#e2e8f0; margin-left:4px;"></span>
+                        </div>
+                    </div>
+
                     <!-- Sender Phone Input -->
                     <div class="form-group" style="margin-bottom:1rem;">
                         <label style="font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-bottom:6px; display:block;" id="localSenderLabel">
@@ -4688,10 +4697,18 @@
                 }
             }
 
+            const pmBkash = (globalPaymentMethods || []).find(m => m.name.toLowerCase().includes('bkash'));
+            const bdtRate = pmBkash ? (Number(pmBkash.exchangeRate) || 127) : 127;
+            let estBdt = Math.round(fee * bdtRate);
+            if (pkg.bdtPrice && !isNaN(Number(pkg.bdtPrice)) && Number(pkg.bdtPrice) > 0) {
+                const discountRatio = pkg.fee > 0 ? (fee / pkg.fee) : 1;
+                estBdt = Math.round(Number(pkg.bdtPrice) * discountRatio);
+            }
+
             const bkSub = document.getElementById('methodSub_bkash');
-            if (bkSub) bkSub.innerText = `Min. $${fee}.00 • ৳${Math.round(fee * 127).toLocaleString()}`;
+            if (bkSub) bkSub.innerText = `Min. $${fee}.00 • ৳${estBdt.toLocaleString()}`;
             const ngSub = document.getElementById('methodSub_nagad');
-            if (ngSub) ngSub.innerText = `Min. $${fee}.00 • ৳${Math.round(fee * 127).toLocaleString()}`;
+            if (ngSub) ngSub.innerText = `Min. $${fee}.00 • ৳${estBdt.toLocaleString()}`;
         }
 
         function selectCheckoutPaymentMethod(methodName) {
@@ -4719,7 +4736,13 @@
             const pmBinance = (globalPaymentMethods || []).find(m => m.name.toLowerCase().includes('binance'));
 
             const rate = (isLocal && pmBkash) ? (Number(pmBkash.exchangeRate) || 127) : 127;
-            const localBdt = Math.round(fee * rate);
+            let localBdt = 0;
+            if (pkg.bdtPrice && !isNaN(Number(pkg.bdtPrice)) && Number(pkg.bdtPrice) > 0) {
+                const discountRatio = pkg.fee > 0 ? (fee / pkg.fee) : 1;
+                localBdt = Math.round(Number(pkg.bdtPrice) * discountRatio);
+            } else {
+                localBdt = Math.round(fee * rate);
+            }
             checkoutState.localAmount = localBdt;
             checkoutState.rate = rate;
 
@@ -4815,6 +4838,19 @@
 
                 const numVal = document.getElementById('localAccountNumberVal');
                 if (numVal) numVal.innerText = officialNumber;
+
+                // Rate Difference / Pricing Reason Note (Image 3)
+                const rateReason = (pkg.pricingNote || (activePM && activePM.rateReason) || '').trim();
+                const reasonBox = document.getElementById('localRateReasonBox');
+                const reasonText = document.getElementById('localRateReasonText');
+                if (reasonBox && reasonText) {
+                    if (rateReason) {
+                        reasonBox.style.display = 'flex';
+                        reasonText.innerText = rateReason;
+                    } else {
+                        reasonBox.style.display = 'none';
+                    }
+                }
 
                 const senderLabel = document.getElementById('localSenderLabel');
                 if (senderLabel) {

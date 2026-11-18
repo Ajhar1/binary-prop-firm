@@ -45,7 +45,8 @@
     "countryCode": "BD",
     "currency": "BDT",
     "currencySymbol": "৳",
-    "exchangeRate": 127
+    "exchangeRate": 127,
+    "rateReason": "বিকাশ ক্যাশ-আউট চার্জ ও কারেন্সি কনভার্সন ফি অন্তর্ভুক্ত।"
   },
   {
     "id": "pm_nagad",
@@ -61,6 +62,7 @@
     "countryCode": "BD",
     "currency": "BDT",
     "currencySymbol": "৳",
-    "exchangeRate": 127
+    "exchangeRate": 127,
+    "rateReason": "নগদ ক্যাশ-আউট চার্জ ও কারেন্সি কনভার্সন ফি অন্তর্ভুক্ত।"
   }
 ]

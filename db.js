@@ -395,6 +395,18 @@ async function initSchema() {
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
+    `CREATE TABLE IF NOT EXISTS payment_methods (
+      id VARCHAR(60) PRIMARY KEY DEFAULT 'default',
+      methodsData JSON DEFAULT NULL,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS challenge_packages (
+      id VARCHAR(60) PRIMARY KEY DEFAULT 'default',
+      packagesData JSON DEFAULT NULL,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
     `CREATE TABLE IF NOT EXISTS academy_profiles (
       id VARCHAR(120) PRIMARY KEY,
       partnerId VARCHAR(120) NOT NULL,
@@ -2389,6 +2401,62 @@ async function savePromoPresets(presets) {
   }
 }
 
+// ==================== PAYMENT METHODS & PACKAGES CRUD ====================
+
+async function getPaymentMethodsFromDb() {
+  if (!isMySqlActive()) return null;
+  try {
+    const [rows] = await pool.query("SELECT methodsData FROM payment_methods WHERE id = 'default' LIMIT 1");
+    if (rows.length > 0 && rows[0].methodsData) {
+      return typeof rows[0].methodsData === 'string' ? JSON.parse(rows[0].methodsData) : rows[0].methodsData;
+    }
+  } catch (e) {
+    console.error('[DATABASE GET PAYMENT METHODS ERROR]:', e.message);
+  }
+  return null;
+}
+
+async function savePaymentMethodsToDb(methods) {
+  if (!isMySqlActive() || !methods) return false;
+  try {
+    const dataStr = JSON.stringify(methods);
+    await pool.query(`INSERT INTO payment_methods (id, methodsData, updatedAt)
+      VALUES ('default', ?, NOW())
+      ON DUPLICATE KEY UPDATE methodsData = VALUES(methodsData), updatedAt = NOW()`, [dataStr]);
+    return true;
+  } catch (e) {
+    console.error('[DATABASE SAVE PAYMENT METHODS ERROR]:', e.message);
+    return false;
+  }
+}
+
+async function getChallengePackagesFromDb() {
+  if (!isMySqlActive()) return null;
+  try {
+    const [rows] = await pool.query("SELECT packagesData FROM challenge_packages WHERE id = 'default' LIMIT 1");
+    if (rows.length > 0 && rows[0].packagesData) {
+      return typeof rows[0].packagesData === 'string' ? JSON.parse(rows[0].packagesData) : rows[0].packagesData;
+    }
+  } catch (e) {
+    console.error('[DATABASE GET CHALLENGE PACKAGES ERROR]:', e.message);
+  }
+  return null;
+}
+
+async function saveChallengePackagesToDb(packages) {
+  if (!isMySqlActive() || !packages) return false;
+  try {
+    const dataStr = JSON.stringify(packages);
+    await pool.query(`INSERT INTO challenge_packages (id, packagesData, updatedAt)
+      VALUES ('default', ?, NOW())
+      ON DUPLICATE KEY UPDATE packagesData = VALUES(packagesData), updatedAt = NOW()`, [dataStr]);
+    return true;
+  } catch (e) {
+    console.error('[DATABASE SAVE CHALLENGE PACKAGES ERROR]:', e.message);
+    return false;
+  }
+}
+
 // ==================== ACADEMY PROFILES CRUD ====================
 
 function parseAcademyProfile(row) {
@@ -3047,6 +3115,11 @@ module.exports = {
   saveLaunchPromo,
   getPromoPresets,
   savePromoPresets,
+  // Payment Methods & Challenge Packages
+  getPaymentMethodsFromDb,
+  savePaymentMethodsToDb,
+  getChallengePackagesFromDb,
+  saveChallengePackagesToDb,
   // Payouts
   getAllPayouts,
   savePayout,

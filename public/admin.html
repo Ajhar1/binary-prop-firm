@@ -4118,6 +4118,11 @@
                     <div style="color:var(--text-secondary); font-size:0.75rem; margin-top:6px;" id="pmRatePreviewText">
                         <span id="pmRateExample"></span>
                     </div>
+                    <div class="form-group" style="margin-top:10px; margin-bottom:0;">
+                        <label style="font-size:0.78rem; color:var(--gold); font-weight:700;"><i class="fas fa-info-circle"></i> Price / Exchange Rate Note (মূল্য কম/বেশির কারণ)</label>
+                        <input type="text" class="form-control" id="pmRateReason" placeholder="যেমন: বিকাশ ও নগদ ক্যাশ-আউট চার্জ এবং গেটওয়ে প্রসেসিং ফি অন্তর্ভুক্ত" style="font-size:0.83rem;" />
+                        <span style="font-size:0.72rem; color:#94a3b8; display:block; margin-top:3px;">এই কারণটি চেকআউট পেজে ইউজারদের সামনে প্রদর্শিত হবে যেন তারা কোনো কনফিউশনে না পড়ে।</span>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Account Number / Wallet Address</label>
@@ -4202,6 +4207,25 @@
                     <div class="form-group" style="margin-top:8px; margin-bottom:0;">
                         <label>Custom Discount Tag (Optional)</label>
                         <input type="text" class="form-control" id="pkgDiscountTag" placeholder="Special Offer" />
+                    </div>
+                </div>
+
+                <!-- Local / Multi-Currency Pricing Override & Explanation -->
+                <div style="background:rgba(46,204,113,0.06); border:1px solid rgba(46,204,113,0.25); border-radius:12px; padding:12px; margin-bottom:1rem;">
+                    <div style="font-size:0.82rem; font-weight:700; color:var(--neon-green); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-coins"></i> Local Currency / BDT Price & Note (বাংলা টাকা ও দামের কারণ)
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1.5fr; gap:12px;">
+                        <div class="form-group" style="margin-bottom:6px;">
+                            <label style="font-size:0.78rem;">BDT Price Override (৳ নির্দিষ্ট টাকা - ঐচ্ছিক)</label>
+                            <input type="number" class="form-control" id="pkgBdtPrice" placeholder="যেমন: 381" step="any" min="0" />
+                            <small style="color:#94a3b8; font-size:0.72rem;">খালি রাখলে এক্সচেঞ্জ রেট দিয়ে স্বয়ংক্রিয় হিসাব হবে।</small>
+                        </div>
+                        <div class="form-group" style="margin-bottom:6px;">
+                            <label style="font-size:0.78rem;">Pricing Note (মূল্য কম/বেশির কারণ)</label>
+                            <input type="text" class="form-control" id="pkgPricingNote" placeholder="যেমন: ক্যাশআউট চার্জ ও প্রসেসিং ফি অন্তর্ভুক্ত" />
+                            <small style="color:#94a3b8; font-size:0.72rem;">ইউজার যেন ডলার ও টাকার পার্থক্যে বিভ্রান্ত না হয়।</small>
+                        </div>
                     </div>
                 </div>
 
@@ -9750,6 +9774,7 @@
                                 <span>${countryName}</span>
                             </div>
                             ${rateBadge}
+                            ${pm.rateReason ? `<div style="font-size:0.7rem; color:#94a3b8; font-style:italic; margin-top:2px;"><i class="fas fa-comment-dollar" style="color:var(--gold);"></i> ${escapeHtml(pm.rateReason)}</div>` : ''}
                         </td>
                         <td>
                             <code style="color:var(--gold); font-weight:700; font-size:0.85rem; word-break:break-all;">${pm.accountNumber}</code>
@@ -9799,6 +9824,7 @@
             document.getElementById('pmCurrency').value = 'BDT';
             document.getElementById('pmCurrencySymbol').value = '৳';
             document.getElementById('pmExchangeRate').value = 125;
+            document.getElementById('pmRateReason').value = '';
             updatePmRatePreview();
 
             openModal('paymentMethodModal');
@@ -9818,6 +9844,7 @@
             document.getElementById('pmIsActive').checked = pm.isActive !== false;
             document.getElementById('pmRequireTrxId').checked = pm.requireTrxId !== false;
             document.getElementById('pmRequireSenderNumber').checked = Boolean(pm.requireSenderNumber);
+            document.getElementById('pmRateReason').value = pm.rateReason || '';
 
             populateAdminCountryDropdown();
             const isBdDefault = pm.name.toLowerCase().includes('bkash') || pm.name.toLowerCase().includes('nagad');
@@ -9841,6 +9868,7 @@
             const currency = (document.getElementById('pmCurrency').value || 'USD').trim().toUpperCase();
             const currencySymbol = (document.getElementById('pmCurrencySymbol').value || '$').trim();
             const exchangeRate = parseFloat(document.getElementById('pmExchangeRate').value) || 1;
+            const rateReason = (document.getElementById('pmRateReason').value || '').trim();
 
             const payload = {
                 serial: parseInt(document.getElementById('pmSerial').value) || 1,
@@ -9850,6 +9878,7 @@
                 currency: currency,
                 currencySymbol: currencySymbol,
                 exchangeRate: exchangeRate,
+                rateReason: rateReason,
                 accountNumber: document.getElementById('pmAccountNumber').value.trim(),
                 badge: document.getElementById('pmBadge').value.trim(),
                 instructions: document.getElementById('pmInstructions').value.trim(),
@@ -10434,6 +10463,8 @@
                                     <span style="font-size:1.02rem; font-weight:700; color:#fff;">$${currentFee}</span>
                                 `}
                             </div>
+                            ${p.bdtPrice ? `<div style="font-size:0.75rem; color:#2ecc71; font-weight:700; margin-top:3px;"><i class="fas fa-coins"></i> ৳${Number(p.bdtPrice).toLocaleString()} BDT</div>` : ''}
+                            ${p.pricingNote ? `<div style="font-size:0.7rem; color:#94a3b8; font-style:italic; margin-top:2px;">${escapeHtml(p.pricingNote)}</div>` : ''}
                         </td>
                         <td>
                             <div style="font-size:0.78rem; line-height:1.45; color:var(--text-secondary);">
@@ -10512,6 +10543,8 @@
             document.getElementById('pkgColorPicker').value = '#F5B041';
             document.getElementById('pkgPopular').checked = false;
             document.getElementById('pkgIsActive').checked = true;
+            document.getElementById('pkgBdtPrice').value = '';
+            document.getElementById('pkgPricingNote').value = '';
             document.getElementById('pkgRules').value = "15 Trading Sessions Required\n25% Maximum Drawdown Limit\nTrade on any verified broker demo\nDaily proof video & screenshot upload\nKeep 75% profit upon passing";
             calculateModalDiscountFee();
             openModal('packageModal');
@@ -10530,6 +10563,8 @@
             document.getElementById('pkgFundedAmount').value = pkg.fundedAmount || '';
             document.getElementById('pkgOriginalFee').value = pkg.originalFee || pkg.fee || '';
             document.getElementById('pkgDiscountPercent').value = pkg.discountPercent || 0;
+            document.getElementById('pkgBdtPrice').value = (pkg.bdtPrice !== undefined && pkg.bdtPrice !== null) ? pkg.bdtPrice : '';
+            document.getElementById('pkgPricingNote').value = pkg.pricingNote || '';
             document.getElementById('pkgProfitSplit').value = pkg.profitSplit || '75%';
             document.getElementById('pkgMaxDrawdown').value = pkg.maxDrawdown || '25%';
             document.getElementById('pkgSessions').value = pkg.sessions || 15;
@@ -10566,6 +10601,8 @@
                 fundedAmount: parseFloat(document.getElementById('pkgFundedAmount').value) || 0,
                 originalFee: parseFloat(document.getElementById('pkgOriginalFee').value) || 0,
                 discountPercent: parseInt(document.getElementById('pkgDiscountPercent').value) || 0,
+                bdtPrice: document.getElementById('pkgBdtPrice').value ? parseFloat(document.getElementById('pkgBdtPrice').value) : null,
+                pricingNote: (document.getElementById('pkgPricingNote').value || '').trim() || null,
                 profitSplit: document.getElementById('pkgProfitSplit').value.trim(),
                 maxDrawdown: document.getElementById('pkgMaxDrawdown').value.trim(),
                 sessions: parseInt(document.getElementById('pkgSessions').value) || 15,

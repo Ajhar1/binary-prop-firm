@@ -5314,35 +5314,38 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
   // Sync existing challenges to ensure status freshness
   const allChallenges = syncChallengesWithSubmissions();
   const userChallenges = allChallenges.filter(c => c.userId === req.user.id);
+  const isSuperOrAdmin = req.user && (req.user.role === 'admin' || req.user.role === 'superadmin');
 
-  // 1. Check if user already has a pending challenge
-  const pendingChallenge = userChallenges.find(c => c.status === 'pending_approval' || c.status === 'pending');
-  if (pendingChallenge) {
-    return res.status(400).json({
-      success: false,
-      message: 'আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে।',
-      reason: 'CHALLENGE_PENDING',
-      existingChallenge: {
-        id: pendingChallenge.id,
-        packageName: pendingChallenge.packageName,
-        status: pendingChallenge.status
-      }
-    });
-  }
+  if (!isSuperOrAdmin) {
+    // 1. Check if user already has a pending challenge
+    const pendingChallenge = userChallenges.find(c => c.status === 'pending_approval' || c.status === 'pending');
+    if (pendingChallenge) {
+      return res.status(400).json({
+        success: false,
+        message: 'আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে।',
+        reason: 'CHALLENGE_PENDING',
+        existingChallenge: {
+          id: pendingChallenge.id,
+          packageName: pendingChallenge.packageName,
+          status: pendingChallenge.status
+        }
+      });
+    }
 
-  // 2. Check if user already has a running / in_progress challenge
-  const runningChallenge = userChallenges.find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
-  if (runningChallenge) {
-    return res.status(400).json({
-      success: false,
-      message: 'আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে।',
-      reason: 'CHALLENGE_RUNNING',
-      existingChallenge: {
-        id: runningChallenge.id,
-        packageName: runningChallenge.packageName,
-        status: runningChallenge.status
-      }
-    });
+    // 2. Check if user already has a running / in_progress challenge
+    const runningChallenge = userChallenges.find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
+    if (runningChallenge) {
+      return res.status(400).json({
+        success: false,
+        message: 'আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে।',
+        reason: 'CHALLENGE_RUNNING',
+        existingChallenge: {
+          id: runningChallenge.id,
+          packageName: runningChallenge.packageName,
+          status: runningChallenge.status
+        }
+      });
+    }
   }
 
   const broker = SUPPORTED_BROKERS.find(b => b.id === brokerId) || SUPPORTED_BROKERS[0];
@@ -10613,7 +10616,7 @@ app.get('/api/admin/payment-methods', authenticateAdminToken, (req, res) => {
 });
 
 app.post('/api/admin/payment-methods', authenticateAdminToken, (req, res) => {
-  const { name, accountNumber, instructions, badge, isActive, serial, requireTrxId, requireSenderNumber, country, countryCode, currency, currencySymbol, exchangeRate } = req.body;
+  const { name, accountNumber, instructions, badge, isActive, serial, requireTrxId, requireSenderNumber, country, countryCode, currency, currencySymbol, exchangeRate, rateReason } = req.body;
   if (!name || !accountNumber) return res.status(400).json({ success: false, message: 'Method Name and Account Number / Address are required.' });
 
   const methods = readJson(PAYMENT_METHODS_FILE);
@@ -10633,18 +10636,20 @@ app.post('/api/admin/payment-methods', authenticateAdminToken, (req, res) => {
     currency: currency ? currency.trim().toUpperCase() : 'USD',
     currencySymbol: currencySymbol ? currencySymbol.trim() : '$',
     exchangeRate: (!isNaN(parsedRate) && parsedRate > 0) ? parsedRate : 1,
+    rateReason: rateReason ? rateReason.trim() : '',
     createdAt: new Date().toISOString()
   };
 
   methods.push(newMethod);
   methods.sort((a, b) => (parseInt(a.serial) || 0) - (parseInt(b.serial) || 0));
   writeJson(PAYMENT_METHODS_FILE, methods);
+  if (db && db.savePaymentMethodsToDb) db.savePaymentMethodsToDb(methods).catch(e => console.error(e));
 
   res.status(201).json({ success: true, message: 'Payment method added successfully!', paymentMethod: newMethod });
 });
 
 app.put('/api/admin/payment-methods/:id', authenticateAdminToken, (req, res) => {
-  const { name, accountNumber, instructions, badge, isActive, serial, requireTrxId, requireSenderNumber, country, countryCode, currency, currencySymbol, exchangeRate } = req.body;
+  const { name, accountNumber, instructions, badge, isActive, serial, requireTrxId, requireSenderNumber, country, countryCode, currency, currencySymbol, exchangeRate, rateReason } = req.body;
   const methods = readJson(PAYMENT_METHODS_FILE);
   const idx = methods.findIndex(m => m.id === req.params.id);
   if (idx === -1) return res.status(404).json({ success: false, message: 'Payment method not found.' });
@@ -10667,9 +10672,11 @@ app.put('/api/admin/payment-methods/:id', authenticateAdminToken, (req, res) => 
       methods[idx].exchangeRate = parsedRate;
     }
   }
+  if (rateReason !== undefined) methods[idx].rateReason = rateReason ? rateReason.trim() : '';
 
   methods.sort((a, b) => (parseInt(a.serial) || 0) - (parseInt(b.serial) || 0));
   writeJson(PAYMENT_METHODS_FILE, methods);
+  if (db && db.savePaymentMethodsToDb) db.savePaymentMethodsToDb(methods).catch(e => console.error(e));
 
   res.json({ success: true, message: 'Payment method updated successfully!', paymentMethod: methods[idx] });
 });
@@ -10678,6 +10685,7 @@ app.delete('/api/admin/payment-methods/:id', authenticateAdminToken, (req, res) 
   let methods = readJson(PAYMENT_METHODS_FILE);
   methods = methods.filter(m => m.id !== req.params.id);
   writeJson(PAYMENT_METHODS_FILE, methods);
+  if (db && db.savePaymentMethodsToDb) db.savePaymentMethodsToDb(methods).catch(e => console.error(e));
   res.json({ success: true, message: 'Payment method removed successfully.' });
 });
 
@@ -10703,7 +10711,7 @@ app.post('/api/admin/packages', authenticateAdminToken, (req, res) => {
   const {
     name, tierNumber, fundedAmount, originalFee, discountPercent,
     profitSplit, maxDrawdown, sessions, dailyLoss, profitTarget,
-    popular, color, rules, isActive, badge
+    popular, color, rules, isActive, badge, bdtPrice, pricingNote
   } = req.body;
 
   if (!name || !fundedAmount || !originalFee) {
@@ -10723,6 +10731,8 @@ app.post('/api/admin/packages', authenticateAdminToken, (req, res) => {
     parsedRules = rules.split('\n').map(r => r.trim()).filter(Boolean);
   }
 
+  const parsedBdtPrice = (bdtPrice !== undefined && bdtPrice !== null && bdtPrice !== '') ? parseFloat(bdtPrice) : null;
+
   const newPkg = {
     id: `pkg_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
     tierNumber: parseInt(tierNumber) || (packages.length + 1),
@@ -10731,6 +10741,8 @@ app.post('/api/admin/packages', authenticateAdminToken, (req, res) => {
     originalFee: origFee,
     discountPercent: discPct,
     fee: calcFee,
+    bdtPrice: parsedBdtPrice,
+    pricingNote: pricingNote ? pricingNote.trim() : null,
     fundedAmount: parseFloat(fundedAmount),
     profitSplit: profitSplit ? profitSplit.trim() : '75%',
     maxDrawdown: maxDrawdown ? maxDrawdown.trim() : '25%',
@@ -10756,6 +10768,7 @@ app.post('/api/admin/packages', authenticateAdminToken, (req, res) => {
   packages.push(newPkg);
   packages.sort((a, b) => (parseInt(a.tierNumber) || 0) - (parseInt(b.tierNumber) || 0));
   writeJson(PACKAGES_FILE, packages);
+  if (db && db.saveChallengePackagesToDb) db.saveChallengePackagesToDb(packages).catch(e => console.error(e));
 
   logUserArchive('PACKAGE_CREATED', req.user, {
     packageId: newPkg.id,
@@ -10777,7 +10790,7 @@ app.put('/api/admin/packages/:id', authenticateAdminToken, (req, res) => {
   const {
     name, tierNumber, fundedAmount, originalFee, discountPercent,
     profitSplit, maxDrawdown, sessions, dailyLoss, profitTarget,
-    popular, color, rules, isActive, badge
+    popular, color, rules, isActive, badge, bdtPrice, pricingNote
   } = req.body;
 
   let packages = readJson(PACKAGES_FILE, PACKAGES);
@@ -10798,6 +10811,10 @@ app.put('/api/admin/packages/:id', authenticateAdminToken, (req, res) => {
     parsedRules = rules.split('\n').map(r => r.trim()).filter(Boolean);
   }
 
+  const parsedBdtPrice = bdtPrice !== undefined 
+    ? ((bdtPrice !== null && bdtPrice !== '') ? parseFloat(bdtPrice) : null) 
+    : packages[idx].bdtPrice;
+
   packages[idx] = {
     ...packages[idx],
     name: name !== undefined ? name.trim() : packages[idx].name,
@@ -10806,6 +10823,8 @@ app.put('/api/admin/packages/:id', authenticateAdminToken, (req, res) => {
     originalFee: origFee,
     discountPercent: discPct,
     fee: calcFee,
+    bdtPrice: parsedBdtPrice,
+    pricingNote: pricingNote !== undefined ? (pricingNote ? pricingNote.trim() : null) : packages[idx].pricingNote,
     fundedAmount: fundedAmount !== undefined ? parseFloat(fundedAmount) : packages[idx].fundedAmount,
     profitSplit: profitSplit !== undefined ? profitSplit.trim() : packages[idx].profitSplit,
     maxDrawdown: maxDrawdown !== undefined ? maxDrawdown.trim() : packages[idx].maxDrawdown,
@@ -10823,6 +10842,7 @@ app.put('/api/admin/packages/:id', authenticateAdminToken, (req, res) => {
 
   packages.sort((a, b) => (parseInt(a.tierNumber) || 0) - (parseInt(b.tierNumber) || 0));
   writeJson(PACKAGES_FILE, packages);
+  if (db && db.saveChallengePackagesToDb) db.saveChallengePackagesToDb(packages).catch(e => console.error(e));
 
   logUserArchive('PACKAGE_UPDATED', req.user, {
     packageId: packages[idx].id,
@@ -10846,6 +10866,7 @@ app.delete('/api/admin/packages/:id', authenticateAdminToken, (req, res) => {
 
   packages = packages.filter(p => p.id !== req.params.id);
   writeJson(PACKAGES_FILE, packages);
+  if (db && db.saveChallengePackagesToDb) db.saveChallengePackagesToDb(packages).catch(e => console.error(e));
 
   logUserArchive('PACKAGE_DELETED', req.user, { packageId: found.id, name: found.name });
 
@@ -10872,6 +10893,7 @@ app.post('/api/admin/packages/:id/discount', authenticateAdminToken, (req, res) 
   packages[idx].updatedAt = new Date().toISOString();
 
   writeJson(PACKAGES_FILE, packages);
+  if (db && db.saveChallengePackagesToDb) db.saveChallengePackagesToDb(packages).catch(e => console.error(e));
 
   res.json({
     success: true,

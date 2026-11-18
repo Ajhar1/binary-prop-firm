@@ -6838,6 +6838,15 @@
                         </button>
                     </div>
 
+                    <!-- Rate Difference / Reason Banner (Image 3 Note) -->
+                    <div id="dashLocalRateReasonBox" style="display:none; background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.25); border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:0.82rem; color:#cbd5e1; align-items:flex-start; gap:8px; line-height:1.4;">
+                        <i class="fas fa-info-circle" style="color:var(--yellow); font-size:0.95rem; margin-top:2px; flex-shrink:0;"></i>
+                        <div>
+                            <span style="color:var(--yellow); font-weight:700;">💡 মূল্য নির্ধারণের কারণ:</span>
+                            <span id="dashLocalRateReasonText" style="color:#e2e8f0; margin-left:4px;"></span>
+                        </div>
+                    </div>
+
                     <!-- Sender Phone Input -->
                     <div class="form-group" style="margin-bottom:1rem;">
                         <label style="font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-bottom:6px; display:block;" id="dashLocalSenderLabel">
@@ -13050,6 +13059,95 @@
             rate: 127
         };
         let dashCryptoCountdownTimer = null;
+        let dashAppliedPromoData = null;
+
+        async function applyDashPromoCode() {
+            const input = document.getElementById('dashBuyPromoCodeInput');
+            const msgEl = document.getElementById('dashBuyPromoMessage');
+            const applyBtn = document.getElementById('dashBuyApplyPromoBtn');
+            const removeBtn = document.getElementById('dashBuyRemovePromoBtn');
+            const successTag = document.getElementById('dashPromoSuccessTag');
+            const packageId = document.getElementById('dashSelectedPackageId')?.value;
+
+            if (!input || !input.value.trim()) {
+                showToast('অনুগ্রহ করে প্রোমো কোড লিখুন', 'error');
+                return;
+            }
+
+            const code = input.value.trim().toUpperCase();
+            if (applyBtn) {
+                applyBtn.disabled = true;
+                applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            }
+
+            try {
+                const res = await fetch('/api/promo-codes/validate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, packageId })
+                });
+                const data = await res.json();
+                if (data.success && data.valid) {
+                    dashAppliedPromoData = {
+                        ...data.promo,
+                        discountAmount: data.discountAmount,
+                        finalFee: data.finalFee,
+                        baseFee: data.baseFee
+                    };
+                    input.value = dashAppliedPromoData.code;
+                    input.readOnly = true;
+                    if (applyBtn) applyBtn.style.display = 'none';
+                    if (removeBtn) removeBtn.style.display = 'inline-block';
+                    if (successTag) successTag.style.display = 'inline-block';
+                    if (msgEl) {
+                        msgEl.style.display = 'block';
+                        msgEl.style.color = '#2ecc71';
+                        msgEl.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message || 'প্রোমো কোড সফলভাবে যোগ করা হয়েছে!'}`;
+                    }
+                    showToast(`🎉 "${dashAppliedPromoData.code}" কার্যকর হয়েছে! $${data.discountAmount} ছাড় পেয়েছেন।`, 'success');
+                    updateDashStep2Display();
+                } else {
+                    dashAppliedPromoData = null;
+                    if (msgEl) {
+                        msgEl.style.display = 'block';
+                        msgEl.style.color = '#e74c3c';
+                        msgEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message || 'প্রোমো কোডটি সঠিক নয়।'}`;
+                    }
+                    showToast(data.message || 'প্রোমো কোডটি সঠিক নয় বা মেয়াদ শেষ।', 'error');
+                }
+            } catch (err) {
+                showToast('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।', 'error');
+            } finally {
+                if (applyBtn) {
+                    applyBtn.disabled = false;
+                    applyBtn.innerHTML = 'Apply';
+                }
+            }
+        }
+
+        function removeDashPromoCode(rerender = true) {
+            dashAppliedPromoData = null;
+            const input = document.getElementById('dashBuyPromoCodeInput');
+            const msgEl = document.getElementById('dashBuyPromoMessage');
+            const applyBtn = document.getElementById('dashBuyApplyPromoBtn');
+            const removeBtn = document.getElementById('dashBuyRemovePromoBtn');
+            const successTag = document.getElementById('dashPromoSuccessTag');
+
+            if (input) {
+                input.value = '';
+                input.readOnly = false;
+            }
+            if (applyBtn) applyBtn.style.display = 'inline-block';
+            if (removeBtn) removeBtn.style.display = 'none';
+            if (successTag) successTag.style.display = 'none';
+            if (msgEl) {
+                msgEl.style.display = 'none';
+                msgEl.innerHTML = '';
+            }
+            if (rerender) {
+                updateDashStep2Display();
+            }
+        }
 
         function selectDashCheckoutBroker(brokerId) {
             dashCheckoutState.brokerId = brokerId;
@@ -13136,10 +13234,18 @@
                 }
             }
 
+            const pmBkash = (dashPaymentMethods || []).find(m => m.name.toLowerCase().includes('bkash'));
+            const bdtRate = pmBkash ? (Number(pmBkash.exchangeRate) || 127) : 127;
+            let estBdt = Math.round(fee * bdtRate);
+            if (pkg.bdtPrice && !isNaN(Number(pkg.bdtPrice)) && Number(pkg.bdtPrice) > 0) {
+                const discountRatio = pkg.fee > 0 ? (fee / pkg.fee) : 1;
+                estBdt = Math.round(Number(pkg.bdtPrice) * discountRatio);
+            }
+
             const bkSub = document.getElementById('dashMethodSub_bkash');
-            if (bkSub) bkSub.innerText = `Min. $${fee}.00 • ৳${Math.round(fee * 127).toLocaleString()}`;
+            if (bkSub) bkSub.innerText = `Min. $${fee}.00 • ৳${estBdt.toLocaleString()}`;
             const ngSub = document.getElementById('dashMethodSub_nagad');
-            if (ngSub) ngSub.innerText = `Min. $${fee}.00 • ৳${Math.round(fee * 127).toLocaleString()}`;
+            if (ngSub) ngSub.innerText = `Min. $${fee}.00 • ৳${estBdt.toLocaleString()}`;
         }
 
         function selectDashCheckoutPaymentMethod(methodName) {
@@ -13167,7 +13273,13 @@
             const pmBinance = (dashPaymentMethods || []).find(m => m.name.toLowerCase().includes('binance'));
 
             const rate = (isLocal && pmBkash) ? (Number(pmBkash.exchangeRate) || 127) : 127;
-            const localBdt = Math.round(fee * rate);
+            let localBdt = 0;
+            if (pkg.bdtPrice && !isNaN(Number(pkg.bdtPrice)) && Number(pkg.bdtPrice) > 0) {
+                const discountRatio = pkg.fee > 0 ? (fee / pkg.fee) : 1;
+                localBdt = Math.round(Number(pkg.bdtPrice) * discountRatio);
+            } else {
+                localBdt = Math.round(fee * rate);
+            }
             dashCheckoutState.localAmount = localBdt;
             dashCheckoutState.rate = rate;
 
@@ -13263,6 +13375,19 @@
 
                 const numVal = document.getElementById('dashLocalAccountNumberVal');
                 if (numVal) numVal.innerText = officialNumber;
+
+                // Rate Difference / Pricing Reason Note (Image 3)
+                const rateReason = (pkg.pricingNote || (activePM && activePM.rateReason) || '').trim();
+                const reasonBox = document.getElementById('dashLocalRateReasonBox');
+                const reasonText = document.getElementById('dashLocalRateReasonText');
+                if (reasonBox && reasonText) {
+                    if (rateReason) {
+                        reasonBox.style.display = 'flex';
+                        reasonText.innerText = rateReason;
+                    } else {
+                        reasonBox.style.display = 'none';
+                    }
+                }
 
                 const senderLabel = document.getElementById('dashLocalSenderLabel');
                 if (senderLabel) {
@@ -13406,50 +13531,73 @@
 
         // Buy Challenge Modal & Payment Logic
         function openDashBuyModal(pkgId) {
-            // Check if user already has a running or pending challenge
-            const runningCh = (myChallenges || []).find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
-            if (runningCh) {
-                showToast('আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে।', 'error');
-                return;
+            try {
+                // If user is admin/superadmin, bypass running/pending check for testing
+                const isSuperOrAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'superadmin');
+                if (!isSuperOrAdmin) {
+                    const runningCh = (myChallenges || []).find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
+                    if (runningCh) {
+                        showToast('আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে।', 'error');
+                        return;
+                    }
+                    const pendingCh = (myChallenges || []).find(c => c.status === 'pending_approval' || c.status === 'pending');
+                    if (pendingCh) {
+                        showToast('আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে।', 'error');
+                        return;
+                    }
+                }
+
+                const pkg = (allPackages || []).find(p => p.id === pkgId);
+                if (!pkg) {
+                    console.warn('Package not found for ID:', pkgId);
+                    showToast('প্যাকেজটি পাওয়া যায়নি। অনুগ্রহ করে পেজ রিফ্রেশ করুন।', 'error');
+                    return;
+                }
+
+                dashCheckoutState.packageId = pkg.id;
+                dashCheckoutState.pkg = pkg;
+                dashCheckoutState.effectiveFee = pkg.fee;
+                dashCheckoutState.brokerId = (currentUser && currentUser.preferredBroker) ? currentUser.preferredBroker : 'quotex';
+                dashCheckoutState.brokerAccountId = (currentUser && currentUser.brokerAccountId) ? currentUser.brokerAccountId : '';
+                dashCheckoutState.paymentMethod = 'USDT (TRC-20)';
+
+                const selPkgInput = document.getElementById('dashSelectedPackageId');
+                if (selPkgInput) selPkgInput.value = pkg.id;
+
+                const t1 = document.getElementById('dashCheckoutStep1Title');
+                if (t1) t1.innerText = `Buy ${pkg.name} Challenge`;
+                const s1 = document.getElementById('dashCheckoutStep1Subtitle');
+                if (s1) s1.innerText = `$${pkg.fee}.00 USD • $${pkg.fundedAmount.toLocaleString()}.00 funded balance`;
+
+                const accInput = document.getElementById('dashBuyBrokerAccountId');
+                if (accInput) accInput.value = dashCheckoutState.brokerAccountId;
+
+                selectDashCheckoutBroker(dashCheckoutState.brokerId);
+                if (typeof removeDashPromoCode === 'function') {
+                    removeDashPromoCode(false);
+                }
+
+                goToDashCheckoutStep(1);
+
+                const dashModalEl = document.getElementById('dashBuyModal');
+                if (dashModalEl) {
+                    dashModalEl.classList.add('active');
+                    dashModalEl.style.display = 'flex';
+                    const dashModalBox = dashModalEl.querySelector('.modal-box');
+                    if (dashModalBox) dashModalBox.scrollTop = 0;
+                }
+            } catch (err) {
+                console.error('Error in openDashBuyModal:', err);
+                showToast('মডাল ওপেন করতে সমস্যা হয়েছে। দয়া করে পেজটি রিফ্রেশ করুন।', 'error');
             }
-            const pendingCh = (myChallenges || []).find(c => c.status === 'pending_approval' || c.status === 'pending');
-            if (pendingCh) {
-                showToast('আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে।', 'error');
-                return;
-            }
-
-            const pkg = (allPackages || []).find(p => p.id === pkgId);
-            if (!pkg) return;
-
-            dashCheckoutState.packageId = pkg.id;
-            dashCheckoutState.pkg = pkg;
-            dashCheckoutState.effectiveFee = pkg.fee;
-            dashCheckoutState.brokerId = (currentUser && currentUser.preferredBroker) ? currentUser.preferredBroker : 'quotex';
-            dashCheckoutState.brokerAccountId = (currentUser && currentUser.brokerAccountId) ? currentUser.brokerAccountId : '';
-            dashCheckoutState.paymentMethod = 'USDT (TRC-20)';
-
-            document.getElementById('dashSelectedPackageId').value = pkg.id;
-            const t1 = document.getElementById('dashCheckoutStep1Title');
-            if (t1) t1.innerText = `Buy ${pkg.name} Challenge`;
-            const s1 = document.getElementById('dashCheckoutStep1Subtitle');
-            if (s1) s1.innerText = `$${pkg.fee}.00 USD • $${pkg.fundedAmount.toLocaleString()}.00 funded balance`;
-
-            const accInput = document.getElementById('dashBuyBrokerAccountId');
-            if (accInput) accInput.value = dashCheckoutState.brokerAccountId;
-
-            selectDashCheckoutBroker(dashCheckoutState.brokerId);
-            removeDashPromoCode(false);
-
-            goToDashCheckoutStep(1);
-
-            const dashModalEl = document.getElementById('dashBuyModal');
-            dashModalEl.classList.add('active');
-            const dashModalBox = dashModalEl.querySelector('.modal-box');
-            if (dashModalBox) dashModalBox.scrollTop = 0;
         }
 
         function closeDashBuyModal() {
-            document.getElementById('dashBuyModal').classList.remove('active');
+            const dashModalEl = document.getElementById('dashBuyModal');
+            if (dashModalEl) {
+                dashModalEl.classList.remove('active');
+                dashModalEl.style.display = '';
+            }
             if (dashCryptoCountdownTimer) {
                 clearInterval(dashCryptoCountdownTimer);
                 dashCryptoCountdownTimer = null;
