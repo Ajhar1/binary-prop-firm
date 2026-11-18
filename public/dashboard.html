@@ -2911,6 +2911,448 @@
             color: #fff;
         }
 
+        /* Modern 3-Step Challenge Checkout Wizard */
+        .checkout-modal-box {
+            background: #0d131f !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border-radius: 20px !important;
+            max-width: 580px !important;
+            width: 100% !important;
+            padding: 1.8rem 1.6rem 2rem 1.6rem !important;
+            position: relative;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+            animation: modalFadeIn 0.25s ease-out;
+            max-height: 90vh;
+            max-height: 90dvh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            margin: auto;
+            color: #e2e8f0;
+        }
+        .checkout-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-right: 25px;
+        }
+        .checkout-back-link {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 0;
+            transition: color 0.2s;
+        }
+        .checkout-back-link:hover {
+            color: #f5b041;
+        }
+        .checkout-step-pill {
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(245, 176, 65, 0.12);
+            color: #f5b041;
+            border: 1px solid rgba(245, 176, 65, 0.25);
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .checkout-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 4px 0;
+            line-height: 1.25;
+        }
+        .checkout-subtitle {
+            font-size: 0.86rem;
+            color: #94a3b8;
+            margin: 0 0 1.2rem 0;
+            line-height: 1.4;
+        }
+        .checkout-broker-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 1.2rem;
+        }
+        @media (max-width: 520px) {
+            .checkout-broker-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .checkout-broker-card {
+            background: #131b2e;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 10px 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .checkout-broker-card:hover {
+            border-color: rgba(245, 176, 65, 0.5);
+            transform: translateY(-2px);
+            background: #18223a;
+        }
+        .checkout-broker-card.selected {
+            border-color: #2ecc71 !important;
+            background: rgba(46, 204, 113, 0.12) !important;
+            box-shadow: 0 0 14px rgba(46, 204, 113, 0.25) !important;
+        }
+        .checkout-broker-card img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            margin-bottom: 6px;
+        }
+        .checkout-broker-name {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+        }
+        .checkout-broker-check {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            color: #2ecc71;
+            font-size: 0.75rem;
+            display: none;
+        }
+        .checkout-broker-card.selected .checkout-broker-check {
+            display: block;
+        }
+        .checkout-coupon-box {
+            background: #131b2e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 6px 8px 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+        .checkout-coupon-box input {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 0.88rem;
+            flex: 1;
+            outline: none;
+        }
+        .checkout-coupon-box input::placeholder {
+            color: #64748b;
+        }
+        .checkout-section-header {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #8e9bb0;
+            margin: 12px 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .checkout-methods-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        @media (max-width: 520px) {
+            .checkout-methods-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .checkout-method-card {
+            background: #131b2e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            position: relative;
+        }
+        .checkout-method-card:hover {
+            background: #18233c;
+            border-color: rgba(245, 176, 65, 0.45);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+        }
+        .checkout-method-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .checkout-method-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .checkout-method-title-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .checkout-method-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .checkout-method-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .checkout-method-badge.best {
+            background: #00c076;
+            color: #ffffff;
+        }
+        .checkout-method-badge.zero {
+            background: #f5b041;
+            color: #000000;
+        }
+        .checkout-method-sub {
+            font-size: 0.72rem;
+            color: #8e9bb0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+        .checkout-method-arrow {
+            color: #64748b;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .crypto-timer-pill {
+            background: rgba(245, 176, 65, 0.15);
+            border: 1px solid rgba(245, 176, 65, 0.35);
+            color: #f5b041;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .crypto-big-price {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-align: center;
+            margin: 10px 0 14px 0;
+            letter-spacing: -0.5px;
+        }
+        .crypto-info-card {
+            background: #131b2e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+        }
+        .crypto-card-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #8e9bb0;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
+        .crypto-card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .crypto-val-text {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .crypto-copy-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .crypto-copy-btn:hover {
+            background: #f5b041;
+            color: #000000;
+            border-color: #f5b041;
+        }
+        .crypto-qr-container {
+            text-align: center;
+            margin: 12px 0 10px 0;
+        }
+        .crypto-qr-img-box {
+            background: #ffffff;
+            padding: 8px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .crypto-qr-img-box img {
+            width: 140px;
+            height: 140px;
+            display: block;
+        }
+        .crypto-network-tag {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #8e9bb0;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 2px 10px;
+            border-radius: 10px;
+        }
+        .crypto-status-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 8px 0 10px 0;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #2ecc71;
+        }
+        .crypto-pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #2ecc71;
+            box-shadow: 0 0 8px #2ecc71;
+            animation: pulse 1.5s infinite;
+        }
+        .crypto-warning-alert {
+            background: rgba(245, 176, 65, 0.08);
+            border: 1px solid rgba(245, 176, 65, 0.25);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 0.8rem;
+            color: #f5b041;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .btn-crypto-pay {
+            background: #2ecc71;
+            color: #0b1a11;
+            border: none;
+            border-radius: 12px;
+            width: 100%;
+            padding: 13px 18px;
+            font-size: 1.02rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-crypto-pay:hover {
+            background: #27ae60;
+            transform: translateY(-1px);
+        }
+        .local-method-card {
+            background: #131b2e;
+            border: 2px solid rgba(245, 176, 65, 0.4);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .local-radio-circle {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #2ecc71;
+            background: #2ecc71;
+            box-shadow: inset 0 0 0 3px #131b2e;
+            flex-shrink: 0;
+        }
+        .btn-bkash-pay {
+            background: #d12053;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            width: 100%;
+            padding: 13px 18px;
+            font-size: 1.02rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(209, 32, 83, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-bkash-pay:hover {
+            background: #b51744;
+            transform: translateY(-1px);
+        }
+        .btn-nagad-pay {
+            background: #f7941d;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            width: 100%;
+            padding: 13px 18px;
+            font-size: 1.02rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(247, 148, 29, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-nagad-pay:hover {
+            background: #e08112;
+            transform: translateY(-1px);
+        }
+
         /* Setup Video Modal Styles */
         .setup-player-horizontal {
             position: relative;
@@ -6051,85 +6493,379 @@
         </div>
     </div>
 
-    <!-- Buy Challenge Modal in Dashboard -->
+    <!-- Buy Challenge Modal in Dashboard (Modern 3-Step Wizard) -->
     <div class="modal-overlay" id="dashBuyModal">
-        <div class="modal-box">
+        <div class="modal-box checkout-modal-box">
             <button class="modal-close" onclick="closeDashBuyModal()">&times;</button>
-            <h2 style="font-size:1.4rem; font-weight:800; margin-bottom:4px;" id="dashBuyModalTitle">Start Challenge</h2>
-            <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:1.4rem;" id="dashBuyModalSubtitle">
-                Select your broker and complete payment to start evaluation
-            </p>
-            <form id="dashBuyForm" onsubmit="handleDashBuyChallenge(event)">
-                <input type="hidden" id="dashSelectedPackageId" value="" />
-                
-                <div class="form-group">
-                    <label>Select External Broker</label>
-                    <select class="form-control" id="dashBuyBrokerSelect">
-                        <option value="quotex">Quotex</option>
-                        <option value="pocketoption">Pocket Option</option>
-                        <option value="olymptrade">Olymp Trade</option>
-                        <option value="binomo">Binomo</option>
-                        <option value="iqoption">IQ Option</option>
-                    </select>
+            <input type="hidden" id="dashSelectedPackageId" value="" />
+            <select id="dashBuyBrokerSelect" style="display:none;"><option value="quotex">quotex</option></select>
+            <select id="dashBuyPaymentMethod" style="display:none;"><option value="USDT (TRC-20)">USDT (TRC-20)</option></select>
+            <div id="dashPaymentInstructionBox" style="display:none;"></div>
+
+            <!-- ================= STEP 1: BROKER SELECTION ================= -->
+            <div id="dashCheckoutStepBroker">
+                <div class="checkout-header-bar">
+                    <span class="checkout-step-pill"><i class="fas fa-layer-group"></i> Step 1 of 3: Broker</span>
+                    <span style="font-size:0.75rem; color:#8e9bb0; font-weight:600;">Preferred Broker</span>
+                </div>
+                <h2 class="checkout-title" id="dashCheckoutStep1Title">Buy Challenge</h2>
+                <p class="checkout-subtitle" id="dashCheckoutStep1Subtitle">Select your trading broker and enter your account ID</p>
+
+                <div style="background:rgba(245,176,65,0.06); border:1px solid rgba(245,176,65,0.2); border-radius:12px; padding:10px 14px; margin-bottom:14px; font-size:0.83rem; color:#cbd5e1; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-info-circle" style="color:var(--yellow); font-size:1rem; flex-shrink:0;"></i>
+                    <span>আপনি যে ব্রোকারে ট্রেড করতে চান সেটি সিলেক্ট করুন এবং আপনার ব্রোকার অ্যাকাউন্ট আইডি লিখুন:</span>
                 </div>
 
-                <div class="form-group">
-                    <label>Account ID Number (On your broker)</label>
-                    <input type="text" class="form-control" id="dashBuyBrokerAccountId" placeholder="e.g. Quotex ID 1849204" required />
-                </div>
-
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <select class="form-control" id="dashBuyPaymentMethod" onchange="renderDashPaymentInstruction()">
-                        <option value="USDT (TRC20 - Instant)">USDT (TRC20 - Instant)</option>
-                        <option value="Binance Pay (Zero Fee)">Binance Pay (Zero Fee)</option>
-                        <option value="bKash (Personal - Send Money)">bKash (Personal - Send Money)</option>
-                        <option value="Nagad (Personal - Send Money)">Nagad (Personal - Send Money)</option>
-                    </select>
-                </div>
-
-                <div class="form-group" style="margin-bottom:1.1rem; background:rgba(255,255,255,0.03); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px 14px;">
-                    <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <span><i class="fas fa-ticket-alt" style="color:var(--yellow); margin-right:4px;"></i> Have a Promo Code? (প্রোমো কোড আছে?)</span>
-                        <span id="dashPromoSuccessTag" style="display:none; font-size:0.75rem; color:#2ecc71; font-weight:700;"><i class="fas fa-check-circle"></i> ডিসকাউন্ট প্রযোজ্য</span>
-                    </label>
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" class="form-control" id="dashBuyPromoCodeInput" placeholder="কুপন বা প্রোমো কোড দিন (e.g. SAVE20)" style="text-transform:uppercase; font-weight:700; letter-spacing:1px; font-size:0.9rem;" />
-                        <button type="button" id="dashBuyApplyPromoBtn" onclick="applyDashPromoCode()" class="btn-gold" style="padding:0 18px; white-space:nowrap; font-weight:700; font-size:0.88rem; flex-shrink:0;">
-                            Apply
-                        </button>
-                        <button type="button" id="dashBuyRemovePromoBtn" onclick="removeDashPromoCode()" class="btn-outline" style="display:none; padding:0 14px; white-space:nowrap; border-color:#e74c3c; color:#e74c3c; font-weight:700; font-size:0.85rem; flex-shrink:0;">
-                            Remove
-                        </button>
+                <label style="font-size:0.82rem; font-weight:700; color:#8e9bb0; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">Choose Broker (ব্রোকার নির্বাচন করুন)</label>
+                <div class="checkout-broker-grid">
+                    <div class="checkout-broker-card selected" id="dashBrokerCard_quotex" onclick="selectDashCheckoutBroker('quotex')">
+                        <i class="fas fa-check-circle checkout-broker-check"></i>
+                        <img src="/assets/brokers/quotex.png" alt="Quotex" onerror="this.src='/assets/brokers/quotex.svg'" />
+                        <span class="checkout-broker-name">Quotex</span>
                     </div>
-                    <div id="dashBuyPromoMessage" style="display:none; margin-top:6px; font-size:0.82rem; font-weight:600;"></div>
+                    <div class="checkout-broker-card" id="dashBrokerCard_pocketoption" onclick="selectDashCheckoutBroker('pocketoption')">
+                        <i class="fas fa-check-circle checkout-broker-check"></i>
+                        <img src="/assets/brokers/pocketoption.png" alt="Pocket Option" onerror="this.src='/assets/brokers/pocketoption.svg'" />
+                        <span class="checkout-broker-name">Pocket Option</span>
+                    </div>
+                    <div class="checkout-broker-card" id="dashBrokerCard_iqoption" onclick="selectDashCheckoutBroker('iqoption')">
+                        <i class="fas fa-check-circle checkout-broker-check"></i>
+                        <img src="/assets/brokers/iqoption.png" alt="IQ Option" onerror="this.src='/assets/brokers/iqoption.svg'" />
+                        <span class="checkout-broker-name">IQ Option</span>
+                    </div>
+                    <div class="checkout-broker-card" id="dashBrokerCard_olymptrade" onclick="selectDashCheckoutBroker('olymptrade')">
+                        <i class="fas fa-check-circle checkout-broker-check"></i>
+                        <img src="/assets/brokers/olymp.png" alt="Olymp Trade" onerror="this.src='/assets/brokers/olymp.svg'" />
+                        <span class="checkout-broker-name">Olymp Trade</span>
+                    </div>
+                    <div class="checkout-broker-card" id="dashBrokerCard_binomo" onclick="selectDashCheckoutBroker('binomo')">
+                        <i class="fas fa-check-circle checkout-broker-check"></i>
+                        <img src="/assets/brokers/binomo.png" alt="Binomo" onerror="this.src='/assets/brokers/binomo.svg'" />
+                        <span class="checkout-broker-name">Binomo</span>
+                    </div>
                 </div>
 
-                <div id="dashPaymentInstructionBox" style="background:rgba(245,176,65,0.06); border:1px solid rgba(245,176,65,0.25); border-radius:12px; padding:12px 14px; margin-bottom:1.2rem; font-size:0.88rem;">
-                    <!-- Populated dynamically by JS -->
+                <div class="form-group" style="margin-bottom:1.4rem;">
+                    <label style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
+                        <span><i class="fas fa-id-card" style="color:var(--yellow); margin-right:4px;"></i> Broker Account ID Number (ব্রোকার অ্যাকাউন্ট আইডি)</span>
+                        <span style="color:#ef4444; font-size:0.75rem;">*বাধ্যতামূলক</span>
+                    </label>
+                    <input type="text" class="form-control" id="dashBuyBrokerAccountId" placeholder="যেমন: Quotex UID 95520628" style="font-size:0.95rem; font-weight:700; background:#131b2e; border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:10px; padding:12px 14px;" required />
+                    <span style="display:block; font-size:0.75rem; color:#64748b; margin-top:4px;">নিশ্চিত করুন যে এই অ্যাকাউন্ট আইডি দিয়ে আপনি ট্রেড হিস্টোরি সাবমিট করবেন।</span>
                 </div>
 
-                <div class="form-group" id="dashSenderNumberGroup" style="display:none;">
-                    <label id="dashSenderNumberLabel"><i class="fas fa-phone-alt" style="color:var(--yellow); margin-right:4px;"></i> Sender Number (যে নম্বর থেকে টাকা পাঠিয়েছেন)</label>
-                    <input type="text" class="form-control" id="dashBuySenderNumber" placeholder="e.g. 017xxxxxxxx বা আপনার বিকাশ/নগদ নম্বর" />
-                </div>
+                <button type="button" class="btn-gold" onclick="goToDashCheckoutStep(2)" style="width:100%; justify-content:center; padding:14px; font-weight:800; font-size:1.02rem; border-radius:12px;">
+                    পেমেন্ট মেথড নির্বাচন করুন (Continue) <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
 
-                <div class="form-group" id="dashTrxIdGroup">
-                    <label id="dashTrxIdLabel"><i class="fas fa-receipt" style="color:var(--yellow); margin-right:4px;"></i> Transaction ID / Hash (TrxID)</label>
-                    <input type="text" class="form-control" id="dashBuyPaymentTxId" placeholder="e.g. 9J4K8L... or TrxID" />
+            <!-- ================= STEP 2: PAYMENT METHOD SELECTION (Image 2 style) ================= -->
+            <div id="dashCheckoutStepMethod" style="display:none;">
+                <div class="checkout-header-bar">
+                    <button type="button" class="checkout-back-link" onclick="goToDashCheckoutStep(1)">
+                        <i class="fas fa-arrow-left"></i> Change Broker
+                    </button>
+                    <span id="dashCheckoutSelectedBrokerTag" class="checkout-step-pill" style="background:rgba(46,204,113,0.15); color:#2ecc71; border-color:rgba(46,204,113,0.3);">
+                        <i class="fas fa-check-circle"></i> Quotex
+                    </span>
                 </div>
+                <h2 class="checkout-title" id="dashCheckoutStep2Title">Buy Mini Challenge</h2>
+                <p class="checkout-subtitle" id="dashCheckoutStep2Subtitle">$3.00 USD • $1,500.00 funded balance</p>
 
-                <div style="background:rgba(255,255,255,0.04); padding:10px 14px; border-radius:12px; margin-bottom:1.2rem; font-size:0.82rem; color:var(--text-secondary);">
-                    <i class="fas fa-info-circle" style="color:var(--yellow);"></i>
-                    পেমেন্ট ভেরিফাই করে এডমিন অনুমোদন দেওয়ার পর আপনার একাউন্টে মানি ম্যানেজমেন্ট শিট লিংক যুক্ত হবে।
-                </div>
-
-                <div class="modal-sticky-footer" style="position:sticky; bottom:-1rem; background:linear-gradient(180deg, rgba(18,24,36,0) 0%, rgba(18,24,36,0.95) 25%, #121824 100%); padding:10px 0 4px 0; margin-top:10px; z-index:10;">
-                    <button type="submit" class="btn-gold" style="width:100%; justify-content:center; padding:13px; font-size:1.02rem; font-weight:800; box-shadow:0 6px 20px rgba(245,176,65,0.35);" id="dashBuySubmitBtn">
-                        <i class="fas fa-check-circle"></i> Confirm & Start Challenge
+                <!-- Coupon Box (Image 2 top) -->
+                <div class="checkout-coupon-box">
+                    <input type="text" id="dashBuyPromoCodeInput" placeholder="Discount coupon (optional)" />
+                    <button type="button" id="dashBuyApplyPromoBtn" onclick="applyDashPromoCode()" class="btn-gold" style="padding:6px 16px; border-radius:8px; font-size:0.82rem; font-weight:700;">
+                        Apply
+                    </button>
+                    <button type="button" id="dashBuyRemovePromoBtn" onclick="removeDashPromoCode()" class="btn-outline" style="display:none; padding:6px 12px; border-radius:8px; font-size:0.82rem; color:#ef4444; border-color:#ef4444; font-weight:700;">
+                        Remove
                     </button>
                 </div>
-            </form>
+                <div id="dashBuyPromoMessage" style="display:none; margin:-6px 0 12px 4px; font-size:0.8rem; font-weight:600;"></div>
+                <div id="dashPromoSuccessTag" style="display:none;"></div>
+
+                <!-- Section: Popular in your region (3) -->
+                <div class="checkout-section-header">
+                    <span>Popular in your region (3)</span>
+                </div>
+                <div class="checkout-methods-grid" style="margin-bottom:12px;">
+                    <!-- USDT TRC20 -->
+                    <div class="checkout-method-card" onclick="selectDashCheckoutPaymentMethod('USDT (TRC-20)')">
+                        <div class="checkout-method-icon" style="background:#26a17b;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.2 5.5v1.28c2.8.14 4.9.82 4.9 1.63 0 .81-2.1 1.49-4.9 1.63v4.96h-2.4v-4.96c-2.8-.14-4.9-.82-4.9-1.63 0-.81 2.1-1.49 4.9-1.63V7.5h2.4zm-1.2 3.8c-2.4 0-4.3-.4-4.3-1s1.9-1 4.3-1 4.3.4 4.3 1-1.9 1-4.3 1z"/></svg>
+                        </div>
+                        <div class="checkout-method-info">
+                            <div class="checkout-method-title-row">
+                                <span class="checkout-method-title">USDT (TRC-20)</span>
+                                <span class="checkout-method-badge best">Best</span>
+                            </div>
+                            <div class="checkout-method-sub">Stable • ~1 min • Best for low fees</div>
+                        </div>
+                        <i class="fas fa-chevron-right checkout-method-arrow"></i>
+                    </div>
+
+                    <!-- bKash -->
+                    <div class="checkout-method-card" onclick="selectDashCheckoutPaymentMethod('bKash')">
+                        <div class="checkout-method-icon" style="background:#d12053; color:#fff; font-weight:900; font-size:16px;">
+                            b
+                        </div>
+                        <div class="checkout-method-info">
+                            <div class="checkout-method-title-row">
+                                <span class="checkout-method-title">bKash</span>
+                            </div>
+                            <div class="checkout-method-sub" id="dashMethodSub_bkash">Min. $3.00</div>
+                        </div>
+                        <i class="fas fa-chevron-right checkout-method-arrow"></i>
+                    </div>
+
+                    <!-- Nagad -->
+                    <div class="checkout-method-card" onclick="selectDashCheckoutPaymentMethod('Nagad')">
+                        <div class="checkout-method-icon" style="background:#f7941d; color:#fff; font-weight:900; font-size:16px;">
+                            N
+                        </div>
+                        <div class="checkout-method-info">
+                            <div class="checkout-method-title-row">
+                                <span class="checkout-method-title">Nagad</span>
+                            </div>
+                            <div class="checkout-method-sub" id="dashMethodSub_nagad">Min. $3.00</div>
+                        </div>
+                        <i class="fas fa-chevron-right checkout-method-arrow"></i>
+                    </div>
+
+                    <!-- Binance Pay -->
+                    <div class="checkout-method-card" onclick="selectDashCheckoutPaymentMethod('Binance Pay')">
+                        <div class="checkout-method-icon" style="background:#f3ba2f;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M12 3l3.5 3.5-3.5 3.5-3.5-3.5L12 3zm-6.5 6.5L9 13l-3.5 3.5L2 13l3.5-3.5zm13 0L22 13l-3.5 3.5L15 13l3.5-3.5zM12 11.5l3.5 3.5-3.5 3.5-3.5-3.5 3.5-3.5z"/></svg>
+                        </div>
+                        <div class="checkout-method-info">
+                            <div class="checkout-method-title-row">
+                                <span class="checkout-method-title">Binance Pay</span>
+                                <span class="checkout-method-badge zero">Zero Fee</span>
+                            </div>
+                            <div class="checkout-method-sub">Instant • Zero network fees</div>
+                        </div>
+                        <i class="fas fa-chevron-right checkout-method-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Section: Other Payment Methods -->
+                <div class="checkout-section-header">
+                    <span>Other Payment Methods</span>
+                </div>
+                <div class="checkout-methods-grid">
+                    <!-- USDT ERC20 -->
+                    <div class="checkout-method-card" onclick="selectDashCheckoutPaymentMethod('USDT (ERC-20)')">
+                        <div class="checkout-method-icon" style="background:#26a17b;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.2 5.5v1.28c2.8.14 4.9.82 4.9 1.63 0 .81-2.1 1.49-4.9 1.63v4.96h-2.4v-4.96c-2.8-.14-4.9-.82-4.9-1.63 0-.81 2.1-1.49 4.9-1.63V7.5h2.4zm-1.2 3.8c-2.4 0-4.3-.4-4.3-1s1.9-1 4.3-1 4.3.4 4.3 1-1.9 1-4.3 1z"/></svg>
+                        </div>
+                        <div class="checkout-method-info">
+                            <div class="checkout-method-title">USDT (ERC-20)</div>
+                            <div class="checkout-method-sub">Stable • ~3 min</div>
+                        </div>
+                        <i class="fas fa-chevron-right checkout-method-arrow"></i>
+                    </div>
+
+                    <!-- USDT BEP20 -->
+                    <div class="checkout-method-card" onclick="selectDashCheckoutPaymentMethod('USDT (BEP-20)')">
+                        <div class="checkout-method-icon" style="background:#26a17b;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.2 5.5v1.28c2.8.14 4.9.82 4.9 1.63 0 .81-2.1 1.49-4.9 1.63v4.96h-2.4v-4.96c-2.8-.14-4.9-.82-4.9-1.63 0-.81 2.1-1.49 4.9-1.63V7.5h2.4zm-1.2 3.8c-2.4 0-4.3-.4-4.3-1s1.9-1 4.3-1 4.3.4 4.3 1-1.9 1-4.3 1z"/></svg>
+                        </div>
+                        <div class="checkout-method-info">
+                            <div class="checkout-method-title">USDT (BEP-20)</div>
+                            <div class="checkout-method-sub">Stable • ~1 min</div>
+                        </div>
+                        <i class="fas fa-chevron-right checkout-method-arrow"></i>
+                    </div>
+
+                    <!-- Ethereum -->
+                    <div class="checkout-method-card" onclick="selectDashCheckoutPaymentMethod('Ethereum')">
+                        <div class="checkout-method-icon" style="background:#627eea;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/></svg>
+                        </div>
+                        <div class="checkout-method-info">
+                            <div class="checkout-method-title">Ethereum</div>
+                            <div class="checkout-method-sub">~3 min</div>
+                        </div>
+                        <i class="fas fa-chevron-right checkout-method-arrow"></i>
+                    </div>
+
+                    <!-- BNB Chain -->
+                    <div class="checkout-method-card" onclick="selectDashCheckoutPaymentMethod('BNB Chain')">
+                        <div class="checkout-method-icon" style="background:#f0b90b;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M12 3l3.5 3.5-3.5 3.5-3.5-3.5L12 3zm-6.5 6.5L9 13l-3.5 3.5L2 13l3.5-3.5zm13 0L22 13l-3.5 3.5L15 13l3.5-3.5zM12 11.5l3.5 3.5-3.5 3.5-3.5-3.5 3.5-3.5z"/></svg>
+                        </div>
+                        <div class="checkout-method-info">
+                            <div class="checkout-method-title">BNB Chain</div>
+                            <div class="checkout-method-sub">~1 min</div>
+                        </div>
+                        <i class="fas fa-chevron-right checkout-method-arrow"></i>
+                    </div>
+
+                    <!-- Bitcoin -->
+                    <div class="checkout-method-card" onclick="selectDashCheckoutPaymentMethod('Bitcoin')">
+                        <div class="checkout-method-icon" style="background:#f7931a;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M15.5 10.5c.7-.5 1.1-1.3 1.1-2.2 0-1.8-1.5-3.3-3.6-3.3H8v14h5.5c2.3 0 4-1.6 4-3.7 0-1.2-.5-2.2-1.5-2.8zM10.5 7h2.2c.8 0 1.5.7 1.5 1.5s-.7 1.5-1.5 1.5h-2.2V7zm2.7 10H10.5v-3.5h2.7c.9 0 1.7.8 1.7 1.7 0 1-.8 1.8-1.7 1.8z"/></svg>
+                        </div>
+                        <div class="checkout-method-info">
+                            <div class="checkout-method-title">Bitcoin</div>
+                            <div class="checkout-method-sub">~30 min</div>
+                        </div>
+                        <i class="fas fa-chevron-right checkout-method-arrow"></i>
+                    </div>
+
+                    <!-- Toncoin -->
+                    <div class="checkout-method-card" onclick="selectDashCheckoutPaymentMethod('Toncoin')">
+                        <div class="checkout-method-icon" style="background:#0098ea;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 15 10-15-10-5zm0 3.3l6.5 3.2L12 18.2 5.5 8.5 12 5.3z"/></svg>
+                        </div>
+                        <div class="checkout-method-info">
+                            <div class="checkout-method-title">Toncoin</div>
+                            <div class="checkout-method-sub">~1 min</div>
+                        </div>
+                        <i class="fas fa-chevron-right checkout-method-arrow"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= STEP 3: PAYMENT DETAILS & SUBMISSION ================= -->
+            <div id="dashCheckoutStepDetails" style="display:none;">
+                
+                <!-- PANE A: CRYPTO PAYMENT (Image 3) -->
+                <div id="dashCheckoutCryptoPane" style="display:none;">
+                    <div class="checkout-header-bar">
+                        <button type="button" class="checkout-back-link" onclick="goToDashCheckoutStep(2)">
+                            <i class="fas fa-arrow-left"></i> Change Method
+                        </button>
+                        <div class="crypto-timer-pill">
+                            <i class="fas fa-clock"></i> <span id="dashCryptoTimerText">59:59</span>
+                        </div>
+                    </div>
+
+                    <h2 class="checkout-title" id="dashCheckoutCryptoPkgTitle" style="text-align:center;">Starter Challenge</h2>
+                    <div class="crypto-big-price" id="dashCheckoutCryptoBigPrice">$39.00 USD</div>
+
+                    <!-- Send Exactly Card -->
+                    <div class="crypto-info-card">
+                        <div class="crypto-card-label">SEND EXACTLY</div>
+                        <div class="crypto-card-row">
+                            <span class="crypto-val-text" id="dashCryptoExactAmount" style="color:#2ecc71; font-size:1.15rem;">39.00 USDT</span>
+                            <button type="button" class="crypto-copy-btn" onclick="copyCheckoutText(document.getElementById('dashCryptoExactAmount').innerText, 'Amount copied!')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- To This Address Card -->
+                    <div class="crypto-info-card">
+                        <div class="crypto-card-label" id="dashCryptoAddressLabel">TO THIS ADDRESS</div>
+                        <div class="crypto-card-row">
+                            <span class="crypto-val-text" id="dashCryptoAddressVal">TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx</span>
+                            <button type="button" class="crypto-copy-btn" onclick="copyCheckoutText(document.getElementById('dashCryptoAddressVal').innerText, 'Address copied!')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QR Code -->
+                    <div class="crypto-qr-container">
+                        <div class="crypto-qr-img-box">
+                            <img id="dashCryptoQrCodeImg" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx" alt="Payment QR" />
+                        </div>
+                        <div>
+                            <span class="crypto-network-tag" id="dashCryptoNetworkTag">USDT • TRC-20</span>
+                        </div>
+                    </div>
+
+                    <!-- Awaiting Payment Status -->
+                    <div class="crypto-status-pill">
+                        <div class="crypto-pulse-dot"></div>
+                        <span>Awaiting payment</span>
+                    </div>
+
+                    <!-- Warning Alert Box -->
+                    <div class="crypto-warning-alert" id="dashCryptoWarningBox">
+                        ⚠️ Send only USDT via TRC-20 network to this address. Any other token will be lost.
+                    </div>
+
+                    <!-- TrxID Input -->
+                    <div class="form-group" style="margin-bottom:1.2rem;">
+                        <label style="font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-bottom:6px; display:block;">
+                            Transaction ID / Hash (TrxID) <span style="color:#ef4444;">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="dashCryptoPaymentTxId" placeholder="e.g. 9J4K8L... or transaction hash" style="background:#131b2e; border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:10px; padding:12px 14px; font-weight:700;" />
+                    </div>
+
+                    <!-- Action Button -->
+                    <button type="button" class="btn-crypto-pay" id="dashCryptoSubmitBtn" onclick="submitDashFinalOrder('crypto')">
+                        <i class="fas fa-check-circle"></i> I've Paid — Check Status
+                    </button>
+                </div>
+
+                <!-- PANE B: LOCAL PAYMENT (bKash / Nagad - Image 4) -->
+                <div id="dashCheckoutLocalPane" style="display:none;">
+                    <div class="checkout-header-bar">
+                        <button type="button" class="checkout-back-link" onclick="goToDashCheckoutStep(2)">
+                            <i class="fas fa-arrow-left"></i> Change Method
+                        </button>
+                        <span class="checkout-step-pill" style="background:rgba(209,32,83,0.15); color:#ff6b8b; border-color:rgba(209,32,83,0.3);">
+                            <i class="fas fa-bolt"></i> Instant Local
+                        </span>
+                    </div>
+
+                    <h2 class="checkout-title" id="dashCheckoutLocalPkgTitle">Starter Challenge</h2>
+                    <p class="checkout-subtitle" id="dashCheckoutLocalSubtitle">
+                        $39.00 USD • $5,000.00 funded balance • <span style="color:var(--yellow); font-weight:700;">৳4,943 via bKash</span>
+                    </p>
+
+                    <!-- Choose Method Section Header -->
+                    <div style="font-size:0.75rem; font-weight:800; color:#8e9bb0; letter-spacing:0.8px; margin-bottom:8px; text-transform:uppercase;" id="dashLocalMethodSectionHeader">
+                        CHOOSE BKASH METHOD
+                    </div>
+
+                    <!-- Method Radio Card -->
+                    <div class="local-method-card">
+                        <div class="local-radio-circle"></div>
+                        <div class="checkout-method-icon" id="dashLocalMethodLogoIcon" style="background:#d12053; color:#fff; font-weight:900; font-size:16px;">
+                            b
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:0.92rem; font-weight:800; color:#fff;" id="dashLocalMethodCardTitle">bKash (Send Money - Personal)</div>
+                            <div style="font-size:0.95rem; font-weight:700; color:var(--yellow); font-family:monospace; margin-top:2px;" id="dashLocalAccountNumberVal">01686313198</div>
+                        </div>
+                        <button type="button" class="crypto-copy-btn" onclick="copyCheckoutText(document.getElementById('dashLocalAccountNumberVal').innerText, 'Number copied!')">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+
+                    <!-- Sender Phone Input -->
+                    <div class="form-group" style="margin-bottom:1rem;">
+                        <label style="font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-bottom:6px; display:block;" id="dashLocalSenderLabel">
+                            YOUR BKASH NUMBER (যে নম্বর থেকে টাকা পাঠিয়েছেন) <span style="color:#ef4444;">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="dashLocalSenderNumber" placeholder="01XXXXXXXXX" style="background:#131b2e; border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:10px; padding:12px 14px; font-weight:700;" />
+                    </div>
+
+                    <!-- TrxID Input -->
+                    <div class="form-group" style="margin-bottom:1.2rem;">
+                        <label style="font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-bottom:6px; display:block;">
+                            TRANSACTION ID (TRXID) <span style="color:#ef4444;">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="dashLocalPaymentTxId" placeholder="Enter TrxID after sending (যেমন: 9J4K8L...)" style="background:#131b2e; border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:10px; padding:12px 14px; font-weight:700;" />
+                    </div>
+
+                    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 12px; font-size:0.8rem; color:#94a3b8; margin-bottom:14px; line-height:1.4;">
+                        <i class="fas fa-shield-alt" style="color:var(--yellow); margin-right:4px;"></i>
+                        বিকাশ/নগদ অ্যাপ থেকে উপরে প্রদর্শিত নম্বরে 'Send Money' সম্পন্ন করে ট্রানজেকশন আইডি দিয়ে নিচের বাটনে ক্লিক করুন।
+                    </div>
+
+                    <!-- Local Action Button -->
+                    <button type="button" id="dashLocalSubmitBtn" class="btn-bkash-pay" onclick="submitDashFinalOrder('local')">
+                        Pay ৳4,943 via bKash →
+                    </button>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -12302,373 +13038,325 @@
             }).join('');
         }
 
-        // Buy Challenge Modal & Payment Logic
-        function openDashBuyModal(pkgId) {
-            // Check if user already has a running or pending challenge
-            const runningCh = myChallenges.find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
-            if (runningCh) {
-                showToast('আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে।', 'error');
-                return;
-            }
-            const pendingCh = myChallenges.find(c => c.status === 'pending_approval' || c.status === 'pending');
-            if (pendingCh) {
-                showToast('আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে।', 'error');
-                return;
+        let dashCheckoutState = {
+            packageId: null,
+            pkg: null,
+            brokerId: 'quotex',
+            brokerAccountId: '',
+            paymentMethod: 'USDT (TRC-20)',
+            currentStep: 1,
+            effectiveFee: 0,
+            localAmount: 0,
+            rate: 127
+        };
+        let dashCryptoCountdownTimer = null;
+
+        function selectDashCheckoutBroker(brokerId) {
+            dashCheckoutState.brokerId = brokerId;
+            document.querySelectorAll('#dashBuyModal .checkout-broker-card').forEach(el => el.classList.remove('selected'));
+            const card = document.getElementById('dashBrokerCard_' + brokerId);
+            if (card) card.classList.add('selected');
+            const selectEl = document.getElementById('dashBuyBrokerSelect');
+            if (selectEl) selectEl.value = brokerId;
+        }
+
+        function goToDashCheckoutStep(step) {
+            if (step === 2) {
+                const accId = (document.getElementById('dashBuyBrokerAccountId')?.value || '').trim();
+                if (!accId) {
+                    showToast('অনুগ্রহ করে আপনার ব্রোকার অ্যাকাউন্ট আইডি নম্বর দিন।', 'error');
+                    document.getElementById('dashBuyBrokerAccountId')?.focus();
+                    return;
+                }
+                dashCheckoutState.brokerAccountId = accId;
             }
 
-            const pkg = allPackages.find(p => p.id === pkgId);
+            dashCheckoutState.currentStep = step;
+            const s1 = document.getElementById('dashCheckoutStepBroker');
+            const s2 = document.getElementById('dashCheckoutStepMethod');
+            const s3 = document.getElementById('dashCheckoutStepDetails');
+
+            if (s1) s1.style.display = (step === 1) ? 'block' : 'none';
+            if (s2) s2.style.display = (step === 2) ? 'block' : 'none';
+            if (s3) s3.style.display = (step === 3) ? 'block' : 'none';
+
+            const modalBox = document.querySelector('#dashBuyModal .checkout-modal-box') || document.querySelector('#dashBuyModal .modal-box');
+            if (modalBox) modalBox.scrollTop = 0;
+
+            if (step === 1) {
+                if (dashCryptoCountdownTimer) {
+                    clearInterval(dashCryptoCountdownTimer);
+                    dashCryptoCountdownTimer = null;
+                }
+            } else if (step === 2) {
+                if (dashCryptoCountdownTimer) {
+                    clearInterval(dashCryptoCountdownTimer);
+                    dashCryptoCountdownTimer = null;
+                }
+                updateDashStep2Display();
+            } else if (step === 3) {
+                updateDashStep3Display();
+            }
+        }
+
+        function updateDashStep2Display() {
+            const pkg = dashCheckoutState.pkg;
             if (!pkg) return;
 
-            document.getElementById('dashSelectedPackageId').value = pkg.id;
-            document.getElementById('dashBuyModalTitle').innerText = `${pkg.name} ($${pkg.fundedAmount.toLocaleString()}) Challenge`;
+            const brokerNames = {
+                quotex: 'Quotex',
+                pocketoption: 'Pocket Option',
+                iqoption: 'IQ Option',
+                olymptrade: 'Olymp Trade',
+                binomo: 'Binomo'
+            };
+            const bName = brokerNames[dashCheckoutState.brokerId] || dashCheckoutState.brokerId;
+            const bTag = document.getElementById('dashCheckoutSelectedBrokerTag');
+            if (bTag) bTag.innerHTML = `<i class="fas fa-check-circle"></i> ${bName} (#${dashCheckoutState.brokerAccountId})`;
 
-            if (pkg.hasDiscount) {
-                document.getElementById('dashBuyModalSubtitle').innerHTML = `
-                    ফি (Evaluation Fee): <span style="font-size:1.05rem; font-weight:800; color:#ff4d4d; text-decoration:line-through; text-decoration-color:#ff3838; text-decoration-thickness:2px;">$${pkg.originalFee}</span> 
-                    <strong style="color:var(--neon-green); font-size:1.35rem; margin-left:6px;">$${pkg.fee}</strong>
-                    <span style="background:rgba(255,77,77,0.2); color:#ff6b81; border:1px solid rgba(255,77,77,0.4); padding:2px 7px; border-radius:4px; font-size:0.75rem; font-weight:800; margin-left:6px;">
-                        ${pkg.discountPercent}% OFF (লঞ্চ অফার)
-                    </span> 
-                    • প্রফিট স্প্লিট: <strong style="color:var(--yellow);">${pkg.profitSplit}</strong>
-                `;
-            } else {
-                document.getElementById('dashBuyModalSubtitle').innerHTML = `One-time evaluation fee: <strong style="color:var(--gold); font-size:1.2rem;">$${pkg.fee}</strong> • Up to ${pkg.profitSplit} Profit Split`;
-            }
+            const fee = (dashAppliedPromoData && typeof dashAppliedPromoData.finalFee === 'number') ? dashAppliedPromoData.finalFee : pkg.fee;
+            dashCheckoutState.effectiveFee = fee;
 
-            document.getElementById('dashBuySubmitBtn').innerHTML = `<i class="fas fa-credit-card"></i> Pay $${pkg.fee} & Start Challenge`;
+            const t2 = document.getElementById('dashCheckoutStep2Title');
+            if (t2) t2.innerText = `Buy ${pkg.name} Challenge`;
 
-            if (currentUser && currentUser.preferredBroker) {
-                document.getElementById('dashBuyBrokerSelect').value = currentUser.preferredBroker;
-            }
-            if (currentUser && currentUser.brokerAccountId) {
-                document.getElementById('dashBuyBrokerAccountId').value = currentUser.brokerAccountId;
-            }
-
-            removeDashPromoCode(false);
-            renderDashPaymentInstruction();
-            const dashModalEl = document.getElementById('dashBuyModal');
-            dashModalEl.classList.add('active');
-            const dashModalBox = dashModalEl.querySelector('.modal-box');
-            if (dashModalBox) dashModalBox.scrollTop = 0;
-        }
-
-        function closeDashBuyModal() {
-            document.getElementById('dashBuyModal').classList.remove('active');
-        }
-
-        async function fetchDashPaymentMethods() {
-            try {
-                const res = await fetch('/api/payment-methods');
-                const data = await res.json();
-                if (data.success && data.paymentMethods && data.paymentMethods.length > 0) {
-                    dashPaymentMethods = data.paymentMethods;
-                    const select = document.getElementById('dashBuyPaymentMethod');
-                    if (select) {
-                        select.innerHTML = dashPaymentMethods.map(pm => {
-                            const isBdDefault = pm.name.toLowerCase().includes('bkash') || pm.name.toLowerCase().includes('nagad');
-                            const countryName = pm.country || (isBdDefault ? 'Bangladesh' : 'Global / International');
-                            const countryCode = pm.countryCode || (isBdDefault ? 'BD' : 'GLOBAL');
-                            const curr = pm.currency || (isBdDefault ? 'BDT' : 'USD');
-                            const sym = pm.currencySymbol || (curr === 'BDT' ? '৳' : (curr === 'USD' ? '$' : curr));
-                            const rate = Number(pm.exchangeRate) || (curr === 'BDT' ? 125 : 1);
-                            const flag = countryCode === 'GLOBAL' ? '🌐' : (window.WORLD_COUNTRIES?.find(c => c.code === countryCode)?.flag || '🏳️');
-
-                            const rateLabel = curr === 'USD' && rate === 1
-                                ? `(${flag} Global • USD)`
-                                : `(${flag} ${countryName} • 1 USD = ${rate} ${sym})`;
-
-                            return `<option value="${pm.name}">${pm.name} ${rateLabel}</option>`;
-                        }).join('');
-                    }
+            const sub2 = document.getElementById('dashCheckoutStep2Subtitle');
+            if (sub2) {
+                if (dashAppliedPromoData) {
+                    sub2.innerHTML = `
+                        <span style="text-decoration:line-through; color:#ef4444; font-size:0.85rem;">$${pkg.fee}.00</span>
+                        <strong style="color:var(--neon-green); font-size:1.05rem; margin-left:4px;">$${fee}.00 USD</strong> • 
+                        $${pkg.fundedAmount.toLocaleString()}.00 funded balance
+                        <span style="background:rgba(46,204,113,0.18); color:#2ecc71; border:1px solid #2ecc71; padding:2px 6px; border-radius:4px; font-size:0.72rem; font-weight:700; margin-left:4px;">
+                            🏷️ ${dashAppliedPromoData.code} (${dashAppliedPromoData.discountType === 'percentage' ? dashAppliedPromoData.discountValue + '% OFF' : '$' + dashAppliedPromoData.discountValue + ' OFF'})
+                        </span>
+                    `;
+                } else {
+                    sub2.innerText = `$${fee}.00 USD • $${pkg.fundedAmount.toLocaleString()}.00 funded balance`;
                 }
-                renderDashPaymentInstruction();
-            } catch (err) {
-                console.error('Failed to load payment methods in dashboard:', err);
+            }
+
+            const bkSub = document.getElementById('dashMethodSub_bkash');
+            if (bkSub) bkSub.innerText = `Min. $${fee}.00 • ৳${Math.round(fee * 127).toLocaleString()}`;
+            const ngSub = document.getElementById('dashMethodSub_nagad');
+            if (ngSub) ngSub.innerText = `Min. $${fee}.00 • ৳${Math.round(fee * 127).toLocaleString()}`;
+        }
+
+        function selectDashCheckoutPaymentMethod(methodName) {
+            dashCheckoutState.paymentMethod = methodName;
+            const sel = document.getElementById('dashBuyPaymentMethod');
+            if (sel) sel.value = methodName;
+            goToDashCheckoutStep(3);
+        }
+
+        function updateDashStep3Display() {
+            const pkg = dashCheckoutState.pkg;
+            if (!pkg) return;
+
+            const isLocal = dashCheckoutState.paymentMethod === 'bKash' || dashCheckoutState.paymentMethod === 'Nagad';
+            const cryptoPane = document.getElementById('dashCheckoutCryptoPane');
+            const localPane = document.getElementById('dashCheckoutLocalPane');
+
+            const fee = (dashAppliedPromoData && typeof dashAppliedPromoData.finalFee === 'number') ? dashAppliedPromoData.finalFee : pkg.fee;
+            dashCheckoutState.effectiveFee = fee;
+
+            // Get live config from dashPaymentMethods
+            const pmBkash = (dashPaymentMethods || []).find(m => m.name.toLowerCase().includes('bkash'));
+            const pmNagad = (dashPaymentMethods || []).find(m => m.name.toLowerCase().includes('nagad'));
+            const pmUsdt = (dashPaymentMethods || []).find(m => m.name.toLowerCase().includes('usdt'));
+            const pmBinance = (dashPaymentMethods || []).find(m => m.name.toLowerCase().includes('binance'));
+
+            const rate = (isLocal && pmBkash) ? (Number(pmBkash.exchangeRate) || 127) : 127;
+            const localBdt = Math.round(fee * rate);
+            dashCheckoutState.localAmount = localBdt;
+            dashCheckoutState.rate = rate;
+
+            if (!isLocal) {
+                // CRYPTO PANE (Image 3)
+                if (cryptoPane) cryptoPane.style.display = 'block';
+                if (localPane) localPane.style.display = 'none';
+
+                startDashCryptoCountdown(3600);
+
+                const titleEl = document.getElementById('dashCheckoutCryptoPkgTitle');
+                if (titleEl) titleEl.innerText = `${pkg.name} ($${pkg.fundedAmount.toLocaleString()}) Challenge`;
+
+                const bigPrice = document.getElementById('dashCheckoutCryptoBigPrice');
+                if (bigPrice) bigPrice.innerText = `$${fee}.00 USD`;
+
+                const exactAmount = document.getElementById('dashCryptoExactAmount');
+                const addrVal = document.getElementById('dashCryptoAddressVal');
+                const addrLabel = document.getElementById('dashCryptoAddressLabel');
+                const netTag = document.getElementById('dashCryptoNetworkTag');
+                const warnBox = document.getElementById('dashCryptoWarningBox');
+                const qrImg = document.getElementById('dashCryptoQrCodeImg');
+
+                let displayAddress = (pmUsdt && pmUsdt.accountNumber) ? pmUsdt.accountNumber : 'TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx';
+                let currencySymbolStr = 'USDT';
+                let networkStr = 'USDT • TRC-20';
+                let warningStr = '⚠️ Send only USDT via TRC-20 network to this address. Any other token will be lost.';
+
+                if (dashCheckoutState.paymentMethod === 'Binance Pay') {
+                    displayAddress = (pmBinance && pmBinance.accountNumber) ? pmBinance.accountNumber : '838241680 (Binance Pay ID)';
+                    currencySymbolStr = 'USDT / USD';
+                    networkStr = 'Binance Pay • 0% Fee';
+                    warningStr = '⚠️ Send payment to Binance Pay ID above. Enter your Binance Pay Order ID / TrxID below.';
+                    if (addrLabel) addrLabel.innerText = 'TO THIS BINANCE PAY ID';
+                } else if (dashCheckoutState.paymentMethod === 'USDT (BEP-20)') {
+                    displayAddress = 'TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx';
+                    networkStr = 'USDT • BEP-20 (BNB Smart Chain)';
+                    warningStr = '⚠️ Send only USDT via BEP-20 (BSC) network to this address.';
+                    if (addrLabel) addrLabel.innerText = 'TO THIS ADDRESS';
+                } else if (dashCheckoutState.paymentMethod === 'USDT (ERC-20)') {
+                    displayAddress = 'TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx';
+                    networkStr = 'USDT • ERC-20 (Ethereum Network)';
+                    warningStr = '⚠️ Send only USDT via ERC-20 network to this address.';
+                    if (addrLabel) addrLabel.innerText = 'TO THIS ADDRESS';
+                } else {
+                    displayAddress = 'TAzvTA1gc2yX9vTm28FUqUNQ6e1N1UGRjx';
+                    networkStr = `${dashCheckoutState.paymentMethod} Network`;
+                    warningStr = `⚠️ Send payment via ${dashCheckoutState.paymentMethod}. Enter your Transaction ID / Hash below.`;
+                    if (addrLabel) addrLabel.innerText = 'TO THIS ADDRESS';
+                }
+
+                if (exactAmount) exactAmount.innerText = `${fee}.00 ${currencySymbolStr}`;
+                if (addrVal) addrVal.innerText = displayAddress;
+                if (netTag) netTag.innerText = networkStr;
+                if (warnBox) warnBox.innerText = warningStr;
+
+                const qrData = encodeURIComponent(displayAddress.replace(/\s*\(.*\)/, ''));
+                if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${qrData}`;
+
+            } else {
+                // LOCAL PANE (bKash / Nagad - Image 4)
+                if (cryptoPane) cryptoPane.style.display = 'none';
+                if (localPane) localPane.style.display = 'block';
+
+                if (dashCryptoCountdownTimer) {
+                    clearInterval(dashCryptoCountdownTimer);
+                    dashCryptoCountdownTimer = null;
+                }
+
+                const isNagad = dashCheckoutState.paymentMethod === 'Nagad';
+                const activePM = isNagad ? pmNagad : pmBkash;
+                const officialNumber = (activePM && activePM.accountNumber) ? activePM.accountNumber : '01686313198';
+
+                const titleEl = document.getElementById('dashCheckoutLocalPkgTitle');
+                if (titleEl) titleEl.innerText = `${pkg.name} ($${pkg.fundedAmount.toLocaleString()}) Challenge`;
+
+                const subEl = document.getElementById('dashCheckoutLocalSubtitle');
+                if (subEl) {
+                    subEl.innerHTML = `$${fee}.00 USD • $${pkg.fundedAmount.toLocaleString()}.00 funded balance • <span style="color:var(--yellow); font-weight:700;">৳${localBdt.toLocaleString()} via ${dashCheckoutState.paymentMethod}</span>`;
+                }
+
+                const secHead = document.getElementById('dashLocalMethodSectionHeader');
+                if (secHead) secHead.innerText = isNagad ? 'CHOOSE NAGAD METHOD' : 'CHOOSE BKASH METHOD';
+
+                const logoIcon = document.getElementById('dashLocalMethodLogoIcon');
+                if (logoIcon) {
+                    logoIcon.style.background = isNagad ? '#f7941d' : '#d12053';
+                    logoIcon.innerText = isNagad ? 'N' : 'b';
+                }
+
+                const cardTitle = document.getElementById('dashLocalMethodCardTitle');
+                if (cardTitle) cardTitle.innerText = isNagad ? 'Nagad (Send Money - Personal)' : 'bKash (Send Money - Personal)';
+
+                const numVal = document.getElementById('dashLocalAccountNumberVal');
+                if (numVal) numVal.innerText = officialNumber;
+
+                const senderLabel = document.getElementById('dashLocalSenderLabel');
+                if (senderLabel) {
+                    senderLabel.innerHTML = isNagad 
+                        ? 'YOUR NAGAD NUMBER (যে নম্বর থেকে টাকা পাঠিয়েছেন) <span style="color:#ef4444;">*</span>' 
+                        : 'YOUR BKASH NUMBER (যে নম্বর থেকে টাকা পাঠিয়েছেন) <span style="color:#ef4444;">*</span>';
+                }
+
+                const submitBtn = document.getElementById('dashLocalSubmitBtn');
+                if (submitBtn) {
+                    submitBtn.className = isNagad ? 'btn-nagad-pay' : 'btn-bkash-pay';
+                    submitBtn.innerHTML = `Pay ৳${localBdt.toLocaleString()} via ${dashCheckoutState.paymentMethod} →`;
+                }
             }
         }
 
-        // ==========================================
-        // DASHBOARD PROMO CODE APPLICATION
-        // ==========================================
-        let dashAppliedPromoData = null;
+        function startDashCryptoCountdown(seconds = 3600) {
+            if (dashCryptoCountdownTimer) clearInterval(dashCryptoCountdownTimer);
+            let remaining = seconds;
+            const updateText = () => {
+                const m = Math.floor(remaining / 60);
+                const s = remaining % 60;
+                const text = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                const el = document.getElementById('dashCryptoTimerText');
+                if (el) el.innerText = text;
+                if (remaining <= 0) {
+                    clearInterval(dashCryptoCountdownTimer);
+                    if (el) el.innerText = '00:00';
+                }
+                remaining--;
+            };
+            updateText();
+            dashCryptoCountdownTimer = setInterval(updateText, 1000);
+        }
 
-        async function applyDashPromoCode() {
-            const input = document.getElementById('dashBuyPromoCodeInput');
-            const msgEl = document.getElementById('dashBuyPromoMessage');
-            const applyBtn = document.getElementById('dashBuyApplyPromoBtn');
-            const removeBtn = document.getElementById('dashBuyRemovePromoBtn');
-            const successTag = document.getElementById('dashPromoSuccessTag');
-            const packageId = document.getElementById('dashSelectedPackageId')?.value;
-
-            if (!input || !input.value.trim()) {
-                showToast('অনুগ্রহ করে প্রোমো কোড লিখুন', 'error');
+        async function submitDashFinalOrder(type) {
+            const token = localStorage.getItem('aj_token');
+            if (!token) {
+                showToast('অনুগ্রহ করে প্রথমে লগইন করুন।', 'error');
                 return;
             }
 
-            const code = input.value.trim().toUpperCase();
-            applyBtn.disabled = true;
-            applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-            try {
-                const res = await fetch('/api/promo-codes/validate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code, packageId })
-                });
-                const data = await res.json();
-                if (data.success && data.valid) {
-                    dashAppliedPromoData = {
-                        ...data.promo,
-                        discountAmount: data.discountAmount,
-                        finalFee: data.finalFee,
-                        baseFee: data.baseFee
-                    };
-                    input.value = dashAppliedPromoData.code;
-                    input.readOnly = true;
-                    applyBtn.style.display = 'none';
-                    removeBtn.style.display = 'inline-block';
-                    if (successTag) successTag.style.display = 'inline-block';
-                    if (msgEl) {
-                        msgEl.style.display = 'block';
-                        msgEl.style.color = '#2ecc71';
-                        msgEl.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message || 'প্রোমো কোড সফলভাবে যোগ করা হয়েছে!'}`;
-                    }
-                    showToast(`🎉 "${dashAppliedPromoData.code}" কার্যকর হয়েছে! $${data.discountAmount} ছাড় পেয়েছেন।`, 'success');
-                    renderDashPaymentInstruction();
-                } else {
-                    dashAppliedPromoData = null;
-                    if (msgEl) {
-                        msgEl.style.display = 'block';
-                        msgEl.style.color = '#e74c3c';
-                        msgEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message || 'প্রোমো কোডটি সঠিক নয়।'}`;
-                    }
-                    showToast(data.message || 'প্রোমো কোডটি সঠিক নয় বা মেয়াদ শেষ।', 'error');
-                }
-            } catch (err) {
-                showToast('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।', 'error');
-            } finally {
-                applyBtn.disabled = false;
-                applyBtn.innerHTML = 'Apply';
-            }
-        }
-
-        function removeDashPromoCode(rerender = true) {
-            dashAppliedPromoData = null;
-            const input = document.getElementById('dashBuyPromoCodeInput');
-            const msgEl = document.getElementById('dashBuyPromoMessage');
-            const applyBtn = document.getElementById('dashBuyApplyPromoBtn');
-            const removeBtn = document.getElementById('dashBuyRemovePromoBtn');
-            const successTag = document.getElementById('dashPromoSuccessTag');
-
-            if (input) {
-                input.value = '';
-                input.readOnly = false;
-            }
-            if (applyBtn) applyBtn.style.display = 'inline-block';
-            if (removeBtn) removeBtn.style.display = 'none';
-            if (successTag) successTag.style.display = 'none';
-            if (msgEl) {
-                msgEl.style.display = 'none';
-                msgEl.innerHTML = '';
-            }
-            if (rerender) {
-                renderDashPaymentInstruction();
-            }
-        }
-
-        function renderDashPaymentInstruction() {
-            const select = document.getElementById('dashBuyPaymentMethod');
-            const box = document.getElementById('dashPaymentInstructionBox');
-            if (!select || !box) return;
-
-            const selectedName = select.value;
-            const pm = (dashPaymentMethods || []).find(m => m.name === selectedName);
-
-            const pkgIdElem = document.getElementById('dashSelectedPackageId');
-            const pkgId = pkgIdElem ? pkgIdElem.value : '';
-            const pkg = (allPackages || []).find(p => p.id === pkgId);
-            const pkgFee = pkg ? Number(pkg.fee) : 7;
-            const effectiveFee = (dashAppliedPromoData && typeof dashAppliedPromoData.finalFee === 'number') ? dashAppliedPromoData.finalFee : pkgFee;
-
-            const senderGroup = document.getElementById('dashSenderNumberGroup');
-            const senderInput = document.getElementById('dashBuySenderNumber');
-            const trxGroup = document.getElementById('dashTrxIdGroup');
-            const trxInput = document.getElementById('dashBuyPaymentTxId');
-            const submitBtn = document.getElementById('dashBuySubmitBtn');
-
-            if (pm) {
-                const isBdDefault = pm.name.toLowerCase().includes('bkash') || pm.name.toLowerCase().includes('nagad');
-                const countryName = pm.country || (isBdDefault ? 'Bangladesh' : 'Global / International');
-                const countryCode = pm.countryCode || (isBdDefault ? 'BD' : 'GLOBAL');
-                const curr = pm.currency || (isBdDefault ? 'BDT' : 'USD');
-                const sym = pm.currencySymbol || (curr === 'BDT' ? '৳' : (curr === 'USD' ? '$' : curr));
-                const rate = Number(pm.exchangeRate) || (curr === 'BDT' ? 125 : 1);
-                const isLocalCurrency = curr !== 'USD' && rate !== 1;
-                const localAmount = isLocalCurrency ? Math.round(effectiveFee * rate) : effectiveFee;
-                const flag = countryCode === 'GLOBAL' ? '🌐' : (window.WORLD_COUNTRIES?.find(c => c.code === countryCode)?.flag || '🏳️');
-
-                if (submitBtn) {
-                    if (isLocalCurrency) {
-                        submitBtn.innerHTML = `<i class="fas fa-credit-card"></i> Pay ${sym}${localAmount.toLocaleString()} & Start Challenge`;
-                    } else {
-                        submitBtn.innerHTML = `<i class="fas fa-credit-card"></i> Pay $${effectiveFee} & Start Challenge`;
-                    }
-                }
-
-                // Dynamic subtitle update showing local amount
-                const subTitle = document.getElementById('dashBuyModalSubtitle');
-                if (subTitle && pkg) {
-                    if (dashAppliedPromoData) {
-                        subTitle.innerHTML = `
-                            ফি: <span style="font-size:1rem; font-weight:700; color:#ff4d4d; text-decoration:line-through; text-decoration-color:#ff3838; text-decoration-thickness:2px;">$${pkgFee}</span> 
-                            <strong style="color:var(--neon-green); font-size:1.35rem; margin-left:6px;">$${effectiveFee}</strong>
-                            ${isLocalCurrency ? `<strong style="color:var(--yellow); font-size:1.2rem; margin-left:6px;">(${sym}${localAmount.toLocaleString()} ${curr})</strong>` : ''}
-                            <span style="background:rgba(46,204,113,0.18); color:#2ecc71; border:1px solid #2ecc71; padding:2px 7px; border-radius:4px; font-size:0.75rem; font-weight:800; margin-left:6px;">
-                                🏷️ ${dashAppliedPromoData.code} (${dashAppliedPromoData.discountType === 'percentage' ? dashAppliedPromoData.discountValue + '% OFF' : '$' + dashAppliedPromoData.discountValue + ' OFF'})
-                            </span>
-                            • প্রফিট স্প্লিট: <strong style="color:var(--yellow);">${pkg.profitSplit}</strong>
-                        `;
-                    } else if (pkg.hasDiscount) {
-                        subTitle.innerHTML = `
-                            ফি (Evaluation Fee): <span style="font-size:1.05rem; font-weight:800; color:#ff4d4d; text-decoration:line-through; text-decoration-color:#ff3838; text-decoration-thickness:2px;">$${pkg.originalFee}</span> 
-                            <strong style="color:var(--neon-green); font-size:1.35rem; margin-left:6px;">$${pkg.fee}</strong>
-                            ${isLocalCurrency ? `<strong style="color:var(--yellow); font-size:1.2rem; margin-left:6px;">(${sym}${localAmount.toLocaleString()} ${curr})</strong>` : ''}
-                            <span style="background:rgba(255,77,77,0.2); color:#ff6b81; border:1px solid rgba(255,77,77,0.4); padding:2px 7px; border-radius:4px; font-size:0.75rem; font-weight:800; margin-left:6px;">
-                                ${pkg.discountPercent}% OFF (লঞ্চ অফার)
-                            </span> 
-                            • প্রফিট স্প্লিট: <strong style="color:var(--yellow);">${pkg.profitSplit}</strong>
-                        `;
-                    } else {
-                        subTitle.innerHTML = `One-time evaluation fee: <strong style="color:var(--gold); font-size:1.2rem;">$${pkg.fee}</strong> ${isLocalCurrency ? `<strong style="color:var(--neon-green); font-size:1.15rem; margin-left:6px;">(${sym}${localAmount.toLocaleString()} ${curr})</strong>` : ''} • Up to ${pkg.profitSplit} Profit Split`;
-                    }
-                }
-
-                // Sender Number Toggle
-                if (senderGroup && senderInput) {
-                    if (pm.requireSenderNumber) {
-                        senderGroup.style.display = 'block';
-                        senderInput.required = true;
-                    } else {
-                        senderGroup.style.display = 'none';
-                        senderInput.required = false;
-                        senderInput.value = '';
-                    }
-                }
-
-                // TrxID Toggle
-                if (trxGroup && trxInput) {
-                    if (pm.requireTrxId !== false) {
-                        trxGroup.style.display = 'block';
-                        trxInput.required = true;
-                    } else {
-                        trxGroup.style.display = 'none';
-                        trxInput.required = false;
-                        trxInput.value = '';
-                    }
-                }
-
-                // Instruction Box with Highlighted Local Conversion Details
-                const conversionCard = isLocalCurrency ? `
-                    <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.35); border-radius:10px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                        <div>
-                            <span style="font-size:0.78rem; color:var(--text-secondary); display:block;">পরিশোধযোগ্য মোট অ্যামাউন্ট (${flag} ${countryName}):</span>
-                            <div style="display:flex; align-items:baseline; gap:6px;">
-                                <strong style="color:var(--neon-green); font-size:1.35rem; font-weight:900;">${sym}${localAmount.toLocaleString()}</strong>
-                                <span style="color:#fff; font-size:0.85rem; font-weight:700;">${curr}</span>
-                                <span style="color:#aaa; font-size:0.78rem; margin-left:4px;">($${effectiveFee} USD)</span>
-                                ${dashAppliedPromoData ? `<span style="font-size:0.78rem; text-decoration:line-through; color:#e74c3c;">($${pkgFee} USD)</span>` : ''}
-                            </div>
-                        </div>
-                        <div style="text-align:right;">
-                            <span style="background:rgba(245,176,65,0.18); color:var(--yellow); border:1px solid rgba(245,176,65,0.4); padding:3px 10px; border-radius:6px; font-size:0.78rem; font-weight:800;">
-                                রেট: 1 USD = ${rate} ${sym} (${curr})
-                            </span>
-                            ${dashAppliedPromoData ? `<div style="margin-top:4px;"><span style="background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid #2ecc71; padding:2px 8px; border-radius:4px; font-size:0.74rem; font-weight:700;">🏷️ ${dashAppliedPromoData.code} (${dashAppliedPromoData.discountType === 'percentage' ? dashAppliedPromoData.discountValue + '% OFF' : '$' + dashAppliedPromoData.discountValue + ' OFF'})</span></div>` : ''}
-                        </div>
-                    </div>
-                ` : `
-                    <div style="background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.25); border-radius:10px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <span style="font-size:0.78rem; color:var(--text-secondary); display:block;">পরিশোধযোগ্য মোট ফি:</span>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                ${dashAppliedPromoData ? `<span style="font-size:1rem; text-decoration:line-through; color:#e74c3c; font-weight:700;">$${pkgFee}</span>` : ''}
-                                <strong style="color:var(--yellow); font-size:1.3rem; font-weight:900;">$${effectiveFee} USD</strong>
-                                ${dashAppliedPromoData ? `<span style="background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid #2ecc71; padding:2px 8px; border-radius:4px; font-size:0.74rem; font-weight:700;">🏷️ ${dashAppliedPromoData.code} (${dashAppliedPromoData.discountType === 'percentage' ? dashAppliedPromoData.discountValue + '% OFF' : '$' + dashAppliedPromoData.discountValue + ' OFF'})</span>` : ''}
-                            </div>
-                        </div>
-                        <span style="background:rgba(255,255,255,0.08); color:#fff; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:600;">
-                            ${flag} Global (1 USD = 1.00 USD)
-                        </span>
-                    </div>
-                `;
-
-                box.innerHTML = `
-                    ${conversionCard}
-                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-                        <span style="font-weight:700; color:var(--yellow);"><i class="fas fa-wallet"></i> ${pm.name}</span>
-                        ${pm.badge ? `<span style="font-size:0.75rem; background:rgba(245,176,65,0.2); color:var(--yellow); padding:2px 8px; border-radius:10px;">${pm.badge}</span>` : ''}
-                    </div>
-                    <div style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:8px;">${pm.instructions || 'নিচের নম্বরে সেন্ড মানি / ডিপোজিট করে প্রয়োজনীয় তথ্য নিচে দিন:'}</div>
-                    <div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:8px; border:1px solid rgba(245,176,65,0.2);">
-                        <code style="color:#fff; font-weight:700; font-size:0.95rem; flex:1; word-break:break-all;">${pm.accountNumber}</code>
-                        <button type="button" onclick="copyDashPaymentNumber('${pm.accountNumber}')" style="background:var(--yellow); color:#000; border:none; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:700; cursor:pointer;">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-                `;
-            } else {
-                box.innerHTML = `<span style="color:var(--text-secondary); font-size:0.85rem;">পেমেন্ট মেথড অনুযায়ী অ্যাকাউন্ট তথ্য লোড হচ্ছে...</span>`;
-                if (senderGroup) senderGroup.style.display = 'none';
-                if (trxGroup) trxGroup.style.display = 'block';
-            }
-        }
-
-        function copyDashPaymentNumber(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Number / Wallet address copied to clipboard!', 'success');
-            }).catch(() => {
-                showToast('Copied: ' + text, 'success');
-            });
-        }
-
-        async function handleDashBuyChallenge(e) {
-            e.preventDefault();
-            const packageId = document.getElementById('dashSelectedPackageId').value;
-            const brokerId = document.getElementById('dashBuyBrokerSelect').value;
-            const brokerAccountId = document.getElementById('dashBuyBrokerAccountId').value.trim();
-            const paymentMethod = document.getElementById('dashBuyPaymentMethod').value;
-            const paymentTxId = (document.getElementById('dashBuyPaymentTxId').value || '').trim();
-            const senderNumber = (document.getElementById('dashBuySenderNumber').value || '').trim();
+            const packageId = dashCheckoutState.packageId;
+            const brokerId = dashCheckoutState.brokerId;
+            const brokerAccountId = dashCheckoutState.brokerAccountId;
+            const paymentMethod = dashCheckoutState.paymentMethod;
 
             if (!brokerAccountId) {
-                showToast('Please enter your broker Account ID Number.', 'error');
+                showToast('ব্রোকার অ্যাকাউন্ট আইডি প্রদান করুন।', 'error');
+                goToDashCheckoutStep(1);
                 return;
             }
 
-            const pm = dashPaymentMethods.find(m => m.name === paymentMethod);
-            if (pm) {
-                if (pm.requireSenderNumber && !senderNumber) {
-                    showToast('যে নম্বর থেকে টাকা পাঠিয়েছেন (Sender Number) অনুগ্রহ করে সেটি লিখুন।', 'error');
+            let paymentTxId = '';
+            let senderNumber = '';
+            let submitBtn = null;
+            let originalBtnHtml = '';
+
+            if (type === 'crypto') {
+                paymentTxId = (document.getElementById('dashCryptoPaymentTxId')?.value || '').trim();
+                submitBtn = document.getElementById('dashCryptoSubmitBtn');
+                if (!paymentTxId) {
+                    showToast('অনুগ্রহ করে Transaction ID / Hash (TrxID) প্রদান করুন।', 'error');
+                    document.getElementById('dashCryptoPaymentTxId')?.focus();
                     return;
                 }
-                if (pm.requireTrxId !== false && !paymentTxId) {
-                    showToast('অনুগ্রহ করে Transaction ID / Hash (TrxID) প্রদান করুন।', 'error');
+            } else {
+                senderNumber = (document.getElementById('dashLocalSenderNumber')?.value || '').trim();
+                paymentTxId = (document.getElementById('dashLocalPaymentTxId')?.value || '').trim();
+                submitBtn = document.getElementById('dashLocalSubmitBtn');
+
+                if (!senderNumber) {
+                    showToast('যে নম্বর থেকে টাকা পাঠিয়েছেন (Sender Number) লিখুন।', 'error');
+                    document.getElementById('dashLocalSenderNumber')?.focus();
+                    return;
+                }
+                if (!paymentTxId) {
+                    showToast('অনুগ্রহ করে Transaction ID (TrxID) লিখুন।', 'error');
+                    document.getElementById('dashLocalPaymentTxId')?.focus();
                     return;
                 }
             }
 
-            const isBdDefault = pm ? (pm.name.toLowerCase().includes('bkash') || pm.name.toLowerCase().includes('nagad')) : false;
-            const curr = pm ? (pm.currency || (isBdDefault ? 'BDT' : 'USD')) : 'USD';
-            const sym = pm ? (pm.currencySymbol || (curr === 'BDT' ? '৳' : (curr === 'USD' ? '$' : curr))) : '$';
-            const rate = pm ? (Number(pm.exchangeRate) || (curr === 'BDT' ? 125 : 1)) : 1;
-            const pkg = allPackages.find(p => p.id === packageId);
-            const pkgFee = pkg ? Number(pkg.fee) : 7;
-            const effectiveFee = (dashAppliedPromoData && typeof dashAppliedPromoData.finalFee === 'number') ? dashAppliedPromoData.finalFee : pkgFee;
-            const localAmount = (curr !== 'USD' && rate !== 1) ? Math.round(effectiveFee * rate) : effectiveFee;
+            const isLocal = type === 'local';
+            const curr = isLocal ? 'BDT' : 'USD';
+            const sym = isLocal ? '৳' : '$';
+            const rate = isLocal ? (dashCheckoutState.rate || 127) : 1;
+            const localAmount = isLocal ? dashCheckoutState.localAmount : dashCheckoutState.effectiveFee;
 
-            const btn = document.getElementById('dashBuySubmitBtn');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
+            if (submitBtn) {
+                originalBtnHtml = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing Order...`;
+            }
 
             try {
                 const res = await fetch('/api/challenges/buy', {
@@ -12691,28 +13379,105 @@
                         promoCode: dashAppliedPromoData ? dashAppliedPromoData.code : null
                     })
                 });
-                let data = null;
-                try {
-                    data = await res.json();
-                } catch (jsonErr) {
-                    console.error('Failed to parse buy challenge response JSON:', jsonErr);
-                }
+
+                const data = await res.json().catch(() => null);
+
                 if (data && data.success) {
                     showToast(data.message || '🎉 অভিনন্দন! আপনার চ্যালেঞ্জটি সফলভাবে অর্ডার হয়েছে এবং অনুমোদনের জন্য জমা দেওয়া হয়েছে।', 'success');
                     closeDashBuyModal();
-                    document.getElementById('dashBuyForm').reset();
                     fetchChallenges();
                     setTimeout(() => switchTab('overview'), 800);
                 } else {
                     showToast((data && data.message) ? data.message : 'চ্যালেঞ্জ অর্ডারে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnHtml;
+                    }
                 }
             } catch (err) {
                 console.error('Dash buy challenge error:', err);
                 showToast('নেটওয়ার্ক সমস্যা অথবা সার্ভার সংযোগে ত্রুটি হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।', 'error');
-            } finally {
-                btn.disabled = false;
-                renderDashPaymentInstruction();
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
             }
+        }
+
+        // Buy Challenge Modal & Payment Logic
+        function openDashBuyModal(pkgId) {
+            // Check if user already has a running or pending challenge
+            const runningCh = (myChallenges || []).find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
+            if (runningCh) {
+                showToast('আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে।', 'error');
+                return;
+            }
+            const pendingCh = (myChallenges || []).find(c => c.status === 'pending_approval' || c.status === 'pending');
+            if (pendingCh) {
+                showToast('আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে।', 'error');
+                return;
+            }
+
+            const pkg = (allPackages || []).find(p => p.id === pkgId);
+            if (!pkg) return;
+
+            dashCheckoutState.packageId = pkg.id;
+            dashCheckoutState.pkg = pkg;
+            dashCheckoutState.effectiveFee = pkg.fee;
+            dashCheckoutState.brokerId = (currentUser && currentUser.preferredBroker) ? currentUser.preferredBroker : 'quotex';
+            dashCheckoutState.brokerAccountId = (currentUser && currentUser.brokerAccountId) ? currentUser.brokerAccountId : '';
+            dashCheckoutState.paymentMethod = 'USDT (TRC-20)';
+
+            document.getElementById('dashSelectedPackageId').value = pkg.id;
+            const t1 = document.getElementById('dashCheckoutStep1Title');
+            if (t1) t1.innerText = `Buy ${pkg.name} Challenge`;
+            const s1 = document.getElementById('dashCheckoutStep1Subtitle');
+            if (s1) s1.innerText = `$${pkg.fee}.00 USD • $${pkg.fundedAmount.toLocaleString()}.00 funded balance`;
+
+            const accInput = document.getElementById('dashBuyBrokerAccountId');
+            if (accInput) accInput.value = dashCheckoutState.brokerAccountId;
+
+            selectDashCheckoutBroker(dashCheckoutState.brokerId);
+            removeDashPromoCode(false);
+
+            goToDashCheckoutStep(1);
+
+            const dashModalEl = document.getElementById('dashBuyModal');
+            dashModalEl.classList.add('active');
+            const dashModalBox = dashModalEl.querySelector('.modal-box');
+            if (dashModalBox) dashModalBox.scrollTop = 0;
+        }
+
+        function closeDashBuyModal() {
+            document.getElementById('dashBuyModal').classList.remove('active');
+            if (dashCryptoCountdownTimer) {
+                clearInterval(dashCryptoCountdownTimer);
+                dashCryptoCountdownTimer = null;
+            }
+        }
+
+        async function fetchDashPaymentMethods() {
+            try {
+                const res = await fetch('/api/payment-methods');
+                const data = await res.json();
+                if (data.success && data.paymentMethods && data.paymentMethods.length > 0) {
+                    dashPaymentMethods = data.paymentMethods;
+                }
+                renderDashPaymentInstruction();
+            } catch (err) {
+                console.error('Failed to load payment methods in dashboard:', err);
+            }
+        }
+
+        function renderDashPaymentInstruction() {
+            if (typeof updateDashStep2Display === 'function') updateDashStep2Display();
+            if (typeof updateDashStep3Display === 'function') updateDashStep3Display();
+        }
+
+        async function handleDashBuyChallenge(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            const isLocal = dashCheckoutState.paymentMethod === 'bKash' || dashCheckoutState.paymentMethod === 'Nagad';
+            submitDashFinalOrder(isLocal ? 'local' : 'crypto');
         }
 
         // ==============================================
