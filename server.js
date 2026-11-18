@@ -9369,23 +9369,13 @@ app.get('/api/admin/challenges', authenticateAdminToken, (req, res) => {
 
     let tradingDays = c.tradingDaysCompleted || 0;
     if (c.category === 'your_rules' || c.challengeModel === 'classic_prop') {
-      const chTrades = allSynced.filter(t => 
-        (t.challengeId && t.challengeId === c.id) ||
-        (userId && t.userId === userId) ||
-        (userEmail && t.userEmail && t.userEmail.toLowerCase() === userEmail.toLowerCase()) ||
-        (traderId && t.traderId && t.traderId.toLowerCase() === traderId.toLowerCase())
-      );
-      if (chTrades.length > 0) {
-        const daySet = new Set();
-        chTrades.forEach(t => {
-          if (t.result === 'WIN' || t.result === 'LOSS') {
-            const dKey = getTradingDayKey(getTradeExecutionTime(t), 'Asia/Dhaka');
-            if (dKey && dKey !== 'unknown') daySet.add(dKey);
-          }
-        });
-        if (daySet.size > tradingDays) {
-          tradingDays = daySet.size;
+      try {
+        const evalRes = evaluateClassicPropChallenge(c, allSynced, { timezone: 'Asia/Dhaka', allowSaveTrades: false });
+        if (evalRes && evalRes.classicMetrics) {
+          tradingDays = evalRes.classicMetrics.tradingDaysCompleted || 0;
         }
+      } catch (err) {
+        tradingDays = c.tradingDaysCompleted || 0;
       }
     }
 
