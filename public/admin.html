@@ -6316,6 +6316,14 @@
 
         async function submitApproveChallenge(e) {
             e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn && btn.disabled) return;
+            const originalBtnHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Approving...';
+            }
+
             const id = document.getElementById('approveChallengeId').value;
             const mmLinkId = document.getElementById('approveMmSelect').value;
 
@@ -6328,17 +6336,22 @@
                     },
                     body: JSON.stringify({ mmLinkId })
                 });
-                const data = await res.json();
-                if (data.success) {
-                    showToast(data.message, 'success');
+                const data = await res.json().catch(() => null);
+                if (res.ok && data && data.success) {
+                    showToast(data.message || 'Challenge approved successfully!', 'success');
                     closeModal('approveChallengeModal');
                     loadAllAdminData();
                 } else {
-                    showToast(data.message || 'Approval failed', 'error');
+                    showToast((data && data.message) ? data.message : 'Approval failed. Please try again.', 'error');
                 }
             } catch (err) {
                 console.error(err);
                 showToast('Failed to approve challenge.', 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnHtml;
+                }
             }
         }
 
@@ -6379,6 +6392,14 @@
 
         async function submitRejectChallenge(e) {
             e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn && btn.disabled) return;
+            const originalBtnHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rejecting...';
+            }
+
             const id = document.getElementById('rejectChallengeId').value;
             let reason = document.getElementById('rejectReason').value.trim();
             if (!reason) {
@@ -6394,17 +6415,22 @@
                     },
                     body: JSON.stringify({ reason })
                 });
-                const data = await res.json();
-                if (data.success) {
+                const data = await res.json().catch(() => null);
+                if (res.ok && data && data.success) {
                     showToast('Challenge order rejected.', 'info');
                     closeModal('rejectChallengeModal');
                     loadAllAdminData();
                 } else {
-                    showToast(data.message || 'Failed to reject challenge.', 'error');
+                    showToast((data && data.message) ? data.message : 'Failed to reject challenge.', 'error');
                 }
             } catch (err) {
                 console.error(err);
                 showToast('Failed to reject challenge.', 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnHtml;
+                }
             }
         }
 
@@ -6471,11 +6497,22 @@
 
         async function submitReactivateChallenge(e) {
             e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn && btn.disabled) return;
+            const originalBtnHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reactivating...';
+            }
+
             const id = document.getElementById('reactivateChallengeId').value;
             const message = document.getElementById('reactivateNoticeText').value.trim();
             const recoveryMode = document.querySelector('input[name="reactivateRecoveryMode"]:checked')?.value || 'resume';
 
-            if (!id) return;
+            if (!id) {
+                if (btn) { btn.disabled = false; btn.innerHTML = originalBtnHtml; }
+                return;
+            }
 
             try {
                 const res = await fetch(`/api/admin/challenges/${id}/reactivate`, {
@@ -6486,8 +6523,8 @@
                     },
                     body: JSON.stringify({ message, recoveryMode })
                 });
-                const data = await res.json();
-                if (data.success) {
+                const data = await res.json().catch(() => null);
+                if (res.ok && data && data.success) {
                     showToast(data.message || 'Challenge reactivated!', 'success');
                     closeModal('reactivateChallengeModal');
                     await loadAllAdminData();
@@ -6495,11 +6532,16 @@
                         renderTraderSerialSessions();
                     }
                 } else {
-                    showToast(data.message || 'Failed to reactivate challenge', 'error');
+                    showToast((data && data.message) ? data.message : 'Failed to reactivate challenge', 'error');
                 }
             } catch (err) {
                 console.error(err);
                 showToast('Network error reactivating challenge', 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnHtml;
+                }
             }
         }
 
@@ -6545,6 +6587,10 @@
 
         async function submitDisqualifyChallenge(e) {
             e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            if (btn && btn.disabled) return;
+            const originalBtnHtml = btn ? btn.innerHTML : '';
+
             const chId = document.getElementById('disqualifyChallengeId').value;
             const subId = document.getElementById('disqualifySubmissionId').value;
             const violatedRule = document.getElementById('disqualifyRuleSelect').value.trim();
@@ -6553,6 +6599,11 @@
             if (!violatedRule) {
                 alert('Please select a violated rule.');
                 return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Disqualifying...';
             }
 
             try {
@@ -6574,8 +6625,8 @@
                     },
                     body: JSON.stringify(payload)
                 });
-                const data = await res.json();
-                if (data.success) {
+                const data = await res.json().catch(() => null);
+                if (res.ok && data && data.success) {
                     showToast('Challenge disqualified.', 'success');
                     closeModal('disqualifyChallengeModal');
                     await loadAllAdminData();
@@ -6583,11 +6634,16 @@
                         renderTraderSerialSessions();
                     }
                 } else {
-                    showToast(data.message || 'Disqualification failed', 'error');
+                    showToast((data && data.message) ? data.message : 'Disqualification failed', 'error');
                 }
             } catch (err) {
                 console.error(err);
                 showToast('Failed to disqualify challenge.', 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnHtml;
+                }
             }
         }
 

@@ -9554,323 +9554,357 @@ app.get('/api/admin/challenges/:id/metrics', authenticateAdminToken, (req, res) 
 
 // 7. Approve Challenge (Sets Active + Assigns Next Serial MM link)
 app.post('/api/admin/challenges/:id/approve', authenticateAdminToken, (req, res) => {
-  const challenges = readJson(CHALLENGES_FILE);
-  const idx = challenges.findIndex(c => c.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
+  try {
+    const challenges = readJson(CHALLENGES_FILE);
+    const idx = challenges.findIndex(c => c.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
 
-  const isClassicProp = (challenges[idx].challengeModel === 'classic_prop' || challenges[idx].category === 'your_rules');
-  const { mmLinkId } = req.body;
-  let assignedLink = null;
+    const isClassicProp = (challenges[idx].challengeModel === 'classic_prop' || challenges[idx].category === 'your_rules');
+    const { mmLinkId } = req.body;
+    let assignedLink = null;
 
-  if (!isClassicProp) {
-    const mmLinks = readJson(MM_LINKS_FILE);
-    if (mmLinkId) {
-      assignedLink = mmLinks.find(l => l.id === mmLinkId);
+    if (!isClassicProp) {
+      const mmLinks = readJson(MM_LINKS_FILE);
+      if (mmLinkId) {
+        assignedLink = mmLinks.find(l => l.id === mmLinkId);
+      }
+
+      if (!assignedLink) {
+        assignedLink = getNextMmSerialLink();
+      } else {
+        assignedLink.assignedCount = (assignedLink.assignedCount || 0) + 1;
+        writeJson(MM_LINKS_FILE, mmLinks);
+      }
     }
 
-    if (!assignedLink) {
-      assignedLink = getNextMmSerialLink();
+    const now = new Date();
+    challenges[idx].status = 'in_progress';
+    challenges[idx].approvedAt = now.toISOString();
+    challenges[idx].durationDays = challenges[idx].durationDays || (isClassicProp ? (challenges[idx].minTradingDays || 10) : 15);
+    challenges[idx].sessionsRequired = isClassicProp ? (challenges[idx].minTradingDays || 10) : (challenges[idx].sessionsRequired || 15);
+
+    if (isClassicProp) {
+      // Classic Prop: Direct evaluation (No MM sheet needed)
+      challenges[idx].challengePhase = 'evaluation';
+      challenges[idx].evaluationStartedAt = now.toISOString();
+      challenges[idx].tradingDaysCompleted = 0;
+      challenges[idx].tradingDaysList = [];
+      challenges[idx].assignedMmId = null;
+      challenges[idx].assignedMmSerial = null;
+      challenges[idx].assignedMmTitle = 'Your Challenge (No Sheet Required)';
+      challenges[idx].assignedMmUrl = null;
+      challenges[idx].assignedMmNote = 'Trade freely using your own strategy while respecting the Target and Drawdown limits.';
+      challenges[idx].expiresAt = new Date(now.getTime() + (challenges[idx].durationDays * 24 * 60 * 60 * 1000)).toISOString();
     } else {
-      assignedLink.assignedCount = (assignedLink.assignedCount || 0) + 1;
-      writeJson(MM_LINKS_FILE, mmLinks);
+      // Practice Phase Settings (48 Hours, up to 3 practice sessions)
+      challenges[idx].challengePhase = 'practice';
+      challenges[idx].practiceHours = 48;
+      challenges[idx].practiceStartedAt = now.toISOString();
+      challenges[idx].practiceExpiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000)).toISOString();
+      challenges[idx].practiceMaxSessions = 3;
+      challenges[idx].practiceSessionsCompleted = 0;
+      challenges[idx].expiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000) + (challenges[idx].durationDays * 24 * 60 * 60 * 1000)).toISOString();
+      challenges[idx].assignedMmId = assignedLink ? assignedLink.id : null;
+      challenges[idx].assignedMmSerial = assignedLink ? assignedLink.serial : null;
+      challenges[idx].assignedMmTitle = assignedLink ? assignedLink.title : null;
+      challenges[idx].assignedMmUrl = assignedLink ? assignedLink.url : null;
+      challenges[idx].assignedMmNote = assignedLink ? assignedLink.note : null;
     }
+    challenges[idx].isActive = true;
+
+    // Partner Commission Confirmation
+    if (challenges[idx].partnerId && challenges[idx].partnerCommission > 0) {
+      challenges[idx].partnerCommissionStatus = 'approved';
+    }
+
+    saveChallenges(challenges, challenges[idx]);
+    if (db && db.isMySqlActive()) {
+      db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE APPROVE ERROR]:', e.message));
+    }
+    logUserArchive('CHALLENGE_APPROVED', { id: challenges[idx].userId, email: challenges[idx].userEmail }, {
+      challengeId: challenges[idx].id,
+      packageName: challenges[idx].packageName,
+      mmSerial: assignedLink ? assignedLink.serial : null,
+      mmTitle: assignedLink ? assignedLink.title : null,
+      status: 'in_progress',
+      approvedAt: challenges[idx].approvedAt
+    });
+
+    syncChallengesWithSubmissions();
+
+    const successMsg = isClassicProp
+      ? 'Your Challenge (Classic Prop) approved & activated successfully! No Money Management Sheet required.'
+      : (assignedLink ? `Challenge approved successfully! Assigned Money Management Serial #${assignedLink.serial}.` : 'Challenge approved successfully!');
+
+    res.json({
+      success: true,
+      message: successMsg,
+      challenge: challenges[idx]
+    });
+  } catch (err) {
+    console.error('[CHALLENGE APPROVE ROUTE ERROR]:', err);
+    res.status(500).json({ success: false, message: 'চ্যালেঞ্জ অনুমোদন করতে সার্ভার ত্রুটি হয়েছে: ' + (err.message || 'Server error') });
   }
-
-  const now = new Date();
-  challenges[idx].status = 'in_progress';
-  challenges[idx].approvedAt = now.toISOString();
-  challenges[idx].durationDays = challenges[idx].durationDays || (isClassicProp ? (challenges[idx].minTradingDays || 10) : 15);
-  challenges[idx].sessionsRequired = isClassicProp ? (challenges[idx].minTradingDays || 10) : (challenges[idx].sessionsRequired || 15);
-
-  if (isClassicProp) {
-    // Classic Prop: Direct evaluation (No MM sheet needed)
-    challenges[idx].challengePhase = 'evaluation';
-    challenges[idx].evaluationStartedAt = now.toISOString();
-    challenges[idx].tradingDaysCompleted = 0;
-    challenges[idx].tradingDaysList = [];
-    challenges[idx].assignedMmId = null;
-    challenges[idx].assignedMmSerial = null;
-    challenges[idx].assignedMmTitle = 'Your Challenge (No Sheet Required)';
-    challenges[idx].assignedMmUrl = null;
-    challenges[idx].assignedMmNote = 'Trade freely using your own strategy while respecting the Target and Drawdown limits.';
-    challenges[idx].expiresAt = new Date(now.getTime() + (challenges[idx].durationDays * 24 * 60 * 60 * 1000)).toISOString();
-  } else {
-    // Practice Phase Settings (48 Hours, up to 3 practice sessions)
-    challenges[idx].challengePhase = 'practice';
-    challenges[idx].practiceHours = 48;
-    challenges[idx].practiceStartedAt = now.toISOString();
-    challenges[idx].practiceExpiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000)).toISOString();
-    challenges[idx].practiceMaxSessions = 3;
-    challenges[idx].practiceSessionsCompleted = 0;
-    challenges[idx].expiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000) + (challenges[idx].durationDays * 24 * 60 * 60 * 1000)).toISOString();
-    challenges[idx].assignedMmId = assignedLink ? assignedLink.id : null;
-    challenges[idx].assignedMmSerial = assignedLink ? assignedLink.serial : null;
-    challenges[idx].assignedMmTitle = assignedLink ? assignedLink.title : null;
-    challenges[idx].assignedMmUrl = assignedLink ? assignedLink.url : null;
-    challenges[idx].assignedMmNote = assignedLink ? assignedLink.note : null;
-  }
-  challenges[idx].isActive = true;
-
-  // Partner Commission Confirmation
-  if (challenges[idx].partnerId && challenges[idx].partnerCommission > 0) {
-    challenges[idx].partnerCommissionStatus = 'approved';
-  }
-
-  saveChallenges(challenges, challenges[idx]);
-  if (db && db.isMySqlActive()) {
-    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE APPROVE ERROR]:', e.message));
-  }
-  logUserArchive('CHALLENGE_APPROVED', { id: challenges[idx].userId, email: challenges[idx].userEmail }, {
-    challengeId: challenges[idx].id,
-    packageName: challenges[idx].packageName,
-    mmSerial: assignedLink ? assignedLink.serial : null,
-    mmTitle: assignedLink ? assignedLink.title : null,
-    status: 'in_progress',
-    approvedAt: challenges[idx].approvedAt
-  });
-
-  syncChallengesWithSubmissions();
-
-  res.json({
-    success: true,
-    message: `Challenge approved successfully! Assigned Money Management Serial #${assignedLink.serial}.`,
-    challenge: challenges[idx]
-  });
 });
 
 // Switch Challenge Phase between Practice & Evaluation (Admin)
 app.post('/api/admin/challenges/:id/set-phase', authenticateAdminToken, (req, res) => {
-  const { phase } = req.body;
-  const challenges = readJson(CHALLENGES_FILE);
-  const idx = challenges.findIndex(c => c.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
+  try {
+    const { phase } = req.body;
+    const challenges = readJson(CHALLENGES_FILE);
+    const idx = challenges.findIndex(c => c.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
 
-  const c = challenges[idx];
-  const now = new Date();
-  if (phase === 'evaluation') {
-    c.challengePhase = 'evaluation';
-    c.evaluationStartedAt = now.toISOString();
-    c.durationDays = c.durationDays || 15;
-    c.expiresAt = new Date(now.getTime() + (c.durationDays * 24 * 60 * 60 * 1000)).toISOString();
-  } else if (phase === 'practice') {
-    c.challengePhase = 'practice';
-    c.practiceStartedAt = now.toISOString();
-    c.practiceExpiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000)).toISOString();
-    c.expiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000) + ((c.durationDays || 15) * 24 * 60 * 60 * 1000)).toISOString();
-  } else {
-    return res.status(400).json({ success: false, message: 'Invalid phase. Must be practice or evaluation.' });
+    const c = challenges[idx];
+    const now = new Date();
+    if (phase === 'evaluation') {
+      c.challengePhase = 'evaluation';
+      c.evaluationStartedAt = now.toISOString();
+      c.durationDays = c.durationDays || 15;
+      c.expiresAt = new Date(now.getTime() + (c.durationDays * 24 * 60 * 60 * 1000)).toISOString();
+    } else if (phase === 'practice') {
+      c.challengePhase = 'practice';
+      c.practiceStartedAt = now.toISOString();
+      c.practiceExpiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000)).toISOString();
+      c.expiresAt = new Date(now.getTime() + (48 * 60 * 60 * 1000) + ((c.durationDays || 15) * 24 * 60 * 60 * 1000)).toISOString();
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid phase. Must be practice or evaluation.' });
+    }
+
+    challenges[idx] = c;
+    saveChallenges(challenges, challenges[idx]);
+    if (db && db.isMySqlActive()) {
+      db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE PHASE ERROR]:', e.message));
+    }
+    syncChallengesWithSubmissions();
+
+    res.json({
+      success: true,
+      message: `চ্যালেঞ্জের ফেজ সফলভাবে '${phase === 'evaluation' ? 'মূল মূল্যায়ন (১৫ দিন)' : '৪৮ ঘণ্টার প্র্যাকটিস'}' এ পরিবর্তন করা হয়েছে।`,
+      challenge: c
+    });
+  } catch (err) {
+    console.error('[SET PHASE ERROR]:', err);
+    res.status(500).json({ success: false, message: 'ফেজ পরিবর্তন করতে সার্ভার ত্রুটি হয়েছে: ' + (err.message || 'Server error') });
   }
-
-  challenges[idx] = c;
-  saveChallenges(challenges, challenges[idx]);
-  if (db && db.isMySqlActive()) {
-    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE PHASE ERROR]:', e.message));
-  }
-  syncChallengesWithSubmissions();
-
-  res.json({
-    success: true,
-    message: `চ্যালেঞ্জের ফেজ সফলভাবে '${phase === 'evaluation' ? 'মূল মূল্যায়ন (১৫ দিন)' : '৪৮ ঘণ্টার প্র্যাকটিস'}' এ পরিবর্তন করা হয়েছে।`,
-    challenge: c
-  });
 });
 
 // 8. Reject Challenge Order (Admin)
 app.post('/api/admin/challenges/:id/reject', authenticateAdminToken, (req, res) => {
-  const challenges = readJson(CHALLENGES_FILE);
-  const idx = challenges.findIndex(c => c.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
+  try {
+    const challenges = readJson(CHALLENGES_FILE);
+    const idx = challenges.findIndex(c => c.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
 
-  const reason = (req.body.reason && req.body.reason.trim()) ? req.body.reason.trim() : 'এডমিন কর্তৃক চ্যালেঞ্জটি বাতিল (Rejected) করা হয়েছে।';
-  challenges[idx].status = 'rejected';
-  challenges[idx].rejectedReason = reason;
-  challenges[idx].failReason = 'CHALLENGE_REJECTED';
-  challenges[idx].failReasonText = reason;
-  challenges[idx].rejectedAt = new Date().toISOString();
-  challenges[idx].isActive = false;
+    const reason = (req.body.reason && req.body.reason.trim()) ? req.body.reason.trim() : 'এডমিন কর্তৃক চ্যালেঞ্জটি বাতিল (Rejected) করা হয়েছে।';
+    challenges[idx].status = 'rejected';
+    challenges[idx].rejectedReason = reason;
+    challenges[idx].failReason = 'CHALLENGE_REJECTED';
+    challenges[idx].failReasonText = reason;
+    challenges[idx].rejectedAt = new Date().toISOString();
+    challenges[idx].isActive = false;
 
-  saveChallenges(challenges, challenges[idx]);
-  if (db && db.isMySqlActive()) {
-    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE REJECT ERROR]:', e.message));
+    saveChallenges(challenges, challenges[idx]);
+    if (db && db.isMySqlActive()) {
+      db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE REJECT ERROR]:', e.message));
+    }
+
+    logUserArchive('CHALLENGE_REJECTED', { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, {
+      challengeId: challenges[idx].id,
+      packageName: challenges[idx].packageName,
+      fundedAmount: challenges[idx].fundedAmount,
+      broker: challenges[idx].brokerName,
+      reason: reason
+    });
+
+    // Automatically notify trader via Gmail with rejection reason
+    sendChallengeRejectionEmail(challenges[idx].userEmail, challenges[idx].userName, challenges[idx].packageName, reason);
+
+    syncChallengesWithSubmissions();
+
+    res.json({ success: true, message: 'চ্যালেঞ্জ অর্ডারটি বাতিল করা হয়েছে এবং কারণ ইউজারের ড্যাশবোর্ড ও ইমেইলে পাঠানো হয়েছে।', challenge: challenges[idx] });
+  } catch (err) {
+    console.error('[REJECT ERROR]:', err);
+    res.status(500).json({ success: false, message: 'চ্যালেঞ্জ রিজেক্ট করতে সার্ভার ত্রুটি হয়েছে: ' + (err.message || 'Server error') });
   }
-
-  logUserArchive('CHALLENGE_REJECTED', { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, {
-    challengeId: challenges[idx].id,
-    packageName: challenges[idx].packageName,
-    fundedAmount: challenges[idx].fundedAmount,
-    broker: challenges[idx].brokerName,
-    reason: reason
-  });
-
-  // Automatically notify trader via Gmail with rejection reason
-  sendChallengeRejectionEmail(challenges[idx].userEmail, challenges[idx].userName, challenges[idx].packageName, reason);
-
-  syncChallengesWithSubmissions();
-
-  res.json({ success: true, message: 'চ্যালেঞ্জ অর্ডারটি বাতিল করা হয়েছে এবং কারণ ইউজারের ড্যাশবোর্ড ও ইমেইলে পাঠানো হয়েছে।', challenge: challenges[idx] });
 });
 
 // Disqualify Challenge for Rule Violation (Admin - Req #3)
 app.post('/api/admin/challenges/:id/disqualify', authenticateAdminToken, (req, res) => {
-  const challenges = readJson(CHALLENGES_FILE, []);
-  const idx = challenges.findIndex(c => c.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
+  try {
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const idx = challenges.findIndex(c => c.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
 
-  const { violatedRule, reasonNote } = req.body;
-  const ruleText = (violatedRule && violatedRule.trim()) ? violatedRule.trim() : 'অফিসিয়াল রুলস লঙ্ঘন';
-  const detailNote = (reasonNote && reasonNote.trim()) ? reasonNote.trim() : 'প্ল্যাটফর্মের অফিসিয়াল নিয়ম ভঙ্গ করায় এই চ্যালেঞ্জটি বাতিল ও বন্ধ করা হয়েছে।';
-  const nowIso = new Date().toISOString();
+    const { violatedRule, reasonNote } = req.body;
+    const ruleText = (violatedRule && violatedRule.trim()) ? violatedRule.trim() : 'অফিসিয়াল রুলস লঙ্ঘন';
+    const detailNote = (reasonNote && reasonNote.trim()) ? reasonNote.trim() : 'প্ল্যাটফর্মের অফিসিয়াল নিয়ম ভঙ্গ করায় এই চ্যালেঞ্জটি বাতিল ও বন্ধ করা হয়েছে।';
+    const nowIso = new Date().toISOString();
 
-  challenges[idx].status = 'failed';
-  challenges[idx].failReason = 'RULE_VIOLATION';
-  challenges[idx].violatedRule = ruleText;
-  challenges[idx].failReasonText = detailNote;
-  challenges[idx].failedAt = nowIso;
-  challenges[idx].isActive = false;
-  challenges[idx].isCompleted = true;
+    challenges[idx].status = 'failed';
+    challenges[idx].failReason = 'RULE_VIOLATION';
+    challenges[idx].violatedRule = ruleText;
+    challenges[idx].failReasonText = detailNote;
+    challenges[idx].failedAt = nowIso;
+    challenges[idx].isActive = false;
+    challenges[idx].isCompleted = true;
 
-  saveChallenges(challenges, challenges[idx]);
-  if (db && db.isMySqlActive()) {
-    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
-  }
-
-  logUserArchive('CHALLENGE_DISQUALIFIED_RULE_VIOLATION', 
-    { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, 
-    {
-      challengeId: challenges[idx].id,
-      packageName: challenges[idx].packageName,
-      violatedRule: ruleText,
-      reasonNote: detailNote,
-      failReason: 'RULE_VIOLATION'
+    saveChallenges(challenges, challenges[idx]);
+    if (db && db.isMySqlActive()) {
+      db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
     }
-  );
 
-  syncChallengesWithSubmissions();
+    logUserArchive('CHALLENGE_DISQUALIFIED_RULE_VIOLATION', 
+      { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, 
+      {
+        challengeId: challenges[idx].id,
+        packageName: challenges[idx].packageName,
+        violatedRule: ruleText,
+        reasonNote: detailNote,
+        failReason: 'RULE_VIOLATION'
+      }
+    );
 
-  res.json({
-    success: true,
-    message: `ট্রেডারকে ${ruleText}-এর কারণে চ্যালেঞ্জ থেকে বাদ দেওয়া হয়েছে এবং চ্যালেঞ্জটি বন্ধ করা হয়েছে।`,
-    challenge: challenges[idx]
-  });
+    syncChallengesWithSubmissions();
+
+    res.json({
+      success: true,
+      message: `ট্রেডারকে ${ruleText}-এর কারণে চ্যালেঞ্জ থেকে বাদ দেওয়া হয়েছে এবং চ্যালেঞ্জটি বন্ধ করা হয়েছে।`,
+      challenge: challenges[idx]
+    });
+  } catch (err) {
+    console.error('[DISQUALIFY ERROR]:', err);
+    res.status(500).json({ success: false, message: 'চ্যালেঞ্জ ডিসকোয়ালিফাই করতে ত্রুটি হয়েছে: ' + (err.message || 'Server error') });
+  }
 });
 
 // Disqualify Trader from Challenge via a Session Rule Violation (Admin - Req #3)
 app.post('/api/admin/submissions/:id/disqualify-challenge', authenticateAdminToken, (req, res) => {
-  const submissions = readJson(SUBMISSIONS_FILE, []);
-  const sIdx = submissions.findIndex(s => s.id === req.params.id);
-  if (sIdx === -1) return res.status(404).json({ success: false, message: 'Submission not found.' });
+  try {
+    const submissions = readJson(SUBMISSIONS_FILE, []);
+    const sIdx = submissions.findIndex(s => s.id === req.params.id);
+    if (sIdx === -1) return res.status(404).json({ success: false, message: 'Submission not found.' });
 
-  const targetSub = submissions[sIdx];
-  if (targetSub.isPractice === true) {
-    return res.status(400).json({
-      success: false,
-      message: 'এটি একটি প্র্যাকটিস সেশন। প্র্যাকটিস সেশনের জন্য ট্রেডারকে চ্যালেঞ্জ থেকে বাদ দেওয়া বা ডিসকোয়ালিফাই করা যাবে না।'
-    });
-  }
-
-  const { violatedRule, adminFeedback } = req.body;
-  const ruleText = (violatedRule && violatedRule.trim()) ? violatedRule.trim() : 'অফিসিয়াল রুলস লঙ্ঘন';
-  const feedback = (adminFeedback && adminFeedback.trim()) ? adminFeedback.trim() : 'রুল লঙ্ঘনের কারণে সেশন ও চ্যালেঞ্জ বাতিল করা হয়েছে।';
-  const nowIso = new Date().toISOString();
-
-  targetSub.status = 'rejected';
-  targetSub.adminFeedback = `[রুল লঙ্ঘন]: ${ruleText} - ${feedback}`;
-  targetSub.reviewedAt = nowIso;
-  submissions[sIdx] = targetSub;
-  writeJson(SUBMISSIONS_FILE, submissions);
-
-  // Disqualify the associated challenge
-  const challenges = readJson(CHALLENGES_FILE, []);
-  const cIdx = challenges.findIndex(c => c.id === targetSub.challengeId || (c.userId === targetSub.userId && c.status === 'in_progress'));
-  if (cIdx !== -1) {
-    challenges[cIdx].status = 'failed';
-    challenges[cIdx].failReason = 'RULE_VIOLATION';
-    challenges[cIdx].violatedRule = ruleText;
-    challenges[cIdx].failReasonText = feedback;
-    challenges[cIdx].failedAt = nowIso;
-    challenges[cIdx].isActive = false;
-    challenges[cIdx].isCompleted = true;
-    saveChallenges(challenges, challenges[cIdx]);
-    if (db && db.isMySqlActive()) {
-      db.saveChallenge(challenges[cIdx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
+    const targetSub = submissions[sIdx];
+    if (targetSub.isPractice === true) {
+      return res.status(400).json({
+        success: false,
+        message: 'এটি একটি প্র্যাকটিস সেশন। প্র্যাকটিস সেশনের জন্য ট্রেডারকে চ্যালেঞ্জ থেকে বাদ দেওয়া বা ডিসকোয়ালিফাই করা যাবে না।'
+      });
     }
 
-    logUserArchive('CHALLENGE_DISQUALIFIED_FROM_SESSION', 
-      { id: targetSub.userId, name: targetSub.userName, email: targetSub.userEmail }, 
-      {
-        submissionId: targetSub.id,
-        challengeId: challenges[cIdx].id,
-        packageName: challenges[cIdx].packageName,
-        violatedRule: ruleText,
-        feedback: feedback,
-        failReason: 'RULE_VIOLATION'
+    const { violatedRule, adminFeedback } = req.body;
+    const ruleText = (violatedRule && violatedRule.trim()) ? violatedRule.trim() : 'অফিসিয়াল রুলস লঙ্ঘন';
+    const feedback = (adminFeedback && adminFeedback.trim()) ? adminFeedback.trim() : 'রুল লঙ্ঘনের কারণে সেশন ও চ্যালেঞ্জ বাতিল করা হয়েছে।';
+    const nowIso = new Date().toISOString();
+
+    targetSub.status = 'rejected';
+    targetSub.adminFeedback = `[রুল লঙ্ঘন]: ${ruleText} - ${feedback}`;
+    targetSub.reviewedAt = nowIso;
+    submissions[sIdx] = targetSub;
+    writeJson(SUBMISSIONS_FILE, submissions);
+
+    // Disqualify the associated challenge
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const cIdx = challenges.findIndex(c => c.id === targetSub.challengeId || (c.userId === targetSub.userId && c.status === 'in_progress'));
+    if (cIdx !== -1) {
+      challenges[cIdx].status = 'failed';
+      challenges[cIdx].failReason = 'RULE_VIOLATION';
+      challenges[cIdx].violatedRule = ruleText;
+      challenges[cIdx].failReasonText = feedback;
+      challenges[cIdx].failedAt = nowIso;
+      challenges[cIdx].isActive = false;
+      challenges[cIdx].isCompleted = true;
+      saveChallenges(challenges, challenges[cIdx]);
+      if (db && db.isMySqlActive()) {
+        db.saveChallenge(challenges[cIdx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
       }
-    );
+
+      logUserArchive('CHALLENGE_DISQUALIFIED_FROM_SESSION', 
+        { id: targetSub.userId, name: targetSub.userName, email: targetSub.userEmail }, 
+        {
+          submissionId: targetSub.id,
+          challengeId: challenges[cIdx].id,
+          packageName: challenges[cIdx].packageName,
+          violatedRule: ruleText,
+          feedback: feedback,
+          failReason: 'RULE_VIOLATION'
+        }
+      );
+    }
+
+    syncChallengesWithSubmissions();
+
+    res.json({
+      success: true,
+      message: `সেশনটি বাতিল করা হয়েছে এবং ট্রেডারকে ${ruleText}-এর জন্য চ্যালেঞ্জ থেকে বাদ দেওয়া হয়েছে।`,
+      submission: targetSub,
+      challenge: cIdx !== -1 ? challenges[cIdx] : null
+    });
+  } catch (err) {
+    console.error('[DISQUALIFY SUBMISSION ERROR]:', err);
+    res.status(500).json({ success: false, message: 'সেশন বাতিল করতে ত্রুটি হয়েছে: ' + (err.message || 'Server error') });
   }
-
-  syncChallengesWithSubmissions();
-
-  res.json({
-    success: true,
-    message: `সেশনটি বাতিল করা হয়েছে এবং ট্রেডারকে ${ruleText}-এর জন্য চ্যালেঞ্জ থেকে বাদ দেওয়া হয়েছে।`,
-    submission: targetSub,
-    challenge: cIdx !== -1 ? challenges[cIdx] : null
-  });
 });
 
 // 9. Update Challenge Status (Passed / Failed / Drawdown)
 app.post('/api/admin/challenges/:id/update-status', authenticateAdminToken, (req, res) => {
-  const { status, sessionsCompleted, currentDrawdown, failReason, failReasonText, violatedRule } = req.body;
-  const challenges = readJson(CHALLENGES_FILE, []);
-  const idx = challenges.findIndex(c => c.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
+  try {
+    const { status, sessionsCompleted, currentDrawdown, failReason, failReasonText, violatedRule } = req.body;
+    const challenges = readJson(CHALLENGES_FILE, []);
+    const idx = challenges.findIndex(c => c.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ success: false, message: 'Challenge not found.' });
 
-  const nowIso = new Date().toISOString();
-  if (status) {
-    challenges[idx].status = status;
-    if (status === 'passed') {
-      challenges[idx].passedAt = nowIso;
-      challenges[idx].isCompleted = true;
-      challenges[idx].isActive = false;
-    } else if (status === 'failed') {
-      challenges[idx].failedAt = nowIso;
-      challenges[idx].failReason = failReason || 'DISQUALIFIED_BY_ADMIN';
-      challenges[idx].failReasonText = failReasonText || 'এডমিন কর্তৃক চ্যালেঞ্জ বাতিল ও বাদ দেওয়া হয়েছে।';
-      if (violatedRule) challenges[idx].violatedRule = violatedRule;
-      challenges[idx].isActive = false;
-      challenges[idx].isCompleted = true;
-    } else if (status === 'in_progress') {
-      challenges[idx].isActive = true;
-      challenges[idx].isCompleted = false;
-      delete challenges[idx].failReason;
-      delete challenges[idx].violatedRule;
-      delete challenges[idx].failReasonText;
-      delete challenges[idx].failedAt;
+    const nowIso = new Date().toISOString();
+    if (status) {
+      challenges[idx].status = status;
+      if (status === 'passed') {
+        challenges[idx].passedAt = nowIso;
+        challenges[idx].isCompleted = true;
+        challenges[idx].isActive = false;
+      } else if (status === 'failed') {
+        challenges[idx].failedAt = nowIso;
+        challenges[idx].failReason = failReason || 'DISQUALIFIED_BY_ADMIN';
+        challenges[idx].failReasonText = failReasonText || 'এডমিন কর্তৃক চ্যালেঞ্জ বাতিল ও বাদ দেওয়া হয়েছে।';
+        if (violatedRule) challenges[idx].violatedRule = violatedRule;
+        challenges[idx].isActive = false;
+        challenges[idx].isCompleted = true;
+      } else if (status === 'in_progress') {
+        challenges[idx].isActive = true;
+        challenges[idx].isCompleted = false;
+        delete challenges[idx].failReason;
+        delete challenges[idx].violatedRule;
+        delete challenges[idx].failReasonText;
+        delete challenges[idx].failedAt;
+      }
     }
-  }
-  if (sessionsCompleted !== undefined) challenges[idx].sessionsCompleted = parseInt(sessionsCompleted) || 0;
-  if (currentDrawdown !== undefined) challenges[idx].currentDrawdown = currentDrawdown;
+    if (sessionsCompleted !== undefined) challenges[idx].sessionsCompleted = parseInt(sessionsCompleted) || 0;
+    if (currentDrawdown !== undefined) challenges[idx].currentDrawdown = currentDrawdown;
 
-  saveChallenges(challenges, challenges[idx]);
-  if (db && db.isMySqlActive()) {
-    db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
-  }
-
-  logUserArchive('CHALLENGE_STATUS_UPDATED', 
-    { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, 
-    {
-      challengeId: challenges[idx].id,
-      packageName: challenges[idx].packageName,
-      status: challenges[idx].status,
-      failReason: challenges[idx].failReason,
-      violatedRule: challenges[idx].violatedRule,
-      failReasonText: challenges[idx].failReasonText
+    saveChallenges(challenges, challenges[idx]);
+    if (db && db.isMySqlActive()) {
+      db.saveChallenge(challenges[idx]).catch(e => console.error('[MYSQL CHALLENGE UPDATE STATUS ERROR]:', e.message));
     }
-  );
 
-  syncChallengesWithSubmissions();
+    logUserArchive('CHALLENGE_STATUS_UPDATED', 
+      { id: challenges[idx].userId, name: challenges[idx].userName, email: challenges[idx].userEmail }, 
+      {
+        challengeId: challenges[idx].id,
+        packageName: challenges[idx].packageName,
+        status: challenges[idx].status,
+        failReason: challenges[idx].failReason,
+        violatedRule: challenges[idx].violatedRule,
+        failReasonText: challenges[idx].failReasonText
+      }
+    );
 
-  res.json({ success: true, message: 'Challenge status updated successfully.', challenge: challenges[idx] });
+    syncChallengesWithSubmissions();
+
+    res.json({ success: true, message: 'Challenge status updated successfully.', challenge: challenges[idx] });
+  } catch (err) {
+    console.error('[UPDATE STATUS ERROR]:', err);
+    res.status(500).json({ success: false, message: 'স্ট্যাটাস আপডেট করতে ত্রুটি হয়েছে: ' + (err.message || 'Server error') });
+  }
 });
 
 // 9.1 Reactivate Disqualified / Failed Challenge with Notification (Admin)
