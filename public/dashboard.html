@@ -3985,7 +3985,7 @@
             <div style="display:flex; gap:8px; margin-bottom:8px;">
                 <button type="button" class="btn-outline-header" onclick="openLanguageModal()" style="flex:1; justify-content:center; padding:7px 8px; font-size:0.78rem; border-radius:8px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:#fff; cursor:pointer;" title="Change Language">
                     <i class="fas fa-globe" style="color:var(--yellow); margin-right:4px;"></i>
-                    <span id="sidebarLangLabel">বাংলা</span>
+                    <span id="sidebarLangLabel">English</span>
                 </button>
                 <button type="button" class="btn-outline-header" onclick="cycleThemeTemplate()" style="flex:1; justify-content:center; padding:7px 8px; font-size:0.78rem; border-radius:8px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:#fff; cursor:pointer;" title="Change Theme">
                     <i class="fas fa-moon" style="color:var(--yellow); margin-right:4px;"></i>
@@ -4019,15 +4019,15 @@
                 <div class="header-lang-wrapper" style="position:relative;">
                     <button type="button" class="btn-outline-header header-pill-btn" onclick="toggleHeaderLangMenu(event)" id="headerLangBtn" title="Change Language">
                         <i class="fas fa-globe" style="color:var(--blue);"></i>
-                        <span id="headerCurrentLangLabel">বাংলা</span>
+                        <span id="headerCurrentLangLabel">English</span>
                         <i class="fas fa-chevron-down" style="font-size:0.65rem; margin-left:2px; opacity:0.7;"></i>
                     </button>
                     <div id="headerLangDropdown" class="header-lang-dropdown" style="display:none;">
                         <div class="lang-option-item active" onclick="changeLanguage('default')" data-lang="default">
-                            <span>🇧🇩</span> <span>বাংলা (Default)</span>
+                            <span>🇺🇸</span> <span>English (Default)</span>
                         </div>
-                        <div class="lang-option-item" onclick="changeLanguage('en')" data-lang="en">
-                            <span>🇺🇸</span> <span>English</span>
+                        <div class="lang-option-item" onclick="changeLanguage('bn')" data-lang="bn">
+                            <span>🇧🇩</span> <span>বাংলা (Bengali)</span>
                         </div>
                         <div class="lang-option-item" onclick="changeLanguage('hi')" data-lang="hi">
                             <span>🇮🇳</span> <span>हिन्दी (Hindi)</span>
@@ -5270,8 +5270,8 @@
                             </label>
                             <div style="position: relative;">
                                 <select class="form-control" id="profileLanguageSelect" onchange="changeLanguage(this.value)" style="height: 48px; font-weight: 600; cursor: pointer; padding-left: 42px;">
-                                    <option value="default">🇧🇩 বাংলা (বাংলা - Default)</option>
-                                    <option value="en">🇺🇸 English</option>
+                                    <option value="default">🇺🇸 English (English - Default)</option>
+                                    <option value="bn">🇧🇩 বাংলা (Bengali)</option>
                                     <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
                                     <option value="ar">🇸🇦 العربية (Arabic)</option>
                                     <option value="es">🇪🇸 Español (Spanish)</option>
@@ -17740,8 +17740,9 @@
 
         const THEMES = ['full-night', 'twilight', 'light-mode'];
         const LANG_META = {
-            'default': { label: 'বাংলা', name: 'বাংলা (Default)' },
-            'en': { label: 'English', name: 'English' },
+            'default': { label: 'English', name: 'English (Default)' },
+            'en': { label: 'English', name: 'English (Default)' },
+            'bn': { label: 'বাংলা', name: 'বাংলা (Bengali)' },
             'hi': { label: 'हिन्दी', name: 'हिन्दी (Hindi)' },
             'ar': { label: 'العربية', name: 'العربية (Arabic)' },
             'es': { label: 'Español', name: 'Español' },
@@ -17902,8 +17903,8 @@
             if (!grid) return;
 
             const list = [
-                { code: 'default', flag: '🇧🇩', name: 'বাংলা', sub: 'Bengali (Default)' },
-                { code: 'en', flag: '🇺🇸', name: 'English', sub: 'English' },
+                { code: 'default', flag: '🇺🇸', name: 'English', sub: 'English (Default)' },
+                { code: 'bn', flag: '🇧🇩', name: 'বাংলা', sub: 'Bengali' },
                 { code: 'hi', flag: '🇮🇳', name: 'हिन्दी', sub: 'Hindi' },
                 { code: 'ar', flag: '🇸🇦', name: 'العربية', sub: 'Arabic' },
                 { code: 'es', flag: '🇪🇸', name: 'Español', sub: 'Spanish' },
@@ -17994,10 +17995,11 @@
         }
 
         function applyDictionaryTranslations(langCode) {
-            const dict = I18N_LOCAL[langCode] || {};
+            const dictLang = (langCode === 'default' || langCode === 'en') ? 'en' : langCode;
+            const dict = I18N_LOCAL[dictLang] || {};
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (langCode === 'default') {
+                if (langCode === 'bn') {
                     if (el._defaultText) {
                         el.textContent = el._defaultText;
                     }
@@ -18011,9 +18013,11 @@
         let googleTranslateInitialized = false;
 
         function setGoogleTranslateCookie(lang) {
-            const cookieVal = lang === 'default' ? '' : `/auto/${lang}`;
+            const isBengali = (lang === 'bn');
+            const targetLang = (lang === 'default' || lang === 'en') ? 'en' : lang;
+            const cookieVal = isBengali ? '' : `/auto/${targetLang}`;
             const domain = window.location.hostname;
-            const expires = lang === 'default' ? 'Thu, 01 Jan 1970 00:00:00 UTC' : 'Fri, 31 Dec 2030 23:59:59 UTC';
+            const expires = isBengali ? 'Thu, 01 Jan 1970 00:00:00 UTC' : 'Fri, 31 Dec 2030 23:59:59 UTC';
             
             document.cookie = `googtrans=${cookieVal}; expires=${expires}; path=/;`;
             document.cookie = `googtrans=${cookieVal}; expires=${expires}; path=/; domain=${domain};`;
@@ -18026,7 +18030,7 @@
         function triggerGoogleTranslate(langCode) {
             setGoogleTranslateCookie(langCode);
 
-            if (langCode === 'default') {
+            if (langCode === 'bn') {
                 const hadTranslation = sessionStorage.getItem('dash_was_translated');
                 if (hadTranslation === 'true') {
                     sessionStorage.removeItem('dash_was_translated');
@@ -18036,6 +18040,7 @@
             }
 
             sessionStorage.setItem('dash_was_translated', 'true');
+            const targetLang = (langCode === 'default' || langCode === 'en') ? 'en' : langCode;
 
             if (!googleTranslateInitialized && !window.google?.translate) {
                 initGoogleTranslateScript();
@@ -18045,7 +18050,7 @@
                     const combo = document.querySelector('.goog-te-combo');
                     if (combo) {
                         clearInterval(checkInterval);
-                        combo.value = langCode;
+                        combo.value = targetLang;
                         combo.dispatchEvent(new Event('change'));
                     } else if (checkCount > 15) {
                         clearInterval(checkInterval);
@@ -18055,7 +18060,7 @@
             } else {
                 const combo = document.querySelector('.goog-te-combo');
                 if (combo) {
-                    combo.value = langCode;
+                    combo.value = targetLang;
                     combo.dispatchEvent(new Event('change'));
                 } else {
                     window.location.reload();

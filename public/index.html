@@ -3353,6 +3353,75 @@
                 font-size: 0.78rem !important;
             }
         }
+
+        /* Language Switcher Dropdown */
+        .header-lang-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .header-lang-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #fff;
+            transition: all 0.2s ease;
+        }
+        .header-lang-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(245, 176, 65, 0.4);
+            color: var(--yellow, #f5b041);
+        }
+        .header-lang-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            left: auto;
+            background: #0f1623;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 14px;
+            padding: 6px;
+            min-width: 210px;
+            max-height: 380px;
+            overflow-y: auto;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1050;
+        }
+        .lang-option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            transition: all 0.15s;
+        }
+        .lang-option-item:hover {
+            background: rgba(245, 176, 65, 0.15);
+            color: var(--yellow, #f5b041);
+        }
+        .lang-option-item.active {
+            background: var(--yellow, #f5b041);
+            color: #000 !important;
+            font-weight: 800;
+        }
+        .goog-te-banner-frame.skiptranslate, iframe.goog-te-banner-frame { display: none !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background: none !important; box-shadow: none !important; }
+        body { top: 0px !important; }
+        @media (max-width: 991px) {
+            .mobile-only-lang { display: block !important; }
+        }
     </style>
 </head>
 <body>
@@ -3375,8 +3444,60 @@
             <li><a href="#how-it-works" onclick="closeMobileMenu()">How It Works</a></li>
             <li><a href="/dashboard" onclick="closeMobileMenu()">Dashboard</a></li>
             <li><a href="/partner" style="color:var(--yellow); font-weight:700;"><i class="fas fa-handshake"></i> Partner</a></li>
+            <li class="mobile-only-lang" style="display:none; padding:8px 0;">
+                <button type="button" class="header-lang-btn" onclick="toggleLandingLangMenu(event)" style="width:100%; justify-content:center; padding:10px 14px;">
+                    <i class="fas fa-globe" style="color:var(--yellow);"></i>
+                    <span id="mobileCurrentLangLabel">Language: English</span>
+                </button>
+            </li>
         </ul>
         <div class="nav-buttons" id="navButtons">
+            <!-- Language Switcher Pill -->
+            <div class="header-lang-wrapper">
+                <button type="button" class="header-lang-btn" onclick="toggleLandingLangMenu(event)" id="headerLangBtn" title="Change Language">
+                    <i class="fas fa-globe" style="color:var(--yellow, #f5b041);"></i>
+                    <span id="headerCurrentLangLabel">English</span>
+                    <i class="fas fa-chevron-down" style="font-size:0.65rem; margin-left:2px; opacity:0.7;"></i>
+                </button>
+                <div id="headerLangDropdown" class="header-lang-dropdown" style="display:none;">
+                    <div class="lang-option-item active" onclick="changeLandingLanguage('en')" data-lang="en">
+                        <span>🇺🇸</span> <span>English (Default)</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('bn')" data-lang="bn">
+                        <span>🇧🇩</span> <span>বাংলা (Bengali)</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('hi')" data-lang="hi">
+                        <span>🇮🇳</span> <span>हिन्दी (Hindi)</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('ar')" data-lang="ar">
+                        <span>🇸🇦</span> <span>العربية (Arabic)</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('es')" data-lang="es">
+                        <span>🇪🇸</span> <span>Español</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('fr')" data-lang="fr">
+                        <span>🇫🇷</span> <span>Français</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('pt')" data-lang="pt">
+                        <span>🇧🇷</span> <span>Português</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('id')" data-lang="id">
+                        <span>🇮🇩</span> <span>Indonesian</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('ru')" data-lang="ru">
+                        <span>🇷🇺</span> <span>Русский</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('tr')" data-lang="tr">
+                        <span>🇹🇷</span> <span>Türkçe</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('vi')" data-lang="vi">
+                        <span>🇻🇳</span> <span>Tiếng Việt</span>
+                    </div>
+                    <div class="lang-option-item" onclick="changeLandingLanguage('zh-CN')" data-lang="zh-CN">
+                        <span>🇨🇳</span> <span>中文 (Chinese)</span>
+                    </div>
+                </div>
+            </div>
             <button class="btn-outline" onclick="openLoginModal()" id="navLoginBtn">
                 <i class="fas fa-sign-in-alt"></i> Login
             </button>
@@ -3399,7 +3520,7 @@
             </h1>
             <div class="hero-mission-box">
                 <i class="fas fa-bullseye" style="color:var(--yellow); font-size:1.1rem; margin-right:6px;"></i>
-                <strong>আমাদের লক্ষ্য:</strong> ট্রেডারদের পকেটের টাকা দিয়ে জুয়া খেলা বন্ধ করে ডিসিপ্লিন্ড ও প্রফিটেবল ট্রেডার তৈরি করা। আগে ডেমোতে নিজের দক্ষতা প্রমাণ করুন, তারপর আমাদের ডলারে ট্রেড করে ৮৫% পর্যন্ত প্রফিট তুলে নিন!
+                <strong>Our Mission:</strong> Stop gambling with personal capital and become a disciplined, profitable trader. Prove your trading edge on demo first, then trade our firm's capital and keep up to 85% profit split!
             </div>
 
             <div class="hero-buttons">
@@ -3440,7 +3561,7 @@
     <section id="brokers" class="brokers-section">
         <h2 class="section-title" style="margin-bottom:2.5rem;">Pick Your Top Broker</h2>
         <div class="broker-scroll-hint">
-            <span><i class="fas fa-arrows-left-right"></i> ব্রোকার দেখতে ডানে-বামে সোয়াইপ করুন</span>
+            <span><i class="fas fa-arrows-left-right"></i> Swipe left or right to explore brokers</span>
         </div>
         <div class="brokers-grid">
             <div class="broker-card glass">
@@ -3494,14 +3615,14 @@
                 <span class="cat-pill-dot"></span>
                 <div class="cat-pill-text-wrap">
                     <span class="cat-pill-title">Easy Challenge Easy Rules.</span>
-                    <span class="cat-pill-subtitle">ম্যানেজড মানি ম্যানেজমেন্ট শিট চ্যালেঞ্জ • ১৫ সেশন পূরণ</span>
+                    <span class="cat-pill-subtitle">Managed Money Management Sheet Challenge • 15 Sessions Required</span>
                 </div>
             </button>
             <button type="button" id="btnCatYourRules" class="btn-cat-nav-pill" onclick="switchLandingChallengeCategory('your_rules')">
                 <span class="cat-pill-dot"></span>
                 <div class="cat-pill-text-wrap">
                     <span class="cat-pill-title">Your Challenge Your Rules.</span>
-                    <span class="cat-pill-subtitle">টার্গেট ও ড্র-ডাউন বেসড প্রপ চ্যালেঞ্জ • নো শিট রিকোয়ার্ড</span>
+                    <span class="cat-pill-subtitle">Target & Drawdown Based Prop Challenge • No Sheet Required</span>
                 </div>
             </button>
         </div>
@@ -3526,19 +3647,19 @@
             <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.5rem; position:relative; z-index:2;">
                 <div style="max-width:640px; flex:1 1 280px;">
                     <div id="launchPromoBadgeBox" style="display:inline-flex; align-items:center; gap:8px; background:rgba(231,76,60,0.25); border:1px solid #ff4d4d; color:#ff6b81; padding:4px 14px; border-radius:20px; font-size:0.8rem; font-weight:800; margin-bottom:10px; letter-spacing:0.5px;">
-                        <i class="fas fa-fire fa-beat" style="color:#ff4757;"></i> <span id="launchPromoBadgeText">ব্রোকার লঞ্চিং মেগা অফার</span>
+                        <i class="fas fa-fire fa-beat" style="color:#ff4757;"></i> <span id="launchPromoBadgeText">Platform Grand Launch Offer</span>
                     </div>
                     <h3 id="launchPromoTitleText" style="font-size:1.5rem; font-weight:900; color:#fff; margin-bottom:8px; line-height:1.3;">
-                        ব্রোকার প্রথম লঞ্চিং উপলক্ষে বিশেষ মূল্যছাড়!
+                        Exclusive Discount for Platform Grand Launch!
                     </h3>
                     <p id="launchPromoDescText" style="color:var(--text-muted); font-size:0.92rem; line-height:1.65; margin:0;">
-                        অফিসিয়াল লঞ্চ উপলক্ষে <strong>২য় চ্যালেঞ্জে ৩০% ছাড়</strong> এবং <strong>৩য় থেকে বাকি সকল চ্যালেঞ্জে ৪০% মেগা ডিসকাউন্ট!</strong> (১ম ব্রোঞ্জ প্যাকেজ রেগুলার ফি)। অফারটি সীমিত সময়ের জন্য কার্যকর।
+                        Grand Launch Special: <strong>30% OFF on your 2nd Challenge</strong> and <strong>40% MEGA DISCOUNT on your 3rd Challenge & beyond!</strong> (1st Bronze package regular fee). Limited time offer.
                     </p>
                 </div>
                 <!-- Live Countdown Timer -->
                 <div id="promoCountdownWrapper" class="promo-countdown-wrapper">
                     <div id="promoCountdownLabel" style="font-size:0.75rem; text-transform:uppercase; color:var(--gold); font-weight:800; letter-spacing:1px; margin-bottom:8px;">
-                        <i class="fas fa-hourglass-half"></i> <span id="promoCountdownLabelText">অফারটি শেষ হতে বাকি</span>
+                        <i class="fas fa-hourglass-half"></i> <span id="promoCountdownLabelText">Offer Ends In</span>
                     </div>
                     <div id="promoCountdown" class="promo-countdown-grid">
                         <!-- Live countdown digits -->
@@ -3595,7 +3716,7 @@
             <span class="rules-badge"><i class="fas fa-star"></i> Rules</span>
             <h2 class="section-title">The 3 Golden Rules</h2>
             <p class="section-subtitle">
-                শৃঙ্খলাবদ্ধ ট্রেডিংয়ের ৩টি সুনির্দিষ্ট নিয়ম। নিয়ম মেনে সফল হলেই ফান্ডেড অ্যাকাউন্ট।
+                3 Disciplined Trading Rules. Follow the rules consistently to earn your funded account.
             </p>
         </div>
 
@@ -3607,22 +3728,22 @@
     <!-- ========== HOW IT WORKS (3 STEPS) ========== -->
     <section id="how-it-works" class="steps">
         <h2 class="section-title">How It Works</h2>
-        <p class="section-subtitle">ফান্ডেড অ্যাকাউন্ট পাওয়ার ৩টি সহজ ধাপ</p>
+        <p class="section-subtitle">3 Simple Steps to Get Your Funded Account</p>
         <div class="steps-grid">
             <div class="step-card glass">
                 <div class="step-icon-box">1</div>
-                <h3>প্যাকেজ ও ব্রোকার নির্বাচন</h3>
-                <p>পছন্দের প্যাকেজ ও ব্রোকার সিলেক্ট করে ডেমো অ্যাকাউন্ট দিয়ে শুরু করুন।</p>
+                <h3>Choose Package & Broker</h3>
+                <p>Select your preferred package and broker to start trading on a demo account.</p>
             </div>
             <div class="step-card glass">
                 <div class="step-icon-box">2</div>
-                <h3>ডেমো ট্রেড ও প্রমাণ জমা</h3>
-                <p>৩টি নিয়ম মেনে ১৫ সেশন ট্রেড করুন এবং ভিডিও প্রমাণ ড্যাশবোর্ডে জমা দিন।</p>
+                <h3>Demo Trade & Submit Proof</h3>
+                <p>Complete 15 trading sessions adhering to the 3 rules and submit proof in dashboard.</p>
             </div>
             <div class="step-card glass">
                 <div class="step-icon-box">3</div>
-                <h3>ফান্ডেড অ্যাকাউন্ট ও ৮৫% প্রফিট</h3>
-                <p>মূল্যায়ন সফল হলে রিয়েল ফান্ডেড অ্যাকাউন্ট পান এবং প্রফিটের ৮৫% উইথড্র করুন।</p>
+                <h3>Funded Account & 85% Profit Split</h3>
+                <p>Pass the evaluation to receive a live funded account and withdraw up to 85% profits.</p>
             </div>
         </div>
 
@@ -3642,16 +3763,16 @@
                 <div class="landing-mm-header">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <i class="fas fa-calculator" style="color:var(--yellow); font-size:1.2rem;"></i>
-                        <h3 class="landing-mm-header-title">ফ্রী প্র্যাকটিস শিট</h3>
+                        <h3 class="landing-mm-header-title">Free Practice Sheet</h3>
                         <span class="landing-mm-mode-badge">
-                            <i class="fas fa-unlock-alt" style="font-size:0.65rem;"></i> ফ্রী টেস্ট মোড
+                            <i class="fas fa-unlock-alt" style="font-size:0.65rem;"></i> Free Practice Mode
                         </span>
                     </div>
                     <div class="landing-mm-header-actions">
-                        <button type="button" class="btn-mm-header-action" onclick="resetLandingFreeMasSession()" title="টেস্ট সেশন রিসেট করুন">
+                        <button type="button" class="btn-mm-header-action" onclick="resetLandingFreeMasSession()" title="Reset Practice Session">
                             <i class="fas fa-redo"></i> Reset
                         </button>
-                        <button type="button" class="btn-mm-header-action" onclick="window.print()" title="প্রিন্ট করুন">
+                        <button type="button" class="btn-mm-header-action" onclick="window.print()" title="Print Sheet">
                             <i class="fas fa-print"></i> Print
                         </button>
                     </div>
@@ -3661,7 +3782,7 @@
                 <div class="landing-mm-params-box">
                     <div class="landing-mm-params-top">
                         <div class="landing-mm-params-label">
-                            <i class="fas fa-sliders-h" style="margin-right:7px;"></i> টেস্ট প্যারামিটার
+                            <i class="fas fa-sliders-h" style="margin-right:7px;"></i> Practice Parameters
                         </div>
                         <div class="landing-mm-params-badge">
                             <i class="fas fa-lock" style="font-size:0.68rem; margin-right:3px;"></i> 16T • 6W • 85%
@@ -3703,12 +3824,12 @@
                 <div class="landing-mm-log-header">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span class="landing-mm-log-title">
-                            <i class="fas fa-list-ol" style="color:var(--yellow); margin-right:8px;"></i> টেস্ট ট্রেড লগ
+                            <i class="fas fa-list-ol" style="color:var(--yellow); margin-right:8px;"></i> Practice Trade Log
                         </span>
                         <span class="landing-sync-badge">
-                            <span class="sync-dot-live"></span> টেস্ট মোড
+                            <span class="sync-dot-live"></span> Practice Mode
                         </span>
-                        <button type="button" id="btnLandingFreeUndo" onclick="landingFreeMasUndoLastTrade()" class="btn-mas-undo-icon no-history" title="শেষ ট্রেড আনডু করুন (Undo - Hotkey: Z)" aria-label="Undo">
+                        <button type="button" id="btnLandingFreeUndo" onclick="landingFreeMasUndoLastTrade()" class="btn-mas-undo-icon no-history" title="Undo Last Trade (Hotkey: Z)" aria-label="Undo">
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
@@ -3720,12 +3841,12 @@
                         <thead>
                             <tr>
                                 <th style="width:50px; text-align:center;">#</th>
-                                <th>এন্ট্রি সাইজ</th>
-                                <th style="min-width:180px; text-align:center;">ফলাফল (W / L)</th>
-                                <th>লাভ / লস</th>
-                                <th>ব্যালেন্স</th>
-                                <th>স্কোর</th>
-                                <th style="text-align:center;">স্ট্যাটাস</th>
+                                <th>Entry Size</th>
+                                <th style="min-width:180px; text-align:center;">Result (W / L)</th>
+                                <th>Profit / Loss</th>
+                                <th>Balance</th>
+                                <th>Score</th>
+                                <th style="text-align:center;">Status</th>
                             </tr>
                         </thead>
                         <tbody id="landingFreeMasTableBody">
@@ -3750,7 +3871,7 @@
             <p class="modal-subtitle">Log in to your Binary Prop Firm dashboard</p>
             <div id="loginPromptNotice" style="display:none; background:rgba(245,176,65,0.12); border:1px solid rgba(245,176,65,0.35); border-radius:10px; padding:10px 14px; margin-bottom:14px; text-align:center;">
                 <i class="fas fa-info-circle" style="color:var(--yellow); margin-right:6px;"></i>
-                <span style="color:#fff; font-size:0.85rem; font-weight:700;">আপনার অ্যাকাউন্টে লগইন করে সরাসরি চ্যালেঞ্জ ক্রয় সম্পন্ন করুন।</span>
+                <span style="color:#fff; font-size:0.85rem; font-weight:700;">Log in to your account to complete your challenge purchase directly.</span>
             </div>
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
@@ -3792,7 +3913,7 @@
                 </div>
                 <h2 class="modal-title" style="margin-bottom:4px;">Reset Password</h2>
                 <p class="modal-subtitle" id="forgotModalSubtitle" style="font-size:0.88rem;">
-                    পাসওয়ার্ড রিসেট করতে আপনার রেজিস্টার্ড ইমেইল অ্যাড্রেস দিন।
+                    Enter your registered email address to reset your password.
                 </p>
             </div>
 
@@ -3815,21 +3936,21 @@
                 <div style="background:rgba(245, 176, 65, 0.1); border:1px solid rgba(245, 176, 65, 0.25); border-radius:10px; padding:10px 14px; margin-bottom:1.2rem; font-size:0.83rem; color:#fff; display:flex; align-items:center; justify-content:space-between;">
                     <div>
                         <i class="fas fa-envelope" style="color:var(--yellow); margin-right:6px;"></i>
-                        কোড পাঠানো হয়েছে: <strong id="forgotTargetEmailDisplay" style="color:var(--yellow);"></strong>
+                        Verification code sent to: <strong id="forgotTargetEmailDisplay" style="color:var(--yellow);"></strong>
                     </div>
                     <a href="javascript:void(0)" onclick="switchForgotStep(1)" style="color:var(--yellow); font-weight:700; text-decoration:underline;">Change</a>
                 </div>
 
                 <div class="form-group" style="margin-bottom:1.2rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <label style="margin-bottom:0;">6-Digit OTP Code (ইমেইল কোড)</label>
+                        <label style="margin-bottom:0;">6-Digit OTP Code (Email Code)</label>
                         <button type="button" id="forgotResendCodeBtn" onclick="handleResendResetCode()" style="background:none; border:none; color:var(--yellow); font-size:0.8rem; cursor:pointer; font-weight:700; text-decoration:underline;">
                             Resend Code
                         </button>
                     </div>
                     <input type="text" class="form-control" id="forgotOtpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="------" style="text-align:center; font-size:1.6rem; letter-spacing:8px; font-weight:800; color:var(--yellow); font-family:monospace; height:50px;" />
                     <small style="display:block; margin-top:6px; color:var(--text-secondary); font-size:0.75rem;">
-                        <i class="fas fa-info-circle" style="color:var(--yellow);"></i> আপনার ইনবক্স অথবা স্প্যাম ফোল্ডারে প্রাপ্ত ৬-সংখ্যার কোডটি লিখুন।
+                        <i class="fas fa-info-circle" style="color:var(--yellow);"></i> Enter the 6-digit code received in your inbox or spam folder.
                     </small>
                 </div>
 
@@ -3846,13 +3967,13 @@
             <form id="forgotStep3Form" style="display:none;" onsubmit="handleResetPasswordSubmit(event)">
                 <div style="background:rgba(46, 204, 113, 0.12); border:1px solid rgba(46, 204, 113, 0.35); border-radius:10px; padding:10px 14px; margin-bottom:1.2rem; font-size:0.83rem; color:#fff; display:flex; align-items:center; gap:8px;">
                     <i class="fas fa-shield-alt" style="color:var(--neon-green); font-size:1.1rem;"></i>
-                    <span>কোড সফলভাবে যাচাই হয়েছে! এবার নতুন পাসওয়ার্ড সেট করুন।</span>
+                    <span>Code verified successfully! Now set your new password.</span>
                 </div>
 
                 <div class="form-group">
-                    <label>New Password (নতুন পাসওয়ার্ড)</label>
+                    <label>New Password</label>
                     <div class="pass-toggle-wrap">
-                        <input type="password" class="form-control" id="forgotNewPassword" required minlength="6" placeholder="কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড" />
+                        <input type="password" class="form-control" id="forgotNewPassword" required minlength="6" placeholder="At least 6 characters" />
                         <button type="button" class="pass-toggle-btn" onclick="togglePasswordVis('forgotNewPassword', this)" title="Show/Hide Password" aria-label="Toggle password visibility">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -3860,9 +3981,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Confirm New Password (পুনরায় নতুন পাসওয়ার্ড)</label>
+                    <label>Confirm New Password</label>
                     <div class="pass-toggle-wrap">
-                        <input type="password" class="form-control" id="forgotConfirmPassword" required minlength="6" placeholder="নতুন পাসওয়ার্ডটি পুনরায় লিখুন" />
+                        <input type="password" class="form-control" id="forgotConfirmPassword" required minlength="6" placeholder="Re-enter your new password" />
                         <button type="button" class="pass-toggle-btn" onclick="togglePasswordVis('forgotConfirmPassword', this)" title="Show/Hide Password" aria-label="Toggle password visibility">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -3894,7 +4015,7 @@
             </div>
             <div id="regPromptNotice" style="display:none; background:rgba(245,176,65,0.12); border:1px solid rgba(245,176,65,0.35); border-radius:10px; padding:10px 14px; margin-bottom:14px; text-align:center;">
                 <i class="fas fa-user-plus" style="color:var(--yellow); margin-right:6px;"></i>
-                <span style="color:#fff; font-size:0.85rem; font-weight:700;">চ্যালেঞ্জ কেনার আগে প্রথমে আপনার ট্রেডার অ্যাকাউন্ট খুলুন (Sign Up করুন)। অ্যাকাউন্ট তৈরি শেষে সরাসরি চ্যালেঞ্জ ক্রয় করতে পারবেন।</span>
+                <span style="color:#fff; font-size:0.85rem; font-weight:700;">Please create your trader account (Sign Up) before purchasing. Challenge checkout will proceed immediately after registration.</span>
             </div>
             <form id="registerForm" onsubmit="handleRegister(event)">
                 <div class="form-group">
@@ -3945,9 +4066,9 @@
             <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(245, 176, 65, 0.15); border: 1px solid var(--yellow); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem auto; font-size: 1.8rem; color: var(--yellow);">
                 <i class="fas fa-envelope-open-text"></i>
             </div>
-            <h2 class="modal-title" style="margin-bottom: 6px;">ইমেইল ভেরিফিকেশন (Email Verify)</h2>
+            <h2 class="modal-title" style="margin-bottom: 6px;">Email Verification</h2>
             <p class="modal-subtitle" style="margin-bottom: 1.5rem; font-size: 0.9rem;">
-                আপনার ইমেইলে একটি ৬-সংখ্যার ভেরিফিকেশন কোড পাঠানো হয়েছে:<br/>
+                A 6-digit verification code has been sent to your email:<br/>
                 <strong id="verifyEmailTarget" style="color: var(--yellow); font-size: 0.98rem; word-break: break-all;">trader@example.com</strong>
             </p>
             <form id="emailVerifyForm" onsubmit="handleVerifyEmail(event)">
@@ -3975,9 +4096,9 @@
             <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(46, 204, 113, 0.15); border: 1px solid #2ecc71; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem auto; font-size: 1.8rem; color: #2ecc71;">
                 <i class="fas fa-shield-alt"></i>
             </div>
-            <h2 class="modal-title" style="margin-bottom: 6px;">২-ধাপের নিরাপত্তা যাচাই (2FA Login OTP)</h2>
+            <h2 class="modal-title" style="margin-bottom: 6px;">Two-Factor Authentication (2FA OTP)</h2>
             <p class="modal-subtitle" style="margin-bottom: 1.5rem; font-size: 0.9rem;">
-                আপনার অ্যাকাউন্টের সুরক্ষার্থে জিমেইলে একটি ৬-সংখ্যার লগইন কোড পাঠানো হয়েছে:<br/>
+                For your account security, a 6-digit login code has been sent to your email:<br/>
                 <strong id="loginOtpEmailTarget" style="color: var(--yellow); font-size: 0.98rem; word-break: break-all;">trader@example.com</strong>
             </p>
             <form id="loginOtpForm" onsubmit="handleVerifyLoginOtp(event)">
@@ -3986,12 +4107,12 @@
                     <input type="text" class="form-control" id="loginOtpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="------" style="text-align:center; font-size:1.8rem; letter-spacing:10px; font-weight:800; color:var(--yellow); font-family:monospace; height:54px;" autocomplete="one-time-code" />
                 </div>
                 <button type="submit" class="btn-primary btn-full" id="loginOtpSubmitBtn" style="justify-content:center; padding:12px; font-size:1rem; margin-bottom:1rem;">
-                    <i class="fas fa-lock-open"></i> কোড যাচাই ও ড্যাশবোর্ডে প্রবেশ
+                    <i class="fas fa-lock-open"></i> Verify Code & Enter Dashboard
                 </button>
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem;">
-                    <span>কোড পাননি?</span>
+                    <span>Didn't receive code?</span>
                     <button type="button" id="resendLoginOtpBtn" onclick="handleResendLoginOtp()" style="background:none; border:none; color:var(--yellow); font-weight:700; cursor:pointer; text-decoration:underline;">
-                        পুনরায় কোড পাঠান (Resend)
+                        Resend Code
                     </button>
                 </div>
             </form>
@@ -4018,10 +4139,10 @@
 
                 <div style="background:rgba(245,176,65,0.06); border:1px solid rgba(245,176,65,0.2); border-radius:12px; padding:10px 14px; margin-bottom:14px; font-size:0.83rem; color:#cbd5e1; display:flex; align-items:center; gap:8px;">
                     <i class="fas fa-info-circle" style="color:var(--yellow); font-size:1rem; flex-shrink:0;"></i>
-                    <span>আপনি যে ব্রোকারে ট্রেড করতে চান সেটি সিলেক্ট করুন এবং আপনার ব্রোকার অ্যাকাউন্ট আইডি লিখুন:</span>
+                    <span>Select the broker you want to trade with and enter your broker account ID:</span>
                 </div>
 
-                <label style="font-size:0.82rem; font-weight:700; color:#8e9bb0; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">Choose Broker (ব্রোকার নির্বাচন করুন)</label>
+                <label style="font-size:0.82rem; font-weight:700; color:#8e9bb0; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">Choose Broker</label>
                 <div class="checkout-broker-grid">
                     <div class="checkout-broker-card selected" id="brokerCard_quotex" onclick="selectCheckoutBroker('quotex')">
                         <i class="fas fa-check-circle checkout-broker-check"></i>
@@ -4052,15 +4173,15 @@
 
                 <div class="form-group" style="margin-bottom:1.4rem;">
                     <label style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-bottom:6px;">
-                        <span><i class="fas fa-id-card" style="color:var(--yellow); margin-right:4px;"></i> Broker Account ID Number (ব্রোকার অ্যাকাউন্ট আইডি)</span>
-                        <span style="color:#ef4444; font-size:0.75rem;">*বাধ্যতামূলক</span>
+                        <span><i class="fas fa-id-card" style="color:var(--yellow); margin-right:4px;"></i> Broker Account ID Number</span>
+                        <span style="color:#ef4444; font-size:0.75rem;">*Required</span>
                     </label>
-                    <input type="text" class="form-control" id="buyBrokerAccountId" placeholder="যেমন: Quotex UID 95520628" style="font-size:0.95rem; font-weight:700; background:#131b2e; border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:10px; padding:12px 14px;" required />
-                    <span style="display:block; font-size:0.75rem; color:#64748b; margin-top:4px;">নিশ্চিত করুন যে এই অ্যাকাউন্ট আইডি দিয়ে আপনি ট্রেড হিস্টোরি সাবমিট করবেন।</span>
+                    <input type="text" class="form-control" id="buyBrokerAccountId" placeholder="e.g. Quotex UID 95520628" style="font-size:0.95rem; font-weight:700; background:#131b2e; border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:10px; padding:12px 14px;" required />
+                    <span style="display:block; font-size:0.75rem; color:#64748b; margin-top:4px;">Ensure this account ID matches the one you will use to submit trade history.</span>
                 </div>
 
                 <button type="button" class="btn-primary btn-full" onclick="goToCheckoutStep(2)" style="padding:14px; font-weight:800; font-size:1.02rem; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
-                    পেমেন্ট মেথড নির্বাচন করুন (Continue) <i class="fas fa-arrow-right"></i>
+                    Continue to Payment Method <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
 
@@ -4347,7 +4468,7 @@
                     <div id="localRateReasonBox" style="display:none; background:rgba(245,176,65,0.08); border:1px solid rgba(245,176,65,0.25); border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:0.82rem; color:#cbd5e1; align-items:flex-start; gap:8px; line-height:1.4;">
                         <i class="fas fa-info-circle" style="color:var(--yellow); font-size:0.95rem; margin-top:2px; flex-shrink:0;"></i>
                         <div>
-                            <span style="color:var(--yellow); font-weight:700;">💡 মূল্য নির্ধারণের কারণ:</span>
+                            <span style="color:var(--yellow); font-weight:700;">💡 Price Adjustment Note:</span>
                             <span id="localRateReasonText" style="color:#e2e8f0; margin-left:4px;"></span>
                         </div>
                     </div>
@@ -4355,7 +4476,7 @@
                     <!-- Sender Phone Input -->
                     <div class="form-group" style="margin-bottom:1rem;">
                         <label style="font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-bottom:6px; display:block;" id="localSenderLabel">
-                            YOUR BKASH NUMBER (যে নম্বর থেকে টাকা পাঠিয়েছেন) <span style="color:#ef4444;">*</span>
+                            YOUR BKASH NUMBER (Sender Phone Number) <span style="color:#ef4444;">*</span>
                         </label>
                         <input type="text" class="form-control" id="localSenderNumber" placeholder="01XXXXXXXXX" style="background:#131b2e; border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:10px; padding:12px 14px; font-weight:700;" />
                     </div>
@@ -4365,12 +4486,12 @@
                         <label style="font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-bottom:6px; display:block;">
                             TRANSACTION ID (TRXID) <span style="color:#ef4444;">*</span>
                         </label>
-                        <input type="text" class="form-control" id="localPaymentTxId" placeholder="Enter TrxID after sending (যেমন: 9J4K8L...)" style="background:#131b2e; border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:10px; padding:12px 14px; font-weight:700;" />
+                        <input type="text" class="form-control" id="localPaymentTxId" placeholder="Enter TrxID after sending (e.g. 9J4K8L...)" style="background:#131b2e; border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:10px; padding:12px 14px; font-weight:700;" />
                     </div>
 
                     <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 12px; font-size:0.8rem; color:#94a3b8; margin-bottom:14px; line-height:1.4;">
                         <i class="fas fa-shield-alt" style="color:var(--yellow); margin-right:4px;"></i>
-                        বিকাশ/নগদ অ্যাপ থেকে উপরে প্রদর্শিত নম্বরে 'Send Money' সম্পন্ন করে ট্রানজেকশন আইডি দিয়ে নিচের বাটনে ক্লিক করুন।
+                        Complete 'Send Money' to the number displayed above from your bKash/Nagad app, then enter the Transaction ID (TrxID) and click below.
                     </div>
 
                     <!-- Local Action Button -->
@@ -4497,9 +4618,9 @@
             const email = 'support@binarypropfirm.com';
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(email).then(() => {
-                    showToast('ইমেইল অ্যাড্রেস কপি হয়েছে: ' + email, 'success');
+                    showToast('Email address copied: ' + email, 'success');
                 }).catch(() => {
-                    showToast('সাপোর্ট ইমেইল: ' + email, 'success');
+                    showToast('Support email: ' + email, 'success');
                 });
             } else {
                 // Fallback for older browsers
@@ -4510,9 +4631,9 @@
                     tempInput.select();
                     document.execCommand('copy');
                     document.body.removeChild(tempInput);
-                    showToast('ইমেইল অ্যাড্রেস কপি হয়েছে: ' + email, 'success');
+                    showToast('Email address copied: ' + email, 'success');
                 } catch (err) {
-                    showToast('সাপোর্ট ইমেইল: ' + email, 'success');
+                    showToast('Support email: ' + email, 'success');
                 }
             }
         }
@@ -4572,19 +4693,19 @@
                 if (form1) form1.style.display = 'block';
                 if (form2) form2.style.display = 'none';
                 if (form3) form3.style.display = 'none';
-                if (sub) sub.innerText = 'পাসওয়ার্ড রিসেট করতে আপনার রেজিস্টার্ড ইমেইল অ্যাড্রেস দিন।';
+                if (sub) sub.innerText = 'Enter your registered email address to reset your password.';
                 setTimeout(() => document.getElementById('forgotEmail')?.focus(), 150);
             } else if (step === 2) {
                 if (form1) form1.style.display = 'none';
                 if (form2) form2.style.display = 'block';
                 if (form3) form3.style.display = 'none';
-                if (sub) sub.innerText = 'আপনার ইমেইলে প্রাপ্ত ৬-সংখ্যার ভেরিফিকেশন কোডটি দিন।';
+                if (sub) sub.innerText = 'Enter the 6-digit verification code received in your email.';
                 setTimeout(() => document.getElementById('forgotOtpInput')?.focus(), 150);
             } else if (step === 3) {
                 if (form1) form1.style.display = 'none';
                 if (form2) form2.style.display = 'none';
                 if (form3) form3.style.display = 'block';
-                if (sub) sub.innerText = 'আপনার অ্যাকাউন্টের জন্য একটি শক্তিশালী নতুন পাসওয়ার্ড সেট করুন।';
+                if (sub) sub.innerText = 'Set a strong new password for your account.';
                 setTimeout(() => document.getElementById('forgotNewPassword')?.focus(), 150);
             }
         }
@@ -4625,7 +4746,7 @@
             if (step === 2) {
                 const accId = (document.getElementById('buyBrokerAccountId')?.value || '').trim();
                 if (!accId) {
-                    showToast('অনুগ্রহ করে আপনার ব্রোকার অ্যাকাউন্ট আইডি নম্বর দিন।', 'error');
+                    showToast('Please enter your broker account ID number.', 'error');
                     document.getElementById('buyBrokerAccountId')?.focus();
                     return;
                 }
@@ -4855,8 +4976,8 @@
                 const senderLabel = document.getElementById('localSenderLabel');
                 if (senderLabel) {
                     senderLabel.innerHTML = isNagad 
-                        ? 'YOUR NAGAD NUMBER (যে নম্বর থেকে টাকা পাঠিয়েছেন) <span style="color:#ef4444;">*</span>' 
-                        : 'YOUR BKASH NUMBER (যে নম্বর থেকে টাকা পাঠিয়েছেন) <span style="color:#ef4444;">*</span>';
+                        ? 'YOUR NAGAD NUMBER (Sender Phone Number) <span style="color:#ef4444;">*</span>' 
+                        : 'YOUR BKASH NUMBER (Sender Phone Number) <span style="color:#ef4444;">*</span>';
                 }
 
                 const submitBtn = document.getElementById('localSubmitBtn');
@@ -4891,14 +5012,14 @@
             navigator.clipboard.writeText(text).then(() => {
                 showToast(msg, 'success');
             }).catch(() => {
-                showToast('কপি করা হয়েছে: ' + text, 'success');
+                showToast('Copied to clipboard: ' + text, 'success');
             });
         }
 
         async function submitFinalOrder(type) {
             const token = localStorage.getItem('aj_token');
             if (!token) {
-                showToast('অনুগ্রহ করে প্রথমে লগইন করুন।', 'error');
+                showToast('Please log in first.', 'error');
                 openLoginModal();
                 return;
             }
@@ -4909,7 +5030,7 @@
             const paymentMethod = checkoutState.paymentMethod;
 
             if (!brokerAccountId) {
-                showToast('ব্রোকার অ্যাকাউন্ট আইডি প্রদান করুন।', 'error');
+                showToast('Please provide your broker account ID.', 'error');
                 goToCheckoutStep(1);
                 return;
             }
@@ -4923,7 +5044,7 @@
                 paymentTxId = (document.getElementById('cryptoPaymentTxId')?.value || '').trim();
                 submitBtn = document.getElementById('cryptoSubmitBtn');
                 if (!paymentTxId) {
-                    showToast('অনুগ্রহ করে Transaction ID / Hash (TrxID) প্রদান করুন।', 'error');
+                    showToast('Please provide Transaction ID / Hash (TrxID).', 'error');
                     document.getElementById('cryptoPaymentTxId')?.focus();
                     return;
                 }
@@ -4933,12 +5054,12 @@
                 submitBtn = document.getElementById('localSubmitBtn');
 
                 if (!senderNumber) {
-                    showToast('যে নম্বর থেকে টাকা পাঠিয়েছেন (Sender Number) লিখুন।', 'error');
+                    showToast('Please enter the sender phone number.', 'error');
                     document.getElementById('localSenderNumber')?.focus();
                     return;
                 }
                 if (!paymentTxId) {
-                    showToast('অনুগ্রহ করে Transaction ID (TrxID) লিখুন।', 'error');
+                    showToast('Please enter the Transaction ID (TrxID).', 'error');
                     document.getElementById('localPaymentTxId')?.focus();
                     return;
                 }
@@ -4981,11 +5102,11 @@
                 const data = await res.json().catch(() => null);
 
                 if (data && data.success) {
-                    showToast(data.message || '🎉 অভিনন্দন! আপনার চ্যালেঞ্জটি সফলভাবে অর্ডার হয়েছে! ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...', 'success');
+                    showToast(data.message || '🎉 Congratulations! Your challenge order has been placed successfully! Redirecting to dashboard...', 'success');
                     closeModals();
                     setTimeout(() => window.location.href = '/dashboard', 900);
                 } else {
-                    showToast((data && data.message) ? data.message : 'চ্যালেঞ্জ অর্ডারে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error');
+                    showToast((data && data.message) ? data.message : 'Failed to place challenge order. Please try again.', 'error');
                     if (submitBtn) {
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = originalBtnHtml;
@@ -4993,7 +5114,7 @@
                 }
             } catch (err) {
                 console.error('Buy challenge error:', err);
-                showToast('নেটওয়ার্ক সমস্যা অথবা সার্ভার সংযোগে ত্রুটি হয়েছে।', 'error');
+                showToast('Network error or server connection issue. Please try again.', 'error');
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalBtnHtml;
@@ -5005,7 +5126,7 @@
             const token = localStorage.getItem('aj_token');
             if (!token) {
                 if (pkgId) sessionStorage.setItem('pendingBuyPackageId', pkgId);
-                showToast('চ্যালেঞ্জ কেনার আগে প্রথমে আপনার ট্রেডার অ্যাকাউন্ট খুলুন (Sign Up করুন)।', 'error');
+                showToast('Please sign up for an account before purchasing a challenge.', 'error');
                 openRegisterModal();
                 return;
             }
@@ -5019,12 +5140,12 @@
                 if (data.success && data.challenges) {
                     const runningCh = data.challenges.find(c => c.status === 'in_progress' || (c.isActive === true && c.status !== 'failed' && c.status !== 'passed' && c.status !== 'rejected'));
                     if (runningCh) {
-                        showToast('আপনার একটি চ্যালেঞ্জ অলরেডি রানিং রয়েছে।', 'error');
+                        showToast('You already have an active challenge in progress.', 'error');
                         return;
                     }
                     const pendingCh = data.challenges.find(c => c.status === 'pending_approval' || c.status === 'pending');
                     if (pendingCh) {
-                        showToast('আপনার একটি চ্যালেঞ্জ অলরেডি পেন্ডিং রয়েছে।', 'error');
+                        showToast('You already have a pending challenge order.', 'error');
                         return;
                     }
                 }
@@ -5107,7 +5228,7 @@
 
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> যাচাই করা হচ্ছে...`;
+                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verifying...`;
             }
 
             try {
@@ -5121,11 +5242,11 @@
                     pendingLoginEmail = data.email || email;
                     pendingLoginPreAuthToken = data.preAuthToken;
                     openLoginOtpModal(pendingLoginEmail, data.maskedEmail);
-                    showToast(data.message || 'আপনার জিমেইলে ৬-সংখ্যার লগইন কোড পাঠানো হয়েছে।', 'info');
+                    showToast(data.message || 'A 6-digit login code has been sent to your email.', 'info');
                 } else if (data.requiresEmailVerification) {
                     pendingVerificationEmail = data.email || email;
                     openEmailVerifyModal(pendingVerificationEmail);
-                    showToast(data.message || 'অনুগ্রহ করে প্রথমে আপনার ইমেইল ভেরিফাই করুন।', 'warning');
+                    showToast(data.message || 'Please verify your email address first.', 'warning');
                 } else if (data.success && data.token) {
                     localStorage.setItem('aj_token', data.token);
                     localStorage.setItem('aj_user_name', data.user.name);
@@ -5135,17 +5256,17 @@
                     if (pendingPkg) {
                         sessionStorage.removeItem('pendingBuyPackageId');
                         closeModals();
-                        showToast('লগইন সফল হয়েছে! এবার প্যাকেজটি ক্রয় সম্পন্ন করুন।', 'success');
+                        showToast('Login successful! Proceeding with challenge purchase.', 'success');
                         setTimeout(() => openBuyModal(pendingPkg), 400);
                         return;
                     }
-                    showToast('লগইন সফল হয়েছে! ড্যাশবোর্ডে প্রবেশ করা হচ্ছে...', 'success');
+                    showToast('Login successful! Entering dashboard...', 'success');
                     setTimeout(() => window.location.href = '/dashboard', 800);
                 } else {
-                    showToast(data.message || 'লগইন ব্যর্থ হয়েছে', 'error');
+                    showToast(data.message || 'Login failed. Please check credentials.', 'error');
                 }
             } catch (err) {
-                showToast('লগইন প্রক্রিয়ায় নেটওয়ার্ক ত্রুটি ঘটেছে।', 'error');
+                showToast('Network error during login. Please try again.', 'error');
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -5163,18 +5284,18 @@
             const preAuthToken = pendingLoginPreAuthToken;
 
             if (!email || !preAuthToken) {
-                showToast('লগইন সেশন পাওয়া যায়নি। দয়া করে পুনরায় ইমেইল-পাসওয়ার্ড দিয়ে চেষ্টা করুন।', 'error');
+                showToast('Login session expired. Please log in again.', 'error');
                 closeModals();
                 document.getElementById('loginModal').classList.add('active');
                 return;
             }
             if (!otp || otp.length !== 6) {
-                showToast('সঠিক ৬-সংখ্যার লগইন কোড দিন।', 'error');
+                showToast('Please enter the valid 6-digit login code.', 'error');
                 return;
             }
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> কোড যাচাই হচ্ছে...`;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verifying code...`;
 
             try {
                 const res = await fetch('/api/auth/verify-login-otp', {
@@ -5193,22 +5314,22 @@
                     if (pendingPkg) {
                         sessionStorage.removeItem('pendingBuyPackageId');
                         closeModals();
-                        showToast('🎉 ২-ধাপ যাচাই সম্পন্ন! এবার প্যাকেজ ক্রয় সম্পন্ন করুন।', 'success');
+                        showToast('🎉 2FA verified! Proceeding with challenge purchase.', 'success');
                         setTimeout(() => openBuyModal(pendingPkg), 400);
                         return;
                     }
 
-                    showToast('🎉 নিরাপত্তা যাচাই সফল! ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...', 'success');
+                    showToast('🎉 Security verification successful! Redirecting to dashboard...', 'success');
                     closeModals();
                     setTimeout(() => window.location.href = '/dashboard', 800);
                 } else {
-                    showToast(data.message || 'ভুল বা মেয়াদোত্তীর্ণ লগইন কোড।', 'error');
+                    showToast(data.message || 'Invalid or expired login code.', 'error');
                 }
             } catch (err) {
-                showToast('নেটওয়ার্ক সমস্যার কারণে কোড যাচাই করা যায়নি।', 'error');
+                showToast('Network error during code verification.', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fas fa-lock-open"></i> কোড যাচাই ও ড্যাশবোর্ডে প্রবেশ`;
+                submitBtn.innerHTML = `<i class="fas fa-lock-open"></i> Verify Code & Enter Dashboard`;
             }
         }
 
@@ -5219,13 +5340,13 @@
             const preAuthToken = pendingLoginPreAuthToken;
 
             if (!email || !preAuthToken) {
-                showToast('সেশন পাওয়া যায়নি। পুনরায় লগইন করুন।', 'error');
+                showToast('Session not found. Please log in again.', 'error');
                 return;
             }
 
             const btn = document.getElementById('resendLoginOtpBtn');
             btn.disabled = true;
-            btn.innerText = 'পাঠানো হচ্ছে...';
+            btn.innerText = 'Sending...';
 
             try {
                 const res = await fetch('/api/auth/resend-login-otp', {
@@ -5235,7 +5356,7 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message || 'নতুন লগইন কোড পাঠানো হয়েছে!', 'success');
+                    showToast(data.message || 'A new login code has been sent!', 'success');
                     loginResendCooldown = 30;
                     btn.disabled = true;
                     const timer = setInterval(() => {
@@ -5243,20 +5364,20 @@
                         if (loginResendCooldown <= 0) {
                             clearInterval(timer);
                             btn.disabled = false;
-                            btn.innerText = 'পুনরায় কোড পাঠান (Resend)';
+                            btn.innerText = 'Resend Code';
                         } else {
-                            btn.innerText = `অপেক্ষা করুন (${loginResendCooldown}s)`;
+                            btn.innerText = `Please wait (${loginResendCooldown}s)`;
                         }
                     }, 1000);
                 } else {
-                    showToast(data.message || 'কোড পুনরায় পাঠানো যায়নি।', 'error');
+                    showToast(data.message || 'Failed to resend code.', 'error');
                     btn.disabled = false;
-                    btn.innerText = 'পুনরায় কোড পাঠান (Resend)';
+                    btn.innerText = 'Resend Code';
                 }
             } catch (err) {
-                showToast('নেটওয়ার্ক সমস্যা। পুনরায় চেষ্টা করুন।', 'error');
+                showToast('Network error. Please try again.', 'error');
                 btn.disabled = false;
-                btn.innerText = 'পুনরায় কোড পাঠান (Resend)';
+                btn.innerText = 'Resend Code';
             }
         }
 
@@ -5269,7 +5390,7 @@
             setTimeout(() => document.getElementById('verifyOtpInput').focus(), 200);
 
             if (devOtp) {
-                showToast(`ভেরিফিকেশন কোড: ${devOtp} (আপনার ইমেইলেও পাঠানো হয়েছে)`, 'info');
+                showToast(`Verification code: ${devOtp} (Sent to your email)`, 'info');
             }
         }
 
@@ -5295,7 +5416,7 @@
             isRegistering = true;
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> অ্যাকাউন্ট তৈরি হচ্ছে...`;
+                submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Creating account...`;
             }
 
             try {
@@ -5308,7 +5429,7 @@
                 if (data.success) {
                     // Mandatory OTP verification required - do not store token until verified
                     pendingVerificationEmail = data.email || email;
-                    showToast('🎉 Congratulations! আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। ইমেইলে পাঠানো কোডটি দিন।', 'success');
+                    showToast('🎉 Congratulations! Account created successfully. Please enter the OTP sent to your email.', 'success');
                     openEmailVerifyModal(pendingVerificationEmail);
                 } else {
                     const isAlreadyExists = data.alreadyExists || (data.message && data.message.toLowerCase().includes('already exists'));
@@ -5350,16 +5471,16 @@
             const email = pendingVerificationEmail || localStorage.getItem('aj_user_email');
 
             if (!email) {
-                showToast('ইমেইল অ্যাড্রেস পাওয়া যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।', 'error');
+                showToast('Email address not found. Please try again.', 'error');
                 return;
             }
             if (!otp || otp.length !== 6) {
-                showToast('সঠিক ৬-সংখ্যার ভেরিফিকেশন কোড দিন।', 'error');
+                showToast('Please enter the valid 6-digit verification code.', 'error');
                 return;
             }
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ভেরিফাই করা হচ্ছে...`;
+            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verifying...`;
 
             try {
                 const res = await fetch('/api/auth/verify-email', {
@@ -5379,20 +5500,20 @@
                     if (pendingPkg) {
                         sessionStorage.removeItem('pendingBuyPackageId');
                         closeModals();
-                        showToast('🎉 অ্যাকাউন্ট তৈরি ও ভেরিফাই সম্পন্ন! এবার আপনার প্যাকেজ ক্রয় কনফার্ম করুন।', 'success');
+                        showToast('🎉 Account verified successfully! Proceeding with challenge order.', 'success');
                         setTimeout(() => openBuyModal(pendingPkg), 400);
                         return;
                     }
-                    showToast('🎉 ইমেইল সফলভাবে ভেরিফাই হয়েছে! ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...', 'success');
+                    showToast('🎉 Email verified successfully! Redirecting to dashboard...', 'success');
                     closeModals();
                     setTimeout(() => window.location.href = '/dashboard', 900);
                 } else {
-                    showToast(data.message || 'ভেরিফিকেশন ব্যর্থ হয়েছে। কোড পুনরায় যাচাই করুন।', 'error');
+                    showToast(data.message || 'Verification failed. Please verify code and try again.', 'error');
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> Verify & Continue to Dashboard`;
                 }
             } catch (err) {
-                showToast('নেটওয়ার্ক সমস্যার কারণে ভেরিফাই করা যায়নি।', 'error');
+                showToast('Network error during verification.', 'error');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fas fa-check-circle"></i> Verify & Continue to Dashboard`;
             }
@@ -5404,7 +5525,7 @@
             if (resendCooldown > 0) return;
             const email = pendingVerificationEmail || localStorage.getItem('aj_user_email');
             if (!email) {
-                showToast('ইমেইল অ্যাড্রেস পাওয়া যায়নি।', 'error');
+                showToast('Email address not found.', 'error');
                 return;
             }
 
@@ -5420,9 +5541,9 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message || 'নতুন ভেরিফিকেশন কোড পাঠানো হয়েছে!', 'success');
+                    showToast(data.message || 'A new verification code has been sent!', 'success');
                     if (data.devOtp) {
-                        showToast(`নতুন কোড: ${data.devOtp}`, 'info');
+                        showToast(`New verification code: ${data.devOtp}`, 'info');
                     }
                     resendCooldown = 30;
                     btn.disabled = true;
@@ -5463,12 +5584,12 @@
             const btn = document.getElementById('forgotSendCodeBtn');
 
             if (!email) {
-                showToast('আপনার রেজিস্টার্ড ইমেইল অ্যাড্রেস দিন।', 'error');
+                showToast('Please enter your registered email address.', 'error');
                 return;
             }
 
             btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> কোড পাঠানো হচ্ছে...`;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending code...`;
 
             try {
                 const res = await fetch('/api/auth/forgot-password', {
@@ -5478,16 +5599,16 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message || 'আপনার ইমেইলে একটি ৬-সংখ্যার পাসওয়ার্ড রিসেট কোড পাঠানো হয়েছে।', 'success');
+                    showToast(data.message || 'A 6-digit password reset code has been sent to your email.', 'success');
                     document.getElementById('forgotTargetEmailDisplay').innerText = email;
                     document.getElementById('forgotOtpInput').value = '';
                     switchForgotStep(2);
                     startForgotResendTimer();
                 } else {
-                    showToast(data.message || 'কোড পাঠাতে ব্যর্থ হয়েছে।', 'error');
+                    showToast(data.message || 'Failed to send reset code.', 'error');
                 }
             } catch (err) {
-                showToast('নেটওয়ার্ক সমস্যা। পুনরায় চেষ্টা করুন।', 'error');
+                showToast('Network error. Please try again.', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fas fa-paper-plane"></i> Send Verification Code`;
@@ -5528,7 +5649,7 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('নতুন ভেরিফিকেশন কোড আপনার ইমেইলে পাঠানো হয়েছে!', 'success');
+                    showToast('A new verification code has been sent to your email!', 'success');
                     startForgotResendTimer();
                 } else {
                     showToast(data.message || 'Failed to resend code', 'error');
@@ -5550,12 +5671,12 @@
             const verifyBtn = document.getElementById('forgotVerifyOtpBtn');
 
             if (!email) {
-                showToast('ইমেইল অ্যাড্রেস প্রয়োজন।', 'error');
+                showToast('Email address is required.', 'error');
                 switchForgotStep(1);
                 return;
             }
             if (!otp || otp.length !== 6) {
-                showToast('আপনার ইমেইলে প্রাপ্ত ৬-সংখ্যার কোডটি দিন।', 'error');
+                showToast('Please enter the 6-digit code received in your email.', 'error');
                 return;
             }
 
@@ -5573,10 +5694,10 @@
                     showToast('✅ ' + data.message, 'success');
                     switchForgotStep(3);
                 } else {
-                    showToast(data.message || 'ভুল ওটিপি কোড। অনুগ্রহ করে সঠিক কোডটি দিন।', 'error');
+                    showToast(data.message || 'Invalid OTP code. Please enter the correct code.', 'error');
                 }
             } catch (err) {
-                showToast('নেটওয়ার্ক সমস্যা। পুনরায় চেষ্টা করুন।', 'error');
+                showToast('Network error. Please try again.', 'error');
             } finally {
                 verifyBtn.disabled = false;
                 verifyBtn.innerHTML = `<i class="fas fa-check-circle"></i> Verify Code & Continue`;
@@ -5593,16 +5714,16 @@
             const submitBtn = document.getElementById('forgotSubmitBtn');
 
             if (!email || !otp) {
-                showToast('অনুগ্রহ করে আবার কোড যাচাই করুন।', 'error');
+                showToast('Please verify the code again.', 'error');
                 switchForgotStep(2);
                 return;
             }
             if (newPassword.length < 6) {
-                showToast('পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।', 'error');
+                showToast('Password must be at least 6 characters.', 'error');
                 return;
             }
             if (newPassword !== confirmPassword) {
-                showToast('উভয় পাসওয়ার্ড একই হতে হবে। অনুগ্রহ করে মিলিয়ে নিন।', 'error');
+                showToast('Both passwords must match.', 'error');
                 return;
             }
 
@@ -5631,10 +5752,10 @@
                         if (loginEmail) loginEmail.value = email;
                     }, 500);
                 } else {
-                    showToast(data.message || 'পাসওয়ার্ড রিসেট করতে ব্যর্থ হয়েছে। কোড পুনরায় যাচাই করুন।', 'error');
+                    showToast(data.message || 'Failed to reset password. Please check the code.', 'error');
                 }
             } catch (err) {
-                showToast('নেটওয়ার্ক সমস্যা। পুনরায় চেষ্টা করুন।', 'error');
+                showToast('Network error. Please try again.', 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fas fa-save"></i> Save New Password`;
@@ -5655,7 +5776,7 @@
             const packageId = document.getElementById('selectedPackageId')?.value;
 
             if (!input || !input.value.trim()) {
-                showToast('অনুগ্রহ করে প্রোমো কোড লিখুন', 'error');
+                showToast('Please enter a promo code.', 'error');
                 return;
             }
 
@@ -5685,21 +5806,21 @@
                     if (msgEl) {
                         msgEl.style.display = 'block';
                         msgEl.style.color = '#2ecc71';
-                        msgEl.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message || 'প্রোমো কোড সফলভাবে যোগ করা হয়েছে!'}`;
+                        msgEl.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message || 'Promo code applied successfully!'}`;
                     }
-                    showToast(`🎉 "${appliedPromoData.code}" কার্যকর হয়েছে! $${data.discountAmount} ছাড় পেয়েছেন।`, 'success');
+                    showToast(`🎉 "${appliedPromoData.code}" applied! You received a $${data.discountAmount} discount.`, 'success');
                     renderPaymentMethodInstruction();
                 } else {
                     appliedPromoData = null;
                     if (msgEl) {
                         msgEl.style.display = 'block';
                         msgEl.style.color = '#e74c3c';
-                        msgEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message || 'প্রোমো কোডটি সঠিক নয়।'}`;
+                        msgEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message || 'Invalid promo code.'}`;
                     }
-                    showToast(data.message || 'প্রোমো কোডটি সঠিক নয় বা মেয়াদ শেষ।', 'error');
+                    showToast(data.message || 'Promo code is invalid or expired.', 'error');
                 }
             } catch (err) {
-                showToast('প্রোমো কোড যাচাই করতে সমস্যা হয়েছে।', 'error');
+                showToast('Failed to validate promo code.', 'error');
             } finally {
                 applyBtn.disabled = false;
                 applyBtn.innerHTML = 'Apply';
@@ -5858,7 +5979,7 @@
                 if (!countdownEl) return;
 
                 if (diff <= 0) {
-                    countdownEl.innerHTML = `<span style="color:#ff4d4d; font-weight:800; font-size:0.9rem;">অফার সমাপ্ত হয়েছে</span>`;
+                    countdownEl.innerHTML = `<span style="color:#ff4d4d; font-weight:800; font-size:0.9rem;">Offer Expired</span>`;
                     return;
                 }
 
@@ -5898,18 +6019,18 @@
         const conciseRules = [
             {
                 id: 1,
-                title: '১৫ সেশন ও ২৫% ব্যালেন্স ব্যবহার',
-                desc: 'মানি ম্যানেজমেন্ট শিট অনুযায়ী সর্বোচ্চ ২৫% ব্যালেন্স ব্যবহার করে ১৫ টি সেশন কমপ্লিট করতে হবে।'
+                title: '15 Sessions & 25% Balance Utilization',
+                desc: 'Complete 15 trading sessions according to the money management sheet using a maximum of 25% account balance.'
             },
             {
                 id: 2,
-                title: 'দৈনিক ৩ সেশন ও সময়সীমা',
-                desc: 'একদিনে সর্বোচ্চ তিনটা সেশন করতে পারবেন। আপনার সুবিধা অনুযায়ী ৫ দিন থেকে ১৫ দিনের মধ্যে চ্যালেঞ্জ কমপ্লিট করলেই হবে।'
+                title: 'Max 3 Sessions Daily & Flexible Timeline',
+                desc: 'Execute up to 3 sessions per day. Complete the challenge at your pace within 5 to 15 days.'
             },
             {
                 id: 3,
-                title: '৮৫%+ পেআউট মার্কেট ও শিট অনুশাসন',
-                desc: 'সকল ট্রেড অবশ্যই ৮৫% বা তার বেশি রিটার্ন দেওয়া মার্কেটে এক্সিকিউট করতে হবে। চ্যালেঞ্জ চলাকালীন মানি ম্যানেজমেন্ট শীটের বাহিরে কোন ট্রেড করা যাবে না।'
+                title: '85%+ Payout Market & Sheet Discipline',
+                desc: 'All trades must be executed on assets with 85%+ payout return. Off-sheet trades are strictly prohibited.'
             }
         ];
 
@@ -5969,14 +6090,14 @@
                                         $${pkg.fee} <span style="font-size:0.85rem; color:var(--text-muted); font-weight:400;">fee</span>
                                     </div>
                                     <div class="card-fee-sub" style="font-size:0.7rem; color:var(--neon-green); font-weight:700; margin-top:2px;">
-                                        <i class="fas fa-tag"></i> ${pkg.discountTag || (globalPromo && globalPromo.discountTag) || 'লঞ্চ স্পেশাল ছাড়'}
+                                        <i class="fas fa-tag"></i> ${pkg.discountTag || (globalPromo && globalPromo.discountTag) || 'Launch Special Offer'}
                                     </div>
                                 ` : `
                                     <div class="card-fee-val" style="font-size:1.9rem; font-weight:900; color:var(--yellow); line-height:1.1;">
                                         $${pkg.fee} <span style="font-size:0.85rem; color:var(--text-muted); font-weight:400;">fee</span>
                                     </div>
                                     <div class="card-fee-sub" style="font-size:0.7rem; color:var(--text-muted); font-weight:500; margin-top:2px;">
-                                        ${isClassic ? 'One-time fee' : 'রেগুলার ফি (Regular)'}
+                                        ${isClassic ? 'One-time fee' : 'Regular Fee'}
                                     </div>
                                 `}
                             </div>
@@ -6178,7 +6299,7 @@
                             <span class="showcase-fee-val" style="color:var(--neon-green);">$${pkg.fee}</span>
                             <span class="showcase-disc-badge">${pkg.discountPercent}% OFF</span>
                             <div style="width:100%; font-size:0.75rem; color:var(--neon-green); font-weight:700; margin-top:3px;">
-                                <i class="fas fa-tag"></i> ${pkg.discountTag || (globalPromo && globalPromo.discountTag) || 'লঞ্চ স্পেশাল মেগা ছাড়'}
+                                <i class="fas fa-tag"></i> ${pkg.discountTag || (globalPromo && globalPromo.discountTag) || 'Launch Mega Discount'}
                             </div>
                         ` : `
                             <span class="showcase-fee-val">$${pkg.fee}</span>
@@ -6518,7 +6639,7 @@
         function landingFreeMasRecordTrade(outcome) {
             if (outcome !== 'w' && outcome !== 'l') return;
             if (landingFreeMasState.history.length >= 16) {
-                showToast('সেশন সম্পন্ন হয়েছে! নতুন সেশন শুরু করতে Reset চাপুন।', 'info');
+                showToast('Practice session complete! Click Reset to start a new session.', 'info');
                 return;
             }
             landingFreeMasState.history.push(outcome);
@@ -6531,7 +6652,7 @@
             landingFreeMasState.history.pop();
             saveLandingFreeMasState();
             calculateAndRenderLandingFreeMas();
-            showToast('শেষ ট্রেড সফলভাবে আনডু (Undo) করা হয়েছে।', 'info');
+            showToast('Last trade undone successfully.', 'info');
         }
 
         function landingFreeMasUndoTrade(targetIndex) {
@@ -6540,22 +6661,22 @@
                 landingFreeMasUndoLastTrade();
                 return;
             }
-            if (confirm(`ট্রেড #${targetIndex + 1} এবং এর পরবর্তী সব রেকর্ড আনডু (Undo) করতে চান?`)) {
+            if (confirm(`Undo trade #${targetIndex + 1} and all subsequent records?`)) {
                 landingFreeMasState.history = landingFreeMasState.history.slice(0, targetIndex);
                 saveLandingFreeMasState();
                 calculateAndRenderLandingFreeMas();
-                showToast('নির্দিষ্ট ট্রেড পর্যন্ত আনডু সম্পন্ন হয়েছে।', 'info');
+                showToast('Trades undone up to selected record.', 'info');
             }
         }
 
         function resetLandingFreeMasSession() {
             if (landingFreeMasState.history && landingFreeMasState.history.length > 0) {
-                if (!confirm('আপনি কি টেস্ট সেশন রিসেট করে প্রথম থেকে শুরু করতে চান?')) return;
+                if (!confirm('Are you sure you want to reset the practice session and start over?')) return;
             }
             landingFreeMasState.history = [];
             saveLandingFreeMasState();
             calculateAndRenderLandingFreeMas();
-            showToast('টেস্ট সেশন রিসেট সফল হয়েছে!', 'success');
+            showToast('Practice session reset successfully!', 'success');
         }
 
         function calculateAndRenderLandingFreeMas() {
@@ -6671,7 +6792,7 @@
                                     </button>
                                 </div>
                             </td>
-                            <td style="color:var(--text-muted); font-size:0.85rem;">অপেক্ষমান</td>
+                            <td style="color:var(--text-muted); font-size:0.85rem;">Pending</td>
                             <td><strong>$${curBal.toFixed(2)}</strong></td>
                             <td style="font-size:0.85rem; font-weight:700;">
                                 <span style="color:var(--neon-green);">${wins}W</span> - <span style="color:var(--danger-red);">${losses}L</span>
@@ -6690,7 +6811,7 @@
                             <td style="text-align:center;"><strong>${tradeNum}</strong></td>
                             <td style="color:var(--text-muted);">~$${stake}</td>
                             <td style="text-align:center; color:var(--text-muted); font-size:0.85rem;">
-                                <span>⏳ অপেক্ষমান</span>
+                                <span>⏳ Pending</span>
                             </td>
                             <td style="color:var(--text-muted);">-</td>
                             <td style="color:var(--text-muted);">-</td>
@@ -6765,6 +6886,162 @@
                 openLoginModal();
             } else if (urlParams.get('forgot') === 'true') {
                 openForgotPasswordModal();
+            }
+        });
+    </script>
+
+    <!-- Google Translate Hidden Host Element -->
+    <div id="landing_google_translate_element" style="display:none;"></div>
+
+    <script>
+        // Language Switcher Logic for Landing Page
+        const LANDING_LANG_META = {
+            'en': { label: 'English', name: 'English (Default)' },
+            'default': { label: 'English', name: 'English (Default)' },
+            'bn': { label: 'বাংলা', name: 'বাংলা (Bengali)' },
+            'hi': { label: 'हिन्दी', name: 'हिन्दी (Hindi)' },
+            'ar': { label: 'العربية', name: 'العربية (Arabic)' },
+            'es': { label: 'Español', name: 'Español' },
+            'fr': { label: 'Français', name: 'Français' },
+            'pt': { label: 'Português', name: 'Português' },
+            'id': { label: 'Indonesia', name: 'Bahasa Indonesia' },
+            'ru': { label: 'Русский', name: 'Русский' },
+            'tr': { label: 'Türkçe', name: 'Türkçe' },
+            'vi': { label: 'Tiếng Việt', name: 'Tiếng Việt' },
+            'zh-CN': { label: '中文', name: '中文 (Chinese)' }
+        };
+
+        function toggleLandingLangMenu(e) {
+            if (e) e.stopPropagation();
+            const dd = document.getElementById('headerLangDropdown');
+            if (!dd) return;
+            dd.style.display = (dd.style.display === 'block') ? 'none' : 'block';
+        }
+
+        document.addEventListener('click', (e) => {
+            const wrapper = document.querySelector('.header-lang-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                const dd = document.getElementById('headerLangDropdown');
+                if (dd) dd.style.display = 'none';
+            }
+        });
+
+        function changeLandingLanguage(langCode, persist = true) {
+            if (!langCode || !LANDING_LANG_META[langCode]) langCode = 'en';
+            if (langCode === 'default') langCode = 'en';
+
+            if (persist) {
+                localStorage.setItem('dash_selected_lang', langCode);
+            }
+
+            const headerLabel = document.getElementById('headerCurrentLangLabel');
+            if (headerLabel && LANDING_LANG_META[langCode]) {
+                headerLabel.textContent = LANDING_LANG_META[langCode].label;
+            }
+            const mobileLabel = document.getElementById('mobileCurrentLangLabel');
+            if (mobileLabel && LANDING_LANG_META[langCode]) {
+                mobileLabel.textContent = 'Language: ' + LANDING_LANG_META[langCode].label;
+            }
+
+            const ddItems = document.querySelectorAll('.lang-option-item');
+            ddItems.forEach(item => {
+                const itemLang = item.getAttribute('data-lang');
+                if (itemLang === langCode || (langCode === 'en' && itemLang === 'default')) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            const dd = document.getElementById('headerLangDropdown');
+            if (dd) dd.style.display = 'none';
+
+            triggerLandingGoogleTranslate(langCode);
+        }
+
+        let landingGoogleTranslateInitialized = false;
+
+        function setLandingGoogleTranslateCookie(lang) {
+            const isEnglish = (lang === 'en' || lang === 'default');
+            const cookieVal = isEnglish ? '' : `/auto/${lang}`;
+            const domain = window.location.hostname;
+            const expires = isEnglish ? 'Thu, 01 Jan 1970 00:00:00 UTC' : 'Fri, 31 Dec 2030 23:59:59 UTC';
+
+            document.cookie = `googtrans=${cookieVal}; expires=${expires}; path=/;`;
+            document.cookie = `googtrans=${cookieVal}; expires=${expires}; path=/; domain=${domain};`;
+            if (domain.indexOf('.') !== -1) {
+                const rootDomain = domain.split('.').slice(-2).join('.');
+                document.cookie = `googtrans=${cookieVal}; expires=${expires}; path=/; domain=.${rootDomain};`;
+            }
+        }
+
+        function triggerLandingGoogleTranslate(langCode) {
+            setLandingGoogleTranslateCookie(langCode);
+
+            if (langCode === 'en' || langCode === 'default') {
+                const hadTranslation = sessionStorage.getItem('landing_was_translated');
+                if (hadTranslation === 'true') {
+                    sessionStorage.removeItem('landing_was_translated');
+                    window.location.reload();
+                }
+                return;
+            }
+
+            sessionStorage.setItem('landing_was_translated', 'true');
+
+            if (!landingGoogleTranslateInitialized && !window.google?.translate) {
+                initLandingGoogleTranslateScript();
+                let checkCount = 0;
+                const checkInterval = setInterval(() => {
+                    checkCount++;
+                    const combo = document.querySelector('.goog-te-combo');
+                    if (combo) {
+                        clearInterval(checkInterval);
+                        combo.value = langCode;
+                        combo.dispatchEvent(new Event('change'));
+                    } else if (checkCount > 15) {
+                        clearInterval(checkInterval);
+                        window.location.reload();
+                    }
+                }, 150);
+            } else {
+                const combo = document.querySelector('.goog-te-combo');
+                if (combo) {
+                    combo.value = langCode;
+                    combo.dispatchEvent(new Event('change'));
+                } else {
+                    window.location.reload();
+                }
+            }
+        }
+
+        function landingGoogleTranslateElementInit() {
+            landingGoogleTranslateInitialized = true;
+            if (window.google && window.google.translate) {
+                new window.google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    includedLanguages: 'en,bn,hi,ar,es,fr,pt,id,ru,tr,vi,zh-CN',
+                    autoDisplay: false
+                }, 'landing_google_translate_element');
+            }
+        }
+
+        function initLandingGoogleTranslateScript() {
+            if (document.getElementById('landing-google-translate-script')) return;
+            window.landingGoogleTranslateElementInit = landingGoogleTranslateElementInit;
+            const script = document.createElement('script');
+            script.id = 'landing-google-translate-script';
+            script.src = 'https://translate.google.com/translate_a/element.js?cb=landingGoogleTranslateElementInit';
+            script.async = true;
+            document.head.appendChild(script);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('dash_selected_lang') || 'en';
+            if (savedLang && savedLang !== 'en' && savedLang !== 'default') {
+                changeLandingLanguage(savedLang, false);
+            } else {
+                changeLandingLanguage('en', false);
             }
         });
     </script>
