@@ -1017,6 +1017,42 @@ async function autoMigrateFromJson() {
       }
       if (count > 0) console.log(`[DATABASE MIGRATION] ✅ Migrated ${count} synced trades into MySQL.`);
     }
+
+    // 17. Challenge Packages Initial Migration
+    const pkgFile = path.join(dataDir, 'packages.json');
+    const permPkgFile = path.join(dataDir, 'packages_permanent_store.json');
+    let pkgItems = [];
+    if (fs.existsSync(pkgFile)) {
+      try { pkgItems = JSON.parse(fs.readFileSync(pkgFile, 'utf8') || '[]'); } catch (e) {}
+    }
+    if ((!pkgItems || pkgItems.length === 0) && fs.existsSync(permPkgFile)) {
+      try { pkgItems = JSON.parse(fs.readFileSync(permPkgFile, 'utf8') || '[]'); } catch (e) {}
+    }
+    if (Array.isArray(pkgItems) && pkgItems.length > 0) {
+      const [existing] = await pool.query("SELECT id FROM challenge_packages WHERE id = 'default' LIMIT 1");
+      if (existing.length === 0) {
+        await saveChallengePackagesToDb(pkgItems);
+        console.log(`[DATABASE MIGRATION] ✅ Migrated ${pkgItems.length} challenge packages into MySQL.`);
+      }
+    }
+
+    // 18. Payment Methods Initial Migration
+    const pmFile = path.join(dataDir, 'payment_methods.json');
+    const permPmFile = path.join(dataDir, 'payment_methods_permanent_store.json');
+    let pmItems = [];
+    if (fs.existsSync(pmFile)) {
+      try { pmItems = JSON.parse(fs.readFileSync(pmFile, 'utf8') || '[]'); } catch (e) {}
+    }
+    if ((!pmItems || pmItems.length === 0) && fs.existsSync(permPmFile)) {
+      try { pmItems = JSON.parse(fs.readFileSync(permPmFile, 'utf8') || '[]'); } catch (e) {}
+    }
+    if (Array.isArray(pmItems) && pmItems.length > 0) {
+      const [existing] = await pool.query("SELECT id FROM payment_methods WHERE id = 'default' LIMIT 1");
+      if (existing.length === 0) {
+        await savePaymentMethodsToDb(pmItems);
+        console.log(`[DATABASE MIGRATION] ✅ Migrated ${pmItems.length} payment methods into MySQL.`);
+      }
+    }
   } catch (err) {
     console.error('[DATABASE AUTO-MIGRATE ERROR]:', err.message);
   }
@@ -3057,6 +3093,62 @@ async function hydrateFromMySql(dataDir) {
       const mergedTrd = Array.from(trdMap.values());
       fs.writeFileSync(trdFile, JSON.stringify(mergedTrd, null, 2), 'utf8');
       fs.writeFileSync(permTrdFile, JSON.stringify(mergedTrd, null, 2), 'utf8');
+    }
+
+    // 17. Challenge Packages Hydration
+    const dbPackages = await getChallengePackagesFromDb();
+    if (dbPackages && Array.isArray(dbPackages) && dbPackages.length > 0) {
+      const pkgFile = path.join(dataDir, 'packages.json');
+      const permPkgFile = path.join(dataDir, 'packages_permanent_store.json');
+      let existingPkgs = [];
+      try { if (fs.existsSync(pkgFile)) existingPkgs = JSON.parse(fs.readFileSync(pkgFile, 'utf8') || '[]'); } catch (e) {}
+      if (existingPkgs.length === 0) {
+        try { if (fs.existsSync(permPkgFile)) existingPkgs = JSON.parse(fs.readFileSync(permPkgFile, 'utf8') || '[]'); } catch (e) {}
+      }
+
+      const localMap = new Map();
+      existingPkgs.forEach(p => { if (p && p.id) localMap.set(p.id, p); });
+
+      let needsSqlSync = false;
+      const hydratedPackages = dbPackages.map(sqlPkg => {
+        if (!sqlPkg || !sqlPkg.id) return sqlPkg;
+        const localPkg = localMap.get(sqlPkg.id);
+        if (!localPkg) return sqlPkg;
+
+        const sqlTime = sqlPkg.updatedAt ? new Date(sqlPkg.updatedAt).getTime() : 0;
+        const localTime = localPkg.updatedAt ? new Date(localPkg.updatedAt).getTime() : 0;
+
+        if (localTime > sqlTime) {
+          needsSqlSync = true;
+          return { ...sqlPkg, ...localPkg };
+        }
+
+        const merged = { ...localPkg, ...sqlPkg };
+        if ((sqlPkg.bdtPrice === undefined || sqlPkg.bdtPrice === null) && (localPkg.bdtPrice !== undefined && localPkg.bdtPrice !== null) && sqlTime <= localTime) {
+          merged.bdtPrice = localPkg.bdtPrice;
+          needsSqlSync = true;
+        }
+        if (!sqlPkg.pricingNote && localPkg.pricingNote && sqlTime <= localTime) {
+          merged.pricingNote = localPkg.pricingNote;
+          needsSqlSync = true;
+        }
+        return merged;
+      });
+
+      fs.writeFileSync(pkgFile, JSON.stringify(hydratedPackages, null, 2), 'utf8');
+      fs.writeFileSync(permPkgFile, JSON.stringify(hydratedPackages, null, 2), 'utf8');
+      if (needsSqlSync) {
+        saveChallengePackagesToDb(hydratedPackages).catch(e => console.error('[HYDRATE PACKAGES MYSQL SYNC ERROR]:', e.message));
+      }
+    }
+
+    // 18. Payment Methods Hydration
+    const dbPaymentMethods = await getPaymentMethodsFromDb();
+    if (dbPaymentMethods && Array.isArray(dbPaymentMethods) && dbPaymentMethods.length > 0) {
+      const pmFile = path.join(dataDir, 'payment_methods.json');
+      const permPmFile = path.join(dataDir, 'payment_methods_permanent_store.json');
+      fs.writeFileSync(pmFile, JSON.stringify(dbPaymentMethods, null, 2), 'utf8');
+      fs.writeFileSync(permPmFile, JSON.stringify(dbPaymentMethods, null, 2), 'utf8');
     }
 
     console.log('[DATABASE] ✅ Local safe cache hydrated with live MySQL data.');

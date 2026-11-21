@@ -33,11 +33,13 @@ const SUBMISSIONS_FILE = path.join(DATA_DIR, 'submissions.json');
 const COURSES_FILE = path.join(DATA_DIR, 'courses.json');
 const MM_LINKS_FILE = path.join(DATA_DIR, 'mm_links.json');
 const PAYMENT_METHODS_FILE = path.join(DATA_DIR, 'payment_methods.json');
+const PAYMENT_METHODS_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'payment_methods_permanent_store.json');
 const EMAIL_SETTINGS_FILE = path.join(DATA_DIR, 'email_settings.json');
 const ARCHIVE_FILE = path.join(DATA_DIR, 'user_archive.json');
 const LAUNCH_PROMO_FILE = path.join(DATA_DIR, 'launch_promo.json');
 const PROMO_PRESETS_FILE = path.join(DATA_DIR, 'promo_presets.json');
 const PACKAGES_FILE = path.join(DATA_DIR, 'packages.json');
+const PACKAGES_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'packages_permanent_store.json');
 const PROMO_CODES_FILE = path.join(DATA_DIR, 'promo_codes.json');
 const PROMO_CODES_PERMANENT_STORE_FILE = path.join(DATA_DIR, 'promo_codes_permanent_store.json');
 const SUPPORT_FILE = path.join(DATA_DIR, 'support_tickets.json');
@@ -99,11 +101,15 @@ const CRITICAL_DATA_FILES = [
   PARTNER_PAYOUTS_FILE,
   PARTNER_SETTINGS_FILE,
   PARTNER_PROMO_REQUESTS_FILE,
-  // Promo codes & presets
+  // Promo codes & presets & packages
   PROMO_CODES_FILE,
   PROMO_CODES_PERMANENT_STORE_FILE,
   LAUNCH_PROMO_FILE,
   PROMO_PRESETS_FILE,
+  PACKAGES_FILE,
+  PACKAGES_PERMANENT_STORE_FILE,
+  PAYMENT_METHODS_FILE,
+  PAYMENT_METHODS_PERMANENT_STORE_FILE,
   // User & challenge stores
   USERS_FILE,
   USERS_PERMANENT_STORE_FILE,
@@ -1129,6 +1135,9 @@ function createDatabaseBackup(type = 'auto') {
       PROMO_CODES_PERMANENT_STORE_FILE,
       LAUNCH_PROMO_FILE,
       PROMO_PRESETS_FILE,
+      PACKAGES_FILE,
+      PACKAGES_PERMANENT_STORE_FILE,
+      PAYMENT_METHODS_PERMANENT_STORE_FILE,
       PAYOUTS_FILE,
       PAYOUT_SETTINGS_FILE
     ];
@@ -3826,7 +3835,10 @@ const PACKAGES = [
     name: "Bronze",
     badge: "#1",
     originalFee: 5,
+    discountPercent: 0,
     fee: 5,
+    bdtPrice: 650,
+    pricingNote: "Rounded up to Nagad & bkash minimum of ৳650.",
     fundedAmount: 100,
     profitSplit: "75%",
     maxDrawdown: "25%",
@@ -3835,7 +3847,10 @@ const PACKAGES = [
     dailyLoss: "No Strict Limit (Rec. 5%)",
     profitTarget: "No Fixed Pressure",
     popular: false,
+    isActive: true,
     color: "#CD7F32",
+    category: "easy_rules",
+    challengeModel: "mm_sheet",
     rules: [
       "15 Trading Sessions Required",
       "25% Maximum Drawdown Limit",
@@ -4035,6 +4050,300 @@ const PACKAGES = [
       "Daily proof video & screenshot upload",
       "Keep 85% profit upon passing"
     ]
+  },
+  {
+    id: "pkg_1790770550854_n6rb",
+    tierNumber: 10,
+    name: "Apex",
+    badge: "TIER 10",
+    originalFee: 1999,
+    discountPercent: 40,
+    fee: 1199,
+    fundedAmount: 65000,
+    profitSplit: "85%",
+    maxDrawdown: "25%",
+    minDays: 15,
+    sessions: 15,
+    dailyLoss: "No Strict Limit)",
+    profitTarget: "No Fixed Pressure",
+    popular: false,
+    isActive: true,
+    color: "#F5B041",
+    category: "easy_rules",
+    challengeModel: "mm_sheet",
+    rules: [
+      "15 Trading Sessions Required",
+      "25% Maximum Drawdown Limit",
+      "Trade on any verified broker demo",
+      "Daily proof video & screenshot upload",
+      "Keep 85% profit upon passing"
+    ]
+  },
+  {
+    id: "prop-mini-1500",
+    tierNumber: 1,
+    category: "your_rules",
+    challengeModel: "classic_prop",
+    name: "Mini",
+    badge: "$1.5K",
+    originalFee: 3,
+    discountPercent: 0,
+    fee: 3,
+    bdtPrice: 650,
+    pricingNote: "Rounded up to Nagad & bkash minimum of ৳650.",
+    fundedAmount: 1500,
+    profitSplit: "70%",
+    profitTarget: 30,
+    dailyLoss: 3,
+    maxDrawdown: "5%",
+    maxDrawdownPercent: 5,
+    dailyProfitCap: 3,
+    minWinRate: 75,
+    minDays: 15,
+    sessions: 15,
+    popular: false,
+    isActive: true,
+    color: "#00E676",
+    rules: [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -3%",
+      "Max Drawdown Limit: -5%",
+      "Daily Profit Cap: +3%",
+      "Minimum Win Rate: 75%",
+      "Minimum Trading Days: 15 Days",
+      "Profit Split: 70%"
+    ]
+  },
+  {
+    id: "prop-basic-3000",
+    tierNumber: 2,
+    category: "your_rules",
+    challengeModel: "classic_prop",
+    name: "Basic",
+    badge: "",
+    originalFee: 17,
+    discountPercent: 0,
+    fee: 17,
+    fundedAmount: 3000,
+    profitSplit: "80%",
+    profitTarget: 30,
+    dailyLoss: 4,
+    maxDrawdown: "7%",
+    maxDrawdownPercent: 7,
+    dailyProfitCap: 4,
+    minWinRate: 70,
+    minDays: 10,
+    sessions: 10,
+    popular: false,
+    isActive: true,
+    color: "#3498DB",
+    rules: [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -4%",
+      "Max Drawdown Limit: -7%",
+      "Daily Profit Cap: +4%",
+      "Minimum Win Rate: 70%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 80%"
+    ]
+  },
+  {
+    id: "prop-starter-5000",
+    tierNumber: 3,
+    category: "your_rules",
+    challengeModel: "classic_prop",
+    name: "Starter",
+    badge: "",
+    originalFee: 39,
+    discountPercent: 0,
+    fee: 39,
+    fundedAmount: 5000,
+    profitSplit: "85%",
+    profitTarget: 30,
+    dailyLoss: 5,
+    maxDrawdown: "10%",
+    maxDrawdownPercent: 10,
+    dailyProfitCap: 4,
+    minWinRate: 55,
+    minDays: 10,
+    sessions: 10,
+    popular: true,
+    isActive: true,
+    color: "#F5B041",
+    rules: [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +4%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ]
+  },
+  {
+    id: "prop-pro-10000",
+    tierNumber: 4,
+    category: "your_rules",
+    challengeModel: "classic_prop",
+    name: "Pro",
+    badge: "",
+    originalFee: 69,
+    discountPercent: 0,
+    fee: 69,
+    fundedAmount: 10000,
+    profitSplit: "85%",
+    profitTarget: 30,
+    dailyLoss: 5,
+    maxDrawdown: "10%",
+    maxDrawdownPercent: 10,
+    dailyProfitCap: 4,
+    minWinRate: 55,
+    minDays: 10,
+    sessions: 10,
+    popular: false,
+    isActive: true,
+    color: "#E67E22",
+    rules: [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +4%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ]
+  },
+  {
+    id: "prop-advanced-25000",
+    tierNumber: 5,
+    category: "your_rules",
+    challengeModel: "classic_prop",
+    name: "Advanced",
+    badge: "",
+    originalFee: 99,
+    discountPercent: 0,
+    fee: 99,
+    fundedAmount: 25000,
+    profitSplit: "85%",
+    profitTarget: 30,
+    dailyLoss: 5,
+    maxDrawdown: "10%",
+    maxDrawdownPercent: 10,
+    dailyProfitCap: 5,
+    minWinRate: 55,
+    minDays: 10,
+    sessions: 10,
+    popular: false,
+    isActive: true,
+    color: "#9B59B6",
+    rules: [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +5%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ]
+  },
+  {
+    id: "prop-elite-50000",
+    tierNumber: 6,
+    category: "your_rules",
+    challengeModel: "classic_prop",
+    name: "Elite",
+    badge: "",
+    originalFee: 169,
+    discountPercent: 0,
+    fee: 169,
+    fundedAmount: 50000,
+    profitSplit: "85%",
+    profitTarget: 30,
+    dailyLoss: 5,
+    maxDrawdown: "10%",
+    maxDrawdownPercent: 10,
+    dailyProfitCap: 5,
+    minWinRate: 55,
+    minDays: 10,
+    sessions: 10,
+    popular: false,
+    isActive: true,
+    color: "#E74C3C",
+    rules: [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +5%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ]
+  },
+  {
+    id: "prop-prime-75000",
+    tierNumber: 7,
+    category: "your_rules",
+    challengeModel: "classic_prop",
+    name: "Prime",
+    badge: "",
+    originalFee: 299,
+    discountPercent: 0,
+    fee: 299,
+    fundedAmount: 75000,
+    profitSplit: "85%",
+    profitTarget: 30,
+    dailyLoss: 5,
+    maxDrawdown: "10%",
+    maxDrawdownPercent: 10,
+    dailyProfitCap: 5,
+    minWinRate: 55,
+    minDays: 10,
+    sessions: 10,
+    popular: false,
+    isActive: true,
+    color: "#1ABC9C",
+    rules: [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +5%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ]
+  },
+  {
+    id: "prop-master-100000",
+    tierNumber: 8,
+    category: "your_rules",
+    challengeModel: "classic_prop",
+    name: "Master",
+    badge: "",
+    originalFee: 399,
+    discountPercent: 0,
+    fee: 399,
+    fundedAmount: 100000,
+    profitSplit: "85%",
+    profitTarget: 30,
+    dailyLoss: 5,
+    maxDrawdown: "10%",
+    maxDrawdownPercent: 10,
+    dailyProfitCap: 5,
+    minWinRate: 55,
+    minDays: 10,
+    sessions: 10,
+    popular: false,
+    isActive: true,
+    color: "#F1C40F",
+    rules: [
+      "Profit Target: +30%",
+      "Daily Loss Limit: -5%",
+      "Max Drawdown Limit: -10%",
+      "Daily Profit Cap: +5%",
+      "Minimum Win Rate: 55%",
+      "Minimum Trading Days: 10 Days",
+      "Profit Split: 85%"
+    ]
   }
 ];
 
@@ -4176,16 +4485,52 @@ function isPromoApplicableToPackage(promo, targetPkgId) {
   return true;
 }
 
+function getPackages() {
+  let packages = readJson(PACKAGES_FILE, null);
+  if (!Array.isArray(packages) || packages.length === 0) {
+    const perm = readJson(PACKAGES_PERMANENT_STORE_FILE, null);
+    if (Array.isArray(perm) && perm.length > 0) {
+      packages = perm;
+      writeJson(PACKAGES_FILE, packages);
+    } else {
+      const restored = restoreSingleFileFromExternal(PACKAGES_FILE, true);
+      if (Array.isArray(restored) && restored.length > 0) {
+        packages = restored;
+        writeJson(PACKAGES_PERMANENT_STORE_FILE, packages);
+      } else {
+        packages = PACKAGES;
+        writeJson(PACKAGES_FILE, packages);
+        writeJson(PACKAGES_PERMANENT_STORE_FILE, packages);
+      }
+    }
+  } else {
+    backupToExternalSafeDir(PACKAGES_FILE, packages);
+    const perm = readJson(PACKAGES_PERMANENT_STORE_FILE, null);
+    if (!Array.isArray(perm) || perm.length === 0) {
+      writeJson(PACKAGES_PERMANENT_STORE_FILE, packages);
+    }
+  }
+  return packages;
+}
+
+function savePackages(packages) {
+  writeJson(PACKAGES_FILE, packages);
+  if (Array.isArray(packages) && packages.length > 0) {
+    writeJson(PACKAGES_PERMANENT_STORE_FILE, packages);
+    backupToExternalSafeDir(PACKAGES_FILE, packages);
+    backupToExternalSafeDir(PACKAGES_PERMANENT_STORE_FILE, packages);
+    if (db && db.saveChallengePackagesToDb) {
+      db.saveChallengePackagesToDb(packages).catch(e => console.error('[SAVE PACKAGES MYSQL ERROR]:', e.message));
+    }
+  }
+}
+
 function getEnrichedPackages(includeInactive = false) {
   const promo = getLaunchPromo();
   const isPromoActive = promo && promo.active && new Date(promo.expiresAt) > new Date();
   const applyDiscounts = isPromoActive && (promo.enableDiscounts !== false);
 
-  let allPackages = readJson(PACKAGES_FILE, PACKAGES);
-  if (!allPackages || allPackages.length === 0) {
-    allPackages = PACKAGES;
-    writeJson(PACKAGES_FILE, allPackages);
-  }
+  let allPackages = [...getPackages()];
 
   // Sort by tierNumber
   allPackages.sort((a, b) => (parseInt(a.tierNumber) || 0) - (parseInt(b.tierNumber) || 0));
@@ -4219,6 +4564,12 @@ function getEnrichedPackages(includeInactive = false) {
     const discountAmount = discountPercent > 0 ? Math.round(originalFee * (discountPercent / 100)) : 0;
     const payableFee = discountPercent > 0 ? Math.max(1, originalFee - discountAmount) : originalFee;
     const discountTag = pkg.discountTag || globalDiscountTag;
+    const parsedBdtPrice = (pkg.bdtPrice !== undefined && pkg.bdtPrice !== null && pkg.bdtPrice !== '' && !isNaN(parseFloat(pkg.bdtPrice)) && parseFloat(pkg.bdtPrice) > 0)
+      ? parseFloat(pkg.bdtPrice)
+      : null;
+    const cleanPricingNote = (pkg.pricingNote && typeof pkg.pricingNote === 'string' && pkg.pricingNote.trim())
+      ? pkg.pricingNote.trim()
+      : null;
 
     return {
       ...pkg,
@@ -4226,6 +4577,8 @@ function getEnrichedPackages(includeInactive = false) {
       challengeModel,
       originalFee: originalFee,
       fee: payableFee,
+      bdtPrice: parsedBdtPrice,
+      pricingNote: cleanPricingNote,
       discountPercent: discountPercent,
       savedDiscountPercent: rawDiscountPercent,
       discountAmount: discountAmount,
@@ -5421,7 +5774,14 @@ app.post('/api/challenges/buy', authenticateToken, (req, res) => {
   }
 
   const numExchangeRate = (exchangeRate && !isNaN(parseFloat(exchangeRate)) && parseFloat(exchangeRate) > 0) ? parseFloat(exchangeRate) : 1;
-  const numLocalAmount = (localAmount && !isNaN(parseFloat(localAmount)) && parseFloat(localAmount) > 0) ? parseFloat(localAmount) : (finalFee * numExchangeRate);
+  const isBdtOrder = (currency && String(currency).toUpperCase() === 'BDT') || (paymentMethod && /bkash|nagad/i.test(String(paymentMethod)));
+  let numLocalAmount;
+  if (isBdtOrder && pkg.bdtPrice && !isNaN(parseFloat(pkg.bdtPrice)) && parseFloat(pkg.bdtPrice) > 0) {
+    const discountRatio = pkg.fee > 0 ? (finalFee / pkg.fee) : 1;
+    numLocalAmount = Math.round(parseFloat(pkg.bdtPrice) * discountRatio);
+  } else {
+    numLocalAmount = (localAmount && !isNaN(parseFloat(localAmount)) && parseFloat(localAmount) > 0) ? parseFloat(localAmount) : Math.round(finalFee * numExchangeRate);
+  }
 
   // Partner / Affiliate Attribution
   let matchedPartner = null;
@@ -10746,7 +11106,7 @@ app.post('/api/admin/packages', authenticateAdminToken, (req, res) => {
     return res.status(400).json({ success: false, message: 'প্যাকেজের নাম, ফান্ডেড ক্যাপিটাল এবং ফি আবশ্যক।' });
   }
 
-  let packages = readJson(PACKAGES_FILE, PACKAGES);
+  let packages = [...getPackages()];
   const origFee = parseFloat(originalFee);
   const discPct = parseInt(discountPercent) || 0;
   const discAmt = discPct > 0 ? Math.round(origFee * (discPct / 100)) : 0;
@@ -10759,29 +11119,29 @@ app.post('/api/admin/packages', authenticateAdminToken, (req, res) => {
     parsedRules = rules.split('\n').map(r => r.trim()).filter(Boolean);
   }
 
-  const parsedBdtPrice = (bdtPrice !== undefined && bdtPrice !== null && bdtPrice !== '') ? parseFloat(bdtPrice) : null;
+  const parsedBdtPrice = (bdtPrice !== undefined && bdtPrice !== null && bdtPrice !== '' && !isNaN(parseFloat(bdtPrice)) && parseFloat(bdtPrice) > 0) ? parseFloat(bdtPrice) : null;
 
   const newPkg = {
     id: `pkg_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
     tierNumber: parseInt(tierNumber) || (packages.length + 1),
-    name: name.trim(),
-    badge: badge ? badge.trim() : `#${packages.length + 1}`,
+    name: String(name).trim(),
+    badge: badge ? String(badge).trim() : `#${packages.length + 1}`,
     originalFee: origFee,
     discountPercent: discPct,
     fee: calcFee,
     bdtPrice: parsedBdtPrice,
-    pricingNote: pricingNote ? pricingNote.trim() : null,
+    pricingNote: pricingNote ? String(pricingNote).trim() : null,
     fundedAmount: parseFloat(fundedAmount),
-    profitSplit: profitSplit ? profitSplit.trim() : '75%',
-    maxDrawdown: maxDrawdown ? maxDrawdown.trim() : '25%',
+    profitSplit: profitSplit ? String(profitSplit).trim() : '75%',
+    maxDrawdown: maxDrawdown ? String(maxDrawdown).trim() : '25%',
     minDays: parseInt(sessions) || 15,
     sessions: parseInt(sessions) || 15,
-    dailyLoss: dailyLoss ? dailyLoss.trim() : 'No Strict Limit (Rec. 5%)',
-    profitTarget: profitTarget ? profitTarget.trim() : 'No Fixed Pressure',
+    dailyLoss: dailyLoss ? String(dailyLoss).trim() : 'No Strict Limit (Rec. 5%)',
+    profitTarget: profitTarget ? String(profitTarget).trim() : 'No Fixed Pressure',
     popular: Boolean(popular),
     isActive: isActive !== undefined ? Boolean(isActive) : true,
     color: color || '#F5B041',
-    discountTag: req.body.discountTag ? req.body.discountTag.trim() : undefined,
+    discountTag: req.body.discountTag ? String(req.body.discountTag).trim() : undefined,
     rules: parsedRules.length > 0 ? parsedRules : [
       `${parseInt(sessions) || 15} Trading Sessions Required`,
       `${maxDrawdown || '25%'} Maximum Drawdown Limit`,
@@ -10795,14 +11155,14 @@ app.post('/api/admin/packages', authenticateAdminToken, (req, res) => {
 
   packages.push(newPkg);
   packages.sort((a, b) => (parseInt(a.tierNumber) || 0) - (parseInt(b.tierNumber) || 0));
-  writeJson(PACKAGES_FILE, packages);
-  if (db && db.saveChallengePackagesToDb) db.saveChallengePackagesToDb(packages).catch(e => console.error(e));
+  savePackages(packages);
 
   logUserArchive('PACKAGE_CREATED', req.user, {
     packageId: newPkg.id,
     name: newPkg.name,
     fundedAmount: newPkg.fundedAmount,
     fee: newPkg.fee,
+    bdtPrice: newPkg.bdtPrice,
     discountPercent: newPkg.discountPercent
   });
 
@@ -10821,7 +11181,7 @@ app.put('/api/admin/packages/:id', authenticateAdminToken, (req, res) => {
     popular, color, rules, isActive, badge, bdtPrice, pricingNote
   } = req.body;
 
-  let packages = readJson(PACKAGES_FILE, PACKAGES);
+  let packages = [...getPackages()];
   const idx = packages.findIndex(p => p.id === req.params.id);
   if (idx === -1) {
     return res.status(404).json({ success: false, message: 'Challenge package not found.' });
@@ -10840,42 +11200,42 @@ app.put('/api/admin/packages/:id', authenticateAdminToken, (req, res) => {
   }
 
   const parsedBdtPrice = bdtPrice !== undefined 
-    ? ((bdtPrice !== null && bdtPrice !== '') ? parseFloat(bdtPrice) : null) 
+    ? ((bdtPrice !== null && bdtPrice !== '' && !isNaN(parseFloat(bdtPrice)) && parseFloat(bdtPrice) > 0) ? parseFloat(bdtPrice) : null) 
     : packages[idx].bdtPrice;
 
   packages[idx] = {
     ...packages[idx],
-    name: name !== undefined ? name.trim() : packages[idx].name,
+    name: name !== undefined ? String(name).trim() : packages[idx].name,
     tierNumber: tierNumber !== undefined ? parseInt(tierNumber) : packages[idx].tierNumber,
-    badge: badge !== undefined ? badge.trim() : packages[idx].badge,
+    badge: badge !== undefined ? String(badge).trim() : packages[idx].badge,
     originalFee: origFee,
     discountPercent: discPct,
     fee: calcFee,
     bdtPrice: parsedBdtPrice,
-    pricingNote: pricingNote !== undefined ? (pricingNote ? pricingNote.trim() : null) : packages[idx].pricingNote,
+    pricingNote: pricingNote !== undefined ? (pricingNote ? String(pricingNote).trim() : null) : packages[idx].pricingNote,
     fundedAmount: fundedAmount !== undefined ? parseFloat(fundedAmount) : packages[idx].fundedAmount,
-    profitSplit: profitSplit !== undefined ? profitSplit.trim() : packages[idx].profitSplit,
-    maxDrawdown: maxDrawdown !== undefined ? maxDrawdown.trim() : packages[idx].maxDrawdown,
+    profitSplit: profitSplit !== undefined ? String(profitSplit).trim() : packages[idx].profitSplit,
+    maxDrawdown: maxDrawdown !== undefined ? String(maxDrawdown).trim() : packages[idx].maxDrawdown,
     sessions: sessions !== undefined ? parseInt(sessions) : packages[idx].sessions,
     minDays: sessions !== undefined ? parseInt(sessions) : packages[idx].minDays,
-    dailyLoss: dailyLoss !== undefined ? dailyLoss.trim() : packages[idx].dailyLoss,
-    profitTarget: profitTarget !== undefined ? profitTarget.trim() : packages[idx].profitTarget,
+    dailyLoss: dailyLoss !== undefined ? String(dailyLoss).trim() : packages[idx].dailyLoss,
+    profitTarget: profitTarget !== undefined ? String(profitTarget).trim() : packages[idx].profitTarget,
     popular: popular !== undefined ? Boolean(popular) : packages[idx].popular,
     isActive: isActive !== undefined ? Boolean(isActive) : packages[idx].isActive,
     color: color !== undefined ? color : packages[idx].color,
-    discountTag: req.body.discountTag !== undefined ? (req.body.discountTag ? req.body.discountTag.trim() : null) : packages[idx].discountTag,
+    discountTag: req.body.discountTag !== undefined ? (req.body.discountTag ? String(req.body.discountTag).trim() : null) : packages[idx].discountTag,
     rules: parsedRules,
     updatedAt: new Date().toISOString()
   };
 
   packages.sort((a, b) => (parseInt(a.tierNumber) || 0) - (parseInt(b.tierNumber) || 0));
-  writeJson(PACKAGES_FILE, packages);
-  if (db && db.saveChallengePackagesToDb) db.saveChallengePackagesToDb(packages).catch(e => console.error(e));
+  savePackages(packages);
 
   logUserArchive('PACKAGE_UPDATED', req.user, {
     packageId: packages[idx].id,
     name: packages[idx].name,
     fee: packages[idx].fee,
+    bdtPrice: packages[idx].bdtPrice,
     discountPercent: packages[idx].discountPercent
   });
 
@@ -10888,13 +11248,12 @@ app.put('/api/admin/packages/:id', authenticateAdminToken, (req, res) => {
 
 // 4. Delete challenge package
 app.delete('/api/admin/packages/:id', authenticateAdminToken, (req, res) => {
-  let packages = readJson(PACKAGES_FILE, PACKAGES);
+  let packages = [...getPackages()];
   const found = packages.find(p => p.id === req.params.id);
   if (!found) return res.status(404).json({ success: false, message: 'Package not found.' });
 
   packages = packages.filter(p => p.id !== req.params.id);
-  writeJson(PACKAGES_FILE, packages);
-  if (db && db.saveChallengePackagesToDb) db.saveChallengePackagesToDb(packages).catch(e => console.error(e));
+  savePackages(packages);
 
   logUserArchive('PACKAGE_DELETED', req.user, { packageId: found.id, name: found.name });
 
@@ -10907,7 +11266,7 @@ app.delete('/api/admin/packages/:id', authenticateAdminToken, (req, res) => {
 // 5. Quick Set Discount for a challenge
 app.post('/api/admin/packages/:id/discount', authenticateAdminToken, (req, res) => {
   const { discountPercent } = req.body;
-  let packages = readJson(PACKAGES_FILE, PACKAGES);
+  let packages = [...getPackages()];
   const idx = packages.findIndex(p => p.id === req.params.id);
   if (idx === -1) return res.status(404).json({ success: false, message: 'Package not found.' });
 
@@ -10920,8 +11279,7 @@ app.post('/api/admin/packages/:id/discount', authenticateAdminToken, (req, res) 
   packages[idx].fee = calcFee;
   packages[idx].updatedAt = new Date().toISOString();
 
-  writeJson(PACKAGES_FILE, packages);
-  if (db && db.saveChallengePackagesToDb) db.saveChallengePackagesToDb(packages).catch(e => console.error(e));
+  savePackages(packages);
 
   res.json({
     success: true,
@@ -14259,9 +14617,10 @@ app.all('/api/system/auto-deploy', (req, res) => {
     CRITICAL_DATA_FILES.forEach(f => {
       try {
         const snap = inMemorySnapshots[f];
-        if (snap && snap.trim().length > 2) {
+        if (snap && snap.trim().length > 2 && snap.trim() !== '[]' && snap.trim() !== '{}') {
           if (!fs.existsSync(f) || fs.readFileSync(f, 'utf8').trim() === '[]' || fs.readFileSync(f, 'utf8').trim() === '') {
             fs.writeFileSync(f, snap, 'utf8');
+            memoryJsonCache.delete(f);
             console.log(`[AUTO-DEPLOY] Restored critical data for ${path.basename(f)} from pre-deploy in-memory snapshot.`);
           }
         }
@@ -14270,10 +14629,11 @@ app.all('/api/system/auto-deploy', (req, res) => {
       }
     });
 
-    // 6. Safety check: ensure partners and promo codes are intact
+    // 6. Safety check: ensure partners, promo codes, and packages are intact
     try {
       getPartners();
       getPromoCodes();
+      getPackages();
       backupAllCriticalFilesToExternal();
     } catch (e) {
       console.error('[AUTO-DEPLOY] Post-deploy store check warning:', e.message);
@@ -14500,9 +14860,13 @@ app.listen(PORT, async () => {
     if (mysqlConnected) {
       console.log(`🐬 MySQL Database Engine: CONNECTED & SYNCHRONIZED`);
       await db.hydrateFromMySql(DATA_DIR);
+      memoryJsonCache.clear();
+      getPackages();
+      backupAllCriticalFilesToExternal();
       await syncPartnersFromMySql(true);
     } else {
       console.log(`📁 Database Mode: Local JSON Safe Store & Lifelong Vault`);
+      getPackages();
     }
   } catch (dbErr) {
     console.error('[DATABASE INIT ERROR]:', dbErr.message);

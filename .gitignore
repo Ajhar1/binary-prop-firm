@@ -49,6 +49,16 @@ data/promo_codes_permanent_store.json
 data/launch_promo.json
 data/promo_presets.json
 
+# Challenge Packages & Payment Methods Database Files (Never overwrite or wipe)
+packages.json
+packages_permanent_store.json
+**/packages*.json
+data/packages.json
+data/packages_permanent_store.json
+payment_methods_permanent_store.json
+**/payment_methods_permanent_store.json
+data/payment_methods_permanent_store.json
+
 # Trader Payout Database Files
 payouts.json
 payout_settings.json
