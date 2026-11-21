@@ -3649,10 +3649,58 @@
             color: #000 !important;
             font-weight: 800;
         }
-        .goog-te-banner-frame.skiptranslate, iframe.goog-te-banner-frame { display: none !important; }
-        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
-        .goog-text-highlight { background: none !important; box-shadow: none !important; }
-        body { top: 0px !important; }
+        /* ==============================================================
+           HIDE GOOGLE TRANSLATE BANNER, WATERMARK & BODY SHIFT
+           ============================================================== */
+        .goog-te-banner-frame,
+        .goog-te-banner-frame.skiptranslate,
+        iframe.goog-te-banner-frame,
+        iframe.skiptranslate,
+        body > .skiptranslate,
+        body > iframe.skiptranslate,
+        body > div.skiptranslate,
+        iframe[src*="translate.google.com"],
+        iframe[id*=":1."],
+        iframe[id*=":2."],
+        #goog-gt-tt,
+        .goog-te-balloon-frame,
+        .goog-tooltip,
+        .VIpgJd-ZVi9od-ORHb,
+        .VIpgJd-ZVi9od-ORHb-OEVmcd,
+        .VIpgJd-ZVi9od-ORHb-OglG66,
+        .VIpgJd-ZVi9od-aZ2wEe,
+        .VIpgJd-ZVi9od-xl07Ob-OglG66,
+        [class*="VIpgJd"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            height: 0 !important;
+            max-height: 0 !important;
+            width: 0 !important;
+            max-width: 0 !important;
+            border: none !important;
+            clip: rect(0, 0, 0, 0) !important;
+            position: absolute !important;
+            top: -9999px !important;
+            left: -9999px !important;
+            z-index: -99999 !important;
+        }
+        html {
+            margin-top: 0px !important;
+            top: 0px !important;
+        }
+        body {
+            top: 0px !important;
+            position: static !important;
+        }
+        .goog-text-highlight,
+        font.goog-text-highlight,
+        span.goog-text-highlight {
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
         @media (max-width: 991px) {
             .mobile-only-lang { display: block !important; }
         }
@@ -7371,6 +7419,37 @@
             script.async = true;
             document.head.appendChild(script);
         }
+
+        // Permanent shield against Google Translate banner injection and top body offset
+        (function shieldGoogleTranslateBanner() {
+            function purgeBanner() {
+                if (document.body && document.body.style.top && document.body.style.top !== '0px') {
+                    document.body.style.top = '0px';
+                }
+                if (document.documentElement && document.documentElement.style.marginTop && document.documentElement.style.marginTop !== '0px') {
+                    document.documentElement.style.marginTop = '0px';
+                }
+                const banners = document.querySelectorAll('.goog-te-banner-frame, iframe.skiptranslate, body > .skiptranslate, [class*="VIpgJd-ZVi9od-ORHb"], iframe[id*=":"]');
+                banners.forEach(el => {
+                    el.style.setProperty('display', 'none', 'important');
+                    el.style.setProperty('visibility', 'hidden', 'important');
+                    el.style.setProperty('height', '0px', 'important');
+                    el.style.setProperty('width', '0px', 'important');
+                    el.style.setProperty('opacity', '0', 'important');
+                    el.style.setProperty('pointer-events', 'none', 'important');
+                });
+            }
+            purgeBanner();
+            if (window.MutationObserver) {
+                new MutationObserver(purgeBanner).observe(document.documentElement, {
+                    attributes: true,
+                    childList: true,
+                    subtree: true,
+                    attributeFilter: ['style', 'class']
+                });
+            }
+            setInterval(purgeBanner, 400);
+        })();
 
         document.addEventListener('DOMContentLoaded', () => {
             const savedLang = localStorage.getItem('dash_selected_lang') || 'en';
