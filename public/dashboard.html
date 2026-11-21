@@ -850,28 +850,31 @@
         .challenge-category-nav-wrap {
             display: flex;
             justify-content: center;
-            align-items: stretch;
+            align-items: center;
             gap: 16px;
             margin: 0 auto 1.8rem auto;
-            max-width: 900px;
-            padding: 0;
+            max-width: 760px;
+            padding: 0 10px;
             width: 100%;
         }
         .btn-cat-nav-pill {
-            flex: 1 1 350px;
-            display: flex;
+            flex: 1 1 340px;
+            display: inline-flex;
             align-items: center;
-            gap: 14px;
-            padding: 14px 20px;
-            border-radius: 16px;
+            justify-content: center;
+            gap: 12px;
+            padding: 13px 22px;
+            border-radius: 999px;
             background: rgba(255, 255, 255, 0.04);
             border: 2px solid rgba(255, 255, 255, 0.1);
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            text-align: left;
+            text-align: center;
             position: relative;
             overflow: hidden;
+            user-select: none;
+            box-sizing: border-box;
         }
         .btn-cat-nav-pill:hover {
             background: rgba(255, 255, 255, 0.08);
@@ -890,8 +893,8 @@
             box-shadow: 0 0 25px rgba(245, 176, 65, 0.32);
         }
         .cat-pill-dot {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.3);
             flex-shrink: 0;
@@ -905,21 +908,62 @@
             background: #f5b041;
             box-shadow: 0 0 12px #f5b041;
         }
-        .cat-pill-text-wrap {
-            display: flex;
-            flex-direction: column;
-        }
         .cat-pill-title {
-            font-size: 1.05rem;
-            font-weight: 900;
+            font-size: 1.02rem;
+            font-weight: 800;
             line-height: 1.25;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
         }
         .cat-pill-subtitle {
-            font-size: 0.78rem;
-            color: rgba(255, 255, 255, 0.68);
-            margin-top: 3px;
-            line-height: 1.35;
+            display: none !important;
+        }
+        @media (max-width: 768px) {
+            .challenge-category-nav-wrap {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: center !important;
+                align-items: center !important;
+                gap: 8px !important;
+                padding: 0 4px !important;
+                margin: 0 auto 1.2rem auto !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .btn-cat-nav-pill {
+                flex: 1 1 50% !important;
+                min-width: 0 !important;
+                padding: 10px 8px !important;
+                border-radius: 12px !important;
+                gap: 6px !important;
+                justify-content: center !important;
+                align-items: center !important;
+                text-align: center !important;
+                box-sizing: border-box !important;
+            }
+            .cat-pill-dot {
+                width: 8px !important;
+                height: 8px !important;
+                flex-shrink: 0 !important;
+            }
+            .cat-pill-title {
+                font-size: 0.8rem !important;
+                font-weight: 800 !important;
+                line-height: 1.22 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                letter-spacing: 0px !important;
+            }
+        }
+        @media (max-width: 400px) {
+            .btn-cat-nav-pill {
+                padding: 8px 5px !important;
+                gap: 5px !important;
+            }
+            .cat-pill-title {
+                font-size: 0.74rem !important;
+            }
         }
 
         /* ---------- OVERVIEW & CHALLENGES STATS GRID (4-IN-A-ROW) ---------- */
@@ -5058,17 +5102,11 @@
             <div class="challenge-category-nav-wrap">
                 <button type="button" id="btnDashCatEasyRules" class="btn-cat-nav-pill active-easy" onclick="switchDashboardChallengeCategory('easy_rules')">
                     <span class="cat-pill-dot"></span>
-                    <div class="cat-pill-text-wrap">
-                        <span class="cat-pill-title">Easy Challenge Easy Rules.</span>
-                        <span class="cat-pill-subtitle">ম্যানেজড মানি ম্যানেজমেন্ট শিট চ্যালেঞ্জ • ১৫ সেশন পূরণ</span>
-                    </div>
+                    <span class="cat-pill-title">Easy Challenge Easy Rules.</span>
                 </button>
                 <button type="button" id="btnDashCatYourRules" class="btn-cat-nav-pill" onclick="switchDashboardChallengeCategory('your_rules')">
                     <span class="cat-pill-dot"></span>
-                    <div class="cat-pill-text-wrap">
-                        <span class="cat-pill-title">Your Challenge Your Rules.</span>
-                        <span class="cat-pill-subtitle">টার্গেট ও ড্র-ডাউন বেসড প্রপ চ্যালেঞ্জ • নো শিট রিকোয়ার্ড</span>
-                    </div>
+                    <span class="cat-pill-title">Your Challenge Your Rules.</span>
                 </button>
             </div>
 

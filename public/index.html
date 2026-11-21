@@ -895,27 +895,31 @@
         .challenge-category-nav-wrap {
             display: flex;
             justify-content: center;
-            align-items: stretch;
+            align-items: center;
             gap: 16px;
             margin: 0 auto 2.2rem auto;
-            max-width: 900px;
+            max-width: 760px;
             padding: 0 1rem;
+            width: 100%;
         }
         .btn-cat-nav-pill {
-            flex: 1 1 400px;
-            display: flex;
+            flex: 1 1 340px;
+            display: inline-flex;
             align-items: center;
-            gap: 14px;
-            padding: 14px 22px;
-            border-radius: 16px;
+            justify-content: center;
+            gap: 12px;
+            padding: 13px 22px;
+            border-radius: 999px;
             background: rgba(255, 255, 255, 0.04);
             border: 2px solid rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            text-align: left;
+            text-align: center;
             position: relative;
             overflow: hidden;
+            box-sizing: border-box;
+            user-select: none;
         }
         .btn-cat-nav-pill:hover {
             background: rgba(255, 255, 255, 0.08);
@@ -934,8 +938,8 @@
             box-shadow: 0 0 25px rgba(245, 176, 65, 0.32);
         }
         .cat-pill-dot {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.3);
             flex-shrink: 0;
@@ -949,21 +953,15 @@
             background: #f5b041;
             box-shadow: 0 0 12px #f5b041;
         }
-        .cat-pill-text-wrap {
-            display: flex;
-            flex-direction: column;
-        }
         .cat-pill-title {
-            font-size: 1.05rem;
-            font-weight: 900;
+            font-size: 1.02rem;
+            font-weight: 800;
             line-height: 1.25;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
         }
         .cat-pill-subtitle {
-            font-size: 0.78rem;
-            color: rgba(255, 255, 255, 0.68);
-            margin-top: 3px;
-            line-height: 1.35;
+            display: none !important;
         }
 
         /* ========== INTERACTIVE CAPITAL TIER PICKER (BinaryFunded Inspired) ========== */
@@ -2492,6 +2490,52 @@
                 padding: 2.8rem 0.6rem !important;
                 overflow: hidden !important;
             }
+            /* Dual Challenge Category Switcher (Mobile Sleek Compact Side-by-Side) */
+            .challenge-category-nav-wrap {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: center !important;
+                align-items: center !important;
+                gap: 8px !important;
+                padding: 0 4px !important;
+                margin: 0 auto 1.4rem auto !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .btn-cat-nav-pill {
+                flex: 1 1 50% !important;
+                min-width: 0 !important;
+                padding: 10px 8px !important;
+                border-radius: 12px !important;
+                gap: 6px !important;
+                justify-content: center !important;
+                align-items: center !important;
+                text-align: center !important;
+                box-sizing: border-box !important;
+            }
+            .cat-pill-dot {
+                width: 8px !important;
+                height: 8px !important;
+                flex-shrink: 0 !important;
+            }
+            .cat-pill-title {
+                font-size: 0.8rem !important;
+                font-weight: 800 !important;
+                line-height: 1.22 !important;
+                white-space: normal !important;
+                text-align: center !important;
+                letter-spacing: 0px !important;
+            }
+            @media (max-width: 400px) {
+                .btn-cat-nav-pill {
+                    padding: 8px 5px !important;
+                    gap: 5px !important;
+                }
+                .cat-pill-title {
+                    font-size: 0.74rem !important;
+                }
+            }
             .challenge-grid {
                 display: grid !important;
                 grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -3815,17 +3859,11 @@
         <div class="challenge-category-nav-wrap">
             <button type="button" id="btnCatEasyRules" class="btn-cat-nav-pill active-easy" onclick="switchLandingChallengeCategory('easy_rules')">
                 <span class="cat-pill-dot"></span>
-                <div class="cat-pill-text-wrap">
-                    <span class="cat-pill-title">Easy Challenge Easy Rules.</span>
-                    <span class="cat-pill-subtitle">Managed Money Management Sheet Challenge • 15 Sessions Required</span>
-                </div>
+                <span class="cat-pill-title">Easy Challenge Easy Rules.</span>
             </button>
             <button type="button" id="btnCatYourRules" class="btn-cat-nav-pill" onclick="switchLandingChallengeCategory('your_rules')">
                 <span class="cat-pill-dot"></span>
-                <div class="cat-pill-text-wrap">
-                    <span class="cat-pill-title">Your Challenge Your Rules.</span>
-                    <span class="cat-pill-subtitle">Target & Drawdown Based Prop Challenge • No Sheet Required</span>
-                </div>
+                <span class="cat-pill-title">Your Challenge Your Rules.</span>
             </button>
         </div>
 
@@ -3912,18 +3950,38 @@
         </div>
     </section>
 
-    <!-- ========== 3 GOLDEN RULES ========== -->
+    <!-- ========== 3 GOLDEN RULES (DYNAMIC PER SELECTED CATEGORY) ========== -->
     <section id="rules" class="rules-section">
         <div style="text-align:center;">
-            <span class="rules-badge"><i class="fas fa-star"></i> Rules</span>
+            <span class="rules-badge" id="rulesBadge"><i class="fas fa-file-invoice-dollar"></i> Sheet Challenge Rules</span>
             <h2 class="section-title">The 3 Golden Rules</h2>
-            <p class="section-subtitle">
-                3 Disciplined Trading Rules. Follow the rules consistently to earn your funded account.
+            <p class="section-subtitle" id="rulesSubtitle">
+                Follow the Money Management Sheet consistently to earn your funded account.
             </p>
         </div>
 
         <div class="rules-grid" id="rulesContainer">
-            <!-- Populated dynamically or static fallback -->
+            <div class="rule-card glass">
+                <div class="rule-number">1</div>
+                <div class="rule-details">
+                    <h3>15 Sessions & 25% Balance Utilization</h3>
+                    <p>Complete 15 trading sessions according to the money management sheet using a maximum of 25% account balance.</p>
+                </div>
+            </div>
+            <div class="rule-card glass">
+                <div class="rule-number">2</div>
+                <div class="rule-details">
+                    <h3>Max 3 Sessions Daily & Flexible Timeline</h3>
+                    <p>Execute up to 3 sessions per day. Complete the challenge at your pace within 5 to 15 days.</p>
+                </div>
+            </div>
+            <div class="rule-card glass">
+                <div class="rule-number">3</div>
+                <div class="rule-details">
+                    <h3>85%+ Payout Market & Sheet Discipline</h3>
+                    <p>All trades must be executed on assets with 85%+ payout return. Off-sheet trades are strictly prohibited.</p>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -3939,8 +3997,8 @@
             </div>
             <div class="step-card glass">
                 <div class="step-icon-box">2</div>
-                <h3>Demo Trade & Submit Proof</h3>
-                <p>Complete 15 trading sessions adhering to the 3 rules and submit proof in dashboard.</p>
+                <h3 id="step2Title">Demo Trade & Submit Proof</h3>
+                <p id="step2Desc">Complete 15 trading sessions adhering to the sheet rules and submit proof in dashboard.</p>
             </div>
             <div class="step-card glass">
                 <div class="step-icon-box">3</div>
@@ -6153,6 +6211,7 @@
             globalPackages = filtered;
             renderPackages(filtered);
             renderInteractiveCapitalTier(filtered);
+            renderRules(cat);
         }
 
         async function loadPackagesAndRules() {
@@ -6162,7 +6221,6 @@
                 if (data.success) {
                     allLandingPackages = data.packages || [];
                     globalPromo = data.launchPromo;
-                    renderRules(data.tenRules);
                     switchLandingChallengeCategory('easy_rules');
                     renderPromoBanner(globalPromo);
                 }
@@ -6257,39 +6315,75 @@
             promoCountdownTimerInterval = setInterval(update, 1000);
         }
 
-        // Render 3 Golden Rules (Official Rules Provided by User)
-        const conciseRules = [
-            {
-                id: 1,
-                title: '15 Sessions & 25% Balance Utilization',
-                desc: 'Complete 15 trading sessions according to the money management sheet using a maximum of 25% account balance.'
+        // Dual 3 Golden Rules Data (Easy Challenge vs Your Challenge)
+        const GOLDEN_RULES_SETS = {
+            easy_rules: {
+                badge: '<i class="fas fa-file-invoice-dollar"></i> Sheet Challenge Rules',
+                subtitle: 'Follow the Money Management Sheet consistently to earn your funded account.',
+                step2: 'Complete 15 trading sessions adhering to the sheet rules and submit proof in dashboard.',
+                rules: [
+                    {
+                        id: 1,
+                        title: '15 Sessions & 25% Balance Utilization',
+                        desc: 'Complete 15 trading sessions according to the money management sheet using a maximum of 25% account balance.'
+                    },
+                    {
+                        id: 2,
+                        title: 'Max 3 Sessions Daily & Flexible Timeline',
+                        desc: 'Execute up to 3 sessions per day. Complete the challenge at your pace within 5 to 15 days.'
+                    },
+                    {
+                        id: 3,
+                        title: '85%+ Payout Market & Sheet Discipline',
+                        desc: 'All trades must be executed on assets with 85%+ payout return. Off-sheet trades are strictly prohibited.'
+                    }
+                ]
             },
-            {
-                id: 2,
-                title: 'Max 3 Sessions Daily & Flexible Timeline',
-                desc: 'Execute up to 3 sessions per day. Complete the challenge at your pace within 5 to 15 days.'
-            },
-            {
-                id: 3,
-                title: '85%+ Payout Market & Sheet Discipline',
-                desc: 'All trades must be executed on assets with 85%+ payout return. Off-sheet trades are strictly prohibited.'
+            your_rules: {
+                badge: '<i class="fas fa-bullseye"></i> Classic Prop Rules',
+                subtitle: 'Trade with disciplined target & drawdown risk control to earn your funded account.',
+                step2: 'Trade according to target & drawdown rules, reach +30% profit, and submit proof in dashboard.',
+                rules: [
+                    {
+                        id: 1,
+                        title: '+30% Profit Target & Min 10 Trading Days',
+                        desc: 'Achieve a +30% profit target with no maximum time pressure. Maintain active trading for at least 10 days to prove consistency.'
+                    },
+                    {
+                        id: 2,
+                        title: '-10% Max Drawdown & -5% Daily Loss Limit',
+                        desc: 'Strict risk management: overall account drawdown must never exceed -10%, and daily loss is capped at -5% from the starting daily balance.'
+                    },
+                    {
+                        id: 3,
+                        title: '+4% Daily Profit Cap & 55% Win Rate',
+                        desc: 'Prevent overtrading with a +4% daily profit soft cap and demonstrate a genuine edge with at least a 55% overall win rate.'
+                    }
+                ]
             }
-        ];
+        };
 
-        function renderRules(rules) {
+        function renderRules(cat) {
+            const category = (cat === 'your_rules' || cat === 'classic_prop') ? 'your_rules' : 'easy_rules';
+            const config = GOLDEN_RULES_SETS[category] || GOLDEN_RULES_SETS.easy_rules;
             const container = document.getElementById('rulesContainer');
+            const subtitleEl = document.getElementById('rulesSubtitle');
+            const badgeEl = document.getElementById('rulesBadge');
+            const step2DescEl = document.getElementById('step2Desc');
+
+            if (subtitleEl && config.subtitle) {
+                subtitleEl.innerText = config.subtitle;
+            }
+            if (badgeEl && config.badge) {
+                badgeEl.innerHTML = config.badge;
+            }
+            if (step2DescEl && config.step2) {
+                step2DescEl.innerText = config.step2;
+            }
+
             if (!container) return;
 
-            const list = (rules && Array.isArray(rules) && rules.length === 3) ? rules.map((r, idx) => {
-                const c = conciseRules[idx] || {};
-                return {
-                    id: r.id || (idx + 1),
-                    title: c.title || r.titleBn || r.titleEn,
-                    desc: r.descBn || c.desc || r.descEn
-                };
-            }) : conciseRules;
-
-            container.innerHTML = list.map(rule => `
+            container.innerHTML = config.rules.map(rule => `
                 <div class="rule-card glass">
                     <div class="rule-number">${rule.id}</div>
                     <div class="rule-details">

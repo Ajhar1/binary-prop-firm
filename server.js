@@ -4269,6 +4269,32 @@ const THREE_RULES = [
     descBn: "সকল ট্রেড অবশ্যই ৮৫% বা তার বেশি রিটার্ন দেওয়া মার্কেটে এক্সিকিউট করতে হবে। চ্যালেঞ্জ চলাকালীন মানি ম্যানেজমেন্ট শীটের বাহিরে কোন ট্রেড করা যাবে না।"
   }
 ];
+
+// Classic Prop Challenge 3 Golden Rules Data
+const CLASSIC_RULES = [
+  {
+    id: 1,
+    titleEn: "+30% Profit Target & Min 10 Trading Days",
+    titleBn: "+৩০% প্রফিট টার্গেট ও নূন্যতম ১০ ট্রেডিং দিন",
+    descEn: "Achieve a +30% profit target with no maximum time pressure. Maintain active trading for at least 10 days to prove consistency.",
+    descBn: "কোন সময়সীমা ছাড়াই +৩০% প্রফিট টার্গেট অর্জন করুন। নিজের ট্রেডিং ডিসিপ্লিন প্রমাণের জন্য নূন্যতম ১০ দিন ট্রেড করতে হবে।"
+  },
+  {
+    id: 2,
+    titleEn: "-10% Max Drawdown & -5% Daily Loss Limit",
+    titleBn: "-১০% সর্বোচ্চ ড্র-ডাউন ও -৫% দৈনিক লস সীমা",
+    descEn: "Strict risk management: overall account drawdown must never exceed -10%, and daily loss is capped at -5% from the starting daily balance.",
+    descBn: "কঠোর রিস্ক ম্যানেজমেন্ট: মোট ড্র-ডাউন সর্বোচ্চ -১০% এবং দিনের প্রারম্ভিক ব্যালেন্সের ওপর দৈনিক লস সীমা সর্বোচ্চ -৫%।"
+  },
+  {
+    id: 3,
+    titleEn: "+4% Daily Profit Cap & 55% Win Rate",
+    titleBn: "+৪% দৈনিক প্রফিট ক্যাপ ও ৫৫% উইন রেট",
+    descEn: "Prevent overtrading with a +4% daily profit soft cap and demonstrate a genuine edge with at least a 55% overall win rate.",
+    descBn: "ওভারট্রেডিং রোধে দৈনিক প্রফিট ক্যাপ +৪% এবং কার্যকর প্রফিটেবিলিটি বজায় রাখতে নূন্যতম ৫৫% উইন রেট আবশ্যক।"
+  }
+];
+
 const TEN_RULES = THREE_RULES; // Backward compatibility alias
 
 // Course Lessons Data
@@ -5299,6 +5325,8 @@ app.get('/api/challenges/packages', (req, res) => {
       active: isPromoActive
     },
     brokers: SUPPORTED_BROKERS,
+    threeRules: THREE_RULES,
+    classicRules: CLASSIC_RULES,
     tenRules: TEN_RULES
   });
 });
