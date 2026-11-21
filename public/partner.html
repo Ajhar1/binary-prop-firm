@@ -439,6 +439,9 @@
             display: flex;
             flex-direction: column;
             width: calc(100% - var(--sidebar-w));
+            max-width: calc(100% - var(--sidebar-w));
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
         .topbar {
             height: var(--header-h);
@@ -1970,10 +1973,31 @@
             }
         }
 
+        /* Sidebar Backdrop Overlay for Mobile / Tablet */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .sidebar-backdrop.active {
+            display: block;
+            opacity: 1;
+        }
+
         /* Responsive */
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-100%);
+                box-shadow: 10px 0 35px rgba(0,0,0,0.85);
             }
             .sidebar.mobile-open {
                 transform: translateX(0);
@@ -1981,19 +2005,30 @@
             .main-wrapper {
                 margin-left: 0;
                 width: 100%;
+                max-width: 100%;
             }
             .menu-toggle-btn {
                 display: inline-flex;
             }
         }
-        @media (max-width: 640px) {
-            .content-body { padding: 1rem 0.75rem; }
+        @media (max-width: 768px) {
+            .content-body { padding: 1.25rem 0.85rem; }
             .stats-grid { grid-template-columns: 1fr; }
-            .topbar { padding: 0 1rem; }
             .auth-box { padding: 1.75rem 1.25rem; }
             .dest-selector-strip { flex-direction: column; }
             .dest-btn { width: 100%; justify-content: center; }
             .campaign-tag-prefix { font-size: 0.82rem; padding: 0 10px; }
+            .data-table { min-width: 600px; }
+            .wallet-input-row { flex-direction: column !important; align-items: stretch !important; }
+            .wallet-input-row .btn-emerald { width: 100% !important; justify-content: center !important; }
+        }
+        @media (max-width: 540px) {
+            .content-body { padding: 1rem 0.65rem; }
+            .topbar { padding: 0 0.85rem; }
+            .topbar-left { gap: 8px; }
+            #topActivePageTitle { font-size: 0.95rem !important; }
+            #topPartnerWelcome { display: none !important; }
+            .topbar-withdraw-btn { display: none !important; }
         }
     
         /* ================= TARGET AFFILIATE PORTAL STYLES (binaryfunded.com/affiliate MATCH) ================= */
@@ -3334,6 +3369,9 @@
             </div>
         </aside>
 
+        <!-- Sidebar backdrop for mobile/tablet drawer -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
+
         <!-- MAIN CONTENT WRAPPER -->
         <div class="main-wrapper">
             <!-- TOPBAR -->
@@ -3363,7 +3401,7 @@
                         </div>
                     </div>
 
-                    <button type="button" class="btn-gold" onclick="switchPartnerTab('withdraw')" style="padding:7px 16px; font-size:0.82rem; border-radius:10px;">
+                    <button type="button" class="btn-gold topbar-withdraw-btn" onclick="switchPartnerTab('withdraw')" style="padding:7px 16px; font-size:0.82rem; border-radius:10px;">
                         <i class="fas fa-arrow-down"></i> Withdraw
                     </button>
                 </div>
@@ -4101,8 +4139,6 @@
 
                         </div>
 
-                        </div>
-
                     </div>
 
                 </div>
@@ -4363,7 +4399,7 @@
                                 </div>
                             </div>
 
-                            <div style="display:flex; gap:10px; align-items:flex-end;">
+                            <div class="wallet-input-row" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
                                 <div class="form-group" style="flex:1; margin:0;">
                                     <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Wallet Address / ID *</label>
                                     <input type="text" class="form-control" id="walletAddressInput" placeholder="Paste your wallet address or Binance Pay ID" required style="font-size:0.88rem; font-family:monospace;" />
@@ -6377,7 +6413,10 @@
             checkAcademyStatusBadge();
 
             const params = new URLSearchParams(window.location.search);
-            const targetTab = params.get('tab');
+            let targetTab = params.get('tab');
+            if (!targetTab && window.location.hash) {
+                targetTab = window.location.hash.replace('#', '').split('?')[0];
+            }
             if (targetTab && ['overview', 'links', 'network', 'academy', 'challenge', 'payouts', 'withdraw', 'wallets', 'telegram', 'account'].includes(targetTab.toLowerCase())) {
                 switchPartnerTab(targetTab.toLowerCase());
             } else {
@@ -7184,9 +7223,11 @@
             const topTitle = document.getElementById('topActivePageTitle');
             if (topTitle) topTitle.innerText = titleMap[actualKey] || 'Overview';
 
-            // Close mobile sidebar
+            // Close mobile sidebar & backdrop
             const sidebar = document.getElementById('partnerSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
             if (sidebar) sidebar.classList.remove('mobile-open');
+            if (backdrop) backdrop.classList.remove('active');
 
             // Trigger data load
             if (actualKey === 'links') { fetchPartnerCustomLinks(); fetchPartnerPromoCodes(); }
@@ -8338,7 +8379,17 @@
 
         function toggleMobileSidebar() {
             const sidebar = document.getElementById('partnerSidebar');
-            if (sidebar) sidebar.classList.toggle('mobile-open');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) {
+                const isOpen = sidebar.classList.toggle('mobile-open');
+                if (backdrop) {
+                    if (isOpen) {
+                        backdrop.classList.add('active');
+                    } else {
+                        backdrop.classList.remove('active');
+                    }
+                }
+            }
         }
 
         // ================= COPY & SHARE UTILITIES =================
