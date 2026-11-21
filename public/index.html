@@ -192,21 +192,35 @@
             line-height: 1.6;
         }
 
-        /* ---------- NAVBAR ---------- */
+        /* ---------- ULTRA LUXURY RESPONSIVE NAVBAR ---------- */
         .navbar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            padding: 0.8rem 2rem;
+            height: 70px;
+            padding: 0;
+            background: rgba(9, 13, 22, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 28px rgba(0, 0, 0, 0.55);
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 1.75rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(10, 10, 10, 0.88);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(245, 176, 65, 0.2);
+            gap: 1.5rem;
+            box-sizing: border-box;
         }
 
         .logo {
@@ -215,69 +229,201 @@
             gap: 12px;
             cursor: pointer;
             text-decoration: none;
+            flex-shrink: 0;
         }
 
-        .logo-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(245, 176, 65, 0.1));
-            border: 1px solid rgba(255, 215, 0, 0.4);
-            box-shadow: 0 0 20px rgba(245, 176, 65, 0.2);
-            font-weight: 900;
-            font-size: 1.25rem;
-            color: #fff;
+        .navbar-logo-img {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 0 16px rgba(245, 176, 65, 0.35);
+            border: 1px solid rgba(245, 176, 65, 0.3);
+            flex-shrink: 0;
         }
 
         .logo-text {
-            font-size: 1.6rem;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            background: linear-gradient(135deg, #ffffff 10%, #FFE082 50%, #F5B041 100%);
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+            background: linear-gradient(135deg, #ffffff 15%, #FFE082 55%, #F5B041 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             color: #ffffff;
+            white-space: nowrap;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 2rem;
+            gap: 1.8rem;
             list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links li {
             margin: 0;
             padding: 0;
         }
 
         .nav-links a {
             text-decoration: none;
-            color: var(--text);
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.2s;
+            color: rgba(255, 255, 255, 0.78);
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: color 0.2s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .nav-links a:hover {
-            color: var(--yellow);
+            color: var(--yellow, #f5b041);
+        }
+
+        .nav-partner-link {
+            color: var(--yellow, #f5b041) !important;
+            font-weight: 700;
+        }
+
+        .mobile-drawer-auth {
+            display: none;
+        }
+
+        .nav-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .header-lang-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .header-lang-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 40px;
+            padding: 0 14px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #fff;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .header-lang-btn i.fa-globe {
+            color: var(--yellow, #f5b041);
+            font-size: 0.92rem;
+        }
+
+        .header-lang-btn i.fa-chevron-down {
+            font-size: 0.65rem;
+            opacity: 0.7;
+            margin-left: 2px;
+        }
+
+        .header-lang-btn:hover {
+            background: rgba(245, 176, 65, 0.12);
+            border-color: rgba(245, 176, 65, 0.45);
+            color: var(--yellow, #f5b041);
+        }
+
+        .header-lang-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            left: auto;
+            background: #0d121c;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 14px;
+            padding: 6px;
+            min-width: 210px;
+            max-height: 380px;
+            overflow-y: auto;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            z-index: 10050;
         }
 
         .nav-buttons {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 10px;
+        }
+
+        .nav-buttons .btn-outline {
+            height: 40px;
+            padding: 0 16px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border-radius: 10px;
+            border: 1px solid rgba(245, 176, 65, 0.45);
+            color: var(--yellow, #f5b041);
+            background: rgba(245, 176, 65, 0.08);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-buttons .btn-outline:hover {
+            background: rgba(245, 176, 65, 0.18);
+            border-color: var(--yellow, #f5b041);
+            transform: translateY(-1px);
+        }
+
+        .nav-buttons .btn-primary {
+            height: 40px;
+            padding: 0 18px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #f5b041, #f39c12);
+            color: #000;
+            box-shadow: 0 4px 18px rgba(245, 176, 65, 0.35);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-buttons .btn-primary:hover {
+            background: linear-gradient(135deg, #ffbe53, #e67e22);
+            box-shadow: 0 6px 22px rgba(245, 176, 65, 0.5);
+            transform: translateY(-1px);
         }
 
         .mobile-menu-btn {
             display: none;
-            background: none;
-            border: none;
-            color: var(--text);
-            font-size: 1.8rem;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(245, 176, 65, 0.1);
+            border: 1px solid rgba(245, 176, 65, 0.3);
+            color: var(--yellow, #f5b041);
+            font-size: 1.15rem;
             cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
         }
 
         /* ---------- WATER CANVAS & TOUCH GLOW ---------- */
@@ -1966,102 +2112,154 @@
                 box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
             }
 
-            /* Navbar & Logo (High Brightness White + Golden Glow) */
+            /* Responsive Top Panel (Desktop / Tablet / Mobile) */
             .navbar {
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 0.5rem 0.55rem !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: space-between !important;
-                gap: 4px !important;
-                background: rgba(10, 14, 22, 0.92) !important;
-                backdrop-filter: blur(20px) saturate(180%) !important;
-                -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+                height: 60px !important;
+                padding: 0 !important;
+                background: rgba(9, 13, 22, 0.94) !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-                box-sizing: border-box !important;
+            }
+            .navbar-container {
+                padding: 0 12px !important;
+                gap: 6px !important;
+                justify-content: space-between !important;
             }
             .logo {
-                display: flex !important;
-                align-items: center !important;
-                gap: 4px !important;
-                text-decoration: none !important;
-                flex-shrink: 0 !important;
+                gap: 7px !important;
                 min-width: 0 !important;
-            }
-            .logo-icon,
-            .logo img {
-                width: 28px !important;
-                height: 28px !important;
-                min-width: 28px !important;
-                font-size: 0.9rem !important;
-                border-radius: 8px !important;
                 flex-shrink: 0 !important;
-                box-shadow: 0 0 10px rgba(245, 176, 65, 0.3) !important;
+            }
+            .navbar-logo-img {
+                width: 32px !important;
+                height: 32px !important;
+                min-width: 32px !important;
+                border-radius: 8px !important;
             }
             .logo-text {
-                font-size: clamp(0.82rem, 2.7vw, 1rem) !important;
-                font-weight: 900 !important;
-                color: #ffffff !important;
-                background: none !important;
-                -webkit-background-clip: initial !important;
-                -webkit-text-fill-color: initial !important;
-                background-clip: initial !important;
-                text-shadow: 0 1px 8px rgba(245, 176, 65, 0.5) !important;
+                font-size: 0.98rem !important;
+                font-weight: 800 !important;
+                letter-spacing: -0.3px !important;
                 white-space: nowrap !important;
-                letter-spacing: -0.2px !important;
             }
             .nav-links {
                 display: none;
             }
-            .nav-buttons {
+            .nav-links.mobile-show {
+                display: flex !important;
+                flex-direction: column !important;
+                position: absolute !important;
+                top: 60px !important;
+                left: 0 !important;
+                right: 0 !important;
+                background: rgba(11, 15, 23, 0.98) !important;
+                backdrop-filter: blur(28px) !important;
+                -webkit-backdrop-filter: blur(28px) !important;
+                border-bottom: 2px solid var(--yellow, #f5b041) !important;
+                padding: 1.1rem 1.25rem 1.6rem 1.25rem !important;
+                gap: 0.65rem !important;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9) !important;
+                z-index: 10000 !important;
+            }
+            .nav-links.mobile-show li a {
+                font-size: 0.95rem !important;
+                font-weight: 600 !important;
+                padding: 10px 14px !important;
+                border-radius: 10px !important;
+                background: rgba(255, 255, 255, 0.03) !important;
+                border: 1px solid rgba(255, 255, 255, 0.06) !important;
                 display: flex !important;
                 align-items: center !important;
-                gap: 4px !important;
+                justify-content: space-between !important;
+            }
+            .mobile-drawer-auth {
+                display: block !important;
+                margin-top: 4px !important;
+                padding-top: 10px !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+            }
+            .mobile-drawer-btn-grid {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+            .mobile-drawer-btn-grid button {
+                width: 100% !important;
+                height: 44px !important;
+                border-radius: 10px !important;
+                font-weight: 800 !important;
+                font-size: 0.92rem !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 8px !important;
+                cursor: pointer !important;
+            }
+            .nav-right-actions {
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
                 margin-left: auto !important;
                 flex-shrink: 0 !important;
             }
-            .nav-buttons .btn-outline {
-                padding: 4px 7px !important;
-                font-size: 0.70rem !important;
+            .header-lang-btn {
+                height: 34px !important;
+                padding: 0 8px !important;
+                font-size: 0.78rem !important;
                 font-weight: 700 !important;
-                border-radius: 7px !important;
-                white-space: nowrap !important;
-                border: 1px solid var(--yellow) !important;
-                color: var(--yellow) !important;
-                background: rgba(245, 176, 65, 0.08) !important;
-                display: inline-flex !important;
+                border-radius: 8px !important;
+                gap: 4px !important;
+                flex-shrink: 0 !important;
+            }
+            .header-lang-btn i.fa-globe {
+                font-size: 0.85rem !important;
+            }
+            .header-lang-btn i.fa-chevron-down {
+                font-size: 0.58rem !important;
+            }
+            /* Hide secondary Login button in the top bar on mobile phones so elements never overflow */
+            @media (max-width: 580px) {
+                #navButtons #navLoginBtn {
+                    display: none !important;
+                }
+            }
+            .nav-buttons {
+                display: flex !important;
                 align-items: center !important;
-                gap: 3px !important;
+                gap: 5px !important;
+                flex-shrink: 0 !important;
+            }
+            .nav-buttons .btn-outline {
+                height: 34px !important;
+                padding: 0 9px !important;
+                font-size: 0.76rem !important;
+                font-weight: 700 !important;
+                border-radius: 8px !important;
+                gap: 4px !important;
                 flex-shrink: 0 !important;
             }
             .nav-buttons .btn-primary {
-                padding: 4px 8px !important;
-                font-size: 0.70rem !important;
-                font-weight: 700 !important;
-                border-radius: 7px !important;
-                white-space: nowrap !important;
-                display: inline-flex !important;
-                align-items: center !important;
-                gap: 3px !important;
+                height: 34px !important;
+                padding: 0 10px !important;
+                font-size: 0.78rem !important;
+                font-weight: 800 !important;
+                border-radius: 8px !important;
+                gap: 4px !important;
                 flex-shrink: 0 !important;
-            }
-            .nav-buttons .btn-outline i,
-            .nav-buttons .btn-primary i {
-                font-size: 0.68rem !important;
             }
             .mobile-menu-btn {
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                width: 28px !important;
-                height: 28px !important;
-                min-width: 28px !important;
-                font-size: 1.15rem !important;
+                width: 34px !important;
+                height: 34px !important;
+                min-width: 34px !important;
+                font-size: 1.05rem !important;
                 color: var(--yellow) !important;
-                background: rgba(245, 176, 65, 0.1) !important;
-                border: 1px solid rgba(245, 176, 65, 0.28) !important;
-                border-radius: 7px !important;
+                background: rgba(245, 176, 65, 0.12) !important;
+                border: 1px solid rgba(245, 176, 65, 0.35) !important;
+                border-radius: 8px !important;
                 cursor: pointer !important;
                 flex-shrink: 0 !important;
             }
@@ -2862,39 +3060,31 @@
             }
         }
         @media (max-width: 360px) {
-            .navbar {
-                padding: 0.45rem 0.35rem !important;
-                gap: 3px !important;
+            .navbar-container {
+                padding: 0 8px !important;
+                gap: 4px !important;
             }
-            .logo {
-                gap: 3px !important;
-            }
-            .logo-icon,
-            .logo img {
-                width: 25px !important;
-                height: 25px !important;
-                min-width: 25px !important;
+            .navbar-logo-img {
+                width: 28px !important;
+                height: 28px !important;
+                min-width: 28px !important;
             }
             .logo-text {
-                font-size: 0.78rem !important;
-                letter-spacing: -0.3px !important;
+                font-size: 0.90rem !important;
             }
-            .nav-buttons {
-                gap: 3px !important;
-            }
-            .nav-buttons .btn-outline {
-                padding: 4px 5px !important;
-                font-size: 0.66rem !important;
+            .header-lang-btn {
+                padding: 0 6px !important;
+                font-size: 0.74rem !important;
             }
             .nav-buttons .btn-primary {
-                padding: 4px 6px !important;
-                font-size: 0.66rem !important;
+                padding: 0 8px !important;
+                font-size: 0.74rem !important;
             }
             .mobile-menu-btn {
-                width: 26px !important;
-                height: 26px !important;
-                min-width: 26px !important;
-                font-size: 1.05rem !important;
+                width: 32px !important;
+                height: 32px !important;
+                min-width: 32px !important;
+                font-size: 0.95rem !important;
             }
             .promo-countdown-wrapper {
                 padding: 0.7rem 0.35rem !important;
@@ -3433,79 +3623,91 @@
 
     <!-- ========== NAVBAR ========== -->
     <nav class="navbar">
-        <a href="/" class="logo">
-            <img src="/assets/logo.png" alt="Binary Prop Firm Logo" style="width:44px; height:44px; object-fit:cover; border-radius:12px; box-shadow:0 0 15px rgba(245, 176, 65, 0.35);" />
-            <div class="logo-text">Binary Prop Firm</div>
-        </a>
-        <ul class="nav-links" id="navLinks">
-            <li><a href="#brokers" onclick="closeMobileMenu()">Supported Brokers</a></li>
-            <li><a href="#challenges" onclick="closeMobileMenu()">Challenges</a></li>
-            <li><a href="#rules" onclick="closeMobileMenu()">3 Golden Rules</a></li>
-            <li><a href="#how-it-works" onclick="closeMobileMenu()">How It Works</a></li>
-            <li><a href="/dashboard" onclick="closeMobileMenu()">Dashboard</a></li>
-            <li><a href="/partner" style="color:var(--yellow); font-weight:700;"><i class="fas fa-handshake"></i> Partner</a></li>
-            <li class="mobile-only-lang" style="display:none; padding:8px 0;">
-                <button type="button" class="header-lang-btn" onclick="toggleLandingLangMenu(event)" style="width:100%; justify-content:center; padding:10px 14px;">
-                    <i class="fas fa-globe" style="color:var(--yellow);"></i>
-                    <span id="mobileCurrentLangLabel">Language: English</span>
-                </button>
-            </li>
-        </ul>
-        <div class="nav-buttons" id="navButtons">
-            <!-- Language Switcher Pill -->
-            <div class="header-lang-wrapper">
-                <button type="button" class="header-lang-btn" onclick="toggleLandingLangMenu(event)" id="headerLangBtn" title="Change Language">
-                    <i class="fas fa-globe" style="color:var(--yellow, #f5b041);"></i>
-                    <span id="headerCurrentLangLabel">English</span>
-                    <i class="fas fa-chevron-down" style="font-size:0.65rem; margin-left:2px; opacity:0.7;"></i>
-                </button>
-                <div id="headerLangDropdown" class="header-lang-dropdown" style="display:none;">
-                    <div class="lang-option-item active" onclick="changeLandingLanguage('en')" data-lang="en">
-                        <span>🇺🇸</span> <span>English (Default)</span>
+        <div class="navbar-container">
+            <a href="/" class="logo">
+                <img src="/assets/logo.png" alt="Binary Prop Firm Logo" class="navbar-logo-img" />
+                <div class="logo-text">Binary Prop Firm</div>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#brokers" onclick="closeMobileMenu()">Supported Brokers</a></li>
+                <li><a href="#challenges" onclick="closeMobileMenu()">Challenges</a></li>
+                <li><a href="#rules" onclick="closeMobileMenu()">3 Golden Rules</a></li>
+                <li><a href="#how-it-works" onclick="closeMobileMenu()">How It Works</a></li>
+                <li id="desktopNavDashboardLink"><a href="/dashboard" onclick="closeMobileMenu()">Dashboard</a></li>
+                <li><a href="/partner" class="nav-partner-link" onclick="closeMobileMenu()"><i class="fas fa-handshake"></i> Partner</a></li>
+
+                <!-- Mobile Drawer Special Items -->
+                <li class="mobile-drawer-auth" id="mobileDrawerAuth">
+                    <div class="mobile-drawer-btn-grid" id="mobileDrawerBtnGrid">
+                        <!-- Populated dynamically: Login/Register OR Dashboard/Profile -->
                     </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('bn')" data-lang="bn">
-                        <span>🇧🇩</span> <span>বাংলা (Bengali)</span>
-                    </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('hi')" data-lang="hi">
-                        <span>🇮🇳</span> <span>हिन्दी (Hindi)</span>
-                    </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('ar')" data-lang="ar">
-                        <span>🇸🇦</span> <span>العربية (Arabic)</span>
-                    </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('es')" data-lang="es">
-                        <span>🇪🇸</span> <span>Español</span>
-                    </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('fr')" data-lang="fr">
-                        <span>🇫🇷</span> <span>Français</span>
-                    </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('pt')" data-lang="pt">
-                        <span>🇧🇷</span> <span>Português</span>
-                    </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('id')" data-lang="id">
-                        <span>🇮🇩</span> <span>Indonesian</span>
-                    </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('ru')" data-lang="ru">
-                        <span>🇷🇺</span> <span>Русский</span>
-                    </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('tr')" data-lang="tr">
-                        <span>🇹🇷</span> <span>Türkçe</span>
-                    </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('vi')" data-lang="vi">
-                        <span>🇻🇳</span> <span>Tiếng Việt</span>
-                    </div>
-                    <div class="lang-option-item" onclick="changeLandingLanguage('zh-CN')" data-lang="zh-CN">
-                        <span>🇨🇳</span> <span>中文 (Chinese)</span>
+                </li>
+            </ul>
+
+            <div class="nav-right-actions">
+                <!-- Language Switcher Pill -->
+                <div class="header-lang-wrapper">
+                    <button type="button" class="header-lang-btn" onclick="toggleLandingLangMenu(event)" id="headerLangBtn" title="Change Language">
+                        <i class="fas fa-globe"></i>
+                        <span id="headerCurrentLangLabel">English</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div id="headerLangDropdown" class="header-lang-dropdown" style="display:none;">
+                        <div class="lang-option-item active" onclick="changeLandingLanguage('en')" data-lang="en">
+                            <span>🇺🇸</span> <span>English (Default)</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('bn')" data-lang="bn">
+                            <span>🇧🇩</span> <span>বাংলা (Bengali)</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('hi')" data-lang="hi">
+                            <span>🇮🇳</span> <span>हिन्दी (Hindi)</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('ar')" data-lang="ar">
+                            <span>🇸🇦</span> <span>العربية (Arabic)</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('es')" data-lang="es">
+                            <span>🇪🇸</span> <span>Español</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('fr')" data-lang="fr">
+                            <span>🇫🇷</span> <span>Français</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('pt')" data-lang="pt">
+                            <span>🇧🇷</span> <span>Português</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('id')" data-lang="id">
+                            <span>🇮🇩</span> <span>Indonesian</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('ru')" data-lang="ru">
+                            <span>🇷🇺</span> <span>Русский</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('tr')" data-lang="tr">
+                            <span>🇹🇷</span> <span>Türkçe</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('vi')" data-lang="vi">
+                            <span>🇻🇳</span> <span>Tiếng Việt</span>
+                        </div>
+                        <div class="lang-option-item" onclick="changeLandingLanguage('zh-CN')" data-lang="zh-CN">
+                            <span>🇨🇳</span> <span>中文 (Chinese)</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Desktop / Tablet Auth Buttons -->
+                <div class="nav-buttons" id="navButtons">
+                    <button class="btn-outline" onclick="openLoginModal()" id="navLoginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button class="btn-primary" onclick="openRegisterModal()" id="navActionBtn">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </button>
+                </div>
+
+                <!-- Hamburger Button for Mobile / Small Screens -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
-            <button class="btn-outline" onclick="openLoginModal()" id="navLoginBtn">
-                <i class="fas fa-sign-in-alt"></i> Login
-            </button>
-            <button class="btn-primary" onclick="openRegisterModal()" id="navActionBtn">
-                <i class="fas fa-user-plus"></i> Sign Up
-            </button>
         </div>
-        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation">☰</button>
     </nav>
 
     <!-- ========== HERO ========== -->
@@ -4570,29 +4772,69 @@
         })();
 
         // Check user session
+        function handleLogout() {
+            localStorage.removeItem('aj_token');
+            localStorage.removeItem('token');
+            localStorage.removeItem('aj_user_name');
+            localStorage.removeItem('aj_user_email');
+            showToast('Logged out successfully', 'info');
+            setTimeout(() => window.location.reload(), 400);
+        }
+
         function checkUserSession() {
-            const token = localStorage.getItem('aj_token');
+            const token = localStorage.getItem('aj_token') || localStorage.getItem('token');
             const userName = localStorage.getItem('aj_user_name');
             const navLoginBtn = document.getElementById('navLoginBtn');
             const navActionBtn = document.getElementById('navActionBtn');
+            const desktopNavDashboardLink = document.getElementById('desktopNavDashboardLink');
+            const mobileDrawerBtnGrid = document.getElementById('mobileDrawerBtnGrid');
 
             if (token && userName) {
+                // Logged in
                 if (navLoginBtn) {
-                    navLoginBtn.innerHTML = `<i class="fas fa-tachometer-alt"></i> Dashboard`;
+                    navLoginBtn.innerHTML = `<i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>`;
                     navLoginBtn.onclick = () => window.location.href = '/dashboard';
                 }
                 if (navActionBtn) {
-                    navActionBtn.innerHTML = `<i class="fas fa-user"></i> ${userName.split(' ')[0]}`;
+                    navActionBtn.innerHTML = `<i class="fas fa-user-circle"></i> <span>${userName.split(' ')[0]}</span>`;
                     navActionBtn.onclick = () => window.location.href = '/dashboard';
                 }
+                if (desktopNavDashboardLink) {
+                    // Avoid duplicating "Dashboard" in desktop links when already present in action buttons
+                    desktopNavDashboardLink.style.display = 'none';
+                }
+                if (mobileDrawerBtnGrid) {
+                    mobileDrawerBtnGrid.innerHTML = `
+                        <button class="btn-primary" onclick="window.location.href='/dashboard'" style="width:100%; height:44px; justify-content:center; gap:8px;">
+                            <i class="fas fa-tachometer-alt"></i> Go to Trader Dashboard
+                        </button>
+                        <button class="btn-outline" onclick="handleLogout()" style="width:100%; height:40px; justify-content:center; gap:8px; border-color:rgba(239,68,68,0.4); color:#ef4444; background:rgba(239,68,68,0.06);">
+                            <i class="fas fa-sign-out-alt"></i> Logout (${userName.split(' ')[0]})
+                        </button>
+                    `;
+                }
             } else {
+                // Logged out
                 if (navLoginBtn) {
-                    navLoginBtn.innerHTML = `<i class="fas fa-sign-in-alt"></i> Login`;
+                    navLoginBtn.innerHTML = `<i class="fas fa-sign-in-alt"></i> <span>Login</span>`;
                     navLoginBtn.onclick = () => openLoginModal();
                 }
                 if (navActionBtn) {
-                    navActionBtn.innerHTML = `<i class="fas fa-user-plus"></i> Sign Up`;
+                    navActionBtn.innerHTML = `<i class="fas fa-user-plus"></i> <span>Sign Up</span>`;
                     navActionBtn.onclick = () => openRegisterModal();
+                }
+                if (desktopNavDashboardLink) {
+                    desktopNavDashboardLink.style.display = 'block';
+                }
+                if (mobileDrawerBtnGrid) {
+                    mobileDrawerBtnGrid.innerHTML = `
+                        <button class="btn-primary" onclick="closeMobileMenu(); openRegisterModal();" style="width:100%; height:44px; justify-content:center; gap:8px;">
+                            <i class="fas fa-user-plus"></i> Sign Up (Get Funded)
+                        </button>
+                        <button class="btn-outline" onclick="closeMobileMenu(); openLoginModal();" style="width:100%; height:40px; justify-content:center; gap:8px;">
+                            <i class="fas fa-sign-in-alt"></i> Login to Account
+                        </button>
+                    `;
                 }
             }
         }
@@ -6505,7 +6747,7 @@
             const navLinks = document.getElementById('navLinks');
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             if (navLinks) navLinks.classList.remove('mobile-show');
-            if (mobileMenuBtn) mobileMenuBtn.innerHTML = '&#9776;';
+            if (mobileMenuBtn) mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
         }
 
         // Mobile menu toggle
@@ -6515,7 +6757,7 @@
             mobileMenuBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const isOpen = navLinks.classList.toggle('mobile-show');
-                mobileMenuBtn.innerHTML = isOpen ? '&times;' : '&#9776;';
+                mobileMenuBtn.innerHTML = isOpen ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
             });
             document.addEventListener('click', (e) => {
                 if (!navLinks.contains(e.target) && e.target !== mobileMenuBtn) {

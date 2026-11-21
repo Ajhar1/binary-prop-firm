@@ -98,12 +98,12 @@
           <img src="/icons/icon-192.png?v=3" alt="Binary Prop Firm" style="width:44px; height:44px; border-radius:11px; flex-shrink:0; object-fit:cover; box-shadow:0 0 12px rgba(255,184,0,0.3); border:1px solid rgba(255,184,0,0.3);" />
           <div style="min-width:0;">
             <div style="font-weight:800; font-size:0.9rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Binary Prop Firm</div>
-            <div style="font-size:0.73rem; color:#cbd5e1; line-height:1.2;">ফোনে অ্যাপ আকারে ব্যবহার করুন</div>
+            <div style="font-size:0.73rem; color:#cbd5e1; line-height:1.2;">Install web app on your phone</div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
           <button id="bpfPwaInstallBtn" type="button" style="background:linear-gradient(135deg, #ffb800, #ff9100); color:#000; border:none; padding:8px 15px; border-radius:10px; font-weight:800; font-size:0.8rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:0 4px 14px rgba(255,184,0,0.4); transition:all 0.2s ease;">
-            <i class="fas fa-download"></i> ইন্সটল
+            <i class="fas fa-download"></i> Install
           </button>
           <button id="bpfPwaDismissBtn" type="button" aria-label="Close" style="background:none; border:none; color:#94a3b8; font-size:1.3rem; cursor:pointer; padding:4px 6px; line-height:1; display:flex; align-items:center; justify-content:center;">
             &times;
@@ -186,20 +186,20 @@
             <div style="width:58px; height:58px; border-radius:15px; background:rgba(255,184,0,0.15); border:1px solid var(--yellow, #ffb800); display:flex; align-items:center; justify-content:center; margin:0 auto 12px auto; font-size:1.7rem; color:#ffb800;">
               <i class="fab fa-apple"></i>
             </div>
-            <h3 style="margin:0 0 6px 0; font-size:1.15rem; font-weight:800;">iPhone-এ অ্যাপ ইন্সটল করার নিয়ম</h3>
-            <p style="font-size:0.78rem; color:#94a3b8; margin:0 0 16px 0;">সাফারি (Safari) ব্রাউজার থেকে মাত্র ২ ধাপে অ্যাপটি আপনার হোম স্ক্রিনে যুক্ত করুন:</p>
+            <h3 style="margin:0 0 6px 0; font-size:1.15rem; font-weight:800;">How to install app on iPhone</h3>
+            <p style="font-size:0.78rem; color:#94a3b8; margin:0 0 16px 0;">Add the app to your home screen in Safari in 2 simple steps:</p>
             <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px 14px; text-align:left; margin-bottom:16px; font-size:0.82rem; line-height:1.6;">
               <div style="margin-bottom:10px; display:flex; align-items:flex-start; gap:8px;">
-                <span style="background:#ffb800; color:#000; font-weight:800; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0;">১</span>
-                <span>সাফারি ব্রাউজারের নিচের <strong>Share</strong> আইকনে <i class="fas fa-arrow-up-from-bracket" style="color:#60a5fa;"></i> চাপ দিন।</span>
+                <span style="background:#ffb800; color:#000; font-weight:800; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0;">1</span>
+                <span>Tap the <strong>Share</strong> icon <i class="fas fa-arrow-up-from-bracket" style="color:#60a5fa;"></i> at the bottom of Safari.</span>
               </div>
               <div style="display:flex; align-items:flex-start; gap:8px;">
-                <span style="background:#ffb800; color:#000; font-weight:800; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0;">২</span>
-                <span>একটু নিচে স্ক্রল করে <strong>'Add to Home Screen'</strong> <i class="fas fa-plus-square" style="color:#00e676;"></i> অপশনে ক্লিক করুন।</span>
+                <span style="background:#ffb800; color:#000; font-weight:800; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0;">2</span>
+                <span>Scroll down and tap <strong>'Add to Home Screen'</strong> <i class="fas fa-plus-square" style="color:#00e676;"></i> option.</span>
               </div>
             </div>
             <button type="button" onclick="document.getElementById('bpfIosModal').style.display='none'" style="width:100%; background:linear-gradient(135deg, #ffb800, #ff9100); color:#000; border:none; padding:10px; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer;">
-              বুঝেছি (Got It)
+              Got It
             </button>
           </div>
         </div>
@@ -223,20 +223,20 @@
             <div style="width:58px; height:58px; border-radius:15px; background:rgba(0,230,118,0.15); border:1px solid #00e676; display:flex; align-items:center; justify-content:center; margin:0 auto 12px auto; font-size:1.7rem; color:#00e676;">
               <i class="fab fa-android"></i>
             </div>
-            <h3 style="margin:0 0 6px 0; font-size:1.15rem; font-weight:800;">Android-এ অ্যাপ ইন্সটল করার নিয়ম</h3>
-            <p style="font-size:0.78rem; color:#94a3b8; margin:0 0 16px 0;">ব্রাউজার থেকে সরাসরি মাত্র ২ ধাপে অ্যাপটি আপনার ফোনে ইনস্টল করুন:</p>
+            <h3 style="margin:0 0 6px 0; font-size:1.15rem; font-weight:800;">How to install app on Android</h3>
+            <p style="font-size:0.78rem; color:#94a3b8; margin:0 0 16px 0;">Install the app directly to your phone in 2 easy steps:</p>
             <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px 14px; text-align:left; margin-bottom:16px; font-size:0.82rem; line-height:1.6;">
               <div style="margin-bottom:10px; display:flex; align-items:flex-start; gap:8px;">
-                <span style="background:#00e676; color:#000; font-weight:800; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0;">১</span>
-                <span>ব্রাউজারের উপরে বা নিচের <strong>৩ ডট মেন্যু (⋮)</strong> অপশনে চাপ দিন।</span>
+                <span style="background:#00e676; color:#000; font-weight:800; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0;">1</span>
+                <span>Tap the <strong>3-dots menu (⋮)</strong> at the top or bottom of your browser.</span>
               </div>
               <div style="display:flex; align-items:flex-start; gap:8px;">
-                <span style="background:#00e676; color:#000; font-weight:800; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0;">২</span>
-                <span>মেন্যু থেকে <strong>'Install app'</strong> বা <strong>'Add to Home screen'</strong> এ ক্লিক করুন।</span>
+                <span style="background:#00e676; color:#000; font-weight:800; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0;">2</span>
+                <span>Tap <strong>'Install app'</strong> or <strong>'Add to Home screen'</strong> from the menu.</span>
               </div>
             </div>
             <button type="button" onclick="document.getElementById('bpfAndroidModal').style.display='none'" style="width:100%; background:linear-gradient(135deg, #00e676, #00c853); color:#000; border:none; padding:10px; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer;">
-              বুঝেছি (Got It)
+              Got It
             </button>
           </div>
         </div>
