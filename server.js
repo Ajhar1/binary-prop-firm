@@ -4351,8 +4351,8 @@ const PACKAGES = [
 function getLaunchPromo() {
   const promo = readJson(LAUNCH_PROMO_FILE, null);
   const defaultPromo = {
-    active: true,
-    enableDiscounts: true,
+    active: false,
+    enableDiscounts: false,
     badge: "🔥 ব্রোকার গ্র্যান্ড লঞ্চ স্পেশাল মেগা অফার • মাত্র ৭ দিন বাকি!",
     title: "ব্রোকার প্রথম লঞ্চিং উপলক্ষে বিশেষ ছাড় ধামাকা!",
     description: "আমাদের ব্রোকার প্ল্যাটফর্মের প্রথম লঞ্চ উপলক্ষে ২য় চ্যালেঞ্জে ৩০% ছাড় এবং ৩য় থেকে বাকি সকল চ্যালেঞ্জে পাচ্ছেন ফ্ল্যাট ৪০% মেগা ডিসকাউন্ট! (১ম ব্রোঞ্জ চ্যালেঞ্জ রেগুলার ফি প্রযোজ্য)। অফারটি মাত্র ৭ দিন পর্যন্ত বহাল থাকবে।",
@@ -4360,8 +4360,8 @@ function getLaunchPromo() {
     countdownTitle: "অফারটি শেষ হতে আর বাকি",
     showCountdown: true,
     durationDays: 7,
-    startedAt: new Date().toISOString(),
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    startedAt: "2026-10-01T00:00:00.000Z",
+    expiresAt: "2026-10-08T00:00:00.000Z"
   };
 
   if (!promo || !promo.expiresAt) {
@@ -4369,15 +4369,17 @@ function getLaunchPromo() {
     return defaultPromo;
   }
 
+  const isAutoStub = !promo.updatedAt;
   return {
     ...defaultPromo,
     ...promo,
+    active: isAutoStub ? false : Boolean(promo.active),
     badge: promo.badge || defaultPromo.badge,
     title: promo.title || defaultPromo.title,
     description: promo.description || defaultPromo.description,
     discountTag: promo.discountTag || defaultPromo.discountTag,
     countdownTitle: promo.countdownTitle || defaultPromo.countdownTitle,
-    enableDiscounts: promo.enableDiscounts !== undefined ? promo.enableDiscounts : true,
+    enableDiscounts: isAutoStub ? false : (promo.enableDiscounts !== undefined ? promo.enableDiscounts : true),
     showCountdown: promo.showCountdown !== undefined ? promo.showCountdown : true
   };
 }
@@ -11323,6 +11325,8 @@ app.post('/api/admin/launch-promo', authenticateAdminToken, (req, res) => {
   };
 
   writeJson(LAUNCH_PROMO_FILE, promo);
+  backupToExternalSafeDir(LAUNCH_PROMO_FILE, promo);
+  if (db && db.saveLaunchPromo) db.saveLaunchPromo(promo).catch(e => console.error(e));
 
   res.json({
     success: true,
@@ -11370,6 +11374,8 @@ app.post('/api/admin/promo-presets', authenticateAdminToken, (req, res) => {
 
   presets.push(newPreset);
   writeJson(PROMO_PRESETS_FILE, presets);
+  backupToExternalSafeDir(PROMO_PRESETS_FILE, presets);
+  if (db && db.savePromoPresets) db.savePromoPresets(presets).catch(e => console.error(e));
 
   res.json({
     success: true,
@@ -11391,6 +11397,8 @@ app.delete('/api/admin/promo-presets/:id', authenticateAdminToken, (req, res) =>
 
   presets = presets.filter(p => p.id !== targetId);
   writeJson(PROMO_PRESETS_FILE, presets);
+  backupToExternalSafeDir(PROMO_PRESETS_FILE, presets);
+  if (db && db.savePromoPresets) db.savePromoPresets(presets).catch(e => console.error(e));
 
   res.json({
     success: true,
